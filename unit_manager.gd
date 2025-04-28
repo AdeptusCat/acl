@@ -1,0 +1,107 @@
+# UnitManager.gd
+extends Node2D
+
+@export var ground_layer: TileMapLayer
+@export var unit_scene: PackedScene
+
+
+var units: Array[Node2D] = []
+var selected_unit: Node2D = null
+var current_team: int = 0  # 0 or 1
+var los_enemy_lines: Array = []
+
+func _ready():
+	for node in get_tree().get_nodes_in_group("units"):
+		if node is Node2D:
+			units.append(node)
+
+func _input(event):
+	if Input.is_action_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
+		handle_mouse_click(event.position)
+	if Input.is_action_pressed("RIGHT"):
+		place_unit_at_mouse(unit_scene, event.position)
+
+func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
+	var clicked_hex = ground_layer.local_to_map(mouse_pos)
+	var snapped_position = ground_layer.map_to_local(clicked_hex)
+
+	var unit = unit_scene.instantiate()
+	unit.position = snapped_position
+	unit.current_hex = clicked_hex
+	unit.set_team(current_team)
+
+	add_child(unit)
+	unit.add_to_group("units")
+	units.append(unit)
+
+	# 🚀 Connect the move signal
+	unit.moved_to_hex.connect(_on_unit_moved)
+
+	# Alternate team
+	current_team = 1 if current_team == 0 else 0
+
+func handle_mouse_click(mouse_pos: Vector2):
+	var clicked_hex = ground_layer.local_to_map(mouse_pos)
+
+	# Check if clicking on a unit
+	for unit in units:
+		if ground_layer.local_to_map(unit.position) == clicked_hex:
+			select_unit(unit)
+			return
+
+	# If no unit clicked, try moving the selected unit
+	if selected_unit != null:
+		move_selected_unit_to(clicked_hex)
+
+func select_unit(unit: Node2D):
+	if selected_unit != null:
+		selected_unit.deselect()
+
+	selected_unit = unit
+	selected_unit.select()
+
+func move_selected_unit_to(hex: Vector2i):
+	if selected_unit == null:
+		return
+
+	selected_unit.move_to_hex(hex, ground_layer)
+	selected_unit.deselect()
+	selected_unit = null
+
+func _on_unit_moved(unit, vector):
+	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
+
+	for enemy_unit in units:
+		if enemy_unit == unit:
+			continue  # Skip self
+		if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
+			draw_los_to_enemy(unit.current_hex, enemy_unit.current_hex)
+
+func draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
+	var from_pos = ground_layer.map_to_local(from_hex)
+	var to_pos = ground_layer.map_to_local(to_hex)
+
+	los_enemy_lines.append({
+		"from": from_pos,
+		"to": to_pos,
+		"timer": 0.0,
+		"duration": 2.0  # Line fades out over 2 seconds
+	})
+
+	queue_redraw()
+
+func _draw():
+	# 🔥 New: Draw blue lines to visible enemies
+	for los_data in los_enemy_lines:
+		draw_line(los_data["from"], los_data["to"], Color(0, 0, 1), 2.0)
+
+func _process(delta):
+	for line in los_enemy_lines:
+		line["timer"] += delta
+
+	# Remove fully expired lines
+	los_enemy_lines = los_enemy_lines.filter(func(line):
+		return line["timer"] < line["duration"]
+	)
+
+	queue_redraw()  # Always request redraw if lines change

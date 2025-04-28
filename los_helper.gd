@@ -17,6 +17,30 @@ var los_lines: Array = []
 const GRID_SIZE = 7
 
 # --- PUBLIC FUNCTION ---
+var los_lookup: Dictionary = {}
+
+
+func prebake_los():
+	for ox in range(GRID_SIZE):
+		for oy in range(GRID_SIZE):
+			var origin_hex = Vector2i(ox, oy)
+			var origin_pos = ground_layer.map_to_local(origin_hex)
+
+			los_lookup[origin_hex] = []
+
+			for tx in range(GRID_SIZE):
+				for ty in range(GRID_SIZE):
+					var target_hex = Vector2i(tx, ty)
+					if origin_hex == target_hex:
+						continue
+
+					var target_pos = ground_layer.map_to_local(target_hex)
+					var los_result = check_los(origin_pos, target_pos, 1, 0, 1, 0)
+
+					if not los_result["blocked"]:
+						los_lookup[origin_hex].append(target_hex)
+
+	print("LOS prebake done!")
 
 func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, target_elevation: int, origin_story: int, target_story: int) -> Dictionary:
 	var result = {
@@ -35,7 +59,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var steps = int(distance / STEP_SIZE_PIXELS)
 
 	var target_hex_map = ground_layer.local_to_map(target_pos)
-
+	
+	var is_in_wall = false
 	for i in range(steps + 1):
 		var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
 		var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
@@ -56,14 +81,25 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			var forward_hex = ground_layer.local_to_map(forward_step)
 
 			var sample_neighbors = get_neighboring_hexes(sample_hex)
+			var origin_hex = ground_layer.local_to_map(origin_pos)
+			
+			if is_in_wall:
+				continue
+			
+			if sample_hex == origin_hex:
+				is_in_wall = true
+				continue
+			
 			if target_hex_map in sample_neighbors and (forward_hex == target_hex_map or sample_hex == target_hex_map):
 				continue
-			else:
-				result["crossed_wall"] = true
-				result["blocked"] = true
-				result["block_point"] = sample_point
-				return result
-		
+			is_in_wall = true
+			result["crossed_wall"] = true
+			result["blocked"] = true
+			result["block_point"] = sample_point
+			return result
+			
+		else:
+			is_in_wall = false
 		# --- Crest line blocking (NEW)
 		if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
 			result["blocked"] = true
@@ -128,7 +164,9 @@ func is_sample_point_blocked_by_crest(sample_point: Vector2, los_height_at_sampl
 
 	return false
 
-
+#func _ready():
+	#await get_tree().process_frame
+	#prebake_los()
 
 func get_neighboring_hexes(hex: Vector2i) -> Array:
 	var neighbors = []

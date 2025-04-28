@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=27 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://node_2d.gd" id="1_0hol4"]
 [ext_resource type="Texture2D" uid="uid://bkkle73esqn4l" path="res://16x16_b.png" id="1_epypp"]
@@ -6,12 +6,13 @@
 [ext_resource type="Texture2D" uid="uid://dj24ceg55dvk" path="res://crest_line.png" id="2_d21ai"]
 [ext_resource type="Texture2D" uid="uid://bjlp1nayu4pca" path="res://base_tile.png" id="3_rj586"]
 [ext_resource type="Texture2D" uid="uid://dpd6aan7mdlns" path="res://wall_w.png" id="4_q6r6c"]
-[ext_resource type="PackedScene" uid="uid://2hjr61yy5x61" path="res://los_helper.tscn" id="6_kdubu"]
 [ext_resource type="Texture2D" uid="uid://d0602m3et1bl2" path="res://wall_nw.png" id="7_4d7sh"]
 [ext_resource type="Texture2D" uid="uid://cuyatpghnecjn" path="res://wall_nw_w.png" id="8_ir8iy"]
 [ext_resource type="Texture2D" uid="uid://k2xk6sgcy4qm" path="res://wall_sw.png" id="9_x0ka3"]
 [ext_resource type="Texture2D" uid="uid://ctsd70v03t58j" path="res://wall_sw_so.png" id="10_0h7mo"]
 [ext_resource type="Texture2D" uid="uid://jf1t138fvbhe" path="res://wall_so.png" id="11_nr8wp"]
+[ext_resource type="PackedScene" uid="uid://ceiirdxs6wb5k" path="res://unit_manager.tscn" id="13_nr8wp"]
+[ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://unit.tscn" id="14_d2bti"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4d7sh"]
 texture = ExtResource("2_d21ai")
@@ -67,31 +68,31 @@ texture_region_size = Vector2i(64, 64)
 texture = ExtResource("7_4d7sh")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, -32, 1.12895, -24.2724, -32, -6.49146, -32, -16)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-0.564476, -38.9487, 6.92947, -28.5353, -27.0947, -9.03158, -37.2553, -19.7566)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x0ka3"]
 texture = ExtResource("8_ir8iy")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, 16, -25.1191, 13.8296, -25.4013, -10.1605, 0.282242, -25.6836, 0, -32, -32, -11.854)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-36.1263, 20.3211, -25.1191, 13.8296, -25.4013, -10.1605, 2.82237, -25.4013, -0.564476, -38.3842, -36.1263, -19.1921)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d2bti"]
 texture = ExtResource("9_x0ka3")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, 9.03158, -32, 16, 0, 32, 0, 24.8369)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-27.0947, 10.725, -37.8197, 18.0632, -0.564476, 37.8197, 2.25789, 25.4013)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ta5nu"]
 texture = ExtResource("10_0h7mo")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, 6.77369, -32, 16, 0, 32, 32, 16, 32, 5.08027, 0.564472, 22.579)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-27.0947, 10.1605, -37.8197, 17.4987, 0, 37.8197, 36.6908, 19.1921, 27.0947, 11.2895, -0.564476, 25.4013)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_flf07"]
 texture = ExtResource("11_nr8wp")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, 32, 32, 16, 32, 7.62039, -1.97565, 22.8612)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-0.564476, 37.8197, -0.564476, 23.7079, 26.5303, 10.725, 37.2553, 20.3211)
 
 [sub_resource type="TileSet" id="TileSet_0hol4"]
 tile_shape = 3
@@ -109,7 +110,7 @@ sources/3 = SubResource("TileSetAtlasSource_d2bti")
 sources/4 = SubResource("TileSetAtlasSource_ta5nu")
 sources/6 = SubResource("TileSetAtlasSource_flf07")
 
-[node name="Node2D" type="Node2D"]
+[node name="World" type="Node2D"]
 script = ExtResource("1_0hol4")
 
 [node name="GroundTileMapLayer" type="TileMapLayer" parent="."]
@@ -124,8 +125,6 @@ tile_set = SubResource("TileSet_q6r6c")
 tile_map_data = PackedByteArray("AAACAAMAAgAAAAAAABADAAIAAgAAAAAAAAADAAEAAAAAAAAAAAADAAAAAgAAAAAAADADAAMABAAAAAAAAAA=")
 tile_set = SubResource("TileSet_0hol4")
 
-[node name="LOSHelper" parent="." node_paths=PackedStringArray("ground_layer", "building_layer", "wall_layer") instance=ExtResource("6_kdubu")]
+[node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("13_nr8wp")]
 ground_layer = NodePath("../GroundTileMapLayer")
-building_layer = NodePath("../BuildingTileMapLayer")
-wall_layer = NodePath("../WallTileMapLayer")
-debug_draw_enabled = true
+unit_scene = ExtResource("14_d2bti")
