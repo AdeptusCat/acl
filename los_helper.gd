@@ -4,12 +4,12 @@ extends Node2D
 @export var ground_layer: TileMapLayer
 @export var building_layer: TileMapLayer
 @export var wall_layer: TileMapLayer
-@export var debug_draw_enabled: bool = false
+@export var debug_draw_enabled: bool = true
 
 # --- CONSTANTS ---
 const FLOOR_HEIGHT_METERS = 3.0
 const UNIT_HEIGHT_METERS = 1.5
-const STEP_SIZE_PIXELS = 2.0
+const STEP_SIZE_PIXELS = 5.0
 
 # --- INTERNAL ---
 var origin_hex: Vector2 = Vector2(-1, -1)

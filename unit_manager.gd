@@ -16,9 +16,9 @@ func _ready():
 			units.append(node)
 
 func _input(event):
-	if Input.is_action_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
+	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
 		handle_mouse_click(event.position)
-	if Input.is_action_pressed("RIGHT"):
+	if Input.is_action_just_pressed("RIGHT"):
 		place_unit_at_mouse(unit_scene, event.position)
 
 func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
