@@ -63,7 +63,13 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 				result["blocked"] = true
 				result["block_point"] = sample_point
 				return result
-
+		
+		# --- Crest line blocking (NEW)
+		if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
+			result["blocked"] = true
+			result["block_point"] = sample_point
+			return result
+	
 	return result
 
 # --- INTERNAL HELPERS ---
@@ -98,6 +104,31 @@ func is_sample_point_crossing_wall(sample_point: Vector2) -> bool:
 		if item.collider == wall_layer:
 			return true
 	return false
+
+func is_sample_point_blocked_by_crest(sample_point: Vector2, los_height_at_sample: float) -> bool:
+	var space_state = get_world_2d().direct_space_state
+	var params = PhysicsPointQueryParameters2D.new()
+	params.position = sample_point
+	params.collide_with_areas = false
+	params.collide_with_bodies = true
+	params.collision_mask = 4  # Assuming layer 4 is crest lines
+	var result = space_state.intersect_point(params, 1)
+
+	if result.size() == 0:
+		return false
+
+	for item in result:
+		# Optionally check collider properties, etc.
+		# Assume crest elevation from custom data or fixed crest height
+		var crest_elevation = 6.0  # Or read from tile data
+
+		if los_height_at_sample < crest_elevation:
+			return true
+	return false
+
+	return false
+
+
 
 func get_neighboring_hexes(hex: Vector2i) -> Array:
 	var neighbors = []
