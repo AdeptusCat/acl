@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=4 uid="uid://cq2fy70xef7ei"]
+
+[ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://node_2d.gd" id="1_0hol4"]
+[ext_resource type="Texture2D" uid="uid://bkkle73esqn4l" path="res://16x16_b.png" id="1_epypp"]
+[ext_resource type="Texture2D" uid="uid://cmlg2lj21tppk" path="res://house.png" id="2_0hol4"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kdubu"]
+texture = ExtResource("1_epypp")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+
+[sub_resource type="TileSet" id="TileSet_rj586"]
+tile_shape = 3
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "elevation"
+custom_data_layer_0/type = 2
+sources/7 = SubResource("TileSetAtlasSource_kdubu")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0hol4"]
+texture = ExtResource("2_0hol4")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(20.5517, -16.0909, -24.3753, -16.7281, -24.0566, 16.7281, 22.1448, 17.0467, 24.3753, 7.80645, 25.3311, -1.75247)
+0:0/0/custom_data_0 = 2
+
+[sub_resource type="TileSet" id="TileSet_q6r6c"]
+tile_shape = 3
+tile_size = Vector2i(64, 64)
+physics_layer_0/collision_layer = 1
+custom_data_layer_0/name = "cover"
+custom_data_layer_0/type = 2
+sources/8 = SubResource("TileSetAtlasSource_0hol4")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_epypp"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_0hol4")
+
+[node name="TileMapLayer3" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAP7/AwAAAAAAAAABAP7/AwAAAAAAAGAAAP7/BwAAAAAAAGABAAAABwAAAAAAAAACAAEABwAAAAAAAAA=")
+tile_set = SubResource("TileSet_rj586")
+
+[node name="TileMapLayer4" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAP7/AwAAAAAAAAABAP7/AwAAAAAAAGAAAP7/CAAAAAAAAAD///7/CAAAAAAAAFACAAEACAAAAAAAAAABAAIAAAAAAAAAAQADAAEACAAAAAAAAAA=")
+tile_set = SubResource("TileSet_q6r6c")
+use_kinematic_bodies = true
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+position = Vector2(256, 19)
+target_position = Vector2(0, 132)
+hit_from_inside = true
+collide_with_areas = true
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(22, 90)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("RectangleShape2D_epypp")
