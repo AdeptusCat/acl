@@ -1,8 +1,10 @@
-[gd_scene load_steps=9 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=12 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://node_2d.gd" id="1_0hol4"]
 [ext_resource type="Texture2D" uid="uid://bkkle73esqn4l" path="res://16x16_b.png" id="1_epypp"]
 [ext_resource type="Texture2D" uid="uid://cmlg2lj21tppk" path="res://house.png" id="2_0hol4"]
+[ext_resource type="Script" uid="uid://cqgguul2pv02n" path="res://draw_los.gd" id="4_0hol4"]
+[ext_resource type="Texture2D" uid="uid://dumhqxj03bmxb" path="res://wall.png" id="4_q6r6c"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kdubu"]
 texture = ExtResource("1_epypp")
@@ -32,28 +34,35 @@ custom_data_layer_0/name = "cover"
 custom_data_layer_0/type = 2
 sources/8 = SubResource("TileSetAtlasSource_0hol4")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_epypp"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
+texture = ExtResource("4_q6r6c")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-25.4013, 13.5474, -27.0947, -11.854, -36.6908, -12.4184, -36.6908, 14.6763)
+
+[sub_resource type="TileSet" id="TileSet_0hol4"]
+tile_shape = 3
+tile_size = Vector2i(64, 64)
+physics_layer_0/collision_layer = 2
+physics_layer_0/collision_mask = 2
+custom_data_layer_0/name = "cover"
+custom_data_layer_0/type = 2
+sources/0 = SubResource("TileSetAtlasSource_d21ai")
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_0hol4")
 
-[node name="TileMapLayer3" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAACAP7/AwAAAAAAAAABAP7/AwAAAAAAAGAAAP7/BwAAAAAAAGABAAAABwAAAAAAAAACAAEABwAAAAAAAAA=")
+[node name="GroundTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAAAAABwAAAAAAAAABAAAABwAAAAAAAAACAAAABwAAAAAAAAADAAAABwAAAAAAAAACAAEABwAAAAAAAAABAAEABwAAAAAAAAAAAAEABwAAAAAAAAAAAAIABwAAAAAAAAABAAIABwAAAAAAAAACAAIABwAAAAAAAAADAAIABwAAAAAAAAAAAAMABwAAAAAAAAABAAMABwAAAAAAAAACAAMABwAAAAAAAAADAAMABwAAAAAAAAAEAAIABwAAAAAAAAADAAEABwAAAAAAAAAEAAAABwAAAAAAAAAEAAMABwAAAAAAAAAFAAAABwAAAAAAAAAEAAEABwAAAAAAAAAFAAIABwAAAAAAAAAFAAMABwAAAAAAAAAFAAQABwAAAAAAAAAEAAQABwAAAAAAAAADAAQABwAAAAAAAAACAAQABwAAAAAAAAABAAQABwAAAAAAAAAAAAQABwAAAAAAAAAAAAUABwAAAAAAAAABAAUABwAAAAAAAAACAAUABwAAAAAAAAADAAUABwAAAAAAAAAEAAUABwAAAAAAAAAAAAYABwAAAAAAAAABAAYABwAAAAAAAAACAAYABwAAAAAAAAADAAYABwAAAAAAAAAEAAYABwAAAAAAAAAGAAYABwAAAAAAAAAFAAYABwAAAAAAAAAFAAUABwAAAAAAAAAGAAUABwAAAAAAAAAGAAQABwAAAAAAAAAGAAMABwAAAAAAAAAGAAIABwAAAAAAAAAGAAEABwAAAAAAAAAGAAAABwAAAAAAAAAFAAEABwAAAAAAAAA=")
 tile_set = SubResource("TileSet_rj586")
 
-[node name="TileMapLayer4" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAACAP7/AwAAAAAAAAABAP7/AwAAAAAAAGAAAP7/CAAAAAAAAAD///7/CAAAAAAAAFACAAEACAAAAAAAAAABAAIAAAAAAAAAAQADAAEACAAAAAAAAAA=")
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAABAAIACAAAAAAAAAADAAQACAAAAAAAAAAEAAEACAAAAAAAAAA=")
 tile_set = SubResource("TileSet_q6r6c")
-use_kinematic_bodies = true
 
-[node name="RayCast2D" type="RayCast2D" parent="."]
-position = Vector2(256, 19)
-target_position = Vector2(0, 132)
-hit_from_inside = true
-collide_with_areas = true
+[node name="WallTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAAMAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_0hol4")
 
-[node name="StaticBody2D" type="StaticBody2D" parent="."]
-position = Vector2(22, 90)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-shape = SubResource("RectangleShape2D_epypp")
+[node name="Node2D" type="Node2D" parent="."]
+script = ExtResource("4_0hol4")

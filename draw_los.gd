@@ -2,9 +2,9 @@ extends Node2D
 
 # --- SETUP ---
 
-@onready var ground_layer = $GroundTileMapLayer
-@onready var building_layer = $BuildingTileMapLayer
-@onready var wall_layer = $WallTileMapLayer
+@onready var ground_layer = $"../GroundTileMapLayer"
+@onready var building_layer = $"../BuildingTileMapLayer"
+@onready var wall_layer = $"../WallTileMapLayer"
 
 # Constants
 const FLOOR_HEIGHT_METERS = 3.0
@@ -13,6 +13,11 @@ const STEP_SIZE_PIXELS = 2.0
 
 const FULL_BLOCKERS = ["building", "cliff", "rubble"]
 const HINDRANCES = ["grain", "orchard", "brush", "smoke"]
+
+
+var origin_hex: Vector2 = Vector2(-1, -1)  # Initialize invalid
+var los_lines = []  # Stores { "target_pos": Vector2, "blocked": bool }
+const GRID_SIZE = 7  # 6x6 hexes
 
 # --- FUNCTIONS ---
 
@@ -34,78 +39,97 @@ func is_sample_point_in_building(sample_point: Vector2) -> bool:
 			return true
 	return false
 
-func is_sample_point_crossing_wall(point: Vector2) -> bool:
+func is_sample_point_crossing_wall(sample_point: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
 	var params = PhysicsPointQueryParameters2D.new()
-	params.position = point
+	params.position = sample_point
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
+	params.collision_mask = 2  # Assuming walls are on layer 1
 	var result = space_state.intersect_point(params, 1)
-	
+
 	for item in result:
-		if item.collider.is_in_group("WallCollision"):
+		if item.collider == wall_layer:
+			# Means this point hits the building_tilemap's collision shape
 			return true
 	return false
 
 func check_los(
-		origin_hex: Vector2, target_hex: Vector2,
-		origin_elevation: int, target_elevation: int,
-		origin_story: int, target_story: int
-	) -> Dictionary:
-	"""
-	Checks line of sight between two hexes considering terrain, elevation, building collisions, and walls.
-	"""
+	origin_pos: Vector2, target_pos: Vector2,
+	origin_elevation: int, target_elevation: int,
+	origin_story: int, target_story: int
+) -> Dictionary:
 
 	var result = {
 		"blocked": false,
 		"hindrance_count": 0,
-		"crossed_wall": false
+		"crossed_wall": false,
+		"block_point": null
 	}
 
 	var shooter_height = calculate_absolute_height(origin_elevation, origin_story)
 	var target_height = calculate_absolute_height(target_elevation, target_story)
 
-	var delta = target_hex - origin_hex
+	var delta = target_pos - origin_pos
 	var distance = delta.length()
 	var direction = delta.normalized()
 	var steps = int(distance / STEP_SIZE_PIXELS)
 
-	var target_hex_map = ground_layer.local_to_map(target_hex)
+	var target_hex_map = ground_layer.local_to_map(target_pos)
 
 	for i in range(steps + 1):
-		var sample_point = origin_hex + direction * (i * STEP_SIZE_PIXELS)
+		var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
 		var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
 		var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
 
-		# Check if sample point is inside target hex
 		var sample_hex = ground_layer.local_to_map(sample_point)
-	
+
 		if sample_hex == target_hex_map:
-			# We are inside the target hex now
-			# DO NOT treat buildings as blocking!
-			# You could still check hindrances if needed
-			continue  # skip blocking checks, continue sampling
-			
+			# Inside target hex → Ignore walls, ignore buildings blocking
+			continue
+
 		# Check if sample hits a real building
 		if is_sample_point_in_building(sample_point):
-			# You could make building height dynamic too if needed
 			result["blocked"] = true
-			return result  # Immediate stop
+			result["block_point"] = sample_point
+			return result
 
 		# Check if sample crosses a real wall
 		if is_sample_point_crossing_wall(sample_point):
-			result["crossed_wall"] = true
+			var forward_step = sample_point + direction * 20.0
+			var forward_hex = ground_layer.local_to_map(forward_step)
 
-		# Ground Layer check for Hindrances
-		var ground_cell = ground_layer.local_to_map(sample_point)
-		var ground_tile_data = ground_layer.get_cell_tile_data(ground_cell)
-
-		#if ground_tile_data:
-			#var terrain_type = ground_tile_data.get_custom_data("terrain_type") or ""
-			#if terrain_type in HINDRANCES:
-				#result["hindrance_count"] += 1
+			# Check if wall is between current hex and target hex
+			var sample_neighbors = get_neighboring_hexes(sample_hex)
+			if target_hex_map in sample_neighbors and (forward_hex == target_hex_map or sample_hex == target_hex_map):
+				# Wall is along hexside into target → ignore
+				continue
+			else:
+				result["crossed_wall"] = true
+				result["blocked"] = true
+				result["block_point"] = sample_point
+				return result
 
 	return result
+
+func get_neighboring_hexes(hex: Vector2i) -> Array:
+	# Assuming pointy-topped hex layout (flat sides left/right)
+	var neighbors = []
+
+	var even = hex.y % 2 == 0
+
+	neighbors.append(hex + Vector2i(1, 0))   # East
+	neighbors.append(hex + Vector2i(-1, 0))  # West
+	neighbors.append(hex + Vector2i(0, -1))  # North-East or North-West
+	neighbors.append(hex + Vector2i(0, 1))   # South-East or South-West
+	if even:
+		neighbors.append(hex + Vector2i(-1, -1)) # NW
+		neighbors.append(hex + Vector2i(-1, 1))  # SW
+	else:
+		neighbors.append(hex + Vector2i(1, -1)) # NE
+		neighbors.append(hex + Vector2i(1, 1))  # SE
+
+	return neighbors
 
 
 func _ready():
@@ -150,17 +174,16 @@ func check_all_los():
 						#print(message, "CLEAR")
 
 
-var origin_hex: Vector2 = Vector2(-1, -1)  # Initialize invalid
-var los_lines = []  # Stores { "target_pos": Vector2, "blocked": bool }
-const GRID_SIZE = 6  # 6x6 hexes
 
 
-#func _input(event):
-	#if event is InputEventMouseButton and event.pressed: #  and event.button_index == MouseButton.LEFT
-		#var mouse_pos = event.position
-		#var hex = ground_layer.local_to_map(mouse_pos)
-		#origin_hex = hex
-		#generate_los_lines()
+
+
+func _input(event):
+	if event is InputEventMouseButton and event.pressed: #  and event.button_index == MouseButton.LEFT
+		var mouse_pos = event.position
+		var hex = ground_layer.local_to_map(mouse_pos)
+		origin_hex = hex
+		generate_los_lines()
 
 func generate_los_lines():
 	los_lines.clear()
@@ -187,20 +210,34 @@ func generate_los_lines():
 
 			los_lines.append({
 				"target_pos": target_pos,
-				"blocked": los_result["blocked"]
+				"blocked": los_result["blocked"],
+				"block_point": los_result["block_point"]  # <-- NEW
 			})
 
 	queue_redraw()
-
+	
+	
 func _draw():
 	if origin_hex == Vector2(-1, -1):
-		return  # No hex selected yet
+		return
 
 	var origin_pos = ground_layer.map_to_local(origin_hex)
 
+	# First: draw all RED (blocked) parts
 	for line_data in los_lines:
-		var color = Color(0, 1, 0)  # Green
 		if line_data["blocked"]:
-			color = Color(1, 0, 0)  # Red
+			var block_point = line_data["block_point"]
+			if block_point == null:
+				block_point = origin_pos  # Failsafe
 
-		draw_line(origin_pos, line_data["target_pos"], color, 2.0)
+			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
+
+	# Then: draw all GREEN (clear) parts on top
+	for line_data in los_lines:
+		var block_point = line_data.get("block_point", null)
+		if not line_data["blocked"]:
+			draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
+		else:
+			if block_point == null:
+				block_point = origin_pos
+			draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
