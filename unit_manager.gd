@@ -46,6 +46,8 @@ func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 
 	# Alternate team
 	current_team = 1 if current_team == 0 else 0
+	
+	_on_unit_moved(unit, unit.current_hex)
 
 func handle_mouse_click(mouse_pos: Vector2):
 	var clicked_hex = ground_layer.local_to_map(mouse_pos)
@@ -91,7 +93,18 @@ func _on_unit_moved(unit, vector):
 			# Fire immediately if stationary (optional fast reaction shot)
 			if not enemy_unit.moving:
 				var distance = enemy_unit.current_hex.distance_to(unit.current_hex)
-				enemy_unit.fire_at(unit, distance)
+				# safely grab the inner dict for this shooter-hex
+				var cover_map = LOSHelper.los_lookup.get(enemy_unit.current_hex, null)
+				var targetCover 
+				if cover_map and cover_map.has(unit.current_hex):
+					var data        = cover_map[unit.current_hex]
+					targetCover = data["target_cover"]
+				else:
+					targetCover = 0  # no LOS or no cover entry
+
+				# now display it
+				unit.set_cover(targetCover)
+				enemy_unit.fire_at(unit, distance, targetCover)
 
 	# 🔥 Update LOS for all units too (global re-check)
 	update_all_unit_visibilities()

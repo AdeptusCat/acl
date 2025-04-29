@@ -17,7 +17,7 @@ var current_hex: Vector2i
 var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
-var move_speed: float = 200.0
+var move_speed: float = 100.0
 var team: int = 0  # 0 or 1
 
 signal moved_to_hex(new_hex: Vector2i)
@@ -25,12 +25,21 @@ signal unit_died(unit)
 
 @onready var sprite_node: Sprite2D = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
+@onready var cover_label = $CoverLabel
+@export var TracerScene: PackedScene  # assign to your Tracer.tscn in the inspector
 
 @export var fire_rate: float = 1.5  # seconds between shots
 var fire_timer: float = 0.0
 
 func _ready():
 	update_team_sprite()
+	
+func set_cover(cover_value: int) -> void:
+	if cover_value > 0:
+		cover_label.text = str(cover_value)
+		cover_label.show()
+	else:
+		cover_label.hide()
 
 func select():
 	selected = true
@@ -73,11 +82,24 @@ func handle_auto_fire(delta):
 	# Find visible enemies (replace this with your own visibility system!)
 	var visible_enemies = get_visible_enemies()
 	
+	
+	
 	for enemy in visible_enemies:
 		if enemy and enemy.alive:
 			var distance = current_hex.distance_to(enemy.current_hex)
 			if distance <= range * 2:  # Can fire at double range (half power)
-				fire_at(enemy, distance)
+				# safely grab the inner dict for this shooter-hex
+				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				var targetCover 
+				if cover_map and cover_map.has(enemy.current_hex):
+					var data        = cover_map[enemy.current_hex]
+					targetCover = data["target_cover"]
+				else:
+					targetCover = 0  # no LOS or no cover entry
+
+				# now display it
+				enemy.set_cover(targetCover)
+				fire_at(enemy, distance, targetCover)
 				fire_timer = fire_rate  # Reset timer after firing
 				break  # Only fire at one enemy per cycle
 
@@ -99,7 +121,7 @@ func update_team_sprite():
 		1:
 			sprite_node.texture = sprite_team_1
 
-func fire_at(target: Node2D, distance_in_hexes: int):
+func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float):
 	if not alive:
 		return
 		
@@ -112,11 +134,43 @@ func fire_at(target: Node2D, distance_in_hexes: int):
 			return  # Target too far, can't fire
 	
 	#target.receive_fire(actual_firepower)
-	target.receive_fire(actual_firepower, target.moving, 0.75)
+	target.receive_fire(actual_firepower, target.moving, terrain_defense_bonus)
+	
+	# tracer
+	#var tracer = TracerScene.instantiate()  # TracerScene = PackedScene of Tracer.tscn
+	#tracer.tracer_texture = preload("res://tracer.png")
+	#get_tree().current_scene.add_child(tracer)
+	#tracer.shoot(global_position, target.global_position, fire_rate)
+	fire_burst(self, target, 8, fire_rate)
+	#shooter.play_muzzle_flash()
+	#shooter.play_shot_sound()
+
+# how many bullets to fire, and bullets per second
+func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
+	var interval = 1.0 / bullets_per_sec
+	var tracer_scene = preload("res://Tracer.tscn")
+
+	# compute world positions once
+	var from_pos = global_position
+	var to_pos   = target.global_position
+
+	for i in range(rounds):
+		if not is_instance_valid(shooter) or not is_instance_valid(target):
+			return   # stops the whole burst
+		# 1) spawn & shoot one tracer
+		var tracer = tracer_scene.instantiate() as Node2D
+		tracer.tracer_texture = preload("res://tracer.png")
+		get_tree().current_scene.add_child(tracer)
+		tracer.shoot(from_pos, to_pos)
+
+		# 2) wait until it’s time for the next bullet
+		await get_tree().create_timer(interval).timeout
 
 func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float):
 	if not alive:
 		return
+	
+	cover_label.text = str(terrain_defense_bonus)
 	
 	# 1. Simulate enemy attack roll (2d6 like ASL)
 	var attack_roll = randi_range(2, 12)
@@ -130,12 +184,13 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 	elif attack_roll >= 10:
 		morale_impact *= 0.5  # Bad roll = less stress inflicted
 	
+	# 5. Adjust for terrain protection
+	if (terrain_defense_bonus > 0):
+		morale_impact *= (1/(terrain_defense_bonus*2))
+	
 	# 4. Adjust if moving
 	if is_moving:
 		morale_impact *= 1.25  # Moving units are easier to hit
-	
-	# 5. Adjust for terrain protection (e.g., Woods = 0.75, Open Ground = 1.0)
-	morale_impact *= terrain_defense_bonus
 	
 	# 6. Apply to morale meter
 	morale_meter_current += int(morale_impact)

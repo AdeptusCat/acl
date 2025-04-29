@@ -19,37 +19,52 @@ const GRID_SIZE = 7
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
 
-
 func prebake_los():
 	for ox in range(GRID_SIZE):
 		for oy in range(GRID_SIZE):
-			var origin_hex = Vector2i(ox, oy)
-			var origin_pos = ground_layer.map_to_local(origin_hex)
+			var o_hex = Vector2i(ox, oy)
+			var o_pos = ground_layer.map_to_local(o_hex)
 
-			los_lookup[origin_hex] = []
+			# make this a Dictionary, not an Array
+			los_lookup[o_hex] = {}
 
 			for tx in range(GRID_SIZE):
 				for ty in range(GRID_SIZE):
-					var target_hex = Vector2i(tx, ty)
-					if origin_hex == target_hex:
+					var t_hex = Vector2i(tx, ty)
+					if o_hex == t_hex:
 						continue
 
-					var target_pos = ground_layer.map_to_local(target_hex)
-					var los_result = check_los(origin_pos, target_pos, 1, 0, 1, 0)
-
-					if not los_result["blocked"]:
-						los_lookup[origin_hex].append(target_hex)
-
-	print("LOS prebake done!")
+					var t_pos = ground_layer.map_to_local(t_hex)
+					var los = check_los(o_pos, t_pos, 1, 0, 1, 0)
+					if not los["blocked"]:
+						# store both cover values under t_hex
+						los_lookup[o_hex][t_hex] = {
+							"shooter_cover": los["shooter_cover"],
+							"target_cover":  los["target_cover"]
+						}
+				# end tx,ty
+			# end ox,oy
+	print("LOS prebake with cover done!")
 
 func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, target_elevation: int, origin_story: int, target_story: int) -> Dictionary:
 	var result = {
 		"blocked": false,
 		"hindrance_count": 0,
 		"crossed_wall": false,
-		"block_point": null
+		"block_point": null,
+		"shooter_cover": 0,
+		"target_cover": 0
 	}
+	const WALL_COVER = 1
+	const BUILDING_COVER = 2
 
+	# 1) shooter building cover
+	if is_sample_point_in_building(origin_pos):
+		result.shooter_cover = BUILDING_COVER
+	# 2) target building cover
+	if is_sample_point_in_building(target_pos):
+		result.target_cover = BUILDING_COVER
+	
 	var shooter_height = calculate_absolute_height(origin_elevation, origin_story)
 	var target_height = calculate_absolute_height(target_elevation, target_story)
 
@@ -58,6 +73,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var direction = delta.normalized()
 	var steps = int(distance / STEP_SIZE_PIXELS)
 
+	var origin_hex_map = ground_layer.local_to_map(origin_pos)
 	var target_hex_map = ground_layer.local_to_map(target_pos)
 	
 	var is_in_wall = false
@@ -67,11 +83,16 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
 
 		var sample_hex = ground_layer.local_to_map(sample_point)
+		var origin_hex = ground_layer.local_to_map(origin_pos)
 
 		if sample_hex == target_hex_map:
 			continue
+		
+		
 
 		if is_sample_point_in_building(sample_point):
+			if sample_hex == origin_hex_map:
+				continue
 			result["blocked"] = true
 			result["block_point"] = sample_point
 			return result
@@ -81,16 +102,20 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			var forward_hex = ground_layer.local_to_map(forward_step)
 
 			var sample_neighbors = get_neighboring_hexes(sample_hex)
-			var origin_hex = ground_layer.local_to_map(origin_pos)
+			
 			
 			if is_in_wall:
 				continue
 			
 			if sample_hex == origin_hex:
 				is_in_wall = true
+				if result.shooter_cover < WALL_COVER:
+					result.shooter_cover = WALL_COVER
 				continue
 			
 			if target_hex_map in sample_neighbors and (forward_hex == target_hex_map or sample_hex == target_hex_map):
+				if result.target_cover < WALL_COVER:
+					result.target_cover = WALL_COVER
 				continue
 			is_in_wall = true
 			result["crossed_wall"] = true
