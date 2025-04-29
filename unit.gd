@@ -19,6 +19,9 @@ var moving: bool = false
 var target_position: Vector2
 var move_speed: float = 100.0
 var team: int = 0  # 0 or 1
+@export var retreat_distance := 2    # how far to run (hexes)
+@export var retreat_speed    := 100.0    # px/sec
+
 
 signal moved_to_hex(new_hex: Vector2i)
 signal unit_died(unit)
@@ -157,6 +160,9 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 	for i in range(rounds):
 		if not is_instance_valid(shooter) or not is_instance_valid(target):
 			return   # stops the whole burst
+		var visible_enemies = get_visible_enemies()
+		if not visible_enemies.has(target):
+			return
 		# 1) spawn & shoot one tracer
 		var tracer = tracer_scene.instantiate() as Node2D
 		tracer.tracer_texture = preload("res://tracer.png")
@@ -169,7 +175,6 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float):
 	if not alive:
 		return
-	
 	cover_label.text = str(terrain_defense_bonus)
 	
 	# 1. Simulate enemy attack roll (2d6 like ASL)
@@ -205,7 +210,9 @@ func make_morale_check():
 	# Simple morale check: roll 2d6 (simulate), must be <= morale to survive
 	var roll = randi_range(2, 12)  # 2 to 12
 	if roll > morale:
-		die()
+		#die()
+		var visible_enemies = get_visible_enemies()
+		_on_morale_failed(visible_enemies)
 	else:
 		# Reset morale meter on successful check
 		morale_meter_current = 0
@@ -226,3 +233,78 @@ func update_morale_bar():
 			morale_bar.color = Color(1, 1, 0)  # Yellow
 		else:
 			morale_bar.color = Color(1, 0, 0)  # Red
+
+
+func _on_morale_failed(known_enemies: Array) -> void:
+	# tell your _process that “we’re moving now”
+	moving = true
+	
+	# gather their hex coords
+	var enemy_hexes = []
+	for e in known_enemies:
+		enemy_hexes.append(e.current_hex)
+
+	# pick a retreat hex N steps away
+	var N = 3  # for example, retreat 3 hexes
+	var origin_hex  = current_hex
+	var retreat_hex = compute_retreat_hex(origin_hex, enemy_hexes, N)
+
+	# get world‐space target
+	var local_pt  = LOSHelper.ground_layer.map_to_local(retreat_hex)
+	var global_pt = LOSHelper.ground_layer.to_global(local_pt)
+
+	# tween your unit there (or pathfind, etc.)
+	var dist_px = (global_position - global_pt).length()
+	var t = dist_px / retreat_speed
+	# 1) Create the Tween and keep it in a local var
+	var tw = create_tween()
+
+	# 2) Tell *that* tween to interpolate your position
+	tw.tween_property(self, "global_position", global_pt, t)
+
+	# 3) Then tell *that same* tween to fire your callback
+	# bind retreat_hex into the callback
+	var cb = Callable(self, "_on_retreat_complete").bind(retreat_hex)
+	tw.tween_callback(cb)
+
+
+func _on_retreat_complete(retreat_hex) -> void:
+	# clear the moving flag so auto‐fire can resume (or die, etc.)
+	moving = false
+
+	# snap your logical hex to the new spot
+	current_hex = retreat_hex
+	emit_signal("moved_to_hex", self, current_hex)
+
+	# optionally reset morale_meter_current or cover_label here
+	# maybe play a "rally" animation, or after retreat die(), etc.
+	#die()
+
+# Helper: find the hex N steps away from origin, moving each step
+# into the neighbor that maximizes distance from enemy_centroid_pos
+func compute_retreat_hex(origin_hex: Vector2i, enemy_hexes: Array, steps: int) -> Vector2i:
+	# 1) find centroid in pixel space
+	var sum_pos = Vector2.ZERO
+	for eh in enemy_hexes:
+		sum_pos += LOSHelper.ground_layer.map_to_local(eh)
+	var centroid = sum_pos / enemy_hexes.size()
+
+	var cur_hex = origin_hex
+	for i in range(steps):
+		var best_hex = cur_hex
+		var best_dist = (LOSHelper.ground_layer.map_to_local(cur_hex) - centroid).length()
+
+		# 2) look at each neighbor; choose the one that is farthest
+		for nb in LOSHelper.get_neighboring_hexes(cur_hex):
+			# optionally: check that nb is within your map bounds
+			var d = (LOSHelper.ground_layer.map_to_local(nb) - centroid).length()
+			if d > best_dist:
+				best_dist = d
+				best_hex = nb
+
+		# if no neighbor is farther, we’re cornered—stop early
+		if best_hex == cur_hex:
+			break
+
+		cur_hex = best_hex
+	return cur_hex
