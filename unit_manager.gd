@@ -21,13 +21,16 @@ func _ready():
 
 func _on_unit_died(unit):
 	units.erase(unit)
+	unit_visible_enemies.erase(unit)
+	unit.queue_free()
 	
 func _input(event):
 	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
 		handle_mouse_click(event.position)
 	if Input.is_action_just_pressed("RIGHT"):
 		place_unit_at_mouse(unit_scene, event.position)
-
+	if Input.is_action_just_pressed("SPACE"):
+		current_team = 1 if current_team == 0 else 0
 
 
 func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
@@ -47,23 +50,27 @@ func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 	# 🚀 Connect the move signal
 	unit.moved_to_hex.connect(_on_unit_moved)
 	unit.unit_died.connect(_on_unit_died)
-
-	# Alternate team
-	current_team = 1 if current_team == 0 else 0
 	
 	_on_unit_moved(unit, unit.current_hex)
 
 func handle_mouse_click(mouse_pos: Vector2):
 	var clicked_hex = ground_layer.local_to_map(mouse_pos)
-
+	
 	# Check if clicking on a unit
 	for unit in units:
 		if ground_layer.local_to_map(unit.position) == clicked_hex:
-			select_unit(unit)
-			return
-
+			if selected_unit == unit and unit.current_hex == clicked_hex:
+				selected_unit.deselect()
+				selected_unit = null
+				return
+			else:
+				if selected_unit == null:
+					select_unit(unit)
+					return
+	
+	
 	# If no unit clicked, try moving the selected unit
-	if selected_unit != null:
+	if selected_unit != null and not selected_unit.broken:
 		move_selected_unit_to(mouse_pos, clicked_hex, selected_unit.current_hex)
 
 func select_unit(unit: Node2D):
@@ -102,12 +109,16 @@ func move_selected_unit_to(target_pos, clicked_hex: Vector2i, current_hex: Vecto
 
 	# 5) hand it off and start walking
 	selected_unit.follow_cube_path(cube_path)
-
+	
+	selected_unit.deselect()
+	selected_unit = null
 
 
 
 
 func _on_unit_moved(unit, vector):
+	if not unit.alive:
+		return
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
 
 	# Clear old visibility info for this unit
@@ -118,6 +129,8 @@ func _on_unit_moved(unit, vector):
 			continue
 		if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
 			draw_los_to_enemy(unit.current_hex, enemy_unit.current_hex)
+			if not unit_visible_enemies.has(unit):
+				continue
 			unit_visible_enemies[unit].append(enemy_unit)
 
 			# Fire immediately if stationary (optional fast reaction shot)

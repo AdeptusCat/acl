@@ -11,6 +11,8 @@ const FLOOR_HEIGHT_METERS = 3.0
 const UNIT_HEIGHT_METERS = 1.5
 const STEP_SIZE_PIXELS = 5.0
 
+const WALL_COVER = 1
+const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
@@ -55,8 +57,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		"shooter_cover": 0,
 		"target_cover": 0
 	}
-	const WALL_COVER = 1
-	const BUILDING_COVER = 2
+	
 
 	# 1) shooter building cover
 	if is_sample_point_in_building(origin_pos):
