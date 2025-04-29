@@ -12,7 +12,7 @@ const UNIT_HEIGHT_METERS = 1.5
 const STEP_SIZE_PIXELS = 5.0
 
 # --- INTERNAL ---
-var origin_hex: Vector2 = Vector2(-1, -1)
+var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
 const GRID_SIZE = 7
 
@@ -189,17 +189,23 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 # --- DEBUG DRAW (Optional) ---
 
 func _input(event):
-	if event is InputEventMouseButton and event.pressed: #  and event.button_index == MouseButton.LEFT
+	if Input.is_action_just_pressed("MIDDLE"): 
+		
 		var mouse_pos = event.position
 		var hex = ground_layer.local_to_map(mouse_pos)
-		origin_hex = hex
-		generate_los_lines_for_debug()
+		if not origin_hex == hex or los_lines.is_empty():
+			origin_hex = hex
+			generate_los_lines_for_debug()
+		else:
+			los_lines.clear()
+			queue_redraw()
+
 
 func _draw():
 	if not debug_draw_enabled:
 		return
 
-	if origin_hex == Vector2(-1, -1):
+	if origin_hex == Vector2i(-1, -1):
 		return
 
 	var origin_pos = ground_layer.map_to_local(origin_hex)
@@ -229,7 +235,7 @@ func generate_los_lines_for_debug():
 
 	for tx in range(GRID_SIZE):
 		for ty in range(GRID_SIZE):
-			var target_hex = Vector2(tx, ty)
+			var target_hex = Vector2i(tx, ty)
 			if origin_hex == target_hex:
 				continue
 

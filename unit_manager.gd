@@ -9,12 +9,18 @@ var units: Array[Node2D] = []
 var selected_unit: Node2D = null
 var current_team: int = 0  # 0 or 1
 var los_enemy_lines: Array = []
+# Maps a unit -> array of enemy units it currently sees
+var unit_visible_enemies: Dictionary = {}
 
 func _ready():
 	for node in get_tree().get_nodes_in_group("units"):
 		if node is Node2D:
 			units.append(node)
+			node.unit_died.connect(_on_unit_died)
 
+func _on_unit_died(unit):
+	units.erase(unit)
+	
 func _input(event):
 	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
 		handle_mouse_click(event.position)
@@ -36,6 +42,7 @@ func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 
 	# 🚀 Connect the move signal
 	unit.moved_to_hex.connect(_on_unit_moved)
+	unit.unit_died.connect(_on_unit_died)
 
 	# Alternate team
 	current_team = 1 if current_team == 0 else 0
@@ -71,12 +78,37 @@ func move_selected_unit_to(hex: Vector2i):
 func _on_unit_moved(unit, vector):
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
 
+	# Clear old visibility info for this unit
+	unit_visible_enemies[unit] = []
+
 	for enemy_unit in units:
 		if enemy_unit == unit:
-			continue  # Skip self
+			continue
 		if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
 			draw_los_to_enemy(unit.current_hex, enemy_unit.current_hex)
+			unit_visible_enemies[unit].append(enemy_unit)
 
+			# Fire immediately if stationary (optional fast reaction shot)
+			if not enemy_unit.moving:
+				var distance = enemy_unit.current_hex.distance_to(unit.current_hex)
+				enemy_unit.fire_at(unit, distance)
+
+	# 🔥 Update LOS for all units too (global re-check)
+	update_all_unit_visibilities()
+
+func update_all_unit_visibilities():
+	for unit in units:
+		if not unit.alive:
+			continue
+		var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
+		unit_visible_enemies[unit] = []
+
+		for enemy_unit in units:
+			if enemy_unit == unit or not enemy_unit.alive:
+				continue
+			if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
+				unit_visible_enemies[unit].append(enemy_unit)
+				
 func draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
 	var from_pos = ground_layer.map_to_local(from_hex)
 	var to_pos = ground_layer.map_to_local(to_hex)
