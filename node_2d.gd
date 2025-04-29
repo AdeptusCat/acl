@@ -5,6 +5,16 @@ extends Node2D
 @onready var ground_layer = $GroundTileMapLayer
 @onready var building_layer = $BuildingTileMapLayer
 @onready var wall_layer = $WallTileMapLayer
+@onready var objective_tilemap := $ObjectiveTileMapLayer
+@onready var result_screen := $ResultScreen
+@onready var start_screen := $StartScreen
+var timer_running := false
+var objective_hex : Vector2i = Vector2.ZERO
+
+
+@export var time_left_seconds: float = 120.0  
+
+@onready var timer_label = $CanvasLayer/HBoxContainer/TimerLabel
 
 func _ready():
 	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
@@ -12,4 +22,45 @@ func _ready():
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	await get_tree().process_frame
 	LOSHelper.prebake_los()
-	#$GroundTileMapLayer.pathfinding_enabled = true
+	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
+	if cells.size() > 0:
+		objective_hex = cells[0]
+	else:
+		push_error("ObjectiveTileMapLayer has no tiles placed!")
+	start_screen.set_objective_text("Hold hex at %s with an unbroken unit!" % str(objective_hex))
+	start_screen.game_started.connect(_on_game_started)
+	start_screen.visible = true
+	$UnitManager.set_input_enabled(false)
+
+func _on_game_started(team : int):
+	timer_running = true
+	$UnitManager.team = team
+	$UnitManager.set_input_enabled(true)
+
+func _process(delta):
+	if timer_running:
+		time_left_seconds -= delta
+		if time_left_seconds <= 0:
+			time_left_seconds = 0
+			timer_running = false
+			end_game_check()
+
+		update_timer_label()
+
+func update_timer_label():
+	var minutes = int(time_left_seconds) / 60
+	var seconds = int(time_left_seconds) % 60
+	timer_label.text = "Time left: %02d:%02d" % [minutes, seconds]
+
+func end_game_check():
+	var occupying_units : Array
+	for unit in $UnitManager.units:
+		if unit.current_hex == objective_hex:
+			occupying_units.append(unit)
+
+	for unit in occupying_units:
+		if not unit.broken:
+			result_screen.show_winner(unit.team)
+			return
+
+	result_screen.show_winner(-1)

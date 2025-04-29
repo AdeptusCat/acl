@@ -8,7 +8,8 @@ extends Node2D
 @export var morale_meter_max: int = 100
 var morale_meter_current: int = 0
 
-
+@export var morale_popup_scene: PackedScene
+@export var morale_flash_scene: PackedScene
 @export var base_death_chance: float = 0.1      # 10% base chance
 @export var broken_death_multiplier: float = 2.0  # broken units have double the chance
 
@@ -283,6 +284,7 @@ func make_morale_check():
 	var roll = randi_range(2, 12)  # 2 to 12
 	if roll > morale:
 		#die()
+		on_morale_check_failure()
 		_on_morale_failed(get_visible_enemies())
 		# enter broken state
 		broken = true
@@ -291,10 +293,15 @@ func make_morale_check():
 	else:
 		# Reset morale meter on successful check
 		morale_meter_current = 0
+		on_morale_check_success()
 
 func die():
 	alive = false
 	emit_signal("unit_died", self)
+	var tween = create_tween()
+	tween.tween_property($Sprite2D.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
+	await tween.finished
+	queue_free()
 	
 
 func update_morale_bar():
@@ -443,7 +450,8 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 	# gather just the enemy hex coords
 	enemy_hexes = []
 	for e in known_enemies:
-		enemy_hexes.append(e.current_hex)
+		if is_instance_valid(e):
+			enemy_hexes.append(e.current_hex)
 
 	for h in pool:
 		var moves_closer := false
@@ -496,4 +504,28 @@ func _recover() -> void:
 	broken_label.visible = false
 	morale_meter_current = 0
 	update_morale_bar()
+	on_morale_check_success()
 	# Optionally play a “rally” animation or sound here
+
+func on_morale_check_failure():
+	var popup = morale_popup_scene.instantiate()
+	get_parent().add_child(popup)  # Add to world, not UI
+	popup.global_position = global_position + Vector2(0, -20)
+	popup.start_failure()
+
+	var flash = morale_flash_scene.instantiate()
+	get_parent().add_child(flash)
+	flash.global_position = global_position
+	flash.start_failure()
+
+
+func on_morale_check_success():
+	var popup = morale_popup_scene.instantiate()
+	get_parent().add_child(popup)  # Add to world, not UI
+	popup.global_position = global_position + Vector2(0, -20)
+	popup.start_success()
+
+	var flash = morale_flash_scene.instantiate()
+	get_parent().add_child(flash)
+	flash.global_position = global_position
+	flash.start_success()

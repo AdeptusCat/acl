@@ -5,6 +5,7 @@ extends Node2D
 @export var unit_scene: PackedScene
 @export var hexmap: HexagonTileMapLayer  # drag your HexagonTileMapLayer node here
 
+var team : int = 0
 
 var units: Array[Node2D] = []
 var selected_unit: Node2D = null
@@ -12,6 +13,10 @@ var current_team: int = 0  # 0 or 1
 var los_enemy_lines: Array = []
 # Maps a unit -> array of enemy units it currently sees
 var unit_visible_enemies: Dictionary = {}
+
+func set_input_enabled(enabled: bool):
+	set_process_input(enabled)
+	# Or enable/disable unit control scripts here
 
 func _ready():
 	for node in get_tree().get_nodes_in_group("units"):
@@ -22,7 +27,7 @@ func _ready():
 func _on_unit_died(unit):
 	units.erase(unit)
 	unit_visible_enemies.erase(unit)
-	unit.queue_free()
+	#unit.queue_free()
 	
 func _input(event):
 	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
@@ -58,6 +63,8 @@ func handle_mouse_click(mouse_pos: Vector2):
 	
 	# Check if clicking on a unit
 	for unit in units:
+		if not unit.team == team:
+			continue
 		if ground_layer.local_to_map(unit.position) == clicked_hex:
 			if selected_unit == unit and unit.current_hex == clicked_hex:
 				selected_unit.deselect()
