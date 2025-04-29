@@ -3,6 +3,7 @@ extends Node2D
 
 @export var ground_layer: TileMapLayer
 @export var unit_scene: PackedScene
+@export var hexmap: HexagonTileMapLayer  # drag your HexagonTileMapLayer node here
 
 
 var units: Array[Node2D] = []
@@ -27,6 +28,8 @@ func _input(event):
 	if Input.is_action_just_pressed("RIGHT"):
 		place_unit_at_mouse(unit_scene, event.position)
 
+
+
 func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 	var clicked_hex = ground_layer.local_to_map(mouse_pos)
 	var snapped_position = ground_layer.map_to_local(clicked_hex)
@@ -35,6 +38,7 @@ func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 	unit.position = snapped_position
 	unit.current_hex = clicked_hex
 	unit.set_team(current_team)
+	unit.hexmap = hexmap
 
 	add_child(unit)
 	unit.add_to_group("units")
@@ -60,7 +64,7 @@ func handle_mouse_click(mouse_pos: Vector2):
 
 	# If no unit clicked, try moving the selected unit
 	if selected_unit != null:
-		move_selected_unit_to(clicked_hex)
+		move_selected_unit_to(mouse_pos, clicked_hex, selected_unit.current_hex)
 
 func select_unit(unit: Node2D):
 	if selected_unit != null:
@@ -69,13 +73,39 @@ func select_unit(unit: Node2D):
 	selected_unit = unit
 	selected_unit.select()
 
-func move_selected_unit_to(hex: Vector2i):
+func move_selected_unit_to(target_pos, clicked_hex: Vector2i, current_hex: Vector2i):
 	if selected_unit == null:
 		return
 
-	selected_unit.move_to_hex(hex, ground_layer)
-	selected_unit.deselect()
-	selected_unit = null
+	#selected_unit.move_to_hex(hex, ground_layer)
+	#selected_unit.deselect()
+	#selected_unit = null
+	
+	# 1) turn screen‐pos into map coords
+	var local     = hexmap.to_local(target_pos)
+	var map_coord = hexmap.local_to_map(local)
+
+	# 2) ignore empty tiles
+	if hexmap.get_cell_source_id(map_coord) == -1:
+		return
+
+	# 3) ask A* for a path
+	var from_id = hexmap.pathfinding_get_point_id(current_hex)
+	var to_id   = hexmap.pathfinding_get_point_id(map_coord)
+	var id_path = hexmap.astar.get_id_path(from_id, to_id)
+
+	# 4) convert to cube coords
+	var cube_path: Array[Vector3i] = []
+	for pid in id_path:
+		var p = hexmap.astar.get_point_position(pid)
+		cube_path.append( hexmap.local_to_cube(p) )
+
+	# 5) hand it off and start walking
+	selected_unit.follow_cube_path(cube_path)
+
+
+
+
 
 func _on_unit_moved(unit, vector):
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])

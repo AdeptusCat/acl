@@ -12,3 +12,4 @@ func _ready():
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	await get_tree().process_frame
 	LOSHelper.prebake_los()
+	#$GroundTileMapLayer.pathfinding_enabled = true

@@ -8,6 +8,10 @@ extends Node2D
 @export var morale_meter_max: int = 100
 var morale_meter_current: int = 0
 
+# the “walkable” hexes in offset coords that we’ll follow
+var path_hexes: Array[Vector2i] = []
+var path_index: int = 0
+
 var alive: bool = true
 
 @export var sprite_team_0: Texture2D
@@ -30,6 +34,7 @@ signal unit_died(unit)
 @onready var morale_bar: ColorRect = $MoraleBar
 @onready var cover_label = $CoverLabel
 @export var TracerScene: PackedScene  # assign to your Tracer.tscn in the inspector
+var hexmap: HexagonTileMapLayer  # drag your HexagonTileMapLayer node here
 
 @export var fire_rate: float = 1.5  # seconds between shots
 var fire_timer: float = 0.0
@@ -58,18 +63,37 @@ func move_to_hex(new_hex: Vector2i, ground_layer: TileMapLayer):
 	emit_signal("moved_to_hex", self, current_hex)  # 🔥 Notify manager!
 	moving = true
 
+func follow_cube_path(cube_path: Array[Vector3i]) -> void:
+	path_hexes.clear()
+	# convert each cube‐coord to the map’s offset coords
+	for c in cube_path:
+		path_hexes.append( hexmap.cube_to_map(c) )
+	# drop the first element (it’s your current hex)
+	if path_hexes.size() > 1:
+		path_index = 1
+		move_to_hex(path_hexes[path_index], hexmap)
+
 func _process(delta):
 	if moving:
-		var direction = (target_position - position).normalized()
-		var distance_to_target = position.distance_to(target_position)
-		var step = move_speed * delta
+		var dir    = (target_position - position).normalized()
+		var dist   = position.distance_to(target_position)
+		var step   = move_speed * delta
 
-		if distance_to_target <= step:
+		if dist <= step:
 			position = target_position
-			moving = false
-			
+			moving  = false
+
+			# advance to next hex in the path, if any
+			if path_index < path_hexes.size() - 1:
+				path_index += 1
+				move_to_hex(path_hexes[path_index], hexmap)
+			else:
+				# done walking
+				path_hexes.clear()
+				path_index = 0
 		else:
-			position += direction * step
+			position += dir * step
+		return   # skip auto-fire while moving
 	
 	# Handle firing
 	handle_auto_fire(delta)
@@ -175,6 +199,8 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float):
 	if not alive:
 		return
+	#var visible_enemies = get_visible_enemies()
+	#_on_morale_failed(visible_enemies)
 	cover_label.text = str(terrain_defense_bonus)
 	
 	# 1. Simulate enemy attack roll (2d6 like ASL)
@@ -234,38 +260,51 @@ func update_morale_bar():
 		else:
 			morale_bar.color = Color(1, 0, 0)  # Red
 
-
 func _on_morale_failed(known_enemies: Array) -> void:
-	# tell your _process that “we’re moving now”
-	moving = true
-	
-	# gather their hex coords
-	var enemy_hexes = []
-	for e in known_enemies:
-		enemy_hexes.append(e.current_hex)
+	# compute the best hex to run to
+	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
+	# then A* from current_hex → retreat_map
+	var from_id = hexmap.pathfinding_get_point_id(current_hex)
+	var to_id   = hexmap.pathfinding_get_point_id(retreat_map)
+	var id_path = hexmap.astar.get_id_path(from_id, to_id)
 
-	# pick a retreat hex N steps away
-	var N = 3  # for example, retreat 3 hexes
-	var origin_hex  = current_hex
-	var retreat_hex = compute_retreat_hex(origin_hex, enemy_hexes, N)
-
-	# get world‐space target
-	var local_pt  = LOSHelper.ground_layer.map_to_local(retreat_hex)
-	var global_pt = LOSHelper.ground_layer.to_global(local_pt)
-
-	# tween your unit there (or pathfind, etc.)
-	var dist_px = (global_position - global_pt).length()
-	var t = dist_px / retreat_speed
-	# 1) Create the Tween and keep it in a local var
-	var tw = create_tween()
-
-	# 2) Tell *that* tween to interpolate your position
-	tw.tween_property(self, "global_position", global_pt, t)
-
-	# 3) Then tell *that same* tween to fire your callback
-	# bind retreat_hex into the callback
-	var cb = Callable(self, "_on_retreat_complete").bind(retreat_hex)
-	tw.tween_callback(cb)
+	# convert to cube path and follow it
+	var cube_path : Array[Vector3i] = []
+	for pid in id_path:
+		var pos = hexmap.astar.get_point_position(pid)
+		cube_path.append( hexmap.local_to_cube(pos) )
+	follow_cube_path(cube_path)
+#
+#func _on_morale_failed(known_enemies: Array) -> void:
+	#if known_enemies.is_empty():
+		##die()
+		#return
+#
+	## 1) build an Array of enemy offset‐coords (Vector2i)
+	#var enemy_maps: Array[Vector2i] = []
+	#for e in known_enemies:
+		#enemy_maps.append(e.current_hex)
+#
+	## 2) pick a retreat hex N steps away (still Vector2i)
+	#var retreat_map : Vector2i = compute_retreat_hex(current_hex, enemy_maps, retreat_distance)
+#
+	## 3) sanity‐check it’s on the map
+	#if hexmap.get_cell_source_id(retreat_map) == -1:
+		##die()
+		#return
+#
+	## 4) A* from your current hex → that retreat_map
+	#var from_id = hexmap.pathfinding_get_point_id(current_hex)
+	#var to_id   = hexmap.pathfinding_get_point_id(retreat_map)
+	#var id_path = hexmap.astar.get_id_path(from_id, to_id)
+#
+	## 5) convert the ID path into cube coords for your walker
+	#var cube_path: Array[Vector3i] = []
+	#for pid in id_path:
+		#var local_pos = hexmap.astar.get_point_position(pid)
+		#cube_path.append( hexmap.local_to_cube(local_pos) )
+	## 6) follow it
+	#follow_cube_path(cube_path)
 
 
 func _on_retreat_complete(retreat_hex) -> void:
@@ -279,32 +318,76 @@ func _on_retreat_complete(retreat_hex) -> void:
 	# optionally reset morale_meter_current or cover_label here
 	# maybe play a "rally" animation, or after retreat die(), etc.
 	#die()
+func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int) -> Vector2i:
+	# shortcuts
+	var map    = hexmap                          # HexagonTileMapLayer reference
+	var ground = LOSHelper.ground_layer          # for map_to_local()
+	var build  = LOSHelper.building_layer        # for get_cell_source_id()
 
-# Helper: find the hex N steps away from origin, moving each step
-# into the neighbor that maximizes distance from enemy_centroid_pos
-func compute_retreat_hex(origin_hex: Vector2i, enemy_hexes: Array, steps: int) -> Vector2i:
-	# 1) find centroid in pixel space
-	var sum_pos = Vector2.ZERO
-	for eh in enemy_hexes:
-		sum_pos += LOSHelper.ground_layer.map_to_local(eh)
-	var centroid = sum_pos / enemy_hexes.size()
+	# 1) enemy centroid in pixel‐space
+	var centroid = Vector2.ZERO
+	var enemy_hexes : Array
+	for enemy in known_enemies:
+		enemy_hexes.append(enemy.current_hex)
+	for e_hex in enemy_hexes:
+		centroid += ground.map_to_local(e_hex)
+	if enemy_hexes.size() > 0:
+		centroid /= enemy_hexes.size()
 
-	var cur_hex = origin_hex
-	for i in range(steps):
-		var best_hex = cur_hex
-		var best_dist = (LOSHelper.ground_layer.map_to_local(cur_hex) - centroid).length()
+	# 2) all cubes within 'steps'
+	var origin_cube = map.map_to_cube(origin_hex)
+	var cube_list   = map.cube_range(origin_cube, steps)
 
-		# 2) look at each neighbor; choose the one that is farthest
-		for nb in LOSHelper.get_neighboring_hexes(cur_hex):
-			# optionally: check that nb is within your map bounds
-			var d = (LOSHelper.ground_layer.map_to_local(nb) - centroid).length()
-			if d > best_dist:
-				best_dist = d
-				best_hex = nb
+	# 3) inline Callable to test “unseen by all enemies”
+	var is_unseen = func(test_map_hex: Vector2i) -> bool:
+		var tpos = ground.map_to_local(test_map_hex)
+		for e_hex in enemy_hexes:
+			var epos = ground.map_to_local(e_hex)
+			var los  = LOSHelper.check_los(epos, tpos, 1, 0, 1, 0)
+			if not los["blocked"]:
+				return false
+		return true
 
-		# if no neighbor is farther, we’re cornered—stop early
-		if best_hex == cur_hex:
-			break
+	# 4) bucket hexes by priority
+	var unseen_bld  : Array[Vector2i] = []
+	var any_bld     : Array[Vector2i] = []
+	var unseen_only : Array[Vector2i] = []
+	for c3 in cube_list:
+		var m = map.cube_to_map(c3)
+		if map.get_cell_source_id(m) == -1:
+			continue  # no tile here
+		var has_b = build.get_cell_source_id(m) != -1
+		var vis   = is_unseen.call(m)
+		if has_b and vis:
+			unseen_bld.append(m)
+		elif has_b:
+			any_bld.append(m)
+		elif vis:
+			unseen_only.append(m)
 
-		cur_hex = best_hex
-	return cur_hex
+	# 5) fallback = origin + every reachable hex
+	var fallback : Array[Vector2i] = [ origin_hex ]
+	for c3 in cube_list:
+		fallback.append(map.cube_to_map(c3))
+
+	# 6) choose the pool in priority order
+	var pool : Array[Vector2i]
+	if unseen_bld.size() > 0:
+		pool = unseen_bld
+	elif any_bld.size() > 0:
+		pool = any_bld
+	elif unseen_only.size() > 0:
+		pool = unseen_only
+	else:
+		pool = fallback
+
+	# 7) pick the hex from pool farthest from centroid
+	var best_hex  = origin_hex
+	var best_dist = -1.0
+	for h in pool:
+		var d = (ground.map_to_local(h) - centroid).length()
+		if d > best_dist:
+			best_dist = d
+			best_hex  = h
+
+	return best_hex
