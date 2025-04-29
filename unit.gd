@@ -200,7 +200,7 @@ func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: floa
 # how many bullets to fire, and bullets per second
 func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 	var interval = 1.0 / bullets_per_sec
-	var tracer_scene = preload("res://Tracer.tscn")
+	var tracer_scene = preload("res://tracer.tscn")
 
 	# compute world positions once
 	var from_pos = global_position
@@ -214,7 +214,7 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 			return
 		# 1) spawn & shoot one tracer
 		var tracer = tracer_scene.instantiate() as Node2D
-		tracer.tracer_texture = preload("res://tracer.png")
+		tracer.tracer_texture = preload("res://assets/tracer.png")
 		get_tree().current_scene.add_child(tracer)
 		tracer.shoot(from_pos, target.global_position)
 

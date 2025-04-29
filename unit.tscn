@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://unit.gd" id="1_btf8p"]
-[ext_resource type="Texture2D" uid="uid://c2fy74ivf3jt7" path="res://unit_ta.png" id="2_5wnup"]
-[ext_resource type="Texture2D" uid="uid://b8opj0j235q5b" path="res://unit_tb.png" id="3_1sk4h"]
+[ext_resource type="Texture2D" uid="uid://cglfa6udtw18d" path="res://assets/unit_ta.png" id="2_5wnup"]
+[ext_resource type="Texture2D" uid="uid://c5qf7rqxxcvje" path="res://assets/unit_tb.png" id="3_1sk4h"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://tracer.tscn" id="4_5wnup"]
 
 [node name="Unit" type="Node2D"]

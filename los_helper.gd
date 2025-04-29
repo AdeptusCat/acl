@@ -9,14 +9,14 @@ extends Node2D
 # --- CONSTANTS ---
 const FLOOR_HEIGHT_METERS = 3.0
 const UNIT_HEIGHT_METERS = 1.5
-const STEP_SIZE_PIXELS = 5.0
+const STEP_SIZE_PIXELS = 3.0
 
 const WALL_COVER = 1
 const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE = 7
+const GRID_SIZE = 8
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}

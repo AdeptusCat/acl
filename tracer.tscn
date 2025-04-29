@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://f0alj1u01yb5"]
 
 [ext_resource type="Script" uid="uid://dhgn3ugjdh5p1" path="res://tracer.gd" id="1_yt2qg"]
-[ext_resource type="Texture2D" uid="uid://cf06bhmtc30fg" path="res://tracer.png" id="2_hhrec"]
+[ext_resource type="Texture2D" uid="uid://biiqwlbm4tbl7" path="res://assets/tracer.png" id="2_hhrec"]
 
 [node name="Tracer" type="Node2D"]
 script = ExtResource("1_yt2qg")
