@@ -16,22 +16,38 @@ const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE = 8
+const GRID_SIZE_X = 24
+const GRID_SIZE_Y = 10
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
 
+func load_prebaked_los(file_path: String):
+	var los_resource = load(file_path) as LosLookupData
+	los_lookup = los_resource.los_lookup
+	print("LOS data loaded!")
+
+
+func bake_and_save_los_data(file_path: String):
+	prebake_los()
+
+	var los_resource = LosLookupData.new()
+	los_resource.los_lookup = los_lookup
+
+	ResourceSaver.save(los_resource, file_path)
+	print("LOS data saved to: ", file_path)
+
 func prebake_los():
-	for ox in range(GRID_SIZE):
-		for oy in range(GRID_SIZE):
+	for ox in range(GRID_SIZE_X):
+		for oy in range(GRID_SIZE_Y):
 			var o_hex = Vector2i(ox, oy)
 			var o_pos = ground_layer.map_to_local(o_hex)
 
 			# make this a Dictionary, not an Array
 			los_lookup[o_hex] = {}
 
-			for tx in range(GRID_SIZE):
-				for ty in range(GRID_SIZE):
+			for tx in range(GRID_SIZE_X):
+				for ty in range(GRID_SIZE_Y):
 					var t_hex = Vector2i(tx, ty)
 					if o_hex == t_hex:
 						continue
@@ -259,8 +275,8 @@ func generate_los_lines_for_debug():
 	los_lines.clear()
 	var origin_pos = ground_layer.map_to_local(origin_hex)
 
-	for tx in range(GRID_SIZE):
-		for ty in range(GRID_SIZE):
+	for tx in range(GRID_SIZE_X):
+		for ty in range(GRID_SIZE_Y):
 			var target_hex = Vector2i(tx, ty)
 			if origin_hex == target_hex:
 				continue

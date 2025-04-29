@@ -1,12 +1,9 @@
-[gd_scene load_steps=33 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=26 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://node_2d.gd" id="1_0hol4"]
-[ext_resource type="Texture2D" uid="uid://b77dca64gm23o" path="res://assets/16x16_b.png" id="1_epypp"]
 [ext_resource type="Texture2D" uid="uid://ydo6mryviyos" path="res://assets/house.png" id="2_0hol4"]
-[ext_resource type="Texture2D" uid="uid://xbgc0i6rgk0f" path="res://assets/crest_line.png" id="2_d21ai"]
-[ext_resource type="Texture2D" uid="uid://ceckxks431fw4" path="res://assets/base_tile.png" id="3_rj586"]
+[ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://ground_tile_map_layer.tscn" id="2_nr8wp"]
 [ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/wall_w.png" id="4_q6r6c"]
-[ext_resource type="Script" uid="uid://dtpieva6bnkny" path="res://ground_tile_map_layer.gd" id="5_nr8wp"]
 [ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/wall_nw.png" id="7_4d7sh"]
 [ext_resource type="Texture2D" uid="uid://c2u24pcpcb65s" path="res://assets/wall_nw_w.png" id="8_ir8iy"]
 [ext_resource type="Texture2D" uid="uid://cq3dewh8mtw4m" path="res://assets/wall_sw.png" id="9_x0ka3"]
@@ -17,35 +14,6 @@
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://unit.tscn" id="14_d2bti"]
 [ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://start_screen.tscn" id="16_flf07"]
 [ext_resource type="PackedScene" uid="uid://b84f65gu8hp6e" path="res://result_screen.tscn" id="16_ta5nu"]
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4d7sh"]
-texture = ExtResource("2_d21ai")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ir8iy"]
-texture = ExtResource("3_rj586")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kdubu"]
-texture = ExtResource("1_epypp")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_0 = 1
-
-[sub_resource type="TileSet" id="TileSet_rj586"]
-tile_shape = 3
-tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
-physics_layer_0/collision_layer = 4
-physics_layer_0/collision_mask = 4
-custom_data_layer_0/name = "elevation"
-custom_data_layer_0/type = 2
-sources/7 = SubResource("TileSetAtlasSource_kdubu")
-sources/0 = SubResource("TileSetAtlasSource_4d7sh")
-sources/1 = SubResource("TileSetAtlasSource_ir8iy")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
 texture = ExtResource("4_q6r6c")
@@ -131,28 +99,87 @@ sources/0 = SubResource("TileSetAtlasSource_k73cj")
 [node name="World" type="Node2D"]
 script = ExtResource("1_0hol4")
 
-[node name="GroundTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAABAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAAAAAMAAQAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAQAAAAAAAAADAAEAAQAAAAAAAAAEAAAAAQAAAAAAAAAFAAAAAQAAAAAAAAAFAAQAAQAAAAAAAAADAAQAAQAAAAAAAAACAAQAAQAAAAAAAAABAAQAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAAUAAQAAAAAAAAABAAUAAQAAAAAAAAACAAUAAQAAAAAAAAAEAAUAAQAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYAAQAAAAAAAAAFAAUAAQAAAAAAAAAGAAUAAQAAAAAAAAAGAAQAAQAAAAAAAAAGAAMAAQAAAAAAAAAGAAIAAQAAAAAAAAAGAAEAAQAAAAAAAAAGAAAAAQAAAAAAAAAFAAEAAQAAAAAAAAAHAAAAAQAAAAAAAAAHAAIAAQAAAAAAAAADAAUAAQAAAAAAAAAEAAQAAQAAAAAAAAAFAAMAAQAAAAAAAAAFAAIAAQAAAAAAAAAEAAMAAQAAAAAAAAAEAAIAAQAAAAAAAAAEAAEAAQAAAAAAAAAIAAAAAQAAAAAAAAAHAAEAAQAAAAAAAAAIAAIAAQAAAAAAAAAHAAMAAQAAAAAAAAAIAAMAAQAAAAAAAAAIAAQAAQAAAAAAAAAIAAUAAQAAAAAAAAAIAAEAAQAAAAAAAAAHAAQAAQAAAAAAAAAHAAUAAQAAAAAAAAAIAAYAAQAAAAAAAAAIAAcAAQAAAAAAAAAIAAgAAQAAAAAAAAAHAAgAAQAAAAAAAAAGAAgAAQAAAAAAAAAFAAgAAQAAAAAAAAAEAAgAAQAAAAAAAAADAAgAAQAAAAAAAAACAAgAAQAAAAAAAAABAAgAAQAAAAAAAAAAAAgAAQAAAAAAAAAAAAcAAQAAAAAAAAABAAcAAQAAAAAAAAACAAcAAQAAAAAAAAADAAcAAQAAAAAAAAAEAAcAAQAAAAAAAAAFAAcAAQAAAAAAAAAGAAcAAQAAAAAAAAAHAAcAAQAAAAAAAAAHAAYAAQAAAAAAAAA=")
-tile_set = SubResource("TileSet_rj586")
-script = ExtResource("5_nr8wp")
-pathfinding_enabled = true
+[node name="GroundTileMapLayer" parent="." instance=ExtResource("2_nr8wp")]
 
 [node name="WallTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAFAAgAAgAAAAAAAAAEAAgAAwAAAAAAAAAFAAcABAAAAAAAABAFAAYAAgAAAAAAABAGAAYAAQAAAAAAAAAAAAUAAgAAAAAAAAABAAUAAgAAAAAAACACAAUAAgAAAAAAACACAAQAAwAAAAAAAAADAAMABAAAAAAAABAEAAMAAgAAAAAAACA=")
+tile_map_data = PackedByteArray("AAAFAAgAAgAAAAAAAAAEAAgAAwAAAAAAAAAFAAcABAAAAAAAABAFAAYAAgAAAAAAABAGAAYAAQAAAAAAAAAAAAUAAgAAAAAAAAABAAUAAgAAAAAAACACAAUAAgAAAAAAACACAAQAAwAAAAAAAAADAAMABAAAAAAAABAEAAMAAgAAAAAAACAIAAAAAgAAAAAAAAAJAAAAAgAAAAAAACAKAAAAAQAAAAAAAAAKAAEAAgAAAAAAADALAAEABAAAAAAAABALAAIABAAAAAAAAAAMAAMAAgAAAAAAAAAKAAYAAgAAAAAAAAALAAYAAgAAAAAAAAALAAcABAAAAAAAAAAMAAgAAgAAAAAAAAAPAAUAAgAAAAAAAAAOAAUABAAAAAAAAAAOAAQAAgAAAAAAAAAPAAcAAgAAAAAAAAAPAAgABAAAAAAAAAASAAIABAAAAAAAAAASAAEAAwAAAAAAAAATAAAAAgAAAAAAAAASAAMAAgAAAAAAABASAAQABAAAAAAAABATAAcABAAAAAAAABATAAYAAgAAAAAAAAASAAYAAgAAAAAAABA=")
 tile_set = SubResource("TileSet_0hol4")
 
 [node name="BuildingTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAGAAEACAAAAAAAAAABAAcACAAAAAAAAAAHAAMACAAAAAAAAAAGAAYACAAAAAAAAAAIAAUACAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAGAAEACAAAAAAAAAABAAcACAAAAAAAAAAHAAMACAAAAAAAAAAGAAYACAAAAAAAAAAIAAUACAAAAAAAAAAOAAgACAAAAAAAAAAOAAUACAAAAAAAAAAQAAIACAAAAAAAAAARAAEACAAAAAAAAAAUAAIACAAAAAAAAAAUAAgACAAAAAAAAAATAAQACAAAAAAAAAARAAcACAAAAAAAAAA=")
 tile_set = SubResource("TileSet_q6r6c")
 
 [node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAHAAMAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_rjqkl")
 
-[node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer", "hexmap") instance=ExtResource("13_nr8wp")]
+[node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("13_nr8wp")]
 ground_layer = NodePath("../GroundTileMapLayer")
 unit_scene = ExtResource("14_d2bti")
-hexmap = NodePath("../GroundTileMapLayer")
+
+[node name="Unit" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(704, 544)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit2" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(848, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit3" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(944, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit4" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(944, 320)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit5" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(704, 352)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit6" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(224, 544)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit7" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(272, 448)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit8" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(176, 192)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit9" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(128, 288)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit10" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(32, 352)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit11" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(224, 608)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit12" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(848, 576)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit13" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(848, 576)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit16" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(608, 224)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
 
 [node name="StartScreen" parent="." instance=ExtResource("16_flf07")]
 visible = false

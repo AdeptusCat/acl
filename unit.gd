@@ -1,4 +1,9 @@
+@tool
 extends Node2D
+class_name Unit
+
+@export var snap_to_grid := true
+@export var ground_map: HexagonTileMapLayer
 
 @export var firepower: int = 4
 @export var range: int = 6
@@ -33,7 +38,7 @@ var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
 var move_speed: float = 100.0
-var team: int = 0  # 0 or 1
+@export var team: int = 0  # 0 or 1
 @export var retreat_distance := 3    # how far to run (hexes)
 @export var retreat_speed    := 100.0    # px/sec
 var retreating: bool = false            
@@ -48,48 +53,36 @@ signal retreat_complete(retreat_hex: Vector2i)
 @onready var morale_bar: ColorRect = $MoraleBar
 @onready var cover_label = $CoverLabel
 @onready var broken_label = $BrokenLabel
+@onready var unit_selected_sprite = $UnitSelectedSprite
 @export var TracerScene: PackedScene  # assign to your Tracer.tscn in the inspector
-var hexmap: HexagonTileMapLayer  # drag your HexagonTileMapLayer node here
+
 
 @export var fire_rate: float = 1.5  # seconds between shots
 var fire_timer: float = 0.0
+
 
 func _ready():
 	update_team_sprite()
 	connect("retreat_complete", _on_retreat_complete)
 	
-func set_cover(cover_value: int) -> void:
-	if cover_value > 0:
-		cover_label.text = str(cover_value)
-		cover_label.show()
-	else:
-		cover_label.hide()
 
-func select():
-	selected = true
-	modulate = Color(0.5, 1, 0.5)
-
-func deselect():
-	selected = false
-	modulate = Color(1, 1, 1)
-
-func move_to_hex(new_hex: Vector2i, ground_layer: TileMapLayer):
-	current_hex = new_hex
-	target_position = ground_layer.map_to_local(current_hex)
-	emit_signal("moved_to_hex", self, current_hex)  # 🔥 Notify manager!
-	moving = true
-
-func follow_cube_path(cube_path: Array[Vector3i]) -> void:
-	path_hexes.clear()
-	# convert each cube‐coord to the map’s offset coords
-	for c in cube_path:
-		path_hexes.append( hexmap.cube_to_map(c) )
-	# drop the first element (it’s your current hex)
-	if path_hexes.size() > 1:
-		path_index = 1
-		move_to_hex(path_hexes[path_index], hexmap)
 
 func _process(delta):
+	if Engine.is_editor_hint() and snap_to_grid:
+		if ground_map == null:
+			return
+		snap_to_hex()
+		var map_coords = ground_map.local_to_map(position)
+		position = ground_map.map_to_local(map_coords)
+		current_hex = map_coords
+		if team == 0:
+			set_team(0)
+			#$Sprite2D.texture == sprite_team_0
+		elif team == 1:
+			set_team(1)
+			#$Sprite2D.texture == sprite_team_1
+		return
+	
 	if not alive:
 		return
 		
@@ -108,7 +101,7 @@ func _process(delta):
 			# advance to next hex in the path, if any
 			if path_index < path_hexes.size() - 1:
 				path_index += 1
-				move_to_hex(path_hexes[path_index], hexmap)
+				move_to_hex(path_hexes[path_index], ground_map)
 			else:
 				# retreat path is done?
 				if retreating:
@@ -123,6 +116,50 @@ func _process(delta):
 	
 	# Handle firing
 	handle_auto_fire(delta)
+	
+	
+
+
+func snap_to_hex():
+	if ground_map == null:
+		return
+	var map_coords = ground_map.local_to_map(position)
+	position = ground_map.map_to_local(map_coords)
+
+
+func set_cover(cover_value: int) -> void:
+	if cover_value > 0:
+		cover_label.text = str(cover_value)
+		cover_label.show()
+	else:
+		cover_label.hide()
+
+func select():
+	unit_selected_sprite.visible = true
+	selected = true
+	#modulate = Color(0.5, 1, 0.5)
+
+func deselect():
+	unit_selected_sprite.visible = false
+	selected = false
+	#modulate = Color(1, 1, 1)
+
+func move_to_hex(new_hex: Vector2i, ground_layer: HexagonTileMapLayer):
+	current_hex = new_hex
+	target_position = ground_layer.map_to_local(current_hex)
+	emit_signal("moved_to_hex", self, current_hex)  # 🔥 Notify manager!
+	moving = true
+
+func follow_cube_path(cube_path: Array[Vector3i]) -> void:
+	path_hexes.clear()
+	# convert each cube‐coord to the map’s offset coords
+	for c in cube_path:
+		path_hexes.append( ground_map.cube_to_map(c) )
+	# drop the first element (it’s your current hex)
+	if path_hexes.size() > 1:
+		path_index = 1
+		move_to_hex(path_hexes[path_index], ground_map)
+
 
 func handle_auto_fire(delta):
 	if moving or not alive or broken:
@@ -284,6 +321,8 @@ func make_morale_check():
 	var roll = randi_range(2, 12)  # 2 to 12
 	if roll > morale:
 		#die()
+		get_parent().selected_unit = null
+		deselect()
 		on_morale_check_failure()
 		_on_morale_failed(get_visible_enemies())
 		# enter broken state
@@ -323,15 +362,15 @@ func _on_morale_failed(known_enemies: Array) -> void:
 	retreating = true                           
 	retreat_target_hex = retreat_map            
 	# then A* from current_hex → retreat_map
-	var from_id = hexmap.pathfinding_get_point_id(current_hex)
-	var to_id   = hexmap.pathfinding_get_point_id(retreat_map)
-	var id_path = hexmap.astar.get_id_path(from_id, to_id)
+	var from_id = ground_map.pathfinding_get_point_id(current_hex)
+	var to_id   = ground_map.pathfinding_get_point_id(retreat_map)
+	var id_path = ground_map.astar.get_id_path(from_id, to_id)
 
 	# convert to cube path and follow it
 	var cube_path : Array[Vector3i] = []
 	for pid in id_path:
-		var pos = hexmap.astar.get_point_position(pid)
-		cube_path.append( hexmap.local_to_cube(pos) )
+		var pos = ground_map.astar.get_point_position(pid)
+		cube_path.append( ground_map.local_to_cube(pos) )
 	follow_cube_path(cube_path)
 #
 #func _on_morale_failed(known_enemies: Array) -> void:
@@ -382,7 +421,7 @@ func _on_retreat_complete(retreat_hex) -> void:
 
 func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int) -> Vector2i:
 	# shortcuts
-	var map    = hexmap                          # HexagonTileMapLayer reference
+	var map    = ground_map                          # HexagonTileMapLayer reference
 	var ground = LOSHelper.ground_layer          # for map_to_local()
 	var build  = LOSHelper.building_layer        # for get_cell_source_id()
 

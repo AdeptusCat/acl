@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://rsqpaeas8ic5"]
+[gd_scene load_steps=12 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://unit.gd" id="1_btf8p"]
 [ext_resource type="Texture2D" uid="uid://cglfa6udtw18d" path="res://assets/unit_ta.png" id="2_5wnup"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://yvtxxd7huor6" path="res://morale_flash.tscn" id="3_of1k5"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://tracer.tscn" id="4_5wnup"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://unit.gdshader" id="7_of1k5"]
+[ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/unit_selected.png" id="8_74e6i"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_of1k5"]
 
@@ -19,7 +20,7 @@ shader = ExtResource("7_of1k5")
 shader_parameter/dissolve_amount = 0.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_74e6i")
 
-[node name="Unit" type="Node2D"]
+[node name="Unit" type="Node2D" groups=["units"]]
 script = ExtResource("1_btf8p")
 morale_popup_scene = ExtResource("2_baxm0")
 morale_flash_scene = ExtResource("3_of1k5")
@@ -27,7 +28,7 @@ sprite_team_0 = ExtResource("2_5wnup")
 sprite_team_1 = ExtResource("3_1sk4h")
 TracerScene = ExtResource("4_5wnup")
 
-[node name="Sprite2D" type="Sprite2D" parent="." groups=["units"]]
+[node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_74e6i")
 texture = ExtResource("2_5wnup")
 
@@ -51,3 +52,7 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Broken
 "
+
+[node name="UnitSelectedSprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("8_74e6i")

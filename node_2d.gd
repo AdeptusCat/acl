@@ -21,7 +21,9 @@ func _ready():
 	LOSHelper.building_layer = building_layer  # <-- inject the TileMap
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	await get_tree().process_frame
-	LOSHelper.prebake_los()
+	#LOSHelper.prebake_los()
+	#LOSHelper.bake_and_save_los_data("res://los_data.tres")
+	LOSHelper.load_prebaked_los("res://los_data.tres")
 	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
 	if cells.size() > 0:
 		objective_hex = cells[0]
@@ -31,6 +33,7 @@ func _ready():
 	start_screen.game_started.connect(_on_game_started)
 	start_screen.visible = true
 	$UnitManager.set_input_enabled(false)
+
 
 func _on_game_started(team : int):
 	timer_running = true

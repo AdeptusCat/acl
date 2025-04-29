@@ -1,9 +1,8 @@
 # UnitManager.gd
 extends Node2D
 
-@export var ground_layer: TileMapLayer
+@export var ground_layer: HexagonTileMapLayer
 @export var unit_scene: PackedScene
-@export var hexmap: HexagonTileMapLayer  # drag your HexagonTileMapLayer node here
 
 var team : int = 0
 
@@ -23,6 +22,8 @@ func _ready():
 		if node is Node2D:
 			units.append(node)
 			node.unit_died.connect(_on_unit_died)
+			node.moved_to_hex.connect(_on_unit_moved)
+			node.current_hex = ground_layer.local_to_map(node.global_position)
 
 func _on_unit_died(unit):
 	units.erase(unit)
@@ -32,8 +33,8 @@ func _on_unit_died(unit):
 func _input(event):
 	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
 		handle_mouse_click(event.position)
-	if Input.is_action_just_pressed("RIGHT"):
-		place_unit_at_mouse(unit_scene, event.position)
+	#if Input.is_action_just_pressed("RIGHT"):
+		#place_unit_at_mouse(unit_scene, event.position)
 	if Input.is_action_just_pressed("SPACE"):
 		current_team = 1 if current_team == 0 else 0
 
@@ -42,11 +43,11 @@ func place_unit_at_mouse(unit_scene: PackedScene, mouse_pos: Vector2):
 	var clicked_hex = ground_layer.local_to_map(mouse_pos)
 	var snapped_position = ground_layer.map_to_local(clicked_hex)
 
-	var unit = unit_scene.instantiate()
+	var unit : Unit = unit_scene.instantiate()
 	unit.position = snapped_position
 	unit.current_hex = clicked_hex
 	unit.set_team(current_team)
-	unit.hexmap = hexmap
+	unit.ground_layer = ground_layer
 
 	add_child(unit)
 	unit.add_to_group("units")
@@ -71,7 +72,7 @@ func handle_mouse_click(mouse_pos: Vector2):
 				selected_unit = null
 				return
 			else:
-				if selected_unit == null:
+				if selected_unit == null and not unit.broken:
 					select_unit(unit)
 					return
 	
@@ -79,6 +80,7 @@ func handle_mouse_click(mouse_pos: Vector2):
 	# If no unit clicked, try moving the selected unit
 	if selected_unit != null and not selected_unit.broken:
 		move_selected_unit_to(mouse_pos, clicked_hex, selected_unit.current_hex)
+		
 
 func select_unit(unit: Node2D):
 	if selected_unit != null:
@@ -90,35 +92,35 @@ func select_unit(unit: Node2D):
 func move_selected_unit_to(target_pos, clicked_hex: Vector2i, current_hex: Vector2i):
 	if selected_unit == null:
 		return
-
 	#selected_unit.move_to_hex(hex, ground_layer)
 	#selected_unit.deselect()
 	#selected_unit = null
 	
 	# 1) turn screen‐pos into map coords
-	var local     = hexmap.to_local(target_pos)
-	var map_coord = hexmap.local_to_map(local)
+	var local     = ground_layer.to_local(target_pos)
+	var map_coord = ground_layer.local_to_map(local)
 
 	# 2) ignore empty tiles
-	if hexmap.get_cell_source_id(map_coord) == -1:
+	if ground_layer.get_cell_source_id(map_coord) == -1:
 		return
 
 	# 3) ask A* for a path
-	var from_id = hexmap.pathfinding_get_point_id(current_hex)
-	var to_id   = hexmap.pathfinding_get_point_id(map_coord)
-	var id_path = hexmap.astar.get_id_path(from_id, to_id)
+	var from_id = ground_layer.pathfinding_get_point_id(current_hex)
+	var to_id   = ground_layer.pathfinding_get_point_id(map_coord)
+	var id_path = ground_layer.astar.get_id_path(from_id, to_id)
 
 	# 4) convert to cube coords
 	var cube_path: Array[Vector3i] = []
 	for pid in id_path:
-		var p = hexmap.astar.get_point_position(pid)
-		cube_path.append( hexmap.local_to_cube(p) )
+		var p = ground_layer.astar.get_point_position(pid)
+		cube_path.append( ground_layer.local_to_cube(p) )
 
-	# 5) hand it off and start walking
-	selected_unit.follow_cube_path(cube_path)
-	
-	selected_unit.deselect()
-	selected_unit = null
+	if not selected_unit == null:
+		# 5) hand it off and start walking
+		selected_unit.follow_cube_path(cube_path)
+	if not selected_unit == null:
+		selected_unit.deselect()
+		selected_unit = null
 
 
 
