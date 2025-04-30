@@ -46,6 +46,7 @@ var retreat_target_hex: Vector2i = Vector2i()
 
 
 signal moved_to_hex(new_hex: Vector2i)
+signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit)
 signal retreat_complete(retreat_hex: Vector2i) 
 
@@ -108,6 +109,7 @@ func _process(delta):
 					retreating = false
 					emit_signal("retreat_complete", current_hex)
 				# done walking
+				unit_arrived_at_hex.emit(current_hex)
 				path_hexes.clear()
 				path_index = 0
 		else:
@@ -263,6 +265,8 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 			return   # stops the whole burst
 		var visible_enemies = get_visible_enemies()
 		if not visible_enemies.has(target):
+			return
+		if broken:
 			return
 		# 1) spawn & shoot one tracer
 		var tracer = tracer_scene.instantiate() as Node2D
@@ -517,7 +521,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 			safe_pool.append(h)
 	# if nothing left, you have no “away” route → die
 	if safe_pool.is_empty() or safe_pool[0] == current_hex:
-		die()
+		#die()
 		return origin_hex
 
 	# replace pool with safe options
