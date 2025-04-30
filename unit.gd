@@ -214,26 +214,40 @@ func update_team_sprite():
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float):
 	if not alive:
 		return
-		
+
+	# 1) compute actual firepower
 	var actual_firepower = firepower
-	
 	if distance_in_hexes > range:
 		if distance_in_hexes <= range * 2:
-			actual_firepower = firepower / 2  # Half firepower at extended range
+			actual_firepower = firepower / 2
 		else:
-			return  # Target too far, can't fire
-	
-	#target.receive_fire(actual_firepower)
-	target.receive_fire(actual_firepower, target.moving, terrain_defense_bonus)
-	
-	# tracer
-	#var tracer = TracerScene.instantiate()  # TracerScene = PackedScene of Tracer.tscn
-	#tracer.tracer_texture = preload("res://tracer.png")
-	#get_tree().current_scene.add_child(tracer)
-	#tracer.shoot(global_position, target.global_position, fire_rate)
-	fire_burst(self, target, 8, fire_rate)
-	#shooter.play_muzzle_flash()
-	#shooter.play_shot_sound()
+			return
+	# 2) figure out which hex we’re shooting into
+	var target_hex = target.current_hex
+
+	# 3) collect *all* live units in that same hex
+	var visible = get_visible_enemies()
+	var batch_targets: Array = []
+	for u in visible:
+		if not is_instance_valid(u):
+			continue
+		if u.alive and u.current_hex == target_hex:
+			batch_targets.append(u)
+
+	if batch_targets.is_empty():
+		return
+
+	# 4) apply damage/morale to each
+	for u in batch_targets:
+		u.set_cover(terrain_defense_bonus)
+		u.receive_fire(actual_firepower, u.moving, terrain_defense_bonus)
+
+	# 5) play *one* burst toward that hex (use first unit for position)
+	fire_burst(self, batch_targets[0], 8, fire_rate)
+
+	# (optional) muzzle‐flash or sound once:
+	# play_muzzle_flash()
+	# play_shot_sound()
 
 # how many bullets to fire, and bullets per second
 func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
