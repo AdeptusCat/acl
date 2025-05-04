@@ -109,10 +109,6 @@ tile_set = SubResource("TileSet_0hol4")
 tile_map_data = PackedByteArray("AAAGAAEACAAAAAAAAAABAAcACAAAAAAAAAAHAAMACAAAAAAAAAAGAAYACAAAAAAAAAAIAAUACAAAAAAAAAAOAAgACAAAAAAAAAAOAAUACAAAAAAAAAAQAAIACAAAAAAAAAARAAEACAAAAAAAAAAUAAIACAAAAAAAAAAUAAgACAAAAAAAAAATAAQACAAAAAAAAAARAAcACAAAAAAAAAA=")
 tile_set = SubResource("TileSet_q6r6c")
 
-[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_rjqkl")
-
 [node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("13_nr8wp")]
 ground_layer = NodePath("../GroundTileMapLayer")
 unit_scene = ExtResource("14_d2bti")
@@ -180,6 +176,10 @@ team = 1
 position = Vector2(608, 224)
 ground_map = NodePath("../../GroundTileMapLayer")
 team = 1
+
+[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_rjqkl")
 
 [node name="StartScreen" parent="." instance=ExtResource("16_flf07")]
 visible = false

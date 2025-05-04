@@ -29,7 +29,7 @@ func _ready():
 		objective_hex = cells[0]
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
-	start_screen.set_objective_text("Hold hex at %s with an unbroken unit!" % str(objective_hex))
+	start_screen.set_objective_text("Hold hex at %s (red circle) with an unbroken unit!" % str(objective_hex))
 	start_screen.game_started.connect(_on_game_started)
 	start_screen.visible = true
 	$UnitManager.set_input_enabled(false)

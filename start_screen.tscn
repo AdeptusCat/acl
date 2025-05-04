@@ -85,6 +85,7 @@ text = "Start as Axis"
 
 [node name="StartAsAlliesButton" type="Button" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
+disabled = true
 text = "Start as Allies"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
