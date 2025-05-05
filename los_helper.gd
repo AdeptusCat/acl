@@ -18,8 +18,8 @@ const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE_X = 6#24
-const GRID_SIZE_Y = 6#10
+const GRID_SIZE_X = 24
+const GRID_SIZE_Y = 10
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
@@ -229,6 +229,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		if sample_hex_map == origin_hex_map:
 			continue
+		
+		
 		#var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
 #
 		#var sample_hex = ground_layer.local_to_map(sample_point)
@@ -252,7 +254,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			if result.blocked:
 				return result
 
-		if wall_layer.get_cell_source_id(prev_hex_map) != -1:
+		if wall_layer.get_cell_source_id(prev_hex_map) != -1 and not prev_hex_map == origin_hex_map:
 			#print(building_layer.cube_to_map(prev_hex_cube))
 			#print(building_layer.cube_to_map(sample_hex_cube))
 			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
@@ -289,7 +291,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 				result["blocked"] = true
 				result["block_point"] = sample_point
 				return result
-		if wall_layer.get_cell_source_id(sample_hex_map) != -1:
+		if wall_layer.get_cell_source_id(sample_hex_map) != -1 and not prev_hex_map == origin_hex_map:
 			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
 			
 			var wall : bool = false
