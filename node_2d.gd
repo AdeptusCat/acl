@@ -2,9 +2,9 @@ extends Node2D
 
 # --- SETUP ---
 
-@onready var ground_layer = $GroundTileMapLayer
-@onready var building_layer = $BuildingTileMapLayer
-@onready var wall_layer = $WallTileMapLayer
+@onready var ground_layer : HexagonTileMapLayer = $GroundTileMapLayer
+@onready var building_layer : HexagonTileMapLayer = $BuildingTileMapLayer
+@onready var wall_layer : HexagonTileMapLayer = $WallTileMapLayer
 @onready var objective_tilemap := $ObjectiveTileMapLayer
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
@@ -21,9 +21,9 @@ func _ready():
 	LOSHelper.building_layer = building_layer  # <-- inject the TileMap
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	await get_tree().process_frame
-	#LOSHelper.prebake_los()
+	LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://los_data.tres")
-	LOSHelper.load_prebaked_los("res://los_data.tres")
+	#LOSHelper.load_prebaked_los("res://los_data.tres")
 	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
 	if cells.size() > 0:
 		objective_hex = cells[0]

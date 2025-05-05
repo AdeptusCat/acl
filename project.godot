@@ -26,7 +26,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/hexagon_tilemaplayer/plugin.cfg")
+enabled=PackedStringArray("res://addons/hex_tool/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
 
 [input]
 

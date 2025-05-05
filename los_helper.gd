@@ -1,9 +1,9 @@
 extends Node2D
 
 # --- EXPORTED PROPERTIES ---
-@export var ground_layer: TileMapLayer
-@export var building_layer: TileMapLayer
-@export var wall_layer: TileMapLayer
+@export var ground_layer: HexagonTileMapLayer
+@export var building_layer: HexagonTileMapLayer
+@export var wall_layer: HexagonTileMapLayer
 @export var debug_draw_enabled: bool = true
 
 # --- CONSTANTS ---
@@ -16,8 +16,8 @@ const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE_X = 24
-const GRID_SIZE_Y = 10
+const GRID_SIZE_X = 6#24
+const GRID_SIZE_Y = 6#10
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
@@ -64,6 +64,92 @@ func prebake_los():
 			# end ox,oy
 	print("LOS prebake with cover done!")
 
+
+#func check_los(
+		#origin_pos: Vector2, target_pos: Vector2,
+		#origin_elevation: int, target_elevation: int,
+		#origin_story: int, target_story: int
+#) -> Dictionary:
+	#var result = {
+		#"blocked": false,
+		#"hindrance_count": 0,
+		#"crossed_wall": false,
+		#"block_point": null,
+		#"shooter_cover": 0.0,
+		#"target_cover": 0.0,
+	#}
+	#
+	## 1) shooter/target building cover
+	#if is_sample_point_in_building(origin_pos):
+		#result.shooter_cover = BUILDING_COVER
+	#if is_sample_point_in_building(target_pos):
+		#result.target_cover = BUILDING_COVER
+#
+	## 2) heights for crest‐blocking
+	#var shooter_h = calculate_absolute_height(origin_elevation, origin_story)
+	#var target_h  = calculate_absolute_height(target_elevation, target_story)
+#
+	## 3) origin/target hex in map coords
+	#var origin_hex = ground_layer.local_to_map(origin_pos)
+	#var target_hex = ground_layer.local_to_map(target_pos)
+#
+	## 4) cube coords & hex‐distance
+	#var co = ground_layer.map_to_cube(origin_hex)
+	#var ct = ground_layer.map_to_cube(target_hex)
+	#var hex_path = ground_layer.cube_linedraw(co, ct)
+	## we’ll skip hex_path[0]==origin_hex, hex_path[-1]==target_hex if you like
+#
+	## 5) walk each hex‐center along that line
+	#for i in hex_path.size():
+		## sample at the center of this hex
+		#var hex_cube : Vector3i = hex_path[i]
+		## convert cube → map coords
+		#var hex_map : Vector2i = ground_layer.cube_to_map(hex_cube)
+		## get world position of the hex‐center
+		#var sample_pt : Vector2 = ground_layer.cube_to_local(hex_cube)
+#
+		## 5a) building? → refine between previous & current
+		#if building_layer.get_cell_source_id(hex_map) != -1:
+			## we hit the first building‐hex:
+			## find the exact entry-point by sub-sampling between centers
+			#var prev_pt = ground_layer.cube_to_local(hex_path[i - 1]) if i > 0 else origin_pos
+			#result.block_point = _refine_entry(prev_pt, sample_pt)
+			#result.blocked     = true
+			#if result.blocked:
+				#return result
+#
+		## 5b) wall‐crossing (your existing logic)
+		#if is_sample_point_crossing_wall(sample_pt):
+			#pass
+			## … same as before …
+			## set result.crossed_wall, result.block_point, etc.
+			## return if fully blocked
+		## 5c) crest‐blocking
+		#var ratio = i / float(hex_path.size() - 1)
+		#var height_here = lerp(shooter_h, target_h, ratio)
+		#if is_sample_point_blocked_by_crest(sample_pt, height_here):
+			#result.blocked     = true
+			#result.block_point = sample_pt
+			#return result
+#
+	## 6) nothing blocked!
+	#return result
+
+
+# Sub‐sampling between two points at 1px increments to find exactly
+# where you enter the building tile.
+func _refine_entry(a: Vector2, b: Vector2) -> Vector2:
+	var dir = (b - a).normalized()
+	var dist = a.distance_to(b)
+	var steps = int(dist / STEP_SIZE_PIXELS)
+	for j in range(steps + 1):
+		var p = a + dir * (j * STEP_SIZE_PIXELS)
+		if is_sample_point_in_building(p):
+			return p
+	# fallback
+	return Vector2.ZERO
+
+
 func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, target_elevation: int, origin_story: int, target_story: int) -> Dictionary:
 	var result = {
 		"blocked": false,
@@ -71,7 +157,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		"crossed_wall": false,
 		"block_point": null,
 		"shooter_cover": 0,
-		"target_cover": 0
+		"target_cover": 0,
+		"hexes": []
 	}
 	
 
@@ -88,31 +175,69 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var delta = target_pos - origin_pos
 	var distance = delta.length()
 	var direction = delta.normalized()
-	var steps = int(distance / STEP_SIZE_PIXELS)
+	#var steps = int(distance / STEP_SIZE_PIXELS)
+	#var steps = distance
 
-	var origin_hex_map = ground_layer.local_to_map(origin_pos)
-	var target_hex_map = ground_layer.local_to_map(target_pos)
+	var origin_hex_map : Vector2i = ground_layer.local_to_map(origin_pos)
+	var target_hex_map : Vector2i = ground_layer.local_to_map(target_pos)
+	
+	var origin_hex_cube : Vector3i = ground_layer.local_to_cube(origin_pos)
+	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
+	
+	var hexes : Array[Vector3i] = ground_layer.cube_linedraw(origin_hex_cube, target_hex_cube)
+	result.hexes = hexes
 	
 	var is_in_wall = false
-	for i in range(steps + 1):
-		var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
-		var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
-		var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
-
-		var sample_hex = ground_layer.local_to_map(sample_point)
-		var origin_hex = ground_layer.local_to_map(origin_pos)
-
+	var steps = hexes.size()
+	
+	if steps < 2:
+		return result  # nothing to sample
+	
+	for i in range(steps):
+		 # t runs from 0.0 at origin to 1.0 at target
+		var t := float(i) / float(steps - 1)
+		# sample_point equally spaced along the straight line
+		var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
+		# same t for height interpolation
+		var los_height_at_sample = lerp(shooter_height, target_height, t)
+		#var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
+		#var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
+		var sample_hex: Vector2i = ground_layer.local_to_map(sample_point)
+		
+		# skip the target-hex center check if you like:
 		if sample_hex == target_hex_map:
 			continue
 		
-		
+		#var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
+#
+		#var sample_hex = ground_layer.local_to_map(sample_point)
+		#var origin_hex = ground_layer.local_to_map(origin_pos)
 
-		if is_sample_point_in_building(sample_point):
-			if sample_hex == origin_hex_map:
-				continue
-			result["blocked"] = true
-			result["block_point"] = sample_point
-			return result
+		#if sample_hex == origin_hex_map:
+			#continue
+		
+		# 5a) building? → refine between previous & current
+		if not sample_hex == origin_hex_map:# and not sample_point == target_pos:
+			if building_layer.get_cell_source_id(sample_hex) != -1:
+				# we hit the first building‐hex:
+				# find the exact entry-point by sub-sampling between centers
+				#var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
+				var t1 := float(i-1) / float(steps - 1)
+				var t2 := float(i+1) / float(steps - 1)
+				var prev_pt : Vector2 = origin_pos.lerp(target_pos, t1)
+				var next_pt : Vector2 = origin_pos.lerp(target_pos, t2)
+				result.block_point = _refine_entry(prev_pt, next_pt)
+				if not result.block_point == Vector2.ZERO:
+					result.blocked = true
+				if result.blocked:
+					return result
+
+		#if is_sample_point_in_building(sample_point):
+			#if sample_hex == origin_hex_map:
+				#continue
+			#result["blocked"] = true
+			#result["block_point"] = sample_point
+			#return result
 
 		if is_sample_point_crossing_wall(sample_point):
 			var forward_step = sample_point + direction * 20.0
@@ -241,7 +366,8 @@ func _input(event):
 		else:
 			los_lines.clear()
 			queue_redraw()
-
+			
+		
 
 func _draw():
 	if not debug_draw_enabled:
@@ -252,21 +378,27 @@ func _draw():
 
 	var origin_pos = ground_layer.map_to_local(origin_hex)
 
-	for line_data in los_lines:
-		if line_data["blocked"]:
-			var block_point = line_data["block_point"]
-			if block_point == null:
-				block_point = origin_pos  # Failsafe
-			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
+	#for line_data in los_lines:
+		#if line_data["blocked"]:
+			#var block_point = line_data["block_point"]
+			#if block_point == null:
+				#block_point = origin_pos  # Failsafe
+			#draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
 
 	for line_data in los_lines:
-		var block_point = line_data["block_point"]
-		if block_point == null:
-			block_point = origin_pos  # Failsafe
-		if not line_data["blocked"]:
-			draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
-		else:
-			draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
+		#var block_point = line_data["block_point"]
+		#if block_point == null:
+			#block_point = origin_pos  # Failsafe
+		#if not line_data["blocked"]:
+			#draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
+		#else:
+			#draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
+		var orig = origin_pos
+		for hex in line_data["hexes"]:
+			var pos = ground_layer.cube_to_local(hex)
+			draw_line(orig, pos, Color(0, 1, 0), 2.0)
+			orig = pos
+			
 
 func generate_los_lines_for_debug():
 	if not debug_draw_enabled:
@@ -288,7 +420,38 @@ func generate_los_lines_for_debug():
 			los_lines.append({
 				"target_pos": target_pos,
 				"blocked": los_result["blocked"],
-				"block_point": los_result["block_point"]
+				"block_point": los_result["block_point"],
+				"hexes": los_result["hexes"]
 			})
+			
+			
 
 	queue_redraw()
+
+
+func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
+	# 1) Convert to cube coords
+	var ca: Vector3i = ground_layer.map_to_cube(a)
+	var cb: Vector3i = ground_layer.map_to_cube(b)
+
+	# 2) Compute the delta vector
+	var dx = cb.x - ca.x
+	var dy = cb.y - ca.y
+	var dz = cb.z - ca.z
+	
+	print(a)
+	print(b)
+	
+	print(ca)
+	print(cb)
+
+	# 3) Check for “between-axes”: two equal components, third == –2× them
+	#    This covers all multiples of (1,1,–2), (–2,1,1), etc.
+	if   (dx == dy   and dz == -2*dx) \
+	 or (dy == dz   and dx == -2*dy) \
+	 or (dz == dx   and dy == -2*dz):
+		print("✅ Line runs perfectly between two axes.")
+		return true
+	else:
+		print("❌ Line does _not_ run between axes.")
+		return false

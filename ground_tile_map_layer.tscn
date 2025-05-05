@@ -39,3 +39,4 @@ tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAA
 tile_set = SubResource("TileSet_rj586")
 script = ExtResource("4_typbj")
 pathfinding_enabled = true
+metadata/_edit_lock_ = true

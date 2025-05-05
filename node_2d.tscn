@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=28 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://node_2d.gd" id="1_0hol4"]
 [ext_resource type="Texture2D" uid="uid://ydo6mryviyos" path="res://assets/house.png" id="2_0hol4"]
@@ -6,9 +6,11 @@
 [ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/wall_w.png" id="4_q6r6c"]
 [ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/wall_nw.png" id="7_4d7sh"]
 [ext_resource type="Texture2D" uid="uid://c2u24pcpcb65s" path="res://assets/wall_nw_w.png" id="8_ir8iy"]
+[ext_resource type="Script" uid="uid://dmau1rh153fsa" path="res://wall_tile_map_layer.gd" id="9_d2bti"]
 [ext_resource type="Texture2D" uid="uid://cq3dewh8mtw4m" path="res://assets/wall_sw.png" id="9_x0ka3"]
 [ext_resource type="Texture2D" uid="uid://beb0yfr6kl7yi" path="res://assets/wall_sw_so.png" id="10_0h7mo"]
 [ext_resource type="Texture2D" uid="uid://dw8gqf0mwo47t" path="res://assets/wall_so.png" id="11_nr8wp"]
+[ext_resource type="Script" uid="uid://cg8f2xiajwc44" path="res://building_tile_map_layer.gd" id="11_ta5nu"]
 [ext_resource type="Texture2D" uid="uid://dtx0tgn2cjgiu" path="res://assets/objective_tile.png" id="13_d2bti"]
 [ext_resource type="PackedScene" uid="uid://ceiirdxs6wb5k" path="res://unit_manager.tscn" id="13_nr8wp"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://unit.tscn" id="14_d2bti"]
@@ -104,10 +106,14 @@ script = ExtResource("1_0hol4")
 [node name="WallTileMapLayer" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAAFAAgAAgAAAAAAAAAEAAgAAwAAAAAAAAAFAAcABAAAAAAAABAFAAYAAgAAAAAAABAGAAYAAQAAAAAAAAAAAAUAAgAAAAAAAAABAAUAAgAAAAAAACACAAUAAgAAAAAAACACAAQAAwAAAAAAAAADAAMABAAAAAAAABAEAAMAAgAAAAAAACAIAAAAAgAAAAAAAAAJAAAAAgAAAAAAACAKAAAAAQAAAAAAAAAKAAEAAgAAAAAAADALAAEABAAAAAAAABALAAIABAAAAAAAAAAMAAMAAgAAAAAAAAAKAAYAAgAAAAAAAAALAAYAAgAAAAAAAAALAAcABAAAAAAAAAAMAAgAAgAAAAAAAAAPAAUAAgAAAAAAAAAOAAUABAAAAAAAAAAOAAQAAgAAAAAAAAAPAAcAAgAAAAAAAAAPAAgABAAAAAAAAAASAAIABAAAAAAAAAASAAEAAwAAAAAAAAATAAAAAgAAAAAAAAASAAMAAgAAAAAAABASAAQABAAAAAAAABATAAcABAAAAAAAABATAAYAAgAAAAAAAAASAAYAAgAAAAAAABA=")
 tile_set = SubResource("TileSet_0hol4")
+script = ExtResource("9_d2bti")
+metadata/_edit_lock_ = true
 
 [node name="BuildingTileMapLayer" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAGAAEACAAAAAAAAAABAAcACAAAAAAAAAAHAAMACAAAAAAAAAAGAAYACAAAAAAAAAAIAAUACAAAAAAAAAAOAAgACAAAAAAAAAAOAAUACAAAAAAAAAAQAAIACAAAAAAAAAARAAEACAAAAAAAAAAUAAIACAAAAAAAAAAUAAgACAAAAAAAAAATAAQACAAAAAAAAAARAAcACAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAGAAEACAAAAAAAAAABAAcACAAAAAAAAAAHAAMACAAAAAAAAAAGAAYACAAAAAAAAAAIAAUACAAAAAAAAAAOAAgACAAAAAAAAAAOAAUACAAAAAAAAAAQAAIACAAAAAAAAAARAAEACAAAAAAAAAAUAAIACAAAAAAAAAAUAAgACAAAAAAAAAATAAQACAAAAAAAAAARAAcACAAAAAAAAAACAAEACAAAAAAAAAA=")
 tile_set = SubResource("TileSet_q6r6c")
+script = ExtResource("11_ta5nu")
+metadata/_edit_lock_ = true
 
 [node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("13_nr8wp")]
 ground_layer = NodePath("../GroundTileMapLayer")
