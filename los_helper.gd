@@ -185,7 +185,19 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var origin_hex_cube : Vector3i = ground_layer.local_to_cube(origin_pos)
 	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
 	
-	var hexes : Array[Vector3i] = ground_layer.cube_linedraw(origin_hex_cube, target_hex_cube)
+	var n = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
+	var hexes : Array[Vector3i] = []
+	for i in range(n + 1):
+		var t = float(i) / float(n)
+		# linear interpolate in 3D
+		var fx = lerp(origin_hex_cube.x, target_hex_cube.x, t)
+		var fy = lerp(origin_hex_cube.y, target_hex_cube.y, t)
+		var fz = lerp(origin_hex_cube.z, target_hex_cube.z, t)
+		# round to the nearest valid cube coord
+		var h = HexagonTileMap.cube_round(Vector3(fx, fy, fz))
+		hexes.append(h)
+	
+	#var hexes : Array[Vector3i] = ground_layer.cube_linedraw(origin_hex_cube, target_hex_cube)
 	result.hexes = hexes
 	
 	var is_in_wall = false
@@ -206,8 +218,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		var los_height_at_sample = lerp(shooter_height, target_height, t)
 		#var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
 		#var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
-		var sample_hex_map: Vector2i = ground_layer.local_to_map(sample_point)
-		var sample_hex_cube: Vector3i = ground_layer.local_to_cube(sample_point)
+		
+		var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
+		var sample_hex_cube: Vector3i = hexes[i]
 		
 		
 		# skip the target-hex center check if you like:
