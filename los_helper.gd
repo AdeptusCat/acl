@@ -11,6 +11,8 @@ const FLOOR_HEIGHT_METERS = 3.0
 const UNIT_HEIGHT_METERS = 1.5
 const STEP_SIZE_PIXELS = 3.0
 
+enum COMPASS_DIRECTION {NORTH, NORTHEAST, SOUTHEAST, SOUTH, SOUTHWEST, NORTHWEST}
+
 const WALL_COVER = 1
 const BUILDING_COVER = 2
 # --- INTERNAL ---
@@ -26,7 +28,6 @@ func load_prebaked_los(file_path: String):
 	var los_resource = load(file_path) as LosLookupData
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
-
 
 func bake_and_save_los_data(file_path: String):
 	prebake_los()
@@ -193,6 +194,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	if steps < 2:
 		return result  # nothing to sample
 	
+	var prev_hex_cube : Vector3i = origin_hex_cube
+	var prev_hex_map : Vector2i = origin_hex_map
+	
 	for i in range(steps):
 		 # t runs from 0.0 at origin to 1.0 at target
 		var t := float(i) / float(steps - 1)
@@ -202,12 +206,16 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		var los_height_at_sample = lerp(shooter_height, target_height, t)
 		#var sample_point = origin_pos + direction * (i * STEP_SIZE_PIXELS)
 		#var sample_distance_ratio = (i * STEP_SIZE_PIXELS) / distance
-		var sample_hex: Vector2i = ground_layer.local_to_map(sample_point)
+		var sample_hex_map: Vector2i = ground_layer.local_to_map(sample_point)
+		var sample_hex_cube: Vector3i = ground_layer.local_to_cube(sample_point)
+		
 		
 		# skip the target-hex center check if you like:
-		if sample_hex == target_hex_map:
+		if sample_hex_map == target_hex_map:
 			continue
 		
+		if sample_hex_map == origin_hex_map:
+			continue
 		#var los_height_at_sample = lerp(shooter_height, target_height, sample_distance_ratio)
 #
 		#var sample_hex = ground_layer.local_to_map(sample_point)
@@ -217,57 +225,126 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			#continue
 		
 		# 5a) building? → refine between previous & current
-		if not sample_hex == origin_hex_map:# and not sample_point == target_pos:
-			if building_layer.get_cell_source_id(sample_hex) != -1:
-				# we hit the first building‐hex:
-				# find the exact entry-point by sub-sampling between centers
-				#var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
-				var t1 := float(i-1) / float(steps - 1)
-				var t2 := float(i+1) / float(steps - 1)
-				var prev_pt : Vector2 = origin_pos.lerp(target_pos, t1)
-				var next_pt : Vector2 = origin_pos.lerp(target_pos, t2)
-				result.block_point = _refine_entry(prev_pt, next_pt)
-				if not result.block_point == Vector2.ZERO:
-					result.blocked = true
-				if result.blocked:
-					return result
+		if building_layer.get_cell_source_id(sample_hex_map) != -1:
+			# we hit the first building‐hex:
+			# find the exact entry-point by sub-sampling between centers
+			#var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
+			var t1 := float(i-1) / float(steps - 1)
+			var t2 := float(i+1) / float(steps - 1)
+			var prev_pt : Vector2 = origin_pos.lerp(target_pos, t1)
+			var next_pt : Vector2 = origin_pos.lerp(target_pos, t2)
+			result.block_point = _refine_entry(prev_pt, next_pt)
+			if not result.block_point == Vector2.ZERO:
+				result.blocked = true
+			if result.blocked:
+				return result
 
-		#if is_sample_point_in_building(sample_point):
-			#if sample_hex == origin_hex_map:
+		if wall_layer.get_cell_source_id(prev_hex_map) != -1:
+			#print(building_layer.cube_to_map(prev_hex_cube))
+			#print(building_layer.cube_to_map(sample_hex_cube))
+			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
+			
+			var wall : bool = false
+			var tile_data_prev : TileData = wall_layer.get_cell_tile_data(prev_hex_map)
+			if tile_data_prev:
+				if tile_data_prev.has_custom_data("n"):
+					var dir : bool = tile_data_prev.get_custom_data("n")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
+						wall = true
+				if tile_data_prev.has_custom_data("ne"):
+					var dir : bool = tile_data_prev.get_custom_data("ne")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
+						wall = true
+				if tile_data_prev.has_custom_data("se"):
+					var dir : bool = tile_data_prev.get_custom_data("se")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
+						wall = true
+				if tile_data_prev.has_custom_data("s"):
+					var dir : bool = tile_data_prev.get_custom_data("s")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
+						wall = true
+				if tile_data_prev.has_custom_data("sw"):
+					var dir : bool = tile_data_prev.get_custom_data("sw")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
+						wall = true
+				if tile_data_prev.has_custom_data("nw"):
+					var dir : bool = tile_data_prev.get_custom_data("nw")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
+						wall = true
+			if wall == true:
+				result["crossed_wall"] = true
+				result["blocked"] = true
+				result["block_point"] = sample_point
+				return result
+		if wall_layer.get_cell_source_id(sample_hex_map) != -1:
+			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
+			
+			var wall : bool = false
+			var tile_data_sample : TileData = wall_layer.get_cell_tile_data(sample_hex_map)
+			if tile_data_sample:
+				if tile_data_sample.has_custom_data("n"):
+					var dir : bool = tile_data_sample.get_custom_data("n")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
+						wall = true
+				if tile_data_sample.has_custom_data("ne"):
+					var dir : bool = tile_data_sample.get_custom_data("ne")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
+						wall = true
+				if tile_data_sample.has_custom_data("se"):
+					var dir : bool = tile_data_sample.get_custom_data("se")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
+						wall = true
+				if tile_data_sample.has_custom_data("s"):
+					var dir : bool = tile_data_sample.get_custom_data("s")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
+						wall = true
+				if tile_data_sample.has_custom_data("sw"):
+					var dir : bool = tile_data_sample.get_custom_data("sw")
+					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
+						wall = true
+				if tile_data_sample.has_custom_data("nw"):
+					var dir : bool = tile_data_sample.get_custom_data("nw")
+					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
+						wall = true
+			if wall == true:
+				result["crossed_wall"] = true
+				result["blocked"] = true
+				result["block_point"] = sample_point
+				return result
+				
+			
+		prev_hex_cube = sample_hex_cube
+		prev_hex_map = sample_hex_map
+		
+		#if is_sample_point_crossing_wall(sample_point):
+			#var forward_step = sample_point + direction * 20.0
+			#var forward_hex = ground_layer.local_to_map(forward_step)
+#
+			#var sample_neighbors = get_neighboring_hexes(sample_hex_map)
+			#
+			#
+			#if is_in_wall:
 				#continue
+			#
+			#if sample_hex_map == origin_hex:
+				#is_in_wall = true
+				#if result.shooter_cover < WALL_COVER:
+					#result.shooter_cover = WALL_COVER
+				#continue
+			#
+			#if target_hex_map in sample_neighbors and (forward_hex == target_hex_map or sample_hex_map == target_hex_map):
+				#if result.target_cover < WALL_COVER:
+					#result.target_cover = WALL_COVER
+				#continue
+			#is_in_wall = true
+			#result["crossed_wall"] = true
 			#result["blocked"] = true
 			#result["block_point"] = sample_point
 			#return result
-
-		if is_sample_point_crossing_wall(sample_point):
-			var forward_step = sample_point + direction * 20.0
-			var forward_hex = ground_layer.local_to_map(forward_step)
-
-			var sample_neighbors = get_neighboring_hexes(sample_hex)
-			
-			
-			if is_in_wall:
-				continue
-			
-			if sample_hex == origin_hex:
-				is_in_wall = true
-				if result.shooter_cover < WALL_COVER:
-					result.shooter_cover = WALL_COVER
-				continue
-			
-			if target_hex_map in sample_neighbors and (forward_hex == target_hex_map or sample_hex == target_hex_map):
-				if result.target_cover < WALL_COVER:
-					result.target_cover = WALL_COVER
-				continue
-			is_in_wall = true
-			result["crossed_wall"] = true
-			result["blocked"] = true
-			result["block_point"] = sample_point
-			return result
-			
-		else:
-			is_in_wall = false
-		# --- Crest line blocking (NEW)
+			#
+		#else:
+			#is_in_wall = false
+		## --- Crest line blocking (NEW)
 		if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
 			result["blocked"] = true
 			result["block_point"] = sample_point
@@ -378,26 +455,26 @@ func _draw():
 
 	var origin_pos = ground_layer.map_to_local(origin_hex)
 
-	#for line_data in los_lines:
-		#if line_data["blocked"]:
-			#var block_point = line_data["block_point"]
-			#if block_point == null:
-				#block_point = origin_pos  # Failsafe
-			#draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
+	for line_data in los_lines:
+		if line_data["blocked"]:
+			var block_point = line_data["block_point"]
+			if block_point == null:
+				block_point = origin_pos  # Failsafe
+			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
 
 	for line_data in los_lines:
-		#var block_point = line_data["block_point"]
-		#if block_point == null:
-			#block_point = origin_pos  # Failsafe
-		#if not line_data["blocked"]:
-			#draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
-		#else:
-			#draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
-		var orig = origin_pos
-		for hex in line_data["hexes"]:
-			var pos = ground_layer.cube_to_local(hex)
-			draw_line(orig, pos, Color(0, 1, 0), 2.0)
-			orig = pos
+		var block_point = line_data["block_point"]
+		if block_point == null:
+			block_point = origin_pos  # Failsafe
+		if not line_data["blocked"]:
+			draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
+		else:
+			draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
+		#var orig = origin_pos
+		#for hex in line_data["hexes"]:
+			#var pos = ground_layer.cube_to_local(hex)
+			#draw_line(orig, pos, Color(0, 1, 0), 2.0)
+			#orig = pos
 			
 
 func generate_los_lines_for_debug():
@@ -428,6 +505,15 @@ func generate_los_lines_for_debug():
 
 	queue_redraw()
 
+func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> int:
+	var d = nxt - cur
+	if d == Vector3i( 0,  1, -1): return COMPASS_DIRECTION.SOUTH
+	if d == Vector3i( 1,  0, -1): return COMPASS_DIRECTION.SOUTHEAST
+	if d == Vector3i( 1, -1,  0): return COMPASS_DIRECTION.NORTHEAST
+	if d == Vector3i( 0, -1,  1): return COMPASS_DIRECTION.NORTH
+	if d == Vector3i(-1,  0,  1): return COMPASS_DIRECTION.NORTHWEST
+	if d == Vector3i(-1,  1,  0): return COMPASS_DIRECTION.SOUTHWEST
+	return 66
 
 func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	# 1) Convert to cube coords

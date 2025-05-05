@@ -3,7 +3,8 @@
 extends EditorPlugin
 
 var _tilemap: HexagonTileMapLayer = null
-var _clicks: Array[Vector2i] = []
+var map_clicks: Array[Vector2i] = []
+var cube_clicks: Array[Vector3i] = []
 var _prev_left := false
 
 func _enter_tree():
@@ -17,7 +18,8 @@ func _edit(obj: Object) -> void:
 	_tilemap = obj as HexagonTileMapLayer
 	# pull in all the conversion functions now that we’re in editor
 	_tilemap._on_tileset_changed()    # <— this makes map_to_cube()/cube_to_local() valid
-	_clicks.clear()
+	map_clicks.clear()
+	cube_clicks.clear()
 	update_overlays()
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
@@ -25,8 +27,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not _tilemap:
 		return false
 	if event is InputEventMouseButton and event.pressed:
-		if _clicks.size() >= 2:
-			_clicks.clear()
+		if map_clicks.size() >= 2:
+			map_clicks.clear()
+		if cube_clicks.size() >= 2:
+			cube_clicks.clear()
 		 # 1) raw mouse in viewport coords
 		var scene_root = get_tree().get_edited_scene_root()
 		var mouse_coords = scene_root.get_global_mouse_position()
@@ -37,13 +41,27 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 
 		# 4) to map (cell) coords
 		var map_pos  = _tilemap.local_to_map(mouse_v)
+		var cube_pos  = _tilemap.local_to_cube(mouse_v)
 
-		print(map_pos)
-		_clicks.append(map_pos)
+		map_clicks.append(map_pos)
+		cube_clicks.append(cube_pos)
 		update_overlays()
-		if _clicks.size() == 2:
-			_check_between_axes(_clicks[0], _clicks[1])
+		if map_clicks.size() == 2:
+			_check_between_axes(map_clicks[0], map_clicks[1])
+		if cube_clicks.size() == 2:
+			var na = cube_direction_name(cube_clicks[0], cube_clicks[1])
+			print(na)
 	return false  # return true if you want to _consume_ the click
+
+func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> String:
+	var d = nxt - cur
+	if d == Vector3i( 0,  1, -1): return "north"
+	if d == Vector3i( 1,  0, -1): return "northeast"
+	if d == Vector3i( 1, -1,  0): return "southeast"
+	if d == Vector3i( 0, -1,  1): return "south"
+	if d == Vector3i(-1,  0,  1): return "southwest"
+	if d == Vector3i(-1,  1,  0): return "northwest"
+	return "other"
 
 #func _process(delta: float) -> void:
 	#if not _tilemap:
@@ -111,10 +129,10 @@ func _check_between_axes(a: Vector2i, b: Vector2i) -> void:
 
 func _forward_canvas_draw_over_viewport(overlay: Control) -> void:
 	# only draw when we have exactly two clicks
-	if _tilemap and _clicks.size() == 2:
+	if _tilemap and map_clicks.size() == 2:
 		# 1) convert map -> cube -> local (pixel) coords
-		var p1 = _tilemap.cube_to_local( _tilemap.map_to_cube(_clicks[0]) )
-		var p2 = _tilemap.cube_to_local( _tilemap.map_to_cube(_clicks[1]) )
+		var p1 = _tilemap.cube_to_local( _tilemap.map_to_cube(map_clicks[0]) )
+		var p2 = _tilemap.cube_to_local( _tilemap.map_to_cube(map_clicks[1]) )
 		# 2) draw a line between them
 		overlay.draw_line(p1, p2, Color.RED, 2)
 		update_overlays()
