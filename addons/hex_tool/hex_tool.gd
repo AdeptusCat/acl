@@ -6,6 +6,7 @@ var _tilemap: HexagonTileMapLayer = null
 var map_clicks: Array[Vector2i] = []
 var cube_clicks: Array[Vector3i] = []
 var _prev_left := false
+var points_to_draw : Array[Vector2]
 
 func _enter_tree():
 	set_process(true)                                      # turn on _process()
@@ -50,8 +51,29 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			_check_between_axes(map_clicks[0], map_clicks[1])
 		if cube_clicks.size() == 2:
 			var na = cube_direction_name(cube_clicks[0], cube_clicks[1])
+			draw_selected_hexes(cube_clicks[0], cube_clicks[1])
 			print(na)
 	return false  # return true if you want to _consume_ the click
+
+func draw_selected_hexes(origin_hex_cube, target_hex_cube):
+	#var origin_hex_map : Vector2i = ground_layer.local_to_map(origin_pos)
+	#var target_hex_map : Vector2i = ground_layer.local_to_map(target_pos)
+	#
+	#var origin_hex_cube : Vector3i = ground_layer.local_to_cube(origin_pos)
+	#var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
+	points_to_draw.clear()
+	var n = _tilemap.cube_distance(origin_hex_cube, target_hex_cube)
+	var hexes : Array[Vector3i] = []
+	for i in range(n + 1):
+		var t = float(i) / float(n)
+		# linear interpolate in 3D
+		var fx = lerp(origin_hex_cube.x, target_hex_cube.x, t)
+		var fy = lerp(origin_hex_cube.y, target_hex_cube.y, t)
+		var fz = lerp(origin_hex_cube.z, target_hex_cube.z, t)
+		# round to the nearest valid cube coord
+		var h = HexagonTileMap.cube_round(Vector3(fx, fy, fz))
+		hexes.append(h)
+		points_to_draw.append(_tilemap.cube_to_local(h))
 
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> String:
 	var d = nxt - cur
@@ -136,3 +158,7 @@ func _forward_canvas_draw_over_viewport(overlay: Control) -> void:
 		# 2) draw a line between them
 		overlay.draw_line(p1, p2, Color.RED, 2)
 		update_overlays()
+	if _tilemap:
+		
+		for i in range(points_to_draw.size()-1):
+			overlay.draw_line(points_to_draw[i], points_to_draw[i+1], Color.GREEN, 2)
