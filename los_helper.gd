@@ -219,153 +219,145 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
 	
 	var res = check_dir_between_axes(origin_hex_map, target_hex_map)
-	#match res:
-		#BetweenAxis.X_Y_POS:
-			#print("✅ Between X and Y, positive direction (+X/+Y, -Z)")
-			#var start_hex_cube : Vector3i = origin_hex_cube
-			#var start_hex_map : Vector2i = target_hex_map
-			#while true:
-				#
-				#var s_hex_cube : Vector3i = start_hex_cube + Vector3i(0, 1, -1)
-				#var s_hex_map : Vector2i = ground_layer.cube_to_map(s_hex_cube)
-				#var se_hex_cube : Vector3i = start_hex_cube + Vector3i(1, 0, -1)
-				#var se_hex_map : Vector2i = ground_layer.cube_to_map(se_hex_cube)
-				#var next_middle_hex_cube : Vector3i = s_hex_cube + Vector3i(1, 0, -1)
-				#var next_middle_hex_map : Vector2i = ground_layer.cube_to_map(next_middle_hex_cube)
-				#
-				## check blocked by building from start to target hex, so test line is along hexspine
-				#if not start_hex_cube == origin_hex_cube:
-					#result["block_point"] = _refine_entry(ground_layer.cube_to_local(start_hex_cube), ground_layer.cube_to_local(next_middle_hex_cube))
-					#if result["block_point"] != Vector2.ZERO:
-						#result["blocked"] = true
-					#if result.blocked:
-						#return result
+	match res:
+		BetweenAxis.X_Y_POS:
+			print("✅ Between X and Y, positive direction (+X/+Y, -Z)")
+			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
+			var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
+			var start_hex_cube : Vector3i = origin_hex_cube
+			var start_hex_map : Vector2i = target_hex_map
+			while true:
+				var s_hex_cube : Vector3i = start_hex_cube + s_cube_vector
+				var s_hex_map : Vector2i = ground_layer.cube_to_map(s_hex_cube)
+				var se_hex_cube : Vector3i = start_hex_cube + se_cube_vector
+				var se_hex_map : Vector2i = ground_layer.cube_to_map(se_hex_cube)
+				var next_middle_hex_cube : Vector3i = s_hex_cube + Vector3i(1, 0, -1)
+				var next_middle_hex_map : Vector2i = ground_layer.cube_to_map(next_middle_hex_cube)
+				
+				# check blocked by building from start to target hex, so test line is along hexspine
+				if not start_hex_cube == origin_hex_cube:
+					result["block_point"] = _refine_entry(ground_layer.cube_to_local(start_hex_cube), ground_layer.cube_to_local(next_middle_hex_cube))
+					if result["block_point"] != Vector2.ZERO:
+						result["blocked"] = true
+					if result.blocked:
+						return result
+
+				# from start to South
+				if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
+					var wall_result = is_wall_blocking(start_hex_cube, s_hex_cube, start_hex_map, s_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+
+					wall_result = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, start_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+					
+				
+				# from South to next middle hex
+				if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not s_hex_map == origin_hex_map:
+					var wall_result = is_wall_blocking(s_hex_cube, next_middle_hex_cube, s_hex_map, next_middle_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+
+					wall_result = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, s_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+				
+				# from start to South-East
+				if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
+					var wall_result = is_wall_blocking(start_hex_cube, se_hex_cube, start_hex_map, se_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+
+					wall_result = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, start_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
+				
+				# from South-East to next middle hex
+				var wall_result = is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, next_middle_hex_map, origin_hex_map)
+				if wall_result.size() > 0:
+					result.merge(wall_result, true)
+					return result
+
+				wall_result = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, se_hex_map, origin_hex_map)
+				if wall_result.size() > 0:
+					result.merge(wall_result, true)
+					return result
+				
+				start_hex_cube = next_middle_hex_cube
+				if next_middle_hex_cube == target_hex_cube:
+					break;
+			print("reached goal")
+			#print(ground_layer.map_to_cube(Vector2i(0,1))) # south
+			#print(ground_layer.map_to_cube(Vector2i(1,0))) # southeast
+		BetweenAxis.X_Y_NEG:
+			print("✅ Between X and Y, negative direction (-X/-Y, +Z)")
+		BetweenAxis.Y_Z_POS:
+			print("✅ Between Y and Z, positive direction (+Y/+Z, -X)")
+		BetweenAxis.Y_Z_NEG:
+			print("✅ Between Y and Z, negative direction (-Y/-Z, +X)")
+		BetweenAxis.Z_X_POS:
+			print("✅ Between Z and X, positive direction (+Z/+X, -Y)")
+		BetweenAxis.Z_X_NEG:
+			print("✅ Between Z and X, negative direction (-Z/-X, +Y)")
+		BetweenAxis.NONE:
+			print("❌ Line does not run between two axes.")
+	
+	#var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
+	#result.hexes = hexes
+	#var steps = hexes.size()
+	#
+	#if steps < 2:
+		#return result
+	#
+	#var prev_hex_cube : Vector3i = origin_hex_cube
+	#var prev_hex_map : Vector2i = origin_hex_map
+	#
+	#for i in range(steps):
+		#var t := float(i) / float(steps - 1)
+		#var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
+		#var los_height_at_sample = lerp(shooter_height, target_height, t)
+		#var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
+		#var sample_hex_cube: Vector3i = hexes[i]
+		#
+		## skip the target-hex center check
+		#if sample_hex_map == target_hex_map:
+			#continue
+		#
+		## skip the origin-hex center check
+		#if sample_hex_map == origin_hex_map:
+			#continue
 #
-				## from start to South
-				#if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
-					#var compass_direction : int = cube_direction_name(start_hex_cube, s_hex_cube)
-					#
-					#var wall_result := is_wall_blocking(start_hex_cube, s_hex_cube, start_hex_map, s_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-					#wall_result = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, start_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-				#
-				## from South to next middle hex
-				#if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not s_hex_map == origin_hex_map:
-					#var compass_direction : int = cube_direction_name(s_hex_cube, next_middle_hex_cube)
-					#
-					#var wall_result := is_wall_blocking(s_hex_cube, next_middle_hex_cube, s_hex_map, next_middle_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-					#wall_result = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, s_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-				#
-				## from start to South-East
-				#if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
-					#var compass_direction : int = cube_direction_name(start_hex_cube, se_hex_cube)
-					#
-					#var wall_result := is_wall_blocking(start_hex_cube, se_hex_cube, start_hex_map, se_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-					#wall_result = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, start_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-				#
-				## from South-East to next middle hex
-				#if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not se_hex_map == origin_hex_map:
-					#var compass_direction : int = cube_direction_name(se_hex_cube, next_middle_hex_cube)
-					#
-					#var wall_result := is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, next_middle_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-					#wall_result = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, se_hex_map, origin_hex_map)
-					#if wall_result.size() > 0:
-						#result.merge(wall_result, true)
-						#return result
-				#
-				#start_hex_cube = next_middle_hex_cube
-				##print("check")
-				##print(ground_layer.cube_to_map(s_hex_cube))
-				##print(ground_layer.cube_to_map(se_hex_cube))
-				#
-				#if next_middle_hex_cube == target_hex_cube:
-					#break;
-			#print("reached goal")
-			##print(ground_layer.map_to_cube(Vector2i(0,1))) # south
-			##print(ground_layer.map_to_cube(Vector2i(1,0))) # southeast
-		#BetweenAxis.X_Y_NEG:
-			#print("✅ Between X and Y, negative direction (-X/-Y, +Z)")
-		#BetweenAxis.Y_Z_POS:
-			#print("✅ Between Y and Z, positive direction (+Y/+Z, -X)")
-		#BetweenAxis.Y_Z_NEG:
-			#print("✅ Between Y and Z, negative direction (-Y/-Z, +X)")
-		#BetweenAxis.Z_X_POS:
-			#print("✅ Between Z and X, positive direction (+Z/+X, -Y)")
-		#BetweenAxis.Z_X_NEG:
-			#print("✅ Between Z and X, negative direction (-Z/-X, +Y)")
-		#BetweenAxis.NONE:
-			#print("❌ Line does not run between two axes.")
-	
-	var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
-	result.hexes = hexes
-	var steps = hexes.size()
-	
-	if steps < 2:
-		return result
-	
-	var prev_hex_cube : Vector3i = origin_hex_cube
-	var prev_hex_map : Vector2i = origin_hex_map
-	
-	for i in range(steps):
-		var t := float(i) / float(steps - 1)
-		var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
-		var los_height_at_sample = lerp(shooter_height, target_height, t)
-		var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
-		var sample_hex_cube: Vector3i = hexes[i]
-		
-		# skip the target-hex center check
-		if sample_hex_map == target_hex_map:
-			continue
-		
-		# skip the origin-hex center check
-		if sample_hex_map == origin_hex_map:
-			continue
-
-		if building_layer.get_cell_source_id(sample_hex_map) != -1:
-			result = _check_building_block(sample_hex_map, i, steps, origin_pos, target_pos, result)
-			if result.blocked:
-				return result
-
-		if wall_layer.get_cell_source_id(sample_hex_map) != -1 and not prev_hex_map == origin_hex_map:
-			var wall_result := is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point, origin_hex_map)
-			if wall_result.size() > 0:
-				result.merge(wall_result, true)
-				return result
-		
-		if wall_layer.get_cell_source_id(prev_hex_map) != -1 and not prev_hex_map == origin_hex_map:
-			var wall_result := is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_point, prev_hex_map, origin_hex_map)
-			if wall_result.size() > 0:
-				result.merge(wall_result, true)
-				return result
-
-		prev_hex_cube = sample_hex_cube
-		prev_hex_map = sample_hex_map
-
-		## --- Crest line blocking (NEW)
-		if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
-			result["blocked"] = true
-			result["block_point"] = sample_point
-			return result
+		#if building_layer.get_cell_source_id(sample_hex_map) != -1:
+			#result = _check_building_block(sample_hex_map, i, steps, origin_pos, target_pos, result)
+			#if result.blocked:
+				#return result
+		#
+		#var wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point, origin_hex_map)
+		#if wall_result.size() > 0:
+			#result.merge(wall_result, true)
+			#return result
+#
+		#wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point, origin_hex_map)
+		#if wall_result.size() > 0:
+			#result.merge(wall_result, true)
+			#return result
+#
+#
+		#prev_hex_cube = sample_hex_cube
+		#prev_hex_map = sample_hex_map
+#
+		### --- Crest line blocking (NEW)
+		#if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
+			#result["blocked"] = true
+			#result["block_point"] = sample_point
+			#return result
 	
 	return result
 
@@ -399,35 +391,44 @@ func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_
 
 	return result
 
+# helper to map compass constants to your custom-data keys
+func compass_direction_to_label(dir: int) -> String:
+	match dir:
+		COMPASS_DIRECTION.NORTH:     return "n"
+		COMPASS_DIRECTION.NORTHEAST: return "ne"
+		COMPASS_DIRECTION.SOUTHEAST: return "se"
+		COMPASS_DIRECTION.SOUTH:     return "s"
+		COMPASS_DIRECTION.SOUTHWEST: return "sw"
+		COMPASS_DIRECTION.NORTHWEST: return "nw"
+		_:                          return ""
 
-func is_wall_blocking(from_cube: Vector3i, to_cube: Vector3i, from_map: Vector2i, to_map, origin_map: Vector2i) -> Dictionary:
+
+func is_wall_blocking(
+		from_cube: Vector3i,
+		to_cube:   Vector3i,
+		from_map:  Vector2i,
+		sample_pt: Vector2,
+		origin_map: Vector2i
+	) -> Dictionary:
 	var result := {}
-	
-	if wall_layer.get_cell_source_id(from_map) == -1 or from_map == origin_map:
+	# early out if there's no tile here or it's the origin tile
+	if wall_layer.get_cell_source_id(from_map) == -1 \
+	   or from_map == origin_map:
 		return result
-	
-	var compass_direction: int = cube_direction_name(from_cube, to_cube)
+
+	var dir = cube_direction_name(from_cube, to_cube)
+	var label = compass_direction_to_label(dir)
+	if label == "":
+		return result   # some weird direction?
+
 	var tile_data: TileData = wall_layer.get_cell_tile_data(from_map)
-	
-	if tile_data:
-		var dir_labels := {
-			COMPASS_DIRECTION.NORTH: "n",
-			COMPASS_DIRECTION.NORTHEAST: "ne",
-			COMPASS_DIRECTION.SOUTHEAST: "se",
-			COMPASS_DIRECTION.SOUTH: "s",
-			COMPASS_DIRECTION.SOUTHWEST: "sw",
-			COMPASS_DIRECTION.NORTHWEST: "nw"
-		}
-		
-		if dir_labels.has(compass_direction):
-			var label: String = dir_labels[compass_direction]
-			if tile_data.has_custom_data(label):
-				var is_wall: bool = tile_data.get_custom_data(label)
-				if is_wall:
-					result["crossed_wall"] = true
-					result["blocked"] = true
-					result["block_point"] = to_map
+	if tile_data and tile_data.has_custom_data(label) \
+	   and tile_data.get_custom_data(label):
+		result["crossed_wall"] = true
+		result["blocked"]      = true
+		result["block_point"]  = sample_pt
 	return result
+
 
 func calculate_absolute_height(hex_elevation: int, story_level: int) -> float:
 	return (hex_elevation * FLOOR_HEIGHT_METERS) + (story_level * FLOOR_HEIGHT_METERS) + UNIT_HEIGHT_METERS
