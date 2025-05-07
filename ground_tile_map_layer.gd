@@ -29,12 +29,16 @@ func _ready():
 	#print(na)
 	# Enable pathfinding
 	
-
+	#var start_cube : Vector3i = map_to_cube(Vector2i(0,0))
+	#var target_cube : Vector3i = map_to_cube(Vector2i(2,3))
+	#start_cube = Vector3i(0,0,0)
+	#target_cube = Vector3i(2,2,-4)
+	#target_cube = Vector3i(2,-4,2)
+	
 	# Enable debug visualization (optional)
 	#debug_mode = DebugModeFlags.TILES_COORDS | DebugModeFlags.CONNECTIONS
 	#pathfinding_get_point_id(Vector2i.ZERO)
-	
-	
+
 
 
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> String:

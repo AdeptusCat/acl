@@ -24,6 +24,14 @@ const GRID_SIZE_Y = 10
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
 
+enum BetweenAxis {
+	NONE,
+	X_Y_POS, X_Y_NEG,
+	Y_Z_POS, Y_Z_NEG,
+	Z_X_POS, Z_X_NEG
+}
+
+
 func load_prebaked_los(file_path: String):
 	var los_resource = load(file_path) as LosLookupData
 	los_lookup = los_resource.los_lookup
@@ -150,6 +158,29 @@ func _refine_entry(a: Vector2, b: Vector2) -> Vector2:
 	# fallback
 	return Vector2.ZERO
 
+func is_uneven(n: int) -> bool:
+	return n % 2 != 0
+
+# 1) Cube → Axial (pointy-topped convention:  q = x, r = z)
+func cube_to_axial_frac(c: Vector3) -> Vector2:
+	return Vector2(c.x, c.z)
+
+
+# flat-topped:
+#   radius = tile_size.x/2
+#   x = radius * 1.5 * q
+#   y = radius * sqrt(3) * (r + q*0.5)
+func axial_to_pixel_flat(p: Vector2, tile_size: Vector2) -> Vector2:
+	var radius = tile_size.x * 0.5
+	var x = radius * 1.5 * p.x
+	var y = radius * sqrt(3) * (p.y + p.x * 0.5)
+	return Vector2(x, y)
+
+
+# 3) All together:
+func fractional_cube_to_local(c: Vector3, tile_size: Vector2) -> Vector2:
+	var axial = cube_to_axial_frac(c)
+	return axial_to_pixel_flat(axial, tile_size)
 
 func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, target_elevation: int, origin_story: int, target_story: int) -> Dictionary:
 	var result = {
@@ -186,6 +217,27 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
 	
 	var n = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
+	
+	var is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
+	print(is_between_hexes)
+	
+	var res = check_dir_between_axes(origin_hex_map, target_hex_map)
+	match res:
+		BetweenAxis.X_Y_POS:
+			print("✅ Between X and Y, positive direction (+X/+Y, -Z)")
+		BetweenAxis.X_Y_NEG:
+			print("✅ Between X and Y, negative direction (-X/-Y, +Z)")
+		BetweenAxis.Y_Z_POS:
+			print("✅ Between Y and Z, positive direction (+Y/+Z, -X)")
+		BetweenAxis.Y_Z_NEG:
+			print("✅ Between Y and Z, negative direction (-Y/-Z, +X)")
+		BetweenAxis.Z_X_POS:
+			print("✅ Between Z and X, positive direction (+Z/+X, -Y)")
+		BetweenAxis.Z_X_NEG:
+			print("✅ Between Z and X, negative direction (-Z/-X, +Y)")
+		BetweenAxis.NONE:
+			print("❌ Line does not run between two axes.")
+	
 	var hexes : Array[Vector3i] = []
 	for i in range(n + 1):
 		var t = float(i) / float(n)
@@ -196,6 +248,15 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		# round to the nearest valid cube coord
 		var h = HexagonTileMap.cube_round(Vector3(fx, fy, fz))
 		hexes.append(h)
+		if is_uneven(i):
+			print(ground_layer.cube_to_map(Vector3(fx, fy, fz)))
+		var frac_cube = Vector3(fx, fy, fz)
+		var tile_size  = Vector2(64, 64)
+		var local_pos  = fractional_cube_to_local(frac_cube, tile_size)
+		var map1 = ground_layer.local_to_map(local_pos)
+		var map2 = ground_layer.cube_to_map(h)
+		
+		# now `local_pos` is exactly where that fractional cube‐point sits in world/local coords
 	
 	#var hexes : Array[Vector3i] = ground_layer.cube_linedraw(origin_hex_cube, target_hex_cube)
 	result.hexes = hexes
@@ -241,6 +302,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		# 5a) building? → refine between previous & current
 		if building_layer.get_cell_source_id(sample_hex_map) != -1:
+			result = _check_building_block(sample_hex_map, i, steps, origin_pos, target_pos, result)
+			if result.blocked:
+				return result
 			# we hit the first building‐hex:
 			# find the exact entry-point by sub-sampling between centers
 			#var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
@@ -259,73 +323,86 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			#print(building_layer.cube_to_map(sample_hex_cube))
 			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
 			
-			var wall : bool = false
-			var tile_data_prev : TileData = wall_layer.get_cell_tile_data(prev_hex_map)
-			if tile_data_prev:
-				if tile_data_prev.has_custom_data("n"):
-					var dir : bool = tile_data_prev.get_custom_data("n")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
-						wall = true
-				if tile_data_prev.has_custom_data("ne"):
-					var dir : bool = tile_data_prev.get_custom_data("ne")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
-						wall = true
-				if tile_data_prev.has_custom_data("se"):
-					var dir : bool = tile_data_prev.get_custom_data("se")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
-						wall = true
-				if tile_data_prev.has_custom_data("s"):
-					var dir : bool = tile_data_prev.get_custom_data("s")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
-						wall = true
-				if tile_data_prev.has_custom_data("sw"):
-					var dir : bool = tile_data_prev.get_custom_data("sw")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
-						wall = true
-				if tile_data_prev.has_custom_data("nw"):
-					var dir : bool = tile_data_prev.get_custom_data("nw")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
-						wall = true
-			if wall == true:
-				result["crossed_wall"] = true
-				result["blocked"] = true
-				result["block_point"] = sample_point
+			var wall_result := is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point, origin_hex_map)
+			if wall_result.size() > 0:
+				result.merge(wall_result, true)
 				return result
-		if wall_layer.get_cell_source_id(sample_hex_map) != -1 and not prev_hex_map == origin_hex_map:
-			var compass_direction : int = cube_direction_name(prev_hex_cube, sample_hex_cube)
+
+			wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point, origin_hex_map)
+			if wall_result.size() > 0:
+				result.merge(wall_result, true)
+				return result
 			
-			var wall : bool = false
-			var tile_data_sample : TileData = wall_layer.get_cell_tile_data(sample_hex_map)
-			if tile_data_sample:
-				if tile_data_sample.has_custom_data("n"):
-					var dir : bool = tile_data_sample.get_custom_data("n")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
-						wall = true
-				if tile_data_sample.has_custom_data("ne"):
-					var dir : bool = tile_data_sample.get_custom_data("ne")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
-						wall = true
-				if tile_data_sample.has_custom_data("se"):
-					var dir : bool = tile_data_sample.get_custom_data("se")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
-						wall = true
-				if tile_data_sample.has_custom_data("s"):
-					var dir : bool = tile_data_sample.get_custom_data("s")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
-						wall = true
-				if tile_data_sample.has_custom_data("sw"):
-					var dir : bool = tile_data_sample.get_custom_data("sw")
-					if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
-						wall = true
-				if tile_data_sample.has_custom_data("nw"):
-					var dir : bool = tile_data_sample.get_custom_data("nw")
-					if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
-						wall = true
-			if wall == true:
-				result["crossed_wall"] = true
-				result["blocked"] = true
-				result["block_point"] = sample_point
-				return result
+			
+			result
+			
+			#var wall : bool = false
+			#var tile_data_prev : TileData = wall_layer.get_cell_tile_data(prev_hex_map)
+			#if tile_data_prev:
+				#if tile_data_prev.has_custom_data("n"):
+					#var dir : bool = tile_data_prev.get_custom_data("n")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
+						#wall = true
+				#if tile_data_prev.has_custom_data("ne"):
+					#var dir : bool = tile_data_prev.get_custom_data("ne")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
+						#wall = true
+				#if tile_data_prev.has_custom_data("se"):
+					#var dir : bool = tile_data_prev.get_custom_data("se")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
+						#wall = true
+				#if tile_data_prev.has_custom_data("s"):
+					#var dir : bool = tile_data_prev.get_custom_data("s")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
+						#wall = true
+				#if tile_data_prev.has_custom_data("sw"):
+					#var dir : bool = tile_data_prev.get_custom_data("sw")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
+						#wall = true
+				#if tile_data_prev.has_custom_data("nw"):
+					#var dir : bool = tile_data_prev.get_custom_data("nw")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
+						#wall = true
+			#if wall == true:
+				#result["crossed_wall"] = true
+				#result["blocked"] = true
+				#result["block_point"] = sample_point
+				#return result
+		#if wall_layer.get_cell_source_id(sample_hex_map) != -1 and not prev_hex_map == origin_hex_map:
+			#var compass_direction : int = cube_direction_name(sample_hex_cube, prev_hex_cube)
+			#
+			#var wall : bool = false
+			#var tile_data_sample : TileData = wall_layer.get_cell_tile_data(sample_hex_map)
+			#if tile_data_sample:
+				#if tile_data_sample.has_custom_data("n"):
+					#var dir : bool = tile_data_sample.get_custom_data("n")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTH:
+						#wall = true
+				#if tile_data_sample.has_custom_data("ne"):
+					#var dir : bool = tile_data_sample.get_custom_data("ne")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTHEAST:
+						#wall = true
+				#if tile_data_sample.has_custom_data("se"):
+					#var dir : bool = tile_data_sample.get_custom_data("se")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHEAST:
+						#wall = true
+				#if tile_data_sample.has_custom_data("s"):
+					#var dir : bool = tile_data_sample.get_custom_data("s")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTH:
+						#wall = true
+				#if tile_data_sample.has_custom_data("sw"):
+					#var dir : bool = tile_data_sample.get_custom_data("sw")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.SOUTHWEST:
+						#wall = true
+				#if tile_data_sample.has_custom_data("nw"):
+					#var dir : bool = tile_data_sample.get_custom_data("nw")
+					#if dir == true and compass_direction == COMPASS_DIRECTION.NORTHWEST:
+						#wall = true
+			#if wall == true:
+				#result["crossed_wall"] = true
+				#result["blocked"] = true
+				#result["block_point"] = sample_point
+				#return result
 				
 			
 		prev_hex_cube = sample_hex_cube
@@ -368,6 +445,50 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	return result
 
 # --- INTERNAL HELPERS ---
+
+func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
+	# Compute sub-sampled points just before and after the hit
+	var t1: float = float(i - 1) / float(steps - 1)
+	var t2: float = float(i + 1) / float(steps - 1)
+	var prev_pt: Vector2 = origin_pos.lerp(target_pos, t1)
+	var next_pt: Vector2 = origin_pos.lerp(target_pos, t2)
+
+	# Try to find precise entry point
+	result["block_point"] = _refine_entry(prev_pt, next_pt)
+	if result["block_point"] != Vector2.ZERO:
+		result["blocked"] = true
+
+	return result
+
+
+func is_wall_blocking(from_cube: Vector3i, to_cube: Vector3i, from_map: Vector2i, sample_point, origin_map: Vector2i) -> Dictionary:
+	var result := {}
+	
+	if wall_layer.get_cell_source_id(from_map) == -1 or from_map == origin_map:
+		return result
+	
+	var compass_direction: int = cube_direction_name(from_cube, to_cube)
+	var tile_data: TileData = wall_layer.get_cell_tile_data(from_map)
+	
+	if tile_data:
+		var dir_labels := {
+			COMPASS_DIRECTION.NORTH: "n",
+			COMPASS_DIRECTION.NORTHEAST: "ne",
+			COMPASS_DIRECTION.SOUTHEAST: "se",
+			COMPASS_DIRECTION.SOUTH: "s",
+			COMPASS_DIRECTION.SOUTHWEST: "sw",
+			COMPASS_DIRECTION.NORTHWEST: "nw"
+		}
+		
+		if dir_labels.has(compass_direction):
+			var label: String = dir_labels[compass_direction]
+			if tile_data.has_custom_data(label):
+				var is_wall: bool = tile_data.get_custom_data(label)
+				if is_wall:
+					result["crossed_wall"] = true
+					result["blocked"] = true
+					result["block_point"] = sample_point
+	return result
 
 func calculate_absolute_height(hex_elevation: int, story_level: int) -> float:
 	return (hex_elevation * FLOOR_HEIGHT_METERS) + (story_level * FLOOR_HEIGHT_METERS) + UNIT_HEIGHT_METERS
@@ -530,6 +651,9 @@ func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> int:
 	if d == Vector3i(-1,  1,  0): return COMPASS_DIRECTION.SOUTHWEST
 	return 66
 
+
+
+
 func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	# 1) Convert to cube coords
 	var ca: Vector3i = ground_layer.map_to_cube(a)
@@ -539,12 +663,6 @@ func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	var dx = cb.x - ca.x
 	var dy = cb.y - ca.y
 	var dz = cb.z - ca.z
-	
-	print(a)
-	print(b)
-	
-	print(ca)
-	print(cb)
 
 	# 3) Check for “between-axes”: two equal components, third == –2× them
 	#    This covers all multiples of (1,1,–2), (–2,1,1), etc.
@@ -556,3 +674,37 @@ func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	else:
 		print("❌ Line does _not_ run between axes.")
 		return false
+
+
+func check_dir_between_axes(a: Vector2i, b: Vector2i) -> BetweenAxis:
+	var ca: Vector3i = ground_layer.map_to_cube(a)
+	var cb: Vector3i = ground_layer.map_to_cube(b)
+
+	var dx = cb.x - ca.x
+	var dy = cb.y - ca.y
+	var dz = cb.z - ca.z
+
+	var gcd_val = gcd(abs(dx), gcd(abs(dy), abs(dz)))
+	if gcd_val == 0:
+		return BetweenAxis.NONE
+
+	var ndx = dx / gcd_val
+	var ndy = dy / gcd_val
+	var ndz = dz / gcd_val
+
+	if ndx == ndy and ndz == -2 * ndx:
+		return BetweenAxis.X_Y_POS if ndx > 0 else BetweenAxis.X_Y_NEG
+	elif ndy == ndz and ndx == -2 * ndy:
+		return BetweenAxis.Y_Z_POS if ndy > 0 else BetweenAxis.Y_Z_NEG
+	elif ndz == ndx and ndy == -2 * ndz:
+		return BetweenAxis.Z_X_POS if ndz > 0 else BetweenAxis.Z_X_NEG
+	else:
+		return BetweenAxis.NONE
+
+# Helper: greatest common divisor
+func gcd(a: int, b: int) -> int:
+	while b != 0:
+		var temp = b
+		b = a % b
+		a = temp
+	return a
