@@ -4,6 +4,7 @@ extends Node2D
 @export var ground_layer: HexagonTileMapLayer
 @export var building_layer: HexagonTileMapLayer
 @export var wall_layer: HexagonTileMapLayer
+@export var terrain_layer: HexagonTileMapLayer
 @export var debug_draw_enabled: bool = true
 
 # --- CONSTANTS ---
@@ -190,7 +191,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		"block_point": null,
 		"shooter_cover": 0,
 		"target_cover": 0,
-		"hexes": []
+		"hexes": [],
+		"hindrance": 0,
 	}
 	
 
@@ -304,8 +306,6 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			if res.blocked == true:
 				result.merge(res, true)
 				return result
-		#BetweenAxis.NONE:
-			#print("❌ Line does not run between two axes.")
 	
 	var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
 	result.hexes = hexes
@@ -336,6 +336,15 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			result = _check_building_block(sample_hex_map, i, steps, origin_pos, target_pos, result)
 			if result.blocked:
 				return result
+		
+		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
+			result = _check_hindrance(sample_hex_map, result)
+		
+		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
+			result = _check_blocking_terrain(sample_hex_map, result)
+			if result.blocked:
+				return result
+		
 		
 		var wall_result
 		if not prev_hex_map == origin_hex_map:
@@ -376,6 +385,7 @@ func _walk_between_axes_and_check_walls(
 	var result := {
 		"blocked": false,
 		"block_point": Vector2.ZERO,
+		"hindrance" : 0
 	}
 	var start_hex_cube : Vector3i = origin_hex_cube
 	var start_hex_map : Vector2i = origin_hex_map
@@ -386,6 +396,31 @@ func _walk_between_axes_and_check_walls(
 		var se_hex_map : Vector2i = ground_layer.cube_to_map(se_hex_cube)
 		var next_middle_hex_cube : Vector3i = s_hex_cube + direction_2
 		var next_middle_hex_map : Vector2i = ground_layer.cube_to_map(next_middle_hex_cube)
+		
+		
+		if not start_hex_cube == origin_hex_cube:
+			if terrain_layer.get_cell_source_id(start_hex_map) != -1:
+				result = _check_hindrance(start_hex_map, result)
+				result = _check_blocking_terrain(start_hex_map, result)
+				if result.blocked:
+					return result
+		
+		var hindrance_result : Dictionary = {"hindrance" : 0}
+		if terrain_layer.get_cell_source_id(s_hex_map) != -1:
+			hindrance_result = _check_hindrance(s_hex_map, hindrance_result)
+			result = _check_blocking_terrain(s_hex_map, result)
+			if result.blocked:
+				return result
+		
+		if terrain_layer.get_cell_source_id(se_hex_map) != -1:
+			hindrance_result = _check_hindrance(se_hex_map, hindrance_result)
+			result = _check_blocking_terrain(se_hex_map, result)
+			if result.blocked:
+				return result
+		# only count one hindrance if the hexspine is edging on two hindrance hexes
+		if hindrance_result.hindrance > 0:
+			result.hindrance += 1
+		
 		
 		# check blocked by building from start to target hex, so test line is along hexspine
 		if not start_hex_cube == origin_hex_cube:
@@ -468,6 +503,21 @@ func cube_line(origin_hex_cube: Vector3i, target_hex_cube: Vector3i, n: int) -> 
 		hexes.append(h)
 	return hexes
 
+
+func _check_hindrance(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
+	var tile_data: TileData = terrain_layer.get_cell_tile_data(sample_hex_map)
+	if tile_data and tile_data.has_custom_data("hindrance") \
+	   and tile_data.get_custom_data("hindrance"):
+		result["hindrance"] += 1
+	return result
+
+func _check_blocking_terrain(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
+	var tile_data: TileData = terrain_layer.get_cell_tile_data(sample_hex_map)
+	if tile_data and tile_data.has_custom_data("blocking") \
+	   and tile_data.get_custom_data("blocking"):
+		result["blocked"]      = true
+		result["block_point"]  = ground_layer.map_to_local(sample_hex_map)
+	return result
 
 func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
 	# Compute sub-sampled points just before and after the hit
