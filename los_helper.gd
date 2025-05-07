@@ -219,91 +219,91 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
 	
 	var direction_between_axes = check_dir_between_axes(origin_hex_map, target_hex_map)
-	match direction_between_axes:
-		BetweenAxis.X_Y_POS:
-			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
-			var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							s_cube_vector,
-							se_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
-		BetweenAxis.X_Y_NEG:
-			var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
-			var nw_cube_vector : Vector3i = Vector3i(-1, 0, 1)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							n_cube_vector,
-							nw_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
-		BetweenAxis.Y_Z_POS:
-			var nw_cube_vector : Vector3i = Vector3i(-1, 0, 1)
-			var sw_cube_vector : Vector3i = Vector3i(-1, 1, 0)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							nw_cube_vector,
-							sw_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
-		BetweenAxis.Y_Z_NEG:
-			var ne_cube_vector : Vector3i = Vector3i(1, -1, 0)
-			var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							ne_cube_vector,
-							se_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
-		BetweenAxis.Z_X_POS:
-			var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
-			var ne_cube_vector : Vector3i = Vector3i(1, -1, 0)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							n_cube_vector,
-							ne_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
-		BetweenAxis.Z_X_NEG:
-			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
-			var se_cube_vector : Vector3i = Vector3i(-1, 1, 0)
-			var res : Dictionary = _walk_between_axes_and_check_walls(
-							origin_hex_cube,
-							target_hex_cube,
-							origin_hex_map,
-							target_hex_map,
-							s_cube_vector,
-							se_cube_vector
-						)
-			if res.blocked == true:
-				result.merge(res, true)
-				return result
+	#match direction_between_axes:
+		#BetweenAxis.X_Y_POS:
+			#var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
+			#var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#s_cube_vector,
+							#se_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
+		#BetweenAxis.X_Y_NEG:
+			#var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
+			#var nw_cube_vector : Vector3i = Vector3i(-1, 0, 1)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#n_cube_vector,
+							#nw_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
+		#BetweenAxis.Y_Z_POS:
+			#var nw_cube_vector : Vector3i = Vector3i(-1, 0, 1)
+			#var sw_cube_vector : Vector3i = Vector3i(-1, 1, 0)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#nw_cube_vector,
+							#sw_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
+		#BetweenAxis.Y_Z_NEG:
+			#var ne_cube_vector : Vector3i = Vector3i(1, -1, 0)
+			#var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#ne_cube_vector,
+							#se_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
+		#BetweenAxis.Z_X_POS:
+			#var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
+			#var ne_cube_vector : Vector3i = Vector3i(1, -1, 0)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#n_cube_vector,
+							#ne_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
+		#BetweenAxis.Z_X_NEG:
+			#var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
+			#var se_cube_vector : Vector3i = Vector3i(-1, 1, 0)
+			#var res : Dictionary = _walk_between_axes_and_check_walls(
+							#origin_hex_cube,
+							#target_hex_cube,
+							#origin_hex_map,
+							#target_hex_map,
+							#s_cube_vector,
+							#se_cube_vector
+						#)
+			#if res.blocked == true:
+				#result.merge(res, true)
+				#return result
 		#BetweenAxis.NONE:
 			#print("❌ Line does not run between two axes.")
 	
@@ -352,10 +352,10 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		prev_hex_map = sample_hex_map
 
 		## --- Crest line blocking (NEW)
-		if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
-			result["blocked"] = true
-			result["block_point"] = sample_point
-			return result
+		#if is_sample_point_blocked_by_crest(sample_point, los_height_at_sample):
+			#result["blocked"] = true
+			#result["block_point"] = sample_point
+			#return result
 	
 	return result
 
@@ -698,10 +698,10 @@ func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	if   (dx == dy   and dz == -2*dx) \
 	 or (dy == dz   and dx == -2*dy) \
 	 or (dz == dx   and dy == -2*dz):
-		print("✅ Line runs perfectly between two axes.")
+		#print("✅ Line runs perfectly between two axes.")
 		return true
 	else:
-		print("❌ Line does _not_ run between axes.")
+		#print("❌ Line does _not_ run between axes.")
 		return false
 
 
