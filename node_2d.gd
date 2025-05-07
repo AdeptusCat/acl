@@ -34,9 +34,12 @@ func _ready():
 	start_screen.visible = true
 	$UnitManager.set_input_enabled(false)
 	
-	var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
-	var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
+	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
+	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	
+	var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(1,1))
+	var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(3,4))
+
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
 	LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)

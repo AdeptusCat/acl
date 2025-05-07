@@ -225,7 +225,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
 			var se_cube_vector : Vector3i = Vector3i(1, 0, -1)
 			var start_hex_cube : Vector3i = origin_hex_cube
-			var start_hex_map : Vector2i = target_hex_map
+			var start_hex_map : Vector2i = origin_hex_map
 			while true:
 				var s_hex_cube : Vector3i = start_hex_cube + s_cube_vector
 				var s_hex_map : Vector2i = ground_layer.cube_to_map(s_hex_cube)
@@ -249,20 +249,22 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 						result.merge(wall_result, true)
 						return result
 
-					wall_result = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, start_hex_map, origin_hex_map)
+				if wall_layer.get_cell_source_id(s_hex_map) != -1 and not start_hex_map == origin_hex_map: 
+					var wall_result = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, start_hex_map, origin_hex_map)
 					if wall_result.size() > 0:
 						result.merge(wall_result, true)
 						return result
 					
 				
 				# from South to next middle hex
-				if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not s_hex_map == origin_hex_map:
+				if wall_layer.get_cell_source_id(s_hex_map) != -1 and not next_middle_hex_map == target_hex_map:
 					var wall_result = is_wall_blocking(s_hex_cube, next_middle_hex_cube, s_hex_map, next_middle_hex_map, origin_hex_map)
 					if wall_result.size() > 0:
 						result.merge(wall_result, true)
 						return result
 
-					wall_result = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, s_hex_map, origin_hex_map)
+				if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not next_middle_hex_map == target_hex_map: 
+					var wall_result = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, s_hex_map, origin_hex_map)
 					if wall_result.size() > 0:
 						result.merge(wall_result, true)
 						return result
@@ -273,24 +275,28 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 					if wall_result.size() > 0:
 						result.merge(wall_result, true)
 						return result
-
-					wall_result = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, start_hex_map, origin_hex_map)
+				
+				if wall_layer.get_cell_source_id(se_hex_map) and not start_hex_map == origin_hex_map:
+					var wall_result = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, start_hex_map, origin_hex_map)
 					if wall_result.size() > 0:
 						result.merge(wall_result, true)
 						return result
 				
 				# from South-East to next middle hex
-				var wall_result = is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, next_middle_hex_map, origin_hex_map)
-				if wall_result.size() > 0:
-					result.merge(wall_result, true)
-					return result
+				if wall_layer.get_cell_source_id(se_hex_map) != -1 and not next_middle_hex_map == target_hex_map:
+					var wall_result = is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, next_middle_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
 
-				wall_result = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, se_hex_map, origin_hex_map)
-				if wall_result.size() > 0:
-					result.merge(wall_result, true)
-					return result
+				if wall_layer.get_cell_source_id(next_middle_hex_map) and not next_middle_hex_map == target_hex_map:
+					var wall_result = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, se_hex_map, origin_hex_map)
+					if wall_result.size() > 0:
+						result.merge(wall_result, true)
+						return result
 				
 				start_hex_cube = next_middle_hex_cube
+				start_hex_map = next_middle_hex_map
 				if next_middle_hex_cube == target_hex_cube:
 					break;
 			print("reached goal")
