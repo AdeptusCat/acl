@@ -29,11 +29,11 @@ texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(17.6502, 28.6995, -15.6477, 28.7774, -16.1873, 34.1732, 17.6262, 34.353)
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_4 = true
 0:0/1 = 1
 0:0/1/flip_v = true
-0:0/1/custom_data_0 = 1
+0:0/1/custom_data_0 = 2
 0:0/1/custom_data_1 = true
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hqns4"]
@@ -42,20 +42,20 @@ texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-38.9487, 0.564476, -28.5353, -6.92947, -9.03158, 27.0947, -19.7566, 37.2553)
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_5 = true
 0:0/1 = 1
 0:0/1/flip_v = true
-0:0/1/custom_data_0 = 1
+0:0/1/custom_data_0 = 2
 0:0/1/custom_data_6 = true
 0:0/2 = 2
 0:0/2/flip_h = true
-0:0/2/custom_data_0 = 1
+0:0/2/custom_data_0 = 2
 0:0/2/custom_data_3 = true
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/flip_v = true
-0:0/3/custom_data_0 = 1
+0:0/3/custom_data_0 = 2
 0:0/3/custom_data_2 = true
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x0ka3"]
@@ -64,23 +64,23 @@ texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(13.4894, 33.4537, 13.4894, 30.3961, -15.1081, 29.8565, -29.317, 1.43887, -32.3746, 3.59718, -17.4463, 32.5544)
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_4 = true
 0:0/0/custom_data_5 = true
 0:0/1 = 1
 0:0/1/flip_h = true
-0:0/1/custom_data_0 = 1
+0:0/1/custom_data_0 = 2
 0:0/1/custom_data_3 = true
 0:0/1/custom_data_4 = true
 0:0/2 = 2
 0:0/2/flip_v = true
-0:0/2/custom_data_0 = 1
+0:0/2/custom_data_0 = 2
 0:0/2/custom_data_1 = true
 0:0/2/custom_data_6 = true
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/flip_v = true
-0:0/3/custom_data_0 = 1
+0:0/3/custom_data_0 = 2
 0:0/3/custom_data_1 = true
 0:0/3/custom_data_2 = true
 
@@ -90,12 +90,12 @@ texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(5.64474, 27.0947, 17.4987, 37.8197, 37.8197, 0, 17.4987, -38.9487, 8.46711, -32, 25.4013, 0.564476)
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = true
 0:0/0/custom_data_3 = true
 0:0/1 = 1
 0:0/1/flip_h = true
-0:0/1/custom_data_0 = 1
+0:0/1/custom_data_0 = 2
 0:0/1/custom_data_5 = true
 0:0/1/custom_data_6 = true
 
@@ -248,11 +248,11 @@ ground_layer = NodePath("../GroundTileMapLayer")
 unit_scene = ExtResource("14_d2bti")
 
 [node name="Unit" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
-position = Vector2(320, 160)
+position = Vector2(80, 64)
 ground_map = NodePath("../../GroundTileMapLayer")
 
 [node name="Unit2" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
-position = Vector2(176, 320)
+position = Vector2(128, 96)
 ground_map = NodePath("../../GroundTileMapLayer")
 
 [node name="Unit3" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
@@ -260,7 +260,7 @@ position = Vector2(224, 224)
 ground_map = NodePath("../../GroundTileMapLayer")
 
 [node name="Unit4" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
-position = Vector2(464, 320)
+position = Vector2(320, 416)
 ground_map = NodePath("../../GroundTileMapLayer")
 team = 1
 

@@ -235,7 +235,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							s_cube_vector,
-							se_cube_vector
+							se_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -249,7 +250,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							n_cube_vector,
-							nw_cube_vector
+							nw_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -263,7 +265,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							nw_cube_vector,
-							sw_cube_vector
+							sw_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -277,7 +280,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							ne_cube_vector,
-							se_cube_vector
+							se_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -291,7 +295,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							n_cube_vector,
-							ne_cube_vector
+							ne_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -305,7 +310,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							origin_hex_map,
 							target_hex_map,
 							s_cube_vector,
-							se_cube_vector
+							se_cube_vector,
+							result
 						)
 			if res.blocked == true:
 				result.merge(res, true)
@@ -330,12 +336,12 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		if sample_hex_map == target_hex_map:
 			var wall_result
-			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
 			if wall_result.size() > 0:
 				if wall_result.cover > result.target_cover:
 					result.target_cover = wall_result.cover
 
-			wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
 			if wall_result.size() > 0:
 				if wall_result.cover > result.target_cover:
 					result.target_cover = wall_result.cover
@@ -346,12 +352,12 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		if prev_hex_map == origin_hex_map:
 			var wall_result
-			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
 			if wall_result.size() > 0:
 				if wall_result.cover > result.shooter_cover:
 					result.shooter_cover = wall_result.cover
 
-			wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
 			if wall_result.size() > 0:
 				if wall_result.cover > result.shooter_cover:
 					result.shooter_cover = wall_result.cover
@@ -407,13 +413,16 @@ func _walk_between_axes_and_check_walls(
 		origin_hex_map: Vector2i,
 		target_hex_map: Vector2i,
 		direction_1: Vector3i,
-		direction_2: Vector3i
+		direction_2: Vector3i,
+		_result : Dictionary
 	) -> Dictionary:
 
 	var result := {
 		"blocked": false,
 		"block_point": Vector2.ZERO,
-		"hindrance" : 0
+		"hindrance" : 0,
+		"target_cover" : 0,
+		"shooter_cover" : 0
 	}
 	var start_hex_cube : Vector3i = origin_hex_cube
 	var start_hex_map : Vector2i = origin_hex_map
@@ -468,8 +477,54 @@ func _walk_between_axes_and_check_walls(
 			result["blocked"] = true
 		if result.blocked:
 			return result
+		
+		# check wall cover for shooter
+		if start_hex_map == origin_hex_map:
+			var wall_result : Dictionary
+			wall_result = is_wall_cover(start_hex_cube, s_hex_cube, start_hex_map, ground_layer.map_to_local(s_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.shooter_cover:
+					result.shooter_cover = wall_result.cover
 
+			wall_result = is_wall_cover(s_hex_cube, start_hex_cube, s_hex_map, ground_layer.map_to_local(start_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.shooter_cover:
+					result.shooter_cover = wall_result.cover
+		
+			wall_result = is_wall_cover(start_hex_cube, se_hex_cube, start_hex_map, ground_layer.map_to_local(se_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.shooter_cover:
+					result.shooter_cover = wall_result.cover
 
+			wall_result = is_wall_cover(se_hex_cube, start_hex_cube, se_hex_map, ground_layer.map_to_local(start_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.shooter_cover:
+					result.shooter_cover = wall_result.cover
+		
+		# check wall cover for target
+		if next_middle_hex_map == target_hex_map:
+			var wall_result : Dictionary
+			wall_result = is_wall_cover(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, ground_layer.map_to_local(s_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.target_cover:
+					result.target_cover = wall_result.cover
+
+			wall_result = is_wall_cover(s_hex_cube, next_middle_hex_cube, s_hex_map, ground_layer.map_to_local(next_middle_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.target_cover:
+					result.target_cover = wall_result.cover
+		
+			wall_result = is_wall_cover(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, ground_layer.map_to_local(se_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.target_cover:
+					result.target_cover = wall_result.cover
+
+			wall_result = is_wall_cover(se_hex_cube, next_middle_hex_cube, se_hex_map, ground_layer.map_to_local(next_middle_hex_map))
+			if wall_result.size() > 0:
+				if wall_result.cover > _result.target_cover:
+					result.target_cover = wall_result.cover
+		
+		
 		# from start to South
 		if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
 			var wall_result = is_wall_blocking(start_hex_cube, s_hex_cube, start_hex_map, ground_layer.map_to_local(s_hex_map))
@@ -730,6 +785,28 @@ func compass_direction_to_label(dir: int) -> String:
 		COMPASS_DIRECTION.NORTHWEST: return "nw"
 		_:                          return ""
 
+func is_wall_cover(
+		from_cube: Vector3i,
+		to_cube:   Vector3i,
+		from_map:  Vector2i,
+		sample_pt: Vector2
+	) -> Dictionary:
+	var result := {}
+	# early out if there's no tile here or it's the origin tile
+	if wall_layer.get_cell_source_id(from_map) == -1:
+		return result
+
+	var dir = cube_direction_name(from_cube, to_cube)
+	var label = compass_direction_to_label(dir)
+	if label == "":
+		return result   # some weird direction?
+
+	var tile_data: TileData = wall_layer.get_cell_tile_data(from_map)
+	if tile_data and tile_data.has_custom_data(label) \
+	   and tile_data.get_custom_data(label):
+		result["cover"] = tile_data.get_custom_data("cover")
+	return result
+
 
 func is_wall_blocking(
 		from_cube: Vector3i,
@@ -750,10 +827,8 @@ func is_wall_blocking(
 	var tile_data: TileData = wall_layer.get_cell_tile_data(from_map)
 	if tile_data and tile_data.has_custom_data(label) \
 	   and tile_data.get_custom_data(label):
-		result["crossed_wall"] = true
 		result["blocked"]      = true
 		result["block_point"]  = sample_pt
-		result["cover"] = tile_data.get_custom_data("cover")
 	return result
 
 

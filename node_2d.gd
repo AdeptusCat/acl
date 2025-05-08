@@ -24,8 +24,8 @@ func _ready():
 	LOSHelper.terrain_layer = terrain_layer
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	LOSHelper.bake_and_save_los_data("res://los_data.tres")
-	#LOSHelper.load_prebaked_los("res://los_data.tres")
+	#LOSHelper.bake_and_save_los_data("res://los_data.tres")
+	LOSHelper.load_prebaked_los("res://los_data.tres")
 	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
 	if cells.size() > 0:
 		objective_hex = cells[0]
