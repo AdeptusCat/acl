@@ -48,7 +48,7 @@ func _ready():
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(8,2))
 	
 	var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
-	var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,1))
+	var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(0,2))
 	LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
 	
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
