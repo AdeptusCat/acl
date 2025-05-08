@@ -503,6 +503,46 @@ func cube_line(origin_hex_cube: Vector3i, target_hex_cube: Vector3i, n: int) -> 
 		hexes.append(h)
 	return hexes
 
+func get_tile_local_pixel_coords(world_pos: Vector2, tilemap: HexagonTileMapLayer) -> Vector2i:
+	var hex_map : Vector2i = Vector2i(0,1)
+	var pos_to_check : Vector2 = Vector2(32,75)
+	var hex_pos = tilemap.map_to_local(hex_map)
+	var vector : Vector2 = pos_to_check - hex_pos
+	var pos_on_hex : Vector2 = Vector2(32,32) + vector
+	
+	# 1. Convert world coordinates to tile (cell) coordinates
+	#var cell_coords = tilemap.local_to_map(world_pos)
+	# 2. Get the tile ID at the cell
+	var tile_id = tilemap.get_cell_source_id(hex_map)
+	if tile_id == -1:
+		return Vector2i(-1, -1)  # No tile here
+
+	# 3. Get the atlas texture or tile texture
+	var tileset = tilemap.tile_set
+	
+	var texture = tileset.get_source(tile_id).texture
+	if texture == null:
+		return Vector2i(-1, -1)
+
+	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
+	var tex_size = texture.get_size()
+	var image = texture.get_image()
+	if image == null:
+		return Vector2i(-1, -1)
+
+	#var pixel_x = clamp(int(local_pos.x), 0, tex_size.x - 1)
+	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
+
+	print(hex_map)
+	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
+	print(pos_on_hex.x)
+	print(pos_on_hex.y)
+	print(color)
+
+	print("Alpha at pixel:", color.a)
+	
+	return Vector2i(pos_on_hex.x, pos_on_hex.y)
+
 
 func _check_hindrance(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
 	var tile_data: TileData = terrain_layer.get_cell_tile_data(sample_hex_map)
@@ -519,7 +559,22 @@ func _check_blocking_terrain(sample_hex_map: Vector2i, result: Dictionary) -> Di
 		result["block_point"]  = ground_layer.map_to_local(sample_hex_map)
 	return result
 
+
 func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
+	# Compute sub-sampled points just before and after the hit
+	var t1: float = float(i - 1) / float(steps - 1)
+	var t2: float = float(i + 1) / float(steps - 1)
+	var prev_pt: Vector2 = origin_pos.lerp(target_pos, t1)
+	var next_pt: Vector2 = origin_pos.lerp(target_pos, t2)
+	
+	# Try to find precise entry point
+	result["block_point"] = _refine_entry(prev_pt, next_pt)
+	if result["block_point"] != Vector2.ZERO:
+		result["blocked"] = true
+	
+	return result
+
+func check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
 	# Compute sub-sampled points just before and after the hit
 	var t1: float = float(i - 1) / float(steps - 1)
 	var t2: float = float(i + 1) / float(steps - 1)
