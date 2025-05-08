@@ -25,7 +25,7 @@ func _ready():
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://los_data.tres")
-	#LOSHelper.load_prebaked_los("res://los_data.tres")
+	LOSHelper.load_prebaked_los("res://los_data.tres")
 	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
 	if cells.size() > 0:
 		objective_hex = cells[0]
@@ -47,9 +47,9 @@ func _ready():
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(11,0))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(8,2))
 	
-	var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
-	var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(0,2))
-	LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
+	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
+	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
+	#LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
 	
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)

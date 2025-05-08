@@ -339,8 +339,9 @@ func make_morale_check():
 	var roll = randi_range(2, 12)  # 2 to 12
 	if roll > morale:
 		#die()
-		get_parent().selected_unit = null
-		deselect()
+		if selected:
+			get_parent().selected_unit = null
+			deselect()
 		on_morale_check_failure()
 		_on_morale_failed(get_visible_enemies())
 		# enter broken state
