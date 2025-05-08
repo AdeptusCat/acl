@@ -328,9 +328,33 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
 		var sample_hex_cube: Vector3i = hexes[i]
 		
+		if sample_hex_map == target_hex_map:
+			var wall_result
+			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			if wall_result.size() > 0:
+				if wall_result.cover > result.target_cover:
+					result.target_cover = wall_result.cover
+
+			wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			if wall_result.size() > 0:
+				if wall_result.cover > result.target_cover:
+					result.target_cover = wall_result.cover
+		
 		# skip the target-hex center check
 		if sample_hex_map == target_hex_map:
 			continue
+		
+		if prev_hex_map == origin_hex_map:
+			var wall_result
+			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			if wall_result.size() > 0:
+				if wall_result.cover > result.shooter_cover:
+					result.shooter_cover = wall_result.cover
+
+			wall_result = is_wall_blocking(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			if wall_result.size() > 0:
+				if wall_result.cover > result.shooter_cover:
+					result.shooter_cover = wall_result.cover
 		
 		# skip the origin-hex center check
 		if sample_hex_map == origin_hex_map:
@@ -729,6 +753,7 @@ func is_wall_blocking(
 		result["crossed_wall"] = true
 		result["blocked"]      = true
 		result["block_point"]  = sample_pt
+		result["cover"] = tile_data.get_custom_data("cover")
 	return result
 
 
