@@ -200,11 +200,12 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	
 
 	# 1) shooter building cover
-	if is_sample_point_in_building(origin_pos):
-		result.shooter_cover = BUILDING_COVER
+	result.shooter_cover = is_sample_point_in_building(origin_pos)
+		#result.shooter_cover = BUILDING_COVER
 	# 2) target building cover
-	if is_sample_point_in_building(target_pos):
-		result.target_cover = BUILDING_COVER
+	result.target_cover = is_sample_point_in_building(target_pos)
+	#if is_sample_point_in_building(target_pos):
+		#result.target_cover = BUILDING_COVER
 	
 	var shooter_height = calculate_absolute_height(origin_elevation, origin_story)
 	var target_height = calculate_absolute_height(target_elevation, target_story)
@@ -588,6 +589,8 @@ func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLa
 	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
 
 	#print(hex_map)
+	if pos_on_hex.x == 64 or pos_on_hex.y == 64:
+		return false
 	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
 	#print(pos_on_hex.x)
 	#print(pos_on_hex.y)
@@ -732,19 +735,24 @@ func is_wall_blocking(
 func calculate_absolute_height(hex_elevation: int, story_level: int) -> float:
 	return (hex_elevation * FLOOR_HEIGHT_METERS) + (story_level * FLOOR_HEIGHT_METERS) + UNIT_HEIGHT_METERS
 
-func is_sample_point_in_building(sample_point: Vector2) -> bool:
-	var space_state = get_world_2d().direct_space_state
-	var params = PhysicsPointQueryParameters2D.new()
-	params.position = sample_point
-	params.collide_with_areas = false
-	params.collide_with_bodies = true
-	params.collision_mask = 1  # Assuming buildings are on layer 1
-	var result = space_state.intersect_point(params, 1)
+#func is_sample_point_in_building(sample_point: Vector2) -> bool:
+	#var tile_data: TileData = wall_layer.get_cell_tile_data(from_map)
+	#if tile_data and tile_data.has_custom_data(label) \
+	   #and tile_data.get_custom_data(label):
+		#result["crossed_wall"] = true
+		#result["blocked"]      = true
+		#result["block_point"]  = sample_pt
+	#return false
 
-	for item in result:
-		if item.collider == building_layer:
-			return true
-	return false
+func is_sample_point_in_building(sample_point: Vector2) -> int:
+	var hex_map = building_layer.local_to_map(sample_point)
+	if building_layer.get_cell_source_id(hex_map) == -1:
+		return 0
+	else:
+		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("cover"):
+			return tile_data.get_custom_data("cover")
+		return true
 
 func is_sample_point_crossing_wall(sample_point: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
