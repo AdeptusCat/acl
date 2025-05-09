@@ -374,6 +374,7 @@ func update_morale_bar():
 		else:
 			morale_bar.color = Color(1, 0, 0)  # Red
 
+
 func _on_morale_failed(known_enemies: Array) -> void:
 	# compute the best hex to run to
 	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
