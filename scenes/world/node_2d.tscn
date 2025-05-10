@@ -1,8 +1,7 @@
-[gd_scene load_steps=42 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=41 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/node_2d.gd" id="1_0hol4"]
 [ext_resource type="Texture2D" uid="uid://ydo6mryviyos" path="res://assets/tiles/buildings/house.png" id="2_0hol4"]
-[ext_resource type="Resource" uid="uid://bo0ndv15dt4oj" path="res://scenes/game/los/los_data.tres" id="2_3v36s"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_nr8wp"]
 [ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/tiles/walls/wall_w.png" id="4_q6r6c"]
 [ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/tiles/walls/wall_nw.png" id="7_4d7sh"]
@@ -214,7 +213,6 @@ sources/0 = SubResource("TileSetAtlasSource_k73cj")
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_0hol4")
-los_data = ExtResource("2_3v36s")
 
 [node name="GroundTileMapLayer" parent="." instance=ExtResource("2_nr8wp")]
 

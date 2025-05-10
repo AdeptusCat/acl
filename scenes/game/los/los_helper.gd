@@ -34,7 +34,8 @@ enum BetweenAxis {
 func _ready():
 	z_index = 100  # Higher than other nodes
 
-func load_prebaked_los(los_resource: LosLookupData):
+func load_prebaked_los(_los_resource: String):
+	var los_resource = load(_los_resource) as LosLookupData
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 

@@ -12,7 +12,7 @@ extends Node2D
 var timer_running := false
 var objective_hex : Vector2i = Vector2.ZERO
 
-@export var los_data: Resource
+#@export var los_data: Resource
 @export var time_left_seconds: float = 120.0  
 
 @onready var timer_label = $CanvasLayer/HBoxContainer/TimerLabel
@@ -24,8 +24,8 @@ func _ready():
 	LOSHelper.terrain_layer = terrain_layer
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	#LOSHelper.bake_and_save_los_data("res://los_data.tres")
-	LOSHelper.load_prebaked_los(los_data)
+	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
+	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
 	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
 	if cells.size() > 0:
 		objective_hex = cells[0]
