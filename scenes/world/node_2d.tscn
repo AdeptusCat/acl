@@ -1,0 +1,322 @@
+[gd_scene load_steps=42 format=4 uid="uid://cq2fy70xef7ei"]
+
+[ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/node_2d.gd" id="1_0hol4"]
+[ext_resource type="Texture2D" uid="uid://ydo6mryviyos" path="res://assets/tiles/buildings/house.png" id="2_0hol4"]
+[ext_resource type="Resource" uid="uid://bo0ndv15dt4oj" path="res://scenes/game/los/los_data.tres" id="2_3v36s"]
+[ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_nr8wp"]
+[ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/tiles/walls/wall_w.png" id="4_q6r6c"]
+[ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/tiles/walls/wall_nw.png" id="7_4d7sh"]
+[ext_resource type="Texture2D" uid="uid://b52ml4syvr0bp" path="res://assets/tiles/buildings/building_stone_01.png" id="8_ei405"]
+[ext_resource type="Texture2D" uid="uid://c2u24pcpcb65s" path="res://assets/tiles/walls/wall_nw_w.png" id="8_ir8iy"]
+[ext_resource type="Script" uid="uid://dmau1rh153fsa" path="res://scenes/game/maps/wall_tile_map_layer.gd" id="9_d2bti"]
+[ext_resource type="Texture2D" uid="uid://cher7bis77ehd" path="res://assets/tiles/buildings/building_stone_02.png" id="9_e8dv2"]
+[ext_resource type="Texture2D" uid="uid://beb0yfr6kl7yi" path="res://assets/tiles/walls/wall_sw_so.png" id="10_0h7mo"]
+[ext_resource type="Texture2D" uid="uid://opr210nnyx0i" path="res://assets/tiles/buildings/building_wood_01.png" id="10_2nhjh"]
+[ext_resource type="Texture2D" uid="uid://bkxehutr503f2" path="res://assets/tiles/buildings/woods.png" id="10_flf07"]
+[ext_resource type="Texture2D" uid="uid://bys5pajljo7cw" path="res://assets/tiles/buildings/building_wood_02.png" id="11_bjha6"]
+[ext_resource type="Script" uid="uid://cc2pavbgwgo06" path="res://scenes/game/maps/terrain_tile_map_layer.gd" id="11_flf07"]
+[ext_resource type="Script" uid="uid://cg8f2xiajwc44" path="res://scenes/game/maps/building_tile_map_layer.gd" id="11_ta5nu"]
+[ext_resource type="Texture2D" uid="uid://vvsqrcbgo0xc" path="res://assets/tiles/buildings/building_wood_03.png" id="12_gt76g"]
+[ext_resource type="Texture2D" uid="uid://dtx0tgn2cjgiu" path="res://assets/ui/objective_tile.png" id="13_d2bti"]
+[ext_resource type="PackedScene" uid="uid://ceiirdxs6wb5k" path="res://scenes/game/units/unit_manager.tscn" id="13_nr8wp"]
+[ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="14_d2bti"]
+[ext_resource type="Texture2D" uid="uid://72tdw5k8ingr" path="res://assets/tiles/buildings/orchard.png" id="16_ei405"]
+[ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://scenes/ui/start_screen.tscn" id="16_flf07"]
+[ext_resource type="PackedScene" uid="uid://b84f65gu8hp6e" path="res://scenes/ui/result_screen.tscn" id="16_ta5nu"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
+texture = ExtResource("4_q6r6c")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_4 = true
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_1 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hqns4"]
+texture = ExtResource("7_4d7sh")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_5 = true
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_6 = true
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/custom_data_0 = 2
+0:0/2/custom_data_3 = true
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 2
+0:0/3/custom_data_2 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x0ka3"]
+texture = ExtResource("8_ir8iy")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_4 = true
+0:0/0/custom_data_5 = true
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_3 = true
+0:0/1/custom_data_4 = true
+0:0/2 = 2
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 2
+0:0/2/custom_data_1 = true
+0:0/2/custom_data_6 = true
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 2
+0:0/3/custom_data_1 = true
+0:0/3/custom_data_2 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ta5nu"]
+texture = ExtResource("10_0h7mo")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_2 = true
+0:0/0/custom_data_3 = true
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_5 = true
+0:0/1/custom_data_6 = true
+
+[sub_resource type="TileSet" id="TileSet_0hol4"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "cover"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "n"
+custom_data_layer_1/type = 1
+custom_data_layer_2/name = "ne"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "se"
+custom_data_layer_3/type = 1
+custom_data_layer_4/name = "s"
+custom_data_layer_4/type = 1
+custom_data_layer_5/name = "sw"
+custom_data_layer_5/type = 1
+custom_data_layer_6/name = "nw"
+custom_data_layer_6/type = 1
+sources/0 = SubResource("TileSetAtlasSource_d21ai")
+sources/1 = SubResource("TileSetAtlasSource_hqns4")
+sources/2 = SubResource("TileSetAtlasSource_x0ka3")
+sources/4 = SubResource("TileSetAtlasSource_ta5nu")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1fr6y"]
+texture = ExtResource("8_ei405")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2hxjc"]
+texture = ExtResource("9_e8dv2")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ebxd8"]
+texture = ExtResource("10_2nhjh")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2u7jv"]
+texture = ExtResource("11_bjha6")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_24dk6"]
+texture = ExtResource("12_gt76g")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e8dv2"]
+texture = ExtResource("10_flf07")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0hol4"]
+texture = ExtResource("2_0hol4")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_q6r6c"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "cover"
+custom_data_layer_0/type = 2
+sources/8 = SubResource("TileSetAtlasSource_0hol4")
+sources/0 = SubResource("TileSetAtlasSource_1fr6y")
+sources/1 = SubResource("TileSetAtlasSource_2hxjc")
+sources/2 = SubResource("TileSetAtlasSource_ebxd8")
+sources/3 = SubResource("TileSetAtlasSource_2u7jv")
+sources/4 = SubResource("TileSetAtlasSource_24dk6")
+sources/5 = SubResource("TileSetAtlasSource_e8dv2")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rjqkl"]
+texture = ExtResource("10_flf07")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_3 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2nhjh"]
+texture = ExtResource("16_ei405")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_2 = true
+
+[sub_resource type="TileSet" id="TileSet_k73cj"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "woods"
+custom_data_layer_0/type = 1
+custom_data_layer_1/name = "orchard"
+custom_data_layer_1/type = 0
+custom_data_layer_2/name = "hindrance"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "blocking"
+custom_data_layer_3/type = 1
+sources/0 = SubResource("TileSetAtlasSource_rjqkl")
+sources/2 = SubResource("TileSetAtlasSource_2nhjh")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k73cj"]
+texture = ExtResource("13_d2bti")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_rjqkl"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_k73cj")
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_0hol4")
+los_data = ExtResource("2_3v36s")
+
+[node name="GroundTileMapLayer" parent="." instance=ExtResource("2_nr8wp")]
+
+[node name="WallTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAAEAAAAAAAAAAAACAAMAAAAAAAAAAQAFAAMAAQAAAAAAAQAEAAQAAgAAAAAAAwAJAAMABAAAAAAAAAAKAAMABAAAAAAAAQAKAAIAAgAAAAAAAQALAAEAAgAAAAAAAgAMAAUAAgAAAAAAAAAMAAYAAgAAAAAAAwANAAYAAgAAAAAAAwAOAAcABAAAAAAAAQA=")
+tile_set = SubResource("TileSet_0hol4")
+script = ExtResource("9_d2bti")
+metadata/_edit_lock_ = true
+
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAGAAYAAwAAAAAAAAAIAAUAAgAAAAAAAAAOAAUACAAAAAAAAAATAAQACAAAAAAAAAABAAAAAAAAAAAAAAAGAAIAAQAAAAAAAAAEAAUAAgAAAAAAAAAJAAMAAwAAAAAAAAAKAAMAAwAAAAAAAAAJAAYABAAAAAAAAAAIAAgABQAAAAAAAAAQAAYAAAAAAAAAAAASAAMABAAAAAAAAAAQAAcAAQAAAAAAAAABAAMABAAAAAAAAAABAAIAAgAAAAAAAAANAAMAAQAAAAAAAAAOAAIAAgAAAAAAAAAIAAcABQAAAAAAAAAHAAYABQAAAAAAAAAGAAcABQAAAAAAAAAFAAcABQAAAAAAAAAEAAgABQAAAAAAAAAGAAgABQAAAAAAAAAHAAcABQAAAAAAAAAJAAgABQAAAAAAAAAJAAcABQAAAAAAAAAQAAMABQAAAAAAAAAPAAMABQAAAAAAAAAQAAQABQAAAAAAAAARAAQABQAAAAAAAAARAAMABQAAAAAAAAASAAQABQAAAAAAAAASAAUABQAAAAAAAAAQAAUABQAAAAAAAAARAAIABQAAAAAAAAA=")
+tile_set = SubResource("TileSet_q6r6c")
+script = ExtResource("11_ta5nu")
+metadata/_edit_lock_ = true
+
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAACAAcAAAAAAAAAAAABAAYAAAAAAAAAAAACAAEAAgAAAAAAAAABAAEAAgAAAAAAAAAFAAIAAgAAAAAAAAACAAIAAgAAAAAAAAAFAAcAAgAAAAAAAAAGAAgAAgAAAAAAAAAEAAYAAgAAAAAAAAAGAAQAAgAAAAAAAAA=")
+tile_set = SubResource("TileSet_k73cj")
+script = ExtResource("11_flf07")
+metadata/_edit_lock_ = true
+
+[node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("13_nr8wp")]
+ground_layer = NodePath("../GroundTileMapLayer")
+unit_scene = ExtResource("14_d2bti")
+
+[node name="Unit" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(80, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit10" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(80, 192)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit11" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(128, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit12" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(80, 448)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit2" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(128, 160)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit3" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(80, 256)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit4" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(704, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit5" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(464, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit6" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(704, 352)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit7" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(800, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit8" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(752, 256)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit9" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("14_d2bti")]
+position = Vector2(560, 128)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_rjqkl")
+
+[node name="StartScreen" parent="." instance=ExtResource("16_flf07")]
+visible = false
+
+[node name="ResultScreen" parent="." instance=ExtResource("16_ta5nu")]
+visible = false
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="TimerLabel" type="Label" parent="CanvasLayer/HBoxContainer"]
+layout_mode = 2
+text = "Time left: 10:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Node2D" type="Node2D" parent="."]
