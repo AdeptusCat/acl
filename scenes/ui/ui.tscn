@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=2 format=3 uid="uid://jdf7ewo2axfy"]
+
+[ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 
 [node name="Ui" type="CanvasLayer"]
+script = ExtResource("1_u7n8c")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 anchors_preset = 10
