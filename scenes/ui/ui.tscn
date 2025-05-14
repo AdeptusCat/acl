@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://jdf7ewo2axfy"]
+
+[node name="Ui" type="CanvasLayer"]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="TimerLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Time left: 10:00"
+horizontal_alignment = 1
+vertical_alignment = 1
