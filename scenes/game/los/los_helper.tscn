@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://2hjr61yy5x61"]
 
-[ext_resource type="Script" uid="uid://cp2kmro6yapg4" path="res://los_helper.gd" id="1_3kxg5"]
+[ext_resource type="Script" uid="uid://cp2kmro6yapg4" path="res://scenes/game/los/los_helper.gd" id="1_3kxg5"]
 
 [node name="LOSHelper" type="Node2D"]
 script = ExtResource("1_3kxg5")

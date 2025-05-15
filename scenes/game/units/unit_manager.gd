@@ -118,7 +118,7 @@ func move_selected_unit_to(target_pos, clicked_hex: Vector2i, current_hex: Vecto
 
 	if not selected_unit == null:
 		# 5) hand it off and start walking
-		selected_unit.follow_cube_path(cube_path)
+		selected_unit.movement.follow_cube_path(cube_path)
 	if not selected_unit == null:
 		selected_unit.deselect()
 		selected_unit = null
@@ -210,7 +210,7 @@ func _on_unit_moved(unit, vector):
 			unit_visible_enemies[unit].append(enemy_unit)
 
 			# Fire immediately if stationary (optional fast reaction shot)
-			if not enemy_unit.moving:
+			if not enemy_unit.movement.moving:
 				var distance = enemy_unit.current_hex.distance_to(unit.current_hex)
 				# safely grab the inner dict for this shooter-hex
 				var cover_map = LOSHelper.los_lookup.get(enemy_unit.current_hex, null)

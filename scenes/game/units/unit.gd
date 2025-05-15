@@ -35,10 +35,9 @@ var recovery_timer_current: float = 0.0
 var current_cover_bonus: int = 0
 var current_hex: Vector2i
 var selected: bool = false
-var moving: bool = false
+#var moving: bool = false
 var target_position: Vector2
 var move_speed: float = 100.0
-var retreating: bool = false
 var retreat_target_hex: Vector2i = Vector2i()
 var fire_timer: float = 0.0
 
@@ -55,11 +54,22 @@ signal retreat_complete(retreat_hex: Vector2i)
 @onready var broken_label = $BrokenLabel
 @onready var unit_selected_sprite = $UnitSelectedSprite
 
+# === Classes ===
+@onready var morale_system := UnitMorale.new(self)
+@onready var morale_ui := UnitMoraleUI.new(self)
+@onready var movement := UnitMovement.new(self)
+
 # === Ready ===
 func _ready():
 	update_team_sprite()
 	connect("retreat_complete", _on_retreat_complete)
-
+	morale_system.morale_ui = morale_ui
+	morale_ui.morale_bar = $MoraleBar
+	morale_ui.broken_label = $BrokenLabel
+	morale_ui.popup_scene = morale_popup_scene
+	morale_ui.flash_scene = morale_flash_scene
+	movement.ground_map = ground_map
+	
 # === Process Loop ===
 func _process(delta):
 	if Engine.is_editor_hint() and snap_to_grid:
@@ -76,35 +86,15 @@ func _process(delta):
 		return
 
 	if broken:
-		_process_recovery(delta)
+		morale_system._process_recovery(delta)
 
-	if moving:
-		_handle_movement(delta)
-		return
+	movement.process(delta)
+	#if moving:
+		#_handle_movement(delta)
+		#return
 
 	handle_auto_fire(delta)
 
-func _handle_movement(delta):
-	var dir = (target_position - position).normalized()
-	var dist = position.distance_to(target_position)
-	var step = move_speed * delta
-
-	if dist <= step:
-		position = target_position
-		moving = false
-
-		if path_index < path_hexes.size() - 1:
-			path_index += 1
-			move_to_hex(path_hexes[path_index], ground_map)
-		else:
-			if retreating:
-				retreating = false
-				emit_signal("retreat_complete", current_hex)
-			unit_arrived_at_hex.emit(current_hex)
-			path_hexes.clear()
-			path_index = 0
-	else:
-		position += dir * step
 
 # === Utility ===
 func snap_to_hex():
@@ -127,25 +117,9 @@ func set_cover(cover_value: int) -> void:
 	else:
 		cover_label.hide()
 
-func move_to_hex(new_hex: Vector2i, ground_layer: HexagonTileMapLayer):
-	current_hex = new_hex
-	target_position = ground_layer.map_to_local(current_hex)
-	emit_signal("moved_to_hex", self, current_hex)
-	moving = true
-func follow_cube_path(cube_path: Array[Vector3i]) -> void:
-	path_hexes.clear()
-	# Convert each cube-coord to the map’s offset coords
-	for c in cube_path:
-		path_hexes.append(ground_map.cube_to_map(c))
-	
-	# Drop the first element (it’s your current hex)
-	if path_hexes.size() > 1:
-		path_index = 1
-		move_to_hex(path_hexes[path_index], ground_map)
-
 
 func handle_auto_fire(delta):
-	if moving or not alive or broken:
+	if movement.moving or not alive or broken:
 		return
 
 	fire_timer -= delta
@@ -215,7 +189,7 @@ func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: floa
 
 	for u in batch_targets:
 		u.set_cover(terrain_defense_bonus)
-		u.receive_fire(actual_firepower, u.moving, terrain_defense_bonus)
+		u.receive_fire(actual_firepower, terrain_defense_bonus)
 
 	fire_burst(self, batch_targets[0], 8, fire_rate)
 
@@ -240,36 +214,8 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 		await get_tree().create_timer(interval).timeout
 
 
-func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float):
-	if not alive:
-		return
-
-	if broken:
-		recovery_timer_current = 0.0
-
-	cover_label.text = str(terrain_defense_bonus)
-
-	var attack_roll = randi_range(2, 12)
-	var morale_impact = incoming_firepower * 8
-
-	if attack_roll <= 4:
-		morale_impact *= 1.5
-	elif attack_roll >= 10:
-		morale_impact *= 0.5
-
-	if terrain_defense_bonus > 0:
-		morale_impact *= (1 / (terrain_defense_bonus * 2))
-
-	if is_moving:
-		morale_impact *= 1.25
-
-	morale_meter_current += int(morale_impact)
-	morale_meter_current = min(morale_meter_current, morale_meter_max)
-
-	update_morale_bar()
-
-	if morale_meter_current >= morale_meter_max:
-		make_morale_check()
+func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
+	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus)
 
 
 func make_morale_check():
@@ -342,7 +288,7 @@ func on_morale_check_success():
 
 func _on_morale_failed(known_enemies: Array) -> void:
 	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
-	retreating = true
+	movement.retreating = true
 	retreat_target_hex = retreat_map
 
 	var from_id = ground_map.pathfinding_get_point_id(current_hex)
@@ -354,10 +300,10 @@ func _on_morale_failed(known_enemies: Array) -> void:
 		var pos = ground_map.astar.get_point_position(pid)
 		cube_path.append(ground_map.local_to_cube(pos))
 
-	follow_cube_path(cube_path)
+	movement.follow_cube_path(cube_path)
 
 func _on_retreat_complete(retreat_hex) -> void:
-	moving = false
+	movement.moving = false
 	current_hex = retreat_hex
 	emit_signal("moved_to_hex", self, current_hex)
 
@@ -463,30 +409,3 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 			best_hex  = h
 
 	return best_hex
-
-
-
-func _process_recovery(delta: float) -> void:
-	# can only recover if actually in cover (bonus > 0)
-	#if current_cover_bonus <= 0:
-		#return
-
-	## exclude walls: check building_layer’s tile name
-	#var build_id = LOSHelper.building_layer.get_cell_source_id(current_hex)
-	#if build_id != -1:
-		#var tile_name = LOSHelper.building_layer.tile_set.tile_get_name(build_id)
-		#if tile_name == "Wall":
-			#return   # wall gives no recovery
-
-	# accumulate rally time
-	recovery_timer_current += delta
-	if recovery_timer_current >= recovery_time_max:
-		_recover()
-
-func _recover() -> void:
-	broken = false
-	broken_label.visible = false
-	morale_meter_current = 0
-	update_morale_bar()
-	on_morale_check_success()
-	# Optionally play a “rally” animation or sound here
