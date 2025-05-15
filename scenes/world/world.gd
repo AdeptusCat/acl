@@ -9,13 +9,15 @@ extends Node2D
 @onready var objective_tilemap := $ObjectiveTileMapLayer
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
+@onready var ui := $Ui
 var timer_running := false
 var objective_hex : Vector2i = Vector2.ZERO
 
 #@export var los_data: Resource
 @export var time_left_seconds: float = 120.0  
 
-@onready var timer_label = $CanvasLayer/HBoxContainer/TimerLabel
+
+
 
 func _ready():
 	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
@@ -35,6 +37,8 @@ func _ready():
 	start_screen.game_started.connect(_on_game_started)
 	start_screen.visible = true
 	$UnitManager.set_input_enabled(false)
+	
+	ui.update_timer_label(time_left_seconds)
 	
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
@@ -68,12 +72,9 @@ func _process(delta):
 			timer_running = false
 			end_game_check()
 
-		update_timer_label()
+		ui.update_timer_label(time_left_seconds)
 
-func update_timer_label():
-	var minutes = int(time_left_seconds) / 60
-	var seconds = int(time_left_seconds) % 60
-	timer_label.text = "Time left: %02d:%02d" % [minutes, seconds]
+
 
 func end_game_check():
 	var occupying_units : Array
