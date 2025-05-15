@@ -23,12 +23,12 @@ shader_parameter/noise_texture = SubResource("NoiseTexture2D_74e6i")
 
 [node name="Unit" type="Node2D" groups=["units"]]
 script = ExtResource("1_btf8p")
-morale_popup_scene = ExtResource("2_baxm0")
-morale_flash_scene = ExtResource("3_of1k5")
 sprite_team_0 = ExtResource("2_5wnup")
 sprite_team_1 = ExtResource("3_1sk4h")
 tracer_scene = ExtResource("4_5wnup")
 tracer_texture = ExtResource("7_b5oeb")
+morale_popup_scene = ExtResource("2_baxm0")
+morale_flash_scene = ExtResource("3_of1k5")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_74e6i")
