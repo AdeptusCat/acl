@@ -119,6 +119,7 @@ func shoot(from_pos: Vector2, to_pos):
 	tracer.shoot(from_pos, to_pos)
 
 
+
 func die():
 	var tween = create_tween()
 	tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
