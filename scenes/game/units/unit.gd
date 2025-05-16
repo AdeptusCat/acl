@@ -64,8 +64,8 @@ func _ready():
 	update_team_sprite()
 	connect("retreat_complete", _on_retreat_complete)
 	morale_system.morale_ui = morale_ui
-	morale_ui.morale_bar = $MoraleBar
-	morale_ui.broken_label = $BrokenLabel
+	#morale_ui.morale_bar = $MoraleBar
+	#morale_ui.broken_label = $BrokenLabel
 	morale_ui.popup_scene = morale_popup_scene
 	morale_ui.flash_scene = morale_flash_scene
 	movement.ground_map = ground_map
