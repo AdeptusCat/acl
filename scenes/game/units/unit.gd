@@ -64,12 +64,15 @@ signal cover_updated(value: float)
 func _ready():
 	update_team_sprite()
 	connect("retreat_complete", _on_retreat_complete)
-	morale_system.unit_breaks.connect(_on_unit_breaks)
-	morale_system.unit_recovers.connect(_on_unit_recovers)
+	morale_system.morale_breaks.connect(_on_morale_breaks)
+	morale_system.morale_recovered.connect(_on_morale_recovered)
+	#morale_system.unit_recovers.connect(_on_unit_recovers)
 	
 	morale_system.morale_updated.connect(morale_ui._on_morale_updated)
 	morale_system.morale_failure.connect(morale_ui._on_morale_failure)
 	morale_system.morale_success.connect(morale_ui._on_morale_success)
+	morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
+	morale_system.morale_breaks.connect(morale_ui._on_morale_breaks)
 	cover_updated.connect(morale_ui._on_cover_updated)
 	#morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
 	
@@ -79,10 +82,10 @@ func _ready():
 	morale_ui.flash_scene = morale_flash_scene
 	movement.ground_map = ground_map
 
-func _on_unit_breaks():
+func _on_morale_breaks():
 	broken = true
 
-func _on_unit_recovers():
+func _on_morale_recovered():
 	broken = false
 
 # === Process Loop ===

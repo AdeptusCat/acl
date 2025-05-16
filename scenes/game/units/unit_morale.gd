@@ -18,13 +18,13 @@ var recovery_timer_current: float = 0.0
 var broken: bool = false
 var alive: bool = true
 
-signal unit_breaks
-signal unit_recovers
 
 signal morale_updated(current: int, max: int)
 signal morale_failure
 signal morale_success
 signal morale_recovered
+signal morale_breaks
+
 
 
 func _init(_unit: Node2D):
@@ -74,10 +74,9 @@ func make_morale_check():
 		if unit.selected:
 			unit.get_parent().selected_unit = null
 			unit.deselect()
-		morale_failure.emit()
 		unit._on_morale_failed(unit.get_visible_enemies())
 		broken = true
-		unit_breaks.emit()
+		morale_breaks.emit()
 		recovery_timer_current = 0.0
 	else:
 		morale_meter_current = 0
@@ -100,7 +99,6 @@ func _process_recovery(delta: float) -> void:
 
 func _recover() -> void:
 	broken = false
-	unit_recovers.emit()
 	morale_meter_current = 0
 	morale_updated.emit(morale_meter_current, morale_meter_max)
-	morale_success.emit()
+	morale_recovered.emit()

@@ -30,13 +30,12 @@ func _on_unit_died(unit):
 	units.erase(unit)
 	unit_visible_enemies.erase(unit)
 	#unit.queue_free()
-	
+
+
 func _input(event):
-	if Input.is_action_just_pressed("LEFT"): # and event.button_index == MouseButton.LEFT
+	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_LEFT:
 		handle_mouse_click(event.position)
-	#if Input.is_action_just_pressed("RIGHT"):
-		#place_unit_at_mouse(unit_scene, event.position)
-	if Input.is_action_just_pressed("SPACE"):
+	if event is InputEventKey and event.pressed and event.keycode == Key.KEY_SPACE:
 		current_team = 1 if current_team == 0 else 0
 
 

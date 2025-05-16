@@ -9,6 +9,16 @@ var popup_scene: PackedScene
 var flash_scene: PackedScene
 
 
+
+
+func _on_morale_breaks():
+	unit.broken_label.visible = true
+	show_failure()
+
+func _on_morale_recovered():
+	unit.broken_label.visible = false
+	show_success()
+
 func _on_morale_updated(current, max):
 	update_bar(current, max)
 
@@ -39,18 +49,14 @@ func _on_cover_updated(value: int) -> void:
 		unit.cover_label.text = str(value)
 
 func show_failure():
-	unit.broken_label.visible = true
 	_spawn_popup("failure")
 	_spawn_flash("failure")
 
 func show_success():
-	unit.broken_label.visible = false
+	
 	_spawn_popup("success")
 	_spawn_flash("success")
 
-func set_broken_visible(visible: bool):
-	if broken_label:
-		broken_label.visible = visible
 
 func _spawn_popup(type: String):
 	var popup = popup_scene.instantiate()
