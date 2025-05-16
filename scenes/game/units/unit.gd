@@ -118,41 +118,19 @@ func snap_to_hex():
 		var map_coords = ground_map.local_to_map(position)
 		position = ground_map.map_to_local(map_coords)
 
+
 func select():
 	ui.select()
 	selected = true
+
 
 func deselect():
 	ui.deselect()
 	selected = false
 
+
 func set_cover(cover_value: int) -> void:
 	ui.set_cover(cover_value)
-
-#func handle_auto_fire(delta):
-	#if movement.moving or not alive or broken:
-		#return
-#
-	#fire_timer -= delta
-	#if fire_timer > 0:
-		#return  # Still waiting for next shot
-#
-	#var visible_enemies = get_visible_enemies()
-#
-	#for enemy in visible_enemies:
-		#if enemy and enemy.alive:
-			#var distance = current_hex.distance_to(enemy.current_hex)
-			#if distance <= range * 2:
-				#var cover_map = LOSHelper.los_lookup.get(current_hex, null)
-				#var targetCover = 0
-				#if cover_map and cover_map.has(enemy.current_hex):
-					#var data = cover_map[enemy.current_hex]
-					#targetCover = data["target_cover"]
-#
-				#enemy.set_cover(targetCover)
-				#fire_at(enemy, distance, targetCover)
-				#fire_timer = fire_rate
-				#break
 
 
 func get_visible_enemies() -> Array:
@@ -172,47 +150,7 @@ func update_team_sprite(team: int):
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float):
 	if not alive:
 		return
-	#combat.fire_at(target, distance_in_hexes, terrain_defense_bonus)
 	combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, get_visible_enemies(), fire_rate)
-	#var actual_firepower = firepower
-	#if distance_in_hexes > range:
-		#if distance_in_hexes <= range * 2:
-			#actual_firepower = firepower / 2
-		#else:
-			#return
-#
-	#var target_hex = target.current_hex
-	#var visible = get_visible_enemies()
-	#var batch_targets: Array = []
-#
-	#for u in visible:
-		#if is_instance_valid(u) and u.alive and u.current_hex == target_hex:
-			#batch_targets.append(u)
-#
-	#if batch_targets.is_empty():
-		#return
-#
-	#for u in batch_targets:
-		#u.set_cover(terrain_defense_bonus)
-		#u.receive_fire(actual_firepower, terrain_defense_bonus)
-#
-	#fire_burst(self, batch_targets[0], 8, fire_rate)
-
-
-func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
-	var interval = 1.0 / bullets_per_sec
-	var from_pos = global_position
-
-	for i in range(rounds):
-		if not is_instance_valid(shooter) or not is_instance_valid(target):
-			return
-		if not get_visible_enemies().has(target):
-			return
-		if broken:
-			return
-		ui.shoot(from_pos, target.global_position)
-
-		await get_tree().create_timer(interval).timeout
 
 
 func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
