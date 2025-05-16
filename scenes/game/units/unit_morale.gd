@@ -18,13 +18,15 @@ var recovery_timer_current: float = 0.0
 var broken: bool = false
 var alive: bool = true
 
-# Node references (optional)
-#var morale_bar
-#var broken_label
-#var morale_popup_scene: PackedScene
-#var morale_flash_scene: PackedScene
+signal unit_breaks
+signal unit_recovers
 
-var morale_ui : UnitMoraleUI
+signal morale_updated(current: int, max: int)
+signal morale_failure
+signal morale_success
+signal morale_recovered
+
+signal cover_updated(value: float)
 
 func _init(_unit: Node2D):
 	unit = _unit
@@ -36,7 +38,7 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 	if broken:
 		recovery_timer_current = 0.0
 
-	unit.cover_label.text = str(terrain_defense_bonus)
+	cover_updated.emit(int(terrain_defense_bonus))
 
 	var attack_roll = randi_range(2, 12)
 	var morale_impact = incoming_firepower * 8
@@ -55,7 +57,7 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 	morale_meter_current += int(morale_impact)
 	morale_meter_current = min(morale_meter_current, morale_meter_max)
 
-	morale_ui.update_bar(morale_meter_current, morale_meter_max)
+	morale_updated.emit(morale_meter_current, morale_meter_max)
 
 	if morale_meter_current >= morale_meter_max:
 		make_morale_check()
@@ -75,28 +77,15 @@ func make_morale_check():
 		if unit.selected:
 			unit.get_parent().selected_unit = null
 			unit.deselect()
-		morale_ui.show_failure()
+		morale_failure.emit()
 		unit._on_morale_failed(unit.get_visible_enemies())
 		broken = true
-		unit.broken_label.visible = true
+		unit_breaks.emit()
 		recovery_timer_current = 0.0
 	else:
 		morale_meter_current = 0
-		morale_ui.show_success()
+		morale_success.emit()
 
-
-func update_morale_bar():
-	if unit.morale_bar:
-		var fill_ratio = float(morale_meter_current) / float(morale_meter_max)
-		fill_ratio = clamp(fill_ratio, 0.0, 1.0)
-		unit.morale_bar.scale.x = fill_ratio
-
-		if fill_ratio < 0.5:
-			unit.morale_bar.color = Color(0, 1, 0)
-		elif fill_ratio < 0.8:
-			unit.morale_bar.color = Color(1, 1, 0)
-		else:
-			unit.morale_bar.color = Color(1, 0, 0)
 
 
 func _process_recovery(delta: float) -> void:
@@ -107,8 +96,7 @@ func _process_recovery(delta: float) -> void:
 
 func _recover() -> void:
 	broken = false
-	if unit.broken_label:
-		unit.broken_label.visible = false
+	unit_recovers.emit()
 	morale_meter_current = 0
-	update_morale_bar()
-	morale_ui.show_success()
+	morale_updated.emit(morale_meter_current, morale_meter_max)
+	morale_success.emit()

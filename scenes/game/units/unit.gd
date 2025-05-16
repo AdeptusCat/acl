@@ -63,13 +63,27 @@ signal retreat_complete(retreat_hex: Vector2i)
 func _ready():
 	update_team_sprite()
 	connect("retreat_complete", _on_retreat_complete)
-	morale_system.morale_ui = morale_ui
-	#morale_ui.morale_bar = $MoraleBar
-	#morale_ui.broken_label = $BrokenLabel
+	morale_system.unit_breaks.connect(_on_unit_breaks)
+	morale_system.unit_recovers.connect(_on_unit_recovers)
+	
+	morale_system.morale_updated.connect(morale_ui._on_morale_updated)
+	morale_system.morale_failure.connect(morale_ui._on_morale_failure)
+	morale_system.morale_success.connect(morale_ui._on_morale_success)
+	morale_system.cover_updated.connect(morale_ui._on_cover_updated)
+	#morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
+	
+	morale_ui.morale_bar = $MoraleBar
+	morale_ui.broken_label = $BrokenLabel
 	morale_ui.popup_scene = morale_popup_scene
 	morale_ui.flash_scene = morale_flash_scene
 	movement.ground_map = ground_map
-	
+
+func _on_unit_breaks():
+	broken = true
+
+func _on_unit_recovers():
+	broken = false
+
 # === Process Loop ===
 func _process(delta):
 	if Engine.is_editor_hint() and snap_to_grid:
@@ -218,30 +232,6 @@ func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
 	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus)
 
 
-func make_morale_check():
-	var death_chance = base_death_chance
-	if broken:
-		death_chance *= broken_death_multiplier
-
-	if randf() < death_chance:
-		die()
-		return
-
-	var roll = randi_range(2, 12)
-	if roll > morale:
-		if selected:
-			get_parent().selected_unit = null
-			deselect()
-		on_morale_check_failure()
-		_on_morale_failed(get_visible_enemies())
-		broken = true
-		broken_label.visible = true
-		recovery_timer_current = 0.0
-	else:
-		morale_meter_current = 0
-		on_morale_check_success()
-
-
 func die():
 	alive = false
 	emit_signal("unit_died", self)
@@ -249,20 +239,6 @@ func die():
 	tween.tween_property($Sprite2D.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
 	await tween.finished
 	queue_free()
-
-
-func update_morale_bar():
-	if morale_bar:
-		var fill_ratio = float(morale_meter_current) / float(morale_meter_max)
-		fill_ratio = clamp(fill_ratio, 0.0, 1.0)
-		morale_bar.scale.x = fill_ratio
-
-		if fill_ratio < 0.5:
-			morale_bar.color = Color(0, 1, 0)
-		elif fill_ratio < 0.8:
-			morale_bar.color = Color(1, 1, 0)
-		else:
-			morale_bar.color = Color(1, 0, 0)
 
 func on_morale_check_failure():
 	var popup = morale_popup_scene.instantiate()

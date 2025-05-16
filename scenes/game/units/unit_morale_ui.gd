@@ -8,8 +8,19 @@ var broken_label: Label
 var popup_scene: PackedScene
 var flash_scene: PackedScene
 
+
+func _on_morale_updated(current, max):
+	update_bar(current, max)
+
+func _on_morale_failure():
+	show_failure()
+
+func _on_morale_success():
+	show_success()
+
 func _init(_unit: Node2D):
 	unit = _unit
+	morale_bar = unit.morale_bar
 
 func update_bar(current: int, max: int):
 	if morale_bar:
@@ -23,11 +34,17 @@ func update_bar(current: int, max: int):
 		else:
 			morale_bar.color = Color(1, 0, 0)
 
+func _on_cover_updated(value: int) -> void:
+	if unit.cover_label:
+		unit.cover_label.text = str(value)
+
 func show_failure():
+	unit.broken_label.visible = true
 	_spawn_popup("failure")
 	_spawn_flash("failure")
 
 func show_success():
+	unit.broken_label.visible = false
 	_spawn_popup("success")
 	_spawn_flash("success")
 
