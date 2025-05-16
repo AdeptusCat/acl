@@ -46,6 +46,7 @@ signal moved_to_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit)
 signal retreat_complete(retreat_hex: Vector2i)
+signal cover_updated(value: float)
 
 # === Nodes ===
 @onready var sprite_node: Sprite2D = $Sprite2D
@@ -69,7 +70,7 @@ func _ready():
 	morale_system.morale_updated.connect(morale_ui._on_morale_updated)
 	morale_system.morale_failure.connect(morale_ui._on_morale_failure)
 	morale_system.morale_success.connect(morale_ui._on_morale_success)
-	morale_system.cover_updated.connect(morale_ui._on_cover_updated)
+	cover_updated.connect(morale_ui._on_cover_updated)
 	#morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
 	
 	morale_ui.morale_bar = $MoraleBar
@@ -99,8 +100,8 @@ func _process(delta):
 	if not alive:
 		return
 
-	if broken:
-		morale_system._process_recovery(delta)
+	morale_system._process_recovery(delta)
+	
 
 	movement.process(delta)
 	#if moving:
@@ -230,6 +231,7 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 
 func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
 	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus)
+	cover_updated.emit(int(terrain_defense_bonus))
 
 
 func die():

@@ -7,13 +7,13 @@ var unit: Node2D
 
 # External variables (can be set externally or injected)
 var morale: int = 7
-var morale_meter_max: int = 100
+var morale_meter_max: float = 100
 var base_death_chance: float = 0.1
 var broken_death_multiplier: float = 2.0
 var recovery_time_max: float = 5.0
 
 # Runtime state
-var morale_meter_current: int = 0
+var morale_meter_current: float = 0
 var recovery_timer_current: float = 0.0
 var broken: bool = false
 var alive: bool = true
@@ -26,7 +26,6 @@ signal morale_failure
 signal morale_success
 signal morale_recovered
 
-signal cover_updated(value: float)
 
 func _init(_unit: Node2D):
 	unit = _unit
@@ -37,8 +36,6 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 
 	if broken:
 		recovery_timer_current = 0.0
-
-	cover_updated.emit(int(terrain_defense_bonus))
 
 	var attack_roll = randi_range(2, 12)
 	var morale_impact = incoming_firepower * 8
@@ -54,7 +51,7 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 	if is_moving:
 		morale_impact *= 1.25
 
-	morale_meter_current += int(morale_impact)
+	morale_meter_current += morale_impact
 	morale_meter_current = min(morale_meter_current, morale_meter_max)
 
 	morale_updated.emit(morale_meter_current, morale_meter_max)
@@ -89,10 +86,17 @@ func make_morale_check():
 
 
 func _process_recovery(delta: float) -> void:
-	recovery_timer_current += delta
-	if recovery_timer_current >= recovery_time_max:
-		_recover()
-
+	if broken:
+		recovery_timer_current += delta
+		if recovery_timer_current >= recovery_time_max:
+			_recover()
+	else:
+		if morale_meter_current > 0:
+			
+			var x : float = (delta * 2.0)
+			morale_meter_current -= x
+			morale_meter_current = max(morale_meter_current, 0.0)
+			morale_updated.emit(morale_meter_current, morale_meter_max)
 
 func _recover() -> void:
 	broken = false
