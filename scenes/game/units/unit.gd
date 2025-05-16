@@ -14,15 +14,11 @@ class_name Unit
 @export var base_death_chance: float = 0.1
 @export var broken_death_multiplier: float = 2.0
 @export var recovery_time_max: float = 5.0
-@export var sprite_team_0: Texture2D
-@export var sprite_team_1: Texture2D
 @export var team: int = 0
 @export var retreat_distance := 3
 @export var retreat_speed := 100.0
-@export var tracer_scene: PackedScene
-@export var tracer_texture: Texture
-@export var morale_popup_scene: PackedScene
-@export var morale_flash_scene: PackedScene
+
+
 @export var fire_rate: float = 1.5
 
 # === Runtime State ===
@@ -49,37 +45,29 @@ signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
 
 # === Nodes ===
-@onready var sprite_node: Sprite2D = $Sprite2D
-@onready var morale_bar: ColorRect = $MoraleBar
-@onready var cover_label = $CoverLabel
-@onready var broken_label = $BrokenLabel
-@onready var unit_selected_sprite = $UnitSelectedSprite
+@onready var ui := $UnitUi
 
 # === Classes ===
 @onready var morale_system := UnitMorale.new(self)
-@onready var morale_ui := UnitMoraleUI.new(self)
+#@onready var morale_ui := UnitMoraleUI.new(self)
 @onready var movement := UnitMovement.new(self)
 
 # === Ready ===
 func _ready():
-	update_team_sprite()
+	update_team_sprite(team)
 	connect("retreat_complete", _on_retreat_complete)
 	morale_system.morale_breaks.connect(_on_morale_breaks)
 	morale_system.morale_recovered.connect(_on_morale_recovered)
 	#morale_system.unit_recovers.connect(_on_unit_recovers)
 	
-	morale_system.morale_updated.connect(morale_ui._on_morale_updated)
-	morale_system.morale_failure.connect(morale_ui._on_morale_failure)
-	morale_system.morale_success.connect(morale_ui._on_morale_success)
-	morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
-	morale_system.morale_breaks.connect(morale_ui._on_morale_breaks)
-	cover_updated.connect(morale_ui._on_cover_updated)
-	#morale_system.morale_recovered.connect(morale_ui._on_morale_recovered)
+	morale_system.morale_updated.connect(ui._on_morale_updated)
+	morale_system.morale_failure.connect(ui._on_morale_failure)
+	morale_system.morale_success.connect(ui._on_morale_success)
+	morale_system.morale_recovered.connect(ui._on_morale_recovered)
+	morale_system.morale_breaks.connect(ui._on_morale_breaks)
+	cover_updated.connect(ui._on_cover_updated)
+	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
-	morale_ui.morale_bar = $MoraleBar
-	morale_ui.broken_label = $BrokenLabel
-	morale_ui.popup_scene = morale_popup_scene
-	morale_ui.flash_scene = morale_flash_scene
 	movement.ground_map = ground_map
 
 func _on_morale_breaks():
@@ -121,20 +109,15 @@ func snap_to_hex():
 		position = ground_map.map_to_local(map_coords)
 
 func select():
-	unit_selected_sprite.visible = true
+	ui.select()
 	selected = true
 
 func deselect():
-	unit_selected_sprite.visible = false
+	ui.deselect()
 	selected = false
 
 func set_cover(cover_value: int) -> void:
-	if cover_value > 0:
-		cover_label.text = str(cover_value)
-		cover_label.show()
-	else:
-		cover_label.hide()
-
+	ui.set_cover(cover_value)
 
 func handle_auto_fire(delta):
 	if movement.moving or not alive or broken:
@@ -169,18 +152,11 @@ func get_visible_enemies() -> Array:
 
 func set_team(new_team: int):
 	team = new_team
-	update_team_sprite()
+	update_team_sprite(team)
 
 
-func update_team_sprite():
-	if not sprite_node:
-		return
-
-	match team:
-		0:
-			sprite_node.texture = sprite_team_0
-		1:
-			sprite_node.texture = sprite_team_1
+func update_team_sprite(team: int):
+	ui.update_team_sprite(team)
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float):
@@ -223,11 +199,7 @@ func fire_burst(shooter, target, rounds: int, bullets_per_sec: float) -> void:
 			return
 		if broken:
 			return
-
-		var tracer = tracer_scene.instantiate() as Node2D
-		tracer.tracer_texture = tracer_texture
-		get_tree().current_scene.add_child(tracer)
-		tracer.shoot(from_pos, target.global_position)
+		ui.shoot(from_pos, target.global_position)
 
 		await get_tree().create_timer(interval).timeout
 
@@ -240,32 +212,9 @@ func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
 func die():
 	alive = false
 	emit_signal("unit_died", self)
-	var tween = create_tween()
-	tween.tween_property($Sprite2D.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
-	await tween.finished
+	await ui.die()
 	queue_free()
 
-func on_morale_check_failure():
-	var popup = morale_popup_scene.instantiate()
-	get_parent().add_child(popup)
-	popup.global_position = global_position + Vector2(0, -20)
-	popup.start_failure()
-
-	var flash = morale_flash_scene.instantiate()
-	get_parent().add_child(flash)
-	flash.global_position = global_position
-	flash.start_failure()
-
-func on_morale_check_success():
-	var popup = morale_popup_scene.instantiate()
-	get_parent().add_child(popup)  # Add to world, not UI
-	popup.global_position = global_position + Vector2(0, -20)
-	popup.start_success()
-
-	var flash = morale_flash_scene.instantiate()
-	get_parent().add_child(flash)
-	flash.global_position = global_position
-	flash.start_success()
 
 func _on_morale_failed(known_enemies: Array) -> void:
 	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
