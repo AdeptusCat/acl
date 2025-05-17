@@ -65,8 +65,8 @@ func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bulle
 			return
 		if not get_parent().get_visible_enemies().has(target):
 			return
-		#if broken:
-			#return
+		if shooter.broken or shooter.moving:
+			return
 		
 		shoot.emit(shooter.global_position, target.global_position)
 
