@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=48 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -23,6 +23,12 @@
 [ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://scenes/ui/start_screen.tscn" id="21_1cxds"]
 [ext_resource type="PackedScene" uid="uid://b84f65gu8hp6e" path="res://scenes/ui/result_screen.tscn" id="22_2m0ga"]
 [ext_resource type="PackedScene" uid="uid://jdf7ewo2axfy" path="res://scenes/ui/ui.tscn" id="23_ues17"]
+[ext_resource type="PackedScene" uid="uid://b0cjkqk21ctq3" path="res://scenes/game/input_manager.tscn" id="24_x0nq1"]
+[ext_resource type="PackedScene" uid="uid://dy2ockn75uonw" path="res://scenes/game/game_controller.tscn" id="25_rwifv"]
+[ext_resource type="PackedScene" uid="uid://b6vy6s10vot0r" path="res://scenes/game/turn_manager.tscn" id="25_wnndm"]
+[ext_resource type="PackedScene" uid="uid://b7n8wd6ful6o1" path="res://scenes/game/movement_system.tscn" id="26_26xou"]
+[ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
+[ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
 texture = ExtResource("3_xq18t")
@@ -306,3 +312,17 @@ visible = false
 [node name="Ui" parent="." instance=ExtResource("23_ues17")]
 
 [node name="DummyNode2D" type="Node2D" parent="."]
+
+[node name="UnitContainer" type="Node" parent="."]
+
+[node name="InputManager" parent="." instance=ExtResource("24_x0nq1")]
+
+[node name="TurnManager" parent="." instance=ExtResource("25_wnndm")]
+
+[node name="MovementSystem" parent="." instance=ExtResource("26_26xou")]
+
+[node name="CombatSystem" parent="." instance=ExtResource("27_jyr8v")]
+
+[node name="GameController" parent="." instance=ExtResource("25_rwifv")]
+
+[node name="LOSRenderer" parent="." instance=ExtResource("26_rwifv")]

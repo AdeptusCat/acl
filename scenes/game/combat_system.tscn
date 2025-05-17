@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5bxatxtl1pha"]
+
+[ext_resource type="Script" uid="uid://busnbq6ydw1yi" path="res://scenes/game/combat_system.gd" id="1_dsu7f"]
+
+[node name="CombatSystem" type="Node"]
+script = ExtResource("1_dsu7f")
