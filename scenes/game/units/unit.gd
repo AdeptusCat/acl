@@ -134,8 +134,9 @@ func set_cover(cover_value: int) -> void:
 
 
 func get_visible_enemies() -> Array:
-	var manager = get_parent()
-	return manager.unit_visible_enemies.get(self, [])
+	return []
+	#var manager = get_parent()
+	#return manager.unit_visible_enemies.get(self, [])
 
 
 func set_team(new_team: int):

@@ -10,6 +10,7 @@ extends Node2D
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
+@onready var game_controller := $GameController
 var timer_running := false
 var objective_hex : Vector2i = Vector2.ZERO
 
@@ -36,7 +37,7 @@ func _ready():
 	start_screen.set_objective_text("Hold hex at %s (red circle) with an unbroken unit!" % str(objective_hex))
 	start_screen.game_started.connect(_on_game_started)
 	start_screen.visible = true
-	$UnitManager.set_input_enabled(false)
+	#$UnitManager.set_input_enabled(false)
 	
 	ui.update_timer_label(time_left_seconds)
 	
@@ -61,8 +62,9 @@ func _ready():
 
 func _on_game_started(team : int):
 	timer_running = true
-	$UnitManager.team = team
-	$UnitManager.set_input_enabled(true)
+	game_controller.current_team = team
+	#$UnitManager.team = team
+	#$UnitManager.set_input_enabled(true)
 
 func _process(delta):
 	if timer_running:

@@ -31,7 +31,7 @@ func move_to_hex(new_hex: Vector2i):
 	target_position = ground_map.map_to_local(new_hex)
 	moving = true
 	started_moving.emit()
-	unit.emit_signal("moved_to_hex", unit, new_hex)
+	unit.moved_to_hex.emit(unit, new_hex)
 
 func follow_cube_path(cube_path: Array[Vector3i]):
 	path_hexes.clear()

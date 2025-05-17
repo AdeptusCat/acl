@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=47 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -25,7 +25,6 @@
 [ext_resource type="PackedScene" uid="uid://jdf7ewo2axfy" path="res://scenes/ui/ui.tscn" id="23_ues17"]
 [ext_resource type="PackedScene" uid="uid://b0cjkqk21ctq3" path="res://scenes/game/input_manager.tscn" id="24_x0nq1"]
 [ext_resource type="PackedScene" uid="uid://dy2ockn75uonw" path="res://scenes/game/game_controller.tscn" id="25_rwifv"]
-[ext_resource type="PackedScene" uid="uid://b6vy6s10vot0r" path="res://scenes/game/turn_manager.tscn" id="25_wnndm"]
 [ext_resource type="PackedScene" uid="uid://b7n8wd6ful6o1" path="res://scenes/game/movement_system.tscn" id="26_26xou"]
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
 [ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
@@ -241,63 +240,7 @@ tile_set = SubResource("TileSet_k73cj")
 script = ExtResource("17_cmg7y")
 metadata/_edit_lock_ = true
 
-[node name="UnitManager" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("18_nqe8x")]
-ground_layer = NodePath("../GroundTileMapLayer")
-unit_scene = ExtResource("19_sh7a8")
-
-[node name="Unit" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, 512)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit10" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, 192)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit11" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(128, 480)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit12" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, 448)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit2" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(128, 160)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit3" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, 256)
-ground_map = NodePath("../../GroundTileMapLayer")
-
-[node name="Unit4" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(704, 480)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
-
-[node name="Unit5" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(464, 512)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
-
-[node name="Unit6" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(704, 352)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
-
-[node name="Unit7" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(800, 480)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
-
-[node name="Unit8" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(752, 256)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
-
-[node name="Unit9" parent="UnitManager" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(560, 128)
-ground_map = NodePath("../../GroundTileMapLayer")
-team = 1
+[node name="UnitManager" parent="." instance=ExtResource("18_nqe8x")]
 
 [node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
@@ -313,16 +256,68 @@ visible = false
 
 [node name="DummyNode2D" type="Node2D" parent="."]
 
+[node name="GameController" parent="." instance=ExtResource("25_rwifv")]
+
 [node name="UnitContainer" type="Node" parent="."]
 
-[node name="InputManager" parent="." instance=ExtResource("24_x0nq1")]
+[node name="Unit" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(80, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
 
-[node name="TurnManager" parent="." instance=ExtResource("25_wnndm")]
+[node name="Unit10" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(80, 192)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit11" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(128, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit12" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(80, 448)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit2" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(128, 160)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit3" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(80, 256)
+ground_map = NodePath("../../GroundTileMapLayer")
+
+[node name="Unit4" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(704, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit5" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(464, 512)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit6" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(704, 352)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit7" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(800, 480)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit8" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(752, 256)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="Unit9" parent="UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(560, 128)
+ground_map = NodePath("../../GroundTileMapLayer")
+team = 1
+
+[node name="InputManager" parent="." instance=ExtResource("24_x0nq1")]
 
 [node name="MovementSystem" parent="." instance=ExtResource("26_26xou")]
 
 [node name="CombatSystem" parent="." instance=ExtResource("27_jyr8v")]
-
-[node name="GameController" parent="." instance=ExtResource("25_rwifv")]
 
 [node name="LOSRenderer" parent="." instance=ExtResource("26_rwifv")]

@@ -1,23 +1,36 @@
 extends Node2D
 
 var lines = []  # {from, to, timer, duration}
+var los_enemy_lines: Array = []
 
-func _ready():
-	$"../CombatSystem".connect("visibility_changed", self, "_on_vis")
 
-func _on_vis(shooter, enemies):
-	for e in enemies:
-		lines.append({
-			"from": $"../GroundLayer".map_to_local(shooter.current_hex),
-			"to":   $"../GroundLayer".map_to_local(e.current_hex),
-			"timer":0, "duration":2
-		})
+func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
+	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
 
-func _process(dt):
-	for l in lines: l.timer += dt
-	lines = lines.filter(func(l): l.timer < l.duration)
-	update()
+	los_enemy_lines.append({
+		"from": from_pos,
+		"to": to_pos,
+		"timer": 0.0,
+		"duration": 2.0  # Line fades out over 2 seconds
+	})
+
+	queue_redraw()
+
 
 func _draw():
-	for l in lines:
-		draw_line(l.from, l.to, Color.blue, 2)
+	# 🔥 New: Draw blue lines to visible enemies
+	for los_data in los_enemy_lines:
+		draw_line(los_data["from"], los_data["to"], Color(0, 0, 1), 2.0)
+
+
+func _process(delta):
+	for line in los_enemy_lines:
+		line["timer"] += delta
+
+	# Remove fully expired lines
+	los_enemy_lines = los_enemy_lines.filter(func(line):
+		return line["timer"] < line["duration"]
+	)
+
+	queue_redraw()  # Always request redraw if lines change
