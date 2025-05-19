@@ -6,18 +6,15 @@ extends Node2D
 @onready var building_layer : HexagonTileMapLayer = $BuildingTileMapLayer
 @onready var wall_layer : HexagonTileMapLayer = $WallTileMapLayer
 @onready var terrain_layer : HexagonTileMapLayer = $TerrainTileMapLayer
-@onready var objective_tilemap := $ObjectiveTileMapLayer
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
 @onready var game_controller := $GameController
-@onready var unit_container := $UnitContainer
-@onready var input_manager := $InputManager
-var timer_running := false
-var objective_hex : Vector2i = Vector2.ZERO
+
+
 
 #@export var los_data: Resource
-@export var time_left_seconds: float = 120.0  
+
 
 
 
@@ -31,21 +28,19 @@ func _ready():
 	#LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
 	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
-	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
-	if cells.size() > 0:
-		objective_hex = cells[0]
-	else:
-		push_error("ObjectiveTileMapLayer has no tiles placed!")
-	start_screen.set_objective_text("Hold hex at %s (red circle) with an unbroken unit!" % str(objective_hex))
-	start_screen.game_started.connect(_on_game_started)
-	start_screen.visible = true
-	input_manager.set_input(false)
 	
-	ui.update_timer_label(time_left_seconds)
+	
+	start_screen.game_started.connect(_on_game_started)
+	game_controller.update_timer_label.connect(ui._on_update_timer_label)
+	game_controller.show_winner.connect(result_screen._on_show_winner)
+	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
+	
+	game_controller.setup_game()
+	
 	
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
-	#
+	#14,2 10,2
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(1,1))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(3,4))
 
@@ -58,33 +53,13 @@ func _ready():
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	#LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
 	
+	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(14,2))
+	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(10,2))
+	#LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
+	
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 
 
 func _on_game_started(team : int):
-	timer_running = true
-	game_controller.current_team = team
-	input_manager.set_input(true)
-
-
-func _process(delta):
-	if timer_running:
-		time_left_seconds -= delta
-		if time_left_seconds <= 0:
-			time_left_seconds = 0
-			timer_running = false
-			end_game_check()
-		ui.update_timer_label(time_left_seconds)
-
-
-func end_game_check():
-	var occupying_units : Array
-	for unit in unit_container.get_children():
-		if unit.current_hex == objective_hex:
-			occupying_units.append(unit)
-	for unit in occupying_units:
-		if not unit.broken:
-			result_screen.show_winner(unit.team)
-			return
-	result_screen.show_winner(-1)
+	game_controller.start_game(team)

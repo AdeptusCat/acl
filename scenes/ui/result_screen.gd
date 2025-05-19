@@ -2,7 +2,7 @@ extends CanvasLayer
 
 @onready var result_label := $CenterContainer/ResultLabel
 
-func show_winner(team: int):
+func _on_show_winner(team: int):
 	if team == -1:
 		result_label.text = "No one wins."
 	elif team == 0:

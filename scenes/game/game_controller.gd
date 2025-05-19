@@ -1,16 +1,30 @@
 extends Node2D
 
-@onready var input_mgr      = $"../InputManager"
-@onready var ground_layer   = $"../GroundTileMapLayer"
-@onready var unit_container = $"../UnitContainer"
-@onready var move_sys       = $"../MovementSystem"
-@onready var combat_sys     = $"../CombatSystem"
-@onready var los_renderer   = $"../LOSRenderer"
+@onready var input_mgr      = $InputManager
+@onready var unit_container = $UnitContainer
+@onready var move_sys       = $MovementSystem
+@onready var combat_sys     = $CombatSystem
+@onready var los_renderer   = $LOSRenderer
+
+
+@export var objective_tilemap : TileMapLayer
+@export var ground_layer : HexagonTileMapLayer
+
+
+var objective_hex : Vector2i = Vector2.ZERO
+@export var time_left_seconds: float = 120.0  
+var timer_running := false
 
 var current_team: int = 0
 var selected_unit: Node2D = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
+
+
+signal update_timer_label(time_left_seconds: float)
+signal show_winner(team: int)
+signal set_objective_text(hex: String)
+
 
 func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
@@ -33,7 +47,23 @@ func _ready():
 	move_sys.units = units
 	combat_sys.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	
-	
+	update_timer_label.emit(time_left_seconds)
+	input_mgr.set_input(false)
+
+
+func setup_game():
+	set_objective_cells()
+	set_objective_text.emit(str(objective_hex))
+
+
+func set_objective_cells(): 
+	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
+	if cells.size() > 0:
+		objective_hex = cells[0]
+	else:
+		push_error("ObjectiveTileMapLayer has no tiles placed!")
+
+
 func _on_mouse_button_left_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
 	var unit = _find_unit_at(map_hex)
@@ -72,3 +102,31 @@ func _on_unit_died(unit):
 	units.erase(unit)
 	unit_visible_enemies.erase(unit)
 	#unit.queue_free()
+
+
+func start_game(team: int):
+	timer_running = true
+	current_team = team
+	input_mgr.set_input(true)
+
+
+func _process(delta):
+	if timer_running:
+		time_left_seconds -= delta
+		if time_left_seconds <= 0:
+			time_left_seconds = 0
+			timer_running = false
+			end_game_check()
+		update_timer_label.emit(time_left_seconds)
+
+
+func end_game_check():
+	var occupying_units : Array
+	for unit in unit_container.get_children():
+		if unit.current_hex == objective_hex:
+			occupying_units.append(unit)
+	for unit in occupying_units:
+		if not unit.broken:
+			show_winner.emit(unit.team)
+			return
+	show_winner.emit(-1)

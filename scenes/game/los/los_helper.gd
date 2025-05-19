@@ -238,8 +238,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							se_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 		BetweenAxis.X_Y_NEG:
 			var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
@@ -253,8 +253,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							nw_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 		BetweenAxis.Y_Z_POS:
 			var nw_cube_vector : Vector3i = Vector3i(-1, 0, 1)
@@ -268,8 +268,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							sw_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 		BetweenAxis.Y_Z_NEG:
 			var ne_cube_vector : Vector3i = Vector3i(1, -1, 0)
@@ -283,8 +283,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							se_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 		BetweenAxis.Z_X_POS:
 			var n_cube_vector : Vector3i = Vector3i(0, -1, 1)
@@ -298,8 +298,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							ne_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 		BetweenAxis.Z_X_NEG:
 			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
@@ -313,8 +313,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							se_cube_vector,
 							result
 						)
+			result.merge(res, true)
 			if res.blocked == true:
-				result.merge(res, true)
 				return result
 	
 	var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
