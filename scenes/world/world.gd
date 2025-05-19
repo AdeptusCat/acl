@@ -12,13 +12,6 @@ extends Node2D
 @onready var game_controller := $GameController
 
 
-
-#@export var los_data: Resource
-
-
-
-
-
 func _ready():
 	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
 	LOSHelper.building_layer = building_layer  # <-- inject the TileMap

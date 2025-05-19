@@ -5,7 +5,6 @@ class_name Unit
 # === Exported ===
 @export var snap_to_grid := true
 @export var ground_map: HexagonTileMapLayer
-
 @export var firepower: int = 4
 @export var range: int = 6
 @export var morale: int = 7
@@ -18,6 +17,7 @@ class_name Unit
 @export var retreat_distance := 3
 @export var retreat_speed := 100.0
 @export var fire_rate: float = 1.5
+
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -46,11 +46,13 @@ signal deselect_unit(unit)
 # === Nodes ===
 @onready var ui := $UnitUi
 
+
 # === Classes ===
 @onready var morale_system := UnitMorale.new(self)
 #@onready var morale_ui := UnitMoraleUI.new(self)
 @onready var movement := UnitMovement.new(self)
-@onready var combat := UnitCombat.new(self)
+@onready var combat := UnitCombat.new()
+
 
 # === Ready ===
 func _ready():
@@ -76,8 +78,10 @@ func _ready():
 	movement.stopped_moving.connect(_on_stopped_moving)
 	add_child(combat)
 
+
 func _on_started_moving():
 	moving = true
+
 
 func _on_stopped_moving():
 	moving = false
@@ -89,8 +93,10 @@ func _on_morale_breaks():
 		deselect()
 	broken = true
 
+
 func _on_morale_recovered():
 	broken = false
+
 
 # === Process Loop ===
 func _process(delta):
@@ -135,9 +141,6 @@ func set_cover(cover_value: int) -> void:
 
 func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
 	return unit_visible_enemies.get(self, [])
-	#return []
-	#var manager = get_parent()
-	#return manager.unit_visible_enemies.get(self, [])
 
 
 func set_team(new_team: int):

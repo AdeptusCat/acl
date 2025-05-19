@@ -14,10 +14,6 @@ func _process(delta: float) -> void:
 			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 
-func _cover(u,e):
-	var m = LOSHelper.los_lookup.get(e.current_hex, {})
-	return m.get(u.current_hex, {}).get("target_cover", 0)
-
 func _on_unit_moved(unit, vector):
 	if not unit.alive:
 		return
@@ -54,6 +50,7 @@ func _on_unit_moved(unit, vector):
 
 	# 🔥 Update LOS for all units too (global re-check)
 	update_all_unit_visibilities()
+
 
 func update_all_unit_visibilities():
 	for unit in units:

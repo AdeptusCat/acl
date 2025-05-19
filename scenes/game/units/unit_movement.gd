@@ -19,12 +19,15 @@ var retreat_target_hex: Vector2i = Vector2i()
 signal started_moving
 signal stopped_moving
 
+
 func _init(_unit: Node2D):
 	unit = _unit
+
 
 func process(delta: float):
 	if moving:
 		_process_movement(delta)
+
 
 func move_to_hex(new_hex: Vector2i):
 	unit.current_hex = new_hex
@@ -41,6 +44,7 @@ func follow_cube_path(cube_path: Array[Vector3i]):
 		path_index = 1
 		move_to_hex(path_hexes[path_index])
 
+
 func begin_retreat(target_hex: Vector2i):
 	retreat_target_hex = target_hex
 	retreating = true
@@ -53,6 +57,7 @@ func begin_retreat(target_hex: Vector2i):
 		var pos = ground_map.astar.get_point_position(pid)
 		cube_path.append(ground_map.local_to_cube(pos))
 	follow_cube_path(cube_path)
+
 
 func _process_movement(delta: float):
 	var dir = (target_position - unit.position).normalized()
@@ -77,6 +82,7 @@ func _process_movement(delta: float):
 	else:
 		unit.position += dir * step
 
+
 func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
 	retreating = true
@@ -92,6 +98,7 @@ func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 		cube_path.append(ground_map.local_to_cube(pos))
 
 	follow_cube_path(cube_path)
+
 
 func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int) -> Vector2i:
 	# shortcuts

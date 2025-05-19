@@ -11,10 +11,6 @@ func _on_move_requested(selected_unit, to_hex):
 
 
 func _compute_path(from_h, to_h) -> Array[Vector3i]:
-	#var id1 = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
-	#var id2 = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
-	#var raw = LOSHelper.ground_layer.astar.get_id_path(id1, id2)
-	#return raw.map(func(pid): LOSHelper.ground_layer.local_to_cube( LOSHelper.ground_layer.astar.get_point_position(pid) ))
 	var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
 	var to_id: int   = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 	var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)

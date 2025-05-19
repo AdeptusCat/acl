@@ -1,13 +1,9 @@
 class_name UnitCombat
 extends Node
 
-var unit: Node2D
 var fire_timer: float = 0.0
 
 signal shoot(from_pos, target_pos)
-
-func _init(_unit: Node2D):
-	unit = _unit
 
 
 func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):

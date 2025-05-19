@@ -6,10 +6,8 @@ extends Node2D
 @onready var combat_sys     = $CombatSystem
 @onready var los_renderer   = $LOSRenderer
 
-
 @export var objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
-
 
 var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
@@ -19,7 +17,6 @@ var current_team: int = 0
 var selected_unit: Node2D = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
-
 
 signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
@@ -68,7 +65,10 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
 	var unit = _find_unit_at(map_hex)
 	if unit and unit.team == current_team and not unit.broken:
-		_select_unit(unit)
+		if selected_unit == unit:
+			_deselect_unit(unit)
+		else:
+			_select_unit(unit)
 	elif selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
 		_deselect_unit(selected_unit)
