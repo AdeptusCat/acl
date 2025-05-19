@@ -21,6 +21,7 @@ var unit_visible_enemies: Dictionary
 signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
 signal set_objective_text(hex: String)
+signal mouse_event_position_changed(event_pos)
 
 
 func _ready():
@@ -43,8 +44,8 @@ func _ready():
 	move_sys.unit_visible_enemies = unit_visible_enemies
 	move_sys.units = units
 	combat_sys.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
-	
 	update_timer_label.emit(time_left_seconds)
+	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	input_mgr.set_input(false)
 
 
@@ -72,6 +73,10 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	elif selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
 		_deselect_unit(selected_unit)
+
+
+func _on_mouse_event_position_changed(event_pos: Vector2):
+	mouse_event_position_changed.emit(event_pos)
 
 
 func _on_key_space_pressed(event_pos: Vector2):
