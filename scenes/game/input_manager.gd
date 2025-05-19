@@ -4,6 +4,10 @@ signal mouse_button_left_pressed(event_pos)
 signal key_space_pressed(event_pos)
 
 
+func set_input(enabled: bool):
+	set_process_input(enabled)
+
+
 func _input(event):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_LEFT:
 		mouse_button_left_pressed.emit(event.position)

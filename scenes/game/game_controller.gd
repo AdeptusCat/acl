@@ -16,8 +16,8 @@ func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
-	for child in $"../UnitManager".get_children():
-		child.unit_arrived_at_hex.connect(move_sys._on_arrived)
+	#for child in $"../UnitManager".get_children():
+		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is Node2D:
 			units.append(unit)

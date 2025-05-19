@@ -12,6 +12,7 @@ extends Node2D
 @onready var ui := $Ui
 @onready var game_controller := $GameController
 @onready var unit_container := $UnitContainer
+@onready var input_manager := $InputManager
 var timer_running := false
 var objective_hex : Vector2i = Vector2.ZERO
 
@@ -38,7 +39,7 @@ func _ready():
 	start_screen.set_objective_text("Hold hex at %s (red circle) with an unbroken unit!" % str(objective_hex))
 	start_screen.game_started.connect(_on_game_started)
 	start_screen.visible = true
-	#$UnitManager.set_input_enabled(false)
+	input_manager.set_input(false)
 	
 	ui.update_timer_label(time_left_seconds)
 	
@@ -64,8 +65,8 @@ func _ready():
 func _on_game_started(team : int):
 	timer_running = true
 	game_controller.current_team = team
-	#$UnitManager.team = team
-	#$UnitManager.set_input_enabled(true)
+	input_manager.set_input(true)
+
 
 func _process(delta):
 	if timer_running:
@@ -74,9 +75,7 @@ func _process(delta):
 			time_left_seconds = 0
 			timer_running = false
 			end_game_check()
-
 		ui.update_timer_label(time_left_seconds)
-
 
 
 func end_game_check():
@@ -84,10 +83,8 @@ func end_game_check():
 	for unit in unit_container.get_children():
 		if unit.current_hex == objective_hex:
 			occupying_units.append(unit)
-
 	for unit in occupying_units:
 		if not unit.broken:
 			result_screen.show_winner(unit.team)
 			return
-
 	result_screen.show_winner(-1)
