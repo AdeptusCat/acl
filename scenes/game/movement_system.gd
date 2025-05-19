@@ -6,19 +6,23 @@ var units: Array[Node2D] = []
 
 
 func _on_move_requested(selected_unit, to_hex):
-	var path = _compute_path(selected_unit.current_hex, to_hex)
+	var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex)
 	selected_unit.movement.follow_cube_path(path)
 
 
-func _compute_path(from_h, to_h):
+func _compute_path(from_h, to_h) -> Array[Vector3i]:
 	#var id1 = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
 	#var id2 = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 	#var raw = LOSHelper.ground_layer.astar.get_id_path(id1, id2)
 	#return raw.map(func(pid): LOSHelper.ground_layer.local_to_cube( LOSHelper.ground_layer.astar.get_point_position(pid) ))
-	var from_id = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
-	var to_id   = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
-	var id_path = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
-	return id_path
+	var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
+	var to_id: int   = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
+	var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
+	var cube_path: Array[Vector3i] = []
+	for pid in id_path:
+		var pos = LOSHelper.ground_layer.astar.get_point_position(pid)
+		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
+	return cube_path
 
 
 func _on_arrived(hex):
