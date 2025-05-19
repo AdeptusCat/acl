@@ -11,6 +11,7 @@ extends Node2D
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
 @onready var game_controller := $GameController
+@onready var unit_container := $UnitContainer
 var timer_running := false
 var objective_hex : Vector2i = Vector2.ZERO
 
@@ -80,7 +81,7 @@ func _process(delta):
 
 func end_game_check():
 	var occupying_units : Array
-	for unit in $UnitManager.units:
+	for unit in unit_container.get_children():
 		if unit.current_hex == objective_hex:
 			occupying_units.append(unit)
 

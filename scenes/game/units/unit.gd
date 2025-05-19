@@ -41,6 +41,7 @@ signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit)
 signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
+signal deselect_unit(unit)
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -83,6 +84,9 @@ func _on_stopped_moving():
 
 
 func _on_morale_breaks():
+	if selected:
+		deselect_unit.emit(self)
+		deselect()
 	broken = true
 
 func _on_morale_recovered():
@@ -107,10 +111,6 @@ func _process(delta):
 	
 	movement.process(delta)
 
-	if not moving or alive or not broken:
-		combat.handle_auto_fire(delta, self, get_visible_enemies(), current_hex, range, fire_rate, firepower)
-	
-
 
 # === Utility ===
 func snap_to_hex():
@@ -133,8 +133,9 @@ func set_cover(cover_value: int) -> void:
 	ui.set_cover(cover_value)
 
 
-func get_visible_enemies() -> Array:
-	return []
+func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
+	return unit_visible_enemies.get(self, [])
+	#return []
 	#var manager = get_parent()
 	#return manager.unit_visible_enemies.get(self, [])
 
@@ -148,14 +149,14 @@ func update_team_sprite(team: int):
 	ui.update_team_sprite(team)
 
 
-func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float):
+func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 	if not alive:
 		return
-	combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, get_visible_enemies(), fire_rate)
+	combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
 
 
-func receive_fire(incoming_firepower: int, terrain_defense_bonus: float):
-	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus)
+func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
+	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
 
 

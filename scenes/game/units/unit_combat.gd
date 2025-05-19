@@ -10,11 +10,12 @@ func _init(_unit: Node2D):
 	unit = _unit
 
 
-func handle_auto_fire(delta, shooter: Node2D, visible_enemies, current_hex, range, fire_rate, firepower):
+func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
 	fire_timer -= delta
 	if fire_timer > 0:
 		return  # Still waiting for next shot
 
+	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive:
 			var distance = current_hex.distance_to(enemy.current_hex)
@@ -26,11 +27,11 @@ func handle_auto_fire(delta, shooter: Node2D, visible_enemies, current_hex, rang
 					targetCover = data["target_cover"]
 
 				enemy.set_cover(targetCover)
-				fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, visible_enemies, fire_rate)
+				fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate
 				break
 
-func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower : float, range, visible_enemies, fire_rate):
+func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower : float, range, unit_visible_enemies: Dictionary, fire_rate):
 
 	var actual_firepower = firepower
 	if distance_in_hexes > range:
@@ -42,6 +43,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var target_hex = target.current_hex
 	var batch_targets: Array = []
 
+	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
 		if is_instance_valid(u) and u.alive and u.current_hex == target_hex:
 			batch_targets.append(u)
@@ -51,19 +53,20 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 
 	for u in batch_targets:
 		u.set_cover(terrain_defense_bonus)
-		u.receive_fire(actual_firepower, terrain_defense_bonus)
+		u.receive_fire(actual_firepower, terrain_defense_bonus, unit_visible_enemies)
 
-	fire_burst(shooter, current_hex, batch_targets[0], 8, fire_rate, visible_enemies)
+	fire_burst(shooter, current_hex, batch_targets[0], 8, fire_rate, unit_visible_enemies)
 
 
-func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float, visible_enemies) -> void:
+func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float, unit_visible_enemies: Dictionary) -> void:
 	var interval = 1.0 / bullets_per_sec
 	var from_pos = LOSHelper.ground_layer.map_to_local(current_hex)
 	
 	for i in range(rounds):
 		if not is_instance_valid(shooter) or not is_instance_valid(target):
 			return
-		if not get_parent().get_visible_enemies().has(target):
+		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		if not visible_enemies.has(target):
 			return
 		if shooter.broken or shooter.moving:
 			return

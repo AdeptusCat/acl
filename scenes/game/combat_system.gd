@@ -7,6 +7,13 @@ var unit_visible_enemies: Dictionary
 var units: Array[Node2D] = []
 signal draw_los_to_enemy(from_hex, to_hex)
 
+
+func _process(delta: float) -> void:
+	for unit in units:
+		if not unit.moving and unit.alive and not unit.broken:
+			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+
+
 func _cover(u,e):
 	var m = LOSHelper.los_lookup.get(e.current_hex, {})
 	return m.get(u.current_hex, {}).get("target_cover", 0)
@@ -43,7 +50,7 @@ func _on_unit_moved(unit, vector):
 
 				# now display it
 				unit.set_cover(targetCover)
-				enemy_unit.fire_at(unit, distance, targetCover)
+				enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 
 	# 🔥 Update LOS for all units too (global re-check)
 	update_all_unit_visibilities()

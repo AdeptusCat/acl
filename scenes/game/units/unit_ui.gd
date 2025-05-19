@@ -1,3 +1,4 @@
+@tool
 extends Node2D
 
 @export var sprite_team_0: Texture2D
@@ -87,6 +88,7 @@ func show_failure():
 
 
 func show_success():
+	update_bar(0, 100)
 	_spawn_popup("success")
 	_spawn_flash("success")
 

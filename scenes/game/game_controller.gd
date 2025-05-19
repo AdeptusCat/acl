@@ -18,18 +18,21 @@ func _ready():
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	for child in $"../UnitManager".get_children():
 		child.unit_arrived_at_hex.connect(move_sys._on_arrived)
-	for node in get_tree().get_nodes_in_group("units"):
-		if node is Node2D:
-			units.append(node)
-			node.unit_died.connect(_on_unit_died)
-			node.moved_to_hex.connect(combat_sys._on_unit_moved)
-			node.unit_arrived_at_hex.connect(move_sys._on_arrived)
-			node.current_hex = ground_layer.local_to_map(node.global_position)
+	for unit in get_tree().get_nodes_in_group("units"):
+		if unit is Node2D:
+			units.append(unit)
+			unit.unit_died.connect(_on_unit_died)
+			unit.moved_to_hex.connect(combat_sys._on_unit_moved)
+			unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
+			unit.current_hex = ground_layer.local_to_map(unit.global_position)
+			unit.deselect_unit.connect(_deselect_unit)
+			
 	combat_sys.unit_visible_enemies = unit_visible_enemies
 	combat_sys.units = units
 	move_sys.unit_visible_enemies = unit_visible_enemies
 	move_sys.units = units
 	combat_sys.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
+	
 	
 func _on_mouse_button_left_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
@@ -38,6 +41,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 		_select_unit(unit)
 	elif selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
+		_deselect_unit(selected_unit)
 
 
 func _on_key_space_pressed(event_pos: Vector2):
@@ -49,6 +53,12 @@ func _select_unit(unit):
 		selected_unit.deselect()
 	selected_unit = unit
 	unit.select()
+
+
+func _deselect_unit(unit):
+	if selected_unit == unit:
+		selected_unit.deselect()
+		selected_unit = null
 
 
 func _find_unit_at(hex: Vector2i) -> Node2D:
