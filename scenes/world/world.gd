@@ -76,7 +76,7 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	
 	var top_pos = ground_layer.cube_to_local(hex_cube_top)
 	var res = LOSHelper.check_los(event_pos, top_pos, 0, 0, 0, 0)
-	result.cover_n = res.shooter_cover # CAREFUL, THIS IS ADDED BUILDING COVER, CHECK WALL INDIVIDUALLY
+	result.cover_n = res.wall_cover
 	print(res)
 	
 	var top_right = ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_RIGHT_SIDE)
@@ -96,6 +96,7 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 	#ui.mouse_event_position_changed.emit(event_pos)
+
 
 
 func _on_game_started(team : int):

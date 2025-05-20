@@ -192,6 +192,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		"hindrance_count": 0,
 		"crossed_wall": false,
 		"block_point": null,
+		"hex_cover": 0,
+		"wall_cover" : 0,
 		"shooter_cover": 0,
 		"target_cover": 0,
 		"hexes": [],
@@ -201,6 +203,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 
 	# 1) shooter building cover
 	result.shooter_cover = is_sample_point_in_building(origin_pos)
+	result.hex_cover = result.shooter_cover
 		#result.shooter_cover = BUILDING_COVER
 	# 2) target building cover
 	result.target_cover = is_sample_point_in_building(target_pos)
@@ -346,21 +349,23 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 				if wall_result.cover > result.target_cover:
 					result.target_cover = wall_result.cover
 		
-		# skip the target-hex center check
-		if sample_hex_map == target_hex_map:
-			continue
-		
 		if prev_hex_map == origin_hex_map:
 			var wall_result
 			wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > result.shooter_cover:
 					result.shooter_cover = wall_result.cover
 
 			wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > result.shooter_cover:
 					result.shooter_cover = wall_result.cover
+		
+		# skip the target-hex center check
+		if sample_hex_map == target_hex_map:
+			continue
 		
 		# skip the origin-hex center check
 		if sample_hex_map == origin_hex_map:
@@ -422,7 +427,9 @@ func _walk_between_axes_and_check_walls(
 		"block_point": Vector2.ZERO,
 		"hindrance" : 0,
 		"target_cover" : 0,
-		"shooter_cover" : 0
+		"shooter_cover" : 0,
+		"hex_cover": 0,
+		"wall_cover" : 0,
 	}
 	var start_hex_cube : Vector3i = origin_hex_cube
 	var start_hex_map : Vector2i = origin_hex_map
@@ -483,21 +490,26 @@ func _walk_between_axes_and_check_walls(
 			var wall_result : Dictionary
 			wall_result = is_wall_cover(start_hex_cube, s_hex_cube, start_hex_map, ground_layer.map_to_local(s_hex_map))
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > _result.shooter_cover:
 					result.shooter_cover = wall_result.cover
+					
 
 			wall_result = is_wall_cover(s_hex_cube, start_hex_cube, s_hex_map, ground_layer.map_to_local(start_hex_map))
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > _result.shooter_cover:
 					result.shooter_cover = wall_result.cover
 		
 			wall_result = is_wall_cover(start_hex_cube, se_hex_cube, start_hex_map, ground_layer.map_to_local(se_hex_map))
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > _result.shooter_cover:
 					result.shooter_cover = wall_result.cover
 
 			wall_result = is_wall_cover(se_hex_cube, start_hex_cube, se_hex_map, ground_layer.map_to_local(start_hex_map))
 			if wall_result.size() > 0:
+				result.wall_cover = wall_result.cover
 				if wall_result.cover > _result.shooter_cover:
 					result.shooter_cover = wall_result.cover
 		
