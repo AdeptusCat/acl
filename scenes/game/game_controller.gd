@@ -17,6 +17,7 @@ var current_team: int = 0
 var selected_unit: Node2D = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
+var mouse_hover_hex: Vector2i
 
 signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
@@ -76,7 +77,10 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
-	mouse_event_position_changed.emit(event_pos)
+	var map_hex = ground_layer.local_to_map(event_pos)
+	if not map_hex == mouse_hover_hex:
+		mouse_hover_hex = map_hex
+		mouse_event_position_changed.emit(event_pos)
 
 
 func _on_key_space_pressed(event_pos: Vector2):

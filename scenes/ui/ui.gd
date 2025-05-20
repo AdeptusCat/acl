@@ -12,3 +12,16 @@ func _on_update_timer_label(time_left_seconds : float):
 
 func mouse_event_position_changed(event_pos: Vector2):
 	pass
+
+
+func show_tile_data(result: Dictionary):
+	print(result)
+	result.cover_in_hex
+	result.blocking
+	result.cover_n
+	result.cover_ne
+	result.cover_se
+	result.cover_s
+	result.cover_sw
+	result.cover_nw
+	result.hindrance # is not passed yet
