@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=45 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -178,12 +178,6 @@ sources/3 = SubResource("TileSetAtlasSource_2u7jv")
 sources/4 = SubResource("TileSetAtlasSource_24dk6")
 sources/5 = SubResource("TileSetAtlasSource_e8dv2")
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rjqkl"]
-texture = ExtResource("13_fymcc")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_3 = true
-
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2nhjh"]
 texture = ExtResource("16_0wrxw")
 texture_region_size = Vector2i(64, 64)
@@ -202,7 +196,6 @@ custom_data_layer_2/name = "hindrance"
 custom_data_layer_2/type = 1
 custom_data_layer_3/name = "blocking"
 custom_data_layer_3/type = 1
-sources/0 = SubResource("TileSetAtlasSource_rjqkl")
 sources/2 = SubResource("TileSetAtlasSource_2nhjh")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k73cj"]
@@ -221,27 +214,27 @@ script = ExtResource("1_6hctx")
 
 [node name="TileMapLayers" type="Node2D" parent="."]
 
-[node name="GroundTileMapLayer" parent="TileMapLayers" instance=ExtResource("2_ues17")]
+[node name="GroundTileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"] instance=ExtResource("2_ues17")]
 
-[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers"]
+[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
 tile_map_data = PackedByteArray("AAACAAEAAAAAAAAAAAACAAMAAAAAAAAAAQAFAAMAAQAAAAAAAQAEAAQAAgAAAAAAAwAJAAMABAAAAAAAAAAKAAMABAAAAAAAAQAKAAIAAgAAAAAAAQALAAEAAgAAAAAAAgAMAAUAAgAAAAAAAAAMAAYAAgAAAAAAAwANAAYAAgAAAAAAAwAOAAcABAAAAAAAAQA=")
 tile_set = SubResource("TileSet_0hol4")
 script = ExtResource("7_2x71e")
 metadata/_edit_lock_ = true
 
-[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers"]
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
 tile_map_data = PackedByteArray("AAAGAAYAAwAAAAAAAAAIAAUAAgAAAAAAAAAOAAUACAAAAAAAAAATAAQACAAAAAAAAAABAAAAAAAAAAAAAAAGAAIAAQAAAAAAAAAEAAUAAgAAAAAAAAAJAAMAAwAAAAAAAAAKAAMAAwAAAAAAAAAJAAYABAAAAAAAAAAIAAgABQAAAAAAAAAQAAYAAAAAAAAAAAASAAMABAAAAAAAAAAQAAcAAQAAAAAAAAABAAMABAAAAAAAAAABAAIAAgAAAAAAAAANAAMAAQAAAAAAAAAOAAIAAgAAAAAAAAAIAAcABQAAAAAAAAAHAAYABQAAAAAAAAAGAAcABQAAAAAAAAAFAAcABQAAAAAAAAAEAAgABQAAAAAAAAAGAAgABQAAAAAAAAAHAAcABQAAAAAAAAAJAAgABQAAAAAAAAAJAAcABQAAAAAAAAAQAAMABQAAAAAAAAAPAAMABQAAAAAAAAAQAAQABQAAAAAAAAARAAQABQAAAAAAAAARAAMABQAAAAAAAAASAAQABQAAAAAAAAASAAUABQAAAAAAAAAQAAUABQAAAAAAAAARAAIABQAAAAAAAAA=")
 tile_set = SubResource("TileSet_q6r6c")
 script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
-[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers"]
-tile_map_data = PackedByteArray("AAACAAcAAAAAAAAAAAABAAYAAAAAAAAAAAACAAEAAgAAAAAAAAABAAEAAgAAAAAAAAAFAAIAAgAAAAAAAAACAAIAAgAAAAAAAAAFAAcAAgAAAAAAAAAGAAgAAgAAAAAAAAAEAAYAAgAAAAAAAAAGAAQAAgAAAAAAAAA=")
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+tile_map_data = PackedByteArray("AAACAAEAAgAAAAAAAAABAAEAAgAAAAAAAAAFAAIAAgAAAAAAAAACAAIAAgAAAAAAAAAFAAcAAgAAAAAAAAAGAAgAAgAAAAAAAAAEAAYAAgAAAAAAAAAGAAQAAgAAAAAAAAA=")
 tile_set = SubResource("TileSet_k73cj")
 script = ExtResource("17_cmg7y")
 metadata/_edit_lock_ = true
 
-[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers"]
+[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
 tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_rjqkl")
 
