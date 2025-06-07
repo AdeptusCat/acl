@@ -101,7 +101,7 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	result.building_texture_transform = get_tilemaplayer_texture_transform(map_hex, building_layer)
 	result.terrain_texture = get_tilemaplayer_texture(map_hex, terrain_layer)
 	result.terrain_texture_transform = get_tilemaplayer_texture_transform(map_hex, terrain_layer)
-	#ui.show_tile_data(result)
+	ui.show_tile_data(result)
 
 func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
