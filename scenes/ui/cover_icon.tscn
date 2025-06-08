@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cnam7dkrou122"]
+
+[ext_resource type="Texture2D" uid="uid://by1gy1h45ih3g" path="res://assets/status/cover.png" id="1_hxmf7"]
+
+[node name="CoverIcon" type="TextureRect"]
+offset_right = 1024.0
+offset_bottom = 1024.0
+texture = ExtResource("1_hxmf7")

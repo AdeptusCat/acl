@@ -46,15 +46,23 @@ offset_right = 78.0
 offset_bottom = 78.0
 scale = Vector2(1.5, 1.5)
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(250, 258)
+[node name="Node2D" type="Node2D" parent="."]
+position = Vector2(45, 580)
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
-position = Vector2(250, 258)
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+
+[node name="Sprite2D2" type="Sprite2D" parent="Node2D"]
 scale = Vector2(1, -1)
 
-[node name="Sprite2D3" type="Sprite2D" parent="."]
-position = Vector2(250, 258)
+[node name="Sprite2D3" type="Sprite2D" parent="Node2D"]
 
-[node name="Sprite2D4" type="Sprite2D" parent="."]
-position = Vector2(250, 258)
+[node name="Sprite2D4" type="Sprite2D" parent="Node2D"]
+
+[node name="CoverHBoxContainer" type="HBoxContainer" parent="Node2D"]
+offset_left = -31.0
+offset_top = -7.0
+offset_right = -31.0
+offset_bottom = -7.0
+scale = Vector2(0.02, 0.02)
+theme_override_constants/separation = 0
+alignment = 1

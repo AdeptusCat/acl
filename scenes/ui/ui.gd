@@ -2,6 +2,19 @@ extends CanvasLayer
 
 
 @onready var timer_label = $HBoxContainer/TimerLabel
+
+@onready var ground_sprite = $Node2D/Sprite2D
+@onready var wall_sprite = $Node2D/Sprite2D2
+@onready var building_sprite = $Node2D/Sprite2D3
+@onready var terrain_sprite = $Node2D/Sprite2D4
+
+@onready var coverHBoxContainer = $Node2D/CoverHBoxContainer
+@onready var terrainDetail = $Node2D
+
+@onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
+
+
+
 # Configuration
 const TILE_SIZE = Vector2(64, 64)  # Adjust this to your tile size
 const HEX_DIRECTIONS = [
@@ -24,7 +37,7 @@ func mouse_event_position_changed(event_pos: Vector2):
 
 
 func show_tile_data(result: Dictionary):
-	print(result)
+	#print(result)
 	result.cover_in_hex
 	result.blocking
 	result.cover_n
@@ -35,31 +48,36 @@ func show_tile_data(result: Dictionary):
 	result.cover_nw
 	result.hindrance
 	
+	for child in coverHBoxContainer.get_children():
+		child.queue_free()
+	
+	for cover in range(result.cover_in_hex):
+		var cover_icon = cover_icon_scene.instantiate()
+		coverHBoxContainer.add_child(cover_icon)
+		
+	
 	if not result.ground_texture == null:
-		$Sprite2D.texture = result.ground_texture
-		$Sprite2D.transform = result.ground_texture_transform
-		$Sprite2D.position = Vector2(128,128)
-		$Sprite2D.scale = $Sprite2D.scale * Vector2(1.5, 1.5)
+		ground_sprite.texture = result.ground_texture
+		ground_sprite.transform = result.ground_texture_transform
+		ground_sprite.scale = ground_sprite.scale * Vector2(1.5, 1.5)
 	else:
-		$Sprite2D.texture = null
+		ground_sprite.texture = null
 	if not result.wall_texture == null:
-		$Sprite2D2.texture = result.wall_texture
-		$Sprite2D2.transform = result.wall_texture_transform
-		$Sprite2D2.position = Vector2(128,128)
-		$Sprite2D2.scale = $Sprite2D2.scale * Vector2(1.5, 1.5)
+		wall_sprite.texture = result.wall_texture
+		wall_sprite.transform = result.wall_texture_transform
+		wall_sprite.scale = wall_sprite.scale * Vector2(1.5, 1.5)
 	else:
-		$Sprite2D2.texture = null
+		wall_sprite.texture = null
 	if not result.building_texture == null:
-		$Sprite2D3.texture = result.building_texture
-		$Sprite2D3.transform = result.building_texture_transform
-		$Sprite2D3.position = Vector2(128,128)
-		$Sprite2D3.scale = $Sprite2D3.scale * Vector2(1.5, 1.5)
+		building_sprite.texture = result.building_texture
+		building_sprite.transform = result.building_texture_transform
+		building_sprite.scale = building_sprite.scale * Vector2(1.5, 1.5)
 	else:
-		$Sprite2D3.texture = null
+		building_sprite.texture = null
 	if not result.terrain_texture == null:
-		$Sprite2D4.texture = result.terrain_texture
-		$Sprite2D4.transform = result.terrain_texture_transform
-		$Sprite2D4.position = Vector2(128,128)
-		$Sprite2D4.scale = $Sprite2D4.scale * Vector2(1.5, 1.5)
+		terrain_sprite.texture = result.terrain_texture
+		terrain_sprite.transform = result.terrain_texture_transform
+		terrain_sprite.scale = terrain_sprite.scale * Vector2(1.5, 1.5)
 	else:
-		$Sprite2D4.texture = null
+		terrain_sprite.texture = null
+	
