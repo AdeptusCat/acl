@@ -51,6 +51,7 @@ position = Vector2(250, 258)
 
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 position = Vector2(250, 258)
+scale = Vector2(1, -1)
 
 [node name="Sprite2D3" type="Sprite2D" parent="."]
 position = Vector2(250, 258)

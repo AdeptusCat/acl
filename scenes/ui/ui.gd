@@ -39,27 +39,27 @@ func show_tile_data(result: Dictionary):
 		$Sprite2D.texture = result.ground_texture
 		$Sprite2D.transform = result.ground_texture_transform
 		$Sprite2D.position = Vector2(128,128)
-		$Sprite2D.scale = Vector2(1.5, 1.5)
+		$Sprite2D.scale = $Sprite2D.scale * Vector2(1.5, 1.5)
 	else:
 		$Sprite2D.texture = null
 	if not result.wall_texture == null:
 		$Sprite2D2.texture = result.wall_texture
 		$Sprite2D2.transform = result.wall_texture_transform
 		$Sprite2D2.position = Vector2(128,128)
-		$Sprite2D2.scale = Vector2(1.5, 1.5)
+		$Sprite2D2.scale = $Sprite2D2.scale * Vector2(1.5, 1.5)
 	else:
 		$Sprite2D2.texture = null
 	if not result.building_texture == null:
 		$Sprite2D3.texture = result.building_texture
 		$Sprite2D3.transform = result.building_texture_transform
 		$Sprite2D3.position = Vector2(128,128)
-		$Sprite2D3.scale = Vector2(1.5, 1.5)
+		$Sprite2D3.scale = $Sprite2D3.scale * Vector2(1.5, 1.5)
 	else:
 		$Sprite2D3.texture = null
 	if not result.terrain_texture == null:
 		$Sprite2D4.texture = result.terrain_texture
 		$Sprite2D4.transform = result.terrain_texture_transform
 		$Sprite2D4.position = Vector2(128,128)
-		$Sprite2D4.scale = Vector2(1.5, 1.5)
+		$Sprite2D4.scale = $Sprite2D4.scale * Vector2(1.5, 1.5)
 	else:
 		$Sprite2D4.texture = null

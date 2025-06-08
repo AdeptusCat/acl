@@ -103,26 +103,56 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	result.terrain_texture_transform = get_tilemaplayer_texture_transform(map_hex, terrain_layer)
 	ui.show_tile_data(result)
 
+#func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
+	#var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
+	#var transf 
+	#if tile_data:
+		#var flip_h = tile_data.get_flip_h()
+		#var flip_v = tile_data.get_flip_v()
+		#var transpose = tile_data.get_transpose()
+#
+		#transf = Transform2D.IDENTITY
+#
+		## Apply transpose first (swap x and y)
+		#if transpose:
+			#transf = Transform2D(Vector2(0, 1), Vector2(1, 0), Vector2.ZERO)
+#
+		## Apply flips
+		#if flip_h:
+			#transf = transf.scaled(Vector2(-1, 1))
+		#if flip_v:
+			#transf = transf.scaled(Vector2(1, -1))
+	#return transf
+
 func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
-	var transf 
-	if tile_data:
-		var flip_h = tile_data.get_flip_h()
-		var flip_v = tile_data.get_flip_v()
-		var transpose = tile_data.get_transpose()
+	if not tile_data:
+		return Transform2D.IDENTITY
 
-		transf = Transform2D.IDENTITY
+	var flip_h = tile_data.get_flip_h()
+	var flip_v = tile_data.get_flip_v()
+	var transpose = tile_data.get_transpose()
 
-		# Apply transpose first (swap x and y)
-		if transpose:
-			transf = Transform2D(Vector2(0, 1), Vector2(1, 0), Vector2.ZERO)
+	var basis_x = Vector2(1, 0)
+	var basis_y = Vector2(0, 1)
 
-		# Apply flips
-		if flip_h:
-			transf = transf.scaled(Vector2(-1, 1))
-		if flip_v:
-			transf = transf.scaled(Vector2(1, -1))
-	return transf
+	# Apply transpose: swap axes
+	if transpose:
+		var temp = basis_x
+		basis_x = basis_y
+		basis_y = temp
+		# Also swap meaning of flip_h and flip_v
+		var temp_flip = flip_h
+		flip_h = flip_v
+		flip_v = temp_flip
+
+	# Apply flips in the correct (possibly transposed) axes
+	if flip_h:
+		basis_x *= -1
+	if flip_v:
+		basis_y *= -1
+
+	return Transform2D(basis_x, basis_y, Vector2.ZERO)
 
 func get_tilemaplayer_texture(map_hex: Vector2i, tilemaplayer):
 	var tile_id = tilemaplayer.get_cell_source_id(map_hex)
