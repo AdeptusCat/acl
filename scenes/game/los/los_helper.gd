@@ -680,7 +680,8 @@ func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLa
 	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
 
 	#print(hex_map)
-	if pos_on_hex.x == 64 or pos_on_hex.y == 64:
+	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
+	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
 		return false
 	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
 	#print(pos_on_hex.x)
@@ -743,7 +744,8 @@ func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileM
 	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
 
 	#print(hex_map)
-	if pos_on_hex.x == 64  or pos_on_hex.y == 64:
+	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
+	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
 		return false
 	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
 	#print(pos_on_hex.x)

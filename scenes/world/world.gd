@@ -73,6 +73,18 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 		"wall_texture_transform": null,
 		"building_texture_transform": null,
 		"terrain_texture_transform": null,
+		"wall_n_texture": null,
+		"wall_n_texture_transform": null,
+		"wall_ne_texture": null,
+		"wall_ne_texture_transform": null,
+		"wall_se_texture": null,
+		"wall_se_texture_transform": null,
+		"wall_s_texture": null,
+		"wall_s_texture_transform": null,
+		"wall_sw_texture": null,
+		"wall_sw_texture_transform": null,
+		"wall_nw_texture": null,
+		"wall_nw_texture_transform": null,
 	}
 	result.cover_in_hex = LOSHelper.is_sample_point_in_building(event_pos)
 	if result.cover_in_hex > 0:
@@ -97,6 +109,33 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	result.ground_texture_transform = get_tilemaplayer_texture_transform(map_hex, ground_layer)
 	result.wall_texture = get_tilemaplayer_texture(map_hex, wall_layer)
 	result.wall_texture_transform = get_tilemaplayer_texture_transform(map_hex, wall_layer)
+	
+	var map_cube : Vector3i = ground_layer.map_to_cube(map_hex)
+	var map_n_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_SIDE)
+	var map_n_hex : Vector2i = ground_layer.cube_to_map(map_n_cube)
+	result.wall_n_texture = get_tilemaplayer_texture(map_n_hex, wall_layer)
+	result.wall_n_texture_transform = get_tilemaplayer_texture_transform(map_n_hex, wall_layer)
+	var map_ne_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_RIGHT_SIDE)
+	var map_ne_hex : Vector2i = ground_layer.cube_to_map(map_ne_cube)
+	result.wall_ne_texture = get_tilemaplayer_texture(map_ne_hex, wall_layer)
+	result.wall_ne_texture_transform = get_tilemaplayer_texture_transform(map_ne_hex, wall_layer)
+	var map_se_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE)
+	var map_se_hex : Vector2i = ground_layer.cube_to_map(map_se_cube)
+	result.wall_se_texture = get_tilemaplayer_texture(map_se_hex, wall_layer)
+	result.wall_se_texture_transform = get_tilemaplayer_texture_transform(map_se_hex, wall_layer)
+	var map_s_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_SIDE)
+	var map_s_hex : Vector2i = ground_layer.cube_to_map(map_s_cube)
+	result.wall_s_texture = get_tilemaplayer_texture(map_s_hex, wall_layer)
+	result.wall_s_texture_transform = get_tilemaplayer_texture_transform(map_s_hex, wall_layer)
+	var map_sw_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE)
+	var map_sw_hex : Vector2i = ground_layer.cube_to_map(map_sw_cube)
+	result.wall_sw_texture = get_tilemaplayer_texture(map_sw_hex, wall_layer)
+	result.wall_sw_texture_transform = get_tilemaplayer_texture_transform(map_sw_hex, wall_layer)
+	var map_nw_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_LEFT_SIDE)
+	var map_nw_hex : Vector2i = ground_layer.cube_to_map(map_nw_cube)
+	result.wall_nw_texture = get_tilemaplayer_texture(map_nw_hex, wall_layer)
+	result.wall_nw_texture_transform = get_tilemaplayer_texture_transform(map_nw_hex, wall_layer)
+	
 	result.building_texture = get_tilemaplayer_texture(map_hex, building_layer)
 	result.building_texture_transform = get_tilemaplayer_texture_transform(map_hex, building_layer)
 	result.terrain_texture = get_tilemaplayer_texture(map_hex, terrain_layer)

@@ -46,23 +46,44 @@ offset_right = 78.0
 offset_bottom = 78.0
 scale = Vector2(1.5, 1.5)
 
-[node name="Node2D" type="Node2D" parent="."]
-position = Vector2(45, 580)
+[node name="Node2D" type="Control" parent="."]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+grow_vertical = 0
 
-[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+[node name="GroundSprite" type="Sprite2D" parent="Node2D"]
 
-[node name="Sprite2D2" type="Sprite2D" parent="Node2D"]
+[node name="WallSprite" type="Sprite2D" parent="Node2D"]
 scale = Vector2(1, -1)
 
-[node name="Sprite2D3" type="Sprite2D" parent="Node2D"]
+[node name="BuildingSprite" type="Sprite2D" parent="Node2D"]
 
-[node name="Sprite2D4" type="Sprite2D" parent="Node2D"]
+[node name="TerrainSprite" type="Sprite2D" parent="Node2D"]
 
-[node name="CoverHBoxContainer" type="HBoxContainer" parent="Node2D"]
-offset_left = -31.0
-offset_top = -7.0
-offset_right = -31.0
-offset_bottom = -7.0
+[node name="WallNESprite" type="Sprite2D" parent="Node2D"]
+
+[node name="WallNSprite" type="Sprite2D" parent="Node2D"]
+
+[node name="WallSESprite" type="Sprite2D" parent="Node2D"]
+
+[node name="WallSSprite" type="Sprite2D" parent="Node2D"]
+
+[node name="WallSWSprite" type="Sprite2D" parent="Node2D"]
+
+[node name="WallNWSprite" type="Sprite2D" parent="Node2D"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 38.0
+offset_top = 558.0
+offset_right = 304.0
+offset_bottom = 645.0
+
+[node name="CoverHBoxContainer" type="HBoxContainer" parent="Control"]
 scale = Vector2(0.02, 0.02)
 theme_override_constants/separation = 0
 alignment = 1

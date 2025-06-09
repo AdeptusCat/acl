@@ -244,7 +244,8 @@ visible = false
 [node name="ResultScreen" parent="." instance=ExtResource("22_2m0ga")]
 visible = false
 
-[node name="Ui" parent="." instance=ExtResource("23_ues17")]
+[node name="Ui" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("23_ues17")]
+ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 
 [node name="DummyNode2D" type="Node2D" parent="."]
 
