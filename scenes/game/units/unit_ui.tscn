@@ -37,7 +37,9 @@ offset_bottom = 64.0
 texture = ExtResource("3_hwp2m")
 
 [node name="MoraleBar" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(65, 10)
 layout_mode = 2
+scale = Vector2(1e-05, 1)
 color = Color(0, 0.556863, 0, 1)
 
 [node name="CoverLabel" type="Label" parent="."]
@@ -52,8 +54,9 @@ layout_mode = 2
 text = "Broken
 "
 
-[node name="UnitSelectedSprite" type="Sprite2D" parent="."]
+[node name="UnitSelectedSprite" type="TextureRect" parent="."]
 visible = false
+layout_mode = 0
 texture = ExtResource("4_3gpgx")
 
 [node name="UnitStatus" type="Control" parent="."]
@@ -67,7 +70,7 @@ offset_bottom = 13.0
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
 visible = false
 layout_mode = 0
-offset_right = 60.0
+offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("8_3avcp")
 expand_mode = 3
@@ -75,7 +78,7 @@ expand_mode = 3
 [node name="Moving" type="TextureRect" parent="UnitStatus"]
 visible = false
 layout_mode = 0
-offset_right = 60.0
+offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("9_kue5q")
 expand_mode = 3
@@ -83,7 +86,7 @@ expand_mode = 3
 [node name="Shooting" type="TextureRect" parent="UnitStatus"]
 visible = false
 layout_mode = 0
-offset_right = 60.0
+offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("10_sw8nw")
 expand_mode = 3
@@ -91,7 +94,7 @@ expand_mode = 3
 [node name="Pinned" type="TextureRect" parent="UnitStatus"]
 visible = false
 layout_mode = 0
-offset_right = 60.0
+offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("11_87qi7")
 expand_mode = 3

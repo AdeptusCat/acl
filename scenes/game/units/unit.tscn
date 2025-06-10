@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://rsqpaeas8ic5"]
+[gd_scene load_steps=9 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Texture2D" uid="uid://cglfa6udtw18d" path="res://assets/units/unit_ta.png" id="3_kd8m2"]
+[ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="4_5wnup"]
 [ext_resource type="Texture2D" uid="uid://c5qf7rqxxcvje" path="res://assets/units/unit_tb.png" id="4_djab4"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
 [ext_resource type="Texture2D" uid="uid://biiqwlbm4tbl7" path="res://assets/effects/tracer.png" id="7_b5oeb"]
@@ -20,6 +21,6 @@ sprite_team_0 = ExtResource("3_kd8m2")
 sprite_team_1 = ExtResource("4_djab4")
 morale_popup_scene = ExtResource("5_djab4")
 morale_flash_scene = ExtResource("5_djab4")
-tracer_scene = ExtResource("5_djab4")
+tracer_scene = ExtResource("4_5wnup")
 tracer_texture = ExtResource("7_b5oeb")
 cover_icon_scene = ExtResource("7_h0ojj")

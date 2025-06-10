@@ -90,6 +90,8 @@ func update_visible_hexes():
 			for hex in unit_visible:
 				if not LOSHelper.visible_hexes.has(hex):
 					LOSHelper.visible_hexes.append(hex)
+			if not LOSHelper.visible_hexes.has(u.current_hex):
+				LOSHelper.visible_hexes.append(u.current_hex)
 
 func _on_unit_moved(unit, vector: Vector2i):
 	update_visible_hexes()
