@@ -148,7 +148,9 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 		selected_hex_index = 0
 	var units: Array[Node2D] = _find_units_at(map_hex)
 	if units.is_empty():
-		_deselect_unit(selected_unit)
+		if not selected_unit == null:
+			_deselect_unit(selected_unit)
+		return
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
 	var unit = units[selected_hex_index]
