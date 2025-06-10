@@ -61,46 +61,39 @@ func _ready():
 	
 	
 func draw_fog():
-	
-	var visible_hexes: Array[Vector2i]
-	# Step 1: Collect all visible hexes from team units
-	for u in units:
-		if u.team == current_team:
-			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
-			for hex in unit_visible:
-				visible_hexes.append(hex)
-
-	# Step 2: Iterate over all tiles in the map
 	var used_cells := fog_of_war_layer.get_used_cells()
 	for cell in used_cells:
-		if visible_hexes.has(cell):
+		if LOSHelper.visible_hexes.has(cell):
 			fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
 		else:
 			fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
 	for x in LOSHelper.GRID_SIZE_X:
 		for y in LOSHelper.GRID_SIZE_Y:
-			if not visible_hexes.has(Vector2i(x, y)):
+			if not LOSHelper.visible_hexes.has(Vector2i(x, y)):
 				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
 
 
 func show_visible_units():
-	var visible_hexes: Array[Vector2i]
-	# Step 1: Collect all visible hexes from team units
-	for u in units:
-		if u.team == current_team:
-			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
-			for hex in unit_visible:
-				visible_hexes.append(hex)
-	
 	for u in units:
 		if not u.team == current_team:
-			if visible_hexes.has(u.current_hex):
+			if LOSHelper.visible_hexes.has(u.current_hex):
 				u.visible = true
 			else:
 				u.visible = false 
 
 
+func update_visible_hexes():
+	LOSHelper.visible_hexes.clear()
+	for u in units:
+		if u.team == current_team:
+			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
+			for hex in unit_visible:
+				if not LOSHelper.visible_hexes.has(hex):
+					LOSHelper.visible_hexes.append(hex)
+
 func _on_unit_moved(unit, vector: Vector2i):
+	update_visible_hexes()
+	show_visible_units()
 	draw_fog()
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):

@@ -22,6 +22,8 @@ var los_lines: Array = []
 const GRID_SIZE_X = 24
 const GRID_SIZE_Y = 10
 
+var visible_hexes: Array[Vector2i]
+
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
 
