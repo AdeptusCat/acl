@@ -74,7 +74,8 @@ func mouse_event_position_changed(event_pos: Vector2):
 	pass
 
 
-
+func show_unit_data(map_hex: Vector2i):
+	pass
 
 
 

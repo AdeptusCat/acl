@@ -143,6 +143,11 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	result.terrain_texture = get_tilemaplayer_texture(map_hex, terrain_layer)
 	result.terrain_texture_transform = get_tilemaplayer_texture_transform(map_hex, terrain_layer)
 	ui.show_tile_data(result)
+	
+	var units: Array
+	for unit in game_controller.units:
+		
+	ui.show_unit_data(map_hex, units)
 
 #func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	#var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)

@@ -168,3 +168,9 @@ texture = ExtResource("4_pfayw")
 [node name="CoverNW2" type="Sprite2D" parent="TileStats"]
 visible = false
 texture = ExtResource("4_pfayw")
+
+[node name="UnitStats" type="HBoxContainer" parent="."]
+offset_left = 298.0
+offset_top = 554.0
+offset_right = 338.0
+offset_bottom = 594.0
