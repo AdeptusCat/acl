@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 @export var ground_layer : HexagonTileMapLayer
+@export var unit_stats_details_scene : PackedScene
 
 @onready var timer_label = $HBoxContainer/TimerLabel
 
@@ -23,6 +24,8 @@ extends CanvasLayer
 @onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
 
 @onready var tile_stats = $TileStats
+@onready var unit_stats = $UnitStats
+@onready var unit_stats_container = $UnitStats/UnitStatsContainer
 
 # Configuration
 const HEX_DIRECTIONS = [
@@ -74,10 +77,16 @@ func mouse_event_position_changed(event_pos: Vector2):
 	pass
 
 
-func show_unit_data(map_hex: Vector2i):
-	pass
-
-
+func show_unit_data(map_hex: Vector2i, units: Array):
+	for child in unit_stats_container.get_children():
+		child.queue_free()
+	for unit in units:
+		var unit_ui = unit.ui.duplicate()
+		unit_stats_container.add_child(unit_ui)
+		var unit_stats_details = unit_stats_details_scene.instantiate()
+		unit_stats_details.set_details(unit)
+		unit_stats_container.add_child(unit_stats_details)
+		
 
 func show_tile_data(result: Dictionary):
 	#print(result)

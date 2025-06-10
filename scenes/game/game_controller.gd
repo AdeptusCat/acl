@@ -95,6 +95,13 @@ func _on_unit_moved(unit, vector: Vector2i):
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
+	
+	var map_hex: Vector2i = ground_layer.local_to_map(get_local_mouse_position())
+	var _units: Array
+	for _unit in units:
+		if _unit.current_hex == map_hex: 
+			_units.append(_unit)
+	get_parent().ui.show_unit_data(map_hex, _units)
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
 			#fog_of_war_layer.set_cell(Vector2(x, y), -1)

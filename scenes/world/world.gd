@@ -146,9 +146,11 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	
 	var units: Array
 	for unit in game_controller.units:
-		
+		if unit.current_hex == map_hex: 
+			units.append(unit)
+	
 	ui.show_unit_data(map_hex, units)
-
+	
 #func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	#var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
 	#var transf 

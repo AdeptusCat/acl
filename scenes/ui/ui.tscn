@@ -1,12 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=6 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
 [ext_resource type="Texture2D" uid="uid://cnfjonnfugdws" path="res://assets/status/hindrance.png" id="3_0dwhk"]
 [ext_resource type="Texture2D" uid="uid://by1gy1h45ih3g" path="res://assets/status/cover.png" id="4_pfayw"]
+[ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/UnitStatsDetails.tscn" id="5_0dwhk"]
 
 [node name="Ui" type="CanvasLayer"]
 script = ExtResource("1_u7n8c")
+unit_stats_details_scene = ExtResource("5_0dwhk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 anchors_preset = 10
@@ -169,8 +171,15 @@ texture = ExtResource("4_pfayw")
 visible = false
 texture = ExtResource("4_pfayw")
 
-[node name="UnitStats" type="HBoxContainer" parent="."]
-offset_left = 298.0
-offset_top = 554.0
-offset_right = 338.0
-offset_bottom = 594.0
+[node name="UnitStats" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 207.0
+offset_top = 558.0
+offset_right = 247.0
+offset_bottom = 598.0
+
+[node name="UnitStatsContainer" type="HBoxContainer" parent="UnitStats"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
