@@ -57,6 +57,7 @@ func _ready():
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
+	event_pos = get_local_mouse_position()
 	var result = {
 		"blocking" : false,
 		"hindrance": false,

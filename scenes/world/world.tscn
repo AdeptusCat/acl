@@ -351,7 +351,11 @@ team = 1
 
 [node name="Camera2D" type="Camera2D" parent="GameController"]
 position = Vector2(579, 321)
+limit_left = -500
+limit_top = -300
+limit_right = 10000
+limit_bottom = 10000
 limit_smoothed = true
 position_smoothing_enabled = true
-rotation_smoothing_enabled = true
 script = ExtResource("29_wnndm")
+speed = 800.0

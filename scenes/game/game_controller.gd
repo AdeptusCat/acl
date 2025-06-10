@@ -134,6 +134,7 @@ func set_objective_cells():
 
 
 func _on_mouse_button_right_pressed(event_pos: Vector2):
+	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
 	if selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
@@ -143,6 +144,7 @@ var previous_selected_hex: Vector2i = Vector2i(-1, -1)
 var selected_hex_index: int = 0
 
 func _on_mouse_button_left_pressed(event_pos: Vector2):
+	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
 	if previous_selected_hex == map_hex:
 		selected_hex_index += 1

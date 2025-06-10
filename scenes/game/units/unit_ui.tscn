@@ -35,6 +35,7 @@ layout_mode = 2
 offset_right = 64.0
 offset_bottom = 64.0
 texture = ExtResource("3_hwp2m")
+expand_mode = 3
 
 [node name="MoraleBar" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(65, 10)

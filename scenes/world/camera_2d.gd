@@ -16,6 +16,13 @@ var _zoom_level: float = 1.0
 @export var speed: float = 400.0
 
 
+#func _ready() -> void:
+	#limit_left = - 500 
+	#limit_top = - 300
+	#limit_right = LOSHelper.GRID_SIZE_X * LOSHelper.si
+	#limit_bottom 
+
+
 func _physics_process(delta):
 	var direction: Vector2 = Vector2.ZERO
 	if Input.is_action_pressed("up"):
