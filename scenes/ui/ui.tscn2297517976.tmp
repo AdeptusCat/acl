@@ -97,6 +97,7 @@ layout_mode = 2
 texture = ExtResource("4_pfayw")
 
 [node name="Cover2" type="TextureRect" parent="Control/CoverHBoxContainer"]
+visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 

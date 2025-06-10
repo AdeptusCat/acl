@@ -46,6 +46,8 @@ func _ready() -> void:
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
+	$TileStats/Blocked.scale = detail_zoom_factor * 0.02
+	$TileStats/Hindrance.scale = detail_zoom_factor * 0.02
 	$TileStats/Blocked.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
 	$TileStats/Hindrance.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
 	$TileStats/CoverN1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, 0)
@@ -132,12 +134,12 @@ func show_tile_data(result: Dictionary):
 	elif result.cover_nw == 2:
 		$TileStats/CoverNW1.visible = true
 		$TileStats/CoverNW2.visible = true
+	
 	for child in coverHBoxContainer.get_children():
-		child.queue_free()
+		child.visible = false
 	
 	for cover in range(result.cover_in_hex):
-		var cover_icon = cover_icon_scene.instantiate()
-		coverHBoxContainer.add_child(cover_icon)
+		coverHBoxContainer.get_children()[cover].visible = true
 		
 	
 	
