@@ -1,5 +1,5 @@
 @tool
-extends Node2D
+extends Control
 
 @export var sprite_team_0: Texture2D
 @export var sprite_team_1: Texture2D
@@ -10,7 +10,7 @@ extends Node2D
 @export var cover_icon_scene: PackedScene
 
 # === Nodes ===
-@onready var sprite_node: Sprite2D = $Sprite2D
+@onready var sprite_node: TextureRect = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
 @onready var cover_label = $CoverLabel
 @onready var cover_container = $Cover

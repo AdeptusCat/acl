@@ -1,17 +1,13 @@
-[gd_scene load_steps=17 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=13 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
 [ext_resource type="Texture2D" uid="uid://cglfa6udtw18d" path="res://assets/units/unit_ta.png" id="3_hwp2m"]
-[ext_resource type="Texture2D" uid="uid://c5qf7rqxxcvje" path="res://assets/units/unit_tb.png" id="3_scjr7"]
 [ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/ui/unit_selected.png" id="4_3gpgx"]
-[ext_resource type="PackedScene" uid="uid://yvtxxd7huor6" path="res://scenes/game/effects/morale_flash.tscn" id="4_hwp2m"]
-[ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="4_xqi78"]
 [ext_resource type="Texture2D" uid="uid://2nxuv8urg7sw" path="res://assets/status/broken.png" id="8_3avcp"]
 [ext_resource type="Texture2D" uid="uid://c6ffdp6d331fw" path="res://assets/status/moving.png" id="9_kue5q"]
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
-[ext_resource type="PackedScene" uid="uid://cnam7dkrou122" path="res://scenes/ui/cover_icon.tscn" id="12_kue5q"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
@@ -25,35 +21,34 @@ shader = ExtResource("2_scjr7")
 shader_parameter/dissolve_amount = 0.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_74e6i")
 
-[node name="UnitUi" type="Node2D"]
+[node name="UnitUi" type="Control"]
+custom_minimum_size = Vector2(65, 65)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 script = ExtResource("1_wym2j")
-sprite_team_0 = ExtResource("3_hwp2m")
-sprite_team_1 = ExtResource("3_scjr7")
-morale_popup_scene = ExtResource("4_xqi78")
-morale_flash_scene = ExtResource("4_hwp2m")
-cover_icon_scene = ExtResource("12_kue5q")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
+layout_mode = 2
+offset_right = 64.0
+offset_bottom = 64.0
 texture = ExtResource("3_hwp2m")
 
 [node name="MoraleBar" type="ColorRect" parent="."]
-offset_top = 11.0
-offset_right = 1.0
-offset_bottom = 12.0
+layout_mode = 2
 color = Color(0, 0.556863, 0, 1)
 
 [node name="CoverLabel" type="Label" parent="."]
 visible = false
-offset_right = 1.0
-offset_bottom = 23.0
+layout_mode = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BrokenLabel" type="Label" parent="."]
 visible = false
-offset_right = 40.0
-offset_bottom = 23.0
+layout_mode = 2
 text = "Broken
 "
 
@@ -62,21 +57,16 @@ visible = false
 texture = ExtResource("4_3gpgx")
 
 [node name="UnitStatus" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -19.0
-offset_top = -18.0
-offset_right = 21.0
-offset_bottom = 22.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 13.0
+offset_right = 17.0
+offset_bottom = 13.0
 
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
 visible = false
+layout_mode = 0
 offset_right = 60.0
 offset_bottom = 40.0
 texture = ExtResource("8_3avcp")
@@ -84,6 +74,7 @@ expand_mode = 3
 
 [node name="Moving" type="TextureRect" parent="UnitStatus"]
 visible = false
+layout_mode = 0
 offset_right = 60.0
 offset_bottom = 40.0
 texture = ExtResource("9_kue5q")
@@ -91,6 +82,7 @@ expand_mode = 3
 
 [node name="Shooting" type="TextureRect" parent="UnitStatus"]
 visible = false
+layout_mode = 0
 offset_right = 60.0
 offset_bottom = 40.0
 texture = ExtResource("10_sw8nw")
@@ -98,21 +90,19 @@ expand_mode = 3
 
 [node name="Pinned" type="TextureRect" parent="UnitStatus"]
 visible = false
+layout_mode = 0
 offset_right = 60.0
 offset_bottom = 40.0
 texture = ExtResource("11_87qi7")
 expand_mode = 3
 
 [node name="Idle" type="TextureRect" parent="UnitStatus"]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("12_sw8nw")
 expand_mode = 3
 
 [node name="Cover" type="HBoxContainer" parent="."]
-offset_top = 11.0
-offset_right = 1.0
-offset_bottom = 12.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 alignment = 1
