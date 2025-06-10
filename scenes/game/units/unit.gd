@@ -68,6 +68,10 @@ func _ready():
 	morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	morale_system.morale_breaks.connect(ui._on_morale_breaks)
 	cover_updated.connect(ui._on_cover_updated)
+	
+	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
+	movement.started_moving.connect(ui._on_started_moving)
+	movement.stopped_moving.connect(ui._on_stopped_moving)
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	combat.shoot.connect(ui.shoot)

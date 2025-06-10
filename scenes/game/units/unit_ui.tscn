@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=17 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
@@ -7,6 +7,12 @@
 [ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/ui/unit_selected.png" id="4_3gpgx"]
 [ext_resource type="PackedScene" uid="uid://yvtxxd7huor6" path="res://scenes/game/effects/morale_flash.tscn" id="4_hwp2m"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="4_xqi78"]
+[ext_resource type="Texture2D" uid="uid://2nxuv8urg7sw" path="res://assets/status/broken.png" id="8_3avcp"]
+[ext_resource type="Texture2D" uid="uid://c6ffdp6d331fw" path="res://assets/status/moving.png" id="9_kue5q"]
+[ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
+[ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
+[ext_resource type="PackedScene" uid="uid://cnam7dkrou122" path="res://scenes/ui/cover_icon.tscn" id="12_kue5q"]
+[ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
 
@@ -25,6 +31,7 @@ sprite_team_0 = ExtResource("3_hwp2m")
 sprite_team_1 = ExtResource("3_scjr7")
 morale_popup_scene = ExtResource("4_xqi78")
 morale_flash_scene = ExtResource("4_hwp2m")
+cover_icon_scene = ExtResource("12_kue5q")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
@@ -54,3 +61,98 @@ text = "Broken
 [node name="UnitSelectedSprite" type="Sprite2D" parent="."]
 visible = false
 texture = ExtResource("4_3gpgx")
+
+[node name="UnitStatus" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Broken" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_3avcp")
+expand_mode = 3
+
+[node name="Moving" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_kue5q")
+expand_mode = 3
+
+[node name="Shooting" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_sw8nw")
+expand_mode = 3
+
+[node name="Pinned" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_87qi7")
+expand_mode = 3
+
+[node name="Idle" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_sw8nw")
+expand_mode = 3
+
+[node name="Cover" type="HBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = 19.0
+offset_right = 22.0
+offset_bottom = 39.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1

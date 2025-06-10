@@ -7,14 +7,21 @@ extends Node2D
 @export var morale_flash_scene: PackedScene
 @export var tracer_scene: PackedScene
 @export var tracer_texture: Texture
+@export var cover_icon_scene: PackedScene
 
 # === Nodes ===
 @onready var sprite_node: Sprite2D = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
 @onready var cover_label = $CoverLabel
+@onready var cover_container = $Cover
 @onready var broken_label = $BrokenLabel
 @onready var unit_selected_sprite = $UnitSelectedSprite
-
+@onready var unit_status_control = $UnitStatus
+@onready var broken_texture_rect = $UnitStatus/Broken
+@onready var moving_texture_rect = $UnitStatus/Moving
+@onready var shooting_texture_rect = $UnitStatus/Shooting
+@onready var pinned_texture_rect = $UnitStatus/Pinned
+@onready var idle_texture_rect = $UnitStatus/Idle
 
 func select():
 	unit_selected_sprite.visible = true
@@ -35,21 +42,47 @@ func update_team_sprite(team : int):
 
 
 func set_cover(cover_value: int) -> void:
-	if cover_value > 0:
-		cover_label.text = str(cover_value)
-		cover_label.show()
+	for child in cover_container.get_children():
+		child.queue_free()
+	for cover in cover_value:
+		var cover_icon: TextureRect = cover_icon_scene.instantiate()
+		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
+		cover_container.add_child(cover_icon)
+
+
+func _on_unit_arrived_at_hex(hex):
+	pass
+
+
+func _on_started_moving():
+	for child in unit_status_control.get_children():
+		child.visible = false
+	moving_texture_rect.visible = true
+
+
+func _on_stopped_moving():
+	for child in unit_status_control.get_children():
+		child.visible = false
+	if get_parent().broken == true:
+		broken_texture_rect.visible = true
 	else:
-		cover_label.hide()
+		idle_texture_rect.visible = true
 
 
 func _on_morale_breaks():
-	broken_label.visible = true
+	#broken_label.visible = true
 	show_failure()
+	for child in unit_status_control.get_children():
+		child.visible = false
+	broken_texture_rect.visible = true
 
 
 func _on_morale_recovered():
-	broken_label.visible = false
+	#broken_label.visible = false
 	show_success()
+	for child in unit_status_control.get_children():
+		child.visible = false
+	idle_texture_rect.visible = true
 
 
 func _on_morale_updated(current, max):
@@ -77,9 +110,13 @@ func update_bar(current: int, max: int):
 			morale_bar.color = Color(1, 0, 0)
 
 
-func _on_cover_updated(value: int) -> void:
-	if cover_label:
-		cover_label.text = str(value)
+func _on_cover_updated(cover_value: int) -> void:
+	for child in cover_container.get_children():
+		child.queue_free()
+	for cover in cover_value:
+		var cover_icon: TextureRect = cover_icon_scene.instantiate()
+		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
+		cover_container.add_child(cover_icon)
 
 
 func show_failure():
@@ -118,8 +155,13 @@ func shoot(from_pos: Vector2, to_pos):
 	var tracer = tracer_scene.instantiate() as Node2D
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
-	tracer.shoot(from_pos, to_pos)
-
+	for child in unit_status_control.get_children():
+		child.visible = false
+	shooting_texture_rect.visible = true
+	await tracer.shoot(from_pos, to_pos)
+	for child in unit_status_control.get_children():
+		child.visible = false
+	idle_texture_rect.visible = true
 
 
 func die():
