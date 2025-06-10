@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=50 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" uid="uid://b7n8wd6ful6o1" path="res://scenes/game/movement_system.tscn" id="26_26xou"]
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
 [ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
+[ext_resource type="Script" uid="uid://c11s1s4ounucd" path="res://scenes/world/camera_2d.gd" id="29_wnndm"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
 texture = ExtResource("3_xq18t")
@@ -347,3 +348,10 @@ team = 1
 [node name="CombatSystem" parent="GameController" instance=ExtResource("27_jyr8v")]
 
 [node name="LOSRenderer" parent="GameController" instance=ExtResource("26_rwifv")]
+
+[node name="Camera2D" type="Camera2D" parent="GameController"]
+position = Vector2(579, 321)
+limit_smoothed = true
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
+script = ExtResource("29_wnndm")

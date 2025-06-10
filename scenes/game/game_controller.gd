@@ -5,6 +5,7 @@ extends Node2D
 @onready var move_sys       = $MovementSystem
 @onready var combat_sys     = $CombatSystem
 @onready var los_renderer   = $LOSRenderer
+@onready var camera 		= $Camera2D
 
 @export var objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
@@ -30,6 +31,8 @@ func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
 	input_mgr.mouse_button_right_pressed.connect(_on_mouse_button_right_pressed)
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
+	input_mgr.zoom_in.connect(_on_zoom_in)
+	input_mgr.zoom_out.connect(_on_zoom_out)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
@@ -227,3 +230,11 @@ func end_game_check():
 			show_winner.emit(unit.team)
 			return
 	show_winner.emit(-1)
+
+
+func _on_zoom_in():
+	camera.zoom_in()
+
+
+func _on_zoom_out():
+	camera.zoom_out()
