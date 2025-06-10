@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=5 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
+[ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
+[ext_resource type="Texture2D" uid="uid://cnfjonnfugdws" path="res://assets/status/hindrance.png" id="3_0dwhk"]
+[ext_resource type="Texture2D" uid="uid://by1gy1h45ih3g" path="res://assets/status/cover.png" id="4_pfayw"]
 
 [node name="Ui" type="CanvasLayer"]
 script = ExtResource("1_u7n8c")
@@ -84,6 +87,55 @@ offset_right = 304.0
 offset_bottom = 645.0
 
 [node name="CoverHBoxContainer" type="HBoxContainer" parent="Control"]
+layout_mode = 0
 scale = Vector2(0.02, 0.02)
 theme_override_constants/separation = 0
 alignment = 1
+
+[node name="TileStats" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Blocked" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("2_g5kmx")
+
+[node name="Hindrance" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("3_0dwhk")
+
+[node name="CoverN1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverN2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverNE1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverNE2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverSE1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverSE2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverS1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverS2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverSW1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverSW2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverNW1" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")
+
+[node name="CoverNW2" type="Sprite2D" parent="TileStats"]
+texture = ExtResource("4_pfayw")

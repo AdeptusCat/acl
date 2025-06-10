@@ -22,7 +22,7 @@ extends CanvasLayer
 
 @onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
 
-
+@onready var tile_stats = $TileStats
 
 # Configuration
 const HEX_DIRECTIONS = [
@@ -39,10 +39,27 @@ func _ready() -> void:
 	tile_size = ground_layer.tile_set.tile_size
 	detail_tile_offset = (Vector2(tile_size) * detail_zoom_factor) * 0.2
 	terrainDetail.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
-	terrainDetail.position.y -= terrainDetail.size.y
+	terrainDetail.position.y -= terrainDetail.size.y + terrainDetail.size.x / 10
+	terrainDetail.position.x += terrainDetail.size.x / 5
 	$Control.position.y = terrainDetail.position.y + terrainDetail.size.y / 2.5
 	$Control.position.x = terrainDetail.position.x + terrainDetail.size.x / 5
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
+	for child in tile_stats.get_children():
+		child.scale = detail_zoom_factor * 0.015
+	$TileStats/Blocked.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
+	$TileStats/Hindrance.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
+	$TileStats/CoverN1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, 0)
+	$TileStats/CoverN2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , 0)
+	$TileStats/CoverNW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4)
+	$TileStats/CoverNW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+	$TileStats/CoverSW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4 * 3)
+	$TileStats/CoverSW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
+	$TileStats/CoverS1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, terrainDetail.size.y)
+	$TileStats/CoverS2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , terrainDetail.size.y)
+	$TileStats/CoverSE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4 * 3)
+	$TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
+	$TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
+	$TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
 
 
 func _on_update_timer_label(time_left_seconds : float):
@@ -71,6 +88,50 @@ func show_tile_data(result: Dictionary):
 	result.cover_nw
 	result.hindrance
 	
+	for child in tile_stats.get_children():
+		child.visible = false
+	
+	if result.hindrance == true:
+		$TileStats/Hindrance.visible = true
+	
+	if result.blocking == true:
+		$TileStats/Blocked.visible = true
+	
+	if result.cover_n == 1:
+		$TileStats/CoverN1.visible = true
+	elif result.cover_n == 2:
+		$TileStats/CoverN1.visible = true
+		$TileStats/CoverN2.visible = true
+	
+	if result.cover_ne == 1:
+		$TileStats/CoverNE1.visible = true
+	elif result.cover_ne == 2:
+		$TileStats/CoverNE1.visible = true
+		$TileStats/CoverNE2.visible = true
+	
+	if result.cover_se == 1:
+		$TileStats/CoverSE1.visible = true
+	elif result.cover_se == 2:
+		$TileStats/CoverSE1.visible = true
+		$TileStats/CoverSE2.visible = true
+	
+	if result.cover_s == 1:
+		$TileStats/CoverS2.visible = true
+	elif result.cover_s == 2:
+		$TileStats/CoverS1.visible = true
+		$TileStats/CoverS2.visible = true
+	
+	if result.cover_sw == 1:
+		$TileStats/CoverSW2.visible = true
+	elif result.cover_sw == 2:
+		$TileStats/CoverSW1.visible = true
+		$TileStats/CoverSW2.visible = true
+	
+	if result.cover_nw == 1:
+		$TileStats/CoverNW2.visible = true
+	elif result.cover_nw == 2:
+		$TileStats/CoverNW1.visible = true
+		$TileStats/CoverNW2.visible = true
 	for child in coverHBoxContainer.get_children():
 		child.queue_free()
 	
