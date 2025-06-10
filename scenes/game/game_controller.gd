@@ -62,13 +62,13 @@ func _ready():
 	
 func draw_fog():
 	
-	var visible_hexes := {}
+	var visible_hexes: Array[Vector2i]
 	# Step 1: Collect all visible hexes from team units
 	for u in units:
 		if u.team == current_team:
 			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
 			for hex in unit_visible:
-				visible_hexes[hex] = true  # Using Dictionary as Set
+				visible_hexes.append(hex)
 
 	# Step 2: Iterate over all tiles in the map
 	var used_cells := fog_of_war_layer.get_used_cells()
@@ -81,7 +81,24 @@ func draw_fog():
 		for y in LOSHelper.GRID_SIZE_Y:
 			if not visible_hexes.has(Vector2i(x, y)):
 				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
-		
+
+
+func show_visible_units():
+	var visible_hexes: Array[Vector2i]
+	# Step 1: Collect all visible hexes from team units
+	for u in units:
+		if u.team == current_team:
+			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
+			for hex in unit_visible:
+				visible_hexes.append(hex)
+	
+	for u in units:
+		if not u.team == current_team:
+			if visible_hexes.has(u.current_hex):
+				u.visible = true
+			else:
+				u.visible = false 
+
 
 func _on_unit_moved(unit, vector: Vector2i):
 	draw_fog()

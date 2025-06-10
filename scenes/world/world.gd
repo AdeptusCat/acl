@@ -30,6 +30,7 @@ func _ready():
 	game_controller.setup_game()
 	
 	game_controller.draw_fog()
+	game_controller.show_visible_units()
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	#14,2 10,2
