@@ -28,6 +28,7 @@ signal mouse_event_position_changed(event_pos)
 
 func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
+	input_mgr.mouse_button_right_pressed.connect(_on_mouse_button_right_pressed)
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
@@ -129,17 +130,35 @@ func set_objective_cells():
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
 
+func _on_mouse_button_right_pressed(event_pos: Vector2):
+	var map_hex = ground_layer.local_to_map(event_pos)
+	if selected_unit:
+		move_sys._on_move_requested(selected_unit, map_hex)
+		_deselect_unit(selected_unit)
+
+var previous_selected_hex: Vector2i = Vector2i(-1, -1)
+var selected_hex_index: int = 0
+
 func _on_mouse_button_left_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
-	var unit = _find_unit_at(map_hex)
+	if previous_selected_hex == map_hex:
+		selected_hex_index += 1
+	else:
+		previous_selected_hex = map_hex
+		selected_hex_index = 0
+	var units: Array[Node2D] = _find_units_at(map_hex)
+	if units.is_empty():
+		_deselect_unit(selected_unit)
+	if selected_hex_index >= units.size():
+		selected_hex_index = 0
+	var unit = units[selected_hex_index]
 	if unit and unit.team == current_team and not unit.broken:
-		if selected_unit == unit:
+		if unit == selected_unit:
 			_deselect_unit(unit)
 		else:
 			_select_unit(unit)
-	elif selected_unit:
-		move_sys._on_move_requested(selected_unit, map_hex)
-		_deselect_unit(selected_unit)
+		
+	
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
@@ -166,11 +185,12 @@ func _deselect_unit(unit):
 		selected_unit = null
 
 
-func _find_unit_at(hex: Vector2i) -> Node2D:
+func _find_units_at(hex: Vector2i) -> Array[Node2D]:
+	var units: Array[Node2D]
 	for u in unit_container.get_children():
 		if u.current_hex == hex:
-			return u
-	return null
+			units.append(u)
+	return units
 
 
 func _on_unit_died(unit):
