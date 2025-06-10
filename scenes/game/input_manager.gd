@@ -21,7 +21,7 @@ func _input(event):
 	#if event is InputEventKey and event.pressed and event.scancode==KEY_SPACE:
 		#key_space_pressed.emit(event.position)
 
-func _unhandled_input(event):
+#func _unhandled_input(event):
 	if event.is_action_pressed("zoom_in"):
 		zoom_in.emit()
 	if event.is_action_pressed("zoom_out"):

@@ -13,6 +13,26 @@ extends Camera2D
 var _zoom_level: float = 1.0 
 
 
+@export var speed: float = 400.0
+
+
+func _physics_process(delta):
+	var direction: Vector2 = Vector2.ZERO
+	if Input.is_action_pressed("up"):
+		direction.y -= 1
+	if Input.is_action_pressed("down"):
+		direction.y += 1
+	if Input.is_action_pressed("right"):
+		direction.x += 1
+	if Input.is_action_pressed("left"):
+		direction.x -= 1
+	
+	if direction != Vector2.ZERO:
+		direction = direction.normalized() 
+		position += direction * speed * delta
+
+
+
 func zoom_in():
 	_set_zoom_level(_zoom_level - zoom_factor)
 
