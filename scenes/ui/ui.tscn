@@ -93,14 +93,17 @@ theme_override_constants/separation = 0
 alignment = 1
 
 [node name="Cover1" type="TextureRect" parent="Control/CoverHBoxContainer"]
+visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 
 [node name="Cover2" type="TextureRect" parent="Control/CoverHBoxContainer"]
+visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 
 [node name="Cover3" type="TextureRect" parent="Control/CoverHBoxContainer"]
+visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 
@@ -111,43 +114,57 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Blocked" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("2_g5kmx")
 
 [node name="Hindrance" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("3_0dwhk")
 
 [node name="CoverN1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverN2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverNE1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverNE2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverSE1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverSE2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverS1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverS2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverSW1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverSW2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverNW1" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="CoverNW2" type="Sprite2D" parent="TileStats"]
+visible = false
 texture = ExtResource("4_pfayw")

@@ -8,6 +8,7 @@ extends Node2D
 
 @export var objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
+@export var fog_of_war_layer : HexagonTileMapLayer
 
 var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
@@ -36,6 +37,7 @@ func _ready():
 			units.append(unit)
 			unit.unit_died.connect(_on_unit_died)
 			unit.moved_to_hex.connect(combat_sys._on_unit_moved)
+			unit.moved_to_hex.connect(_on_unit_moved)
 			unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
 			unit.deselect_unit.connect(_deselect_unit)
@@ -48,7 +50,52 @@ func _ready():
 	update_timer_label.emit(time_left_seconds)
 	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	input_mgr.set_input(false)
+	
+	#for x in range(LOSHelper.GRID_SIZE_X):
+		#for y in range(LOSHelper.GRID_SIZE_Y):
+			#fog_of_war_layer.set_cell(Vector2i(x, y), 0)
+	
+	#fog_of_war_layer.set_cell(Vector2i(1, 1), 0)
+	#fog_of_war_layer.set_cell(tile_map_layer, new_tile_map_cell_position, tile_map_cell_source_id, tile_map_cell_atlas_coords, tile_map_cell_alternative)
+	
+	
+	
+func draw_fog():
+	
+	var visible_hexes := {}
+	# Step 1: Collect all visible hexes from team units
+	for u in units:
+		if u.team == current_team:
+			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
+			for hex in unit_visible:
+				visible_hexes[hex] = true  # Using Dictionary as Set
 
+	# Step 2: Iterate over all tiles in the map
+	var used_cells := fog_of_war_layer.get_used_cells()
+	for cell in used_cells:
+		if visible_hexes.has(cell):
+			fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
+		else:
+			fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
+	for x in LOSHelper.GRID_SIZE_X:
+		for y in LOSHelper.GRID_SIZE_Y:
+			if not visible_hexes.has(Vector2i(x, y)):
+				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
+		
+
+func _on_unit_moved(unit, vector: Vector2i):
+	draw_fog()
+	#for x in range(LOSHelper.GRID_SIZE_X):
+		#for y in range(LOSHelper.GRID_SIZE_Y):
+			#fog_of_war_layer.set_cell(Vector2(x, y), -1)
+	
+	#
+	#LOSHelper.GRID_SIZE_Y
+	#var visible_hexes: Array
+	#for u in units:
+		#if u.team == current_team:
+			#var visible_hexes_from_unit = LOSHelper.los_lookup.get(unit.current_hex, [])
+			
 
 func setup_game():
 	set_objective_cells()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=49 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://cg8f2xiajwc44" path="res://scenes/game/maps/building_tile_map_layer.gd" id="15_sygq6"]
 [ext_resource type="Texture2D" uid="uid://72tdw5k8ingr" path="res://assets/tiles/buildings/orchard.png" id="16_0wrxw"]
 [ext_resource type="Script" uid="uid://cc2pavbgwgo06" path="res://scenes/game/maps/terrain_tile_map_layer.gd" id="17_cmg7y"]
+[ext_resource type="Texture2D" uid="uid://d1bbds1iph7gl" path="res://assets/tiles/ground/fog_of_war.png" id="18_2x71e"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_sh7a8"]
 [ext_resource type="Texture2D" uid="uid://dtx0tgn2cjgiu" path="res://assets/ui/objective_tile.png" id="20_7mx70"]
 [ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://scenes/ui/start_screen.tscn" id="21_1cxds"]
@@ -198,6 +199,30 @@ custom_data_layer_3/name = "blocking"
 custom_data_layer_3/type = 1
 sources/2 = SubResource("TileSetAtlasSource_2nhjh")
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wnndm"]
+texture = ExtResource("18_2x71e")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/modulate = Color(1, 1, 1, 0.764706)
+
+[sub_resource type="TileSet" id="TileSet_26xou"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "woods"
+custom_data_layer_0/type = 1
+custom_data_layer_1/name = "orchard"
+custom_data_layer_1/type = 0
+custom_data_layer_2/name = "hindrance"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "blocking"
+custom_data_layer_3/type = 1
+sources/0 = SubResource("TileSetAtlasSource_wnndm")
+
+[sub_resource type="GDScript" id="GDScript_jyr8v"]
+script/source = "extends HexagonTileMapLayer
+"
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k73cj"]
 texture = ExtResource("20_7mx70")
 texture_region_size = Vector2i(64, 64)
@@ -234,6 +259,11 @@ tile_set = SubResource("TileSet_k73cj")
 script = ExtResource("17_cmg7y")
 metadata/_edit_lock_ = true
 
+[node name="FogOfWarTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+tile_set = SubResource("TileSet_26xou")
+script = SubResource("GDScript_jyr8v")
+metadata/_edit_lock_ = true
+
 [node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
 tile_map_data = PackedByteArray("AAAOAAUAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_rjqkl")
@@ -249,9 +279,10 @@ ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 
 [node name="DummyNode2D" type="Node2D" parent="."]
 
-[node name="GameController" parent="." node_paths=PackedStringArray("objective_tilemap", "ground_layer") instance=ExtResource("25_rwifv")]
+[node name="GameController" parent="." node_paths=PackedStringArray("objective_tilemap", "ground_layer", "fog_of_war_layer") instance=ExtResource("25_rwifv")]
 objective_tilemap = NodePath("../TileMapLayers/ObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
+fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 
 [node name="UnitContainer" type="Node" parent="GameController"]
 
