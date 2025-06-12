@@ -556,11 +556,13 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="FogOfWarTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+visible = false
 tile_set = SubResource("TileSet_26xou")
 script = SubResource("GDScript_jyr8v")
 metadata/_edit_lock_ = true
 
 [node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+top_level = true
 tile_map_data = PackedByteArray("AAAYAA0AAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_rjqkl")
 
@@ -580,7 +582,7 @@ objective_tilemap = NodePath("../TileMapLayers/ObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 
-[node name="UnitContainer" type="Node" parent="GameController"]
+[node name="UnitContainer" type="Node2D" parent="GameController"]
 
 [node name="Unit" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(464, 576)
