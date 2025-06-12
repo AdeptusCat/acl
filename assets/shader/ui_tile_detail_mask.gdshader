@@ -5,7 +5,7 @@ uniform vec2 mask_size = vec2(64.0, 64.0);   // size of the visible area in pixe
 
 void fragment() {
     vec2 pixel = UV * textureSize(TEXTURE, 0);
-    
+
     if (pixel.x < mask_position.x || pixel.x > mask_position.x + mask_size.x ||
         pixel.y < mask_position.y || pixel.y > mask_position.y + mask_size.y) {
         discard;

@@ -109,4 +109,8 @@ expand_mode = 3
 
 [node name="Cover" type="HBoxContainer" parent="."]
 layout_mode = 2
+offset_left = 13.0
+offset_top = 47.0
+offset_right = 53.0
+offset_bottom = 57.0
 alignment = 1

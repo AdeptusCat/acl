@@ -55,6 +55,9 @@ func _ready():
 	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	input_mgr.set_input(false)
 	
+	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.GRID_SIZE_X, LOSHelper.GRID_SIZE_Y)
+	camera.set_camera_limit(map_size) 
+	
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
 			#fog_of_war_layer.set_cell(Vector2i(x, y), 0)
@@ -138,7 +141,7 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
 	if selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
-		_deselect_unit(selected_unit)
+		#_deselect_unit(selected_unit)
 
 var previous_selected_hex: Vector2i = Vector2i(-1, -1)
 var selected_hex_index: int = 0

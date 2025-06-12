@@ -932,8 +932,7 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 # --- DEBUG DRAW (Optional) ---
 
 func _input(event):
-	if Input.is_action_just_pressed("MIDDLE"): 
-		
+	if Input.is_action_just_pressed("MIDDLE"): 		
 		var mouse_pos = event.position
 		var hex = ground_layer.local_to_map(mouse_pos)
 		if not origin_hex == hex or los_lines.is_empty():

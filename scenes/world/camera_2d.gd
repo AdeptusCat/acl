@@ -15,12 +15,15 @@ var _zoom_level: float = 1.0
 
 @export var speed: float = 400.0
 
+var map_size : Vector2 
 
-#func _ready() -> void:
-	#limit_left = - 500 
-	#limit_top = - 300
-	#limit_right = LOSHelper.GRID_SIZE_X * LOSHelper.si
-	#limit_bottom 
+func set_camera_limit(_map_size : Vector2):
+	map_size = _map_size
+	limit_left =- map_size.y / 2 
+	limit_top -= map_size.y / 4
+	limit_right = map_size.x
+	limit_bottom = map_size.y + map_size.y / 2
+
 
 
 func _physics_process(delta):
@@ -36,7 +39,9 @@ func _physics_process(delta):
 	
 	if direction != Vector2.ZERO:
 		direction = direction.normalized() 
-		position += direction * speed * delta
+		var pos = position + direction * speed * delta
+		pos = pos.clamp(Vector2(map_size.x/4, 0), Vector2(map_size.x/2, map_size.y))
+		position = pos
 
 
 
