@@ -184,3 +184,19 @@ color = Color(0.462291, 0.462291, 0.462291, 1)
 
 [node name="UnitStatsContainer" type="HBoxContainer" parent="UnitStats"]
 layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -167.0
+offset_bottom = 101.0
+grow_horizontal = 0
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Controls:
+left click - select unit
+right click - move unit
+WASD move camera
+mouse wheel - zoom"
