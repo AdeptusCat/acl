@@ -18,8 +18,8 @@ func _ready():
 	LOSHelper.terrain_layer = terrain_layer
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
-	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
+	LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
+	#LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
 	
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)
@@ -47,11 +47,10 @@ func _ready():
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	#LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
 	
-	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(1,1))
-	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(1,0))
+	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(4,4))
+	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(6,3))
 	#var res = LOSHelper.check_los(pos_a, pos_b, 0, 0, 0, 0)
 	#print(res)
-	#pass
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 

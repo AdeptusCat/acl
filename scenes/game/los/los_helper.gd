@@ -380,6 +380,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
 			result = _check_hindrance(sample_hex_map, result)
+			result.shooter_cover += 1
+			result.target_cover += 1
 		
 		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
 			result = _check_blocking_terrain(sample_hex_map, result)
