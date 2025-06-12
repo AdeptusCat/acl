@@ -19,8 +19,8 @@ const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE_X = 24
-const GRID_SIZE_Y = 10
+const GRID_SIZE_X = 33 
+const GRID_SIZE_Y = 21
 
 var visible_hexes: Array[Vector2i]
 
@@ -380,8 +380,6 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		
 		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
 			result = _check_hindrance(sample_hex_map, result)
-			result.shooter_cover += 1
-			result.target_cover += 1
 		
 		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
 			result = _check_blocking_terrain(sample_hex_map, result)
@@ -468,6 +466,8 @@ func _walk_between_axes_and_check_walls(
 		# only count one hindrance if the hexspine is edging on two hindrance hexes
 		if hindrance_result.hindrance > 0:
 			result.hindrance += 1
+			result.shooter_cover += 1
+			result.target_cover += 1
 		
 		
 		## check blocked by building from start to target hex, so test line is along hexspine
@@ -622,6 +622,9 @@ func _check_hindrance(sample_hex_map: Vector2i, result: Dictionary) -> Dictionar
 	if tile_data and tile_data.has_custom_data("hindrance") \
 	   and tile_data.get_custom_data("hindrance"):
 		result["hindrance"] += 1
+		if result.has("shooter_cover"):
+			result.shooter_cover += 1
+			result.target_cover += 1
 	return result
 
 func _check_blocking_terrain(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
@@ -933,18 +936,18 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 
 # --- DEBUG DRAW (Optional) ---
 
-func _input(event):
-	if Input.is_action_just_pressed("MIDDLE"): 		
-		var mouse_pos = event.position
-		var hex = ground_layer.local_to_map(mouse_pos)
-		if not origin_hex == hex or los_lines.is_empty():
-			origin_hex = hex
-			generate_los_lines_for_debug()
-		else:
-			los_lines.clear()
-			queue_redraw()
-			
-		
+
+#func _input(event):
+	#if Input.is_action_just_pressed("MIDDLE"): 		
+		#var mouse_pos = event.position
+		#var hex = ground_layer.local_to_map(mouse_pos)
+		#if not origin_hex == hex or los_lines.is_empty():
+			#origin_hex = hex
+			#generate_los_lines_for_debug()
+		#else:
+			#los_lines.clear()
+			#queue_redraw()
+
 
 func _draw():
 	if not debug_draw_enabled:

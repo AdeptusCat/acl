@@ -172,6 +172,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
+	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
 	if not map_hex == mouse_hover_hex:
 		mouse_hover_hex = map_hex
