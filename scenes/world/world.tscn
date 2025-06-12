@@ -1,4 +1,4 @@
-[gd_scene load_steps=72 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=84 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://bdvxy0txte44j" path="res://assets/tiles/terrain/road_n_so.png" id="17_fymcc"]
 [ext_resource type="Texture2D" uid="uid://d1bbds1iph7gl" path="res://assets/tiles/ground/fog_of_war.png" id="18_2x71e"]
 [ext_resource type="Texture2D" uid="uid://qqegbcmtyb81" path="res://assets/tiles/terrain/field_nw_sw_alt.png" id="18_nqe8x"]
+[ext_resource type="Texture2D" uid="uid://bvb7p06gp153q" path="res://assets/tiles/walls/hedge_nw.png" id="19_5fxch"]
 [ext_resource type="Texture2D" uid="uid://bm6f2meissu07" path="res://assets/tiles/terrain/field_sw_so.png" id="19_7mx70"]
 [ext_resource type="Texture2D" uid="uid://cn8fvetb3cox5" path="res://assets/tiles/terrain/road_nw_n.png" id="19_lbnhc"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_sh7a8"]
@@ -28,13 +29,18 @@
 [ext_resource type="Texture2D" uid="uid://di74wx0c1md23" path="res://assets/tiles/terrain/field_n_s.png" id="20_sh7a8"]
 [ext_resource type="Texture2D" uid="uid://cfqlrjo4x4i2l" path="res://assets/tiles/terrain/road_nw_no.png" id="20_sygq6"]
 [ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://scenes/ui/start_screen.tscn" id="21_1cxds"]
+[ext_resource type="Texture2D" uid="uid://6j8xpdq38u1b" path="res://assets/tiles/walls/hedge_nw_w.png" id="21_4v0p3"]
 [ext_resource type="Texture2D" uid="uid://bud0enoy8g2x4" path="res://assets/tiles/terrain/field_nw_no.png" id="21_lbnhc"]
 [ext_resource type="PackedScene" uid="uid://b84f65gu8hp6e" path="res://scenes/ui/result_screen.tscn" id="22_2m0ga"]
+[ext_resource type="Texture2D" uid="uid://dpmbh5n4eq7fv" path="res://assets/tiles/walls/hedge_so.png" id="22_fqf7g"]
 [ext_resource type="Texture2D" uid="uid://c6rn04auraxqc" path="res://assets/tiles/terrain/field_nw_sw.png" id="22_sygq6"]
 [ext_resource type="Texture2D" uid="uid://b64f5klfofs0y" path="res://assets/tiles/terrain/field_no_sw.png" id="23_0wrxw"]
+[ext_resource type="Texture2D" uid="uid://06ki7p0r3su" path="res://assets/tiles/walls/hedge_sw.png" id="23_jum6b"]
 [ext_resource type="PackedScene" uid="uid://jdf7ewo2axfy" path="res://scenes/ui/ui.tscn" id="23_ues17"]
 [ext_resource type="Texture2D" uid="uid://2pp707wqe4d1" path="res://assets/tiles/terrain/field_sw_s.png" id="24_cmg7y"]
+[ext_resource type="Texture2D" uid="uid://dcvm30237shwe" path="res://assets/tiles/walls/hedge_sw_so.png" id="24_l4ul6"]
 [ext_resource type="PackedScene" uid="uid://b0cjkqk21ctq3" path="res://scenes/game/input_manager.tscn" id="24_x0nq1"]
+[ext_resource type="Texture2D" uid="uid://cjrrdpi6l47tv" path="res://assets/tiles/walls/hedge_w.png" id="25_q3hpu"]
 [ext_resource type="PackedScene" uid="uid://dy2ockn75uonw" path="res://scenes/game/game_controller.tscn" id="25_rwifv"]
 [ext_resource type="PackedScene" uid="uid://b7n8wd6ful6o1" path="res://scenes/game/movement_system.tscn" id="26_26xou"]
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
@@ -256,6 +262,23 @@ texture_region_size = Vector2i(64, 64)
 0:0/3/custom_data_1 = true
 0:0/3/custom_data_2 = true
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j0rhc"]
+texture = ExtResource("19_5fxch")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 1
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 1
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/custom_data_0 = 1
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ta5nu"]
 texture = ExtResource("6_ckok1")
 texture_region_size = Vector2i(64, 64)
@@ -269,6 +292,31 @@ texture_region_size = Vector2i(64, 64)
 0:0/1/custom_data_0 = 2
 0:0/1/custom_data_5 = true
 0:0/1/custom_data_6 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4jq4u"]
+texture = ExtResource("21_4v0p3")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sar2w"]
+texture = ExtResource("22_fqf7g")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_goy61"]
+texture = ExtResource("23_jum6b")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7rtjl"]
+texture = ExtResource("24_l4ul6")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_phx5y"]
+texture = ExtResource("25_q3hpu")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_0hol4"]
 tile_shape = 3
@@ -292,6 +340,12 @@ sources/0 = SubResource("TileSetAtlasSource_d21ai")
 sources/1 = SubResource("TileSetAtlasSource_hqns4")
 sources/2 = SubResource("TileSetAtlasSource_x0ka3")
 sources/4 = SubResource("TileSetAtlasSource_ta5nu")
+sources/3 = SubResource("TileSetAtlasSource_j0rhc")
+sources/5 = SubResource("TileSetAtlasSource_4jq4u")
+sources/6 = SubResource("TileSetAtlasSource_sar2w")
+sources/7 = SubResource("TileSetAtlasSource_goy61")
+sources/8 = SubResource("TileSetAtlasSource_7rtjl")
+sources/9 = SubResource("TileSetAtlasSource_phx5y")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1fr6y"]
 texture = ExtResource("8_wnndm")
