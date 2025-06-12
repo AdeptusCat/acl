@@ -18,8 +18,8 @@ func _ready():
 	LOSHelper.terrain_layer = terrain_layer
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
-	#LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
+	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
+	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
 	
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)
