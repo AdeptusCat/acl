@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cnfjonnfugdws"
-path.s3tc="res://.godot/imported/hindrance.png-cc0de86b5d47f5b10ccdf79f11904353.s3tc.ctex"
+uid="uid://bqxj0vhj8e7xy"
+path.s3tc="res://.godot/imported/shooting_ger.png-9860a57fef32eff5413f90b0812a9a0d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/status/hindrance.png"
-dest_files=["res://.godot/imported/hindrance.png-cc0de86b5d47f5b10ccdf79f11904353.s3tc.ctex"]
+source_file="res://assets/status/shooting_ger.png"
+dest_files=["res://.godot/imported/shooting_ger.png-9860a57fef32eff5413f90b0812a9a0d.s3tc.ctex"]
 
 [params]
 

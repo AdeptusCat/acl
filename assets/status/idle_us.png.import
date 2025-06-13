@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cnfjonnfugdws"
-path.s3tc="res://.godot/imported/hindrance.png-cc0de86b5d47f5b10ccdf79f11904353.s3tc.ctex"
+uid="uid://d0r8virbrmwn0"
+path.s3tc="res://.godot/imported/idle_us.png-222ace21563bffd29ec658e04e2cca2a.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/status/hindrance.png"
-dest_files=["res://.godot/imported/hindrance.png-cc0de86b5d47f5b10ccdf79f11904353.s3tc.ctex"]
+source_file="res://assets/status/idle_us.png"
+dest_files=["res://.godot/imported/idle_us.png-222ace21563bffd29ec658e04e2cca2a.s3tc.ctex"]
 
 [params]
 

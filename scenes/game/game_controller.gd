@@ -126,6 +126,8 @@ func _on_unit_moved(unit, vector: Vector2i):
 func setup_game():
 	set_objective_cells()
 	set_objective_text.emit(str(objective_hex))
+	for unit in unit_container.get_children():
+		unit.visible = false
 
 
 func set_objective_cells(): 
@@ -214,6 +216,12 @@ func start_game(team: int):
 	timer_running = true
 	current_team = team
 	input_mgr.set_input(true)
+	for unit in unit_container.get_children():
+		if unit.team == current_team:
+			unit.visible = true
+	update_visible_hexes()
+	draw_fog()
+	show_visible_units()
 
 
 func _process(delta):

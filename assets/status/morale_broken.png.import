@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b3r5t4qj4wv26"
-path="res://.godot/imported/morale_broken.png-3d217dd8726757ebc155d3d1f0a7cd9f.ctex"
+path.s3tc="res://.godot/imported/morale_broken.png-3d217dd8726757ebc155d3d1f0a7cd9f.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/status/morale_broken.png"
-dest_files=["res://.godot/imported/morale_broken.png-3d217dd8726757ebc155d3d1f0a7cd9f.ctex"]
+dest_files=["res://.godot/imported/morale_broken.png-3d217dd8726757ebc155d3d1f0a7cd9f.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1

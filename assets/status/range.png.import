@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4pgej42no2ye"
-path="res://.godot/imported/range.png-c93c752ca3bd0a4e7dabb5a91de28e5c.ctex"
+path.s3tc="res://.godot/imported/range.png-c93c752ca3bd0a4e7dabb5a91de28e5c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/status/range.png"
-dest_files=["res://.godot/imported/range.png-c93c752ca3bd0a4e7dabb5a91de28e5c.ctex"]
+dest_files=["res://.godot/imported/range.png-c93c752ca3bd0a4e7dabb5a91de28e5c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1

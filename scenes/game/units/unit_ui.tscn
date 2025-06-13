@@ -1,14 +1,25 @@
-[gd_scene load_steps=13 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=24 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
 [ext_resource type="Texture2D" uid="uid://cglfa6udtw18d" path="res://assets/units/unit_ta.png" id="3_hwp2m"]
 [ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/ui/unit_selected.png" id="4_3gpgx"]
+[ext_resource type="Script" uid="uid://b85d7gbden4ih" path="res://scenes/game/units/unit_status.gd" id="5_xe57g"]
+[ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="6_sw8nw"]
+[ext_resource type="Texture2D" uid="uid://d0r8virbrmwn0" path="res://assets/status/idle_us.png" id="7_87qi7"]
+[ext_resource type="Texture2D" uid="uid://b4uqm5s3ku78a" path="res://assets/status/moving_ger.png" id="8_1rga6"]
 [ext_resource type="Texture2D" uid="uid://2nxuv8urg7sw" path="res://assets/status/broken.png" id="8_3avcp"]
+[ext_resource type="Texture2D" uid="uid://bll7674oq3txi" path="res://assets/status/moving_us.png" id="9_bigh4"]
 [ext_resource type="Texture2D" uid="uid://c6ffdp6d331fw" path="res://assets/status/moving.png" id="9_kue5q"]
+[ext_resource type="Texture2D" uid="uid://bqxj0vhj8e7xy" path="res://assets/status/shooting_ger.png" id="10_gxdh5"]
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
+[ext_resource type="Texture2D" uid="uid://dprqeinm8tbk2" path="res://assets/status/shooting_us.png" id="11_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
+[ext_resource type="Texture2D" uid="uid://c3u7esoded7o8" path="res://assets/status/pinned_ger.png" id="12_dlbli"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
+[ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
+[ext_resource type="Texture2D" uid="uid://c7wd5hgkmf7fi" path="res://assets/status/broken_ger.png" id="14_kswga"]
+[ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
 
@@ -67,6 +78,17 @@ offset_left = 17.0
 offset_top = 13.0
 offset_right = 17.0
 offset_bottom = 13.0
+script = ExtResource("5_xe57g")
+idle_ger = ExtResource("6_sw8nw")
+idle_us = ExtResource("7_87qi7")
+moving_ger = ExtResource("8_1rga6")
+moving_us = ExtResource("9_bigh4")
+shooting_ger = ExtResource("10_gxdh5")
+shooting_us = ExtResource("11_8rtsn")
+pinned_ger = ExtResource("12_dlbli")
+pinned_us = ExtResource("13_hvjme")
+broken_ger = ExtResource("14_kswga")
+broken_us = ExtResource("15_pi8vb")
 
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
 visible = false
@@ -114,3 +136,7 @@ offset_top = 47.0
 offset_right = 53.0
 offset_bottom = 57.0
 alignment = 1
+
+[node name="Timer" type="Timer" parent="."]
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

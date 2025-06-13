@@ -23,6 +23,7 @@ extends Control
 @onready var pinned_texture_rect = $UnitStatus/Pinned
 @onready var idle_texture_rect = $UnitStatus/Idle
 
+
 func select():
 	unit_selected_sprite.visible = true
 
@@ -39,6 +40,8 @@ func update_team_sprite(team : int):
 			sprite_node.texture = sprite_team_0
 		1:
 			sprite_node.texture = sprite_team_1
+	unit_status_control.set_status_image(team)
+
 
 
 func set_cover(cover_value: int) -> void:
@@ -58,6 +61,7 @@ func _on_started_moving():
 	for child in unit_status_control.get_children():
 		child.visible = false
 	moving_texture_rect.visible = true
+	$Timer.stop()
 
 
 func _on_stopped_moving():
@@ -67,6 +71,7 @@ func _on_stopped_moving():
 		broken_texture_rect.visible = true
 	else:
 		idle_texture_rect.visible = true
+	$Timer.stop()
 
 
 func _on_morale_breaks():
@@ -75,6 +80,7 @@ func _on_morale_breaks():
 	for child in unit_status_control.get_children():
 		child.visible = false
 	broken_texture_rect.visible = true
+	$Timer.stop()
 
 
 func _on_morale_recovered():
@@ -140,7 +146,6 @@ func _spawn_popup(type: String):
 		popup.start_success()
 
 
-
 func _spawn_flash(type: String):
 	var flash = morale_flash_scene.instantiate()
 	add_child(flash)
@@ -159,12 +164,19 @@ func shoot(from_pos: Vector2, to_pos):
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos)
-	for child in unit_status_control.get_children():
-		child.visible = false
-	idle_texture_rect.visible = true
+	$Timer.start()
+
+
+
 
 
 func die():
 	var tween = create_tween()
 	tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
 	await tween.finished
+
+
+func _on_timer_timeout() -> void:
+	for child in unit_status_control.get_children():
+		child.visible = false
+	idle_texture_rect.visible = true
