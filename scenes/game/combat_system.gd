@@ -2,6 +2,7 @@ extends Node
 
 @onready var container = $"../UnitContainer"
 
+@export var enabled: bool = true
 
 var unit_visible_enemies: Dictionary
 var units: Array[Node2D] = []
@@ -9,12 +10,16 @@ signal draw_los_to_enemy(from_hex, to_hex)
 
 
 func _process(delta: float) -> void:
+	if not enabled:
+		return
 	for unit in units:
 		if not unit.moving and unit.alive and not unit.broken:
 			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 
 func _on_unit_moved(unit, vector):
+	if not enabled:
+		return
 	if not unit.alive:
 		return
 	

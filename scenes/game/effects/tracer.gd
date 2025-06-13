@@ -38,6 +38,8 @@ func shoot(from: Vector2, to: Vector2) -> void:
 	particles.angle_max = -rad_to_deg(ang)
 	var dist = from.distance_to(to)
 	var life = dist / speed      # seconds
+	if life <= 0:
+		return
 	particles.lifetime = life
 	# restart & fire the one–shot particle
 	particles.restart()

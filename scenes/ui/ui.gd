@@ -81,7 +81,7 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 	for child in unit_stats_container.get_children():
 		child.queue_free()
 	for unit in units:
-		var unit_ui = unit.ui.duplicate()
+		var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
 		unit_stats_container.add_child(unit_ui)
 		var unit_stats_details = unit_stats_details_scene.instantiate()
 		unit_stats_details.set_details(unit)
