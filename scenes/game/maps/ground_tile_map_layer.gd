@@ -1,4 +1,4 @@
-@tool
+#@tool
 extends HexagonTileMapLayer
 
 # ─── store the two map coords the user clicks ──────────────────────────

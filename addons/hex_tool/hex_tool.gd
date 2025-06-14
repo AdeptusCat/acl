@@ -1,5 +1,5 @@
 # res://addons/hex_tool/hex_tool.gd
-@tool
+#@tool
 extends EditorPlugin
 
 var _tilemap: HexagonTileMapLayer = null

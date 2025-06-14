@@ -7,7 +7,8 @@ extends Node2D
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
 
-@export var objective_tilemap : TileMapLayer
+@export var allies_objective_tilemap : TileMapLayer
+@export var axis_objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
 @export var fog_of_war_layer : HexagonTileMapLayer
 
@@ -124,14 +125,23 @@ func _on_unit_moved(unit, vector: Vector2i):
 			
 
 func setup_game():
-	set_objective_cells()
-	set_objective_text.emit(str(objective_hex))
+	
+	set_objective_text.emit("")
 	for unit in unit_container.get_children():
 		unit.visible = false
 
 
-func set_objective_cells(): 
-	var cells = objective_tilemap.get_used_cells()  # 0 = layer index
+func set_objective_cells(team: int): 
+	var objective_tilemap: TileMapLayer
+	if team == 0:
+		objective_tilemap = axis_objective_tilemap
+		axis_objective_tilemap.visible = true
+		allies_objective_tilemap.visible = false
+	else:
+		objective_tilemap = allies_objective_tilemap
+		axis_objective_tilemap.visible = false
+		allies_objective_tilemap.visible = true
+	var cells = objective_tilemap.get_used_cells() 
 	if cells.size() > 0:
 		objective_hex = cells[0]
 	else:
@@ -213,6 +223,7 @@ func _on_unit_died(unit):
 
 
 func start_game(team: int):
+	set_objective_cells(team)
 	timer_running = true
 	current_team = team
 	input_mgr.set_input(true)

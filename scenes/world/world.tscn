@@ -1,4 +1,4 @@
-[gd_scene load_steps=92 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=94 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -529,6 +529,17 @@ tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
 sources/0 = SubResource("TileSetAtlasSource_k73cj")
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_554ci"]
+texture = ExtResource("20_7mx70")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_hph6x"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_554ci")
+
 [node name="World" type="Node2D"]
 script = ExtResource("1_6hctx")
 
@@ -560,10 +571,17 @@ tile_set = SubResource("TileSet_26xou")
 script = SubResource("GDScript_jyr8v")
 metadata/_edit_lock_ = true
 
-[node name="ObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+[node name="AxisObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+visible = false
+top_level = true
+tile_map_data = PackedByteArray("AAAKAAkAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_rjqkl")
+
+[node name="AlliesObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
+visible = false
 top_level = true
 tile_map_data = PackedByteArray("AAAYAA0AAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_rjqkl")
+tile_set = SubResource("TileSet_hph6x")
 
 [node name="StartScreen" parent="." instance=ExtResource("21_1cxds")]
 visible = false
@@ -576,8 +594,9 @@ ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 
 [node name="DummyNode2D" type="Node2D" parent="."]
 
-[node name="GameController" parent="." node_paths=PackedStringArray("objective_tilemap", "ground_layer", "fog_of_war_layer") instance=ExtResource("25_rwifv")]
-objective_tilemap = NodePath("../TileMapLayers/ObjectiveTileMapLayer")
+[node name="GameController" parent="." node_paths=PackedStringArray("allies_objective_tilemap", "axis_objective_tilemap", "ground_layer", "fog_of_war_layer") instance=ExtResource("25_rwifv")]
+allies_objective_tilemap = NodePath("../TileMapLayers/AlliesObjectiveTileMapLayer")
+axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 

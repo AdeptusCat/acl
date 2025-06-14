@@ -15,7 +15,7 @@ func _ready():
 
 
 func _on_set_objective_text(hex: String):
-	objective_label.text = "Hold hex at %s (red circle) with an unbroken unit!" % hex
+	objective_label.text = "Hold objective (red circle) with an unbroken unit when the time runs out!" % hex
 
 
 func _on_start_as_axis_pressed():
