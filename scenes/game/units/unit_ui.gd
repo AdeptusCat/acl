@@ -202,7 +202,10 @@ func shoot(from_pos: Vector2, to_pos):
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos)
 	$Timer.start()
-
+	if detail_ui:
+		for child in detail_ui.unit_status_control.get_children():
+			child.visible = false
+		detail_ui.shooting_texture_rect.visible = true
 
 
 
@@ -210,6 +213,8 @@ func die():
 	var tween = create_tween()
 	tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
 	await tween.finished
+	#if detail_ui:
+		#detail_ui.queue_free()
 
 
 func _on_timer_timeout() -> void:
