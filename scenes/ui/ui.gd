@@ -79,6 +79,8 @@ func mouse_event_position_changed(event_pos: Vector2):
 
 func show_unit_data(map_hex: Vector2i, units: Array):
 	for child in unit_stats_container.get_children():
+		if "detail_ui" in child:
+			child.detail_ui = null
 		child.queue_free()
 	for unit in units:
 		var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
@@ -86,6 +88,7 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 		var unit_stats_details = unit_stats_details_scene.instantiate()
 		unit_stats_details.set_details(unit)
 		unit_stats_container.add_child(unit_stats_details)
+		unit.ui.detail_ui = unit_ui
 		
 
 func show_tile_data(result: Dictionary):

@@ -1,6 +1,8 @@
 @tool
 extends Control
 
+var detail_ui = null
+
 @export var sprite_team_0: Texture2D
 @export var sprite_team_1: Texture2D
 @export var morale_popup_scene: PackedScene
@@ -26,10 +28,14 @@ extends Control
 
 func select():
 	unit_selected_sprite.visible = true
+	if detail_ui:
+		detail_ui.select()
 
 
 func deselect():
 	unit_selected_sprite.visible = false
+	if detail_ui:
+		detail_ui.deselect()
 
 
 func update_team_sprite(team : int):
@@ -41,7 +47,8 @@ func update_team_sprite(team : int):
 		1:
 			sprite_node.texture = sprite_team_1
 	unit_status_control.set_status_image(team)
-
+	if detail_ui:
+		detail_ui.update_team_sprite(team)
 
 
 func set_cover(cover_value: int) -> void:
@@ -51,27 +58,35 @@ func set_cover(cover_value: int) -> void:
 		var cover_icon: TextureRect = cover_icon_scene.instantiate()
 		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
 		cover_container.add_child(cover_icon)
+	if detail_ui:
+		detail_ui.set_cover(cover_value)
 
 
 func _on_unit_arrived_at_hex(hex):
 	pass
+	if detail_ui:
+		pass
 
 
-func _on_started_moving():
+func started_moving(broken: bool):
 	for child in unit_status_control.get_children():
 		child.visible = false
 	moving_texture_rect.visible = true
 	$Timer.stop()
+	if detail_ui:
+		detail_ui.started_moving(broken)
 
 
-func _on_stopped_moving():
+func stopped_moving(broken: bool):
 	for child in unit_status_control.get_children():
 		child.visible = false
-	if get_parent().broken == true:
+	if broken == true:
 		broken_texture_rect.visible = true
 	else:
 		idle_texture_rect.visible = true
 	$Timer.stop()
+	if detail_ui:
+		detail_ui.stopped_moving(broken)
 
 
 func _on_morale_breaks():
@@ -81,6 +96,8 @@ func _on_morale_breaks():
 		child.visible = false
 	broken_texture_rect.visible = true
 	$Timer.stop()
+	if detail_ui:
+		detail_ui._on_morale_breaks()
 
 
 func _on_morale_recovered():
@@ -89,18 +106,26 @@ func _on_morale_recovered():
 	for child in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
+	if detail_ui:
+		detail_ui._on_morale_recovered()
 
 
 func _on_morale_updated(current, max):
 	update_bar(current, max)
+	if detail_ui:
+		detail_ui._on_morale_updated(current, max)
 
 
 func _on_morale_failure():
 	show_failure()
+	if detail_ui:
+		detail_ui._on_morale_failure()
 
 
 func _on_morale_success():
 	show_success()
+	if detail_ui:
+		detail_ui._on_morale_success()
 
 
 func update_bar(current: int, max: int):
@@ -114,7 +139,9 @@ func update_bar(current: int, max: int):
 			morale_bar.color = Color(1, 1, 0)
 		else:
 			morale_bar.color = Color(1, 0, 0)
-
+	if detail_ui:
+		detail_ui.update_bar(current, max)
+		
 
 func _on_cover_updated(cover_value: int) -> void:
 	for child in cover_container.get_children():
@@ -123,17 +150,23 @@ func _on_cover_updated(cover_value: int) -> void:
 		var cover_icon: TextureRect = cover_icon_scene.instantiate()
 		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
 		cover_container.add_child(cover_icon)
+	if detail_ui:
+		detail_ui._on_cover_updated(cover_value)
 
 
 func show_failure():
 	_spawn_popup("failure")
 	_spawn_flash("failure")
+	if detail_ui:
+		detail_ui.show_failure()
 
 
 func show_success():
 	update_bar(0, 100)
 	_spawn_popup("success")
 	_spawn_flash("success")
+	if detail_ui:
+		detail_ui.show_success()
 
 
 func _spawn_popup(type: String):
@@ -144,6 +177,8 @@ func _spawn_popup(type: String):
 		popup.start_failure()
 	else:
 		popup.start_success()
+	if detail_ui:
+		detail_ui._spawn_popup(type)
 
 
 func _spawn_flash(type: String):
@@ -154,6 +189,8 @@ func _spawn_flash(type: String):
 		flash.start_failure()
 	else:
 		flash.start_success()
+	if detail_ui:
+		detail_ui._spawn_flash(type)
 
 
 func shoot(from_pos: Vector2, to_pos):
@@ -169,7 +206,6 @@ func shoot(from_pos: Vector2, to_pos):
 
 
 
-
 func die():
 	var tween = create_tween()
 	tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
@@ -180,3 +216,5 @@ func _on_timer_timeout() -> void:
 	for child in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
+	if detail_ui:
+		detail_ui._on_timer_timeout()
