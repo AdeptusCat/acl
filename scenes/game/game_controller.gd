@@ -230,6 +230,9 @@ func _find_units_at(hex: Vector2i) -> Array[Node2D]:
 func _on_unit_died(unit):
 	units.erase(unit)
 	unit_visible_enemies.erase(unit)
+	update_visible_hexes()
+	show_visible_units()
+	draw_fog()
 	#unit.queue_free()
 
 
