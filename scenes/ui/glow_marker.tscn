@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://d2x4o23gxhsrx"]
+
+[ext_resource type="Script" uid="uid://drwtn0u8yxpgn" path="res://glow_marker.gd" id="1_17fwx"]
+[ext_resource type="Shader" uid="uid://e7uuln2hltp0" path="res://assets/shader/glow_marker.gdshader" id="1_lxjhj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ofnus"]
+shader = ExtResource("1_lxjhj")
+shader_parameter/glow_color = Color(0.7, 0.6, 0.4, 1)
+shader_parameter/glow_thickness = 0.08
+shader_parameter/glow_softness = 0.03
+shader_parameter/border_thickness = 0.025
+shader_parameter/glow_alpha = 1.0
+
+[node name="GlowMarker" type="ColorRect"]
+material = SubResource("ShaderMaterial_ofnus")
+custom_minimum_size = Vector2(64, 64)
+offset_right = 64.0
+offset_bottom = 64.0
+rotation = 1.5708
+pivot_offset = Vector2(32, 32)
+script = ExtResource("1_17fwx")

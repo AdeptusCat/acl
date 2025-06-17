@@ -11,6 +11,7 @@ extends Node2D
 @export var axis_objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
 @export var fog_of_war_layer : HexagonTileMapLayer
+@export var glow_maker_scene: PackedScene
 
 var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
@@ -151,9 +152,19 @@ func set_objective_cells(team: int):
 func _on_mouse_button_right_pressed(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
+	
 	if selected_unit:
 		move_sys._on_move_requested(selected_unit, map_hex)
 		#_deselect_unit(selected_unit)
+		var local_pos = ground_layer.map_to_local(map_hex)
+		hex_glow(local_pos)
+
+
+func hex_glow(pos: Vector2):
+	var glow = glow_maker_scene.instantiate()
+	glow.position = pos
+	add_child(glow)
+
 
 var previous_selected_hex: Vector2i = Vector2i(-1, -1)
 var selected_hex_index: int = 0

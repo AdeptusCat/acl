@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 @export var idle_ger: Texture2D

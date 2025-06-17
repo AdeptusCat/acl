@@ -1,4 +1,4 @@
-[gd_scene load_steps=94 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=95 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -50,6 +50,7 @@
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
 [ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
 [ext_resource type="Script" uid="uid://c11s1s4ounucd" path="res://scenes/world/camera_2d.gd" id="29_wnndm"]
+[ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
 texture = ExtResource("16_d0ajt")
@@ -599,6 +600,7 @@ allies_objective_tilemap = NodePath("../TileMapLayers/AlliesObjectiveTileMapLaye
 axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
+glow_maker_scene = ExtResource("45_q3hpu")
 
 [node name="UnitContainer" type="Node2D" parent="GameController"]
 
