@@ -1,7 +1,8 @@
-[gd_scene load_steps=95 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=101 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
+[ext_resource type="Texture2D" uid="uid://0i3uh37b72ua" path="res://assets/ui/clouds.png" id="3_sar2w"]
 [ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/tiles/walls/wall_w.png" id="3_xq18t"]
 [ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/tiles/walls/wall_nw.png" id="4_x0nq1"]
 [ext_resource type="Texture2D" uid="uid://c2u24pcpcb65s" path="res://assets/tiles/walls/wall_nw_w.png" id="5_rwifv"]
@@ -50,6 +51,8 @@
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
 [ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
 [ext_resource type="Script" uid="uid://c11s1s4ounucd" path="res://scenes/world/camera_2d.gd" id="29_wnndm"]
+[ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
+[ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
@@ -541,6 +544,18 @@ tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
 sources/0 = SubResource("TileSetAtlasSource_554ci")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7rtjl"]
+shader = ExtResource("41_sar2w")
+shader_parameter/scroll_speed = Vector2(0.02, 0.01)
+shader_parameter/texture_scale = Vector2(1, 1)
+shader_parameter/opacity = 0.2
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4jq4u"]
+shader = ExtResource("41_j0rhc")
+shader_parameter/grain_strength = 0.35
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sar2w"]
+
 [node name="World" type="Node2D"]
 script = ExtResource("1_6hctx")
 
@@ -583,6 +598,40 @@ visible = false
 top_level = true
 tile_map_data = PackedByteArray("AAAYAA0AAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_hph6x")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.172549)
+material = SubResource("ShaderMaterial_7rtjl")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1078.0
+offset_top = -1039.0
+offset_right = 2633.0
+offset_bottom = 2451.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("3_sar2w")
+stretch_mode = 1
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2"]
+material = SubResource("ShaderMaterial_4jq4u")
+offset_right = 419.0
+offset_bottom = 329.0
+mouse_filter = 2
+
+[node name="CanvasLayer3" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer3"]
+material = SubResource("ShaderMaterial_sar2w")
+offset_right = 306.0
+offset_bottom = 439.0
 
 [node name="StartScreen" parent="." instance=ExtResource("21_1cxds")]
 visible = false
