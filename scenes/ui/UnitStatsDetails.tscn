@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="2_v4yjn"]
 [ext_resource type="Texture2D" uid="uid://bnr5nmi2sw6sc" path="res://assets/status/morale.png" id="3_g1237"]
 
-[node name="UnitStatsDetails" type="AspectRatioContainer"]
+[node name="UnitStatsDetails" type="MarginContainer"]
 offset_right = 37.0
 offset_bottom = 77.0
 script = ExtResource("1_v4yjn")

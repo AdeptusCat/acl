@@ -7,6 +7,7 @@ signal game_started(team : int)
 @onready var start_as_allies_button = $CenterContainer/VBoxContainer/StartAsAlliesButton
 @onready var animation_player = $AnimationPlayer
 
+
 func _ready():
 	visible = true
 	start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
