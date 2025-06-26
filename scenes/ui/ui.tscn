@@ -11,17 +11,26 @@ script = ExtResource("1_u7n8c")
 unit_stats_details_scene = ExtResource("5_0dwhk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
+visible = false
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 23.0
 grow_horizontal = 2
 alignment = 1
 
+[node name="Label2" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Time left: "
+
 [node name="TimerLabel" type="Label" parent="HBoxContainer"]
 layout_mode = 2
-text = "Time left: 10:00"
+text = "10:00"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Minutes"
 
 [node name="GroundTexture" type="TextureRect" parent="."]
 offset_left = 38.0
@@ -214,3 +223,39 @@ left click - select unit
 right click - move unit
 WASD move camera
 mouse wheel - zoom"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -85.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer"]
+layout_mode = 2
+color = Color(0.233925, 0.233925, 0.233925, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TryAgainButton" type="Button" parent="MarginContainer/MarginContainer"]
+layout_mode = 2
+text = "Try Again!"
+
+[node name="Label" type="Label" parent="."]
+offset_left = 78.0
+offset_top = 622.0
+offset_right = 118.0
+offset_bottom = 645.0
+horizontal_alignment = 1
+
+[connection signal="pressed" from="MarginContainer/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=101 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=103 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -54,170 +54,227 @@
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
+[ext_resource type="Script" uid="uid://cwp4yt03yldxu" path="res://scenes/world/target_area.gd" id="55_7rtjl"]
+[ext_resource type="Texture2D" uid="uid://vabbhirvnspe" path="res://assets/target_area.png" id="56_phx5y"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
+resource_name = "Road"
 texture = ExtResource("16_d0ajt")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 3
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cmg7y"]
+resource_name = "Road"
 texture = ExtResource("17_fymcc")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
 0:0/3 = 3
 0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kx0xk"]
+resource_name = "Field"
 texture = ExtResource("18_nqe8x")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5fxch"]
+resource_name = "Field"
 texture = ExtResource("19_7mx70")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4v0p3"]
+resource_name = "Field"
 texture = ExtResource("20_sh7a8")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jum6b"]
+resource_name = "Road"
 texture = ExtResource("8_fqf7g")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_l4ul6"]
+resource_name = "Road"
 texture = ExtResource("9_jum6b")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
 0:0/2 = 2
 0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q3hpu"]
+resource_name = "Road"
 texture = ExtResource("10_l4ul6")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 3
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_v = true
+0:0/1/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2nhjh"]
+resource_name = "Orchard"
 texture = ExtResource("16_0wrxw")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Orchard"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fqf7g"]
+resource_name = "Field"
 texture = ExtResource("9_4v0p3")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nqe8x"]
+resource_name = "Road"
 texture = ExtResource("19_lbnhc")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
 0:0/3 = 3
 0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sh7a8"]
+resource_name = "Road"
 texture = ExtResource("20_sygq6")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
 0:0/1 = 1
 0:0/1/flip_v = true
+0:0/1/custom_data_4 = "Road"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7mx70"]
+resource_name = "Field"
 texture = ExtResource("21_lbnhc")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 3
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1cxds"]
+resource_name = "Field"
 texture = ExtResource("22_sygq6")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2m0ga"]
+resource_name = "Field"
 texture = ExtResource("23_0wrxw")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
 0:0/2/custom_data_2 = true
+0:0/2/custom_data_4 = "Field"
 0:0/3 = 3
 0:0/3/flip_v = true
 0:0/3/custom_data_2 = true
+0:0/3/custom_data_4 = "Field"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ovomx"]
+resource_name = "Field"
 texture = ExtResource("24_cmg7y")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_2 = true
+0:0/0/custom_data_4 = "Field"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_2 = true
+0:0/1/custom_data_4 = "Field"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
 0:0/2/custom_data_2 = true
+0:0/2/custom_data_4 = "Field"
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/custom_data_2 = true
+0:0/3/custom_data_4 = "Field"
 
 [sub_resource type="TileSet" id="TileSet_k73cj"]
 tile_shape = 3
@@ -231,6 +288,8 @@ custom_data_layer_2/name = "hindrance"
 custom_data_layer_2/type = 1
 custom_data_layer_3/name = "blocking"
 custom_data_layer_3/type = 1
+custom_data_layer_4/name = "name"
+custom_data_layer_4/type = 4
 sources/2 = SubResource("TileSetAtlasSource_2nhjh")
 sources/0 = SubResource("TileSetAtlasSource_0wrxw")
 sources/1 = SubResource("TileSetAtlasSource_cmg7y")
@@ -249,39 +308,48 @@ sources/14 = SubResource("TileSetAtlasSource_l4ul6")
 sources/15 = SubResource("TileSetAtlasSource_q3hpu")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d21ai"]
+resource_name = "Wall"
 texture = ExtResource("3_xq18t")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_4 = true
+0:0/0/custom_data_7 = "Wall"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_0 = 2
 0:0/1/custom_data_1 = true
+0:0/1/custom_data_7 = "Wall"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hqns4"]
+resource_name = "Wall"
 texture = ExtResource("4_x0nq1")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Wall"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_0 = 2
 0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Wall"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/custom_data_0 = 2
 0:0/2/custom_data_3 = true
+0:0/2/custom_data_7 = "Wall"
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/flip_v = true
 0:0/3/custom_data_0 = 2
 0:0/3/custom_data_2 = true
+0:0/3/custom_data_7 = "Wall"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x0ka3"]
+resource_name = "Wall"
 texture = ExtResource("5_rwifv")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
@@ -289,41 +357,51 @@ texture_region_size = Vector2i(64, 64)
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_4 = true
 0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Wall"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_0 = 2
 0:0/1/custom_data_3 = true
 0:0/1/custom_data_4 = true
+0:0/1/custom_data_7 = "Wall"
 0:0/2 = 2
 0:0/2/flip_v = true
 0:0/2/custom_data_0 = 2
 0:0/2/custom_data_1 = true
 0:0/2/custom_data_6 = true
+0:0/2/custom_data_7 = "Wall"
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/flip_v = true
 0:0/3/custom_data_0 = 2
 0:0/3/custom_data_1 = true
 0:0/3/custom_data_2 = true
+0:0/3/custom_data_7 = "Wall"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j0rhc"]
+resource_name = "Hedge"
 texture = ExtResource("19_5fxch")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
+0:0/0/custom_data_7 = "Hedge"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_0 = 1
+0:0/1/custom_data_7 = "Hedge"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
 0:0/2/custom_data_0 = 1
+0:0/2/custom_data_7 = "Hedge"
 0:0/3 = 3
 0:0/3/flip_h = true
 0:0/3/custom_data_0 = 1
+0:0/3/custom_data_7 = "Hedge"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ta5nu"]
+resource_name = "Wall"
 texture = ExtResource("6_ckok1")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
@@ -331,13 +409,16 @@ texture_region_size = Vector2i(64, 64)
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = true
 0:0/0/custom_data_3 = true
+0:0/0/custom_data_7 = "Wall"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_0 = 2
 0:0/1/custom_data_5 = true
 0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Wall"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4jq4u"]
+resource_name = "Hedge"
 texture = ExtResource("21_4v0p3")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
@@ -345,29 +426,35 @@ texture_region_size = Vector2i(64, 64)
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_4 = true
 0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Hedge"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_0 = 1
 0:0/1/custom_data_3 = true
 0:0/1/custom_data_4 = true
+0:0/1/custom_data_7 = "Hedge"
 0:0/2 = 2
 0:0/2/flip_h = true
 0:0/2/flip_v = true
 0:0/2/custom_data_0 = 1
 0:0/2/custom_data_1 = true
 0:0/2/custom_data_2 = true
+0:0/2/custom_data_7 = "Hedge"
 0:0/3 = 3
 0:0/3/flip_v = true
 0:0/3/custom_data_0 = 1
 0:0/3/custom_data_1 = true
 0:0/3/custom_data_6 = true
+0:0/3/custom_data_7 = "Hedge"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sar2w"]
+resource_name = "Hedge"
 texture = ExtResource("22_fqf7g")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_goy61"]
+resource_name = "Hedge"
 texture = ExtResource("23_jum6b")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 4
@@ -389,6 +476,7 @@ texture_region_size = Vector2i(64, 64)
 0:0/3/custom_data_6 = true
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7rtjl"]
+resource_name = "Hedge"
 texture = ExtResource("24_l4ul6")
 texture_region_size = Vector2i(64, 64)
 0:0/next_alternative_id = 2
@@ -396,23 +484,28 @@ texture_region_size = Vector2i(64, 64)
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_2 = true
 0:0/0/custom_data_3 = true
+0:0/0/custom_data_7 = "Hedge"
 0:0/1 = 1
 0:0/1/flip_h = true
 0:0/1/custom_data_0 = 1
 0:0/1/custom_data_5 = true
 0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Hedge"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_phx5y"]
+resource_name = "Hedge"
 texture = ExtResource("25_q3hpu")
 texture_region_size = Vector2i(64, 64)
-0:0/next_alternative_id = 2
+0:0/next_alternative_id = 3
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_4 = true
+0:0/0/custom_data_7 = "Hedge"
 0:0/1 = 1
 0:0/1/flip_v = true
 0:0/1/custom_data_0 = 1
 0:0/1/custom_data_1 = true
+0:0/1/custom_data_7 = "Hedge"
 
 [sub_resource type="TileSet" id="TileSet_0hol4"]
 tile_shape = 3
@@ -432,6 +525,8 @@ custom_data_layer_5/name = "sw"
 custom_data_layer_5/type = 1
 custom_data_layer_6/name = "nw"
 custom_data_layer_6/type = 1
+custom_data_layer_7/name = "name"
+custom_data_layer_7/type = 4
 sources/0 = SubResource("TileSetAtlasSource_d21ai")
 sources/1 = SubResource("TileSetAtlasSource_hqns4")
 sources/2 = SubResource("TileSetAtlasSource_x0ka3")
@@ -444,40 +539,52 @@ sources/8 = SubResource("TileSetAtlasSource_7rtjl")
 sources/9 = SubResource("TileSetAtlasSource_phx5y")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1fr6y"]
+resource_name = "Stone Building"
 texture = ExtResource("8_wnndm")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = "Stone Building"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2hxjc"]
+resource_name = "Stone Building"
 texture = ExtResource("9_26xou")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = "Stone Building"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ebxd8"]
+resource_name = "Wood Building"
 texture = ExtResource("10_jyr8v")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = "Wood Building"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2u7jv"]
+resource_name = "<null>"
 texture = ExtResource("11_5o5dd")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = "Wood Building"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_24dk6"]
+resource_name = "Wood Building"
 texture = ExtResource("12_d0ajt")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = "Wood Building"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e8dv2"]
+resource_name = "Woods"
 texture = ExtResource("13_fymcc")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = "Woods"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0hol4"]
 texture = ExtResource("14_lbnhc")
@@ -490,6 +597,8 @@ tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
 custom_data_layer_0/name = "cover"
 custom_data_layer_0/type = 2
+custom_data_layer_1/name = "name"
+custom_data_layer_1/type = 4
 sources/8 = SubResource("TileSetAtlasSource_0hol4")
 sources/0 = SubResource("TileSetAtlasSource_1fr6y")
 sources/1 = SubResource("TileSetAtlasSource_2hxjc")
@@ -650,6 +759,7 @@ axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 glow_maker_scene = ExtResource("45_q3hpu")
+time_left_seconds = 180.0
 
 [node name="UnitContainer" type="Node2D" parent="GameController"]
 
@@ -725,3 +835,59 @@ limit_smoothed = true
 position_smoothing_enabled = true
 script = ExtResource("29_wnndm")
 speed = 800.0
+
+[node name="TargetArea" type="Node2D" parent="."]
+script = ExtResource("55_7rtjl")
+
+[node name="AxisTargetArea" type="Node2D" parent="TargetArea"]
+visible = false
+
+[node name="AxisTargetArea" type="Sprite2D" parent="TargetArea/AxisTargetArea"]
+position = Vector2(758, 777)
+rotation = 0.128311
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("56_phx5y")
+
+[node name="Label" type="Label" parent="TargetArea/AxisTargetArea"]
+offset_left = 378.0
+offset_top = 561.0
+offset_right = 533.0
+offset_bottom = 630.0
+theme_override_font_sizes/font_size = 50
+text = "Target"
+
+[node name="Label2" type="Label" parent="TargetArea/AxisTargetArea"]
+offset_left = 946.0
+offset_top = 797.0
+offset_right = 1188.0
+offset_bottom = 866.0
+theme_override_font_sizes/font_size = 50
+text = "Start Area"
+
+[node name="AlliesTargetArea" type="Node2D" parent="TargetArea"]
+visible = false
+
+[node name="AlliesTargetArea" type="Sprite2D" parent="TargetArea/AlliesTargetArea"]
+position = Vector2(933, 630)
+rotation = -2.95846
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("56_phx5y")
+
+[node name="Label3" type="Label" parent="TargetArea/AlliesTargetArea"]
+offset_left = 1139.0
+offset_top = 792.0
+offset_right = 1294.0
+offset_bottom = 861.0
+theme_override_font_sizes/font_size = 50
+text = "Target"
+
+[node name="Label4" type="Label" parent="TargetArea/AlliesTargetArea"]
+offset_left = 509.0
+offset_top = 534.0
+offset_right = 751.0
+offset_bottom = 603.0
+theme_override_font_sizes/font_size = 50
+text = "Start Area"
+
+[connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]
+[connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]

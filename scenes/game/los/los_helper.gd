@@ -875,6 +875,20 @@ func is_sample_point_in_building(sample_point: Vector2) -> int:
 			return tile_data.get_custom_data("cover")
 		return true
 
+
+func get_tile_name(sample_point: Vector2) -> String:
+	var tile_name: String = ""
+	var hex_map = building_layer.local_to_map(sample_point)
+	if not building_layer.get_cell_source_id(hex_map) == -1:
+		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("name"):
+			tile_name =  tile_data.get_custom_data("name")
+	if not terrain_layer.get_cell_source_id(hex_map) == -1:
+		var tile_data: TileData = terrain_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("name"):
+			tile_name =  tile_data.get_custom_data("name")
+	return tile_name
+
 func is_sample_point_crossing_wall(sample_point: Vector2) -> bool:
 	var space_state = get_world_2d().direct_space_state
 	var params = PhysicsPointQueryParameters2D.new()

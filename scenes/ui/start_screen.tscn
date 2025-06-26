@@ -92,3 +92,37 @@ root_node = NodePath("../FadeRect")
 libraries = {
 &"": SubResource("AnimationLibrary_afy8x")
 }
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -148.0
+offset_top = -90.0
+offset_right = 146.0
+offset_bottom = -59.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Label2" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Set Game Time to"
+
+[node name="SpinBox" type="SpinBox" parent="HBoxContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 15.0
+value = 3.0
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Minutes"
+
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
+[connection signal="mouse_entered" from="CenterContainer/VBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
+[connection signal="mouse_exited" from="CenterContainer/VBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]
+[connection signal="value_changed" from="HBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]

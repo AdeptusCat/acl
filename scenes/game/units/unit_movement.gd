@@ -9,7 +9,7 @@ var path_hexes: Array[Vector2i] = []
 var path_index: int = 0
 var target_position: Vector2
 var moving: bool = false
-var move_speed: float = 100.0
+var move_speed: float = 50.0
 
 # Retreat state
 var retreating: bool = false

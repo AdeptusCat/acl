@@ -1,18 +1,23 @@
 extends CanvasLayer
 
 signal game_started(team : int)
+signal hover_start_button(team: int)
 
 @onready var objective_label = $CenterContainer/VBoxContainer/ObjectiveLabel
 @onready var start_as_axis_button = $CenterContainer/VBoxContainer/StartAsAxisButton
 @onready var start_as_allies_button = $CenterContainer/VBoxContainer/StartAsAlliesButton
 @onready var animation_player = $AnimationPlayer
+@onready var time_spinbox = $HBoxContainer/SpinBox
 
+
+var time: float
 
 func _ready():
 	visible = true
 	start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
 	start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
 	animation_player.play("fade_in")  # Play when screen appears
+	time = time_spinbox.value
 
 
 func _on_set_objective_text(hex: String):
@@ -31,3 +36,23 @@ func _on_start_as_allies_pressed():
 	await animation_player.animation_finished
 	visible = false
 	game_started.emit(1)
+
+
+func _on_spin_box_value_changed(value: float) -> void:
+	time = value
+
+
+func _on_start_as_axis_button_mouse_entered() -> void:
+	hover_start_button.emit(0)
+
+
+func _on_start_as_axis_button_mouse_exited() -> void:
+	hover_start_button.emit(-1)
+
+
+func _on_start_as_allies_button_mouse_entered() -> void:
+	hover_start_button.emit(1)
+
+
+func _on_start_as_allies_button_mouse_exited() -> void:
+	hover_start_button.emit(-1)

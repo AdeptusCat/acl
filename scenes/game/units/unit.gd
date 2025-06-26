@@ -15,8 +15,8 @@ class_name Unit
 @export var recovery_time_max: float = 5.0
 @export var team: int = 0
 @export var retreat_distance := 3
-@export var retreat_speed := 100.0
-@export var fire_rate: float = 1.5
+@export var retreat_speed := 70.0
+@export var fire_rate: float = 0.75
 
 
 # === Runtime State ===
@@ -31,7 +31,7 @@ var current_hex: Vector2i
 var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
-var move_speed: float = 100.0
+var move_speed: float = 50.0
 var retreat_target_hex: Vector2i = Vector2i()
 
 
@@ -42,6 +42,7 @@ signal unit_died(unit)
 signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
 signal deselect_unit(unit)
+signal started_moving
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -56,6 +57,7 @@ signal deselect_unit(unit)
 
 # === Ready ===
 func _ready():
+	movement.move_speed = move_speed
 	update_team_sprite(team)
 	connect("retreat_complete", _on_retreat_complete)
 	morale_system.morale_breaks.connect(_on_morale_breaks)
@@ -85,6 +87,7 @@ func _ready():
 func _on_started_moving():
 	moving = true
 	ui.started_moving(broken)
+	started_moving.emit()
 
 
 func _on_stopped_moving():

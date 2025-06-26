@@ -47,6 +47,7 @@ func _ready():
 			unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
 			unit.deselect_unit.connect(_deselect_unit)
+			unit.started_moving.connect(_on_started_moving)
 			
 	combat_sys.unit_visible_enemies = unit_visible_enemies
 	combat_sys.units = units
@@ -236,9 +237,10 @@ func _on_unit_died(unit):
 	#unit.queue_free()
 
 
-func start_game(team: int):
+func start_game(team: int, time: float):
+	time_left_seconds = time * 60.0
 	set_objective_cells(team)
-	timer_running = true
+	#timer_running = true
 	current_team = team
 	input_mgr.set_input(true)
 	for unit in unit_container.get_children():
@@ -247,6 +249,10 @@ func start_game(team: int):
 	update_visible_hexes()
 	draw_fog()
 	show_visible_units()
+
+
+func _on_started_moving():
+	timer_running = true
 
 
 func _process(delta):

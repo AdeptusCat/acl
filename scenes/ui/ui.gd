@@ -27,6 +27,8 @@ extends CanvasLayer
 @onready var unit_stats = $UnitStats
 @onready var unit_stats_container = $UnitStats/MarginContainer/VBoxContainer/UnitStatsContainer
 
+signal try_again
+
 # Configuration
 const HEX_DIRECTIONS = [
 	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
@@ -68,9 +70,10 @@ func _ready() -> void:
 
 
 func _on_update_timer_label(time_left_seconds : float):
+	$HBoxContainer.visible = true
 	var minutes = int(time_left_seconds) / 60
 	var seconds = int(time_left_seconds) % 60
-	timer_label.text = "Time left: %02d:%02d" % [minutes, seconds]
+	timer_label.text = "%02d:%02d" % [minutes, seconds]
 
 
 func mouse_event_position_changed(event_pos: Vector2):
@@ -106,7 +109,9 @@ func show_tile_data(result: Dictionary):
 	result.cover_sw
 	result.cover_nw
 	result.hindrance
+	result.tile_name
 	
+	$Label.text = result.tile_name
 	for child in tile_stats.get_children():
 		child.visible = false
 	
@@ -233,3 +238,7 @@ func show_tile_data(result: Dictionary):
 	
 	for child in terrainDetail.get_children():
 		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
+
+
+func _on_try_again_button_pressed() -> void:
+	try_again.emit()

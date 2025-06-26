@@ -9,7 +9,13 @@ extends Node2D
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
 @onready var game_controller := $GameController
+@onready var target_area := $TargetArea
 
+signal try_again
+signal fully_freed
+
+func _exit_tree():
+	fully_freed.emit()
 
 func _ready():
 	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
@@ -85,8 +91,11 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 		"wall_sw_texture_transform": null,
 		"wall_nw_texture": null,
 		"wall_nw_texture_transform": null,
+		"tile_name": "",
+		"hex_wall_name": "",
 	}
 	result.cover_in_hex = LOSHelper.is_sample_point_in_building(event_pos)
+	result.tile_name = LOSHelper.get_tile_name(event_pos)
 	if result.cover_in_hex > 0:
 		result.blocking = true
 	result.cover_n = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_SIDE)
@@ -199,4 +208,13 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 
 
 func _on_game_started(team : int):
-	game_controller.start_game(team)
+	target_area.hide()
+	game_controller.start_game(team, start_screen.time)
+
+
+func _on_ui_try_again() -> void:
+	try_again.emit()
+
+
+func _on_start_screen_hover_start_button(team: int) -> void:
+	target_area.show_target(team)
