@@ -28,6 +28,16 @@ signal show_winner(team: int)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
 
+var point_array: Array[Vector2]
+func draw_points(_point_array):
+	point_array = _point_array
+	queue_redraw()
+
+func _draw():
+	for point in point_array:
+		#draw_line(point, point, Color(1, 0, 0), 2.0)
+		draw_circle(point, 5.0, Color.RED)
+
 
 func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
@@ -41,6 +51,7 @@ func _ready():
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is Node2D:
 			units.append(unit)
+			unit.units = units
 			unit.unit_died.connect(_on_unit_died)
 			unit.moved_to_hex.connect(combat_sys._on_unit_moved)
 			unit.moved_to_hex.connect(_on_unit_moved)

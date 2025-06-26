@@ -33,7 +33,7 @@ var moving: bool = false
 var target_position: Vector2
 var move_speed: float = 50.0
 var retreat_target_hex: Vector2i = Vector2i()
-
+var units: Array[Node2D]
 
 # === Signals ===
 signal moved_to_hex(new_hex: Vector2i)
@@ -178,8 +178,13 @@ func die():
 	queue_free()
 
 
-func _on_morale_failed(known_enemies: Array) -> void:
+func _on_morale_failed(_known_enemies: Array) -> void:
+	var known_enemies: Array[Node2D]
+	for unit in units:
+		if not unit.team == team:
+			known_enemies.append(unit)
 	movement.rout(current_hex, known_enemies, retreat_distance)
+	
 
 
 func _on_retreat_complete(retreat_hex) -> void:

@@ -65,15 +65,21 @@ func make_morale_check(unit_visible_enemies: Dictionary):
 		death_chance *= broken_death_multiplier
 
 	if randf() < death_chance:
+		return # debug
 		unit.die()
 		return
 
 	var roll = randi_range(2, 12)
-	if roll > morale:
-		
+	#if roll > morale:
+	if true: # debug
+		if broken: 
+			# otherwise the unit searches for another hex to retreat to, 
+			# which would be fine, if the current hex wouldnt be the one where the rout started, 
+			# think about it
+			return
+		broken = true
 		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 		unit._on_morale_failed(visible_enemies)
-		broken = true
 		morale_breaks.emit()
 		recovery_timer_current = 0.0
 	else:
