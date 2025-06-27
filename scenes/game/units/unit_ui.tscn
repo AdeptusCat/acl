@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=26 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
@@ -20,6 +20,8 @@
 [ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
 [ext_resource type="Texture2D" uid="uid://c7wd5hgkmf7fi" path="res://assets/status/broken_ger.png" id="14_kswga"]
 [ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
+[ext_resource type="Texture2D" uid="uid://dcq0y3c2t6ub5" path="res://assets/status/surrendered_ger.png" id="16_8rtsn"]
+[ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
 
@@ -89,8 +91,18 @@ pinned_ger = ExtResource("12_dlbli")
 pinned_us = ExtResource("13_hvjme")
 broken_ger = ExtResource("14_kswga")
 broken_us = ExtResource("15_pi8vb")
+surrendered_ger = ExtResource("16_8rtsn")
+surrendered_us = ExtResource("17_dlbli")
 
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("8_3avcp")
+expand_mode = 3
+
+[node name="Surrendered" type="TextureRect" parent="UnitStatus"]
 visible = false
 layout_mode = 0
 offset_right = 40.0

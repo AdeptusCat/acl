@@ -85,29 +85,39 @@ func _process_movement(delta: float):
 
 func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 	# careful, known_enemies are now all enemies, visible or not
-	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
-	if retreat_map == Vector2i.ZERO:
+	var retreat_hex = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
+	if retreat_hex == Vector2i.ZERO:
 		rout_failed.emit()
 		return
-	#var retreat_map = Vector2i(0,0)
+	
 	retreating = true
-	retreat_target_hex = retreat_map
+	retreat_target_hex = retreat_hex
 
-	var from_id = ground_map.pathfinding_get_point_id(current_hex)
-	var to_id = ground_map.pathfinding_get_point_id(retreat_map)
-	var id_path = ground_map.astar.get_id_path(from_id, to_id)
+	var restricted_astar = create_restricted_astar(allowed_hexes)
+	var from_id =  restricted_astar.get_closest_point(ground_map.map_to_local(current_hex))
+	#var from_id = ground_map.pathfinding_get_point_id(current_hex)
+	var to_id =  restricted_astar.get_closest_point(ground_map.map_to_local(retreat_hex))
+	#var to_id = ground_map.pathfinding_get_point_id(retreat_hex)
+	var id_path = restricted_astar.get_id_path(from_id, to_id)
+
+	#var from_id = ground_map.pathfinding_get_point_id(current_hex)
+	#var to_id = ground_map.pathfinding_get_point_id(retreat_map)
+	#var id_path = ground_map.astar.get_id_path(from_id, to_id)
 
 	var cube_path: Array[Vector3i] = []
 	for pid in id_path:
-		var pos = ground_map.astar.get_point_position(pid)
+		var pos = restricted_astar.get_point_position(pid)
 		cube_path.append(ground_map.local_to_cube(pos))
 
 	follow_cube_path(cube_path)
 
 
-var point_array: Array[Vector2]
+#var point_array: Array[Vector2]
+var allowed_hexes: Array[Vector2i]
 func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int) -> Vector2i:
 	var retreat_hex: Vector2i = Vector2i.ZERO
+	allowed_hexes.clear()
+	allowed_hexes.append(origin_hex)
 	var ground_layer = LOSHelper.ground_layer
 	var building_layer = LOSHelper.building_layer
 	var origin_cube = ground_layer.map_to_cube(origin_hex)
@@ -170,7 +180,8 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 				if is_adjacent_to_enemy:
 					continue  # Skip this hex, too close to an enemy
 				
-				point_array.append(ground_map.map_to_local(neighbor))
+				#point_array.append(ground_map.map_to_local(neighbor))
+				allowed_hexes.append(neighbor)
 				
 				if building_layer.get_cell_source_id(neighbor) != -1:
 					var visible_by_enemy := false
@@ -192,7 +203,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 		ring += 1
 	
 	# Optional debug draw
-	unit.get_parent().get_parent().draw_points(point_array)
+	#unit.get_parent().get_parent().draw_points(point_array)
 	
 	return retreat_hex
 
@@ -223,3 +234,22 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 			neighbor_hexes.append(ground_layer.cube_to_map(neighbor_cube))
 	return neighbor_hexes
 	
+func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
+	var new_astar = AStar2D.new()
+	var original = ground_map.astar
+	
+	var allowed_ids = allowed_hexes.map(func(h): return ground_map.pathfinding_get_point_id(h))
+	
+	# Copy only allowed points
+	for id in allowed_ids:
+		var pos = original.get_point_position(id)
+		new_astar.add_point(id, pos)
+	
+	# Copy only connections between allowed points
+	for id in allowed_ids:
+		var connected_ids = original.get_point_connections(id)
+		for conn_id in connected_ids:
+			if allowed_ids.has(conn_id) and not new_astar.are_points_connected(id, conn_id):
+				new_astar.connect_points(id, conn_id, false)
+	
+	return new_astar

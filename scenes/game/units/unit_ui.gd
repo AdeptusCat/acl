@@ -24,7 +24,7 @@ var detail_ui = null
 @onready var shooting_texture_rect = $UnitStatus/Shooting
 @onready var pinned_texture_rect = $UnitStatus/Pinned
 @onready var idle_texture_rect = $UnitStatus/Idle
-
+@onready var surrendered_texture_rect = $UnitStatus/Surrendered
 
 func select():
 	unit_selected_sprite.visible = true
@@ -68,25 +68,30 @@ func _on_unit_arrived_at_hex(hex):
 		pass
 
 
-func started_moving(broken: bool):
+func started_moving(broken: bool, surrendered: bool):
 	for child in unit_status_control.get_children():
 		child.visible = false
 	moving_texture_rect.visible = true
 	$Timer.stop()
 	if detail_ui:
-		detail_ui.started_moving(broken)
+		detail_ui.started_moving(broken, surrendered)
 
 
-func stopped_moving(broken: bool):
+func stopped_moving(broken: bool, surrendered: bool):
 	for child in unit_status_control.get_children():
 		child.visible = false
 	if broken == true:
 		broken_texture_rect.visible = true
 	else:
 		idle_texture_rect.visible = true
+	if surrendered:
+		idle_texture_rect.visible = false
+		broken_texture_rect.visible = false
+		surrendered_texture_rect.visible = true
+	
 	$Timer.stop()
 	if detail_ui:
-		detail_ui.stopped_moving(broken)
+		detail_ui.stopped_moving(broken, surrendered)
 
 
 func _on_morale_breaks():
@@ -207,6 +212,12 @@ func shoot(from_pos: Vector2, to_pos):
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
+
+func surrender():
+	if detail_ui:
+		for child in detail_ui.unit_status_control.get_children():
+			child.visible = false
+		detail_ui.surrendered_texture_rect.visible = true
 
 
 func die():

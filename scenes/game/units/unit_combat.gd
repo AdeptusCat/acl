@@ -13,7 +13,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
-		if enemy and enemy.alive:
+		if enemy and enemy.alive and not enemy.surrendered:
 			var distance = current_hex.distance_to(enemy.current_hex)
 			if distance <= range * 2:
 				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
@@ -41,7 +41,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
-		if is_instance_valid(u) and u.alive and u.current_hex == target_hex:
+		if is_instance_valid(u) and u.alive and not u.surrendered and u.current_hex == target_hex:
 			batch_targets.append(u)
 
 	if batch_targets.is_empty():

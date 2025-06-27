@@ -15,9 +15,6 @@ var recovery_time_max: float = 5.0
 # Runtime state
 var morale_meter_current: float = 0
 var recovery_timer_current: float = 0.0
-var broken: bool = false
-var alive: bool = true
-
 
 signal morale_updated(current: int, max: int)
 signal morale_failure
@@ -30,10 +27,10 @@ func _init(_unit: Node2D):
 	unit = _unit
 
 func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
-	if not alive:
+	if not unit.alive or unit.surrendered:
 		return
 
-	if broken:
+	if unit.broken:
 		recovery_timer_current = 0.0
 
 	var attack_roll = randi_range(2, 12)
@@ -61,23 +58,23 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 
 func make_morale_check(unit_visible_enemies: Dictionary):
 	var death_chance = base_death_chance
-	if broken:
+	if unit.broken:
 		death_chance *= broken_death_multiplier
 
 	if randf() < death_chance:
-		return # debug
+		#return # debug
 		unit.die()
 		return
 
 	var roll = randi_range(2, 12)
-	#if roll > morale:
-	if true: # debug
-		if broken: 
+	if roll > morale:
+	#if true: # debug
+		if unit.broken: 
 			# otherwise the unit searches for another hex to retreat to, 
 			# which would be fine, if the current hex wouldnt be the one where the rout started, 
 			# think about it
 			return
-		broken = true
+		unit.broken = true
 		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 		unit._on_morale_failed(visible_enemies)
 		morale_breaks.emit()
@@ -90,7 +87,7 @@ func make_morale_check(unit_visible_enemies: Dictionary):
 
 
 func _process_recovery(delta: float) -> void:
-	if broken:
+	if unit.broken and not unit.surrendered:
 		recovery_timer_current += delta
 		if recovery_timer_current >= recovery_time_max:
 			_recover()
@@ -103,7 +100,7 @@ func _process_recovery(delta: float) -> void:
 			morale_updated.emit(morale_meter_current, morale_meter_max)
 
 func _recover() -> void:
-	broken = false
+	unit.broken = false
 	morale_meter_current = 0
 	morale_updated.emit(morale_meter_current, morale_meter_max)
 	morale_recovered.emit()

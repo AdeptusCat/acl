@@ -24,6 +24,7 @@ var morale_meter_current: int = 0
 var path_hexes: Array[Vector2i] = []
 var path_index: int = 0
 var alive: bool = true
+var surrendered: bool = false
 var broken: bool = false
 var recovery_timer_current: float = 0.0
 var current_cover_bonus: int = 0
@@ -43,6 +44,7 @@ signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
 signal deselect_unit(unit)
 signal started_moving
+signal unit_surrendered
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -87,17 +89,18 @@ func _ready():
 
 func _on_started_moving():
 	moving = true
-	ui.started_moving(broken)
+	ui.started_moving(broken, surrendered)
 	started_moving.emit()
 
 
 func _on_stopped_moving():
 	moving = false
-	ui.stopped_moving(broken)
+	ui.stopped_moving(broken, surrendered)
 
 
 func _on_rout_failed():
-	die()
+	surrender()
+	#die()
 
 
 func _on_morale_breaks():
@@ -174,6 +177,14 @@ func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: floa
 func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
+
+
+func surrender():
+	surrendered = true
+	#alive = false
+	broken = false
+	emit_signal("unit_surrendered", self)
+	ui.surrender()
 
 
 func die():

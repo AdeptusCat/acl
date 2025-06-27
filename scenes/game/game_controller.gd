@@ -58,6 +58,7 @@ func _ready():
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
 			unit.deselect_unit.connect(_deselect_unit)
 			unit.started_moving.connect(_on_started_moving)
+			unit.unit_surrendered.connect(_on_unit_surrendered)
 			
 	combat_sys.unit_visible_enemies = unit_visible_enemies
 	combat_sys.units = units
@@ -236,6 +237,10 @@ func _find_units_at(hex: Vector2i) -> Array[Node2D]:
 		if u.current_hex == hex:
 			units.append(u)
 	return units
+
+
+func _on_unit_surrendered(unit):
+	pass
 
 
 func _on_unit_died(unit):
