@@ -18,7 +18,7 @@ var retreat_target_hex: Vector2i = Vector2i()
 
 signal started_moving
 signal stopped_moving
-
+signal rout_failed
 
 func _init(_unit: Node2D):
 	unit = _unit
@@ -86,6 +86,9 @@ func _process_movement(delta: float):
 func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 	# careful, known_enemies are now all enemies, visible or not
 	var retreat_map = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
+	if retreat_map == Vector2i.ZERO:
+		rout_failed.emit()
+		return
 	#var retreat_map = Vector2i(0,0)
 	retreating = true
 	retreat_target_hex = retreat_map
@@ -102,53 +105,69 @@ func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 	follow_cube_path(cube_path)
 
 
-# !!! problem !!!
-# this is not breath out, rather it seeks in one direction, see draw debug
-# fix algorithm to look at the nearest hexes first
 var point_array: Array[Vector2]
 func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int) -> Vector2i:
 	var retreat_hex: Vector2i = Vector2i.ZERO
-	var retreat_path: Array[Vector2i]
-	
-	
 	var ground_layer = LOSHelper.ground_layer
 	var building_layer = LOSHelper.building_layer
 	var origin_cube = ground_layer.map_to_cube(origin_hex)
 	
-	
-	var neighbor_hexes: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, origin_cube, known_enemies)
-	for neighbor_hex in neighbor_hexes:
-		
-		if not building_layer.get_cell_source_id(neighbor_hex) == -1:
-			var visible_by_enemy: bool = false
+	# First check immediate neighbors
+	var immediate_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, origin_cube, known_enemies)
+	for neighbor_hex in immediate_neighbors:
+		if building_layer.get_cell_source_id(neighbor_hex) != -1:
+			var visible_by_enemy := false
 			for enemy in known_enemies:
 				var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
 				if visible_hexes.has(neighbor_hex):
 					visible_by_enemy = true
+					break
 			if not visible_by_enemy:
-				retreat_hex = neighbor_hex
-				break
-	while retreat_hex == Vector2i.ZERO:
-		var new_neighbor_hexes: Array[Vector2i]
-		for neighbor_hex in neighbor_hexes:
-			point_array.append(ground_map.map_to_local(neighbor_hex))
-			new_neighbor_hexes = get_neighbor_hexes_not_closer_to_enemy(origin_cube, ground_layer.map_to_cube(neighbor_hex), known_enemies)
-			for new_neighbor_hex in new_neighbor_hexes:
-				point_array.append(ground_map.map_to_local(new_neighbor_hex))
-				if not building_layer.get_cell_source_id(new_neighbor_hex) == -1:
-					var visible_by_enemy: bool = false
+				return neighbor_hex  # Early return for fast escape
+	
+	# BFS for further rings
+	var visited := {}
+	var queue := [origin_hex]
+	visited[origin_hex] = true
+	var ring := 0
+	
+	while queue.size() > 0 and retreat_hex == Vector2i.ZERO:
+		var level_size = queue.size()
+		var added_any := false  # track if we added any new hex this ring
+		
+		for i in range(level_size):
+			var current = queue.pop_front()
+			var current_cube = ground_layer.map_to_cube(current)
+			
+			var next_neighbors = get_neighbor_hexes_not_closer_to_enemy(origin_cube, current_cube, known_enemies)
+			for neighbor in next_neighbors:
+				if visited.has(neighbor):
+					continue
+				visited[neighbor] = true
+				added_any = true  # we added at least one new neighbor
+				point_array.append(ground_map.map_to_local(neighbor))
+				if building_layer.get_cell_source_id(neighbor) != -1:
+					var visible_by_enemy := false
 					for enemy in known_enemies:
 						var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
-						if visible_hexes.has(new_neighbor_hex):
+						if visible_hexes.has(neighbor):
 							visible_by_enemy = true
+							break
 					if not visible_by_enemy:
-						retreat_hex = new_neighbor_hex
+						retreat_hex = neighbor
 						break
-			if not retreat_hex == Vector2i.ZERO:
+				queue.append(neighbor)
+			
+			if retreat_hex != Vector2i.ZERO:
 				break
-		neighbor_hexes = new_neighbor_hexes
+		
+		if not added_any:
+			break  # no new hexes found => no valid retreat path
+		ring += 1
 	
+	# Optional debug draw
 	unit.get_parent().get_parent().draw_points(point_array)
+	
 	return retreat_hex
 
 
@@ -177,102 +196,4 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 		if not closer_to_enemy:
 			neighbor_hexes.append(ground_layer.cube_to_map(neighbor_cube))
 	return neighbor_hexes
-	## shortcuts
-	#var map    = ground_map                          # HexagonTileMapLayer reference
-	#var ground = LOSHelper.ground_layer          # for map_to_local()
-	#var build  = LOSHelper.building_layer        # for get_cell_source_id()
-#
-	## 1) enemy centroid in pixel‐space
-	#var centroid = Vector2.ZERO
-	#var enemy_hexes : Array
-	#for enemy in known_enemies:
-		#if not is_instance_valid(enemy):
-			#continue
-		#enemy_hexes.append(enemy.current_hex)
-	#for e_hex in enemy_hexes:
-		#centroid += ground.map_to_local(e_hex)
-	#if enemy_hexes.size() > 0:
-		#centroid /= enemy_hexes.size()
-#
-	## 2) all cubes within 'steps'
-	#var origin_cube = map.map_to_cube(origin_hex)
-	#var cube_list   = map.cube_range(origin_cube, steps)
-#
-	## 3) inline Callable to test “unseen by all enemies”
-	#var is_unseen = func(test_map_hex: Vector2i) -> bool:
-		#var tpos = ground.map_to_local(test_map_hex)
-		#for e_hex in enemy_hexes:
-			#var epos = ground.map_to_local(e_hex)
-			#var los  = LOSHelper.check_los(epos, tpos, 1, 0, 1, 0)
-			#if not los["blocked"]:
-				#return false
-		#return true
-#
-	## 4) bucket hexes by priority
-	#var unseen_bld  : Array[Vector2i] = []
-	#var any_bld     : Array[Vector2i] = []
-	#var unseen_only : Array[Vector2i] = []
-	#for c3 in cube_list:
-		#var m = map.cube_to_map(c3)
-		#if map.get_cell_source_id(m) == -1:
-			#continue  # no tile here
-		#var has_b = build.get_cell_source_id(m) != -1
-		#var vis   = is_unseen.call(m)
-		#if has_b and vis:
-			#unseen_bld.append(m)
-		#elif has_b:
-			#any_bld.append(m)
-		#elif vis:
-			#unseen_only.append(m)
-#
-	## 5) fallback = origin + every reachable hex
-	#var fallback : Array[Vector2i] = [ origin_hex ]
-	#for c3 in cube_list:
-		#fallback.append(map.cube_to_map(c3))
-#
-	## 6) choose the pool in priority order
-	#var pool : Array[Vector2i]
-	#if unseen_bld.size() > 0:
-		#pool = unseen_bld
-	#elif any_bld.size() > 0:
-		#pool = any_bld
-	#elif unseen_only.size() > 0:
-		#pool = unseen_only
-	#else:
-		#pool = fallback
-#
-	## — new: filter out any hex that is strictly closer to any enemy —
-	#var safe_pool: Array[Vector2i] = []
-	## gather just the enemy hex coords
-	#enemy_hexes = []
-	#for e in known_enemies:
-		#if is_instance_valid(e):
-			#enemy_hexes.append(e.current_hex)
-#
-	#for h in pool:
-		#var moves_closer := false
-		#for e_hex in enemy_hexes:
-			## if h is closer to this enemy than you already are, it's invalid
-			#if h.distance_to(e_hex) < origin_hex.distance_to(e_hex):
-				#moves_closer = true
-				#break
-		#if not moves_closer:
-			#safe_pool.append(h)
-	## if nothing left, you have no “away” route → die
-	#if safe_pool.is_empty() or safe_pool[0] == origin_hex:
-		##die()
-		#return origin_hex
-#
-	## replace pool with safe options
-	#pool = safe_pool
-#
-	## — now pick from pool as before (e.g. farthest from centroid) —
-	#var best_hex  = origin_hex
-	#var best_dist = -1.0
-	#for h in pool:
-		#var d = (ground.map_to_local(h) - centroid).length()
-		#if d > best_dist:
-			#best_dist = d
-			#best_hex  = h
-#
-	#return best_hex
+	

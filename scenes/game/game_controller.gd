@@ -32,7 +32,6 @@ var point_array: Array[Vector2]
 func draw_points(_point_array):
 	point_array = _point_array
 	queue_redraw()
-
 func _draw():
 	for point in point_array:
 		#draw_line(point, point, Color(1, 0, 0), 2.0)

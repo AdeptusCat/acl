@@ -81,6 +81,7 @@ func _ready():
 
 	movement.started_moving.connect(_on_started_moving)
 	movement.stopped_moving.connect(_on_stopped_moving)
+	movement.rout_failed.connect(_on_rout_failed)
 	add_child(combat)
 
 
@@ -93,6 +94,10 @@ func _on_started_moving():
 func _on_stopped_moving():
 	moving = false
 	ui.stopped_moving(broken)
+
+
+func _on_rout_failed():
+	die()
 
 
 func _on_morale_breaks():

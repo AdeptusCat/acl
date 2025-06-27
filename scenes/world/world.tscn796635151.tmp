@@ -769,7 +769,7 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 
 [node name="Unit10" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1088, 800)
+position = Vector2(464, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 
@@ -798,7 +798,7 @@ position = Vector2(1184, 864)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit5" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(992, 672)
+position = Vector2(1088, 992)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit6" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
