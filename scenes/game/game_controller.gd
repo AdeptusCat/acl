@@ -197,7 +197,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
 	var unit = units[selected_hex_index]
-	if unit and unit.team == current_team and not unit.broken:
+	if unit and unit.team == current_team and not unit.broken and not unit.surrendered:
 		if unit == selected_unit:
 			_deselect_unit(unit)
 		else:

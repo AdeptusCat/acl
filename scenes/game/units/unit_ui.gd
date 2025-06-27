@@ -214,6 +214,9 @@ func shoot(from_pos: Vector2, to_pos):
 
 
 func surrender():
+	for child in unit_status_control.get_children():
+		child.visible = false
+	surrendered_texture_rect.visible = true
 	if detail_ui:
 		for child in detail_ui.unit_status_control.get_children():
 			child.visible = false
@@ -229,6 +232,8 @@ func die():
 
 
 func _on_timer_timeout() -> void:
+	if surrendered_texture_rect.visible == true:
+		return
 	for child in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true

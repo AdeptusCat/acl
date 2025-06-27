@@ -19,6 +19,7 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
 
 
 func _draw():
+	return
 	# 🔥 New: Draw blue lines to visible enemies
 	for los_data in los_enemy_lines:
 		draw_line(los_data["from"], los_data["to"], Color(0, 0, 1), 2.0)

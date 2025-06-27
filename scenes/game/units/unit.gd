@@ -169,7 +169,7 @@ func update_team_sprite(team: int):
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
-	if not alive:
+	if not alive or surrendered:
 		return
 	combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
 
@@ -197,7 +197,7 @@ func die():
 func _on_morale_failed(_known_enemies: Array) -> void:
 	var known_enemies: Array[Node2D]
 	for unit in units:
-		if not unit.team == team:
+		if not unit.team == team and not unit.surrendered:
 			known_enemies.append(unit)
 	movement.rout(current_hex, known_enemies, retreat_distance)
 	

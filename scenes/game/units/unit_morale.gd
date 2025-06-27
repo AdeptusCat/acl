@@ -69,15 +69,15 @@ func make_morale_check(unit_visible_enemies: Dictionary):
 	var roll = randi_range(2, 12)
 	if roll > morale:
 	#if true: # debug
-		if unit.broken: 
+		if unit.broken or unit.surrendered: 
 			# otherwise the unit searches for another hex to retreat to, 
 			# which would be fine, if the current hex wouldnt be the one where the rout started, 
 			# think about it
 			return
 		unit.broken = true
 		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
-		unit._on_morale_failed(visible_enemies)
 		morale_breaks.emit()
+		unit._on_morale_failed(visible_enemies)
 		recovery_timer_current = 0.0
 	else:
 		morale_meter_current = 0

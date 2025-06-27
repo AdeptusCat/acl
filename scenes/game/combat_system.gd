@@ -13,14 +13,16 @@ func _process(delta: float) -> void:
 	if not enabled:
 		return
 	for unit in units:
-		if not unit.moving and unit.alive and not unit.broken:
+		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
+			continue
+		else:
 			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 
 func _on_unit_moved(unit, vector):
 	if not enabled:
 		return
-	if not unit.alive:
+	if not unit.alive or unit.surrendered:
 		return
 	
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
@@ -38,7 +40,9 @@ func _on_unit_moved(unit, vector):
 			unit_visible_enemies[unit].append(enemy_unit)
 
 			# Fire immediately if stationary (optional fast reaction shot)
-			if not enemy_unit.movement.moving:
+			if enemy_unit.moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
+				continue
+			else:
 				var distance = enemy_unit.current_hex.distance_to(unit.current_hex)
 				# safely grab the inner dict for this shooter-hex
 				var cover_map = LOSHelper.los_lookup.get(enemy_unit.current_hex, null)
