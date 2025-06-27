@@ -145,7 +145,33 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 					continue
 				visited[neighbor] = true
 				added_any = true  # we added at least one new neighbor
+				
+				# Reject if this hex is adjacent to any enemy
+				# Get all neighbors of the candidate hex
+				var neighbor_cube = ground_layer.map_to_cube(neighbor)
+				var adjacent_hexes := []
+				for direction_index in [
+					TileSet.CELL_NEIGHBOR_TOP_SIDE,
+					TileSet.CELL_NEIGHBOR_TOP_RIGHT_SIDE,
+					TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE,
+					TileSet.CELL_NEIGHBOR_BOTTOM_SIDE,
+					TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE,
+					TileSet.CELL_NEIGHBOR_TOP_LEFT_SIDE,
+				]:
+					var offset = ground_layer.cube_direction(direction_index)
+					var adjacent_cube = neighbor_cube + offset
+					adjacent_hexes.append(ground_layer.cube_to_map(adjacent_cube))
+				# Check if any enemy is on an adjacent hex
+				var is_adjacent_to_enemy := false
+				for enemy in known_enemies:
+					if adjacent_hexes.has(enemy.current_hex):
+						is_adjacent_to_enemy = true
+						break
+				if is_adjacent_to_enemy:
+					continue  # Skip this hex, too close to an enemy
+				
 				point_array.append(ground_map.map_to_local(neighbor))
+				
 				if building_layer.get_cell_source_id(neighbor) != -1:
 					var visible_by_enemy := false
 					for enemy in known_enemies:
