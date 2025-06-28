@@ -93,6 +93,7 @@ func rout(current_hex : Vector2i, known_enemies, retreat_distance):
 	retreating = true
 	retreat_target_hex = retreat_hex
 
+	# add weights to the astar to discourage open ground or hexes seen by the enemy
 	var restricted_astar = create_restricted_astar(allowed_hexes)
 	var from_id =  restricted_astar.get_closest_point(ground_map.map_to_local(current_hex))
 	#var from_id = ground_map.pathfinding_get_point_id(current_hex)

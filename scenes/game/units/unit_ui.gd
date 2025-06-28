@@ -232,7 +232,7 @@ func die():
 
 
 func _on_timer_timeout() -> void:
-	if surrendered_texture_rect.visible == true:
+	if surrendered_texture_rect.visible == true or broken_texture_rect.visible:
 		return
 	for child in unit_status_control.get_children():
 		child.visible = false
