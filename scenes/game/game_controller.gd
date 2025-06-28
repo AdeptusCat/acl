@@ -17,7 +17,6 @@ var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
 var timer_running := false
 
-var current_team: int = 0
 var selected_unit: Node2D = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
@@ -84,35 +83,36 @@ func _ready():
 func draw_fog():
 	var used_cells := fog_of_war_layer.get_used_cells()
 	for cell in used_cells:
-		if LOSHelper.visible_hexes.has(cell):
+		if LOSHelper.visible_hexes[Globals.team_player].has(cell):
 			fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
 		else:
 			fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
 	for x in LOSHelper.GRID_SIZE_X:
 		for y in LOSHelper.GRID_SIZE_Y:
-			if not LOSHelper.visible_hexes.has(Vector2i(x, y)):
+			if not LOSHelper.visible_hexes[Globals.team_player].has(Vector2i(x, y)):
 				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
 
 
 func show_visible_units():
 	for u in units:
-		if not u.team == current_team:
-			if LOSHelper.visible_hexes.has(u.current_hex):
+		if not u.team == Globals.team_player:
+			if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
 				u.visible = true
 			else:
 				u.visible = false 
 
 
 func update_visible_hexes():
-	LOSHelper.visible_hexes.clear()
+	for array in LOSHelper.visible_hexes.values():
+		array.clear()
 	for u in units:
-		if u.team == current_team:
-			var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
-			for hex in unit_visible:
-				if not LOSHelper.visible_hexes.has(hex):
-					LOSHelper.visible_hexes.append(hex)
-			if not LOSHelper.visible_hexes.has(u.current_hex):
-				LOSHelper.visible_hexes.append(u.current_hex)
+		var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
+		for hex in unit_visible:
+			if not LOSHelper.visible_hexes[u.team].has(hex):
+				LOSHelper.visible_hexes[u.team].append(hex)
+		if not LOSHelper.visible_hexes[u.team].has(u.current_hex):
+			LOSHelper.visible_hexes[u.team].append(u.current_hex)
+
 
 func _on_unit_moved(unit, vector: Vector2i):
 	update_visible_hexes()
@@ -197,7 +197,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
 	var unit = units[selected_hex_index]
-	if unit and unit.team == current_team and not unit.broken and not unit.surrendered:
+	if unit and unit.team == Globals.team_player and not unit.broken and not unit.surrendered:
 		if unit == selected_unit:
 			_deselect_unit(unit)
 		else:
@@ -256,10 +256,10 @@ func start_game(team: int, time: float):
 	time_left_seconds = time * 60.0
 	set_objective_cells(team)
 	#timer_running = true
-	current_team = team
+	Globals.team_player = team
 	input_mgr.set_input(true)
 	for unit in unit_container.get_children():
-		if unit.team == current_team:
+		if unit.team == Globals.team_player:
 			unit.visible = true
 	update_visible_hexes()
 	draw_fog()

@@ -22,7 +22,9 @@ var los_lines: Array = []
 const GRID_SIZE_X = 33 
 const GRID_SIZE_Y = 21
 
-var visible_hexes: Array[Vector2i]
+var visible_hexes: Dictionary[int, Array] = {Globals.Team.AXIS: [], Globals.Team.ALLIES: []}
+#var visible_hexes: Array[Vector2i]
+
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
