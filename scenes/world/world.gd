@@ -23,6 +23,7 @@ func _ready():
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	LOSHelper.terrain_layer = terrain_layer
 	Globals.astars[Globals.Team.AXIS] = copy_astar(ground_layer.astar)
+	Globals.astars[Globals.Team.ALLIES] = copy_astar(ground_layer.astar)
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")

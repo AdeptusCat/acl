@@ -6,14 +6,14 @@ var units: Array[Node2D] = []
 
 
 func _on_move_requested(selected_unit, to_hex):
-	var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex)
+	var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex, selected_unit.team)
 	selected_unit.movement.follow_cube_path(path)
 
 
 var threat_weights = {}
 
 
-func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
+func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3i]:
 	var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
 	var to_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 
@@ -21,10 +21,12 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
 	for point_id in LOSHelper.ground_layer.astar.get_point_ids():
 		var world_pos = LOSHelper.ground_layer.astar.get_point_position(point_id)
 		var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-		var weight = current_threat_map.get(hex_map, 1.0)
-		LOSHelper.ground_layer.astar.set_point_weight_scale(point_id, weight)
+		var weight = current_threat_maps[team].get(hex_map, 1.0)
+		Globals.astars[team].set_point_weight_scale(point_id, weight)
+		#LOSHelper.ground_layer.astar.set_point_weight_scale(point_id, weight)
 	# Run A*
-	var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
+	#var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
+	var id_path: PackedInt64Array = Globals.astars[team].get_id_path(from_id, to_id)
 
 	# Convert path to cube coordinates
 	var cube_path: Array[Vector3i] = []
@@ -35,10 +37,10 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
 	return cube_path
 
 
-func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pending_visible_hexes: Dictionary[int, Array]) -> float:
+func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pending_visible_hexes: Dictionary[int, Array], team: int) -> float:
 	var weight = 1.0  # Start with neutral weight scale
 
-	var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.ALLIES
+	var enemy_team = Globals.Team.AXIS if team == Globals.Team.ALLIES else Globals.Team.ALLIES
 	
 	var observed_hexes_by_enemy = pending_visible_hexes.get(enemy_team, [])
 	
@@ -63,7 +65,7 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 
 var thread: Thread
 var result_ready := false
-var current_threat_map: Dictionary[Vector2i, float] = {}
+var current_threat_maps: Dictionary[int, Dictionary] 
 
 var pending_visible_hexes: Dictionary[int, Array]
 var pending_lookup: Dictionary = {}
@@ -90,23 +92,27 @@ func _exit_tree():
 		thread.wait_to_finish()
 
 
-func _set_threat_map_result(result: Dictionary[Vector2i, float]):
-	current_threat_map = result
-	get_parent().draw_threat(current_threat_map)
+func _set_threat_map_result(result: Dictionary[int, Dictionary]):
+	#current_threat_map = result
+	current_threat_maps = result
+	get_parent().draw_threat(current_threat_maps)
 	result_ready = true
 
 
 func _threaded_update_threat_map(pending_lookup: Dictionary, pending_visible_hexes: Dictionary[int, Array]):
-	var temp_threat_map: Dictionary[Vector2i, float] = {}
+	var temp_threat_maps: Dictionary[int, Dictionary]
+	temp_threat_maps[Globals.Team.AXIS] = {}
+	temp_threat_maps[Globals.Team.ALLIES] = {}
 	#temp_threat_map[Vector2i(12, 12)] =  _calculate_threat_weight(Vector2i(12, 12), pending_lookup, pending_visible_hexes)
 	#temp_threat_map[Vector2i(15, 9)] =  _calculate_threat_weight(Vector2i(15, 9), pending_lookup, pending_visible_hexes)
-	for point_id in LOSHelper.ground_layer.astar.get_point_ids():
-		var world_pos = LOSHelper.ground_layer.astar.get_point_position(point_id)
-		var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-		var weight = _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes)
-		temp_threat_map[hex_map] = weight
+	for team in Globals.Team.values():
+		for point_id in LOSHelper.ground_layer.astar.get_point_ids():
+			var world_pos = LOSHelper.ground_layer.astar.get_point_position(point_id)
+			var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
+			var weight = _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
+			temp_threat_maps[team][hex_map] = weight
 
-	call_deferred("_set_threat_map_result", temp_threat_map)
+	call_deferred("_set_threat_map_result", temp_threat_maps)
 	call_deferred("thread_done")
 
 
