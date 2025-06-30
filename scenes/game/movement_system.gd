@@ -20,8 +20,11 @@ func _on_move_requested(selected_unit, to_hex):
 		#cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
 	#return cube_path
 
+var threat_weights = {}
+
 
 #func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
+	#threat_weights.clear()
 	#var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
 	#var to_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 #
@@ -31,7 +34,8 @@ func _on_move_requested(selected_unit, to_hex):
 		#var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
 		#var weight = _calculate_threat_weight(hex_map)
 		#LOSHelper.ground_layer.astar.set_point_weight_scale(point_id, weight)
-#
+		#threat_weights[hex_map] = weight
+	#get_parent().draw_threat(threat_weights)
 	## Run A*
 	#var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
 #
@@ -45,6 +49,7 @@ func _on_move_requested(selected_unit, to_hex):
 
 
 func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
+	threat_weights.clear()
 	var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(from_h)
 	var to_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 
@@ -54,7 +59,8 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
 		var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
 		var weight = current_threat_map.get(hex_map, 1.0)
 		LOSHelper.ground_layer.astar.set_point_weight_scale(point_id, weight)
-
+		threat_weights[hex_map] = weight
+	get_parent().draw_threat(threat_weights)
 	# Run A*
 	var id_path: PackedInt64Array = LOSHelper.ground_layer.astar.get_id_path(from_id, to_id)
 
@@ -65,6 +71,7 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i) -> Array[Vector3i]:
 		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
 
 	return cube_path
+
 
 func _calculate_threat_weight(hex: Vector2i) -> float:
 	var weight = 1.0  # Start with neutral weight scale
@@ -129,6 +136,7 @@ func _process(delta: float) -> void:
 		
 
 func update_threat_map():
+	threat_weights.clear()
 	current_threat_map.clear()
 
 	var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.AXIS
@@ -147,7 +155,8 @@ func update_threat_map():
 			var cover = clamp(LOSHelper.los_lookup[o_hex][t_hex].shooter_cover, 0, 5)
 			var threat = (8.0 - float(cover)) * 0.1
 			threat_map[t_hex] = threat_map.get(t_hex, 1.0) + threat
-
+			threat_weights[t_hex] = 1.0 + threat
+	get_parent().draw_threat(threat_weights)
 	current_threat_map = threat_map
 
 

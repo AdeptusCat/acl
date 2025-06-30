@@ -28,14 +28,36 @@ signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
 
 var point_array: Array[Vector2]
+var threat_weights = {}
+
 func draw_points(_point_array):
 	point_array = _point_array
 	queue_redraw()
 func _draw():
-	for point in point_array:
-		#draw_line(point, point, Color(1, 0, 0), 2.0)
-		draw_circle(point, 5.0, Color.RED)
+	#for point in point_array:
+		##draw_line(point, point, Color(1, 0, 0), 2.0)
+		#draw_circle(point, 5.0, Color.RED)
+	if threat_weights.is_empty():
+		return
+		
+	var weights = threat_weights.values()
+	var min_weight = weights.min()
+	var max_weight = weights.max()
 
+	for hex in threat_weights:
+		var norm = _normalize_weight(threat_weights[hex], min_weight, max_weight)
+		var color = Color(1, 1 - norm, 0)  # Red to Green
+		var pos = ground_layer.map_to_local(hex) + Vector2(32, 32)
+		draw_circle(pos, 4, color)
+		
+func _normalize_weight(w, min_w, max_w):
+	if max_w == min_w:
+		return 0.0
+	return clamp((w - min_w) / (max_w - min_w), 0.0, 1.0)
+	
+func draw_threat(_threat_weights):
+	threat_weights = _threat_weights
+	queue_redraw()
 
 func _ready():
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
