@@ -47,7 +47,7 @@ func _draw():
 	for hex in threat_weights:
 		var norm = _normalize_weight(threat_weights[hex], min_weight, max_weight)
 		var color = Color(1, 1 - norm, 0)  # Red to Green
-		var pos = ground_layer.map_to_local(hex) + Vector2(32, 32)
+		var pos = ground_layer.map_to_local(hex) #+ Vector2(32, 32)
 		draw_circle(pos, 4, color)
 		
 func _normalize_weight(w, min_w, max_w):

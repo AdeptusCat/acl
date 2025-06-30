@@ -22,6 +22,7 @@ func _ready():
 	LOSHelper.building_layer = building_layer  # <-- inject the TileMap
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	LOSHelper.terrain_layer = terrain_layer
+	Globals.astars[Globals.Team.AXIS] = copy_astar(ground_layer.astar)
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
@@ -57,6 +58,26 @@ func _ready():
 	#print(res)
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
+
+func copy_astar(source: AStar2D) -> AStar2D:
+	var copy := AStar2D.new()
+
+	# Step 1: Copy all points
+	for id in source.get_point_ids():
+		var pos = source.get_point_position(id)
+		var weight = source.get_point_weight_scale(id)
+		var disabled = source.is_point_disabled(id)
+		copy.add_point(id, pos, weight)
+		copy.set_point_disabled(id, disabled)
+
+	# Step 2: Copy connections
+	for id in source.get_point_ids():
+		for neighbor in source.get_point_connections(id):
+			# Avoid duplicate connections (only add if id < neighbor)
+			if id < neighbor:
+				copy.connect_points(id, neighbor)
+
+	return copy
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):

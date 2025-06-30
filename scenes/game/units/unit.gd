@@ -180,6 +180,7 @@ func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_vi
 
 
 func surrender():
+	movement.move_to_hex(current_hex)
 	surrendered = true
 	#alive = false
 	broken = false
