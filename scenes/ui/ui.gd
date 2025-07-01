@@ -88,6 +88,8 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 			child.detail_ui = null
 		child.queue_free()
 	for unit in units:
+		if not LOSHelper.visible_hexes[Globals.team_player].has(unit.current_hex):
+			continue
 		var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
 		unit_stats_container.add_child(unit_ui)
 		var unit_stats_details = unit_stats_details_scene.instantiate()
