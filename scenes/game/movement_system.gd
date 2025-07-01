@@ -121,14 +121,79 @@ func thread_done():
 		thread.wait_to_finish()
 		thread = null
 
+
 func _process(delta: float) -> void:
 	update_timer += delta
 	if update_timer >= update_interval:
 		update_timer = 0.0
-		var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.ALLIES
-		var observers: Array = LOSHelper.visible_hexes.get(enemy_team, [])
-		request_threat_update(observers, LOSHelper.los_lookup)
+		
+		await _start_threat_map_update()
+		
+		#var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.ALLIES
+		#var observers: Array = LOSHelper.visible_hexes.get(enemy_team, [])
+		#request_threat_update(observers, LOSHelper.los_lookup)
 
+var updating_threat := false
+func _start_threat_map_update():
+	if updating_threat:
+		return
+	updating_threat = true
+	#pending_visible_hexes = LOSHelper.visible_hexes.duplicate(true)
+	#pending_lookup = LOSHelper.los_lookup.duplicate(true)
+	
+	pending_visible_hexes = await _deferred_copy_dict_visible_hexes(LOSHelper.visible_hexes)
+	#pending_lookup = await _deferred_copy_dict(LOSHelper.los_lookup)
+	pending_lookup = LOSHelper.los_lookup
+	await _incremental_threat_map_update()
+	updating_threat = false
+
+func _deferred_copy_dict_visible_hexes(source: Dictionary[int, Array]) -> Dictionary[int, Array]:
+	var copy:Dictionary[int, Array] = {}
+	for k in source.keys():
+		var v = source[k]
+		if typeof(v) == TYPE_DICTIONARY:
+			copy[k] = v.duplicate(true)
+		elif typeof(v) == TYPE_ARRAY:
+			copy[k] = v.duplicate(true)
+		else:
+			copy[k] = v
+		await get_tree().create_timer(0.0).timeout
+	return copy
+
+func _deferred_copy_dict(source: Dictionary) -> Dictionary:
+	var copy := {}
+	for k in source.keys():
+		var v = source[k]
+		if typeof(v) == TYPE_DICTIONARY:
+			copy[k] = v.duplicate(true)
+		elif typeof(v) == TYPE_ARRAY:
+			copy[k] = v.duplicate(true)
+		else:
+			copy[k] = v
+		await get_tree().create_timer(0.0).timeout
+	return copy
+
+func _incremental_threat_map_update() -> void:
+	var temp_threat_maps: Dictionary[int, Dictionary]
+	temp_threat_maps[Globals.Team.AXIS] = {}
+	temp_threat_maps[Globals.Team.ALLIES] = {}
+
+	for team in Globals.Team.values():
+		var points := Globals.astars[team].get_point_ids()
+		var index := 0
+		while index < points.size():
+			var batch_size := 30  # Lower this if still lagging
+			for j in range(batch_size):
+				if index >= points.size():
+					break
+				var point_id := points[index]
+				var world_pos = Globals.astars[team].get_point_position(point_id)
+				var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
+				var weight := _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
+				temp_threat_maps[team][hex_map] = weight
+				index += 1
+			await get_tree().create_timer(0.00).timeout  # Yield between small batches
+	call_deferred("_set_threat_map_result", temp_threat_maps)
 
 func _on_arrived(hex):
 	_restack_units_in_hex(hex)

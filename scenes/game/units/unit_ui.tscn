@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=29 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
@@ -12,9 +12,11 @@
 [ext_resource type="Texture2D" uid="uid://bll7674oq3txi" path="res://assets/status/moving_us.png" id="9_bigh4"]
 [ext_resource type="Texture2D" uid="uid://c6ffdp6d331fw" path="res://assets/status/moving.png" id="9_kue5q"]
 [ext_resource type="Texture2D" uid="uid://bqxj0vhj8e7xy" path="res://assets/status/shooting_ger.png" id="10_gxdh5"]
+[ext_resource type="Texture2D" uid="uid://bbg3wm65hmb0m" path="res://assets/status/routing_ger.png" id="10_hvjme"]
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://dprqeinm8tbk2" path="res://assets/status/shooting_us.png" id="11_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
+[ext_resource type="Texture2D" uid="uid://cn4m384b387ir" path="res://assets/status/routing_us.png" id="11_kswga"]
 [ext_resource type="Texture2D" uid="uid://c3u7esoded7o8" path="res://assets/status/pinned_ger.png" id="12_dlbli"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
@@ -33,6 +35,9 @@ resource_local_to_scene = true
 shader = ExtResource("2_scjr7")
 shader_parameter/dissolve_amount = 0.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_74e6i")
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_8rtsn"]
+load_path = "res://.godot/imported/moving.png-8a601ddf4709bc8e3654383a07cd187d.s3tc.ctex"
 
 [node name="UnitUi" type="Control"]
 custom_minimum_size = Vector2(65, 65)
@@ -85,6 +90,8 @@ idle_ger = ExtResource("6_sw8nw")
 idle_us = ExtResource("7_87qi7")
 moving_ger = ExtResource("8_1rga6")
 moving_us = ExtResource("9_bigh4")
+routing_ger = ExtResource("10_hvjme")
+routing_us = ExtResource("11_kswga")
 shooting_ger = ExtResource("10_gxdh5")
 shooting_us = ExtResource("11_8rtsn")
 pinned_ger = ExtResource("12_dlbli")
@@ -116,6 +123,14 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("9_kue5q")
+expand_mode = 3
+
+[node name="Routing" type="TextureRect" parent="UnitStatus"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = SubResource("CompressedTexture2D_8rtsn")
 expand_mode = 3
 
 [node name="Shooting" type="TextureRect" parent="UnitStatus"]

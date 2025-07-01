@@ -21,6 +21,7 @@ var detail_ui = null
 @onready var unit_status_control = $UnitStatus
 @onready var broken_texture_rect = $UnitStatus/Broken
 @onready var moving_texture_rect = $UnitStatus/Moving
+@onready var routing_texture_rect = $UnitStatus/Routing
 @onready var shooting_texture_rect = $UnitStatus/Shooting
 @onready var pinned_texture_rect = $UnitStatus/Pinned
 @onready var idle_texture_rect = $UnitStatus/Idle
@@ -71,7 +72,10 @@ func _on_unit_arrived_at_hex(hex):
 func started_moving(broken: bool, surrendered: bool):
 	for child in unit_status_control.get_children():
 		child.visible = false
-	moving_texture_rect.visible = true
+	if broken:
+		routing_texture_rect.visible = true
+	else:
+		moving_texture_rect.visible = true
 	$Timer.stop()
 	if detail_ui:
 		detail_ui.started_moving(broken, surrendered)

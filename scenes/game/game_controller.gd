@@ -56,6 +56,7 @@ func _normalize_weight(w, min_w, max_w):
 	return clamp((w - min_w) / (max_w - min_w), 0.0, 1.0)
 	
 func draw_threat(_threat_weights: Dictionary[int, Dictionary]):
+	return #debug
 	threat_weights = _threat_weights[Globals.team_player]
 	queue_redraw()
 
