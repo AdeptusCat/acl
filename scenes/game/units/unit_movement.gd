@@ -30,11 +30,12 @@ func process(delta: float):
 
 
 func move_to_hex(new_hex: Vector2i):
-	unit.current_hex = new_hex
-	target_position = ground_map.map_to_local(new_hex)
+	#unit.current_hex = new_hex
+	unit.goal_hex = new_hex
+	target_position = ground_map.map_to_local(unit.goal_hex)
 	moving = true
 	started_moving.emit()
-	unit.moved_to_hex.emit(unit, new_hex)
+	#unit.moved_to_hex.emit(unit, new_hex)
 
 func follow_cube_path(cube_path: Array[Vector3i]):
 	path_hexes.clear()
@@ -66,12 +67,18 @@ func _process_movement(delta: float):
 	var dir = (target_position - unit.position).normalized()
 	var dist = unit.position.distance_to(target_position)
 	var step = move_speed * delta
-
+	
+	if path_index < path_hexes.size():
+		if LOSHelper.ground_layer.get_closest_cell_from_local(unit.position) == LOSHelper.ground_layer.map_to_cube(path_hexes[path_index]):
+			if not unit.current_hex == path_hexes[path_index]:
+				unit.current_hex = path_hexes[path_index]
+				unit.moved_to_hex.emit(unit, path_hexes[path_index])
+	
 	if dist <= step:
 		unit.position = target_position
 		moving = false
 		stopped_moving.emit()
-
+		
 		if path_index < path_hexes.size() - 1:
 			path_index += 1
 			move_to_hex(path_hexes[path_index])

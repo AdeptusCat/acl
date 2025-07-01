@@ -29,6 +29,7 @@ var broken: bool = false
 var recovery_timer_current: float = 0.0
 var current_cover_bonus: int = 0
 var current_hex: Vector2i
+var goal_hex: Vector2i
 var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
@@ -45,6 +46,7 @@ signal cover_updated(value: float)
 signal deselect_unit(unit)
 signal started_moving
 signal unit_surrendered
+signal unit_entered_new_hex(new_hex: Vector2i)
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -177,6 +179,8 @@ func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: floa
 func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
+	#if moving and not broken and not surrendered:
+		#movement.recalc_path()
 
 
 func surrender():
@@ -207,4 +211,5 @@ func _on_morale_failed(_known_enemies: Array) -> void:
 func _on_retreat_complete(retreat_hex) -> void:
 	movement.moving = false
 	current_hex = retreat_hex
-	emit_signal("moved_to_hex", self, current_hex)
+	moved_to_hex.emit(self, current_hex)
+	#emit_signal("moved_to_hex", self, current_hex)
