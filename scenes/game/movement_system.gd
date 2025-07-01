@@ -18,8 +18,8 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3
 	var to_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(to_h)
 
 	# Update point weight scales based on enemy LOS threat
-	for point_id in LOSHelper.ground_layer.astar.get_point_ids():
-		var world_pos = LOSHelper.ground_layer.astar.get_point_position(point_id)
+	for point_id in Globals.astars[team].get_point_ids():
+		var world_pos = Globals.astars[team].get_point_position(point_id)
 		var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
 		var weight = current_threat_maps[team].get(hex_map, 1.0)
 		Globals.astars[team].set_point_weight_scale(point_id, weight)
@@ -31,7 +31,7 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3
 	# Convert path to cube coordinates
 	var cube_path: Array[Vector3i] = []
 	for pid in id_path:
-		var pos = LOSHelper.ground_layer.astar.get_point_position(pid)
+		var pos = Globals.astars[team].get_point_position(pid)
 		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
 
 	return cube_path
@@ -106,8 +106,8 @@ func _threaded_update_threat_map(pending_lookup: Dictionary, pending_visible_hex
 	#temp_threat_map[Vector2i(12, 12)] =  _calculate_threat_weight(Vector2i(12, 12), pending_lookup, pending_visible_hexes)
 	#temp_threat_map[Vector2i(15, 9)] =  _calculate_threat_weight(Vector2i(15, 9), pending_lookup, pending_visible_hexes)
 	for team in Globals.Team.values():
-		for point_id in LOSHelper.ground_layer.astar.get_point_ids():
-			var world_pos = LOSHelper.ground_layer.astar.get_point_position(point_id)
+		for point_id in Globals.astars[team].get_point_ids():
+			var world_pos = Globals.astars[team].get_point_position(point_id)
 			var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
 			var weight = _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
 			temp_threat_maps[team][hex_map] = weight

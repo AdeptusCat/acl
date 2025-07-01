@@ -49,12 +49,15 @@ func begin_retreat(target_hex: Vector2i):
 	retreat_target_hex = target_hex
 	retreating = true
 	var from_id = ground_map.pathfinding_get_point_id(unit.current_hex)
-	var to_id = ground_map.pathfinding_get_point_id(target_hex)
-	var id_path = ground_map.astar.get_id_path(from_id, to_id)
+	#var to_id = ground_map.pathfinding_get_point_id(target_hex)
+	var to_id = Globals.astars[unit.team].pathfinding_get_point_id(target_hex)
+	#var id_path = ground_map.astar.get_id_path(from_id, to_id)
+	var id_path = Globals.astars[unit.team].get_id_path(from_id, to_id)
 
 	var cube_path: Array[Vector3i] = []
 	for pid in id_path:
-		var pos = ground_map.astar.get_point_position(pid)
+		#var pos = ground_map.astar.get_point_position(pid)
+		var pos = Globals.astars[unit.team].get_point_position(pid)
 		cube_path.append(ground_map.local_to_cube(pos))
 	follow_cube_path(cube_path)
 
@@ -237,7 +240,8 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 	
 func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
 	var new_astar = AStar2D.new()
-	var original = ground_map.astar
+	#var original = ground_map.astar
+	var original = Globals.astars[unit.team]
 	
 	var allowed_ids = allowed_hexes.map(func(h): return ground_map.pathfinding_get_point_id(h))
 	
