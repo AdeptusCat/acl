@@ -144,6 +144,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array, steps: int)
 					visible_by_enemy = true
 					break
 			if not visible_by_enemy:
+				allowed_hexes.append(neighbor_hex)
 				return neighbor_hex  # Early return for fast escape
 	
 	# BFS for further rings
