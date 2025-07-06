@@ -63,7 +63,7 @@ func make_morale_check(unit_visible_enemies: Dictionary):
 
 	if randf() < death_chance:
 		#return # debug
-		#unit.die()
+		unit.die()
 		return
 
 	var roll = randi_range(2, 12)
