@@ -1,8 +1,9 @@
-[gd_scene load_steps=29 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=30 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
+[ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
-[ext_resource type="Texture2D" uid="uid://c5qf7rqxxcvje" path="res://assets/units/unit_tb.png" id="3_bigh4"]
+[ext_resource type="Texture2D" uid="uid://bdylr2k27jatk" path="res://assets/units/unit_tb_border.png" id="3_djxcy"]
 [ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/ui/unit_selected.png" id="4_3gpgx"]
 [ext_resource type="Script" uid="uid://b85d7gbden4ih" path="res://scenes/game/units/unit_status.gd" id="5_xe57g"]
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="6_sw8nw"]
@@ -46,13 +47,15 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_wym2j")
+sprite_team_0 = ExtResource("2_pi8vb")
+sprite_team_1 = ExtResource("3_djxcy")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
 layout_mode = 2
 offset_right = 64.0
 offset_bottom = 64.0
-texture = ExtResource("3_bigh4")
+texture = ExtResource("3_djxcy")
 expand_mode = 3
 
 [node name="MoraleBar" type="ColorRect" parent="."]
