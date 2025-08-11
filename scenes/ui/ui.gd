@@ -27,6 +27,12 @@ extends CanvasLayer
 @onready var unit_stats = $UnitStats
 @onready var unit_stats_container = $UnitStats/MarginContainer/VBoxContainer/UnitStatsContainer
 
+@onready var target_cover_distance = $TargetCoverDistance
+@onready var cover_container = $TargetCoverDistance/VBoxContainer/Cover
+@onready var firepower_label = $TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
+@onready var distance_label = $TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
+
+
 signal try_again
 
 # Configuration
@@ -67,6 +73,25 @@ func _ready() -> void:
 	$TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
 	$TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
 	$TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+
+
+func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
+	target_cover_distance.show()
+	target_cover_distance.position = local_event_pos
+	for child in cover_container.get_children():
+		child.queue_free()
+	for cover in targetCover:
+		var cover_icon: TextureRect = cover_icon_scene.instantiate()
+		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
+		cover_container.add_child(cover_icon)
+	firepower_label.text = str(firepower)
+	distance_label.text = str(distance)
+	#if detail_ui:
+		#detail_ui.set_cover(targetCover)
+
+
+func hide_target_hex_cover_distance():
+	target_cover_distance.hide()
 
 
 func _on_update_timer_label(time_left_seconds : float):

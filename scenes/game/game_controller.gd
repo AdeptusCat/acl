@@ -26,7 +26,7 @@ signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
-signal show_los
+
 
 var point_array: Array[Vector2]
 var threat_weights = {}
@@ -232,13 +232,50 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 			LOSHelper.clear_los()
 
 
+var origin_hex 
+var target_hex
+var targetCover
+var distance
+var firepower
 func _on_mouse_event_position_changed(event_pos: Vector2):
 	mouse_event_position_changed.emit(event_pos)
 	if selected_unit:
 		var unit_pos = selected_unit.position
 		var local_event_pos = get_local_mouse_position()
 		LOSHelper.draw_los(unit_pos, local_event_pos)
+		
+		var screen_pos = get_viewport().get_mouse_position()
+		if (target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and origin_hex == selected_unit.current_hex):
+			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+		else:
+			origin_hex = selected_unit.current_hex
+			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
+			distance = int(origin_hex.distance_to(target_hex))
+			# safely grab the inner dict for this shooter-hex
+			var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
+			if cover_map and cover_map.has(target_hex):
+				var data        = cover_map[target_hex]
+				targetCover 	= data["target_cover"]
+			else:
+				targetCover = 0  # no LOS or no cover entry
+				get_parent().ui.hide_target_hex_cover_distance()
+				target_hex = null
+				origin_hex = null
+				return
 
+			# now display it
+			firepower = selected_unit.firepower
+			if distance > selected_unit.range:
+				if distance <= selected_unit.range * 2:
+					firepower = firepower / 2
+				else:
+					firepower = 0
+			
+			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+			#selected_unit.set_cover(targetCover)
+			#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
+	else:
+		get_parent().ui.hide_target_hex_cover_distance()
 
 func hex_glow(pos: Vector2):
 	var glow = glow_maker_scene.instantiate()
