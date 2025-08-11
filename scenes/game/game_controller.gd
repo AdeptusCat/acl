@@ -190,20 +190,23 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
 	
 	if selected_unit:
+		var units: Array[Node2D] = _find_units_at(map_hex)
+		for unit in units:
+			if not unit.team == Globals.team_player:
+				selected_unit.combat.target_unit = unit
+				var local_pos = ground_layer.map_to_local(map_hex)
+				hex_glow(local_pos)
+				return
 		move_sys._on_move_requested(selected_unit, map_hex)
 		#_deselect_unit(selected_unit)
 		var local_pos = ground_layer.map_to_local(map_hex)
 		hex_glow(local_pos)
-
-
-func hex_glow(pos: Vector2):
-	var glow = glow_maker_scene.instantiate()
-	glow.position = pos
-	add_child(glow)
+	
 
 
 var previous_selected_hex: Vector2i = Vector2i(-1, -1)
 var selected_hex_index: int = 0
+
 
 func _on_mouse_button_left_pressed(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
@@ -226,8 +229,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 			_deselect_unit(unit)
 		else:
 			_select_unit(unit)
-		
-	
+			LOSHelper.clear_los()
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
@@ -236,6 +238,15 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 		var unit_pos = selected_unit.position
 		var local_event_pos = get_local_mouse_position()
 		LOSHelper.draw_los(unit_pos, local_event_pos)
+
+
+func hex_glow(pos: Vector2):
+	var glow = glow_maker_scene.instantiate()
+	glow.position = pos
+	add_child(glow)
+
+
+
 
 
 func _on_key_space_pressed(event_pos: Vector2):
@@ -253,6 +264,7 @@ func _deselect_unit(unit):
 	if selected_unit == unit:
 		selected_unit.deselect()
 		selected_unit = null
+		LOSHelper.clear_los()
 
 
 func _find_units_at(hex: Vector2i) -> Array[Node2D]:

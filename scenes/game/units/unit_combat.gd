@@ -2,6 +2,7 @@ class_name UnitCombat
 extends Node
 
 var fire_timer: float = 0.0
+var target_unit
 
 signal shoot(from_pos, target_pos)
 
@@ -11,6 +12,24 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 	if fire_timer > 0:
 		return  # Still waiting for next shot
 
+	if target_unit:
+		if target_unit and target_unit.alive and not target_unit.surrendered:
+			var distance = current_hex.distance_to(target_unit.current_hex)
+			if distance <= range * 2:
+				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				var targetCover = 0
+				if cover_map and cover_map.has(target_unit.current_hex):
+					var data = cover_map[target_unit.current_hex]
+					targetCover = data["target_cover"]
+
+				target_unit.set_cover(targetCover)
+				fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+				fire_timer = fire_rate
+				return
+			else:
+				target_unit = null
+		else:
+			target_unit = null
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
@@ -26,6 +45,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 				fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate
 				break
+	
 
 func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower : float, range, unit_visible_enemies: Dictionary, fire_rate):
 

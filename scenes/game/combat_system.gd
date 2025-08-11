@@ -16,7 +16,8 @@ func _process(delta: float) -> void:
 		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
 			continue
 		else:
-			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			if unit.team == Globals.team_player:
+				unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 
 func _on_unit_moved(unit, vector):

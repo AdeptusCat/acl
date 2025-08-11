@@ -1055,6 +1055,10 @@ func draw_los(origin_pos, target_pos):
 	queue_redraw()
 
 
+func clear_los():
+	los_lines.clear()
+	queue_redraw()
+
 
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> int:
 	var d = nxt - cur
