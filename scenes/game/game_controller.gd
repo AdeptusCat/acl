@@ -20,12 +20,13 @@ var timer_running := false
 var selected_unit: Node2D = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
-var mouse_hover_hex: Vector2i
+
 
 signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
+signal show_los
 
 var point_array: Array[Vector2]
 var threat_weights = {}
@@ -230,11 +231,11 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
-	event_pos = get_local_mouse_position()
-	var map_hex = ground_layer.local_to_map(event_pos)
-	if not map_hex == mouse_hover_hex:
-		mouse_hover_hex = map_hex
-		mouse_event_position_changed.emit(event_pos)
+	mouse_event_position_changed.emit(event_pos)
+	if selected_unit:
+		var unit_pos = selected_unit.position
+		var local_event_pos = get_local_mouse_position()
+		LOSHelper.draw_los(unit_pos, local_event_pos)
 
 
 func _on_key_space_pressed(event_pos: Vector2):

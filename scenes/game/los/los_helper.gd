@@ -1026,6 +1026,36 @@ func generate_los_lines_for_debug():
 	
 	queue_redraw()
 
+
+var _target_hex 
+var _origin_hex
+func draw_los(origin_pos, target_pos):
+	los_lines.clear()
+	var target_hex = ground_layer.local_to_map(target_pos)
+	origin_hex = ground_layer.local_to_map(origin_pos)
+	if origin_hex == target_hex:
+		return
+	if target_hex == _target_hex and origin_hex == _origin_hex:
+		return
+	_target_hex = target_hex
+	_origin_hex = origin_hex
+	
+	origin_pos = ground_layer.map_to_local(origin_hex)
+	target_pos = ground_layer.map_to_local(target_hex)
+	var los_result = check_los(origin_pos, target_pos, 1, 1, 1, 1)
+	
+	if los_result["blocked"] == true:
+		pass
+	los_lines.append({
+		"target_pos": target_pos,
+		"blocked": los_result["blocked"],
+		"block_point": los_result["block_point"],
+		"hexes": los_result["hexes"]
+	})
+	queue_redraw()
+
+
+
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> int:
 	var d = nxt - cur
 	if d == Vector3i( 0,  1, -1): return COMPASS_DIRECTION.SOUTH

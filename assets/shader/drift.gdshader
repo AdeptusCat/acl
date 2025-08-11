@@ -10,7 +10,7 @@ void fragment() {
 
 	// Wrap the texture UVs with scrolling
 	vec2 uv = fract(UV + offset);
-	
+
 	vec4 tex_color = texture(TEXTURE, uv);
 	tex_color.a *= opacity; // control alpha manually
 

@@ -14,6 +14,8 @@ extends Node2D
 signal try_again
 signal fully_freed
 
+var mouse_hover_hex: Vector2i
+
 func _exit_tree():
 	fully_freed.emit()
 
@@ -82,6 +84,14 @@ func copy_astar(source: AStar2D) -> AStar2D:
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
+	event_pos = get_local_mouse_position()
+	var map_hex = ground_layer.local_to_map(event_pos)
+	if not map_hex == mouse_hover_hex:
+		mouse_hover_hex = map_hex
+		calc_unit_data_for_ui(event_pos)
+
+
+func calc_unit_data_for_ui(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
 	var result = {
 		"blocking" : false,
@@ -179,7 +189,6 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 			units.append(unit)
 	
 	ui.show_unit_data(map_hex, units)
-
 
 func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
