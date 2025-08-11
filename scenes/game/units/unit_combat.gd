@@ -65,6 +65,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 			batch_targets.append(u)
 
 	if batch_targets.is_empty():
+		target_unit = null
 		return
 
 	for u in batch_targets:
@@ -80,11 +81,14 @@ func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bulle
 	
 	for i in range(rounds):
 		if not is_instance_valid(shooter) or not is_instance_valid(target):
+			target_unit = null
 			return
 		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 		if not visible_enemies.has(target):
+			target_unit = null
 			return
 		if shooter.broken or shooter.moving or shooter.surrendered:
+			target_unit = null
 			return
 		
 		shoot.emit(shooter.global_position, target.global_position)
