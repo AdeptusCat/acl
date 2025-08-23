@@ -1,10 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://rsqpaeas8ic5"]
+[gd_scene load_steps=7 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
-[ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="4_5wnup"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
-[ext_resource type="Texture2D" uid="uid://biiqwlbm4tbl7" path="res://assets/effects/tracer.png" id="7_b5oeb"]
-[ext_resource type="PackedScene" uid="uid://cnam7dkrou122" path="res://scenes/ui/cover_icon.tscn" id="7_h0ojj"]
+[ext_resource type="PackedScene" uid="uid://c24n2ejqyspj8" path="res://scenes/game/units/unit_combat.tscn" id="6_sh6c0"]
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="8_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
@@ -21,10 +19,9 @@ offset_right = 7.0
 offset_bottom = 8.0
 morale_popup_scene = ExtResource("5_djab4")
 morale_flash_scene = ExtResource("5_djab4")
-tracer_scene = ExtResource("4_5wnup")
-tracer_texture = ExtResource("7_b5oeb")
-cover_icon_scene = ExtResource("7_h0ojj")
 
 [node name="UnitStressController" parent="." instance=ExtResource("7_v8x2n")]
 
 [node name="UnitMovement" parent="." instance=ExtResource("8_v8x2n")]
+
+[node name="Combat" parent="." instance=ExtResource("6_sh6c0")]

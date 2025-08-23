@@ -55,13 +55,14 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 @onready var ui := $UnitUi
 @onready var stress_system := $UnitStressController
 @onready var movement := $UnitMovement
+@onready var combat := $Combat
 
 # === Classes ===
 @onready var morale_system := UnitMorale.new(self)
 #@onready var morale_ui := UnitMoraleUI.new(self)
 #@onready var movement := UnitMovement.new(self)
-@onready var combat := UnitCombat.new()
-
+#@onready var combat := UnitCombat.new()
+@onready var base_spv: float = combat.seconds_per_volley
 
 # === Ready ===
 func _ready():
@@ -255,15 +256,11 @@ func _on_state_changed(prev:int, next:int) -> void:
 	combat.current_state = next
 	
 	## 2) ROF/accuracy from state table
-	#var m = STATES.STATE_MOD[next]
+	var m = STATES.STATE_MOD[next]
 	## guard against silly zeros
-	#var rof_mult := max(m.rof, 0.05)
-	#combat.seconds_per_volley = base_spv / rof_mult
-#
-	#if combat.has_method("set_accuracy_multiplier"):
-		#combat.set_accuracy_multiplier(m.acc)
-	#else:
-		#combat.accuracy_multiplier = m.acc  # add this var in UnitCombat if needed
-#
+	var rof_mult: float = max(float(m.rof), 0.05)
+	combat.seconds_per_volley = base_spv / rof_mult
+	combat.accuracy_multiplier = m.acc
+
 	## 3) Visuals/pose
 	ui.state_changed(next)

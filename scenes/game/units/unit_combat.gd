@@ -13,6 +13,7 @@ const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to 
 var can_fire := true
 var current_state := 0 # injected from morale
 var cover_bonus := 0.0 # injected from LOS/terrain (0..1)
+var accuracy_multiplier: float = 1.0
 
 var fire_timer: float = 0.0
 var target_unit

@@ -279,7 +279,7 @@ func state_changed(next:int) -> void:
 	_apply_speed(base_speed * move_mult)
 
 	## 2) Behaviour per morale state
-	#match next:
+	match next:
 		#STATES.MoraleState.NORMAL:
 			#obey_player_orders = true
 			#_set_stance(0) # stand
@@ -296,7 +296,12 @@ func state_changed(next:int) -> void:
 			#_halt()
 			#_crawl_to_nearest_cover()
 #
-		#STATES.MoraleState.PANIC:
+		STATES.MoraleState.PANIC:
+			var known_enemies: Array[Node2D]
+			for u in unit.units:
+				if not u.team == unit.team and not u.surrendered:
+					known_enemies.append(u)
+			rout(unit.current_hex, known_enemies, unit.retreat_distance)
 			#obey_player_orders = false
 			#_set_stance(3) # run
 			#_halt()
