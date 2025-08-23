@@ -57,6 +57,7 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 
 
 func make_morale_check(unit_visible_enemies: Dictionary):
+	return
 	var death_chance = base_death_chance
 	if unit.broken:
 		death_chance *= broken_death_multiplier

@@ -10,21 +10,23 @@ var path_index: int = 0
 var target_position: Vector2
 var moving: bool = false
 var move_speed: float = 50.0
+@export var base_speed: float = 50.0
 
 # Retreat state
 var retreating: bool = false
 var retreat_distance := 3
 var retreat_target_hex: Vector2i = Vector2i()
 
+var obey_player_orders: bool = true
+var stance: int = 0  # 0 stand, 1 crouch, 2 prone, 3 run, 4 withdraw
+
 signal started_moving
 signal stopped_moving
 signal rout_failed
 
-func _init(_unit: Node2D):
-	unit = _unit
 
 
-func process(delta: float):
+func _process(delta: float):
 	if moving:
 		_process_movement(delta)
 
@@ -91,6 +93,9 @@ func _process_movement(delta: float):
 			path_index = 0
 	else:
 		unit.position += dir * step
+		if not unit.stress_system.state == STATES.MoraleState.NORMAL:
+			var state = unit.stress_system.state
+			pass
 
 
 func rout(current_hex : Vector2i, known_enemies, retreat_distance):
@@ -266,3 +271,102 @@ func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
 				new_astar.connect_points(id, conn_id, false)
 	
 	return new_astar
+
+
+func state_changed(next:int) -> void:
+	# 1) Speed from state table
+	var move_mult: float = float(STATES.STATE_MOD[next]["move"])
+	_apply_speed(base_speed * move_mult)
+
+	## 2) Behaviour per morale state
+	#match next:
+		#STATES.MoraleState.NORMAL:
+			#obey_player_orders = true
+			#_set_stance(0) # stand
+			#_resume_if_paused()
+#
+		#STATES.MoraleState.CAUTIOUS:
+			#obey_player_orders = true
+			#_set_stance(1) # crouch
+			#_rebuild_path_with_cover_bias(0.25)
+#
+		#STATES.MoraleState.PINNED:
+			#obey_player_orders = false
+			#_set_stance(2) # prone
+			#_halt()
+			#_crawl_to_nearest_cover()
+#
+		#STATES.MoraleState.PANIC:
+			#obey_player_orders = false
+			#_set_stance(3) # run
+			#_halt()
+			#_route_to_safest_cover()
+#
+		#STATES.MoraleState.COMBAT_INEFFECTIVE:
+			#obey_player_orders = false
+			#_set_stance(4) # withdraw
+			#_halt()
+			#_route_to_safest_cover(true)  # retrograde bias
+
+
+
+# ---------- helpers (minimal, safe to stub out) ----------
+
+func _apply_speed(v: float) -> void:
+	move_speed = v
+	pass
+
+func _set_stance(s: int) -> void:
+	stance = s
+	# TODO: adjust collider/animation/turning cost if needed (e.g., prone lowers collider height)
+
+#func _resume_if_paused() -> void:
+	## TODO: if you paused pathing when pinned/panic, resume here.
+	#if agent and agent.is_navigation_finished() == false:
+		#agent.set_velocity(Vector2.ZERO) # let physics tick resume movement
+#
+#func _rebuild_path_with_cover_bias(bias: float) -> void:
+	## Optional: if you’ve got hex A*, rebuild current path with a small
+	## extra cost for low-cover hexes so the lad keeps to the hedges.
+	## e.g., pathfinder.cover_bias = bias; pathfinder.repath()
+	#pass
+#
+#func _halt() -> void:
+	## stop current movement; don’t clear destination so you can resume later if you like
+	#if agent:
+		#agent.set_velocity(Vector2.ZERO)
+		#agent.target_position = agent.get_global_position()
+	## also tell your order system we’re temporarily disobeying
+	## obey_player_orders already set above
+#
+#func _crawl_to_nearest_cover() -> void:
+	## Pick the best adjacent hex by (cover - enemy_exposure) and crawl to it.
+	#var best_hex := _best_adjacent_cover_hex()
+	#if best_hex:
+		#_path_to_hex(best_hex, crawl := true)
+#
+#func _route_to_safest_cover(retrograde: bool=false) -> void:
+	## Scan a small ring (e.g., radius 4–6) for a hex maximizing safety score.
+	#var best_hex := _best_safe_hex(radius := 5, retrograde := retrograde)
+	#if best_hex:
+		#_path_to_hex(best_hex, sprint := true)
+#
+#func _best_adjacent_cover_hex():
+	## TODO: replace with your actual grid/LOS helpers.
+	## Example scoring:
+	##   score = cover(hex) - enemy_exposure(hex) - 0.2*move_cost(hex)
+	## Return the neighbour with max score.
+	#return null
+#
+#func _best_safe_hex(radius: int=5, retrograde: bool=false):
+	## TODO: search in rings; score with
+	##   cover(hex) - exposure(hex) - 0.05*distance - (retrograde ? -0.2*towards_friendly(hex) : 0.0)
+	#return null
+#
+#func _path_to_hex(hex, crawl: bool=false, sprint: bool=false) -> void:
+	## Hook into your pathfinder; set stance-driven speed if you don’t use agent.
+	#if crawl:
+		#_apply_speed(min(desired_speed, base_speed * 0.35))
+	#elif sprint:
+		#_apply_speed(base_speed * 1.2)
+	## TODO: set the actual path/target using your hex A*.

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bjltvr578vstw"]
+
+[ext_resource type="Script" uid="uid://bqyw0hrtq5mml" path="res://scenes/game/units/unit_movement.gd" id="1_pdc7a"]
+
+[node name="UnitMovement" type="Node"]
+script = ExtResource("1_pdc7a")

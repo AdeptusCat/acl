@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 LOSHelper="*res://scenes/game/los/los_helper.tscn"
 Globals="*res://autoloads/globals.gd"
+STATES="*res://autoloads/unit_states.gd"
 
 [display]
 

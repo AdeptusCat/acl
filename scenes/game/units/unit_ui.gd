@@ -10,6 +10,10 @@ var detail_ui = null
 @export var tracer_scene: PackedScene
 @export var tracer_texture: Texture
 @export var cover_icon_scene: PackedScene
+@export var cautious_texture: Texture
+@export var pinned_texture: Texture
+@export var panic_texture: Texture
+@export var combat_ineffective_texture: Texture
 
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
@@ -27,6 +31,8 @@ var detail_ui = null
 @onready var idle_texture_rect = $UnitStatus/Idle
 @onready var surrendered_texture_rect = $UnitStatus/Surrendered
 
+
+
 func select():
 	unit_selected_sprite.visible = true
 	if detail_ui:
@@ -39,6 +45,22 @@ func deselect():
 		detail_ui.deselect()
 
 
+func state_changed(next:int):
+	match next:
+		STATES.MoraleState.NORMAL:
+			$UnitStates/StateTexture.hide()
+		STATES.MoraleState.CAUTIOUS:
+			$UnitStates/StateTexture.show()
+			$UnitStates/StateTexture.texture = cautious_texture
+		STATES.MoraleState.PINNED:
+			$UnitStates/StateTexture.show()
+			$UnitStates/StateTexture.texture = pinned_texture
+		STATES.MoraleState.PANIC:
+			$UnitStates/StateTexture.show()
+			$UnitStates/StateTexture.texture = panic_texture
+		STATES.MoraleState.COMBAT_INEFFECTIVE:
+			$UnitStates/StateTexture.show()
+			$UnitStates/StateTexture.texture = combat_ineffective_texture
 func update_team_sprite(team : int):
 	if not sprite_node:
 		return

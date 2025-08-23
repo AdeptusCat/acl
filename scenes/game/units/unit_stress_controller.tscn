@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8oapr6lv0pny"]
+
+[ext_resource type="Script" uid="uid://bqu2axcm5d8gd" path="res://scenes/game/units/unit_stress_controller.gd" id="1_ek3hu"]
+
+[node name="UnitStressController" type="Node"]
+script = ExtResource("1_ek3hu")

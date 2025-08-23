@@ -33,9 +33,12 @@ var goal_hex: Vector2i
 var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
-var move_speed: float = 50.0
 var retreat_target_hex: Vector2i = Vector2i()
 var units: Array[Node2D]
+
+var members_alive := 10
+var original_size := 10
+var leader_alive := true
 
 # === Signals ===
 signal moved_to_hex(new_hex: Vector2i)
@@ -50,18 +53,18 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 
 # === Nodes ===
 @onready var ui := $UnitUi
-
+@onready var stress_system := $UnitStressController
+@onready var movement := $UnitMovement
 
 # === Classes ===
 @onready var morale_system := UnitMorale.new(self)
 #@onready var morale_ui := UnitMoraleUI.new(self)
-@onready var movement := UnitMovement.new(self)
+#@onready var movement := UnitMovement.new(self)
 @onready var combat := UnitCombat.new()
 
 
 # === Ready ===
 func _ready():
-	movement.move_speed = move_speed
 	update_team_sprite(team)
 	connect("retreat_complete", _on_retreat_complete)
 	morale_system.morale_breaks.connect(_on_morale_breaks)
@@ -81,11 +84,15 @@ func _ready():
 	
 	combat.shoot.connect(ui.shoot)
 	
+	movement.unit = self
 	movement.ground_map = ground_map
 
 	movement.started_moving.connect(_on_started_moving)
 	movement.stopped_moving.connect(_on_stopped_moving)
 	movement.rout_failed.connect(_on_rout_failed)
+	
+	stress_system.state_changed.connect(_on_state_changed)
+	
 	add_child(combat)
 
 
@@ -133,7 +140,7 @@ func _process(delta):
 
 	morale_system._process_recovery(delta)
 	
-	movement.process(delta)
+	#movement.process(delta)
 
 
 # === Utility ===
@@ -182,6 +189,32 @@ func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_vi
 	#if moving and not broken and not surrendered:
 		#movement.recalc_path()
 
+func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -> void:
+	if casualties > 0:
+		_apply_casualties(casualties)
+	stress_system.apply_stress(df, ds)
+	#emit_signal("stress_applied", df, ds, source)
+
+
+func _apply_casualties(n:int) -> void:
+	members_alive = max(0, members_alive - n)
+	var leader_down = false
+	if leader_alive and randf() < 1.0/float(max(1,members_alive+1)): # small chance hit was leader
+		leader_alive = false
+		leader_down = true
+		#emit_signal("leader_killed")
+		stress_system.leadership_bonus = 0.0
+	stress_system.on_casualty_event(n, leader_down)
+	#emit_signal("casualties_taken", original_size - members_alive)
+	if members_alive <= 0:
+		_set_combat_ineffective()
+
+
+func _set_combat_ineffective():
+	stress_system.state = StressController.MoraleState.COMBAT_INEFFECTIVE
+	ui.state_changed(stress_system.state)
+	#emit_signal("state_changed",
+		#StressController.MoraleState.PANIC, stress_system.state)
 
 func surrender():
 	movement.move_to_hex(current_hex)
@@ -213,3 +246,24 @@ func _on_retreat_complete(retreat_hex) -> void:
 	current_hex = retreat_hex
 	moved_to_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
+
+
+# Single, merged handler — keep ONLY this one in unit.gd
+func _on_state_changed(prev:int, next:int) -> void:
+	# 1) Movement & internal combat state
+	movement.state_changed(next)
+	combat.current_state = next
+	
+	## 2) ROF/accuracy from state table
+	#var m = STATES.STATE_MOD[next]
+	## guard against silly zeros
+	#var rof_mult := max(m.rof, 0.05)
+	#combat.seconds_per_volley = base_spv / rof_mult
+#
+	#if combat.has_method("set_accuracy_multiplier"):
+		#combat.set_accuracy_multiplier(m.acc)
+	#else:
+		#combat.accuracy_multiplier = m.acc  # add this var in UnitCombat if needed
+#
+	## 3) Visuals/pose
+	ui.state_changed(next)

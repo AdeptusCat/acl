@@ -1,19 +1,26 @@
-[gd_scene load_steps=30 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=37 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
 [ext_resource type="Shader" uid="uid://cs5w32e418eaj" path="res://assets/shader/unit.gdshader" id="2_scjr7"]
 [ext_resource type="Texture2D" uid="uid://bdylr2k27jatk" path="res://assets/units/unit_tb_border.png" id="3_djxcy"]
 [ext_resource type="Texture2D" uid="uid://1rs2ndrj5hhc" path="res://assets/ui/unit_selected.png" id="4_3gpgx"]
+[ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="4_25msj"]
+[ext_resource type="Texture2D" uid="uid://biiqwlbm4tbl7" path="res://assets/effects/tracer.png" id="5_eilf2"]
 [ext_resource type="Script" uid="uid://b85d7gbden4ih" path="res://scenes/game/units/unit_status.gd" id="5_xe57g"]
+[ext_resource type="PackedScene" uid="uid://cnam7dkrou122" path="res://scenes/ui/cover_icon.tscn" id="6_fekhn"]
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="6_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://d0r8virbrmwn0" path="res://assets/status/idle_us.png" id="7_87qi7"]
+[ext_resource type="Texture2D" uid="uid://c1igqxirseih7" path="res://assets/states/cautious.png" id="7_755va"]
 [ext_resource type="Texture2D" uid="uid://b4uqm5s3ku78a" path="res://assets/status/moving_ger.png" id="8_1rga6"]
 [ext_resource type="Texture2D" uid="uid://2nxuv8urg7sw" path="res://assets/status/broken.png" id="8_3avcp"]
+[ext_resource type="Texture2D" uid="uid://d8gaqnlhrjbe" path="res://assets/states/pinned.png" id="8_dhwvl"]
 [ext_resource type="Texture2D" uid="uid://bll7674oq3txi" path="res://assets/status/moving_us.png" id="9_bigh4"]
+[ext_resource type="Texture2D" uid="uid://doucs1yxuqmw4" path="res://assets/states/panic.png" id="9_hjrgb"]
 [ext_resource type="Texture2D" uid="uid://c6ffdp6d331fw" path="res://assets/status/moving.png" id="9_kue5q"]
 [ext_resource type="Texture2D" uid="uid://bqxj0vhj8e7xy" path="res://assets/status/shooting_ger.png" id="10_gxdh5"]
 [ext_resource type="Texture2D" uid="uid://bbg3wm65hmb0m" path="res://assets/status/routing_ger.png" id="10_hvjme"]
+[ext_resource type="Texture2D" uid="uid://bt5l7y3ayyhxb" path="res://assets/states/combat_ineffective.png" id="10_qfgpo"]
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://dprqeinm8tbk2" path="res://assets/status/shooting_us.png" id="11_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
@@ -49,6 +56,15 @@ offset_bottom = 40.0
 script = ExtResource("1_wym2j")
 sprite_team_0 = ExtResource("2_pi8vb")
 sprite_team_1 = ExtResource("3_djxcy")
+morale_popup_scene = ExtResource("4_25msj")
+morale_flash_scene = ExtResource("4_25msj")
+tracer_scene = ExtResource("4_25msj")
+tracer_texture = ExtResource("5_eilf2")
+cover_icon_scene = ExtResource("6_fekhn")
+cautious_texture = ExtResource("7_755va")
+pinned_texture = ExtResource("8_dhwvl")
+panic_texture = ExtResource("9_hjrgb")
+combat_ineffective_texture = ExtResource("10_qfgpo")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
@@ -168,5 +184,16 @@ offset_bottom = 57.0
 alignment = 1
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="UnitStates" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="StateTexture" type="TextureRect" parent="UnitStates"]
+layout_mode = 0
+offset_right = 20.0
+offset_bottom = 20.0
+expand_mode = 1
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
