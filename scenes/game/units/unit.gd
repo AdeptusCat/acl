@@ -94,7 +94,6 @@ func _ready():
 	
 	stress_system.state_changed.connect(_on_state_changed)
 	
-	add_child(combat)
 
 
 func _on_started_moving():
@@ -214,6 +213,7 @@ func _apply_casualties(n:int) -> void:
 func _set_combat_ineffective():
 	stress_system.state = StressController.MoraleState.COMBAT_INEFFECTIVE
 	ui.state_changed(stress_system.state)
+	die()
 	#emit_signal("state_changed",
 		#StressController.MoraleState.PANIC, stress_system.state)
 
