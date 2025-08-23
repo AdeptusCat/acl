@@ -214,6 +214,10 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	#if is_sample_point_in_building(target_pos):
 		#result.target_cover = BUILDING_COVER
 	
+	var shooter_cover_origin_hex: int = result.shooter_cover
+	var hex_cover: int = result.hex_cover
+	var target_cover_target_hex: int = result.target_cover
+	
 	var shooter_height = calculate_absolute_height(origin_elevation, origin_story)
 	var target_height = calculate_absolute_height(target_elevation, target_story)
 
@@ -223,6 +227,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 
 	var origin_hex_map : Vector2i = ground_layer.local_to_map(origin_pos)
 	var target_hex_map : Vector2i = ground_layer.local_to_map(target_pos)
+	
+	#if (target_hex_map == Vector2i(22,8)):
+	#print(origin_hex_map, target_hex_map, origin_pos, target_pos, result.target_cover)
 	
 	var origin_hex_cube : Vector3i = ground_layer.local_to_cube(origin_pos)
 	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
@@ -246,6 +253,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 		BetweenAxis.X_Y_NEG:
@@ -261,6 +271,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 		BetweenAxis.Y_Z_POS:
@@ -276,6 +289,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 		BetweenAxis.Y_Z_NEG:
@@ -291,6 +307,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 		BetweenAxis.Z_X_POS:
@@ -306,6 +325,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 		BetweenAxis.Z_X_NEG:
@@ -321,6 +343,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 							result
 						)
 			result.merge(res, true)
+			result.shooter_cover += shooter_cover_origin_hex
+			result.hex_cover = hex_cover
+			result.target_cover += target_cover_target_hex
 			if res.blocked == true:
 				return result
 	
@@ -380,8 +405,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 			if result.blocked:
 				return result
 		
-		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
-			result = _check_hindrance(sample_hex_map, result)
+		if direction_between_axes == BetweenAxis.NONE:
+			if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
+				result = _check_hindrance(sample_hex_map, result)
 		
 		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
 			result = _check_blocking_terrain(sample_hex_map, result)
@@ -448,7 +474,8 @@ func _walk_between_axes_and_check_walls(
 		
 		if not start_hex_cube == origin_hex_cube:
 			if terrain_layer.get_cell_source_id(start_hex_map) != -1:
-				result = _check_hindrance(start_hex_map, result)
+				if not next_middle_hex_cube == target_hex_cube:
+					result = _check_hindrance(start_hex_map, result)
 				result = _check_blocking_terrain(start_hex_map, result)
 				if result.blocked:
 					return result
@@ -599,7 +626,7 @@ func _walk_between_axes_and_check_walls(
 		start_hex_cube = next_middle_hex_cube
 		start_hex_map = next_middle_hex_map
 		if next_middle_hex_cube == target_hex_cube:
-			break;
+			break
 	return result
 
 
@@ -875,7 +902,7 @@ func is_sample_point_in_building(sample_point: Vector2) -> int:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
 		if tile_data and tile_data.has_custom_data("cover"):
 			return tile_data.get_custom_data("cover")
-		return true
+		return 0
 
 
 func get_tile_name(sample_point: Vector2) -> String:

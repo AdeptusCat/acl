@@ -262,7 +262,6 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 				target_hex = null
 				origin_hex = null
 				return
-
 			# now display it
 			firepower = selected_unit.firepower
 			if distance > selected_unit.range:

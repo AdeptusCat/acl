@@ -28,8 +28,8 @@ func _ready():
 	Globals.astars[Globals.Team.ALLIES] = copy_astar(ground_layer.astar)
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
-	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
+	LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
+	#LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
 	
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)
@@ -39,7 +39,10 @@ func _ready():
 	
 	game_controller.setup_game()
 	
-	
+	#var origin_pos = ground_layer.map_to_local(Vector2i(4, 11))
+	#var target_pos = ground_layer.map_to_local(Vector2i(3, 9))
+	#var res = LOSHelper.check_los(origin_pos, target_pos, 0, 0, 0, 0)
+
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,0))
 	#var pos_b : Vector2 = ground_layer.map_to_local(Vector2i(2,3))
 	#14,2 10,2
