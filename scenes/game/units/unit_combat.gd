@@ -7,6 +7,9 @@ extends Node
 @export var casualty_scale := 1.0           # global tuning
 @export var stress_scale := 1.0             # global tuning
 
+const MIN_HIT_MULT: float = 0.35   # floor at extreme cover
+const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to the floor
+
 var can_fire := true
 var current_state := 0 # injected from morale
 var cover_bonus := 0.0 # injected from LOS/terrain (0..1)
@@ -17,42 +20,49 @@ var target_unit
 signal shoot(from_pos, target_pos)
 
 
-#func resolve_volley(target:Node, inputs:Dictionary) -> void:
-	## inputs: { distance, target_exposure (0..1), target_cover (0..1),
-	##           shooter_stress (0..100), target_state:int, crossfire_bonus:float }
-	#var state_mod = STATES.STATE_MOD[current_state]
-	#var acc = base_accuracy * state_mod.acc
-	#acc *= clamp(1.0 - inputs.distance * 0.002, 0.1, 1.0)             # simple falloff
-	#acc *= lerp(0.6, 1.0, 1.0 - cover_bonus)                           # shooting out of cover
-	#acc *= lerp(0.6, 1.0, 1.0 - (inputs.shooter_stress/100.0)*0.7)     # stress hurts aim
-#
-	#var effective_rounds = int(round(volley_size * state_mod.rof))
-	#if effective_rounds <= 0:
+func resolve_volley(target:Node, inputs:Dictionary) -> void:
+	# inputs: { distance, target_exposure (0..1), target_cover (0..1),
+	#           shooter_stress (0..100), target_state:int, crossfire_bonus:float }
+	var state_mod = STATES.STATE_MOD[current_state]
+	var acc = base_accuracy * state_mod.acc
+	acc *= clamp(1.0 - inputs.distance * 0.002, 0.1, 1.0)             # simple falloff
+	acc *= lerp(0.6, 1.0, 1.0 - cover_bonus)                           # shooting out of cover
+	acc *= lerp(0.6, 1.0, 1.0 - (inputs.shooter_stress/100.0)*0.7)     # stress hurts aim
+
+	var effective_rounds = int(round(volley_size * state_mod.rof))
+	if effective_rounds <= 0:
 		#emit_signal("volley_resolved", 0, 0.0, 0.0)
-		#return
-#
-	## --- Direct lethality path ---
-	## Convert many small per-round hit chances into a per-volley casualty chance.
-	#var p_hit_per_round = acc * clamp(inputs.target_exposure, 0.1, 1.0)
-	#p_hit_per_round *= lerp(1.0, 0.35, inputs.target_cover)            # cover protects
-	#p_hit_per_round = clamp(p_hit_per_round, 0.01, 0.95)
-#
-	## Probability at least one disabling hit in the volley (binomial complement)
-	#var p_casualty = 1.0 - pow(1.0 - p_hit_per_round*0.5, effective_rounds)
-	## Crossfire increases lethality
-	#p_casualty *= (1.0 + inputs.get("crossfire_bonus", 0.0))
-	#p_casualty *= casualty_scale
-#
-	#var casualties = randf() < p_casualty ? 1 : 0  # single-man resolution; can extend to >1 with more ROF
-#
-	## --- Stress path ---
-	## Fast spike from being engaged; slow accrues with sustained fire.
-	#var stress_fast = (0.8 + p_hit_per_round) * 12.0 * stress_scale
-	#var stress_slow = effective_rounds * 0.6 * lerp(0.4, 1.0, 1.0 - inputs.target_cover) * stress_scale
-#
-	#target.call_deferred("_on_incoming_fire_effect",
-		#casualties, stress_fast, stress_slow, self)
-#
+		return
+
+	# --- Direct lethality path ---
+	# Convert many small per-round hit chances into a per-volley casualty chance.
+	var exposure: float    = clamp(float(inputs.get("target_exposure", 1.0)), 0.1, 1.0)
+	var cover_pts: float   = max(float(inputs.get("target_cover", 0.0)), 0.0)
+
+	var p_hit_per_round: float = acc * exposure
+	p_hit_per_round *= cover_multiplier_exp(cover_pts)   # diminishing-returns cover
+	p_hit_per_round = clamp(p_hit_per_round, 0.01, 0.95)
+
+	# Probability at least one disabling hit in the volley (binomial complement)
+	var p_casualty: float = 1.0 - pow(1.0 - p_hit_per_round * 0.5, float(effective_rounds))
+
+	# Crossfire increases lethality
+	p_casualty *= (1.0 + inputs.get("crossfire_bonus", 0.0))
+	p_casualty *= casualty_scale
+
+	var casualties := 0
+	for i in effective_rounds:
+		if randf() < p_hit_per_round * 0.5:
+			casualties += 1
+
+	# --- Stress path ---
+	# Fast spike from being engaged; slow accrues with sustained fire.
+	var stress_fast = (0.8 + p_hit_per_round) * 12.0 * stress_scale
+	var stress_slow = effective_rounds * 0.6 * lerp(0.4, 1.0, 1.0 - inputs.target_cover) * stress_scale
+
+	target.call_deferred("_on_incoming_fire_effect",
+		casualties, stress_fast, stress_slow, self)
+
 	#emit_signal("volley_resolved", casualties, stress_fast, stress_slow)
 
 
@@ -123,8 +133,16 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	for u in batch_targets:
 		u.set_cover(terrain_defense_bonus)
 		u.receive_fire(actual_firepower, terrain_defense_bonus, unit_visible_enemies)
-		u.call_deferred("_on_incoming_fire_effect", casualties, stress_fast, stress_slow, self)
-
+		
+		#u.call_deferred("_on_incoming_fire_effect", casualties, stress_fast, stress_slow, self)
+		resolve_volley(u, {
+			"distance": distance_in_hexes,
+			"target_exposure": 1,
+			"target_cover": terrain_defense_bonus,
+			"shooter_stress": get_parent().stress_system.S_eff,
+			"target_state": u.stress_system.state,
+			"crossfire_bonus": 0.0   # e.g. +0.15 if ≥2 sources suppressing
+		})
 	fire_burst(shooter, current_hex, batch_targets[0], 8, fire_rate, unit_visible_enemies)
 	
 	
@@ -151,3 +169,10 @@ func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bulle
 		shoot.emit(shooter.global_position, target.global_position)
 
 		await get_tree().create_timer(interval).timeout
+
+
+
+func cover_multiplier_exp(cover_pts: float) -> float:
+	# Multiplier goes 1.0 → MIN_HIT_MULT with diminishing returns as cover_pts rises
+	var k: float = log(2.0) / HALF_POINT
+	return MIN_HIT_MULT + (1.0 - MIN_HIT_MULT) * exp(-k * max(cover_pts, 0.0))
