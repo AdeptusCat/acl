@@ -17,6 +17,8 @@ var _zoom_level: float = 1.0
 
 var map_size : Vector2 
 
+signal camera_moved
+
 func set_camera_limit(_map_size : Vector2):
 	map_size = _map_size
 	limit_left =- map_size.y / 2 
@@ -25,7 +27,7 @@ func set_camera_limit(_map_size : Vector2):
 	limit_bottom = map_size.y + map_size.y / 2
 
 
-
+var last_pos: Vector2
 func _physics_process(delta):
 	var direction: Vector2 = Vector2.ZERO
 	if Input.is_action_pressed("up"):
@@ -42,8 +44,13 @@ func _physics_process(delta):
 		var pos = position + direction * speed * delta
 		pos = pos.clamp(Vector2(map_size.x/4, 0), Vector2(map_size.x/2, map_size.y))
 		position = pos
-
-
+	#print(global_position)
+	camera_moved.emit()
+	#if position.x - get_screen_center_position().x > 1 or position.y - get_screen_center_position().y > 1:
+		#camera_moved.emit()
+	#if global_position.x - last_pos.x > 1 or global_position.y - last_pos.y > 1:
+		#last_pos = global_position
+		#camera_moved.emit()
 
 func zoom_in():
 	_set_zoom_level(_zoom_level - zoom_factor)

@@ -472,15 +472,19 @@ func _walk_between_axes_and_check_walls(
 		var next_middle_hex_map : Vector2i = ground_layer.cube_to_map(next_middle_hex_cube)
 		
 		
+		var hindrance_result : Dictionary = {"hindrance" : 0}
 		if not start_hex_cube == origin_hex_cube:
 			if terrain_layer.get_cell_source_id(start_hex_map) != -1:
-				if not next_middle_hex_cube == target_hex_cube:
-					result = _check_hindrance(start_hex_map, result)
+				hindrance_result = _check_hindrance(start_hex_map, hindrance_result)
+				if hindrance_result.hindrance > 0:
+					result.hindrance += 1
+					result.shooter_cover += 1
+					result.target_cover += 1
 				result = _check_blocking_terrain(start_hex_map, result)
 				if result.blocked:
 					return result
 		
-		var hindrance_result : Dictionary = {"hindrance" : 0}
+		hindrance_result.hindrance = 0
 		if terrain_layer.get_cell_source_id(s_hex_map) != -1:
 			hindrance_result = _check_hindrance(s_hex_map, hindrance_result)
 			result = _check_blocking_terrain(s_hex_map, result)

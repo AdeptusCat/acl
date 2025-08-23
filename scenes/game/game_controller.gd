@@ -67,6 +67,7 @@ func _ready():
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
 	input_mgr.zoom_in.connect(_on_zoom_in)
 	input_mgr.zoom_out.connect(_on_zoom_out)
+	#camera.camera_moved.connect(_on_camera_moved)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
@@ -238,6 +239,7 @@ var targetCover
 var distance
 var firepower
 func _on_mouse_event_position_changed(event_pos: Vector2):
+	return
 	mouse_event_position_changed.emit(event_pos)
 	if selected_unit:
 		var unit_pos = selected_unit.position
@@ -276,13 +278,59 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 	else:
 		get_parent().ui.hide_target_hex_cover_distance()
 
+
+func handle_mouse_event_position_changed(event_pos: Vector2):
+	mouse_event_position_changed.emit(event_pos)
+	if selected_unit:
+		var unit_pos = selected_unit.position
+		var local_event_pos = get_local_mouse_position()
+		LOSHelper.draw_los(unit_pos, local_event_pos)
+		
+		var screen_pos = get_viewport().get_mouse_position()
+		if (target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and origin_hex == selected_unit.current_hex):
+			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+		else:
+			origin_hex = selected_unit.current_hex
+			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
+			distance = int(origin_hex.distance_to(target_hex))
+			# safely grab the inner dict for this shooter-hex
+			var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
+			if cover_map and cover_map.has(target_hex):
+				var data        = cover_map[target_hex]
+				targetCover 	= data["target_cover"]
+			else:
+				targetCover = 0  # no LOS or no cover entry
+				get_parent().ui.hide_target_hex_cover_distance()
+				target_hex = null
+				origin_hex = null
+				return
+			# now display it
+			firepower = selected_unit.firepower
+			if distance > selected_unit.range:
+				if distance <= selected_unit.range * 2:
+					firepower = firepower / 2
+				else:
+					firepower = 0
+			
+			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+			#selected_unit.set_cover(targetCover)
+			#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
+	else:
+		get_parent().ui.hide_target_hex_cover_distance()
+
+
+#var last_mouse_position: Vector2
+#func _on_camera_moved():
+	#var pos = get_local_mouse_position()
+	#if abs(pos.x - last_mouse_position.x) > 1 or abs(pos.y - last_mouse_position.y) > 1:
+		#handle_mouse_event_position_changed(pos)
+		#last_mouse_position = pos
+
+
 func hex_glow(pos: Vector2):
 	var glow = glow_maker_scene.instantiate()
 	glow.position = pos
 	add_child(glow)
-
-
-
 
 
 func _on_key_space_pressed(event_pos: Vector2):
@@ -341,7 +389,8 @@ func start_game(team: int, time: float):
 func _on_started_moving():
 	timer_running = true
 
-
+var last_unit_hex: Vector2i
+var last_mouse_position: Vector2
 func _process(delta):
 	if timer_running:
 		time_left_seconds -= delta
@@ -350,6 +399,18 @@ func _process(delta):
 			timer_running = false
 			end_game_check()
 		update_timer_label.emit(time_left_seconds)
+	
+	var mouse_or_unit_position_changed: bool = false
+	var pos = get_local_mouse_position()
+	if abs(pos.x - last_mouse_position.x) > 1 or abs(pos.y - last_mouse_position.y) > 1:
+		mouse_or_unit_position_changed = true
+		last_mouse_position = pos
+	if selected_unit:
+		if not selected_unit.current_hex == last_unit_hex:
+			mouse_or_unit_position_changed = true
+			last_unit_hex = selected_unit.current_hex
+	if mouse_or_unit_position_changed:
+		handle_mouse_event_position_changed(pos)
 
 
 func end_game_check():
