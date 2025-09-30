@@ -59,7 +59,7 @@ func _maybe_transition(delta:float) -> void:
 
 	match state:
 		MoraleState.NORMAL:
-			if S_eff >= panic_threshold and roll < _rate_to_prob(0.7, delta):
+			if S_eff >= panic_threshold and roll < _rate_to_prob(0.6, delta):
 				_set_state(MoraleState.PANIC)
 			elif S_eff >= pin_threshold and roll < _rate_to_prob(0.45, delta):
 				_set_state(MoraleState.PINNED)
@@ -67,7 +67,7 @@ func _maybe_transition(delta:float) -> void:
 				_set_state(MoraleState.CAUTIOUS)
 
 		MoraleState.CAUTIOUS:
-			if S_eff >= panic_threshold and roll < _rate_to_prob(0.6, delta):
+			if S_eff >= panic_threshold and roll < _rate_to_prob(0.5, delta):
 				_set_state(MoraleState.PANIC)
 			elif S_eff < pin_threshold*0.6 and roll < _rate_to_prob(0.35*recovery_bias, delta):
 				_set_state(MoraleState.NORMAL)
@@ -75,7 +75,7 @@ func _maybe_transition(delta:float) -> void:
 				_set_state(MoraleState.PINNED)
 
 		MoraleState.PINNED:
-			if S_eff >= panic_threshold and roll < _rate_to_prob(0.55, delta):
+			if S_eff >= panic_threshold and roll < _rate_to_prob(0.45, delta):
 				_set_state(MoraleState.PANIC)
 			elif S_eff < pin_threshold*0.6 and roll < _rate_to_prob(0.25*recovery_bias, delta):
 				_set_state(MoraleState.CAUTIOUS)

@@ -58,7 +58,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 @onready var combat := $Combat
 
 # === Classes ===
-@onready var morale_system := UnitMorale.new(self)
+#@onready var morale_system := UnitMorale.new(self)
 #@onready var morale_ui := UnitMoraleUI.new(self)
 #@onready var movement := UnitMovement.new(self)
 #@onready var combat := UnitCombat.new()
@@ -68,15 +68,15 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 func _ready():
 	update_team_sprite(team)
 	connect("retreat_complete", _on_retreat_complete)
-	morale_system.morale_breaks.connect(_on_morale_breaks)
-	morale_system.morale_recovered.connect(_on_morale_recovered)
+	#morale_system.morale_breaks.connect(_on_morale_breaks)
+	#morale_system.morale_recovered.connect(_on_morale_recovered)
 	#morale_system.unit_recovers.connect(_on_unit_recovers)
 	
-	morale_system.morale_updated.connect(ui._on_morale_updated)
-	morale_system.morale_failure.connect(ui._on_morale_failure)
-	morale_system.morale_success.connect(ui._on_morale_success)
-	morale_system.morale_recovered.connect(ui._on_morale_recovered)
-	morale_system.morale_breaks.connect(ui._on_morale_breaks)
+	#morale_system.morale_updated.connect(ui._on_morale_updated)
+	#morale_system.morale_failure.connect(ui._on_morale_failure)
+	#morale_system.morale_success.connect(ui._on_morale_success)
+	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
+	#morale_system.morale_breaks.connect(ui._on_morale_breaks)
 	cover_updated.connect(ui._on_cover_updated)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
@@ -138,7 +138,7 @@ func _process(delta):
 	if not alive:
 		return
 
-	morale_system._process_recovery(delta)
+	#morale_system._process_recovery(delta)
 	
 	#movement.process(delta)
 
@@ -184,7 +184,7 @@ func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: floa
 
 
 func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
-	morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
+	#morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
 	#if moving and not broken and not surrendered:
 		#movement.recalc_path()
@@ -249,9 +249,16 @@ func _on_retreat_complete(retreat_hex) -> void:
 	moved_to_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
 
-
+enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 # Single, merged handler — keep ONLY this one in unit.gd
 func _on_state_changed(prev:int, next:int) -> void:
+	
+	if next == MoraleState.PANIC:
+		ui._on_morale_breaks()
+		_on_morale_breaks()
+	if prev == MoraleState.PANIC && next != MoraleState.PANIC:
+		ui._on_morale_recovered()
+		_on_morale_recovered()
 	# 1) Movement & internal combat state
 	movement.state_changed(next)
 	combat.current_state = next
