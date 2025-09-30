@@ -24,52 +24,70 @@ signal shoot(from_pos, target_pos)
 func resolve_volley(target:Node, inputs:Dictionary) -> void:
 	# inputs: { distance, target_exposure (0..1), target_cover (0..1),
 	#           shooter_stress (0..100), target_state:int, crossfire_bonus:float }
-	var state_mod = STATES.STATE_MOD[current_state]
-	var acc = base_accuracy * state_mod.acc
-	acc *= clamp(1.0 - inputs.distance * 0.002, 0.1, 1.0)             # simple falloff
-	acc *= lerp(0.6, 1.0, 1.0 - cover_bonus)                           # shooting out of cover
-	acc *= lerp(0.6, 1.0, 1.0 - (inputs.shooter_stress/100.0)*0.7)     # stress hurts aim
+	
+	# --- Shooter state & accuracy mods ---
+	var state_mod: Dictionary = STATES.STATE_MOD[current_state]
+	var acc: float = base_accuracy * float(state_mod.acc)
+	acc *= clamp(1.0 - float(inputs.distance) * 0.002, 0.1, 1.0)                 # simple falloff
+	acc *= lerp(0.6, 1.0, 1.0 - cover_bonus)                                      # shooting out of cover
+	acc *= lerp(0.6, 1.0, 1.0 - (float(inputs.shooter_stress) / 100.0) * 0.7)     # stress hurts aim
 
-	var effective_rounds = int(round(volley_size * state_mod.rof))
+	# --- Scale rounds by men alive (squad output grows/shrinks with manpower) ---
+	var parent_node: Node = get_parent()
+	var members_alive: int = 1
+	if parent_node and "members_alive" in parent_node:
+		members_alive = max(1, int(parent_node.members_alive))   # fall back to 1, no daft zeros
+
+	var effective_rounds: int = int(round(volley_size * float(state_mod.rof) * members_alive))
 	if effective_rounds <= 0:
-		#emit_signal("volley_resolved", 0, 0.0, 0.0)
 		return
 
-	# --- Direct lethality path ---
-	# Convert many small per-round hit chances into a per-volley casualty chance.
-	var exposure: float    = clamp(float(inputs.get("target_exposure", 1.0)), 0.1, 1.0)
-	var cover_pts: float   = max(float(inputs.get("target_cover", 0.0)), 0.0)
+	# # --- Direct lethality path ---
+	var exposure: float  = clamp(float(inputs.get("target_exposure", 1.0)), 0.1, 1.0)
+	var cover_pts: float = max(float(inputs.get("target_cover", 0.0)), 0.0)
 
 	var p_hit_per_round: float = acc * exposure
 	p_hit_per_round *= cover_multiplier_exp(cover_pts)   # diminishing-returns cover
-	p_hit_per_round = clamp(p_hit_per_round, 0.01, 0.95)
+	p_hit_per_round = clamp(p_hit_per_round, 0.001, 0.95)
 
-	# Probability at least one disabling hit in the volley (binomial complement)
-	var p_casualty: float = 1.0 - pow(1.0 - p_hit_per_round * 0.5, float(effective_rounds))
+	# Per-round chance to disable (rifle/MG tuning lives here)
+	var p_disable_given_hit: float = 0.15  # rifles ~0.10–0.20, MGs a tad higher
 
-	# Crossfire increases lethality
-	p_casualty *= (1.0 + inputs.get("crossfire_bonus", 0.0))
-	p_casualty *= casualty_scale
+	# --- hazard-style casualty chance with throttle
+	var per_round_disable: float = p_hit_per_round * p_disable_given_hit
+	var hazard_scale: float = 0.35
+	var hazard: float = per_round_disable * float(effective_rounds) * hazard_scale * casualty_scale
+	var p_casualty: float = 1.0 - exp(-hazard)
+	p_casualty = clamp(p_casualty, 0.0, 0.99)
 
-	var casualties := 0
-	for i in effective_rounds:
-		if randf() < p_hit_per_round * 0.5:
-			casualties += 1
+	## Probability at least one disabling casualty in the volley (binomial complement)
+	#var p_casualty: float = 1.0 - pow(1.0 - p_hit_per_round * p_disable_given_hit, float(effective_rounds))
+#
+	## Crossfire & global tuning
+	#p_casualty *= (1.0 + float(inputs.get("crossfire_bonus", 0.0)))
+	#p_casualty *= casualty_scale
+	#p_casualty = clamp(p_casualty, 0.0, 0.99)
+
+	# Draw casualties — **volley-level 0/1** (keeps spikes rare but meaningful)
+	var casualties: int = 0
+	var random_float: float = randf()
+	if random_float < p_casualty:
+		casualties = 1
+	else:
+		casualties = 0
 
 	# --- Stress path ---
-	# Fast spike from being engaged; slow accrues with sustained fire.
-	var stress_fast = (0.8 + p_hit_per_round) * 12.0 * stress_scale
-	var stress_slow = effective_rounds * 0.6 * lerp(0.4, 1.0, 1.0 - inputs.target_cover) * stress_scale
+	# Fast spike: “we’re under effective fire”; scales with hit prob.
+	# Slow build: more rounds whizzin’ past, worse it feels; cover helps.
+	var stress_fast: float = (0.8 + p_hit_per_round) * 12.0 * stress_scale
+	var stress_slow: float = float(effective_rounds) * 0.6 * lerp(0.4, 1.0, 1.0 - float(inputs.target_cover)) * stress_scale
 
-	target.call_deferred("_on_incoming_fire_effect",
-		casualties, stress_fast, stress_slow, self)
-
-	#emit_signal("volley_resolved", casualties, stress_fast, stress_slow)
+	target.call_deferred("_on_incoming_fire_effect", casualties, stress_fast, stress_slow, self)
 
 
 func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
 	fire_timer -= delta
-	if fire_timer > 0:
+	if fire_timer > 0.0:
 		return  # Still waiting for next shot
 
 	if target_unit:
