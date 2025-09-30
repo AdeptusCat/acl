@@ -30,6 +30,8 @@ var detail_ui = null
 @onready var pinned_texture_rect = $UnitStatus/Pinned
 @onready var idle_texture_rect = $UnitStatus/Idle
 @onready var surrendered_texture_rect = $UnitStatus/Surrendered
+@onready var members_count_label = $MembersCount
+@onready var unit_designation_label = $UnitDesignation
 
 
 
@@ -83,6 +85,14 @@ func set_cover(cover_value: int) -> void:
 		cover_container.add_child(cover_icon)
 	if detail_ui:
 		detail_ui.set_cover(cover_value)
+
+
+func set_memebers_alive(members_alive: int):
+	members_count_label.text = str(members_alive)
+
+
+func set_unit_designation(designation: String):
+	unit_designation_label.text = designation
 
 
 func _on_unit_arrived_at_hex(hex):

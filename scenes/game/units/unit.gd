@@ -206,6 +206,7 @@ func _apply_casualties(n:int) -> void:
 		stress_system.leadership_bonus = 0.0
 	stress_system.on_casualty_event(n, leader_down)
 	#emit_signal("casualties_taken", original_size - members_alive)
+	ui.set_memebers_alive(members_alive)
 	if members_alive <= 0:
 		_set_combat_ineffective()
 

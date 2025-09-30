@@ -378,12 +378,27 @@ func start_game(team: int, time: float):
 	#timer_running = true
 	Globals.team_player = team
 	input_mgr.set_input(true)
+	
+	var i_team_0: int = 0
+	var i_team_1: int = 0
 	for unit in unit_container.get_children():
 		if unit.team == Globals.team_player:
 			unit.visible = true
+		if unit.team == Globals.team_player:
+			unit.ui.set_unit_designation(index_to_char(i_team_0))
+			i_team_0 += 1
+		else:
+			unit.ui.set_unit_designation(index_to_char(i_team_1))
+			i_team_1 += 1
+			
 	update_visible_hexes()
 	draw_fog()
 	show_visible_units()
+
+
+func index_to_char(i: int) -> String:
+	var char_code: int = ord("A") + i
+	return String.chr(char_code)
 
 
 func _on_started_moving():
