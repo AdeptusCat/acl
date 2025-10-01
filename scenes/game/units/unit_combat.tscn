@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://c24n2ejqyspj8"]
+[gd_scene load_steps=3 format=3 uid="uid://c24n2ejqyspj8"]
 
 [ext_resource type="Script" uid="uid://dfw734w77xpxk" path="res://scenes/game/units/unit_combat.gd" id="1_p3j20"]
+[ext_resource type="PackedScene" uid="uid://duj0f1xy1f4wu" path="res://scenes/game/units/mg_burst_controller.tscn" id="2_kwbul"]
 
 [node name="UnitCombat" type="Node"]
 script = ExtResource("1_p3j20")
+
+[node name="MgBurstController" parent="." instance=ExtResource("2_kwbul")]

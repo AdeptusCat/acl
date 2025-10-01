@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://duj0f1xy1f4wu"]
+
+[ext_resource type="Script" uid="uid://54msb1a351aw" path="res://scenes/game/units/mg_burst_controller.gd" id="1_udmvf"]
+
+[node name="MgBurstController" type="Node"]
+script = ExtResource("1_udmvf")

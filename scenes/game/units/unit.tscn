@@ -25,3 +25,31 @@ morale_flash_scene = ExtResource("5_djab4")
 [node name="UnitMovement" parent="." instance=ExtResource("8_v8x2n")]
 
 [node name="Combat" parent="." instance=ExtResource("6_sh6c0")]
+base_accuracy = null
+volley_size = null
+seconds_per_volley = null
+stress_scale = null
+stress_fast_base = null
+stress_fast_hit_factor = null
+stress_slow_per_round = null
+stress_cover_slow_min = null
+stress_cover_slow_max = null
+stress_point_blank_bonus = null
+stress_crossfire_bonus = null
+stress_max_per_volley = null
+weapon_stress_mult = null
+stress_resilience = null
+casualty_scale = null
+p_disable_rifle = null
+p_disable_mg = null
+lethality_cap_per_volley = null
+lethality_cover_min = null
+lethality_cover_max = null
+lethality_mid_range = null
+lethality_far_range = null
+stress_kill_fast_first = null
+stress_kill_fast_each = null
+stress_kill_slow_each = null
+stress_kill_ratio_bonus = null
+stress_kill_max_per_volley = null
+max_cover_pts = null

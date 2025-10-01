@@ -68,10 +68,14 @@ class SquadFireInput:
 # Output of the calculator.
 class VolleyResult:
 	var total_rounds: int
+	var individual_rounds: int
+	var burst_rounds: int
 	var by_source: Array[Dictionary]  # Each: { "name": String, "rounds": int, "meta": Dictionary }
 
 	func _init() -> void:
 		total_rounds = 0
+		individual_rounds = 0
+		burst_rounds = 0
 		by_source = []
 
 # --- Public entry point ---
@@ -82,8 +86,8 @@ func build_volley(input: SquadFireInput) -> VolleyResult:
 	var remaining_men: int = input.total_soldiers_present
 	remaining_men = _allocate_crew(input.crew_equipment, remaining_men)
 
-	# 2) Individual fire (whoever isn’t crewing).
 	var individual_rounds: int = 0
+	# 2) Individual fire (whoever isn’t crewing).
 	if input.individual_weapon != null:
 		if input.individual_weapon.kind == WeaponKind.INDIVIDUAL:
 			individual_rounds = _expected_individual_rounds(input.individual_weapon, remaining_men, input.state_rof_mult, input.dt_seconds)
@@ -127,6 +131,8 @@ func build_volley(input: SquadFireInput) -> VolleyResult:
 
 	# 4) Sum up.
 	result.total_rounds = individual_rounds + mg_total
+	result.individual_rounds = individual_rounds
+	result.burst_rounds = mg_total
 	return result
 
 # --- Crew allocation: highest priority first ---
