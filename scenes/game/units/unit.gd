@@ -17,7 +17,7 @@ class_name Unit
 @export var retreat_distance := 3
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
-
+@export var machine_guns: int = 0
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -64,6 +64,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 #@onready var combat := UnitCombat.new()
 @onready var base_spv: float = combat.seconds_per_volley
 
+
 # === Ready ===
 func _ready():
 	update_team_sprite(team)
@@ -93,7 +94,13 @@ func _ready():
 	movement.rout_failed.connect(_on_rout_failed)
 	
 	stress_system.state_changed.connect(_on_state_changed)
+	stress_system.stress_changed.connect(_on_stress_changed)
 	
+	
+	ui.set_mg(machine_guns)
+	
+	combat.set_mg(machine_guns)
+
 
 
 func _on_started_moving():
@@ -248,6 +255,11 @@ func _on_retreat_complete(retreat_hex) -> void:
 	current_hex = retreat_hex
 	moved_to_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
+
+
+func _on_stress_changed(stress: float):
+	ui.update_bar(int(stress), 100)
+
 
 enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 # Single, merged handler — keep ONLY this one in unit.gd

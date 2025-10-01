@@ -24,6 +24,7 @@ var _since_change := 999.0
 @export var recovery_bias := 0.85    # easier to slip back upward when leadership/cover good
 
 signal state_changed
+signal stress_changed(effective_stress: float)
 
 func _physics_process(delta:float) -> void:
 	# decay (exponential via half-life)
@@ -38,6 +39,7 @@ func _physics_process(delta:float) -> void:
 
 	_since_change += delta
 	_maybe_transition(delta)
+	stress_changed.emit(S_eff)
 
 func apply_stress(df:float, ds:float) -> void:
 	stress_fast += df

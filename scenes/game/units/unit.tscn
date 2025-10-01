@@ -11,6 +11,7 @@
 script = ExtResource("1_btf8p")
 retreat_speed = 100.0
 fire_rate = 1.5
+machine_gun = null
 
 [node name="UnitUi" parent="." instance=ExtResource("10_ga1pk")]
 offset_left = -33.0

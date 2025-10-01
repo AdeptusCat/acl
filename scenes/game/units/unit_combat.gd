@@ -13,7 +13,7 @@ extends Node
 @export var stress_cover_slow_max: float = 1.0  # slow stress at no cover
 @export var stress_point_blank_bonus: float = 1.25 # extra fear at 1 hex
 @export var stress_crossfire_bonus: float = 0.0    # e.g. 0.15 if multiple sources
-@export var stress_max_per_volley: float = 40.0    # safety cap (per volley, per squad)
+@export var stress_max_per_volley: float = 40.0    # safety cap (per volley, per squad) # if this is lower than the kill cap, raise it
 @export var weapon_stress_mult: float = 1.0   # MGs 1.2–1.4, rifles 1.0
 @export var stress_resilience: float = 1.0    # better-trained squads 0.8–0.9
 
@@ -26,7 +26,18 @@ extends Node
 @export var lethality_mid_range: float = 0.7  # mid-range lethality multiplier
 @export var lethality_far_range: float = 0.45 # far-range lethality multiplier
 
+@export var stress_kill_fast_first: float = 14.0        # first KIA this volley (fast spike)
+@export var stress_kill_fast_each: float = 8.0           # each additional KIA (fast spike)
+@export var stress_kill_slow_each: float = 5.0           # per KIA (slow dread)
+@export var stress_kill_ratio_bonus: float = 0.5         # +50% at 100% losses (scales with loss ratio)
+@export var stress_kill_max_per_volley: float = 40.0     # cap for casualty-driven stress per volley
+
+
+
 @export var max_cover_pts: float = 5.0   # stone house is 3; you can raise if needed
+
+@onready var calc: SquadFireCalculator = SquadFireCalculator.new()
+var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput.new()
 
 const MIN_HIT_MULT: float = 0.35   # floor at extreme cover
 const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to the floor
@@ -40,6 +51,58 @@ var fire_timer: float = 0.0
 var target_unit
 
 signal shoot(from_pos, target_pos)
+
+
+func _ready():
+	# Define the rifle spec (individual)
+	var rifle: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+	rifle.name = "Bolt-action Rifle"
+	rifle.kind = SquadFireCalculator.WeaponKind.INDIVIDUAL
+	rifle.practical_rpm = 12.0  # a bit conservative for sustained fire
+
+	# Define the MG (crew-served)
+	var mg: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+	mg.name = "GPMG"
+	mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
+	mg.cyclic_rpm = 700.0
+	mg.burst_rounds = 4           # “short bursts”, aye
+	mg.burst_pause_s = 0.35
+	mg.crew_required = 2          # gunner + loader
+	mg.undercrew_penalty_exp = 1.6
+	mg.priority = 10              # gets crew before anything else
+
+	# Put one MG in the squad
+	var mg_eq: SquadFireCalculator.EquipmentInstance = SquadFireCalculator.EquipmentInstance.new(mg, 1)
+
+	# Build the input for this tick (say dt = 1.0 s, squad state Normal)
+	#var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput.new()
+	fin.total_soldiers_present = 10
+	fin.state_rof_mult = 1.0                    # pull your morale/state ROF multiplier here (e.g. 0.35 if PINNED)
+	fin.dt_seconds = 1.0
+	fin.individual_weapon = rifle
+	#fin.crew_equipment = [] #[mg_eq]
+
+	# Compute volley
+	#var volley: SquadFireCalculator.VolleyResult = calc.build_volley(fin)
+
+	# Now you’ve got volley.total_rounds for visuals and distribution,
+	# and a breakdown for logs or debug.
+	# Example: split total rounds across targets, then call resolve_volley() per target as you already do.
+
+func set_mg(machinge_guns : int):
+	for i in machinge_guns:
+		# Define the MG (crew-served)
+		var mg: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+		mg.name = "GPMG"
+		mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
+		mg.cyclic_rpm = 700.0
+		mg.burst_rounds = 4           # “short bursts”, aye
+		mg.burst_pause_s = 0.35
+		mg.crew_required = 2          # gunner + loader
+		mg.undercrew_penalty_exp = 1.6
+		mg.priority = 10              # gets crew before anything else
+		var mg_eq: SquadFireCalculator.EquipmentInstance = SquadFireCalculator.EquipmentInstance.new(mg, 1)
+		fin.crew_equipment.append(mg_eq)
 
 func _range_lethality_mult(distance_in_hexes: int, max_range: int) -> float:
 	# 1 hex: 1.0; <= max_range: mid; <= 2x max: far; else 0 (but you don’t shoot then).
@@ -202,7 +265,11 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		if parent_node and "members_alive" in parent_node:
 			members_for_output = max(1, int(parent_node.members_alive))
 
-	var total_rounds: int = int(round(volley_size * float(state_mod.rof) * float(members_for_output)))
+	var total_rounds1: int = int(round(volley_size * float(state_mod.rof) * float(members_for_output)))
+	# Compute volley
+	var volley: SquadFireCalculator.VolleyResult = calc.build_volley(fin)
+	var total_rounds2: int = volley.total_rounds
+	var total_rounds: int = total_rounds2
 	if total_rounds <= 0:
 		return
 
@@ -328,6 +395,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		casualties_per_target.append(casualties_i)
 		ii += 1
 
+
 	# --- compute ONE shared stress payload (equal for all squads) ---
 	var mean_p_hit: float = 0.0
 	var iii: int = 0
@@ -371,6 +439,54 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		s_fast = stress_max_per_volley
 	if s_slow > stress_max_per_volley:
 		s_slow = stress_max_per_volley
+	
+	
+	# --- casualties → extra shock (add to s_fast / s_slow) ---
+	var casualties_total: int = 0
+	var members_total_before: int = 0
+	var kk: int = 0
+	while kk < n_targets:
+		var c_i: int = int(casualties_per_target[kk])
+		casualties_total += c_i
+
+		var u0: Node = batch_targets[kk]
+		var heads_before: int = 0
+		if "members_alive" in u0:
+			# members_alive is after losses; add back this volley’s casualties to estimate pre-volley heads
+			heads_before = int(u0.members_alive) + c_i
+		else:
+			heads_before = 0
+		members_total_before += heads_before
+		kk += 1
+
+	var kill_fast: float = 0.0
+	var kill_slow: float = 0.0
+	if casualties_total > 0:
+		# fast spike: first KIA hits hardest, the rest add smaller spikes
+		kill_fast = stress_kill_fast_first
+		if casualties_total > 1:
+			kill_fast += float(casualties_total - 1) * stress_kill_fast_each
+		# slow dread scales with body count
+		kill_slow = float(casualties_total) * stress_kill_slow_each
+
+		# scale by loss ratio (bigger shock for small, mauled groups)
+		var ratio: float = 0.0
+		if members_total_before > 0:
+			ratio = float(casualties_total) / float(members_total_before)
+		var ratio_mult: float = 1.0 + ratio * stress_kill_ratio_bonus
+
+		kill_fast *= ratio_mult
+		kill_slow *= ratio_mult
+
+		# per-volley casualty shock caps (separate from your general stress clamp)
+		if kill_fast > stress_kill_max_per_volley:
+			kill_fast = stress_kill_max_per_volley
+		if kill_slow > stress_kill_max_per_volley:
+			kill_slow = stress_kill_max_per_volley
+
+		# add to the base stress built from rounds/hits
+		s_fast += kill_fast
+		s_slow += kill_slow
 
 	# --- apply effects to each squad: casualties as rolled, stress equal for all ---
 	i = 0

@@ -34,6 +34,10 @@ var detail_ui = null
 @onready var unit_designation_label = $UnitDesignation
 
 
+func set_mg(machine_guns):
+	for i in machine_guns:
+		$MachineGun.show()
+
 
 func select():
 	unit_selected_sprite.visible = true
