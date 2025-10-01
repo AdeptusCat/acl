@@ -26,11 +26,11 @@ extends Node
 @export var lethality_mid_range: float = 0.7  # mid-range lethality multiplier
 @export var lethality_far_range: float = 0.45 # far-range lethality multiplier
 
-@export var stress_kill_fast_first: float = 14.0        # first KIA this volley (fast spike)
-@export var stress_kill_fast_each: float = 8.0           # each additional KIA (fast spike)
-@export var stress_kill_slow_each: float = 5.0           # per KIA (slow dread)
+@export var stress_kill_fast_first: float = 30.0        # first KIA this volley (fast spike)
+@export var stress_kill_fast_each: float = 15.0           # each additional KIA (fast spike)
+@export var stress_kill_slow_each: float = 10.0           # per KIA (slow dread)
 @export var stress_kill_ratio_bonus: float = 0.5         # +50% at 100% losses (scales with loss ratio)
-@export var stress_kill_max_per_volley: float = 40.0     # cap for casualty-driven stress per volley
+@export var stress_kill_max_per_volley: float = 60.0     # cap for casualty-driven stress per volley
 
 
 
@@ -258,18 +258,17 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var state_mod: Dictionary = STATES.STATE_MOD[current_state]
 	var parent_node: Node = get_parent()
 
-	var members_for_output: int = 1
-	if parent_node and "members_effective" in parent_node:
-		members_for_output = max(1, int(parent_node.members_effective))
-	else:
-		if parent_node and "members_alive" in parent_node:
-			members_for_output = max(1, int(parent_node.members_alive))
+	#var members_for_output: int = 1
+	#if parent_node and "members_effective" in parent_node:
+		#members_for_output = max(1, int(parent_node.members_effective))
+	#else:
+		#if parent_node and "members_alive" in parent_node:
+			#members_for_output = max(1, int(parent_node.members_alive))
 
-	var total_rounds1: int = int(round(volley_size * float(state_mod.rof) * float(members_for_output)))
+	#var total_rounds1: int = int(round(volley_size * float(state_mod.rof) * float(members_for_output)))
 	# Compute volley
 	var volley: SquadFireCalculator.VolleyResult = calc.build_volley(fin)
-	var total_rounds2: int = volley.total_rounds
-	var total_rounds: int = total_rounds2
+	var total_rounds: int = volley.total_rounds
 	if total_rounds <= 0:
 		return
 
@@ -288,6 +287,17 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var n_targets: int = batch_targets.size()
 	var p_hit_per_target: Array = []
 	var target_cover_vals: Array = []
+	
+	# --- slower recovery while under fire ---
+	var pressure_rps: float = float(total_rounds)   # or total_rounds / volley_dt if you track it
+	var j: int = 0
+	while j < n_targets:
+		var u_mark: Node = batch_targets[j]
+		if "stress_system" in u_mark:
+			var sc: StressController = u_mark.stress_system as StressController
+			if sc != null:
+				sc.mark_under_fire(pressure_rps)
+		j += 1
 
 	var i: int = 0
 	while i < n_targets:
@@ -411,8 +421,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var s_fast: float = stress_fast_base + mean_p_hit * stress_fast_hit_factor
 
 	# slow stress grows with sheer volume; cover damps it
-	var cover_mix: float = lerp(stress_cover_slow_min, stress_cover_slow_max, 1.0 - float(terrain_defense_bonus))
-	var s_slow: float = float(total_rounds) * stress_slow_per_round * cover_mix
+	var s_slow: float = float(total_rounds) * stress_slow_per_round * cover_norm
 
 	# point-blank fear spike
 	if int(distance_in_hexes) == 1:
