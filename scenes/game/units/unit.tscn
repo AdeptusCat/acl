@@ -25,3 +25,8 @@ morale_flash_scene = ExtResource("5_djab4")
 [node name="UnitMovement" parent="." instance=ExtResource("8_v8x2n")]
 
 [node name="Combat" parent="." instance=ExtResource("6_sh6c0")]
+base_accuracy = null
+volley_size = null
+seconds_per_volley = null
+casualty_scale = null
+stress_scale = null

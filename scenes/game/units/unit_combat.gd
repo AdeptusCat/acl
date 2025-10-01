@@ -46,8 +46,15 @@ func resolve_volley(target:Node, inputs:Dictionary) -> void:
 	var exposure: float  = clamp(float(inputs.get("target_exposure", 1.0)), 0.1, 1.0)
 	var cover_pts: float = max(float(inputs.get("target_cover", 0.0)), 0.0)
 
+	# --- per-round hit prob
 	var p_hit_per_round: float = acc * exposure
 	p_hit_per_round *= cover_multiplier_exp(cover_pts)   # diminishing-returns cover
+	
+	var is_point_blank: bool = int(inputs.distance) == 1
+	if is_point_blank:
+		p_hit_per_round *= 2.0
+	
+	# keep it sane after the boost
 	p_hit_per_round = clamp(p_hit_per_round, 0.001, 0.95)
 
 	# Per-round chance to disable (rifle/MG tuning lives here)
@@ -163,10 +170,6 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 			"crossfire_bonus": 0.0   # e.g. +0.15 if ≥2 sources suppressing
 		})
 	fire_burst(shooter, current_hex, batch_targets[0], 8, fire_rate, unit_visible_enemies)
-	
-	
-	
-	
 
 
 func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float, unit_visible_enemies: Dictionary) -> void:
