@@ -97,7 +97,7 @@ func _ready():
 	stress_system.stress_changed.connect(_on_stress_changed)
 	
 	
-	ui.set_mg(machine_guns)
+	ui.set_support_weapons(machine_guns)
 	
 	combat.set_mg(machine_guns)
 

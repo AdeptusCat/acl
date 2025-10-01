@@ -205,7 +205,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 				if cover_map and cover_map.has(target_unit.current_hex):
 					var data = cover_map[target_unit.current_hex]
 					targetCover = data["target_cover"]
-
+				
 				target_unit.set_cover(targetCover)
 				fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate
@@ -558,7 +558,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 
 
 func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float, unit_visible_enemies: Dictionary) -> void:
-	var interval = 1.0 / bullets_per_sec
+	var interval = bullets_per_sec / rounds
 	var from_pos = LOSHelper.ground_layer.map_to_local(current_hex)
 	
 	for i in range(rounds):

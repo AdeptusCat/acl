@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=40 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -32,6 +32,7 @@
 [ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
 [ext_resource type="Texture2D" uid="uid://dcq0y3c2t6ub5" path="res://assets/status/surrendered_ger.png" id="16_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
+[ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="33_eilf2"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
 
@@ -233,5 +234,46 @@ offset_top = 4.0
 offset_right = 48.0
 offset_bottom = 27.0
 text = "MG"
+
+[node name="SupportWeapons" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 10.0
+offset_top = 17.0
+offset_right = 50.0
+offset_bottom = 57.0
+
+[node name="SupportWeapon#1" type="MarginContainer" parent="SupportWeapons"]
+visible = false
+layout_mode = 0
+offset_right = 10.0
+offset_bottom = 10.0
+
+[node name="ColorRect" type="ColorRect" parent="SupportWeapons/SupportWeapon#1"]
+layout_mode = 2
+color = Color(0.5529412, 0.23921569, 0, 0.81960785)
+
+[node name="TextureRect" type="TextureRect" parent="SupportWeapons/SupportWeapon#1"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+texture = ExtResource("33_eilf2")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="SupportWeapon#2" type="MarginContainer" parent="SupportWeapons"]
+visible = false
+layout_mode = 0
+offset_right = 10.0
+offset_bottom = 10.0
+
+[node name="ColorRect" type="ColorRect" parent="SupportWeapons/SupportWeapon#2"]
+layout_mode = 2
+color = Color(0.5529412, 0.23921569, 0, 0.81960785)
+
+[node name="TextureRect" type="TextureRect" parent="SupportWeapons/SupportWeapon#2"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+texture = ExtResource("33_eilf2")
+expand_mode = 1
+stretch_mode = 4
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

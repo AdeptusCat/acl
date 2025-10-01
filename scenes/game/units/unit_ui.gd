@@ -34,9 +34,10 @@ var detail_ui = null
 @onready var unit_designation_label = $UnitDesignation
 
 
-func set_mg(machine_guns):
-	for i in machine_guns:
-		$MachineGun.show()
+func set_support_weapons(support_weapons: int):
+	var support_weapon_slots: Array = [$"SupportWeapons/SupportWeapon#1", $"SupportWeapons/SupportWeapon#2"]
+	for i in support_weapons:
+		support_weapon_slots[i].show()
 
 
 func select():
