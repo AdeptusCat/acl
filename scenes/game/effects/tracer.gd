@@ -1,7 +1,7 @@
 # Tracer.gd
 extends Node2D
 
-@export var speed := 1200.0          # pixels/sec
+@export var speed := 600.0          # pixels/sec
 @export var tracer_texture: Texture2D
 @onready var particles: CPUParticles2D = $CPUParticles2D
 
