@@ -26,6 +26,35 @@ signal rout_failed
 
 
 
+# --- map ASL-ish terrain to MF (per hex entered) ---
+enum TerrainType { OPEN, ROAD, ORCHARD, GRAIN, BRUSH, WOODS, BUILDING}
+
+@export var mf_by_terrain: Array[float] = [
+	1.0,  # OPEN
+	1.0,  # ROAD (only if using road rate; see below)
+	1.0,  # ORCHARD
+	1.5,  # GRAIN (in season)
+	2.0,  # BRUSH
+	2.0,  # WOODS
+	2.0,  # BUILDING
+]
+
+# hexside & conditions (additive MF unless noted)
+@export var mf_wall_hexside: float = 1.0
+@export var mf_smoke_enter: float = 1.0
+
+# crest line uphill is multiplicative: “double cost of terrain entered”
+@export var crest_uphill_mult: float = 2.0
+
+# turn MF into a 0..1 speed factor (shape & floor to taste)
+@export var mf_to_speed_gamma: float = 1.0   # 1.0 = pure reciprocal; >1 punishes heavy MF more
+@export var mf_speed_floor: float = 0.25     # never slower than 25% of base
+
+# optional: quick mapping from ASL-ish cover points if that’s what your hex exposes (0..3)
+@export var cover_to_move_mult: Array[float] = [1.00, 0.85, 0.70, 0.60]
+
+var terrain_mult: float = 1.0
+
 func _process(delta: float):
 	if moving:
 		_process_movement(delta)
@@ -68,13 +97,18 @@ func begin_retreat(target_hex: Vector2i):
 func _process_movement(delta: float):
 	var dir = (target_position - unit.position).normalized()
 	var dist = unit.position.distance_to(target_position)
-	var step = move_speed * delta
+	var step = move_speed * terrain_mult * delta
+	
 	
 	if path_index < path_hexes.size():
 		if LOSHelper.ground_layer.get_closest_cell_from_local(unit.position) == LOSHelper.ground_layer.map_to_cube(path_hexes[path_index]):
 			if not unit.current_hex == path_hexes[path_index]:
+				var next_terr: int = _get_terrain_type(path_hexes[path_index])
+				var mf_total: float = compute_total_mf(unit.current_hex, path_hexes[path_index], next_terr)
+				terrain_mult = mf_to_speed_mult(mf_total)
 				unit.current_hex = path_hexes[path_index]
 				unit.moved_to_hex.emit(unit, path_hexes[path_index])
+				
 	
 	if dist <= step:
 		unit.position = target_position
@@ -375,3 +409,76 @@ func _set_stance(s: int) -> void:
 	#elif sprint:
 		#_apply_speed(base_speed * 1.2)
 	## TODO: set the actual path/target using your hex A*.
+
+
+
+func _get_terrain_type(hex: Vector2i) -> int:
+	var terrainType: int = TerrainType.OPEN
+	if LOSHelper.building_layer.get_cell_source_id(hex) != -1:
+		terrainType = TerrainType.BUILDING
+	# plug your own source here:
+	# if you’ve got a hex node on the unit:
+	#   return int(current_hex.terrain_type)
+	# or, from a TileMap custom data (example):
+	#   var td: TileData = tilemap.get_cell_tile_data(tiles_layer, tile_coord)
+	#   return int(td.get_custom_data("terrain_type"))
+	return terrainType  # fallback, mate
+
+
+func mf_to_speed_mult(mf_total: float) -> float:
+	# reciprocal mapping with a shaping exponent and a floor
+	var safe_mf: float = max(mf_total, 0.001)
+	var mult: float = pow(1.0 / safe_mf, mf_to_speed_gamma)
+	return clamp(mult, mf_speed_floor, 1.0)
+
+
+
+func _terrain_mf(t: int) -> float:
+	var idx: int = clamp(t, 0, mf_by_terrain.size() - 1)
+	return float(mf_by_terrain[idx])
+
+# if you want to blend current/next hex (so speed doesn’t jump at borders), use this:
+func _blend_mult(cur_mult: float, next_mult: float, alpha: float) -> float:
+	# alpha 0..1 = how far you are towards next hex
+	alpha = clamp(alpha, 0.0, 1.0)
+	return cur_mult * (1.0 - alpha) + next_mult * alpha
+
+func _using_road_rate(cur_hex: Vector2i, next_hex: Vector2i) -> bool:
+	# only true if both hexes have road and you actually *follow* the road across that hexside
+	# plug your own checks here, sarge:
+	# return cur_hex.has_road and next_hex.has_road and map.road_continuous_between(cur_hex, next_hex)
+	return false
+
+func _crest_uphill_between(cur_hex: Vector2i, next_hex: Vector2i) -> bool:
+	# plug your own LOS/height graph check
+	return false
+
+func _hexside_cost(cur_hex: Vector2i, next_hex: Vector2i) -> float:
+	var cost: float = 0.0
+	# example placeholders; wire to your map data
+	var has_wall: bool = false
+	if has_wall:
+		cost += mf_wall_hexside
+	return cost
+
+func _entering_smoke(next_hex: Vector2i) -> bool:
+	# plug your smoke marker check
+	return false
+
+func compute_total_mf(cur_hex: Vector2i, next_hex: Vector2i, next_terr: int) -> float:
+	var mf_base: float = 0.0
+	if _using_road_rate(cur_hex, next_hex):
+		mf_base = 1.0  # road rate replaces the terrain’s normal MF
+	else:
+		mf_base = _terrain_mf(next_terr)
+
+	var mf_add: float = _hexside_cost(cur_hex, next_hex)
+	if _entering_smoke(next_hex):
+		mf_add += mf_smoke_enter
+
+	var mf_total: float = mf_base + mf_add
+
+	if _crest_uphill_between(cur_hex, next_hex):
+		mf_total *= crest_uphill_mult
+
+	return mf_total
