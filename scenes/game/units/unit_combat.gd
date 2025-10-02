@@ -1,6 +1,9 @@
 class_name UnitCombat
 extends Node
 
+# --- STATES (unchanged) ---
+enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
+
 @export var base_accuracy := 0.35
 @export var volley_size := 1               # rounds per burst
 @export var seconds_per_volley := 1.2
@@ -44,7 +47,7 @@ const MIN_HIT_MULT: float = 0.35   # floor at extreme cover
 const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to the floor
 
 var can_fire := true
-var current_state := 0 # injected from morale
+var current_state: int = MoraleState.NORMAL # injected from morale
 var cover_bonus := 0.0 # injected from LOS/terrain (0..1)
 var accuracy_multiplier: float = 1.0
 
@@ -269,11 +272,18 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	#var total_rounds1: int = int(round(volley_size * float(state_mod.rof) * float(members_for_output)))
 	# Compute volley
 	var volley: SquadFireCalculator.VolleyResult = calc.build_volley(fin)
+	
 	var total_rounds: int = volley.total_rounds
 	var individual_rounds: int = volley.individual_rounds
 	var burst_rounds: int = volley.burst_rounds
-	if total_rounds <= 0:
-		return
+	var round_multiplier: float = 1.0
+	if current_state == MoraleState.CAUTIOUS:
+		round_multiplier = 0.8
+	elif current_state == MoraleState.PINNED:
+		round_multiplier = 0.5
+	total_rounds = int(total_rounds * round_multiplier)
+	individual_rounds = int(individual_rounds * round_multiplier)
+	burst_rounds = int(burst_rounds * round_multiplier)
 
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
 	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
@@ -283,7 +293,8 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var shooter_stress: float = 0.0
 	if parent_node and "stress_system" in parent_node:
 		shooter_stress = float(parent_node.stress_system.S_eff)
-	acc *= lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
+	var shooter_stress_multiplier: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
+	acc *= shooter_stress_multiplier
 
 	var is_point_blank: bool = int(distance_in_hexes) == 1
 
