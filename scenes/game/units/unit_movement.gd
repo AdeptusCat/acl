@@ -62,10 +62,12 @@ func _process(delta: float):
 
 func move_to_hex(new_hex: Vector2i):
 	#unit.current_hex = new_hex
+	get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = ground_map.map_to_local(unit.goal_hex)
 	moving = true
 	started_moving.emit()
+	
 	#unit.moved_to_hex.emit(unit, new_hex)
 
 func follow_cube_path(cube_path: Array[Vector3i]):
@@ -108,7 +110,7 @@ func _process_movement(delta: float):
 				# 1. when starting in the hex
 				# 2. when transitioning
 				# 3. when ending in hex
-				get_terrain_multiplier()
+				#get_terrain_multiplier()
 				
 				unit.current_hex = path_hexes[path_index]
 				unit.moved_to_hex.emit(unit, path_hexes[path_index])
@@ -122,6 +124,7 @@ func _process_movement(delta: float):
 		if path_index < path_hexes.size() - 1:
 			path_index += 1
 			move_to_hex(path_hexes[path_index])
+			#get_terrain_multiplier()
 		else:
 			if retreating:
 				retreating = false
