@@ -250,7 +250,7 @@ offset_bottom = 10.0
 
 [node name="ColorRect" type="ColorRect" parent="SupportWeapons/SupportWeapon#1"]
 layout_mode = 2
-color = Color(0.5529412, 0.23921569, 0, 0.81960785)
+color = Color(0.67058825, 0.2784314, 0.043137256, 1)
 
 [node name="TextureRect" type="TextureRect" parent="SupportWeapons/SupportWeapon#1"]
 custom_minimum_size = Vector2(10, 10)

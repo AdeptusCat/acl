@@ -9,10 +9,8 @@ extends Node
 @export var stress_fast_base: float = 8.0       # baseline shock of “being shot at”
 @export var stress_fast_hit_factor: float = 12.0# adds with mean p_hit (0..1)
 @export var stress_slow_per_round: float = 0.6  # accrues with volume
-@export var stress_cover_slow_min: float = 0.25  # slow stress at heavy cover
-@export var stress_cover_slow_max: float = 1.0  # slow stress at no cover
-@export var stress_point_blank_bonus: float = 1.25 # extra fear at 1 hex
-@export var stress_crossfire_bonus: float = 0.0    # e.g. 0.15 if multiple sources
+@export var stress_point_blank_bonus: float = 1.5 # extra fear at 1 hex
+@export var stress_crossfire_bonus: float = 0.15    # e.g. 0.15 if multiple sources
 @export var stress_max_per_volley: float = 40.0    # safety cap (per volley, per squad) # if this is lower than the kill cap, raise it
 @export var weapon_stress_mult: float = 1.0   # MGs 1.2–1.4, rifles 1.0
 @export var stress_resilience: float = 1.0    # better-trained squads 0.8–0.9
@@ -32,7 +30,10 @@ extends Node
 @export var stress_kill_ratio_bonus: float = 0.5         # +50% at 100% losses (scales with loss ratio)
 @export var stress_kill_max_per_volley: float = 60.0     # cap for casualty-driven stress per volley
 
-
+# ---- cover → stress dampening (fast & slow), typed nice and proper ----
+@export var stress_cover_fast_min: float = 0.45   # floor at max cover (fast spike never 0)
+@export var stress_cover_slow_min: float = 0.65   # floor at max cover (slow dread never 0)
+@export var stress_cover_gamma: float = 1.2       # curvature; >1 gives diminishing returns
 
 @export var max_cover_pts: float = 5.0   # stone house is 3; you can raise if needed
 
@@ -423,7 +424,11 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var s_fast: float = stress_fast_base + mean_p_hit * stress_fast_hit_factor
 
 	# slow stress grows with sheer volume; cover damps it
-	var s_slow: float = float(total_rounds) * stress_slow_per_round * cover_norm
+	var s_slow: float = float(total_rounds) * stress_slow_per_round
+	
+	# apply cover damp to stress (not boost!)
+	s_fast *= _stress_cover_mult(cover_norm, stress_cover_fast_min)
+	s_slow *= _stress_cover_mult(cover_norm, stress_cover_slow_min)
 
 	# point-blank fear spike
 	if int(distance_in_hexes) == 1:
@@ -529,6 +534,13 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		fire_rate
 	)
 
+
+func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
+	# cover_norm: 0 = open, 1 = best cover
+	cover_norm = clamp(cover_norm, 0.0, 1.0)
+	var expose: float = pow(1.0 - cover_norm, stress_cover_gamma)  # 1 at open, 0 near full cover
+	var mult: float = min_floor + (1.0 - min_floor) * expose       # lerp to a floor
+	return mult
 
 #func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower : float, range, unit_visible_enemies: Dictionary, fire_rate):
 #

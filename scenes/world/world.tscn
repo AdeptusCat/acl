@@ -793,7 +793,7 @@ team = 1
 machine_guns = 1
 
 [node name="Unit3" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(752, 512)
+position = Vector2(848, 512)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 
