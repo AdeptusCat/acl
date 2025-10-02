@@ -103,9 +103,13 @@ func _process_movement(delta: float):
 	if path_index < path_hexes.size():
 		if LOSHelper.ground_layer.get_closest_cell_from_local(unit.position) == LOSHelper.ground_layer.map_to_cube(path_hexes[path_index]):
 			if not unit.current_hex == path_hexes[path_index]:
-				var next_terr: int = _get_terrain_type(path_hexes[path_index])
-				var mf_total: float = compute_total_mf(unit.current_hex, path_hexes[path_index], next_terr)
-				terrain_mult = mf_to_speed_mult(mf_total)
+				
+				# we need a check 
+				# 1. when starting in the hex
+				# 2. when transitioning
+				# 3. when ending in hex
+				get_terrain_multiplier()
+				
 				unit.current_hex = path_hexes[path_index]
 				unit.moved_to_hex.emit(unit, path_hexes[path_index])
 				
@@ -130,6 +134,18 @@ func _process_movement(delta: float):
 		if not unit.stress_system.state == STATES.MoraleState.NORMAL:
 			var state = unit.stress_system.state
 			pass
+
+
+func get_terrain_multiplier():
+	var next_terr: int = _get_terrain_type(path_hexes[path_index])
+	var mf_total: float = compute_total_mf(unit.current_hex, path_hexes[path_index], next_terr)
+	var from: Vector2 = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+	var to: Vector2 = LOSHelper.ground_layer.map_to_local(path_hexes[path_index])
+	var cover_dict: Dictionary = LOSHelper.check_los(from, to, 1, 1, 1, 1)
+	if cover_dict.has("wall_cover"):
+		if cover_dict.wall_cover > 0:
+			mf_total += 1
+	terrain_mult = mf_to_speed_mult(mf_total)
 
 
 func rout(current_hex : Vector2i, known_enemies, retreat_distance):
