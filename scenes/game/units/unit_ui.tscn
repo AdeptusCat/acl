@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=41 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -29,15 +29,16 @@
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
 [ext_resource type="Texture2D" uid="uid://c7wd5hgkmf7fi" path="res://assets/status/broken_ger.png" id="14_kswga"]
+[ext_resource type="Texture2D" uid="uid://cbfjsvqigymke" path="res://assets/status/ger/leader/leader_idle_ger.png" id="15_fekhn"]
 [ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
 [ext_resource type="Texture2D" uid="uid://dcq0y3c2t6ub5" path="res://assets/status/surrendered_ger.png" id="16_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
 [ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="33_eilf2"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_xqi78"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_74e6i"]
-noise = SubResource("FastNoiseLite_xqi78")
+noise = SubResource("FastNoiseLite_eilf2")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6v8n0"]
 resource_local_to_scene = true
@@ -114,6 +115,7 @@ offset_right = 14.0
 offset_bottom = 12.0
 script = ExtResource("5_xe57g")
 idle_ger = ExtResource("6_sw8nw")
+idle_leader_ger = ExtResource("15_fekhn")
 idle_us = ExtResource("7_87qi7")
 moving_ger = ExtResource("8_1rga6")
 moving_us = ExtResource("9_bigh4")

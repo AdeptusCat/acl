@@ -1,4 +1,4 @@
-[gd_scene load_steps=103 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=104 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -54,6 +54,7 @@
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
+[ext_resource type="PackedScene" uid="uid://ctk7fspts35ju" path="res://scenes/game/units/leader.tscn" id="50_phx5y"]
 [ext_resource type="Script" uid="uid://cwp4yt03yldxu" path="res://scenes/world/target_area.gd" id="55_7rtjl"]
 [ext_resource type="Texture2D" uid="uid://vabbhirvnspe" path="res://assets/target_area.png" id="56_phx5y"]
 
@@ -807,15 +808,15 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 machine_guns = 1
 
 [node name="Unit6" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1040, 704)
+position = Vector2(992, 928)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit7" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1232, 768)
+position = Vector2(1136, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit8" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 704)
+position = Vector2(1088, 928)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 machine_guns = 1
 
@@ -823,6 +824,11 @@ machine_guns = 1
 position = Vector2(1184, 864)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 machine_guns = 1
+
+[node name="Leader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("50_phx5y")]
+position = Vector2(1184, 672)
+ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
+leadership_bonus = 1.0
 
 [node name="InputManager" parent="GameController" instance=ExtResource("24_x0nq1")]
 

@@ -15,6 +15,7 @@ var detail_ui = null
 @export var panic_texture: Texture
 @export var combat_ineffective_texture: Texture
 
+
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
@@ -68,7 +69,9 @@ func state_changed(next:int):
 		STATES.MoraleState.COMBAT_INEFFECTIVE:
 			$UnitStates/StateTexture.show()
 			$UnitStates/StateTexture.texture = combat_ineffective_texture
-func update_team_sprite(team : int):
+
+
+func update_team_sprite(team : int, leader: bool = false):
 	if not sprite_node:
 		return
 	match team:
@@ -76,7 +79,7 @@ func update_team_sprite(team : int):
 			sprite_node.texture = sprite_team_0
 		1:
 			sprite_node.texture = sprite_team_1
-	unit_status_control.set_status_image(team)
+	unit_status_control.set_status_image(team, leader)
 	if detail_ui:
 		detail_ui.update_team_sprite(team)
 

@@ -19,41 +19,9 @@ offset_right = 7.0
 offset_bottom = 8.0
 morale_popup_scene = ExtResource("5_djab4")
 morale_flash_scene = ExtResource("5_djab4")
+metadata/_edit_use_anchors_ = true
 
 [node name="UnitStressController" parent="." instance=ExtResource("7_v8x2n")]
-half_life_fast = null
-half_life_slow = null
-w_fast = null
-w_slow = null
-refractory_s = null
-leadership_bonus = null
-cohesion = null
-pin_threshold = null
-panic_threshold = null
-recovery_bias = null
-H_CAUTION_FROM_NORMAL = null
-H_NORMAL_FROM_CAUTION = null
-H_CAUTION_FROM_PINNED = null
-H_CAUTION_FROM_PANIC = null
-L_NORMAL_TO_PANIC = null
-L_NORMAL_TO_PINNED = null
-L_NORMAL_TO_CAUTIOUS = null
-L_CAUTIOUS_TO_PANIC = null
-L_CAUTIOUS_TO_PINNED = null
-L_CAUTIOUS_TO_NORMAL = null
-L_PINNED_TO_PANIC = null
-L_PINNED_TO_CAUTIOUS = null
-L_PANIC_TO_CAUTIOUS = null
-repin_ramp_s = null
-unpin_ramp_s = null
-S_CAP = null
-incoming_stress_scale = null
-recovery_scale = null
-under_fire_window_s = null
-pressure_ref_rps = null
-slowdown_light = null
-slowdown_heavy = null
-stop_fast_decay_when_heavy = null
 
 [node name="UnitMovement" parent="." instance=ExtResource("8_v8x2n")]
 

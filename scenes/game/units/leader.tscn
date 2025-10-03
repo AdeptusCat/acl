@@ -1,0 +1,29 @@
+[gd_scene load_steps=8 format=3 uid="uid://ctk7fspts35ju"]
+
+[ext_resource type="Script" uid="uid://ceu5og66ljefl" path="res://scenes/game/units/leader.gd" id="1_jvac8"]
+[ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="2_7yqyd"]
+[ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="3_hufnn"]
+[ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="4_5t246"]
+[ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="5_e0eau"]
+[ext_resource type="PackedScene" uid="uid://c24n2ejqyspj8" path="res://scenes/game/units/unit_combat.tscn" id="6_rpllj"]
+[ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="7_dx17b"]
+
+[node name="Leader" type="Node2D" groups=["units"]]
+script = ExtResource("1_jvac8")
+
+[node name="UnitUi" parent="." instance=ExtResource("2_7yqyd")]
+offset_left = -33.0
+offset_top = -32.0
+offset_right = 7.0
+offset_bottom = 8.0
+morale_popup_scene = ExtResource("3_hufnn")
+morale_flash_scene = ExtResource("3_hufnn")
+metadata/_edit_use_anchors_ = true
+
+[node name="UnitStressController" parent="." instance=ExtResource("4_5t246")]
+
+[node name="UnitMovement" parent="." instance=ExtResource("5_e0eau")]
+
+[node name="Combat" parent="." instance=ExtResource("6_rpllj")]
+
+[node name="LeaderAura" parent="." instance=ExtResource("7_dx17b")]

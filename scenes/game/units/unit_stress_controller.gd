@@ -65,8 +65,16 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 var _repin_since_unpin: float = 999.0	    # seconds since PINNED→CAUTIOUS; big at start
 var _since_pinned: float      = 999.0		# seconds since we entered PINNED
 
+# how leaders affect the *rate* the lads get rattled
+@export var leader_gain_reduction_max: float = 0.5      # up to 50% less *incoming* stress
+@export var leader_decay_boost_max: float = 0.15        # up to 15% faster decay
+@export var leader_effect_smooth_s: float = 0.5         # seconds to blend leader influence
+@export var min_incoming_gain_mult: float = 0.4         # floor; never invincible
+
 # --- internal accumulator for trial cadence ---
 var _trial_bucket_s: float = 0.0
+var _leadership_sources: Dictionary = {}  # key: int (source_id), value: LeadershipMod
+var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 
 # --- NEW: caps & scaling ---
 @export var S_CAP: float = 100.0                 # hard ceiling on stress
@@ -94,6 +102,47 @@ var _last_pressure_rps: float = 0.0
 # --- SIGNALS ---
 signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
+
+
+class LeadershipMod:
+	var bonus: float
+	var rally: float
+	var cohesion_mult: float
+	func _init(b: float, r: float, c: float) -> void:
+		bonus = b
+		rally = r
+		cohesion_mult = c
+
+func add_leadership_source(source_id: int, bonus: float, rally: float, cohesion_mult: float) -> void:
+	var lm: LeadershipMod = LeadershipMod.new(bonus, rally, cohesion_mult)
+	_leadership_sources[source_id] = lm
+	_recompute_leadership()
+
+func remove_leadership_source(source_id: int) -> void:
+	if _leadership_sources.has(source_id):
+		_leadership_sources.erase(source_id)
+		_recompute_leadership()
+
+func _recompute_leadership() -> void:
+	var total_bonus: float = 0.0
+	var total_rally: float = 0.0
+	var total_cohesion_mult: float = 1.0
+	for lm in _leadership_sources.values():
+		total_bonus += lm.bonus
+		total_rally += lm.rally
+		total_cohesion_mult *= lm.cohesion_mult
+	leadership_bonus = total_bonus
+	cohesion = clamp(cohesion * total_cohesion_mult, 0.0, 1.5)
+
+
+# Hook this into your recovery rolls (where you already compute recovery chances).
+# Example stub you can call inside your recovery logic:
+func get_rally_bonus() -> float:
+	var s: float = 0.0
+	for lm in _leadership_sources.values():
+		s += lm.rally
+	return s
+
 
 func _physics_process(delta: float) -> void:
 	match state:
@@ -138,27 +187,41 @@ func _physics_process(delta: float) -> void:
 		if _under_fire_t < 0.0:
 			_under_fire_t = 0.0
 
+	# --- leader speeds recovery a touch, still rate-based ---
+	var decay_boost: float = 1.0 + leader_decay_boost_max * _leader_effect
 	# turn rates into multipliers
 	var kf: float = 1.0
 	var ks: float = 1.0
 	if lambda_fast > 0.0:
+		lambda_fast *= decay_boost
 		kf = exp(-lambda_fast)
 	if lambda_slow > 0.0:
+		lambda_slow *= decay_boost
 		ks = exp(-lambda_slow)
 
 	# apply decay
 	stress_fast *= kf
 	stress_slow *= ks
 	_clamp_bins()
+	
+	# --- smooth leader effect so it never steps the meter ---
+	var target_leader: float = clamp(leadership_bonus, 0.0, 1.0)
+	var blend: float = 1.0
+	if leader_effect_smooth_s > 0.0:
+		blend = clamp(delta / leader_effect_smooth_s, 0.0, 1.0)
+	_leader_effect = lerp(_leader_effect, target_leader, blend)
 
 	# effective stress with leadership & cohesion softening
 	#var softener: float = 1.0 - clamp(0.5 * leadership_bonus + 0.3 * cohesion, 0.0, 0.6)
 	var softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
-	S_eff = (w_fast * stress_fast + w_slow * stress_slow) * softener
+	S_eff = (w_fast * stress_fast + w_slow * stress_slow) # * softener
 	if S_eff < 0.0:
 		S_eff = 0.0
 	if S_eff > S_CAP:
 		S_eff = S_CAP
+
+	if leadership_bonus > 0.0:
+		pass
 
 	_since_change += delta
 	_maybe_transition(delta)
@@ -166,19 +229,54 @@ func _physics_process(delta: float) -> void:
 	
 	
 
-
-# add stress from events/volleys
+# add stress from events/volleys — throttled by leadership
 func apply_stress(df: float, ds: float) -> void:
-	if df < 0.0:
-		df = 0.0
-	if ds < 0.0:
-		ds = 0.0
-	var scale: float = incoming_stress_scale
-	if scale < 0.0:
-		scale = 0.0
-	stress_fast += df * scale
-	stress_slow += ds * scale
+	var df_in: float = df
+	var ds_in: float = ds
+	if df_in < 0.0:
+		df_in = 0.0
+	if ds_in < 0.0:
+		ds_in = 0.0
+
+	var base_scale: float = incoming_stress_scale
+	if base_scale < 0.0:
+		base_scale = 0.0
+
+	var L: float = _get_current_leader_effect()
+	var leader_mult: float = 1.0 - leader_gain_reduction_max * L
+	if leader_mult < min_incoming_gain_mult:
+		leader_mult = min_incoming_gain_mult
+	if leader_mult > 1.0:
+		leader_mult = 1.0
+
+	var eff_scale: float = base_scale * leader_mult
+
+	stress_fast += df_in * eff_scale
+	stress_slow += ds_in * eff_scale
 	_clamp_bins()
+
+
+func _get_current_leader_effect() -> float:
+	var L: float = leadership_bonus
+	if L < 0.0:
+		L = 0.0
+	if L > 1.0:
+		L = 1.0
+	return L
+
+
+## add stress from events/volleys
+#func apply_stress(df: float, ds: float) -> void:
+	#if df < 0.0:
+		#df = 0.0
+	#if ds < 0.0:
+		#ds = 0.0
+	#var scale: float = incoming_stress_scale
+	#if scale < 0.0:
+		#scale = 0.0
+	#stress_fast += df * scale
+	#stress_slow += ds * scale
+	#_clamp_bins()
 
 # casualty shock (kept yours, can be tuned)
 func on_casualty_event(n: int, leader_down: bool = false) -> void:

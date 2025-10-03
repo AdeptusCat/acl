@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://i3ic130sb2st"]
+
+[ext_resource type="Script" uid="uid://3pxgoj0186jk" path="res://scenes/game/units/leader_aura.gd" id="1_nbpfp"]
+
+[node name="LeaderAura" type="Node"]
+script = ExtResource("1_nbpfp")
