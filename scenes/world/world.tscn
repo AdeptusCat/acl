@@ -787,13 +787,13 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 
 [node name="Unit2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(800, 544)
+position = Vector2(848, 512)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 machine_guns = 1
 
 [node name="Unit3" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(848, 512)
+position = Vector2(800, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 
@@ -811,11 +811,11 @@ position = Vector2(1040, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit7" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1280, 480)
+position = Vector2(1088, 736)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 
 [node name="Unit8" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 704)
+position = Vector2(992, 480)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 machine_guns = 1
 

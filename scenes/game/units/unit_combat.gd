@@ -278,7 +278,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	var burst_rounds: int = volley.burst_rounds
 	var round_multiplier: float = 1.0
 	if current_state == MoraleState.CAUTIOUS:
-		round_multiplier = 0.8
+		round_multiplier = 0.9
 	elif current_state == MoraleState.PINNED:
 		round_multiplier = 0.5
 	total_rounds = int(total_rounds * round_multiplier)
