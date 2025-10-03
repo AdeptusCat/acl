@@ -18,6 +18,7 @@ class_name Unit
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
+@export var members_alive := 10
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -36,7 +37,7 @@ var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
 var units: Array[Node2D]
 
-var members_alive := 10
+
 var original_size := 10
 var leader_alive := true
 

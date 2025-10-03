@@ -35,7 +35,7 @@ var detail_ui = null
 
 
 func set_support_weapons(support_weapons: int):
-	var support_weapon_slots: Array = [$"SupportWeapons/SupportWeapon#1", $"SupportWeapons/SupportWeapon#2"]
+	var support_weapon_slots: Array = [$"SupportWeapons/VBoxContainer/SupportWeapon#1", $"SupportWeapons/VBoxContainer/SupportWeapon#2"]
 	for i in support_weapons:
 		support_weapon_slots[i].show()
 
