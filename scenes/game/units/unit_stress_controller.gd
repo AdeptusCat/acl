@@ -102,7 +102,7 @@ var _last_pressure_rps: float = 0.0
 # --- SIGNALS ---
 signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
-
+signal leadership_changed(_leadership_bonus: float)
 
 class LeadershipMod:
 	var bonus: float
@@ -133,6 +133,7 @@ func _recompute_leadership() -> void:
 		total_cohesion_mult *= lm.cohesion_mult
 	leadership_bonus = total_bonus
 	cohesion = clamp(cohesion * total_cohesion_mult, 0.0, 1.5)
+	leadership_changed.emit(leadership_bonus)
 
 
 # Hook this into your recovery rolls (where you already compute recovery chances).

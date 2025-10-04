@@ -59,20 +59,20 @@ signal shoot(from_pos, target_pos)
 
 func _ready():
 	# Define the rifle spec (individual)
-	var rifle: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+	var rifle: WeaponSpec = WeaponSpec.new()
 	rifle.name = "Bolt-action Rifle"
 	rifle.kind = SquadFireCalculator.WeaponKind.INDIVIDUAL
-	rifle.practical_rpm = 12.0  # a bit conservative for sustained fire
+	rifle.rpm = 12.0  # a bit conservative for sustained fire
 
 	# Define the MG (crew-served)
-	var mg: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+	var mg: WeaponSpec = WeaponSpec.new()
 	mg.name = "GPMG"
 	mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
-	mg.cyclic_rpm = 700.0
+	mg.rpm = 700.0
 	mg.burst_rounds = 4           # “short bursts”, aye
 	mg.burst_pause_s = 0.35
 	mg.crew_required = 2          # gunner + loader
-	mg.undercrew_penalty_exp = 1.6
+	mg.undercrew_penalty_mult = 1.6
 	mg.priority = 10              # gets crew before anything else
 
 	# Put one MG in the squad
@@ -96,14 +96,14 @@ func _ready():
 func set_mg(machinge_guns : int):
 	for i in machinge_guns:
 		# Define the MG (crew-served)
-		var mg: SquadFireCalculator.WeaponSpec = SquadFireCalculator.WeaponSpec.new()
+		var mg: WeaponSpec = WeaponSpec.new()
 		mg.name = "GPMG"
 		mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
-		mg.cyclic_rpm = 700.0
+		mg.rpm = 700.0
 		mg.burst_rounds = 4           # “short bursts”, aye
 		mg.burst_pause_s = 0.35
 		mg.crew_required = 2          # gunner + loader
-		mg.undercrew_penalty_exp = 1.6
+		mg.undercrew_penalty_mult = 1.6
 		mg.priority = 10              # gets crew before anything else
 		var mg_eq: SquadFireCalculator.EquipmentInstance = SquadFireCalculator.EquipmentInstance.new(mg, 1)
 		fin.crew_equipment.append(mg_eq)
@@ -648,7 +648,7 @@ func animate_mg_bursts(
 		shooter: Node2D,
 		target: Node2D,
 		total_rounds: int,
-		cyclic_rpm: float,
+		rpm: float,
 		burst_size: int,
 		burst_pause_s: float,
 		resolve_mode: String,
@@ -660,7 +660,7 @@ func animate_mg_bursts(
 		return
 	
 	## timing
-	#var bullets_per_sec: float = cyclic_rpm / 60.0
+	#var bullets_per_sec: float = rpm / 60.0
 	#if bullets_per_sec <= 0.0:
 		#bullets_per_sec = 1.0   # safety
 	#var seconds_per_bullet: float = 1.0 / bullets_per_sec

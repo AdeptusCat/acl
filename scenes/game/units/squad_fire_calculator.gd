@@ -4,7 +4,7 @@ class_name SquadFireCalculator
 # --- High-level idea, mate ---
 # 1) Allocate available soldiers to crew-served weapons (MGs first by default).
 # 2) Compute expected rounds over a time slice (dt) for each piece:
-#    - Individual weapons: shooters * practical_rpm
+#    - Individual weapons: shooters * rpm
 #    - Crew-served: burst model + cyclic cap, scaled by crew fraction and ROF state.
 # 3) Return a combined volley with a breakdown, ready for your resolve_volley().
 
@@ -12,29 +12,6 @@ enum WeaponKind {
 	INDIVIDUAL,    # 1 shooter per weapon (e.g., bolt-action rifle)
 	CREW_SERVED    # needs crew (e.g., MG, mortar, HMG)
 }
-
-# A weapon template/specification.
-class WeaponSpec:
-	var name: String
-	var kind: int
-	var practical_rpm: float              # For INDIVIDUAL weapons (expected sustained rpm per shooter)
-	var cyclic_rpm: float                 # For CREW_SERVED (mechanical cyclic rpm)
-	var burst_rounds: int                 # For CREW_SERVED (rounds per burst)
-	var burst_pause_s: float              # Pause between bursts (seconds)
-	var crew_required: int                # How many soldiers to run it properly
-	var undercrew_penalty_exp: float      # Exponent for harsher penalty when under-crewed (>=1.0; try 1.25–1.75)
-	var priority: int                     # Higher gets crew first
-
-	func _init() -> void:
-		name = "Unnamed"
-		kind = WeaponKind.INDIVIDUAL
-		practical_rpm = 15.0
-		cyclic_rpm = 600.0
-		burst_rounds = 3
-		burst_pause_s = 0.3
-		crew_required = 2
-		undercrew_penalty_exp = 1.5
-		priority = 0
 
 # A concrete piece of equipment held by the squad.
 class EquipmentInstance:
@@ -62,7 +39,7 @@ class SquadFireInput:
 		individual_weapon = WeaponSpec.new()
 		individual_weapon.name = "Bolt-action Rifle"
 		individual_weapon.kind = WeaponKind.INDIVIDUAL
-		individual_weapon.practical_rpm = 15.0
+		individual_weapon.rpm = 15.0
 		crew_equipment = []
 
 # Output of the calculator.
@@ -97,7 +74,7 @@ func build_volley(input: SquadFireInput) -> VolleyResult:
 					"rounds": individual_rounds,
 					"meta": {
 						"shooters": remaining_men,
-						"rpm_each": input.individual_weapon.practical_rpm,
+						"rpm_each": input.individual_weapon.rpm,
 						"state_mult": input.state_rof_mult
 					}
 				})
@@ -124,7 +101,7 @@ func build_volley(input: SquadFireInput) -> VolleyResult:
 					"crew_required": eq.spec.crew_required,
 					"burst_rounds": eq.spec.burst_rounds,
 					"burst_pause_s": eq.spec.burst_pause_s,
-					"cyclic_rpm": eq.spec.cyclic_rpm,
+					"rpm": eq.spec.rpm,
 					"state_mult": input.state_rof_mult
 				}
 			})
@@ -173,7 +150,7 @@ func _cmp_priority_desc(a: EquipmentInstance, b: EquipmentInstance) -> bool:
 func _expected_individual_rounds(spec: WeaponSpec, shooters: int, rof_mult: float, dt: float) -> int:
 	if shooters <= 0:
 		return 0
-	var rpm_each: float = spec.practical_rpm * rof_mult
+	var rpm_each: float = spec.rpm * rof_mult
 	if rpm_each < 0.0:
 		rpm_each = 0.0
 	var rounds_f: float = float(shooters) * rpm_each * (dt / 60.0)
@@ -197,10 +174,10 @@ func _expected_crew_served_rounds(spec: WeaponSpec, assigned_crew: int, rof_mult
 	if crew_frac < 0.0:
 		crew_frac = 0.0
 
-	var crew_eff: float = pow(crew_frac, spec.undercrew_penalty_exp)
+	var crew_eff: float = pow(crew_frac, spec.undercrew_penalty_mult)
 
 	# Burst model to get expected bursts over dt.
-	var cyclic_rps: float = spec.cyclic_rpm / 60.0
+	var cyclic_rps: float = spec.rpm / 60.0
 	if cyclic_rps < 0.0001:
 		cyclic_rps = 0.0001
 
@@ -219,7 +196,7 @@ func _expected_crew_served_rounds(spec: WeaponSpec, assigned_crew: int, rof_mult
 	rounds_expected_f *= crew_eff * rof_mult
 
 	# Safety clamp to cyclic ceiling over dt (can happen with tiny pause/big dt combos).
-	var absolute_max: float = spec.cyclic_rpm * (dt / 60.0)
+	var absolute_max: float = spec.rpm * (dt / 60.0)
 	if rounds_expected_f > absolute_max:
 		rounds_expected_f = absolute_max
 	if rounds_expected_f < 0.0:

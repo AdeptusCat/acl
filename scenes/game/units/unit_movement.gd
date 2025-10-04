@@ -113,6 +113,7 @@ func _process_movement(delta: float):
 				#get_terrain_multiplier()
 				
 				unit.current_hex = path_hexes[path_index]
+				unit.current_cube = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
 				unit.moved_to_hex.emit(unit, path_hexes[path_index])
 				
 	

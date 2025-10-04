@@ -31,7 +31,7 @@ func animate_mg_bursts(
 		shooter: Node2D,
 		target: Node2D,
 		total_rounds: int,
-		cyclic_rpm: float,
+		rpm: float,
 		burst_size: int,
 		burst_pause_s: float,
 		resolve_mode: String,
@@ -42,7 +42,7 @@ func animate_mg_bursts(
 		return
 	
 	# timing
-	var bullets_per_sec: float = cyclic_rpm / 60.0
+	var bullets_per_sec: float = rpm / 60.0
 	if bullets_per_sec <= 0.0:
 		bullets_per_sec = 1.0   # safety
 	var seconds_per_bullet: float = 1.0 / bullets_per_sec

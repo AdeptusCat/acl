@@ -6,9 +6,7 @@ class_name LeaderAura
 @export var leadership_bonus: float = 0.15     # folds into stress controller's leadership_bonus
 @export var rally_bonus: float = 0.10          # added to recovery rolls
 @export var cohesion_mult: float = 1.05        # multiplicative on cohesion
-
 @export var scan_interval_s: float = 0.25
-@export var ground_map: HexagonTileMapLayer
 
 var _owner_unit: Node2D
 var _since_scan: float = 0.0
@@ -26,9 +24,9 @@ func _process(delta: float) -> void:
 	_update_aura()
 
 func _update_aura() -> void:
-	if ground_map == null:
+	if LOSHelper.ground_layer == null:
 		return
-	var leader_hex: Vector2i = ground_map.local_to_map(_owner_unit.position)
+	var leader_cube: Vector3i = _owner_unit.current_cube
 	var candidates: Array = get_tree().get_nodes_in_group("units")
 	var seen: Dictionary = {}
 
@@ -36,14 +34,16 @@ func _update_aura() -> void:
 		var unit: Node2D = u
 		if not is_instance_valid(unit):
 			continue
-		if unit == _owner_unit:
-			continue
+		# comment this to allow the same unit to influence itself
+		#if unit == _owner_unit:
+			#continue
 		if not _same_team(_owner_unit, unit):
 			continue
-
-		var unit_hex: Vector2i = unit.current_hex
-		var d: int = _hex_distance(leader_hex, unit_hex)
-		if d <= aura_radius_hexes:
+		
+		var distance: int = LOSHelper.ground_layer.cube_distance(leader_cube, unit.current_cube)
+		if aura_radius_hexes == 2:
+			pass
+		if distance <= aura_radius_hexes:
 			_apply_to(unit)
 			seen[unit] = true
 
@@ -51,6 +51,12 @@ func _update_aura() -> void:
 	for prior in _affected.keys():
 		if not seen.has(prior):
 			_remove_from(prior)
+
+func set_properties(_aura_radius_hexes, _leadership_bonus, _rally_bonus, _cohesion_mult):
+	aura_radius_hexes = _aura_radius_hexes
+	leadership_bonus = _leadership_bonus
+	rally_bonus = _rally_bonus    
+	cohesion_mult = _cohesion_mult
 
 func _apply_to(unit: Node2D) -> void:
 	if _affected.has(unit):
@@ -83,10 +89,10 @@ func _same_team(a: Node2D, b: Node2D) -> bool:
 		return true
 	return false
 
-func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	# Axial conversion if your map is axial; adjust if you’re using offset coords.
-	var dx: int = a.x - b.x
-	var dy: int = a.y - b.y
-	var dz: int = -dx - dy
-	var dist: int = int((abs(dx) + abs(dy) + abs(dz)) / 2)
-	return dist
+#func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+	## Axial conversion if your map is axial; adjust if you’re using offset coords.
+	#var dx: int = a.x - b.x
+	#var dy: int = a.y - b.y
+	#var dz: int = -dx - dy
+	#var dist: int = int((abs(dx) + abs(dy) + abs(dz)) / 2)
+	#return dist

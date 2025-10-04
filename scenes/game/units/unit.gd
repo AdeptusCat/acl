@@ -1,3 +1,4 @@
+# unit.gd
 @tool
 extends Node2D
 class_name Unit
@@ -19,6 +20,17 @@ class_name Unit
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
 @export var members_alive := 10
+@export var members_count: int = 10 : set = set_members_count
+@export var loadouts: Array[SoldierLoadout] = []
+
+# optional defaults to speed setup (assign in the inspector)
+@export var default_rifle: WeaponSpec
+@export var default_smg: WeaponSpec
+@export var default_mg: WeaponSpec
+
+# convenience buttons (toggle to run in-editor)
+@export var make_rifle_squad_10: bool = false : set = _make_rifle_squad_10
+@export var make_mg_team_5: bool = false : set = _make_mg_team_5
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -30,6 +42,7 @@ var broken: bool = false
 var recovery_timer_current: float = 0.0
 var current_cover_bonus: int = 0
 var current_hex: Vector2i
+var current_cube: Vector3i
 var goal_hex: Vector2i
 var selected: bool = false
 var moving: bool = false
@@ -54,9 +67,10 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 
 # === Nodes ===
 @onready var ui := $UnitUi
-@onready var stress_system := $UnitStressController
-@onready var movement := $UnitMovement
-@onready var combat := $Combat
+@onready var stress_system: StressController = $UnitStressController
+@onready var movement:UnitMovement = $UnitMovement
+@onready var combat: UnitCombat = $Combat
+@onready var leader_aura: LeaderAura = $LeaderAura
 
 # === Classes ===
 #@onready var morale_system := UnitMorale.new(self)
@@ -99,9 +113,201 @@ func _ready():
 	
 	
 	ui.set_support_weapons(machine_guns)
+	stress_system.leadership_changed.connect(ui._on_leadership_changed)
 	
 	combat.set_mg(machine_guns)
+	
+	_resize_loadouts(members_count)
+	#_setup_runtime_soldiers()
+	
+	_refresh_leader_aura()
+	
 
+
+
+# Call this after casualties or when loadouts/runtime roster changes.
+func _refresh_leader_aura() -> void:
+	if leader_aura == null:
+		return
+
+	var grade: int = -1
+	var found: bool = false
+
+	# 1) Prefer runtime soldiers (alive only)
+	#if squad_fire != null:
+		#if squad_fire.soldiers.size() > 0:
+	#grade = _highest_grade_from_runtime()
+	grade = _highest_grade_from_loadouts()
+	if grade >= 0:
+		found = true
+
+	# 2) Fallback to editor loadouts
+	if not found:
+		grade = _highest_grade_from_loadouts()
+		if grade >= 0:
+			found = true
+
+	if not found:
+		return
+
+	if RankGrades.GRADE_PARAMS.has(grade):
+		var p: Dictionary = RankGrades.GRADE_PARAMS[grade]
+		var lead: float = float(p["lead"])
+		var rally: float = float(p["rally"])
+		var radius: int = int(p["radius"])
+		var coh: float = float(p["coh_mult"])
+
+		leader_aura.aura_radius_hexes = radius
+		leader_aura.leadership_bonus = lead
+		leader_aura.rally_bonus = rally
+		leader_aura.cohesion_mult = coh
+	
+	ui.set_leadership_rank(grade)
+
+
+#func _highest_grade_from_runtime() -> int:
+	#var best: int = -1
+	#var i: int = 0
+	#while i < loadouts.size():
+		#var s: int = squad_fire.soldiers[i]
+		#if s.is_alive:
+			#var g: int = _runtime_soldier_grade(s)
+			#if g > best:
+				#best = g
+		#i += 1
+	#return best
+
+# Adjust this if your Soldier stores the grade under a different field.
+# Assumes Soldier.rank (or .rank_grade) is aligned to RankGrades.Grade ordering.
+#func _runtime_soldier_grade(s: int) -> int:
+	#var g: int = -1
+	## If you use 'rank_grade' on Soldier, uncomment the next two lines and comment the 'rank' line.
+	## g = int(s.rank_grade)
+	## return g
+	#g = int(s.rank)           # Soldier.Rank should map to RankGrades.Grade in order
+	#return g
+
+func _highest_grade_from_loadouts() -> int:
+	var best: int = -1
+	var i: int = 0
+	while i < loadouts.size():
+		var L: SoldierLoadout = loadouts[i]
+		var g: int = int(L.rank_grade)
+		if g > best:
+			best = g
+		i += 1
+	return best
+	
+#func _setup_runtime_soldiers() -> void:
+	#if squad_fire == null:
+		#return
+	#var list: Array[Soldier] = []
+	#var i: int = 0
+	#while i < loadouts.size():
+		#var L: SoldierLoadout = loadouts[i]
+		#var spec: WeaponSpec = L.weapon
+		#if spec == null:
+			#spec = default_rifle
+		#var s: Soldier = Soldier.new(
+			#i,
+			#L.nickname,
+			#int(L.rank_grade),
+			#int(_map_role(L.role)),   # if your Soldier.Role differs
+			#spec
+		#)
+		#list.append(s)
+		#i += 1
+	#squad_fire.set_soldiers(list)
+
+# map editor roles to runtime Soldier.Role if they differ
+func _map_role(r: int) -> int:
+	return r  # replace if your enums aren’t identical
+
+func set_members_count(n: int) -> void:
+	if n < 1:
+		n = 1
+	members_count = n
+	_resize_loadouts(members_count)
+	# keep runtime count in step if you use it elsewhere
+	members_alive = members_count
+
+func _resize_loadouts(n: int) -> void:
+	# grow
+	var i: int = loadouts.size()
+	while i < n:
+		var L: SoldierLoadout = SoldierLoadout.new()
+		L.nickname = "Man %d" % int(i + 1)
+		if default_rifle != null:
+			L.weapon = default_rifle
+		# sensible first two slots for MG team if MG exists
+		if i == 0:
+			if default_mg != null:
+				L.role = SoldierLoadout.Role.GUNNER
+				L.nickname = "Gunner"
+				L.weapon = default_mg
+				L.is_key_role = true
+		if i == 1:
+			L.role = SoldierLoadout.Role.LOADER
+			L.nickname = "Loader"
+			L.is_key_role = true
+		loadouts.append(L)
+		i += 1
+	# shrink
+	while loadouts.size() > n:
+		loadouts.pop_back()
+
+# template builders (run in editor by ticking the bool, it resets to false)
+func _make_rifle_squad_10(v: bool) -> void:
+	if v:
+		make_rifle_squad_10 = false
+		set_members_count(10)
+		var i: int = 0
+		while i < loadouts.size() - 1:
+			var L: SoldierLoadout = loadouts[i]
+			L.role = SoldierLoadout.Role.RIFLEMAN
+			L.nickname = "Rifle %d" % int(i + 1)
+			L.rank_grade = RankGrades.Grade.RIFLEMAN
+			if default_rifle != null:
+				L.weapon = default_rifle
+			i += 1
+		var leader: SoldierLoadout = loadouts[i]
+		leader.role = SoldierLoadout.Role.SQUAD_LEADER
+		leader.nickname = "Rifle %d" % int(i + 1)
+		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+		if default_rifle != null:
+			leader.weapon = default_rifle
+		i += 1
+		notify_property_list_changed()
+
+func _make_mg_team_5(v: bool) -> void:
+	if v:
+		make_mg_team_5 = false
+		set_members_count(5)
+		var i: int = 0
+		while i < loadouts.size():
+			var L: SoldierLoadout = loadouts[i]
+			if i == 0:
+				L.role = SoldierLoadout.Role.GUNNER
+				L.nickname = "Gunner"
+				L.rank_grade = RankGrades.Grade.TEAM_LEADER
+				if default_mg != null:
+					L.weapon = default_mg
+				L.is_key_role = true
+			elif i == 1:
+				L.role = SoldierLoadout.Role.LOADER
+				L.nickname = "Loader"
+				L.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+				if default_rifle != null:
+					L.weapon = default_rifle
+				L.is_key_role = true
+			else:
+				L.role = SoldierLoadout.Role.RIFLEMAN
+				L.nickname = "Rifle %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.RIFLEMAN
+				if default_rifle != null:
+					L.weapon = default_rifle
+			i += 1
+		notify_property_list_changed()
 
 
 func _on_started_moving():
@@ -140,6 +346,7 @@ func _process(delta):
 		var map_coords = ground_map.local_to_map(position)
 		position = ground_map.map_to_local(map_coords)
 		current_hex = map_coords
+		current_cube = ground_map.map_to_cube(map_coords)
 		set_team(team)
 		return
 
@@ -254,6 +461,7 @@ func _on_morale_failed(_known_enemies: Array) -> void:
 func _on_retreat_complete(retreat_hex) -> void:
 	movement.moving = false
 	current_hex = retreat_hex
+	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
 	moved_to_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
 

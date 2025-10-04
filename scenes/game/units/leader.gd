@@ -77,7 +77,6 @@ func _ready() -> void:
 		aura.leadership_bonus = leadership_bonus
 		aura.rally_bonus = rally_bonus
 		aura.cohesion_mult = cohesion_mult
-		aura.ground_map = ground_map
 	if movement.has_method("set_unit_and_map"):
 		movement.call("set_unit_and_map", self, ground_map)
 	# leaders fight poorly by design

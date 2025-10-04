@@ -4,3 +4,8 @@
 
 [node name="LeaderAura" type="Node"]
 script = ExtResource("1_nbpfp")
+aura_radius_hexes = null
+leadership_bonus = null
+rally_bonus = null
+cohesion_mult = null
+scan_interval_s = null

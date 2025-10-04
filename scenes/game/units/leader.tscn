@@ -23,7 +23,20 @@ metadata/_edit_use_anchors_ = true
 [node name="UnitStressController" parent="." instance=ExtResource("4_5t246")]
 
 [node name="UnitMovement" parent="." instance=ExtResource("5_e0eau")]
+base_speed = null
+mf_by_terrain = null
+mf_wall_hexside = null
+mf_smoke_enter = null
+crest_uphill_mult = null
+mf_to_speed_gamma = null
+mf_speed_floor = null
+cover_to_move_mult = null
 
 [node name="Combat" parent="." instance=ExtResource("6_rpllj")]
 
 [node name="LeaderAura" parent="." instance=ExtResource("7_dx17b")]
+aura_radius_hexes = 2
+leadership_bonus = 0.15
+rally_bonus = 0.1
+cohesion_mult = 1.05
+scan_interval_s = 0.25

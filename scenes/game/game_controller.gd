@@ -80,6 +80,7 @@ func _ready():
 			unit.moved_to_hex.connect(_on_unit_moved)
 			unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
+			unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
 			unit.deselect_unit.connect(_deselect_unit)
 			unit.started_moving.connect(_on_started_moving)
 			unit.unit_surrendered.connect(_on_unit_surrendered)

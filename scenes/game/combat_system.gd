@@ -44,7 +44,8 @@ func _on_unit_moved(unit, vector):
 			if enemy_unit.moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
 				continue
 			else:
-				var distance = enemy_unit.current_hex.distance_to(unit.current_hex)
+				var distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
+				
 				# safely grab the inner dict for this shooter-hex
 				var cover_map = LOSHelper.los_lookup.get(enemy_unit.current_hex, null)
 				var targetCover 

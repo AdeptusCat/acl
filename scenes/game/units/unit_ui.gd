@@ -35,6 +35,15 @@ var detail_ui = null
 @onready var unit_designation_label = $UnitDesignation
 
 
+func _on_leadership_changed(leadership_bonus: float) -> void:
+	var txt: String = "%0.2f" % leadership_bonus
+	$LeadershipBonus.text = txt
+
+
+func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
+	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
+
+
 func set_support_weapons(support_weapons: int):
 	var support_weapon_slots: Array = [$"SupportWeapons/VBoxContainer/SupportWeapon#1", $"SupportWeapons/VBoxContainer/SupportWeapon#2"]
 	for i in support_weapons:
