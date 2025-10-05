@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://rsqpaeas8ic5"]
+[gd_scene load_steps=13 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="2_h0ojj"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="8_b5oeb"]
 [ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="8_v8x2n"]
+[ext_resource type="PackedScene" uid="uid://cb28roffrjgwu" path="res://scenes/game/units/squad_fire_controller.tscn" id="9_b5oeb"]
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
@@ -50,3 +51,5 @@ leadership_bonus = 0.15
 rally_bonus = 0.1
 cohesion_mult = 1.05
 scan_interval_s = 0.25
+
+[node name="SquadFireController" parent="." instance=ExtResource("9_b5oeb")]

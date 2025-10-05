@@ -71,6 +71,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 @onready var movement:UnitMovement = $UnitMovement
 @onready var combat: UnitCombat = $Combat
 @onready var leader_aura: LeaderAura = $LeaderAura
+@onready var squad_fire: SquadFireController = $SquadFireController
 
 # === Classes ===
 #@onready var morale_system := UnitMorale.new(self)
@@ -168,27 +169,27 @@ func _refresh_leader_aura() -> void:
 	ui.set_leadership_rank(grade)
 
 
-#func _highest_grade_from_runtime() -> int:
-	#var best: int = -1
-	#var i: int = 0
-	#while i < loadouts.size():
-		#var s: int = squad_fire.soldiers[i]
-		#if s.is_alive:
-			#var g: int = _runtime_soldier_grade(s)
-			#if g > best:
-				#best = g
-		#i += 1
-	#return best
+func _highest_grade_from_runtime() -> int:
+	var best: int = -1
+	var i: int = 0
+	while i < loadouts.size():
+		var s: Soldier = squad_fire.soldiers[i]
+		if s.is_alive:
+			var g: int = _runtime_soldier_grade(s)
+			if g > best:
+				best = g
+		i += 1
+	return best
 
 # Adjust this if your Soldier stores the grade under a different field.
 # Assumes Soldier.rank (or .rank_grade) is aligned to RankGrades.Grade ordering.
-#func _runtime_soldier_grade(s: int) -> int:
-	#var g: int = -1
-	## If you use 'rank_grade' on Soldier, uncomment the next two lines and comment the 'rank' line.
-	## g = int(s.rank_grade)
-	## return g
-	#g = int(s.rank)           # Soldier.Rank should map to RankGrades.Grade in order
-	#return g
+func _runtime_soldier_grade(s: Soldier) -> int:
+	var g: int = -1
+	# If you use 'rank_grade' on Soldier, uncomment the next two lines and comment the 'rank' line.
+	# g = int(s.rank_grade)
+	# return g
+	g = int(s.rank)           # Soldier.Rank should map to RankGrades.Grade in order
+	return g
 
 func _highest_grade_from_loadouts() -> int:
 	var best: int = -1

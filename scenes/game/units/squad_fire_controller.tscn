@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cb28roffrjgwu"]
+
+[ext_resource type="Script" uid="uid://o5ruyjdyq1qe" path="res://scenes/game/units/squad_fire_controller.gd" id="1_rfg55"]
+
+[node name="SquadFireController" type="Node"]
+script = ExtResource("1_rfg55")
