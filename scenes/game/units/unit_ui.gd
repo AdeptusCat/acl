@@ -42,6 +42,13 @@ func _on_leadership_changed(leadership_bonus: float) -> void:
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
+	match rankGrade:
+		RankGrades.Grade.SQUAD_LEADER:
+			pass
+		RankGrades.Grade.PLATOON_LEADER:
+			pass
+		RankGrades.Grade.COMPANY_LEADER:
+			pass
 
 
 func set_support_weapons(support_weapons: int):

@@ -93,6 +93,9 @@ func _ready():
 	#morale_system.morale_success.connect(ui._on_morale_success)
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	#morale_system.morale_breaks.connect(ui._on_morale_breaks)
+	
+	if Engine.is_editor_hint():
+		return
 	cover_updated.connect(ui._on_cover_updated)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
@@ -346,7 +349,8 @@ func _process(delta):
 		var map_coords = ground_map.local_to_map(position)
 		position = ground_map.map_to_local(map_coords)
 		current_hex = map_coords
-		current_cube = ground_map.map_to_cube(map_coords)
+		if not Engine.is_editor_hint():
+			current_cube = ground_map.map_to_cube(map_coords)
 		set_team(team)
 		return
 
