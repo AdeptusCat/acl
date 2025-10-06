@@ -20,7 +20,6 @@ class_name Unit
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
 @export var members_alive := 10
-@export var members_count: int = 10 : set = set_members_count
 @export var loadouts: Array[SoldierLoadout] = []
 
 # optional defaults to speed setup (assign in the inspector)
@@ -122,12 +121,14 @@ func _ready():
 	
 	combat.set_mg(machine_guns)
 	
-	_resize_loadouts(members_count)
+	#_resize_loadouts(members_count)
 	_setup_runtime_soldiers()
 	
 	_refresh_leader_aura()
 	
 	squad_fire.fire_shot.connect(_on_fire_shot)
+	
+	ui.set_memebers_alive(loadouts.size())
 	
 
 
@@ -240,13 +241,6 @@ func _setup_runtime_soldiers() -> void:
 func _map_role(r: int) -> int:
 	return r  # replace if your enums aren’t identical
 
-func set_members_count(n: int) -> void:
-	if n < 1:
-		n = 1
-	members_count = n
-	_resize_loadouts(members_count)
-	# keep runtime count in step if you use it elsewhere
-	members_alive = members_count
 
 func _resize_loadouts(n: int) -> void:
 	# grow
@@ -277,9 +271,9 @@ func _resize_loadouts(n: int) -> void:
 func _make_rifle_squad_10(v: bool) -> void:
 	if v:
 		make_rifle_squad_10 = false
-		set_members_count(10)
+		loadouts.clear()
 		var i: int = 0
-		while i < loadouts.size() - 1:
+		while i < 9:
 			var L: SoldierLoadout = loadouts[i]
 			L.role = RankGrades.Role.RIFLEMAN
 			L.nickname = "Rifle %d" % int(i + 1)
@@ -287,6 +281,7 @@ func _make_rifle_squad_10(v: bool) -> void:
 			if default_rifle != null:
 				L.weapon = default_rifle
 			i += 1
+			loadouts.append(L)
 		var leader: SoldierLoadout = loadouts[i]
 		leader.role = RankGrades.Role.SQUAD_LEADER
 		leader.nickname = "Rifle %d" % int(i + 1)
@@ -294,12 +289,12 @@ func _make_rifle_squad_10(v: bool) -> void:
 		if default_rifle != null:
 			leader.weapon = default_rifle
 		i += 1
+		loadouts.append(leader)
 		notify_property_list_changed()
 
 func _make_mg_team_5(v: bool) -> void:
 	if v:
 		make_mg_team_5 = false
-		set_members_count(5)
 		var i: int = 0
 		while i < loadouts.size():
 			var L: SoldierLoadout = loadouts[i]
@@ -415,7 +410,6 @@ func update_team_sprite(team: int):
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 	if not alive or surrendered:
 		return
-	pass
 	# combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
 
 
@@ -444,6 +438,9 @@ func _apply_casualties(n:int) -> void:
 	stress_system.on_casualty_event(n, leader_down)
 	#emit_signal("casualties_taken", original_size - members_alive)
 	ui.set_memebers_alive(members_alive)
+	var i: int = randi_range(0, loadouts.size() - 1)
+	loadouts.remove_at(i)
+	squad_fire.soldiers.remove_at(i)
 	if members_alive <= 0:
 		_set_combat_ineffective()
 
