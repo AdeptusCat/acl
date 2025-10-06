@@ -52,4 +52,9 @@ rally_bonus = 0.1
 cohesion_mult = 1.05
 scan_interval_s = 0.25
 
-[node name="SquadFireController" parent="." instance=ExtResource("9_b5oeb")]
+[node name="SquadFireController" parent="." node_paths=PackedStringArray("unit", "combat", "stress_controller") instance=ExtResource("9_b5oeb")]
+unit = NodePath("..")
+combat = NodePath("../Combat")
+stress_controller = NodePath("../UnitStressController")
+state_acc_mults = PackedFloat32Array()
+state_rof_mults = PackedFloat32Array()

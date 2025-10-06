@@ -122,7 +122,7 @@ func _ready():
 	combat.set_mg(machine_guns)
 	
 	_resize_loadouts(members_count)
-	#_setup_runtime_soldiers()
+	_setup_runtime_soldiers()
 	
 	_refresh_leader_aura()
 	
@@ -140,16 +140,17 @@ func _refresh_leader_aura() -> void:
 	# 1) Prefer runtime soldiers (alive only)
 	#if squad_fire != null:
 		#if squad_fire.soldiers.size() > 0:
-	#grade = _highest_grade_from_runtime()
-	grade = _highest_grade_from_loadouts()
+	grade = _highest_grade_from_runtime()
+	#grade = _highest_grade_from_loadouts()
 	if grade >= 0:
 		found = true
 
 	# 2) Fallback to editor loadouts
-	if not found:
-		grade = _highest_grade_from_loadouts()
-		if grade >= 0:
-			found = true
+	# doesnt make sense. when there are no soldiers with rank in runtime, then they are dead
+	#if not found:
+		#grade = _highest_grade_from_loadouts()
+		#if grade >= 0:
+			#found = true
 
 	if not found:
 		return
@@ -188,7 +189,7 @@ func _runtime_soldier_grade(s: Soldier) -> int:
 	# If you use 'rank_grade' on Soldier, uncomment the next two lines and comment the 'rank' line.
 	# g = int(s.rank_grade)
 	# return g
-	g = int(s.rank)           # Soldier.Rank should map to RankGrades.Grade in order
+	g = int(s.rank_grade)           # Soldier.Rank should map to RankGrades.Grade in order
 	return g
 
 func _highest_grade_from_loadouts() -> int:
@@ -202,26 +203,26 @@ func _highest_grade_from_loadouts() -> int:
 		i += 1
 	return best
 	
-#func _setup_runtime_soldiers() -> void:
-	#if squad_fire == null:
-		#return
-	#var list: Array[Soldier] = []
-	#var i: int = 0
-	#while i < loadouts.size():
-		#var L: SoldierLoadout = loadouts[i]
-		#var spec: WeaponSpec = L.weapon
-		#if spec == null:
-			#spec = default_rifle
-		#var s: Soldier = Soldier.new(
-			#i,
-			#L.nickname,
-			#int(L.rank_grade),
-			#int(_map_role(L.role)),   # if your Soldier.Role differs
-			#spec
-		#)
-		#list.append(s)
-		#i += 1
-	#squad_fire.set_soldiers(list)
+func _setup_runtime_soldiers() -> void:
+	if squad_fire == null:
+		return
+	var list: Array[Soldier] = []
+	var i: int = 0
+	while i < loadouts.size():
+		var L: SoldierLoadout = loadouts[i]
+		var spec: WeaponSpec = L.weapon
+		if spec == null:
+			spec = default_rifle
+		var s: Soldier = Soldier.new(
+			i,
+			L.nickname,
+			int(L.rank_grade),
+			int(_map_role(L.role)),   # if your Soldier.Role differs
+			spec
+		)
+		list.append(s)
+		i += 1
+	squad_fire.set_soldiers(list)
 
 # map editor roles to runtime Soldier.Role if they differ
 func _map_role(r: int) -> int:
@@ -246,12 +247,12 @@ func _resize_loadouts(n: int) -> void:
 		# sensible first two slots for MG team if MG exists
 		if i == 0:
 			if default_mg != null:
-				L.role = SoldierLoadout.Role.GUNNER
+				L.role = RankGrades.Role.GUNNER
 				L.nickname = "Gunner"
 				L.weapon = default_mg
 				L.is_key_role = true
 		if i == 1:
-			L.role = SoldierLoadout.Role.LOADER
+			L.role = RankGrades.Role.LOADER
 			L.nickname = "Loader"
 			L.is_key_role = true
 		loadouts.append(L)
@@ -268,14 +269,14 @@ func _make_rifle_squad_10(v: bool) -> void:
 		var i: int = 0
 		while i < loadouts.size() - 1:
 			var L: SoldierLoadout = loadouts[i]
-			L.role = SoldierLoadout.Role.RIFLEMAN
+			L.role = RankGrades.Role.RIFLEMAN
 			L.nickname = "Rifle %d" % int(i + 1)
 			L.rank_grade = RankGrades.Grade.RIFLEMAN
 			if default_rifle != null:
 				L.weapon = default_rifle
 			i += 1
 		var leader: SoldierLoadout = loadouts[i]
-		leader.role = SoldierLoadout.Role.SQUAD_LEADER
+		leader.role = RankGrades.Role.SQUAD_LEADER
 		leader.nickname = "Rifle %d" % int(i + 1)
 		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
 		if default_rifle != null:
@@ -291,21 +292,21 @@ func _make_mg_team_5(v: bool) -> void:
 		while i < loadouts.size():
 			var L: SoldierLoadout = loadouts[i]
 			if i == 0:
-				L.role = SoldierLoadout.Role.GUNNER
+				L.role = RankGrades.Role.GUNNER
 				L.nickname = "Gunner"
 				L.rank_grade = RankGrades.Grade.TEAM_LEADER
 				if default_mg != null:
 					L.weapon = default_mg
 				L.is_key_role = true
 			elif i == 1:
-				L.role = SoldierLoadout.Role.LOADER
+				L.role = RankGrades.Role.LOADER
 				L.nickname = "Loader"
 				L.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
 				if default_rifle != null:
 					L.weapon = default_rifle
 				L.is_key_role = true
 			else:
-				L.role = SoldierLoadout.Role.RIFLEMAN
+				L.role = RankGrades.Role.RIFLEMAN
 				L.nickname = "Rifle %d" % int(i + 1)
 				L.rank_grade = RankGrades.Grade.RIFLEMAN
 				if default_rifle != null:

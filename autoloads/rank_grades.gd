@@ -2,6 +2,7 @@
 extends Node
 
 enum Grade { RIFLEMAN, ASSISTANT_TEAM_LEADER, TEAM_LEADER, SQUAD_LEADER, PLATOON_LEADER, COMPANY_LEADER }
+enum Role { RIFLEMAN, GUNNER, LOADER, RADIO, MEDIC, ASSISTANT_TEAM_LEADER, TEAM_LEADER, SQUAD_LEADER }
 
 const GRADE_PARAMS: Dictionary = {
 	Grade.RIFLEMAN:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },

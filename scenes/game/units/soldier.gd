@@ -2,12 +2,11 @@
 class_name Soldier
 extends RefCounted
 
-enum Role { RIFLEMAN, GUNNER, LOADER, RADIO, MEDIC, LEADER }
 
 var id: int
 var name: String
 var rank_grade: RankGrades.Grade
-var role: Role
+var role: RankGrades.Role
 var weapon: WeaponSpec
 var is_alive: bool = true
 

@@ -3,10 +3,9 @@ extends Node
 class_name SquadFireController
 
 # Wiring
-@export var unit: Node2D
-@export var combat: Node
-@export var stress_controller_path: NodePath
-@export var ground_map: HexagonTileMapLayer
+@export var unit: Unit
+@export var combat: UnitCombat
+@export var stress_controller: StressController
 
 # Timing
 @export var burst_window_s: float = 0.10      # batch rounds within this window per hex
@@ -28,16 +27,6 @@ var _accum_window_s: float = 0.0
 var target_hex: Vector2i
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
-# Cached refs
-var _stress: Node = null
-
-func _ready() -> void:
-	if stress_controller_path != NodePath(""):
-		_stress = get_node(stress_controller_path)
-	# optional sanity
-	if combat == null and unit != null:
-		if unit.has_node("Combat"):
-			combat = unit.get_node("Combat")
 
 func set_soldiers(list: Array[Soldier]) -> void:
 	soldiers = list
@@ -57,9 +46,7 @@ func _physics_process(delta: float) -> void:
 
 func _update_state_multipliers() -> void:
 	var state_idx: int = 0
-	if _stress != null:
-		if _stress.has_variable("state"):
-			state_idx = int(_stress.state)
+	state_idx = stress_controller.state
 	var acc_mult: float = 1.0
 	var rof_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acc_mults.size():
@@ -79,8 +66,8 @@ func _tick_soldiers(delta: float) -> void:
 	var rounds_emitted: int = 0
 
 	# count available crew for MGs
-	var crew_available: int = _count_role(Soldier.Role.LOADER)
-	var gunners: Array[int] = _indices_with_role(Soldier.Role.GUNNER)
+	var crew_available: int = _count_role(RankGrades.Role.LOADER)
+	var gunners: Array[int] = _indices_with_role(RankGrades.Role.GUNNER)
 
 	# handle gunners first (crew-served)
 	var j: int = 0
@@ -98,7 +85,7 @@ func _tick_soldiers(delta: float) -> void:
 	while i < soldiers.size():
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
-			if s2.role != Soldier.Role.GUNNER:
+			if s2.role != RankGrades.Role.GUNNER:
 				rounds_emitted += _try_fire_soldier(s2, false, 0)
 				if rounds_emitted >= max_shots_per_tick:
 					return
