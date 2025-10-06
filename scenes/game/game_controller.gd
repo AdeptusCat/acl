@@ -195,7 +195,7 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 		var units: Array[Node2D] = _find_units_at(map_hex)
 		for unit in units:
 			if not unit.team == Globals.team_player:
-				selected_unit.combat.target_unit = unit
+				selected_unit.combat.set_target_unit(unit)
 				var local_pos = ground_layer.map_to_local(map_hex)
 				hex_glow(local_pos)
 				return

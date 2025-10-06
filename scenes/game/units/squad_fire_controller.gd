@@ -15,6 +15,10 @@ class_name SquadFireController
 @export var state_acc_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.5, 0.0, 0.0])
 @export var state_rof_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.85, 0.35, 0.0, 0.0])
 
+# NEW: state influence on target acquisition time (Normal..CombatIneffective)
+@export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 1.15, 1.6, 9999.0, 9999.0])
+# panic/CI effectively “never acquire”
+
 # Crew-served behaviour
 @export var crew_idle_to_loader: bool = true
 
@@ -27,11 +31,15 @@ var _accum_window_s: float = 0.0
 var target_hex: Vector2i
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
+signal fire_shot
 
 func set_soldiers(list: Array[Soldier]) -> void:
 	soldiers = list
 
 func set_target_hex(hx: Vector2i) -> void:
+	#if not target_hex == hx and not hx == Vector2i.ZERO:
+	if not hx == Vector2i.ZERO:
+		_prime_acquisition_for_new_target()
 	target_hex = hx
 
 func _physics_process(delta: float) -> void:
@@ -45,8 +53,7 @@ func _physics_process(delta: float) -> void:
 		_flush_burst_window()
 
 func _update_state_multipliers() -> void:
-	var state_idx: int = 0
-	state_idx = stress_controller.state
+	var state_idx: int = stress_controller.state
 	var acc_mult: float = 1.0
 	var rof_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acc_mults.size():
@@ -92,8 +99,13 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) -> int:
-	if target_hex == Vector2i():
+	if target_hex == Vector2i.ZERO:
 		return 0
+	
+	# acquisition gate: don’t shoot until settled on the new target
+	if _now_s < s.acquire_ready_s:
+		return 0
+	
 	if s.jammed:
 		# simple unjam: use reload time as clear jam delay
 		if s.next_ready_s <= _now_s:
@@ -127,6 +139,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 
 	# emit shots immediately into current window
 	_add_rounds_to_hex(target_hex, shots)
+	fire_shot.emit()
 
 	# apply jam chance
 	var k: int = 0
@@ -141,17 +154,27 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 
 	# spend ammo
 	s.rounds_in_mag -= shots
-
-	# compute time to next burst:
-	# firing time for shots at cyclic rpm + burst pause, scaled by ROF and crew
-	var rps: float = s.weapon.cyclic_rpm / 60.0
+	
+	# cadence to next burst (respect soldier’s rof and crew)
+	var rps: float = s.weapon.rpm / 60.0
 	if rps < 1.0:
 		rps = 1.0
 	var fire_time_s: float = float(shots) / rps
 	var pause_s: float = s.weapon.burst_pause_s
 	var total_cadence_s: float = (fire_time_s + pause_s) * s.rof_mult * crew_mult
 
-	s.next_ready_s = _now_s + total_cadence_s
+	# keep a little persistent desync in the rhythm
+	var phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
+	s.next_ready_s = _now_s + total_cadence_s + phase_bump
+	
+	var state_idx: int = stress_controller.state
+	var acquire_mult: float = 1.0
+	if state_idx >= 0 and state_idx < state_acquire_mults.size():
+		acquire_mult = state_acquire_mults[state_idx]
+	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+	s.next_ready_s += settle_s
+	
+	var delta: float = s.next_ready_s - _now_s
 	return shots
 
 func _add_rounds_to_hex(hx: Vector2i, n: int) -> void:
@@ -198,3 +221,40 @@ func _indices_with_role(role: int) -> Array[int]:
 				res.append(i)
 		i += 1
 	return res
+
+
+func _prime_acquisition_for_new_target() -> void:
+	# called whenever target_hex changes
+	var state_idx: int = stress_controller.state
+	var acquire_mult: float = 1.0
+	if state_idx >= 0 and state_idx < state_acquire_mults.size():
+		acquire_mult = state_acquire_mults[state_idx]
+
+	var i: int = 0
+	while i < soldiers.size():
+		var s: Soldier = soldiers[i]
+		if s.is_alive:
+			#var changed: bool = s.last_target_hex != target_hex
+			#if changed:
+			var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+			# add the soldier's fixed cadence phase so first bursts don’t sync
+			settle_s += s.cadence_phase_s
+			s.acquire_ready_s = _now_s + settle_s
+			s.last_target_hex = target_hex
+			# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
+			if s.next_ready_s < s.acquire_ready_s:
+				s.next_ready_s = s.acquire_ready_s
+		i += 1
+
+
+func _calc_acquire_delay(s: Soldier) -> float:
+	# prefer weapon raise/aim timings if available; else use soldier base
+	var base: float = s.base_acquire_s
+	if s.weapon != null:
+		var has_raise: bool = s.weapon.raise_s > 0.0
+		var has_aim: bool = s.weapon.aim_s > 0.0
+		if has_raise or has_aim:
+			base = s.weapon.raise_s + s.weapon.aim_s
+	# add a random bit per target switch
+	var jitter: float = randf_range(0.0, s.aim_jitter_s)
+	return base + jitter

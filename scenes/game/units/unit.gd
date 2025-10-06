@@ -104,6 +104,7 @@ func _ready():
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	combat.shoot.connect(ui.shoot)
+	combat.new_target_unit.connect(_on_new_target_unit)
 	
 	movement.unit = self
 	movement.ground_map = ground_map
@@ -126,7 +127,20 @@ func _ready():
 	
 	_refresh_leader_aura()
 	
+	squad_fire.fire_shot.connect(_on_fire_shot)
+	
 
+
+func _on_fire_shot():
+	if combat.target_unit:
+		ui.shoot(global_position, combat.target_unit.global_position)
+
+
+func _on_new_target_unit(unit: Unit):
+	var hex: Vector2i = Vector2i.ZERO
+	if unit:
+		hex = unit.current_hex
+	squad_fire.set_target_hex(hex)
 
 
 # Call this after casualties or when loadouts/runtime roster changes.
@@ -220,6 +234,7 @@ func _setup_runtime_soldiers() -> void:
 			int(_map_role(L.role)),   # if your Soldier.Role differs
 			spec
 		)
+		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
 		list.append(s)
 		i += 1
 	squad_fire.set_soldiers(list)
@@ -319,6 +334,9 @@ func _on_started_moving():
 	moving = true
 	ui.started_moving(broken, surrendered)
 	started_moving.emit()
+	var hex: Vector2i = Vector2i.ZERO
+	combat.set_target_unit(null)
+	squad_fire.set_target_hex(hex)
 
 
 func _on_stopped_moving():

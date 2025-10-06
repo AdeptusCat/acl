@@ -55,7 +55,7 @@ var fire_timer: float = 0.0
 var target_unit
 
 signal shoot(from_pos, target_pos)
-
+signal new_target_unit(unit: Unit)
 
 func _ready():
 	# Define the rifle spec (individual)
@@ -194,6 +194,10 @@ func resolve_volley(target: Node, inputs: Dictionary) -> void:
 	target.call_deferred("_on_incoming_fire_effect", casualties, stress_fast, stress_slow, self)
 
 
+func set_target_unit(unit: Unit):
+	target_unit = unit
+	new_target_unit.emit(unit)
+
 
 func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
 	fire_timer -= delta
@@ -216,8 +220,10 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 				return
 			else:
 				target_unit = null
+				new_target_unit.emit(target_unit)
 		else:
 			target_unit = null
+			new_target_unit.emit(target_unit)
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
@@ -229,6 +235,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 					var data = cover_map[enemy.current_hex]
 					targetCover = data["target_cover"]
 
+				set_target_unit(enemy)
 				enemy.set_cover(targetCover)
 				fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate
@@ -256,6 +263,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 
 	if batch_targets.is_empty():
 		target_unit = null
+		new_target_unit.emit(target_unit)
 		return
 
 	# --- compute TOTAL rounds once (scaled by members_effective & state) ---
@@ -532,18 +540,18 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		i += 1
 
 	# --- visuals use TOTAL rounds so it looks right noisy ---
-	fire_burst(shooter, current_hex, batch_targets[0], individual_rounds, fire_rate, unit_visible_enemies)
-	animate_mg_bursts(
-		shooter,
-		target,
-		burst_rounds,
-		700,
-		4,
-		0.35,
-		"instant",                # or "per_burst" if timing should affect results
-		unit_visible_enemies,
-		fire_rate
-	)
+	#fire_burst(shooter, current_hex, batch_targets[0], individual_rounds, fire_rate, unit_visible_enemies)
+	#animate_mg_bursts(
+		#shooter,
+		#target,
+		#burst_rounds,
+		#700,
+		#4,
+		#0.35,
+		#"instant",                # or "per_burst" if timing should affect results
+		#unit_visible_enemies,
+		#fire_rate
+	#)
 
 
 func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
