@@ -271,7 +271,7 @@ func _resize_loadouts(n: int) -> void:
 func _make_rifle_squad_10(v: bool) -> void:
 	if v:
 		make_rifle_squad_10 = false
-		loadouts.clear()
+		_resize_loadouts(10)
 		var i: int = 0
 		while i < 9:
 			var L: SoldierLoadout = loadouts[i]
@@ -281,7 +281,6 @@ func _make_rifle_squad_10(v: bool) -> void:
 			if default_rifle != null:
 				L.weapon = default_rifle
 			i += 1
-			loadouts.append(L)
 		var leader: SoldierLoadout = loadouts[i]
 		leader.role = RankGrades.Role.SQUAD_LEADER
 		leader.nickname = "Rifle %d" % int(i + 1)
@@ -289,7 +288,6 @@ func _make_rifle_squad_10(v: bool) -> void:
 		if default_rifle != null:
 			leader.weapon = default_rifle
 		i += 1
-		loadouts.append(leader)
 		notify_property_list_changed()
 
 func _make_mg_team_5(v: bool) -> void:

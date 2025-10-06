@@ -1,4 +1,4 @@
-[gd_scene load_steps=129 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=139 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -801,6 +801,60 @@ rank_grade = 4
 role = 7
 weapon = SubResource("Resource_v8x2n")
 
+[sub_resource type="Resource" id="Resource_7o8ut"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 1"
+weapon = SubResource("Resource_v8x2n")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_a5636"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 2"
+weapon = SubResource("Resource_v8x2n")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_jhdiv"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 3"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_4ln07"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 4"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_yr5cl"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 5"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_x77xw"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 6"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_pkfnk"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 7"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_5obl8"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 8"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_bmoad"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 9"
+weapon = SubResource("Resource_v8x2n")
+
+[sub_resource type="Resource" id="Resource_mb8w1"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 10"
+rank_grade = 3
+role = 7
+weapon = SubResource("Resource_v8x2n")
+
 [node name="World" type="Node2D"]
 script = ExtResource("1_6hctx")
 
@@ -913,11 +967,17 @@ machine_guns = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 
 [node name="Unit" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1040, 576)
+position = Vector2(896, 480)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubResource("Resource_0n6td")])
+
+[node name="Unit2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(1088, 544)
+ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7o8ut"), SubResource("Resource_a5636"), SubResource("Resource_jhdiv"), SubResource("Resource_4ln07"), SubResource("Resource_yr5cl"), SubResource("Resource_x77xw"), SubResource("Resource_pkfnk"), SubResource("Resource_5obl8"), SubResource("Resource_bmoad"), SubResource("Resource_mb8w1")])
 
 [node name="InputManager" parent="GameController" instance=ExtResource("24_x0nq1")]
 
