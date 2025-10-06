@@ -18,8 +18,8 @@ func _process(delta: float) -> void:
 		else:
 			#if unit.team == Globals.team_player:
 			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-
-
+			
+			
 func _on_unit_moved(unit, vector):
 	if not enabled:
 		return
@@ -57,7 +57,8 @@ func _on_unit_moved(unit, vector):
 
 				# now display it
 				unit.set_cover(targetCover)
-				enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
+				enemy_unit.squad_fire.set_target_unit(unit)
+				#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 
 	# 🔥 Update LOS for all units too (global re-check)
 	update_all_unit_visibilities()

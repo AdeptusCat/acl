@@ -22,6 +22,45 @@ class_name SquadFireController
 # Crew-served behaviour
 @export var crew_idle_to_loader: bool = true
 
+@export var max_cover_pts: float = 5.0   # stone house is 3; you can raise if needed
+
+@onready var calc: SquadFireCalculator = SquadFireCalculator.new()
+var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput.new()
+
+
+@export var stress_scale := 1.0             # global tuning
+@export var stress_fast_base: float = 8.0       # baseline shock of “being shot at”
+@export var stress_fast_hit_factor: float = 12.0# adds with mean p_hit (0..1)
+@export var stress_slow_per_round: float = 0.6  # accrues with volume
+@export var stress_point_blank_bonus: float = 1.5 # extra fear at 1 hex
+@export var stress_crossfire_bonus: float = 0.15    # e.g. 0.15 if multiple sources
+@export var stress_max_per_volley: float = 40.0    # safety cap (per volley, per squad) # if this is lower than the kill cap, raise it
+@export var weapon_stress_mult: float = 1.0   # MGs 1.2–1.4, rifles 1.0
+@export var stress_resilience: float = 1.0    # better-trained squads 0.8–0.9
+
+@export var casualty_scale: float = 0.75      # lower than 1.0 to reduce deaths overall
+@export var p_disable_rifle: float = 0.12     # was 0.5; rifles should be low
+@export var p_disable_mg: float = 0.18        # MGs a tad higher than rifles
+@export var lethality_cap_per_volley: int = 2 # per target, per volley; 1 keeps spikes down
+@export var lethality_cover_min: float = 0.6  # cover also reduces *lethality* (not just hit)
+@export var lethality_cover_max: float = 1.0  # no cover → 1.0 (full lethality)
+@export var lethality_mid_range: float = 0.7  # mid-range lethality multiplier
+@export var lethality_far_range: float = 0.45 # far-range lethality multiplier
+
+@export var stress_kill_fast_first: float = 30.0        # first KIA this volley (fast spike)
+@export var stress_kill_fast_each: float = 15.0           # each additional KIA (fast spike)
+@export var stress_kill_slow_each: float = 10.0           # per KIA (slow dread)
+@export var stress_kill_ratio_bonus: float = 0.5         # +50% at 100% losses (scales with loss ratio)
+@export var stress_kill_max_per_volley: float = 60.0     # cap for casualty-driven stress per volley
+
+# ---- cover → stress dampening (fast & slow), typed nice and proper ----
+@export var stress_cover_fast_min: float = 0.45   # floor at max cover (fast spike never 0)
+@export var stress_cover_slow_min: float = 0.65   # floor at max cover (slow dread never 0)
+@export var stress_cover_gamma: float = 1.2       # curvature; >1 gives diminishing returns
+
+const MIN_HIT_MULT: float = 0.35   # floor at extreme cover
+const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to the floor
+
 # Soldiers
 var soldiers: Array[Soldier] = []
 var _now_s: float = 0.0
@@ -29,18 +68,36 @@ var _accum_window_s: float = 0.0
 
 # Targeting
 var target_hex: Vector2i
+var target_cover: float
+var target_unit: Unit
+var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
+var unit_visible_enemies: Dictionary
 
 signal fire_shot
 
 func set_soldiers(list: Array[Soldier]) -> void:
 	soldiers = list
 
-func set_target_hex(hx: Vector2i) -> void:
-	#if not target_hex == hx and not hx == Vector2i.ZERO:
-	if not hx == Vector2i.ZERO:
+#var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				#var targetCover = 0
+#if cover_map and cover_map.has(enemy.current_hex):
+					#var data = cover_map[enemy.current_hex]
+					#targetCover = data["target_cover"]
+					
+func set_target_unit(targetUnit: Unit) -> void:
+	var hex: Vector2i = Vector2i.ZERO
+	target_cover = 0
+	if targetUnit:
+		target_unit = targetUnit
+		hex = targetUnit.current_hex
+		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+		if cover_map and cover_map.has(targetUnit.current_hex):
+			var data = cover_map[targetUnit.current_hex]
+			target_cover = data["target_cover"]
+		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 		_prime_acquisition_for_new_target()
-	target_hex = hx
+	target_hex = hex
 
 func _physics_process(delta: float) -> void:
 	_now_s += delta
@@ -101,6 +158,23 @@ func _tick_soldiers(delta: float) -> void:
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) -> int:
 	if target_hex == Vector2i.ZERO:
 		return 0
+	
+	var batch_targets: Array = []
+	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	for u in visible_enemies:
+		if is_instance_valid(u):
+			if u.alive:
+				if not u.surrendered:
+					if u.current_hex == target_hex:
+						batch_targets.append(u)
+	if batch_targets.is_empty():
+		set_target_unit(null)
+		return 0
+	
+	if target_distance > unit.range:
+		set_target_unit(null)
+		return 0
+	
 	
 	# acquisition gate: don’t shoot until settled on the new target
 	if _now_s < s.acquire_ready_s:
@@ -174,8 +248,285 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 	s.next_ready_s += settle_s
 	
-	var delta: float = s.next_ready_s - _now_s
+	var delta: float = s.next_ready_s - _now_s # debug
+	fire_at()
 	return shots
+
+
+
+func fire_at() -> void:
+	var terrain_defense_bonus: float = target_cover
+	# --- range gating & power falloff ---
+
+	# --- collect all enemy squads in the target hex ---
+	var batch_targets: Array = []
+	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	for u in visible_enemies:
+		if is_instance_valid(u):
+			if u.alive:
+				if not u.surrendered:
+					if u.current_hex == target_hex:
+						batch_targets.append(u)
+	if batch_targets.is_empty():
+		return
+	
+	var cover_norm: float = float(terrain_defense_bonus) / max_cover_pts
+	if cover_norm > 1.0:
+		cover_norm = 1.0
+	if cover_norm < 0.0:
+		cover_norm = 0.0
+	# the idea here is that hard cover also modifies lethallity and not just accuracy, but needs rework
+	#var lethality_cover_mult: float = lerp(lethality_cover_min, lethality_cover_max, 1.0 - cover_norm)
+	var lethality_cover_mult: float = 1.0
+	
+	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
+	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
+	var base_accuracy := 0.35
+	var state_mod: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
+	var acc: float = base_accuracy * float(state_mod.acc)
+	acc *= clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
+	acc *= lerp(0.6, 1.0, 1.0 - target_cover) # what does this?
+	var shooter_stress: float = 0.0
+	if unit and "stress_system" in unit:
+		shooter_stress = float(unit.stress_system.S_eff)
+	var shooter_stress_multiplier: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
+	acc *= shooter_stress_multiplier
+
+	var is_point_blank: bool = int(target_distance) == 1
+
+	var n_targets: int = batch_targets.size()
+	var p_hit_per_target: Array = []
+	var target_cover_vals: Array = []
+	
+	# --- slower recovery while under fire ---
+	var total_rounds: int = 1 # maybe change this for bursts
+	var pressure_rps: float = float(total_rounds)   # or total_rounds / volley_dt if you track it
+	var j: int = 0
+	while j < n_targets:
+		var u_mark: Node = batch_targets[j]
+		if "stress_system" in u_mark:
+			var sc: StressController = u_mark.stress_system as StressController
+			if sc != null:
+				sc.mark_under_fire(pressure_rps)
+		j += 1
+
+	var i: int = 0
+	while i < n_targets:
+		var u: Node = batch_targets[i]
+		u.set_cover(terrain_defense_bonus)  # keep your existing hook
+		u.receive_fire(terrain_defense_bonus)
+
+		var exposure: float = 1.0
+		var cover_pts: float = float(terrain_defense_bonus)
+		target_cover_vals.append(cover_pts)
+
+		var p_hit_per_round: float = acc * exposure
+		p_hit_per_round *= cover_multiplier_exp(cover_pts)
+
+		if is_point_blank:
+			p_hit_per_round *= 2.0
+		else:
+			p_hit_per_round *= 1.0
+
+		p_hit_per_round = clamp(p_hit_per_round, 0.002, 0.95)
+		p_hit_per_target.append(p_hit_per_round)
+		i += 1
+
+	# --- assign each round to ONE squad and roll the hit there ---
+	# Even assignment chance; to weight, build a weight list and roulette-pick.
+	var hits_per_target: Array = []
+	i = 0
+	while i < n_targets:
+		hits_per_target.append(0)
+		i += 1
+
+	i = 0
+	while i < total_rounds:
+		# pick recipient squad
+		var idx: int = randi() % n_targets
+		# roll hit with that squad's p
+		var p_hit: float = float(p_hit_per_target[idx])
+		if randf() < p_hit:
+			hits_per_target[idx] = int(hits_per_target[idx]) + 1
+		i += 1
+
+	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
+	# Decide per-hit disable based on weapon; here we default to rifle numbers
+	var base_p_disable: float = 0.12
+
+	# Range and cover reduce *lethality* further (separate from hit chance)
+	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.range))
+	
+	
+
+	# Final per-hit disable after all throttles
+	var p_disable_final: float = base_p_disable * lethality_range_mult * lethality_cover_mult * casualty_scale
+	if p_disable_final < 0.01:
+		p_disable_final = 0.01  # tiny floor so hits can still matter
+
+	# Convert hits → casualties with a capped, smooth hazard form
+	# lambda = hits * p_disable_final;  p_cas = 1 - exp(-lambda)
+	# This scales gently and avoids huge spikes.
+	var casualties_per_target: Array = []
+	var ii: int = 0
+	while ii < n_targets:
+		var hits_i: int = int(hits_per_target[ii])
+		var casualties_i: int = 0
+
+		if hits_i > 0:
+			var lambda_val: float = float(hits_i) * p_disable_final
+			var p_cas: float = 1.0 - exp(-lambda_val)
+
+			var d: int = 0
+			while d < hits_i:
+				if randf() < p_cas:
+					casualties_i += 1
+				else:
+					casualties_i += 0
+				d += 1
+
+		# Never exceed living heads, if present
+		var u_chk: Node = batch_targets[ii]
+		if "members_alive" in u_chk:
+			if casualties_i > int(u_chk.members_alive):
+				casualties_i = int(u_chk.members_alive)
+
+		casualties_per_target.append(casualties_i)
+		ii += 1
+
+
+	# --- compute ONE shared stress payload (equal for all squads) ---
+	var mean_p_hit: float = 0.0
+	var iii: int = 0
+	while iii < n_targets:
+		mean_p_hit += float(p_hit_per_target[iii])
+		iii += 1
+	if n_targets > 0:
+		mean_p_hit /= float(n_targets)
+	else:
+		mean_p_hit = 0.0
+
+	# base fast shock + how “accurate” incoming fire looks
+	var s_fast: float = stress_fast_base + mean_p_hit * stress_fast_hit_factor
+
+	# slow stress grows with sheer volume; cover damps it
+	var s_slow: float = float(total_rounds) * stress_slow_per_round
+	
+	# apply cover damp to stress (not boost!)
+	s_fast *= _stress_cover_mult(cover_norm, stress_cover_fast_min)
+	s_slow *= _stress_cover_mult(cover_norm, stress_cover_slow_min)
+
+	# point-blank fear spike
+	if int(target_distance) == 1:
+		s_fast *= stress_point_blank_bonus
+		s_slow *= stress_point_blank_bonus
+	else:
+		s_fast *= 1.0
+		s_slow *= 1.0
+
+	# crossfire bonus if you track it outside; else leave 0.0
+	if stress_crossfire_bonus > 0.0:
+		s_fast *= (1.0 + stress_crossfire_bonus)
+		s_slow *= (1.0 + stress_crossfire_bonus)
+	else:
+		s_fast *= 1.0
+		s_slow *= 1.0
+
+	# weapon flavour & global scale
+	s_fast *= weapon_stress_mult * stress_scale
+	s_slow *= weapon_stress_mult * stress_scale
+
+	# clamp so one volley can’t nuke morale outright
+	if s_fast > stress_max_per_volley:
+		s_fast = stress_max_per_volley
+	if s_slow > stress_max_per_volley:
+		s_slow = stress_max_per_volley
+	
+	
+	# --- casualties → extra shock (add to s_fast / s_slow) ---
+	var casualties_total: int = 0
+	var members_total_before: int = 0
+	var kk: int = 0
+	while kk < n_targets:
+		var c_i: int = int(casualties_per_target[kk])
+		casualties_total += c_i
+
+		var u0: Node = batch_targets[kk]
+		var heads_before: int = 0
+		if "members_alive" in u0:
+			# members_alive is after losses; add back this volley’s casualties to estimate pre-volley heads
+			heads_before = int(u0.members_alive) + c_i
+		else:
+			heads_before = 0
+		members_total_before += heads_before
+		kk += 1
+
+	var kill_fast: float = 0.0
+	var kill_slow: float = 0.0
+	if casualties_total > 0:
+		# fast spike: first KIA hits hardest, the rest add smaller spikes
+		kill_fast = stress_kill_fast_first
+		if casualties_total > 1:
+			kill_fast += float(casualties_total - 1) * stress_kill_fast_each
+		# slow dread scales with body count
+		kill_slow = float(casualties_total) * stress_kill_slow_each
+
+		# scale by loss ratio (bigger shock for small, mauled groups)
+		var ratio: float = 0.0
+		if members_total_before > 0:
+			ratio = float(casualties_total) / float(members_total_before)
+		var ratio_mult: float = 1.0 + ratio * stress_kill_ratio_bonus
+
+		kill_fast *= ratio_mult
+		kill_slow *= ratio_mult
+
+		# per-volley casualty shock caps (separate from your general stress clamp)
+		if kill_fast > stress_kill_max_per_volley:
+			kill_fast = stress_kill_max_per_volley
+		if kill_slow > stress_kill_max_per_volley:
+			kill_slow = stress_kill_max_per_volley
+
+		# add to the base stress built from rounds/hits
+		s_fast += kill_fast
+		s_slow += kill_slow
+
+	# --- apply effects to each squad: casualties as rolled, stress equal for all ---
+	i = 0
+	while i < n_targets:
+		var u_apply: Node = batch_targets[i]
+		var cas_i: int = int(casualties_per_target[i])
+
+		var rf: float = 1.0
+		if "stress_resilience" in u_apply:
+			rf = float(u_apply.stress_resilience)
+
+		var s_fast_final: float = s_fast * rf
+		var s_slow_final: float = s_slow * rf
+		
+		# debug, or rather balance?
+		s_fast_final *= 0.2
+		s_slow_final *= 0.2
+
+		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast_final, s_slow_final, self)
+		i += 1
+
+func _range_lethality_mult(distance_in_hexes: int, max_range: int) -> float:
+	# 1 hex: 1.0; <= max_range: mid; <= 2x max: far; else 0 (but you don’t shoot then).
+	if distance_in_hexes <= 1:
+		return 1.0
+	else:
+		if distance_in_hexes <= max_range:
+			return lethality_mid_range
+		else:
+			return lethality_far_range
+
+
+func cover_multiplier_exp(cover_pts: float) -> float:
+	# Multiplier goes 1.0 → MIN_HIT_MULT with diminishing returns as cover_pts rises
+	var k: float = log(2.0) / HALF_POINT
+	return MIN_HIT_MULT + (1.0 - MIN_HIT_MULT) * exp(-k * max(cover_pts, 0.0))
+
+
 
 func _add_rounds_to_hex(hx: Vector2i, n: int) -> void:
 	var cur: int = 0
@@ -201,6 +552,13 @@ func _emit_burst_to_combat(hx: Vector2i, rounds: int) -> void:
 		return
 	# Fallback: if you only have fire_at(), you can adapt it or add a proper method.
 
+
+func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
+	# cover_norm: 0 = open, 1 = best cover
+	cover_norm = clamp(cover_norm, 0.0, 1.0)
+	var expose: float = pow(1.0 - cover_norm, stress_cover_gamma)  # 1 at open, 0 near full cover
+	var mult: float = min_floor + (1.0 - min_floor) * expose       # lerp to a floor
+	return mult
 
 func _count_role(role: int) -> int:
 	var c: int = 0

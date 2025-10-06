@@ -84,6 +84,7 @@ func _ready():
 			unit.deselect_unit.connect(_deselect_unit)
 			unit.started_moving.connect(_on_started_moving)
 			unit.unit_surrendered.connect(_on_unit_surrendered)
+			unit.squad_fire.unit_visible_enemies = unit_visible_enemies
 			
 	combat_sys.unit_visible_enemies = unit_visible_enemies
 	combat_sys.units = units

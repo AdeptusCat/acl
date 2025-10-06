@@ -137,10 +137,7 @@ func _on_fire_shot():
 
 
 func _on_new_target_unit(unit: Unit):
-	var hex: Vector2i = Vector2i.ZERO
-	if unit:
-		hex = unit.current_hex
-	squad_fire.set_target_hex(hex)
+	squad_fire.set_target_unit(unit)
 
 
 # Call this after casualties or when loadouts/runtime roster changes.
@@ -334,9 +331,8 @@ func _on_started_moving():
 	moving = true
 	ui.started_moving(broken, surrendered)
 	started_moving.emit()
-	var hex: Vector2i = Vector2i.ZERO
 	combat.set_target_unit(null)
-	squad_fire.set_target_hex(hex)
+	squad_fire.set_target_unit(null)
 
 
 func _on_stopped_moving():
@@ -419,10 +415,12 @@ func update_team_sprite(team: int):
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 	if not alive or surrendered:
 		return
-	combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
+	pass
+	# combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
 
 
-func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
+#func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
+func receive_fire(terrain_defense_bonus: float):
 	#morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
 	#if moving and not broken and not surrendered:
