@@ -140,6 +140,8 @@ func _tick_soldiers(delta: float) -> void:
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
 			rounds_emitted += _try_fire_soldier(s, true, crew_available)
+			if rounds_emitted > 0:
+				pass
 			if rounds_emitted >= max_shots_per_tick:
 				return
 		j += 1
@@ -210,10 +212,14 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		s.next_ready_s = _now_s + s.weapon.reload_s
 		s.rounds_in_mag = s.weapon.mag_capacity
 		return 0
+	
+	if shots > 1:
+		pass
 
 	# emit shots immediately into current window
 	_add_rounds_to_hex(target_hex, shots)
-	fire_shot.emit()
+	#fire_shot.emit()
+	fire_shots(shots, s.weapon.rpm)
 
 	# apply jam chance
 	var k: int = 0
@@ -252,7 +258,11 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	fire_at()
 	return shots
 
-
+func fire_shots(shots: int, rpm: float):
+	var interval: float = 60.0 / rpm
+	for shot in shots:
+		fire_shot.emit()
+		await get_tree().create_timer(interval).timeout
 
 func fire_at() -> void:
 	var terrain_defense_bonus: float = target_cover
