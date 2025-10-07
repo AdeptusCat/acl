@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://dmn373dp04x33"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_vn361"]
+
+[resource]
+script = ExtResource("1_vn361")
+name = "M1 Garand"
+burst_pause_s = 0.2
+mag_capacity = 8
+reload_s = 2.3
+accuracy_base = 0.62
+undercrew_penalty_mult = 1.0
+raise_s = 1.4
+aim_s = 0.45
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

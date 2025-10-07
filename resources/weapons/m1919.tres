@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://bn7tg73bvhpsv"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_m165w"]
+
+[resource]
+script = ExtResource("1_m165w")
+rpm = 400.0
+burst_rounds = 6
+burst_pause_s = 0.5
+mag_capacity = 250
+reload_s = 6.0
+range_hexes = 8
+accuracy_base = 0.52
+kind = 1
+undercrew_penalty_mult = 2.0
+priority = 10
+raise_s = 2.0
+aim_s = 0.8
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

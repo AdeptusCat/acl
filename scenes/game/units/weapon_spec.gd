@@ -2,6 +2,11 @@
 extends Resource
 class_name WeaponSpec
 
+enum WeaponKind {
+	PERSONAL,
+	CREW_SERVED
+}
+
 @export var name: String = "Rifle"
 @export var rpm: float = 600.0
 @export var burst_rounds: int = 1              # rifles 1, SMG 2–3, MG 4–6
@@ -11,7 +16,7 @@ class_name WeaponSpec
 @export var jam_per_shot: float = 0.0
 @export var range_hexes: int = 6
 @export var accuracy_base: float = 0.6
-@export var kind: int = 0                      # 0 = personal, 1 = crew_served
+@export var kind: WeaponKind = WeaponKind.PERSONAL
 @export var crew_required: int = 1             # MG typically 2
 @export var undercrew_penalty_mult: float = 1.6  # >1 slows ROF if under-crewed
 @export var priority: int = 1  # 10 meaning that it has to me manned first

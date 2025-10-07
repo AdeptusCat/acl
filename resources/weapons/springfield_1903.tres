@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://cynuqxxv7ap1d"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_qmbp3"]
+
+[resource]
+script = ExtResource("1_qmbp3")
+burst_pause_s = 0.85
+reload_s = 3.0
+range_hexes = 7
+accuracy_base = 0.68
+undercrew_penalty_mult = 1.0
+raise_s = 1.6
+aim_s = 0.6
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
