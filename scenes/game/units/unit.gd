@@ -449,6 +449,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 
 
 func _apply_casualties(n:int) -> void:
+	var casualty_indexes: Array[int] =  get_unique_random_ints(n, members_alive)
 	members_alive = max(0, members_alive - n)
 	var leader_down = false
 	if leader_alive and randf() < 1.0/float(max(1,members_alive+1)): # small chance hit was leader
@@ -459,14 +460,40 @@ func _apply_casualties(n:int) -> void:
 	stress_system.on_casualty_event(n, leader_down)
 	#emit_signal("casualties_taken", original_size - members_alive)
 	ui.set_memebers_alive(members_alive)
-	for casualty in range(n):
-		if loadouts.size() - 1 > 0:
-			var i: int = randi_range(0, loadouts.size() - 1)
-			loadouts.remove_at(i)
-			squad_fire.soldiers.remove_at(i)
+	var casualties: Array[Soldier]
+	for i in casualty_indexes:
+		var soldier: Soldier = squad_fire.soldiers[i]
+		casualties.append(soldier)
+	remove_indices(loadouts, casualty_indexes)
+	remove_indices(squad_fire.soldiers, casualty_indexes)
+	var casualty_roles: Array[RankGrades.Role]
+	for i in casualties:
+		casualty_roles.append(casualties[i].role)
+	
+	
 	if members_alive <= 0:
 		_set_combat_ineffective()
 
+func remove_indices(target: Array, indices: Array[int]) -> void:
+	# Sort descending so the higher indices go first
+	indices.sort()
+	indices.reverse()
+
+	var i: int = 0
+	while i < indices.size():
+		var idx: int = indices[i]
+		if idx >= 0 and idx < target.size():
+			target.remove_at(idx)
+		i += 1
+
+func get_unique_random_ints(n: int, max: int) -> Array[int]:
+	var all_nums: Array[int] = []
+	var i: int = 0
+	while i <= max:
+		all_nums.append(i)
+		i += 1
+	all_nums.shuffle()
+	return all_nums.slice(0, n)
 
 func _set_combat_ineffective():
 	stress_system.state = StressController.MoraleState.COMBAT_INEFFECTIVE
