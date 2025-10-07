@@ -89,14 +89,17 @@ func set_target_unit(targetUnit: Unit) -> void:
 	var hex: Vector2i = Vector2i.ZERO
 	target_cover = 0
 	if targetUnit:
-		target_unit = targetUnit
 		hex = targetUnit.current_hex
 		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
 		if cover_map and cover_map.has(targetUnit.current_hex):
 			var data = cover_map[targetUnit.current_hex]
 			target_cover = data["target_cover"]
-		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-		_prime_acquisition_for_new_target()
+		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+		if not target_unit == targetUnit:
+			_prime_acquisition_for_new_target()
+			target_unit = targetUnit
+	else:
+		target_unit = null
 	target_hex = hex
 
 func _physics_process(delta: float) -> void:
