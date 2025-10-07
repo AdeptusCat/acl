@@ -459,9 +459,11 @@ func _apply_casualties(n:int) -> void:
 	stress_system.on_casualty_event(n, leader_down)
 	#emit_signal("casualties_taken", original_size - members_alive)
 	ui.set_memebers_alive(members_alive)
-	var i: int = randi_range(0, loadouts.size() - 1)
-	loadouts.remove_at(i)
-	squad_fire.soldiers.remove_at(i)
+	for casualty in range(n):
+		if loadouts.size() - 1 > 0:
+			var i: int = randi_range(0, loadouts.size() - 1)
+			loadouts.remove_at(i)
+			squad_fire.soldiers.remove_at(i)
 	if members_alive <= 0:
 		_set_combat_ineffective()
 
