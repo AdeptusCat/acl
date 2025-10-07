@@ -94,9 +94,13 @@ func _ready():
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	#morale_system.morale_breaks.connect(ui._on_morale_breaks)
 	
+	
+	
 	if Engine.is_editor_hint():
 		return
 	cover_updated.connect(ui._on_cover_updated)
+	
+	current_cube = ground_map.map_to_cube(current_hex)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
 	
@@ -116,25 +120,27 @@ func _ready():
 	stress_system.stress_changed.connect(_on_stress_changed)
 	
 	
-	ui.set_support_weapons(machine_guns)
+	
 	stress_system.leadership_changed.connect(ui._on_leadership_changed)
 	
 	combat.set_mg(machine_guns)
 	
 	#_resize_loadouts(members_count)
 	_setup_runtime_soldiers()
+	ui.set_support_weapons(machine_guns)
 	
 	_refresh_leader_aura()
 	
 	squad_fire.fire_shot.connect(_on_fire_shot)
 	
+	members_alive = loadouts.size()
 	ui.set_memebers_alive(loadouts.size())
 	
 
 
 func _on_fire_shot():
-	if combat.target_unit:
-		ui.shoot(global_position, combat.target_unit.global_position)
+	if squad_fire.target_unit:
+		ui.shoot(global_position, squad_fire.target_unit.global_position)
 
 
 func _on_new_target_unit(unit: Unit):
@@ -232,6 +238,8 @@ func _setup_runtime_soldiers() -> void:
 			int(_map_role(L.role)),   # if your Soldier.Role differs
 			spec
 		)
+		if s.role == RankGrades.Role.GUNNER:
+			machine_guns += 1
 		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
 		list.append(s)
 		i += 1
@@ -270,6 +278,11 @@ func _resize_loadouts(n: int) -> void:
 # template builders (run in editor by ticking the bool, it resets to false)
 func _make_rifle_squad_10(v: bool) -> void:
 	if v:
+		var rifle: WeaponSpec
+		if team == 0:
+			rifle = preload("res://resources/weapons/kar98.tres")
+		else:
+			rifle = preload("res://resources/weapons/springfield_1903.tres")
 		make_rifle_squad_10 = false
 		_resize_loadouts(10)
 		var i: int = 0
@@ -278,45 +291,55 @@ func _make_rifle_squad_10(v: bool) -> void:
 			L.role = RankGrades.Role.RIFLEMAN
 			L.nickname = "Rifle %d" % int(i + 1)
 			L.rank_grade = RankGrades.Grade.RIFLEMAN
-			if default_rifle != null:
-				L.weapon = default_rifle
+			L.weapon = rifle
 			i += 1
 		var leader: SoldierLoadout = loadouts[i]
 		leader.role = RankGrades.Role.SQUAD_LEADER
-		leader.nickname = "Rifle %d" % int(i + 1)
+		leader.nickname = "SquadLeader" % int(i + 1)
 		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
-		if default_rifle != null:
-			leader.weapon = default_rifle
+		leader.weapon = rifle
 		i += 1
 		notify_property_list_changed()
 
 func _make_mg_team_5(v: bool) -> void:
 	if v:
+		var rifle: WeaponSpec
+		var mg: WeaponSpec
+		if team == 0:
+			rifle = preload("res://resources/weapons/kar98.tres")
+			mg = preload("res://resources/weapons/mg34.tres")
+		else:
+			rifle = preload("res://resources/weapons/springfield_1903.tres")
+			mg = preload("res://resources/weapons/m1919.tres")
 		make_mg_team_5 = false
+		_resize_loadouts(5)
 		var i: int = 0
-		while i < loadouts.size():
+		while i < 4:
 			var L: SoldierLoadout = loadouts[i]
 			if i == 0:
 				L.role = RankGrades.Role.GUNNER
 				L.nickname = "Gunner"
 				L.rank_grade = RankGrades.Grade.TEAM_LEADER
-				if default_mg != null:
-					L.weapon = default_mg
+				L.weapon = mg
 				L.is_key_role = true
 			elif i == 1:
 				L.role = RankGrades.Role.LOADER
 				L.nickname = "Loader"
 				L.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
-				if default_rifle != null:
-					L.weapon = default_rifle
+				L.weapon = rifle
 				L.is_key_role = true
 			else:
 				L.role = RankGrades.Role.RIFLEMAN
 				L.nickname = "Rifle %d" % int(i + 1)
 				L.rank_grade = RankGrades.Grade.RIFLEMAN
-				if default_rifle != null:
-					L.weapon = default_rifle
+				L.weapon = rifle
 			i += 1
+		var leader: SoldierLoadout = loadouts[i]
+		leader.role = RankGrades.Role.SQUAD_LEADER
+		leader.nickname = "Squad Leader" % int(i + 1)
+		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+		leader.weapon = rifle
+		i += 1
 		notify_property_list_changed()
 
 

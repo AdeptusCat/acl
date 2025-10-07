@@ -61,13 +61,13 @@ func _ready():
 	# Define the rifle spec (individual)
 	var rifle: WeaponSpec = WeaponSpec.new()
 	rifle.name = "Bolt-action Rifle"
-	rifle.kind = SquadFireCalculator.WeaponKind.INDIVIDUAL
+	rifle.kind = WeaponSpec.WeaponKind.PERSONAL
 	rifle.rpm = 12.0  # a bit conservative for sustained fire
 
 	# Define the MG (crew-served)
 	var mg: WeaponSpec = WeaponSpec.new()
 	mg.name = "GPMG"
-	mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
+	mg.kind = WeaponSpec.WeaponKind.CREW_SERVED
 	mg.rpm = 700.0
 	mg.burst_rounds = 4           # “short bursts”, aye
 	mg.burst_pause_s = 0.35
@@ -98,7 +98,7 @@ func set_mg(machinge_guns : int):
 		# Define the MG (crew-served)
 		var mg: WeaponSpec = WeaponSpec.new()
 		mg.name = "GPMG"
-		mg.kind = SquadFireCalculator.WeaponKind.CREW_SERVED
+		mg.kind = WeaponSpec.WeaponKind.CREW_SERVED
 		mg.rpm = 700.0
 		mg.burst_rounds = 4           # “short bursts”, aye
 		mg.burst_pause_s = 0.35
@@ -205,6 +205,11 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 		return  # Still waiting for next shot
 
 	if target_unit:
+		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		if not visible_enemies.has(target_unit):
+			target_unit = null
+			new_target_unit.emit(target_unit)
+			return
 		if target_unit and target_unit.alive and not target_unit.surrendered:
 			var distance = current_hex.distance_to(target_unit.current_hex)
 			if distance <= range * 2:

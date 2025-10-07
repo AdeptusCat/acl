@@ -38,7 +38,7 @@ class SquadFireInput:
 		dt_seconds = 1.0
 		individual_weapon = WeaponSpec.new()
 		individual_weapon.name = "Bolt-action Rifle"
-		individual_weapon.kind = WeaponKind.INDIVIDUAL
+		individual_weapon.kind = WeaponSpec.WeaponKind.PERSONAL
 		individual_weapon.rpm = 15.0
 		crew_equipment = []
 

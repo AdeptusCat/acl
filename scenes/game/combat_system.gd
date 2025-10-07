@@ -17,8 +17,8 @@ func _process(delta: float) -> void:
 			continue
 		else:
 			#if unit.team == Globals.team_player:
-			unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			
+			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			
 func _on_unit_moved(unit, vector):
 	if not enabled:

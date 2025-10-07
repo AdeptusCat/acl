@@ -129,6 +129,65 @@ func _update_state_multipliers() -> void:
 			s.rof_mult = rof_mult
 		i += 1
 
+var fire_timer: float = 0.0
+func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
+	fire_timer -= delta
+	if fire_timer > 0.0:
+		return  # Still waiting for next shot
+
+	if target_unit:
+		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		if not visible_enemies.has(target_unit):
+			target_unit = null
+			set_target_unit(target_unit)
+			return
+		if target_unit and target_unit.alive and not target_unit.surrendered:
+			#var distance = current_hex.distance_to(target_unit.current_hex)
+			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+			var has_range: bool = false
+			for soldier: Soldier in unit.squad_fire.soldiers:
+				if soldier.weapon.range_hexes >= distance:
+					has_range = true
+			if has_range:
+				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				var targetCover = 0
+				if cover_map and cover_map.has(target_unit.current_hex):
+					var data = cover_map[target_unit.current_hex]
+					targetCover = data["target_cover"]
+				
+				target_unit.set_cover(targetCover)
+				#fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+				fire_timer = fire_rate
+				return
+			else:
+				target_unit = null
+				set_target_unit(target_unit)
+		else:
+			target_unit = null
+			set_target_unit(target_unit)
+	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	for enemy in visible_enemies:
+		if enemy and enemy.alive and not enemy.surrendered:
+			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, enemy.current_cube)
+			var has_range: bool = false
+			for soldier: Soldier in unit.squad_fire.soldiers:
+				if soldier.weapon.range_hexes >= distance:
+					has_range = true
+			if has_range:
+				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				var targetCover = 0
+				if cover_map and cover_map.has(enemy.current_hex):
+					var data = cover_map[enemy.current_hex]
+					targetCover = data["target_cover"]
+				
+				set_target_unit(enemy)
+				enemy.set_cover(targetCover)
+				#fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+				fire_timer = fire_rate
+				
+				break
+
+
 func _tick_soldiers(delta: float) -> void:
 	var rounds_emitted: int = 0
 
@@ -176,8 +235,8 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		set_target_unit(null)
 		return 0
 	
-	if target_distance > unit.range:
-		set_target_unit(null)
+	if target_distance > s.weapon.range_hexes:
+		#set_target_unit(null) # this should only happen if none have range
 		return 0
 	
 	
@@ -258,7 +317,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	s.next_ready_s += settle_s
 	
 	var delta: float = s.next_ready_s - _now_s # debug
-	fire_at()
+	fire_at(shots)
 	return shots
 
 func fire_shots(shots: int, rpm: float):
@@ -267,7 +326,7 @@ func fire_shots(shots: int, rpm: float):
 		fire_shot.emit()
 		await get_tree().create_timer(interval).timeout
 
-func fire_at() -> void:
+func fire_at(total_rounds: int) -> void:
 	var terrain_defense_bonus: float = target_cover
 	# --- range gating & power falloff ---
 
@@ -312,7 +371,6 @@ func fire_at() -> void:
 	var target_cover_vals: Array = []
 	
 	# --- slower recovery while under fire ---
-	var total_rounds: int = 1 # maybe change this for bursts
 	var pressure_rps: float = float(total_rounds)   # or total_rounds / volley_dt if you track it
 	var j: int = 0
 	while j < n_targets:
@@ -519,6 +577,9 @@ func fire_at() -> void:
 		# debug, or rather balance?
 		s_fast_final *= 0.2
 		s_slow_final *= 0.2
+		
+		s_fast_final *= total_rounds
+		s_slow_final *= total_rounds
 
 		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast_final, s_slow_final, self)
 		i += 1
