@@ -12,6 +12,7 @@ reload_s = 6.0
 range_hexes = 8
 accuracy_base = 0.52
 kind = 1
+crew_required = 2
 undercrew_penalty_mult = 2.0
 priority = 10
 raise_s = 2.0

@@ -448,31 +448,204 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 	#emit_signal("stress_applied", df, ds, source)
 
 
-func _apply_casualties(n:int) -> void:
-	var casualty_indexes: Array[int] =  get_unique_random_ints(n, members_alive)
+#func _apply_casualties(n:int) -> void:
+	#var casualty_indexes: Array[int] =  get_unique_random_ints(n, members_alive)
+	#members_alive = max(0, members_alive - n)
+	#var leader_down = false
+	#if leader_alive and randf() < 1.0/float(max(1,members_alive+1)): # small chance hit was leader
+		#leader_alive = false
+		#leader_down = true
+		##emit_signal("leader_killed")
+		#stress_system.leadership_bonus = 0.0
+	#stress_system.on_casualty_event(n, leader_down)
+	##emit_signal("casualties_taken", original_size - members_alive)
+	#ui.set_memebers_alive(members_alive)
+	#var casualties: Array[Soldier]
+	#for i in casualty_indexes:
+		#var soldier: Soldier = squad_fire.soldiers[i]
+		#casualties.append(soldier)
+	#remove_indices(loadouts, casualty_indexes)
+	#remove_indices(squad_fire.soldiers, casualty_indexes)
+	#var casualty_roles: Array[RankGrades.Role]
+	#for i in casualties:
+		#casualty_roles.append(casualties[i].role)
+	#
+	#
+	#if members_alive <= 0:
+		#_set_combat_ineffective()
+
+
+# --- casualties, role replacement, and support-weapon re-crewing ---
+func _apply_casualties(n: int) -> void:
+	var casualty_indexes: Array[int] = get_unique_random_ints(n, members_alive)
 	members_alive = max(0, members_alive - n)
-	var leader_down = false
-	if leader_alive and randf() < 1.0/float(max(1,members_alive+1)): # small chance hit was leader
-		leader_alive = false
-		leader_down = true
-		#emit_signal("leader_killed")
-		stress_system.leadership_bonus = 0.0
-	stress_system.on_casualty_event(n, leader_down)
-	#emit_signal("casualties_taken", original_size - members_alive)
-	ui.set_memebers_alive(members_alive)
-	var casualties: Array[Soldier]
-	for i in casualty_indexes:
-		var soldier: Soldier = squad_fire.soldiers[i]
-		casualties.append(soldier)
+
+	var leader_down: bool = false
+	if leader_alive:
+		var denom: int = max(1, members_alive + 1)
+		var p_leader: float = 1.0 / float(denom)
+		if randf() < p_leader:
+			leader_alive = false
+			leader_down = true
+			# the old boss is gone; stress bonus collapses until we promote
+			stress_system.leadership_bonus = 0.0
+
+	# capture the actual Soldier objects before we remove them from arrays
+	var casualties: Array[Soldier] = []
+	var i_idx: int = 0
+	while i_idx < casualty_indexes.size():
+		var s_idx: int = casualty_indexes[i_idx]
+		if s_idx >= 0 and s_idx < squad_fire.soldiers.size():
+			var soldier: Soldier = squad_fire.soldiers[s_idx]
+			casualties.append(soldier)
+		i_idx += 1
+
+	# record which non-rifle roles were lost and what crew-served weapons got orphaned
+	var roles_lost: Array[int] = []
+	var dropped_support: Array[WeaponSpec] = []
+	var c: int = 0
+	while c < casualties.size():
+		var s: Soldier = casualties[c]
+		if s.role != RankGrades.Role.RIFLEMAN:
+			if not roles_lost.has(s.role):
+				roles_lost.append(s.role)
+		if s.role == RankGrades.Role.GUNNER:
+			if s.weapon != null:
+				dropped_support.append(s.weapon)
+		c += 1
+
+	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
-	var casualty_roles: Array[RankGrades.Role]
-	for i in casualties:
-		casualty_roles.append(casualties[i].role)
-	
-	
+
+	# book-keeping and UI
+	stress_system.on_casualty_event(n, leader_down)
+	ui.set_memebers_alive(members_alive)
+
+	# if the whole lot’s gone, we’re done
 	if members_alive <= 0:
 		_set_combat_ineffective()
+		return
+
+	# 1) replace leader if needed: ASL first, else any rifleman
+	if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
+		_promote_new_leader()
+
+	# 2) re-crew any dropped guns (e.g., MG) — loader preferred as new gunner
+	var g: int = 0
+	while g < dropped_support.size():
+		var wp: WeaponSpec = dropped_support[g]
+		_assign_gunner_and_loader_for_weapon(wp)
+		g += 1
+
+	# 3) if we lost a loader but the gun’s still in the squad, top up loaders
+	if roles_lost.has(RankGrades.Role.LOADER):
+		_fill_missing_loaders_for_existing_guns()
+
+	# optional: if you maintain any cached fire stats, rebuild them now
+	# squad_fire.rebuild_cached_stats()
+	# emit signals as needed
+	# emit_signal("casualties_taken", original_size - members_alive)
+
+
+
+# ---------- helpers (typed, no ternarys) ----------
+
+func _promote_new_leader() -> void:
+	var idx_asl: int = _index_of_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER)
+	var new_leader_idx: int = idx_asl
+	if new_leader_idx == -1:
+		new_leader_idx = _find_first_rifleman()
+	if new_leader_idx != -1:
+		var s: Soldier = squad_fire.soldiers[new_leader_idx]
+		s.role = RankGrades.Role.SQUAD_LEADER
+		leader_alive = true
+		# if you track graded leadership, update bonus here instead of this placeholder:
+		# stress_system.leadership_bonus = _compute_leadership_bonus_for(s)
+	else:
+		# no one left to lead; keep leader_alive false and bonus at 0
+		pass
+
+func _assign_gunner_and_loader_for_weapon(wp: WeaponSpec) -> void:
+	if wp == null:
+		return
+
+	# pick gunner: prefer an existing loader, else any rifleman
+	var gunner_idx: int = _index_of_role(RankGrades.Role.LOADER)
+	if gunner_idx == -1:
+		gunner_idx = _find_first_rifleman()
+	if gunner_idx == -1:
+		# no hands left to serve the gun
+		return
+
+	var gunner: Soldier = squad_fire.soldiers[gunner_idx]
+	gunner.role = RankGrades.Role.GUNNER
+	gunner.weapon = wp
+
+	# ensure loader if weapon wants a crew
+	if wp.crew_required > 1:
+		var loader_idx: int = _find_first_rifleman_excluding([gunner_idx])
+		if loader_idx != -1:
+			var loader: Soldier = squad_fire.soldiers[loader_idx]
+			loader.role = RankGrades.Role.LOADER
+			# loaders generally don’t carry the weapon object; the gun sits on the gunner
+		else:
+			# under-crewed; your fire calc should already scale with wp.undercrew_penalty_exp
+			pass
+
+func _fill_missing_loaders_for_existing_guns() -> void:
+	# for each gunner with a crew-served, ensure there is at least one loader in the squad
+	var has_loader: bool = _has_role(RankGrades.Role.LOADER)
+	if has_loader:
+		return
+
+	var i: int = 0
+	while i < squad_fire.soldiers.size():
+		var s: Soldier = squad_fire.soldiers[i]
+		if s.role == RankGrades.Role.GUNNER and s.support_weapon != null:
+			if s.support_weapon.crew_required > 1:
+				var idx: int = _find_first_rifleman_excluding([i])
+				if idx != -1:
+					var loader: Soldier = squad_fire.soldiers[idx]
+					loader.role = RankGrades.Role.LOADER
+				# if still none, we stay under-crewed
+		i += 1
+
+func _index_of_role(role: int) -> int:
+	var i: int = 0
+	while i < squad_fire.soldiers.size():
+		var s: Soldier = squad_fire.soldiers[i]
+		if s.role == role:
+			return i
+		i += 1
+	return -1
+
+func _has_role(role: int) -> bool:
+	var i: int = 0
+	while i < squad_fire.soldiers.size():
+		if squad_fire.soldiers[i].role == role:
+			return true
+		i += 1
+	return false
+
+func _find_first_rifleman() -> int:
+	var i: int = 0
+	while i < squad_fire.soldiers.size():
+		if squad_fire.soldiers[i].role == RankGrades.Role.RIFLEMAN:
+			return i
+		i += 1
+	return -1
+
+func _find_first_rifleman_excluding(exclude: Array[int]) -> int:
+	var i: int = 0
+	while i < squad_fire.soldiers.size():
+		if not exclude.has(i):
+			var s: Soldier = squad_fire.soldiers[i]
+			if s.role == RankGrades.Role.RIFLEMAN:
+				return i
+		i += 1
+	return -1
+	
 
 func remove_indices(target: Array, indices: Array[int]) -> void:
 	# Sort descending so the higher indices go first
