@@ -38,6 +38,27 @@ var detail_ui = null
 @onready var unit_designation_label = $UnitDesignation
 @onready var rank_texture_rect =$Rank
 
+@onready var soldiers_detail_container = $Soldiers/SoldiersHBoxContainer
+@export var soldier_detail_scene: PackedScene
+
+
+func set_loadout(soldiers: Array[Soldier]):
+	if detail_ui:
+		soldiers_detail_container.hide()
+		detail_ui._set_loadout(soldiers)
+	else:
+		soldiers_detail_container.hide()
+
+
+func _set_loadout(soldiers: Array[Soldier]):
+	soldiers_detail_container.show()
+	for child in soldiers_detail_container.get_children():
+		child.queue_free()
+	for i in soldiers:
+		var soldier: Soldier = i
+		var soldier_detail: SoldierDetail = soldier_detail_scene.instantiate()
+		soldier_detail.set_soldier_detail(soldier)
+		soldiers_detail_container.add_child(soldier_detail)
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
 	var txt: String = "%0.2f" % leadership_bonus

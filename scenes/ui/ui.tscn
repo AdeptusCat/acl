@@ -183,15 +183,14 @@ visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="UnitStats" type="MarginContainer" parent="."]
-visible = false
-offset_left = 205.0
-offset_top = 536.0
-offset_right = 300.0
-offset_bottom = 579.0
+offset_left = 206.0
+offset_top = 526.0
+offset_right = 331.0
+offset_bottom = 573.0
 
 [node name="ColorRect" type="ColorRect" parent="UnitStats"]
 layout_mode = 2
-color = Color(0.20517, 0.0844985, 0.0826791, 1)
+color = Color(0.8359449, 0.62697864, 0.23420596, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="UnitStats"]
 layout_mode = 2

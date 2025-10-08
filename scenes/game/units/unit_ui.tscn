@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=45 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -37,6 +37,7 @@
 [ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
 [ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="33_eilf2"]
 [ext_resource type="Texture2D" uid="uid://crjhtiymtndlu" path="res://assets/ranks/2nd_lieutenant.png" id="35_755va"]
+[ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/soldier_detail.tscn" id="38_qfgpo"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
@@ -81,6 +82,7 @@ combat_ineffective_texture = ExtResource("10_qfgpo")
 seargeant_texture = ExtResource("11_hjrgb")
 second_lieutenant_texture = ExtResource("35_755va")
 captain_texture = ExtResource("13_qfgpo")
+soldier_detail_scene = ExtResource("38_qfgpo")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
@@ -313,5 +315,19 @@ offset_bottom = 22.0
 texture = ExtResource("35_755va")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Soldiers" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 1.0
+offset_top = 59.0
+offset_right = 41.0
+offset_bottom = 99.0
+
+[node name="SoldiersHBoxContainer" type="GridContainer" parent="Soldiers"]
+layout_mode = 0
+offset_right = 108.0
+offset_bottom = 220.0
+theme_override_constants/h_separation = 2
+columns = 5
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -50,7 +50,8 @@ func _update_aura() -> void:
 	# remove those who left
 	for prior in _affected.keys():
 		if not seen.has(prior):
-			_remove_from(prior)
+			if prior:
+				_remove_from(prior)
 
 func set_properties(_aura_radius_hexes, _leadership_bonus, _rally_bonus, _cohesion_mult):
 	aura_radius_hexes = _aura_radius_hexes

@@ -121,6 +121,7 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 		unit_stats_details.set_details(unit)
 		unit_stats_container.add_child(unit_stats_details)
 		unit.ui.detail_ui = unit_ui
+		unit_ui._set_loadout(unit.squad_fire.soldiers)
 		unit_detail_counter += 1
 	if unit_detail_counter == 0:
 		unit_stats.visible = false

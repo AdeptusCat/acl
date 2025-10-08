@@ -7,6 +7,12 @@ enum WeaponKind {
 	CREW_SERVED
 }
 
+enum WeaponType {
+	Rifle,
+	MG
+}
+
+
 @export var name: String = "Rifle"
 @export var rpm: float = 600.0
 @export var burst_rounds: int = 1              # rifles 1, SMG 2–3, MG 4–6
@@ -17,6 +23,7 @@ enum WeaponKind {
 @export var range_hexes: int = 6
 @export var accuracy_base: float = 0.6
 @export var kind: WeaponKind = WeaponKind.PERSONAL
+@export var type: WeaponType = WeaponType.Rifle
 @export var crew_required: int = 1             # MG typically 2
 @export var undercrew_penalty_mult: float = 1.6  # >1 slows ROF if under-crewed
 @export var priority: int = 1  # 10 meaning that it has to me manned first

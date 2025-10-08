@@ -135,6 +135,8 @@ func _ready():
 	ui.set_memebers_alive(loadouts.size())
 	
 	_refresh_leader_aura()
+	
+	ui.set_loadout(squad_fire.soldiers)
 
 
 func _on_fire_shot():
@@ -445,6 +447,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 	if casualties > 0:
 		_apply_casualties(casualties)
 	stress_system.apply_stress(df, ds)
+	ui.set_loadout(squad_fire.soldiers)
 	#emit_signal("stress_applied", df, ds, source)
 
 
@@ -481,14 +484,14 @@ func _apply_casualties(n: int) -> void:
 	members_alive = max(0, members_alive - n)
 
 	var leader_down: bool = false
-	if leader_alive:
-		var denom: int = max(1, members_alive + 1)
-		var p_leader: float = 1.0 / float(denom)
-		if randf() < p_leader:
-			leader_alive = false
-			leader_down = true
-			# the old boss is gone; stress bonus collapses until we promote
-			stress_system.leadership_bonus = 0.0
+	#if leader_alive:
+		#var denom: int = max(1, members_alive + 1)
+		#var p_leader: float = 1.0 / float(denom)
+		#if randf() < p_leader:
+			#leader_alive = false
+			#leader_down = true
+			## the old boss is gone; stress bonus collapses until we promote
+			#stress_system.leadership_bonus = 0.0
 
 	# capture the actual Soldier objects before we remove them from arrays
 	var casualties: Array[Soldier] = []
@@ -518,7 +521,12 @@ func _apply_casualties(n: int) -> void:
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
 
+	# debug
+	if n != casualty_indexes.size():
+		pass
+
 	# book-keeping and UI
+	members_alive = squad_fire.soldiers.size()
 	stress_system.on_casualty_event(n, leader_down)
 	ui.set_memebers_alive(members_alive)
 
