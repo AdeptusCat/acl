@@ -129,13 +129,12 @@ func _ready():
 	_setup_runtime_soldiers()
 	ui.set_support_weapons(machine_guns)
 	
-	_refresh_leader_aura()
-	
 	squad_fire.fire_shot.connect(_on_fire_shot)
 	
 	members_alive = loadouts.size()
 	ui.set_memebers_alive(loadouts.size())
 	
+	_refresh_leader_aura()
 
 
 func _on_fire_shot():
@@ -185,7 +184,8 @@ func _refresh_leader_aura() -> void:
 		leader_aura.rally_bonus = rally
 		leader_aura.cohesion_mult = coh
 	
-	ui.set_leadership_rank(grade)
+	var rank: RankGrades.Grade = _highest_grade_from_loadouts()
+	ui.set_leadership_rank(rank)
 
 
 func _highest_grade_from_runtime() -> int:

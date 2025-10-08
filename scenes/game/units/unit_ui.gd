@@ -15,6 +15,9 @@ var detail_ui = null
 @export var panic_texture: Texture
 @export var combat_ineffective_texture: Texture
 
+@export var seargeant_texture: Texture
+@export var second_lieutenant_texture: Texture
+@export var captain_texture: Texture
 
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
@@ -33,6 +36,7 @@ var detail_ui = null
 @onready var surrendered_texture_rect = $UnitStatus/Surrendered
 @onready var members_count_label = $MembersCount
 @onready var unit_designation_label = $UnitDesignation
+@onready var rank_texture_rect =$Rank
 
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
@@ -44,11 +48,11 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
 	match rankGrade:
 		RankGrades.Grade.SQUAD_LEADER:
-			pass
+			rank_texture_rect.texture = seargeant_texture
 		RankGrades.Grade.PLATOON_LEADER:
-			pass
+			rank_texture_rect.texture = second_lieutenant_texture
 		RankGrades.Grade.COMPANY_LEADER:
-			pass
+			rank_texture_rect.texture = captain_texture
 
 
 func set_support_weapons(support_weapons: int):

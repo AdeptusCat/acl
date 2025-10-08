@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=44 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -24,16 +24,19 @@
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://dprqeinm8tbk2" path="res://assets/status/shooting_us.png" id="11_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
+[ext_resource type="Texture2D" uid="uid://cx708ounalns5" path="res://assets/ranks/sergeant.png" id="11_hjrgb"]
 [ext_resource type="Texture2D" uid="uid://cn4m384b387ir" path="res://assets/status/routing_us.png" id="11_kswga"]
 [ext_resource type="Texture2D" uid="uid://c3u7esoded7o8" path="res://assets/status/pinned_ger.png" id="12_dlbli"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
+[ext_resource type="Texture2D" uid="uid://5p3uklrg82vu" path="res://assets/ranks/captain.png" id="13_qfgpo"]
 [ext_resource type="Texture2D" uid="uid://c7wd5hgkmf7fi" path="res://assets/status/broken_ger.png" id="14_kswga"]
 [ext_resource type="Texture2D" uid="uid://cbfjsvqigymke" path="res://assets/status/ger/leader/leader_idle_ger.png" id="15_fekhn"]
 [ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
 [ext_resource type="Texture2D" uid="uid://dcq0y3c2t6ub5" path="res://assets/status/surrendered_ger.png" id="16_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
 [ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="33_eilf2"]
+[ext_resource type="Texture2D" uid="uid://crjhtiymtndlu" path="res://assets/ranks/2nd_lieutenant.png" id="35_755va"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
@@ -75,6 +78,9 @@ cautious_texture = ExtResource("7_755va")
 pinned_texture = ExtResource("8_dhwvl")
 panic_texture = ExtResource("9_hjrgb")
 combat_ineffective_texture = ExtResource("10_qfgpo")
+seargeant_texture = ExtResource("11_hjrgb")
+second_lieutenant_texture = ExtResource("35_755va")
+captain_texture = ExtResource("13_qfgpo")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_6v8n0")
@@ -218,6 +224,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="UnitDesignation" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 39.0
 offset_top = 21.0
@@ -240,9 +247,9 @@ text = "MG"
 [node name="SupportWeapons" type="Control" parent="."]
 anchors_preset = 0
 offset_left = 10.0
-offset_top = 17.0
+offset_top = 24.0
 offset_right = 10.0
-offset_bottom = 17.0
+offset_bottom = 24.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SupportWeapons"]
 layout_mode = 0
@@ -280,6 +287,7 @@ expand_mode = 1
 stretch_mode = 4
 
 [node name="LeadershipBonus" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 13.0
 offset_top = 58.0
@@ -288,11 +296,22 @@ offset_bottom = 81.0
 text = "0"
 
 [node name="LeadershipRank" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = -19.0
 offset_right = 51.0
 offset_bottom = 4.0
 text = "Rank"
+
+[node name="Rank" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 7.0
+offset_top = 2.0
+offset_right = 27.0
+offset_bottom = 22.0
+texture = ExtResource("35_755va")
+expand_mode = 1
+stretch_mode = 5
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
