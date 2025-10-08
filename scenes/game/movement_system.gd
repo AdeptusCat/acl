@@ -6,9 +6,11 @@ var units: Array[Node2D] = []
 
 
 func _on_move_requested(selected_unit, to_hex):
-	var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex, selected_unit.team)
-	selected_unit.movement.follow_cube_path(path)
-
+	if not selected_unit.current_hex == to_hex:
+		var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex, selected_unit.team)
+		selected_unit.movement.follow_cube_path(path)
+	else:
+		selected_unit.movement.move_to_hex(to_hex)
 
 var threat_weights = {}
 
