@@ -602,8 +602,8 @@ func _fill_missing_loaders_for_existing_guns() -> void:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
 		var s: Soldier = squad_fire.soldiers[i]
-		if s.role == RankGrades.Role.GUNNER and s.support_weapon != null:
-			if s.support_weapon.crew_required > 1:
+		if s.role == RankGrades.Role.GUNNER and s.weapon != null:
+			if s.weapon.crew_required > 1:
 				var idx: int = _find_first_rifleman_excluding([i])
 				if idx != -1:
 					var loader: Soldier = squad_fire.soldiers[idx]
