@@ -235,10 +235,13 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		set_target_unit(null)
 		return 0
 	
-	if target_distance > s.weapon.range_hexes:
+	if target_distance > s.weapon.range_hexes * 2:
 		#set_target_unit(null) # this should only happen if none have range
 		return 0
 	
+	var long_range: bool = false
+	if target_distance > s.weapon.range_hexes:
+		long_range = true
 	
 	# acquisition gate: don’t shoot until settled on the new target
 	if _now_s < s.acquire_ready_s:
@@ -317,7 +320,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	s.next_ready_s += settle_s
 	
 	var delta: float = s.next_ready_s - _now_s # debug
-	fire_at(shots)
+	fire_at(shots, long_range)
 	return shots
 
 func fire_shots(shots: int, rpm: float):
@@ -326,7 +329,7 @@ func fire_shots(shots: int, rpm: float):
 		fire_shot.emit()
 		await get_tree().create_timer(interval).timeout
 
-func fire_at(total_rounds: int) -> void:
+func fire_at(total_rounds: int, long_range: bool) -> void:
 	var terrain_defense_bonus: float = target_cover
 	# --- range gating & power falloff ---
 
@@ -363,6 +366,8 @@ func fire_at(total_rounds: int) -> void:
 		shooter_stress = float(unit.stress_system.S_eff)
 	var shooter_stress_multiplier: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
 	acc *= shooter_stress_multiplier
+	if long_range:
+		acc *= 0.5
 
 	var is_point_blank: bool = int(target_distance) == 1
 

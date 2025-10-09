@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://btw7qmulsva7g"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_6grgc"]
+
+[resource]
+script = ExtResource("1_6grgc")
+name = "MP40"
+rpm = 500.0
+burst_rounds = 3
+burst_pause_s = 0.4
+mag_capacity = 32
+reload_s = 2.0
+range_hexes = 2
+accuracy_base = 0.45
+type = 2
+priority = 6
+raise_s = 0.8
+aim_s = 0.2
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

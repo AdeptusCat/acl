@@ -9,7 +9,8 @@ enum WeaponKind {
 
 enum WeaponType {
 	Rifle,
-	MG
+	MG,
+	SMG
 }
 
 

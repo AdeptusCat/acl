@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_m165w")
+name = "M1919A4"
 rpm = 400.0
 burst_rounds = 6
 burst_pause_s = 0.5

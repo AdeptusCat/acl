@@ -28,8 +28,8 @@ class_name Unit
 @export var default_mg: WeaponSpec
 
 # convenience buttons (toggle to run in-editor)
-@export var make_rifle_squad_10: bool = false : set = _make_rifle_squad_10
-@export var make_mg_team_5: bool = false : set = _make_mg_team_5
+@export var make_rifle_squad: bool = false : set = _make_rifle_squad
+@export var make_light_mg_team: bool = false : set = _make_light_mg_team
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -278,70 +278,164 @@ func _resize_loadouts(n: int) -> void:
 		loadouts.pop_back()
 
 # template builders (run in editor by ticking the bool, it resets to false)
-func _make_rifle_squad_10(v: bool) -> void:
+func _make_rifle_squad(v: bool) -> void:
 	if v:
-		var rifle: WeaponSpec
+		make_rifle_squad = false
 		if team == 0:
+			var group_size: int = 10
+			var rifle: WeaponSpec
+			var smg: WeaponSpec
+			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/kar98.tres")
-		else:
-			rifle = preload("res://resources/weapons/springfield_1903.tres")
-		make_rifle_squad_10 = false
-		_resize_loadouts(10)
-		var i: int = 0
-		while i < 9:
-			var L: SoldierLoadout = loadouts[i]
-			L.role = RankGrades.Role.SOLDIER
-			L.nickname = "Rifle %d" % int(i + 1)
-			L.rank_grade = RankGrades.Grade.SOLDIER
-			L.weapon = rifle
-			i += 1
-		var leader: SoldierLoadout = loadouts[i]
-		leader.role = RankGrades.Role.SQUAD_LEADER
-		leader.nickname = "SquadLeader" % int(i + 1)
-		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
-		leader.weapon = rifle
-		i += 1
-		notify_property_list_changed()
-
-func _make_mg_team_5(v: bool) -> void:
-	if v:
-		var rifle: WeaponSpec
-		var mg: WeaponSpec
-		if team == 0:
-			rifle = preload("res://resources/weapons/kar98.tres")
+			smg = preload("res://resources/weapons/mp40.tres")
 			mg = preload("res://resources/weapons/mg34.tres")
-		else:
-			rifle = preload("res://resources/weapons/springfield_1903.tres")
-			mg = preload("res://resources/weapons/m1919.tres")
-		make_mg_team_5 = false
-		_resize_loadouts(5)
-		var i: int = 0
-		while i < 4:
-			var L: SoldierLoadout = loadouts[i]
-			if i == 0:
-				L.role = RankGrades.Role.GUNNER
-				L.nickname = "Gunner"
-				L.rank_grade = RankGrades.Grade.TEAM_LEADER
-				L.weapon = mg
-				L.is_key_role = true
-			elif i == 1:
-				L.role = RankGrades.Role.LOADER
-				L.nickname = "Loader"
-				L.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
-				L.weapon = rifle
-				L.is_key_role = true
-			else:
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = smg
+			i += 1
+			var assistant_leader: SoldierLoadout = loadouts[i]
+			assistant_leader.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			assistant_leader.nickname = "Ass. Squad Leader"
+			assistant_leader.rank_grade = RankGrades.Grade.TEAM_LEADER
+			assistant_leader.weapon = smg
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.weapon = mg
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
 				L.role = RankGrades.Role.SOLDIER
 				L.nickname = "Rifle %d" % int(i + 1)
 				L.rank_grade = RankGrades.Grade.SOLDIER
 				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 12
+			var rifle: WeaponSpec
+			var smg: WeaponSpec
+			var mg: WeaponSpec
+			rifle = preload("res://resources/weapons/m1_garand.tres")
+			smg = preload("res://resources/weapons/m3_grease_gun.tres")
+			mg = preload("res://resources/weapons/m1918a1_bar.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = rifle
 			i += 1
-		var leader: SoldierLoadout = loadouts[i]
-		leader.role = RankGrades.Role.SQUAD_LEADER
-		leader.nickname = "Squad Leader" % int(i + 1)
-		leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
-		leader.weapon = rifle
-		i += 1
+			var assistant_leader: SoldierLoadout = loadouts[i]
+			assistant_leader.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			assistant_leader.nickname = "Ass. Squad Leader"
+			assistant_leader.rank_grade = RankGrades.Grade.TEAM_LEADER
+			assistant_leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.weapon = mg
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Rifle %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		notify_property_list_changed()
+
+func _make_light_mg_team(v: bool) -> void:
+	if v:
+		make_light_mg_team = false
+		if team == 0:
+			var group_size: int = 7
+			var rifle: WeaponSpec
+			var smg: WeaponSpec
+			var mg: WeaponSpec
+			rifle = preload("res://resources/weapons/kar98.tres")
+			smg = preload("res://resources/weapons/m3_grease_gun.tres")
+			mg = preload("res://resources/weapons/mg34.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = smg
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.weapon = mg
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Rifle %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 5
+			var rifle: WeaponSpec
+			var mg: WeaponSpec
+			rifle = preload("res://resources/weapons/m1_carbine.tres")
+			mg = preload("res://resources/weapons/m1919a4.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.weapon = mg
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Rifle %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
 		notify_property_list_changed()
 
 

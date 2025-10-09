@@ -143,6 +143,7 @@ func _process_movement(delta: float):
 func get_terrain_multiplier():
 	if path_hexes.is_empty():
 		terrain_mult = 1.0
+		return
 	var next_terr: int = _get_terrain_type(path_hexes[path_index])
 	var mf_total: float = compute_total_mf(unit.current_hex, path_hexes[path_index], next_terr)
 	var from: Vector2 = LOSHelper.ground_layer.map_to_local(unit.current_hex)

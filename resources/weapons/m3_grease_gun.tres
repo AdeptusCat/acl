@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://byepsybo14u36"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_ynltd"]
+
+[resource]
+script = ExtResource("1_ynltd")
+name = "M3 Grease Gun"
+rpm = 150.0
+burst_rounds = 3
+burst_pause_s = 0.4
+mag_capacity = 30
+reload_s = 2.2
+range_hexes = 3
+accuracy_base = 0.5
+type = 2
+priority = 5
+raise_s = 0.9
+aim_s = 0.25
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

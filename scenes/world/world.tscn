@@ -1,4 +1,4 @@
-[gd_scene load_steps=158 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=164 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -57,10 +57,14 @@
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="50_hph6x"]
 [ext_resource type="Resource" uid="uid://ber2oq0vvl7pp" path="res://resources/weapons/mg34.tres" id="51_kngxi"]
 [ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="52_dhssw"]
-[ext_resource type="Resource" uid="uid://bn7tg73bvhpsv" path="res://resources/weapons/m1919.tres" id="53_cf0uk"]
-[ext_resource type="Resource" uid="uid://cynuqxxv7ap1d" path="res://resources/weapons/springfield_1903.tres" id="54_j2kh8"]
+[ext_resource type="Resource" uid="uid://bn7tg73bvhpsv" path="res://resources/weapons/m1919a4.tres" id="53_cf0uk"]
+[ext_resource type="Resource" uid="uid://btw7qmulsva7g" path="res://resources/weapons/mp40.tres" id="53_dhssw"]
 [ext_resource type="Script" uid="uid://cwp4yt03yldxu" path="res://scenes/world/target_area.gd" id="55_7rtjl"]
+[ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="55_hpffo"]
+[ext_resource type="Resource" uid="uid://byepsybo14u36" path="res://resources/weapons/m3_grease_gun.tres" id="56_hpffo"]
 [ext_resource type="Texture2D" uid="uid://vabbhirvnspe" path="res://assets/target_area.png" id="56_phx5y"]
+[ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
+[ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
 resource_name = "Road"
@@ -672,23 +676,25 @@ shader_parameter/grain_strength = 0.35
 
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("56_hpffo")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_dhssw"]
+script = ExtResource("50_hph6x")
 nickname = "Gunner"
 rank_grade = 2
 role = 1
 weapon = ExtResource("51_kngxi")
 is_key_role = true
 
-[sub_resource type="Resource" id="Resource_dhssw"]
+[sub_resource type="Resource" id="Resource_cf0uk"]
 script = ExtResource("50_hph6x")
 nickname = "Loader"
 rank_grade = 1
 role = 2
-weapon = ExtResource("52_dhssw")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_cf0uk"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 3"
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_j2kh8"]
@@ -698,31 +704,47 @@ weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_hpffo"]
 script = ExtResource("50_hph6x")
-nickname = "Squad Leader"
-rank_grade = 3
-role = 7
+nickname = "Rifle 5"
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_ckeh6"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 6"
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_pww7v"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 7"
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_hph6x"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 1"
-weapon = ExtResource("52_dhssw")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("53_dhssw")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_5aamg"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 2"
+nickname = "Ass. Squad Leader"
+rank_grade = 2
+role = 8
 weapon = ExtResource("52_dhssw")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_hnqnj"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 3"
-weapon = ExtResource("52_dhssw")
+nickname = "Gunner"
+rank_grade = 2
+role = 1
+weapon = ExtResource("51_kngxi")
 
 [sub_resource type="Resource" id="Resource_7lp0r"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 4"
+nickname = "Loader"
+rank_grade = 1
+role = 2
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_tj3jo"]
@@ -752,9 +774,7 @@ weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_1o6i5"]
 script = ExtResource("50_hph6x")
-nickname = "SquadLeader"
-rank_grade = 3
-role = 9
+nickname = "Rifle 10"
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_124cm"]
@@ -867,90 +887,95 @@ weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_1n8ra"]
 script = ExtResource("50_hph6x")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("55_hpffo")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_0n6td"]
+script = ExtResource("50_hph6x")
 nickname = "Gunner"
 rank_grade = 2
 role = 1
 weapon = ExtResource("53_cf0uk")
 is_key_role = true
 
-[sub_resource type="Resource" id="Resource_0n6td"]
+[sub_resource type="Resource" id="Resource_j3x8u"]
 script = ExtResource("50_hph6x")
 nickname = "Loader"
 rank_grade = 1
 role = 2
-weapon = ExtResource("54_j2kh8")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_j3x8u"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 3"
-weapon = ExtResource("54_j2kh8")
 
 [sub_resource type="Resource" id="Resource_l72hy"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 4"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("55_hpffo")
 
 [sub_resource type="Resource" id="Resource_6eles"]
 script = ExtResource("50_hph6x")
-nickname = "Squad Leader"
-rank_grade = 3
-role = 7
-weapon = ExtResource("54_j2kh8")
+nickname = "Rifle 5"
+weapon = ExtResource("55_hpffo")
 
 [sub_resource type="Resource" id="Resource_7o8ut"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 1"
-weapon = ExtResource("54_j2kh8")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("56_hpffo")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_a5636"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 2"
-weapon = ExtResource("54_j2kh8")
+nickname = "Ass. Squad Leader"
+rank_grade = 2
+role = 8
+weapon = ExtResource("58_7lp0r")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_jhdiv"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 3"
-weapon = ExtResource("54_j2kh8")
+nickname = "Gunner"
+rank_grade = 2
+role = 1
+weapon = ExtResource("57_hnqnj")
 
 [sub_resource type="Resource" id="Resource_4ln07"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 4"
-weapon = ExtResource("54_j2kh8")
+nickname = "Loader"
+rank_grade = 1
+role = 2
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_yr5cl"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 5"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_x77xw"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 6"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_pkfnk"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 7"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_5obl8"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 8"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_bmoad"]
 script = ExtResource("50_hph6x")
 nickname = "Rifle 9"
-weapon = ExtResource("54_j2kh8")
+weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_mb8w1"]
 script = ExtResource("50_hph6x")
-nickname = "SquadLeader"
-rank_grade = 3
-role = 7
-weapon = ExtResource("54_j2kh8")
+nickname = "Rifle 10"
+weapon = ExtResource("58_7lp0r")
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_6hctx")
@@ -1055,7 +1080,7 @@ time_left_seconds = 180.0
 [node name="AxisMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 896)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo")])
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1184, 736)
@@ -1073,14 +1098,14 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ghkdt"), SubResource("Resource_s64j0"), SubResource("Resource_jtcuk"), SubResource("Resource_k6jmd"), SubResource("Resource_pyabd"), SubResource("Resource_qjyj0"), SubResource("Resource_do88p"), SubResource("Resource_j8f2q"), SubResource("Resource_pnq3x"), SubResource("Resource_8b617")])
 
 [node name="AlliesMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(800, 544)
+position = Vector2(704, 672)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubResource("Resource_0n6td"), SubResource("Resource_j3x8u"), SubResource("Resource_l72hy"), SubResource("Resource_6eles")])
 
 [node name="AlliesMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(752, 640)
+position = Vector2(656, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
