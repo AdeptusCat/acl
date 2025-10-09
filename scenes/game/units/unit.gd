@@ -290,9 +290,9 @@ func _make_rifle_squad_10(v: bool) -> void:
 		var i: int = 0
 		while i < 9:
 			var L: SoldierLoadout = loadouts[i]
-			L.role = RankGrades.Role.RIFLEMAN
+			L.role = RankGrades.Role.SOLDIER
 			L.nickname = "Rifle %d" % int(i + 1)
-			L.rank_grade = RankGrades.Grade.RIFLEMAN
+			L.rank_grade = RankGrades.Grade.SOLDIER
 			L.weapon = rifle
 			i += 1
 		var leader: SoldierLoadout = loadouts[i]
@@ -331,9 +331,9 @@ func _make_mg_team_5(v: bool) -> void:
 				L.weapon = rifle
 				L.is_key_role = true
 			else:
-				L.role = RankGrades.Role.RIFLEMAN
+				L.role = RankGrades.Role.SOLDIER
 				L.nickname = "Rifle %d" % int(i + 1)
-				L.rank_grade = RankGrades.Grade.RIFLEMAN
+				L.rank_grade = RankGrades.Grade.SOLDIER
 				L.weapon = rifle
 			i += 1
 		var leader: SoldierLoadout = loadouts[i]
@@ -509,7 +509,7 @@ func _apply_casualties(n: int) -> void:
 	var c: int = 0
 	while c < casualties.size():
 		var s: Soldier = casualties[c]
-		if s.role != RankGrades.Role.RIFLEMAN:
+		if s.role != RankGrades.Role.SOLDIER:
 			if not roles_lost.has(s.role):
 				roles_lost.append(s.role)
 		if s.role == RankGrades.Role.GUNNER:
@@ -535,7 +535,7 @@ func _apply_casualties(n: int) -> void:
 		_set_combat_ineffective()
 		return
 
-	# 1) replace leader if needed: ASL first, else any rifleman
+	# 1) replace leader if needed: ASL first, else any SOLDIER
 	if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
 		_promote_new_leader()
 
@@ -563,7 +563,7 @@ func _promote_new_leader() -> void:
 	var idx_asl: int = _index_of_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER)
 	var new_leader_idx: int = idx_asl
 	if new_leader_idx == -1:
-		new_leader_idx = _find_first_rifleman()
+		new_leader_idx = _find_first_SOLDIER()
 	if new_leader_idx != -1:
 		var s: Soldier = squad_fire.soldiers[new_leader_idx]
 		s.role = RankGrades.Role.SQUAD_LEADER
@@ -578,10 +578,10 @@ func _assign_gunner_and_loader_for_weapon(wp: WeaponSpec) -> void:
 	if wp == null:
 		return
 
-	# pick gunner: prefer an existing loader, else any rifleman
+	# pick gunner: prefer an existing loader, else any SOLDIER
 	var gunner_idx: int = _index_of_role(RankGrades.Role.LOADER)
 	if gunner_idx == -1:
-		gunner_idx = _find_first_rifleman()
+		gunner_idx = _find_first_SOLDIER()
 	if gunner_idx == -1:
 		# no hands left to serve the gun
 		return
@@ -592,7 +592,7 @@ func _assign_gunner_and_loader_for_weapon(wp: WeaponSpec) -> void:
 
 	# ensure loader if weapon wants a crew
 	if wp.crew_required > 1:
-		var loader_idx: int = _find_first_rifleman_excluding([gunner_idx])
+		var loader_idx: int = _find_first_SOLDIER_excluding([gunner_idx])
 		if loader_idx != -1:
 			var loader: Soldier = squad_fire.soldiers[loader_idx]
 			loader.role = RankGrades.Role.LOADER
@@ -612,7 +612,7 @@ func _fill_missing_loaders_for_existing_guns() -> void:
 		var s: Soldier = squad_fire.soldiers[i]
 		if s.role == RankGrades.Role.GUNNER and s.weapon != null:
 			if s.weapon.crew_required > 1:
-				var idx: int = _find_first_rifleman_excluding([i])
+				var idx: int = _find_first_SOLDIER_excluding([i])
 				if idx != -1:
 					var loader: Soldier = squad_fire.soldiers[idx]
 					loader.role = RankGrades.Role.LOADER
@@ -636,20 +636,20 @@ func _has_role(role: int) -> bool:
 		i += 1
 	return false
 
-func _find_first_rifleman() -> int:
+func _find_first_SOLDIER() -> int:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
-		if squad_fire.soldiers[i].role == RankGrades.Role.RIFLEMAN:
+		if squad_fire.soldiers[i].role == RankGrades.Role.SOLDIER:
 			return i
 		i += 1
 	return -1
 
-func _find_first_rifleman_excluding(exclude: Array[int]) -> int:
+func _find_first_SOLDIER_excluding(exclude: Array[int]) -> int:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
 		if not exclude.has(i):
 			var s: Soldier = squad_fire.soldiers[i]
-			if s.role == RankGrades.Role.RIFLEMAN:
+			if s.role == RankGrades.Role.SOLDIER:
 				return i
 		i += 1
 	return -1

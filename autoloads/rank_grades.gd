@@ -1,12 +1,25 @@
 # RankGrades.gd (autoload)
 extends Node
 
-enum Grade { RIFLEMAN, ASSISTANT_TEAM_LEADER, TEAM_LEADER, SQUAD_LEADER, PLATOON_LEADER, COMPANY_LEADER }
-enum Role { RIFLEMAN, GUNNER, LOADER, RADIO, MEDIC, ASSISTANT_TEAM_LEADER, TEAM_LEADER, ASSISTANT_SQUAD_LEADER, SQUAD_LEADER }
+enum Grade { SOLDIER, ASSISTANT_TEAM_LEADER, TEAM_LEADER, SQUAD_LEADER, PLATOON_LEADER, COMPANY_LEADER }
+enum Role { SOLDIER, GUNNER, LOADER, ASSISTANT, RADIO, MEDIC, ASSISTANT_TEAM_LEADER, TEAM_LEADER, ASSISTANT_SQUAD_LEADER, SQUAD_LEADER }
 
+func get_role_name(role: Role) -> String:
+	match role:
+		Role.SOLDIER: return "Soldier"
+		Role.GUNNER: return "Gunner"
+		Role.ASSISTANT: return "Assistant"
+		Role.LOADER: return "Loader"
+		Role.RADIO: return "Radio Operator"
+		Role.MEDIC: return "Medic"
+		Role.ASSISTANT_TEAM_LEADER: return "Asst. Team Leader"
+		Role.TEAM_LEADER: return "Team Leader"
+		Role.ASSISTANT_SQUAD_LEADER: return "Asst. Leader"
+		Role.SQUAD_LEADER: return "Squad Leader"
+		_: return "Unknown"
 
 const GRADE_PARAMS: Dictionary = {
-	Grade.RIFLEMAN:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
+	Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
 	Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
 	Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
 	Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 1, "coh_mult": 1.04 },
@@ -16,7 +29,7 @@ const GRADE_PARAMS: Dictionary = {
 
 const TITLES: Dictionary = {
 	"UK": {
-		Grade.RIFLEMAN:       "Private",
+		Grade.SOLDIER:       "Private",
 		Grade.ASSISTANT_TEAM_LEADER: "Acting Lance Corporal",
 		Grade.TEAM_LEADER:    "Lance Corporal",
 		Grade.SQUAD_LEADER:   "Sergeant",
@@ -24,7 +37,7 @@ const TITLES: Dictionary = {
 		Grade.COMPANY_LEADER: "Captain",
 	},
 	"US": {
-		Grade.RIFLEMAN:       "Private",
+		Grade.SOLDIER:       "Private",
 		Grade.ASSISTANT_TEAM_LEADER: "Private First Class",
 		Grade.TEAM_LEADER:    "Corporal",
 		Grade.SQUAD_LEADER:   "Sergeant",
@@ -32,7 +45,7 @@ const TITLES: Dictionary = {
 		Grade.COMPANY_LEADER: "Captain",
 	},
 	"DE": {
-		Grade.RIFLEMAN:       "Schütze",
+		Grade.SOLDIER:       "Schütze",
 		Grade.ASSISTANT_TEAM_LEADER: "Obergefreiter",
 		Grade.TEAM_LEADER:    "Gefreiter",
 		Grade.SQUAD_LEADER:   "Feldwebel",
@@ -40,7 +53,7 @@ const TITLES: Dictionary = {
 		Grade.COMPANY_LEADER: "Hauptmann",
 	},
 	"SU": {
-		Grade.RIFLEMAN:       "Ryadovoy",
+		Grade.SOLDIER:       "Ryadovoy",
 		Grade.ASSISTANT_TEAM_LEADER: "Yefreytor",
 		Grade.TEAM_LEADER:    "Mladshiy Serzhant",
 		Grade.SQUAD_LEADER:   "Serzhant",

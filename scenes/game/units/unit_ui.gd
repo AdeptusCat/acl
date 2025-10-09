@@ -38,7 +38,7 @@ var detail_ui = null
 @onready var unit_designation_label = $UnitDesignation
 @onready var rank_texture_rect =$Rank
 
-@onready var soldiers_detail_container = $Soldiers/SoldiersHBoxContainer
+@onready var soldiers_detail_container = $Soldiers/SoldiersContainer
 @export var soldier_detail_scene: PackedScene
 
 

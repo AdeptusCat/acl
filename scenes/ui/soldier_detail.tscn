@@ -4,22 +4,56 @@
 [ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="2_vy1ga"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="3_ihiuf"]
 
-[node name="SoldierDetail" type="VBoxContainer"]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="SoldierDetail" type="MarginContainer"]
+offset_right = 127.0
+offset_bottom = 15.0
 script = ExtResource("1_wshtr")
 mg_texture = ExtResource("2_vy1ga")
 
-[node name="Soldier" type="TextureRect" parent="."]
-custom_minimum_size = Vector2(10, 10)
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 2
+color = Color(0.3403393, 0.34033933, 0.3403393, 1)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Soldier" type="TextureRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(15, 15)
 layout_mode = 2
 texture = ExtResource("3_ihiuf")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="Weapon" type="TextureRect" parent="."]
+[node name="WeaponTexture" type="TextureRect" parent="HBoxContainer"]
 visible = false
-custom_minimum_size = Vector2(10, 10)
+custom_minimum_size = Vector2(15, 15)
 layout_mode = 2
+texture = ExtResource("2_vy1ga")
 expand_mode = 1
 stretch_mode = 4
+
+[node name="Division3" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "|"
+
+[node name="WeaponName" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "asdf"
+
+[node name="Division2" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "|"
+
+[node name="RoleName" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Squad Leader"
+
+[node name="Division" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "|"

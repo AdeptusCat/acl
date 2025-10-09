@@ -754,7 +754,7 @@ weapon = ExtResource("52_dhssw")
 script = ExtResource("50_hph6x")
 nickname = "SquadLeader"
 rank_grade = 3
-role = 7
+role = 9
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_124cm"]
@@ -808,7 +808,7 @@ weapon = ExtResource("52_dhssw")
 script = ExtResource("50_hph6x")
 nickname = "SquadLeader"
 rank_grade = 4
-role = 8
+role = 9
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_ghkdt"]
@@ -862,7 +862,7 @@ weapon = ExtResource("52_dhssw")
 script = ExtResource("50_hph6x")
 nickname = "SquadLeader"
 rank_grade = 5
-role = 8
+role = 9
 weapon = ExtResource("52_dhssw")
 
 [sub_resource type="Resource" id="Resource_1n8ra"]

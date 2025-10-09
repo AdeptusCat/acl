@@ -62,11 +62,11 @@ outline_size = 3
 outline_color = Color(0, 0, 0, 1)
 
 [node name="UnitUi" type="Control"]
-custom_minimum_size = Vector2(65, 65)
+custom_minimum_size = Vector2(200, 65)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 65.0
+offset_bottom = 65.0
 script = ExtResource("1_wym2j")
 sprite_team_0 = ExtResource("2_pi8vb")
 sprite_team_1 = ExtResource("3_djxcy")
@@ -316,18 +316,23 @@ texture = ExtResource("35_755va")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Soldiers" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 1.0
-offset_top = 59.0
-offset_right = 41.0
-offset_bottom = 99.0
+[node name="Soldiers" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 63.0
+offset_top = 3.0
+offset_right = 63.0
+offset_bottom = 3.0
+grow_vertical = 0
 
-[node name="SoldiersHBoxContainer" type="GridContainer" parent="Soldiers"]
-layout_mode = 0
-offset_right = 108.0
-offset_bottom = 220.0
-theme_override_constants/h_separation = 2
-columns = 5
+[node name="SoldiersContainer" type="VBoxContainer" parent="Soldiers"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="SoldierDetail" parent="Soldiers/SoldiersContainer" instance=ExtResource("38_qfgpo")]
+layout_mode = 2
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

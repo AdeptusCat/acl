@@ -117,14 +117,17 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 			continue
 		var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
 		unit_stats_container.add_child(unit_ui)
-		var unit_stats_details = unit_stats_details_scene.instantiate()
-		unit_stats_details.set_details(unit)
-		unit_stats_container.add_child(unit_stats_details)
+		#var unit_detail_container = unit_ui.soldiers_detail_container.duplicate()
+		#unit_stats_container.add_child(unit_detail_container)
+		#var unit_stats_details = unit_stats_details_scene.instantiate()
+		#unit_stats_details.set_details(unit)
+		#unit_stats_container.add_child(unit_stats_details)
 		unit.ui.detail_ui = unit_ui
 		unit_ui._set_loadout(unit.squad_fire.soldiers)
 		unit_detail_counter += 1
 	if unit_detail_counter == 0:
 		unit_stats.visible = false
+	
 
 func show_tile_data(result: Dictionary):
 	#print(result)
