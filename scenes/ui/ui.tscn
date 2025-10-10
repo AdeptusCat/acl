@@ -183,13 +183,13 @@ visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="UnitStats" type="MarginContainer" parent="."]
-anchors_preset = -1
+anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 179.0
-offset_top = -182.0
+offset_top = -206.0
 offset_right = 329.0
-offset_bottom = -12.0
+offset_bottom = -16.0
 grow_vertical = 0
 
 [node name="ColorRect" type="ColorRect" parent="UnitStats"]
@@ -204,7 +204,7 @@ theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UnitStats/MarginContainer"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 alignment = 2
 
@@ -224,6 +224,7 @@ grow_horizontal = 0
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 8
 text = "Controls:
 left click - select/unselect unit
 right click - move/attack unit
@@ -231,16 +232,8 @@ WASD move camera
 mouse wheel - zoom"
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -85.0
-offset_top = -20.0
-offset_bottom = 20.0
-grow_horizontal = 0
-grow_vertical = 2
+offset_right = 105.0
+offset_bottom = 51.0
 
 [node name="ColorRect" type="ColorRect" parent="MarginContainer"]
 layout_mode = 2
