@@ -17,7 +17,7 @@ var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
 var timer_running := false
 
-var selected_unit: Node2D = null
+var selected_unit: Unit = null
 var units: Array[Node2D] = []
 var unit_visible_enemies: Dictionary
 
@@ -254,7 +254,10 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 		else:
 			origin_hex = selected_unit.current_hex
 			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
-			distance = int(origin_hex.distance_to(target_hex))
+			#distance = int(origin_hex.distance_to(target_hex))
+			var origin_cube: Vector3i = selected_unit.current_cube
+			var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
+			distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
 			# safely grab the inner dict for this shooter-hex
 			var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
 			if cover_map and cover_map.has(target_hex):
@@ -294,7 +297,9 @@ func handle_mouse_event_position_changed(event_pos: Vector2):
 		else:
 			origin_hex = selected_unit.current_hex
 			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
-			distance = int(origin_hex.distance_to(target_hex))
+			var origin_cube: Vector3i = selected_unit.current_cube
+			var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
+			distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
 			# safely grab the inner dict for this shooter-hex
 			var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
 			if cover_map and cover_map.has(target_hex):
