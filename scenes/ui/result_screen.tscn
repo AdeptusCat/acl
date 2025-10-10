@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b84f65gu8hp6e"]
 
-[ext_resource type="Script" uid="uid://bj7ycyqixb6gq" path="res://result_screen.gd" id="1_e2y21"]
+[ext_resource type="Script" uid="uid://bj7ycyqixb6gq" path="res://scenes/ui/result_screen.gd" id="1_e2y21"]
 
 [node name="ResultScreen" type="CanvasLayer"]
 script = ExtResource("1_e2y21")
@@ -21,3 +21,21 @@ grow_vertical = 2
 [node name="ResultLabel" type="Label" parent="CenterContainer"]
 layout_mode = 2
 text = "Winner"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+offset_left = 479.0
+offset_top = 347.0
+offset_right = 707.0
+offset_bottom = 387.0
+theme_override_constants/separation = 40
+
+[node name="TryAgain" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Try Again"
+
+[node name="KeepPlaying" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Keep Playing"
+
+[connection signal="pressed" from="HBoxContainer/TryAgain" to="." method="_on_try_again_pressed"]
+[connection signal="pressed" from="HBoxContainer/KeepPlaying" to="." method="_on_keep_playing_pressed"]

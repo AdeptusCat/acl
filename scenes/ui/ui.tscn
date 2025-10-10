@@ -279,6 +279,7 @@ texture = ExtResource("6_7vp6q")
 expand_mode = 3
 
 [node name="FirepowerLabel" type="Label" parent="TargetCoverDistance/VBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "123"
 

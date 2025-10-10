@@ -1574,4 +1574,5 @@ theme_override_font_sizes/font_size = 50
 text = "Start Area"
 
 [connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]
+[connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]

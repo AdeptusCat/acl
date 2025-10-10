@@ -253,3 +253,7 @@ func _on_ui_try_again() -> void:
 
 func _on_start_screen_hover_start_button(team: int) -> void:
 	target_area.show_target(team)
+
+
+func _on_result_screen_try_again() -> void:
+	try_again.emit()
