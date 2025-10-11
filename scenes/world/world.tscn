@@ -1,4 +1,4 @@
-[gd_scene load_steps=224 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=223 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -61,7 +61,6 @@
 [ext_resource type="Resource" uid="uid://btw7qmulsva7g" path="res://resources/weapons/mp40.tres" id="53_dhssw"]
 [ext_resource type="Script" uid="uid://cwp4yt03yldxu" path="res://scenes/world/target_area.gd" id="55_7rtjl"]
 [ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="55_hpffo"]
-[ext_resource type="Resource" uid="uid://byepsybo14u36" path="res://resources/weapons/m3_grease_gun.tres" id="56_hpffo"]
 [ext_resource type="Texture2D" uid="uid://vabbhirvnspe" path="res://assets/target_area.png" id="56_phx5y"]
 [ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
@@ -679,7 +678,7 @@ script = ExtResource("50_hph6x")
 nickname = "Squad Leader"
 rank_grade = 3
 role = 9
-weapon = ExtResource("56_hpffo")
+weapon = ExtResource("53_dhssw")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_dhssw"]
@@ -782,7 +781,7 @@ script = ExtResource("50_hph6x")
 nickname = "Squad Leader"
 rank_grade = 3
 role = 9
-weapon = ExtResource("56_hpffo")
+weapon = ExtResource("53_dhssw")
 is_key_role = true
 
 [sub_resource type="Resource" id="Resource_6a7tq"]

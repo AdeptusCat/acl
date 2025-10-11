@@ -28,6 +28,8 @@ signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
 
 
+var end_game_handled: bool = false
+
 var point_array: Array[Vector2]
 var threat_weights = {}
 
@@ -436,6 +438,9 @@ func _process(delta):
 
 
 func end_game_check():
+	if end_game_handled:
+		return
+	end_game_handled = true
 	var occupying_units : Array
 	for unit in unit_container.get_children():
 		if unit.current_hex == objective_hex:

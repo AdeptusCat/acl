@@ -374,7 +374,7 @@ func _make_light_mg_team(v: bool) -> void:
 			var smg: WeaponSpec
 			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/kar98.tres")
-			smg = preload("res://resources/weapons/m3_grease_gun.tres")
+			smg = preload("res://resources/weapons/mp40.tres")
 			mg = preload("res://resources/weapons/mg34.tres")
 			_resize_loadouts(group_size)
 			var i: int = 0

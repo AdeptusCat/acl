@@ -1,4 +1,5 @@
 extends Node
+class_name UnitStates
 
 enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 

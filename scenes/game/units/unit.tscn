@@ -29,7 +29,6 @@ fire_rate = 1.5
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
-make_rifle_squad_10 = false
 
 [node name="UnitUi" parent="." instance=ExtResource("10_ga1pk")]
 offset_left = -33.0
@@ -57,5 +56,3 @@ scan_interval_s = 0.25
 unit = NodePath("..")
 combat = NodePath("../Combat")
 stress_controller = NodePath("../UnitStressController")
-state_acc_mults = PackedFloat32Array()
-state_rof_mults = PackedFloat32Array()

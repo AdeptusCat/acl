@@ -11,9 +11,9 @@ class_name SquadFireController
 @export var burst_window_s: float = 0.10      # batch rounds within this window per hex
 @export var max_shots_per_tick: int = 128
 
-# State influence (from your STATES table)
-@export var state_acc_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.5, 0.0, 0.0])
-@export var state_rof_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.85, 0.35, 0.0, 0.0])
+## State influence (from your STATES table)
+#@export var state_acc_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.5, 0.0, 0.0])
+#@export var state_rof_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.85, 0.35, 0.0, 0.0])
 
 # NEW: state influence on target acquisition time (Normal..CombatIneffective)
 @export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 1.15, 1.6, 9999.0, 9999.0])
@@ -116,10 +116,8 @@ func _update_state_multipliers() -> void:
 	var state_idx: int = stress_controller.state
 	var acc_mult: float = 1.0
 	var rof_mult: float = 1.0
-	if state_idx >= 0 and state_idx < state_acc_mults.size():
-		acc_mult = state_acc_mults[state_idx]
-	if state_idx >= 0 and state_idx < state_rof_mults.size():
-		rof_mult = state_rof_mults[state_idx]
+	acc_mult = UnitStates.STATE_MOD[stress_controller.state]["acc"]
+	rof_mult = UnitStates.STATE_MOD[stress_controller.state]["rof"]
 
 	var i: int = 0
 	while i < soldiers.size():
@@ -220,6 +218,7 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) -> int:
+	s.now_s = _now_s
 	if target_hex == Vector2i.ZERO:
 		return 0
 	
@@ -251,7 +250,9 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		# simple unjam: use reload time as clear jam delay
 		if s.next_ready_s <= _now_s:
 			s.jammed = false
-			s.next_ready_s = _now_s + s.weapon.reload_s
+			s.next_ready_delta_s = s.weapon.reload_s / s.rof_mult
+			s.next_ready_s = _now_s + s.next_ready_delta_s
+			s.next_ready_start_s = _now_s
 		return 0
 
 	if s.next_ready_s > _now_s:
@@ -274,7 +275,9 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 
 	if shots <= 0:
 		# reload
-		s.next_ready_s = _now_s + s.weapon.reload_s
+		s.next_ready_delta_s = s.weapon.reload_s / s.rof_mult
+		s.next_ready_s = _now_s + s.next_ready_delta_s
+		s.next_ready_start_s = _now_s
 		s.rounds_in_mag = s.weapon.mag_capacity
 		return 0
 	
@@ -306,18 +309,20 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		rps = 1.0
 	var fire_time_s: float = float(shots) / rps
 	var pause_s: float = s.weapon.burst_pause_s
-	var total_cadence_s: float = (fire_time_s + pause_s) * s.rof_mult * crew_mult
+	var total_cadence_s: float = (fire_time_s + pause_s) * crew_mult / s.rof_mult
 
 	# keep a little persistent desync in the rhythm
 	var phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
-	s.next_ready_s = _now_s + total_cadence_s + phase_bump
+	
 	
 	var state_idx: int = stress_controller.state
 	var acquire_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
 	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-	s.next_ready_s += settle_s
+	s.next_ready_delta_s = total_cadence_s + phase_bump + settle_s
+	s.next_ready_s = _now_s + s.next_ready_delta_s
+	s.next_ready_start_s = _now_s
 	
 	var delta: float = s.next_ready_s - _now_s # debug
 	fire_at(shots, long_range)
@@ -676,11 +681,14 @@ func _prime_acquisition_for_new_target() -> void:
 			var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 			# add the soldier's fixed cadence phase so first bursts don’t sync
 			settle_s += s.cadence_phase_s
-			s.acquire_ready_s = _now_s + settle_s
+			s.acquire_start_s = _now_s
+			s.next_ready_delta_s = settle_s / s.rof_mult
+			s.acquire_ready_s = _now_s + s.next_ready_delta_s
 			s.last_target_hex = target_hex
 			# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
 			if s.next_ready_s < s.acquire_ready_s:
 				s.next_ready_s = s.acquire_ready_s
+				s.next_ready_start_s = _now_s
 		i += 1
 
 

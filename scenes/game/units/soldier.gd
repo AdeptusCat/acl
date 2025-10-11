@@ -14,11 +14,16 @@ var is_alive: bool = true
 var rounds_in_mag: int
 var jammed: bool = false
 var next_ready_s: float = 0.0       # simulation time when he can act again
+var next_ready_delta_s: float = 0.0
+var next_ready_start_s: float = 0.0
 
 # cached multipliers (state/leadership may change these each tick)
 var rof_mult: float = 1.0
 var acc_mult: float = 1.0
 
+var now_s: float = 0.0
+var acquire_start_s: float = 0.0
+var acquire_target_s: float = 0.0
 var acquire_ready_s: float = 0.0
 var last_target_hex: Vector2i = Vector2i(-9999, -9999)
 
