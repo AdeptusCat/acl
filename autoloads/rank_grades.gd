@@ -22,9 +22,9 @@ const GRADE_PARAMS: Dictionary = {
 	Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
 	Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
 	Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
-	Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 1, "coh_mult": 1.04 },
-	Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 2, "coh_mult": 1.06 },
-	Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 3, "coh_mult": 1.08 },
+	Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 0, "coh_mult": 1.04 },
+	Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
+	Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
 }
 
 const TITLES: Dictionary = {
