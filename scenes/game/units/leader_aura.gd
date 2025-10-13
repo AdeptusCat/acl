@@ -54,11 +54,11 @@ func _update_aura() -> void:
 			if prior:
 				_remove_from(prior)
 
-func set_properties(_aura_radius_hexes, _leadership_bonus, _rally_bonus, _cohesion_mult):
-	aura_radius_hexes = _aura_radius_hexes
-	leadership_bonus = _leadership_bonus
-	rally_bonus = _rally_bonus    
-	cohesion_mult = _cohesion_mult
+#func set_properties(_aura_radius_hexes, _leadership_bonus, _rally_bonus, _cohesion_mult):
+	#aura_radius_hexes = _aura_radius_hexes
+	#leadership_bonus = _leadership_bonus
+	#rally_bonus = _rally_bonus    
+	#cohesion_mult = _cohesion_mult
 
 func _apply_to(unit: Node2D) -> void:
 	if _affected.has(unit):

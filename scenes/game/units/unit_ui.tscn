@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=48 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -26,10 +26,13 @@
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
 [ext_resource type="Texture2D" uid="uid://cx708ounalns5" path="res://assets/ranks/sergeant.png" id="11_hjrgb"]
 [ext_resource type="Texture2D" uid="uid://cn4m384b387ir" path="res://assets/status/routing_us.png" id="11_kswga"]
+[ext_resource type="Texture2D" uid="uid://cd4qwkl3vrn5p" path="res://assets/ranks/private.png" id="11_pyl2t"]
 [ext_resource type="Texture2D" uid="uid://c3u7esoded7o8" path="res://assets/status/pinned_ger.png" id="12_dlbli"]
+[ext_resource type="Texture2D" uid="uid://bxq4t2j71wj4j" path="res://assets/ranks/private_first_class.png" id="12_pjyrh"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="12_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://c6ixbw7ifoib3" path="res://assets/status/pinned_us.png" id="13_hvjme"]
 [ext_resource type="Texture2D" uid="uid://5p3uklrg82vu" path="res://assets/ranks/captain.png" id="13_qfgpo"]
+[ext_resource type="Texture2D" uid="uid://c37od34iuj2p" path="res://assets/ranks/corporal.png" id="13_u05qo"]
 [ext_resource type="Texture2D" uid="uid://c7wd5hgkmf7fi" path="res://assets/status/broken_ger.png" id="14_kswga"]
 [ext_resource type="Texture2D" uid="uid://cbfjsvqigymke" path="res://assets/status/ger/leader/leader_idle_ger.png" id="15_fekhn"]
 [ext_resource type="Texture2D" uid="uid://bff6000rupxvt" path="res://assets/status/broken_us.png" id="15_pi8vb"]
@@ -79,6 +82,9 @@ cautious_texture = ExtResource("7_755va")
 pinned_texture = ExtResource("8_dhwvl")
 panic_texture = ExtResource("9_hjrgb")
 combat_ineffective_texture = ExtResource("10_qfgpo")
+private_texture = ExtResource("11_pyl2t")
+private_first_class_texture = ExtResource("12_pjyrh")
+corporal_texture = ExtResource("13_u05qo")
 seargeant_texture = ExtResource("11_hjrgb")
 second_lieutenant_texture = ExtResource("35_755va")
 captain_texture = ExtResource("13_qfgpo")
@@ -298,7 +304,6 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="LeadershipRank" type="Label" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = -19.0

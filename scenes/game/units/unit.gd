@@ -188,8 +188,8 @@ func _refresh_leader_aura() -> void:
 		leader_aura.rally_bonus = rally
 		leader_aura.cohesion_mult = coh
 	
-	var rank: RankGrades.Grade = _highest_grade_from_loadouts()
-	ui.set_leadership_rank(rank)
+	#var rank: RankGrades.Grade = _highest_grade_from_loadouts()
+	ui.set_leadership_rank(grade)
 
 
 func _highest_grade_from_runtime() -> int:
@@ -544,6 +544,9 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 		_apply_casualties(casualties)
 	stress_system.apply_stress(df, ds)
 	ui.set_loadout(squad_fire.soldiers)
+	_refresh_leader_aura()
+	leader_aura._affected.erase(self)
+	leader_aura._apply_to(self)
 	#emit_signal("stress_applied", df, ds, source)
 
 
@@ -664,6 +667,7 @@ func _promote_new_leader() -> void:
 		var s: Soldier = squad_fire.soldiers[new_leader_idx]
 		s.role = RankGrades.Role.SQUAD_LEADER
 		leader_alive = true
+		
 		# if you track graded leadership, update bonus here instead of this placeholder:
 		# stress_system.leadership_bonus = _compute_leadership_bonus_for(s)
 	else:

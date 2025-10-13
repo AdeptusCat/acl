@@ -15,6 +15,9 @@ var detail_ui = null
 @export var panic_texture: Texture
 @export var combat_ineffective_texture: Texture
 
+@export var private_texture: Texture
+@export var private_first_class_texture: Texture
+@export var corporal_texture: Texture
 @export var seargeant_texture: Texture
 @export var second_lieutenant_texture: Texture
 @export var captain_texture: Texture
@@ -63,7 +66,7 @@ func _set_loadout(soldiers: Array[Soldier]):
 		soldiers_detail_container.add_child(soldier_detail)
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
-	var txt: String #= "%0.2f" % leadership_bonus
+	var txt: String = "%0.2f" % leadership_bonus
 	txt += stress_to_plus_string(leadership_bonus)
 	$LeadershipBonus.text = txt
 	
@@ -81,6 +84,12 @@ func stress_to_plus_string(value: float) -> String:
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
 	match rankGrade:
+		RankGrades.Grade.SOLDIER:
+			rank_texture_rect.texture = private_texture
+		RankGrades.Grade.ASSISTANT_TEAM_LEADER:
+			rank_texture_rect.texture = private_first_class_texture
+		RankGrades.Grade.TEAM_LEADER:
+			rank_texture_rect.texture = corporal_texture
 		RankGrades.Grade.SQUAD_LEADER:
 			rank_texture_rect.texture = seargeant_texture
 		RankGrades.Grade.PLATOON_LEADER:
