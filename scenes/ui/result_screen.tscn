@@ -18,24 +18,39 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ResultLabel" type="Label" parent="CenterContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="CenterContainer/MarginContainer2"]
+layout_mode = 2
+color = Color(0.5449743, 0.54497427, 0.54497427, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/MarginContainer2"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/MarginContainer2/MarginContainer"]
+layout_mode = 2
+
+[node name="ResultLabel" type="Label" parent="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Winner"
+horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-offset_left = 479.0
-offset_top = 347.0
-offset_right = 707.0
-offset_bottom = 387.0
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer"]
+layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="TryAgain" type="Button" parent="HBoxContainer"]
+[node name="TryAgain" type="Button" parent="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Try Again"
 
-[node name="KeepPlaying" type="Button" parent="HBoxContainer"]
+[node name="KeepPlaying" type="Button" parent="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Keep Playing"
 
-[connection signal="pressed" from="HBoxContainer/TryAgain" to="." method="_on_try_again_pressed"]
-[connection signal="pressed" from="HBoxContainer/KeepPlaying" to="." method="_on_keep_playing_pressed"]
+[connection signal="pressed" from="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer/HBoxContainer/TryAgain" to="." method="_on_try_again_pressed"]
+[connection signal="pressed" from="CenterContainer/MarginContainer2/MarginContainer/VBoxContainer/HBoxContainer/KeepPlaying" to="." method="_on_keep_playing_pressed"]

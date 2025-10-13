@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@onready var result_label := $CenterContainer/ResultLabel
+@onready var result_label := $CenterContainer/MarginContainer2/MarginContainer/VBoxContainer/ResultLabel
 
 signal try_again
 

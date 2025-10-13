@@ -308,13 +308,13 @@ func _make_rifle_squad(v: bool) -> void:
 			var gunner: SoldierLoadout = loadouts[i]
 			gunner.role = RankGrades.Role.GUNNER
 			gunner.nickname = "Gunner"
-			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.rank_grade = RankGrades.Grade.SOLDIER
 			gunner.weapon = mg
 			i += 1
 			var loader: SoldierLoadout = loadouts[i]
 			loader.role = RankGrades.Role.LOADER
 			loader.nickname = "Loader"
-			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
 			while i < group_size:
@@ -349,13 +349,13 @@ func _make_rifle_squad(v: bool) -> void:
 			var gunner: SoldierLoadout = loadouts[i]
 			gunner.role = RankGrades.Role.GUNNER
 			gunner.nickname = "Gunner"
-			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.rank_grade = RankGrades.Grade.SOLDIER
 			gunner.weapon = mg
 			i += 1
 			var loader: SoldierLoadout = loadouts[i]
 			loader.role = RankGrades.Role.LOADER
 			loader.nickname = "Loader"
-			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
 			while i < group_size:
@@ -389,13 +389,13 @@ func _make_light_mg_team(v: bool) -> void:
 			var gunner: SoldierLoadout = loadouts[i]
 			gunner.role = RankGrades.Role.GUNNER
 			gunner.nickname = "Gunner"
-			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.rank_grade = RankGrades.Grade.SOLDIER
 			gunner.weapon = mg
 			i += 1
 			var loader: SoldierLoadout = loadouts[i]
 			loader.role = RankGrades.Role.LOADER
 			loader.nickname = "Loader"
-			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
 			while i < group_size:
@@ -422,13 +422,13 @@ func _make_light_mg_team(v: bool) -> void:
 			var gunner: SoldierLoadout = loadouts[i]
 			gunner.role = RankGrades.Role.GUNNER
 			gunner.nickname = "Gunner"
-			gunner.rank_grade = RankGrades.Grade.TEAM_LEADER
+			gunner.rank_grade = RankGrades.Grade.SOLDIER
 			gunner.weapon = mg
 			i += 1
 			var loader: SoldierLoadout = loadouts[i]
 			loader.role = RankGrades.Role.LOADER
 			loader.nickname = "Loader"
-			loader.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
 			while i < group_size:
