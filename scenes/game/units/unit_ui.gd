@@ -41,6 +41,8 @@ var detail_ui = null
 @onready var soldiers_detail_container = $Soldiers/SoldiersContainer
 @export var soldier_detail_scene: PackedScene
 
+var _surrendered: bool = false
+
 
 func set_loadout(soldiers: Array[Soldier]):
 	if detail_ui:
@@ -61,9 +63,20 @@ func _set_loadout(soldiers: Array[Soldier]):
 		soldiers_detail_container.add_child(soldier_detail)
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
-	var txt: String = "%0.2f" % leadership_bonus
+	var txt: String #= "%0.2f" % leadership_bonus
+	txt += stress_to_plus_string(leadership_bonus)
 	$LeadershipBonus.text = txt
+	
 
+func stress_to_plus_string(value: float) -> String:
+	var result: String = ""
+	if value > 0.0:
+		var count: int = int(floor(value / 0.10))
+		var i: int = 0
+		while i < count:
+			result += "+"
+			i += 1
+	return result
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
@@ -169,7 +182,7 @@ func stopped_moving(broken: bool, surrendered: bool):
 		broken_texture_rect.visible = true
 	else:
 		idle_texture_rect.visible = true
-	if surrendered:
+	if _surrendered:
 		idle_texture_rect.visible = false
 		broken_texture_rect.visible = false
 		surrendered_texture_rect.visible = true
@@ -196,6 +209,10 @@ func _on_morale_recovered():
 	for child in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
+	if _surrendered:
+		idle_texture_rect.visible = false
+		broken_texture_rect.visible = false
+		surrendered_texture_rect.visible = true
 	if detail_ui:
 		detail_ui._on_morale_recovered()
 
@@ -302,6 +319,7 @@ func surrender():
 	for child in unit_status_control.get_children():
 		child.visible = false
 	surrendered_texture_rect.visible = true
+	_surrendered = true
 	if detail_ui:
 		for child in detail_ui.unit_status_control.get_children():
 			child.visible = false
@@ -322,5 +340,9 @@ func _on_timer_timeout() -> void:
 	for child in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
+	if _surrendered:
+		idle_texture_rect.visible = false
+		broken_texture_rect.visible = false
+		surrendered_texture_rect.visible = true
 	if detail_ui:
 		detail_ui._on_timer_timeout()

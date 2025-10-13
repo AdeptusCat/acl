@@ -290,11 +290,12 @@ stretch_mode = 4
 
 [node name="LeadershipBonus" type="Label" parent="."]
 layout_mode = 0
-offset_left = 13.0
-offset_top = 58.0
-offset_right = 53.0
-offset_bottom = 81.0
-text = "0"
+offset_left = 9.0
+offset_top = 40.0
+offset_right = 56.0
+offset_bottom = 63.0
+text = "+"
+horizontal_alignment = 1
 
 [node name="LeadershipRank" type="Label" parent="."]
 visible = false
