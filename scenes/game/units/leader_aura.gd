@@ -8,7 +8,7 @@ class_name LeaderAura
 @export var cohesion_mult: float = 1.05        # multiplicative on cohesion
 @export var scan_interval_s: float = 0.25
 
-var _owner_unit: Node2D
+var _owner_unit: Unit
 var _since_scan: float = 0.0
 var _affected: Dictionary = {}  # Node2D -> bool
 
@@ -40,9 +40,10 @@ func _update_aura() -> void:
 		if not _same_team(_owner_unit, unit):
 			continue
 		
+		if _owner_unit.highest_rank_grade <= unit.highest_rank_grade and not unit == _owner_unit:
+			continue
+			
 		var distance: int = LOSHelper.ground_layer.cube_distance(leader_cube, unit.current_cube)
-		if aura_radius_hexes == 2:
-			pass
 		if distance <= aura_radius_hexes:
 			_apply_to(unit)
 			seen[unit] = true

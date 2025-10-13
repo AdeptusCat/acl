@@ -289,7 +289,6 @@ expand_mode = 1
 stretch_mode = 4
 
 [node name="LeadershipBonus" type="Label" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 13.0
 offset_top = 58.0

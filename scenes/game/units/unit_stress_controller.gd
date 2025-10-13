@@ -55,7 +55,7 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 @export var L_PINNED_TO_CAUTIOUS: float= 0.35   # recovery; ramped, then gets recovery_bias
 
 # PANIC →
-@export var L_PANIC_TO_CAUTIOUS: float = 0.28   # recovery; gets recovery_bias
+@export var L_PANIC_TO_CAUTIOUS: float = 0.1   # recovery; gets recovery_bias
 
 # --- TUNABLES: ramps (seconds to go 0 → 100%) ---
 @export var repin_ramp_s: float  = 10.0   # CAUTIOUS→PINNED hazard ramps up after unpin
@@ -87,6 +87,11 @@ var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 @export var slowdown_light: float = 0.4         # decay-rate multiplier at light pressure
 @export var slowdown_heavy: float = 0.1         # decay-rate multiplier at heavy pressure
 @export var stop_fast_decay_when_heavy: bool = false  # freeze fast-stress decay at heavy pressure
+
+# --- slower recovery when panic ---
+@export var panic_decay_mult_slow: float = 1.0            # 0..1; lower = slower recovery while panicking
+@export var panic_decay_mult_fast: float = 0.2            # 0..1; lower = slower recovery while panicking
+@export var panic_freeze_fast_when_panic: bool = false # if true, fast-stress doesn’t decay in PANIC
 
 # --- STATE ---
 var stress_fast: float = 0.0
@@ -188,8 +193,17 @@ func _physics_process(delta: float) -> void:
 		if _under_fire_t < 0.0:
 			_under_fire_t = 0.0
 
+	# --- panic slows recovery ---
+	if state == MoraleState.PANIC:
+		var m_slow: float = clamp(panic_decay_mult_slow, 0.0, 1.0)
+		var m_fast: float = clamp(panic_decay_mult_fast, 0.0, 1.0)
+		lambda_slow *= m_slow
+		lambda_fast *= m_fast
+		if panic_freeze_fast_when_panic:
+			lambda_fast = 0.0
+			
 	# --- leader speeds recovery a touch, still rate-based ---
-	var decay_boost: float = 1.0 + leader_decay_boost_max * _leader_effect
+	var decay_boost: float = 1.0 + _leader_effect * 10.0
 	# turn rates into multipliers
 	var kf: float = 1.0
 	var ks: float = 1.0

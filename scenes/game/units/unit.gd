@@ -49,6 +49,7 @@ var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
 var units: Array[Node2D]
 
+var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
 var original_size := 10
 var leader_alive := true
@@ -160,6 +161,7 @@ func _refresh_leader_aura() -> void:
 	#if squad_fire != null:
 		#if squad_fire.soldiers.size() > 0:
 	grade = _highest_grade_from_runtime()
+	highest_rank_grade = (grade)
 	#grade = _highest_grade_from_loadouts()
 	if grade >= 0:
 		found = true
