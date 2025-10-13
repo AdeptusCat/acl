@@ -338,6 +338,7 @@ theme_override_constants/separation = 0
 alignment = 2
 
 [node name="KillSoldier" type="Button" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 68.0
 offset_top = -13.0
