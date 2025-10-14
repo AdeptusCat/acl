@@ -18,7 +18,7 @@ var objective_hex : Vector2i = Vector2.ZERO
 var timer_running := false
 
 var selected_unit: Unit = null
-var units: Array[Node2D] = []
+var units: Array[Unit] = []
 var unit_visible_enemies: Dictionary
 
 
@@ -74,7 +74,7 @@ func _ready():
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
 	for unit in get_tree().get_nodes_in_group("units"):
-		if unit is Node2D:
+		if unit is Unit:
 			units.append(unit)
 			unit.units = units
 			unit.unit_died.connect(_on_unit_died)

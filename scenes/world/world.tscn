@@ -1470,7 +1470,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
 
 [node name="AlliesRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(848, 512)
+position = Vector2(1184, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])

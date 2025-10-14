@@ -47,7 +47,7 @@ var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
-var units: Array[Node2D]
+var units: Array[Unit]
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 

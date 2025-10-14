@@ -5,7 +5,7 @@ extends Node
 @export var enabled: bool = true
 
 var unit_visible_enemies: Dictionary
-var units: Array[Node2D] = []
+var units: Array[Unit] = []
 signal draw_los_to_enemy(from_hex, to_hex)
 
 
@@ -20,7 +20,7 @@ func _process(delta: float) -> void:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			
-func _on_unit_moved(unit, vector):
+func _on_unit_moved(unit: Unit, vector):
 	if not enabled:
 		return
 	if not unit.alive or unit.surrendered:
@@ -42,7 +42,10 @@ func _on_unit_moved(unit, vector):
 
 			# Fire immediately if stationary (optional fast reaction shot)
 			if enemy_unit.moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
-				continue
+				if enemy_unit.broken:
+					var distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
+					if distance <= 1:
+						enemy_unit.stress_system.state_changed.emit(enemy_unit.stress_system.state, enemy_unit.stress_system.state)
 			else:
 				var distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
 				

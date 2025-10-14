@@ -101,6 +101,8 @@ var state: int = MoraleState.NORMAL
 var _since_change: float = 999.0
 
 # --- RUNTIME (under fire) ---
+var _how_long_under_fire_s: float = 0.0
+var _how_long_under_fire_util_rout_s: float = 4.0
 var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
 
@@ -156,6 +158,13 @@ func _physics_process(delta: float) -> void:
 			_repin_since_unpin += delta
 		MoraleState.PINNED:
 			_since_pinned += delta
+		MoraleState.PANIC:
+			if _how_long_under_fire_s > _how_long_under_fire_util_rout_s:
+				state_changed.emit(state, state)
+				_how_long_under_fire_s = 0.0
+	
+	if not state == MoraleState.PANIC:
+		_how_long_under_fire_s = 0.0
 	
 	# decay using exponential form so we can scale the *rate* cleanly
 	var ln2: float = 0.69314718056
@@ -175,6 +184,7 @@ func _physics_process(delta: float) -> void:
 
 	# slower decay while under fire
 	if _under_fire_t > 0.0:
+		_how_long_under_fire_s += delta
 		var x: float = 0.0
 		if pressure_ref_rps > 0.0:
 			x = clamp(_last_pressure_rps / pressure_ref_rps, 0.0, 1.0)
@@ -201,7 +211,9 @@ func _physics_process(delta: float) -> void:
 		lambda_fast *= m_fast
 		if panic_freeze_fast_when_panic:
 			lambda_fast = 0.0
-			
+		if get_parent().movement.retreating:
+			lambda_slow = 0.0
+			lambda_fast = 0.0
 	# --- leader speeds recovery a touch, still rate-based ---
 	var decay_boost: float = 1.0 + _leader_effect * 10.0
 	# turn rates into multipliers

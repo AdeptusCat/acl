@@ -2,7 +2,7 @@ extends Node
 
 
 var unit_visible_enemies: Dictionary
-var units: Array[Node2D] = []
+var units: Array[Unit] = []
 
 
 func _on_move_requested(selected_unit, to_hex):
