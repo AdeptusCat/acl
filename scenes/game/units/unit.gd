@@ -580,7 +580,10 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 # --- casualties, role replacement, and support-weapon re-crewing ---
 func _apply_casualties(n: int) -> void:
 	var casualty_indexes: Array[int] = get_unique_random_ints(n, members_alive)
+	var members_alive_before: int = members_alive
 	members_alive = max(0, members_alive - n)
+	if n == 0:
+		pass
 
 	var leader_down: bool = false
 	#if leader_alive:
@@ -615,7 +618,7 @@ func _apply_casualties(n: int) -> void:
 			if s.weapon != null:
 				dropped_support.append(s.weapon)
 		c += 1
-
+	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
@@ -629,6 +632,8 @@ func _apply_casualties(n: int) -> void:
 	stress_system.on_casualty_event(n, leader_down)
 	ui.set_memebers_alive(members_alive)
 
+	if members_alive_before == members_alive:
+		pass
 	# if the whole lot’s gone, we’re done
 	if members_alive <= 0:
 		_set_combat_ineffective()
@@ -770,7 +775,7 @@ func remove_indices(target: Array, indices: Array[int]) -> void:
 func get_unique_random_ints(n: int, max: int) -> Array[int]:
 	var all_nums: Array[int] = []
 	var i: int = 0
-	while i <= max:
+	while i < max:
 		all_nums.append(i)
 		i += 1
 	all_nums.shuffle()

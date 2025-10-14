@@ -67,19 +67,32 @@ func _set_loadout(soldiers: Array[Soldier]):
 		soldiers_detail_container.add_child(soldier_detail)
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
-	var txt: String = "%0.2f" % leadership_bonus
+	var txt: String# = "%0.2f" % leadership_bonus
 	txt += stress_to_plus_string(leadership_bonus)
 	$LeadershipBonus.text = txt
 	
 
 func stress_to_plus_string(value: float) -> String:
+	#Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
+	#Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
+	#Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
+	#Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 0, "coh_mult": 1.04 },
+	#Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
+	#Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
 	var result: String = ""
-	if value > 0.0:
-		var count: int = int(floor(value / 0.10))
-		var i: int = 0
-		while i < count:
-			result += "+"
-			i += 1
+	if value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.COMPANY_LEADER].lead:
+		result = "+++"
+	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.PLATOON_LEADER].lead:
+		result = "++"
+	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.SQUAD_LEADER].lead:
+		result = "+"
+	#var result: String = ""
+	#if value > 0.0:
+		#var count: int = int(floor(value / 0.09))
+		#var i: int = 0
+		#while i < count:
+			#result += "+"
+			#i += 1
 	return result
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:

@@ -221,6 +221,7 @@ offset_bottom = 20.0
 expand_mode = 1
 
 [node name="MembersCount" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 37.0
 offset_top = 5.0
@@ -304,6 +305,7 @@ text = "+"
 horizontal_alignment = 1
 
 [node name="LeadershipRank" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 11.0
 offset_top = -19.0
@@ -313,10 +315,10 @@ text = "Rank"
 
 [node name="Rank" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 7.0
-offset_top = 2.0
-offset_right = 27.0
-offset_bottom = 22.0
+offset_left = 39.0
+offset_top = -1.0
+offset_right = 59.0
+offset_bottom = 19.0
 texture = ExtResource("35_755va")
 expand_mode = 1
 stretch_mode = 5
@@ -338,7 +340,6 @@ theme_override_constants/separation = 0
 alignment = 2
 
 [node name="KillSoldier" type="Button" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 68.0
 offset_top = -13.0
