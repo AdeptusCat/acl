@@ -75,3 +75,6 @@ show_percentage = false
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
+
+[node name="Nickname" type="Label" parent="HBoxContainer"]
+layout_mode = 2

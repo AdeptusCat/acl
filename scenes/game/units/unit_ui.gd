@@ -46,6 +46,7 @@ var detail_ui = null
 
 var _surrendered: bool = false
 
+signal debug_kill_soldier
 
 func set_loadout(soldiers: Array[Soldier]):
 	if detail_ui:
@@ -355,3 +356,7 @@ func _on_timer_timeout() -> void:
 		surrendered_texture_rect.visible = true
 	if detail_ui:
 		detail_ui._on_timer_timeout()
+
+
+func _on_kill_soldier_pressed() -> void:
+	debug_kill_soldier.emit()

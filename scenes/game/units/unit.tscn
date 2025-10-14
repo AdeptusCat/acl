@@ -56,3 +56,5 @@ scan_interval_s = 0.25
 unit = NodePath("..")
 combat = NodePath("../Combat")
 stress_controller = NodePath("../UnitStressController")
+
+[connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]
