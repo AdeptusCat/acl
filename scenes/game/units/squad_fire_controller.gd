@@ -97,6 +97,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 		if not target_unit == targetUnit:
 			#_prime_acquisition_for_new_target()
+			aim_delay()
 			target_unit = targetUnit
 	else:
 		target_unit = null
@@ -327,6 +328,23 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	var delta: float = s.next_ready_s - _now_s # debug
 	fire_at(shots, long_range)
 	return shots
+
+func aim_delay():
+	var state_idx: int = stress_controller.state
+	var acquire_mult: float = 1.0
+	if state_idx >= 0 and state_idx < state_acquire_mults.size():
+		acquire_mult = state_acquire_mults[state_idx]
+	for s in soldiers:
+		var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+		s.next_ready_delta_s = settle_s
+		s.next_ready_s = _now_s + s.next_ready_delta_s
+		s.next_ready_start_s = _now_s
+		# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
+		if s.next_ready_s < s.acquire_ready_s:
+			s.next_ready_s = s.acquire_ready_s
+			s.next_ready_start_s = _now_s
+			s.next_ready_delta_s = s.acquire_ready_s - _now_s 
+
 
 func fire_shots(shots: int, rpm: float):
 	var interval: float = 60.0 / rpm
