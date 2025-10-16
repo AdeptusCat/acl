@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://rsqpaeas8ic5"]
+[gd_scene load_steps=14 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="2_h0ojj"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="8_b5oeb"]
 [ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="8_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://cb28roffrjgwu" path="res://scenes/game/units/squad_fire_controller.tscn" id="9_b5oeb"]
+[ext_resource type="PackedScene" uid="uid://cwhe3w1khnk8d" path="res://scenes/game/audio/weapon_audio.tscn" id="10_7ghvu"]
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
@@ -56,5 +57,7 @@ scan_interval_s = 0.25
 unit = NodePath("..")
 combat = NodePath("../Combat")
 stress_controller = NodePath("../UnitStressController")
+
+[node name="WeaponAudio" parent="." instance=ExtResource("10_7ghvu")]
 
 [connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]

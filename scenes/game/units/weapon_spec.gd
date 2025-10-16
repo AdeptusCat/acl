@@ -31,3 +31,9 @@ enum WeaponType {
 @export var raise_s: float = 1.5   # shoulder weapon
 @export var aim_s: float = 0.5     # acquire/sight picture
 @export var setup_s: float = 0.5     # setup weapon
+
+@export var snd_shot: AudioStream = null        # close one-shot muzzle
+@export var snd_mech: AudioStream = null        # mechanical action (bolt, trigger)
+@export var snd_mg_loop: AudioStream = null     # loop for continuous MG fire
+@export var snd_reload: AudioStream = null
+@export var snd_distant: AudioStream = null     # low-salience distant thumpse one-shot muzzle

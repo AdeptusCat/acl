@@ -288,6 +288,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	# emit shots immediately into current window
 	_add_rounds_to_hex(target_hex, shots)
 	#fire_shot.emit()
+	_on_fire_weapon(s.weapon, unit.position, false, 1, unit)
 	fire_shots(shots, s.weapon.rpm)
 
 	# apply jam chance
@@ -726,3 +727,12 @@ func _calc_acquire_delay(s: Soldier) -> float:
 	# add a random bit per target switch
 	var jitter: float = randf_range(0.0, s.aim_jitter_s)
 	return base + jitter
+
+func _on_fire_weapon(weapon_spec: WeaponSpec, pos: Vector2, is_auto: bool, owner_id: int, position_node: Node2D) -> void:
+	if is_auto:
+		# start loop when begins firing
+		$"../WeaponAudio".start_mg_loop(owner_id, weapon_spec, position_node)
+		# each volley still spawns muzzle puffs/visuals and optional short bursts
+		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
+	else:
+		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
