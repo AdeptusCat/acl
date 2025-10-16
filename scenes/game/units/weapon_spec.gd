@@ -30,3 +30,4 @@ enum WeaponType {
 @export var priority: int = 1  # 10 meaning that it has to me manned first
 @export var raise_s: float = 1.5   # shoulder weapon
 @export var aim_s: float = 0.5     # acquire/sight picture
+@export var setup_s: float = 0.5     # setup weapon

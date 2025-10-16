@@ -27,7 +27,7 @@ func _on_unit_moved(unit: Unit, vector):
 		return
 	
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
-
+	
 	# Clear old visibility info for this unit
 	unit_visible_enemies[unit] = []
 

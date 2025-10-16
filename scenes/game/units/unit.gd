@@ -104,7 +104,7 @@ func _ready():
 	current_cube = ground_map.map_to_cube(current_hex)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
-	
+	unit_arrived_at_hex.connect(squad_fire._on_unit_arrived_at_hex)
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	combat.shoot.connect(ui.shoot)
@@ -138,6 +138,9 @@ func _ready():
 	_refresh_leader_aura()
 	
 	ui.set_loadout(squad_fire.soldiers)
+
+
+
 
 
 func _on_fire_shot():

@@ -96,7 +96,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 			target_cover = data["target_cover"]
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 		if not target_unit == targetUnit:
-			_prime_acquisition_for_new_target()
+			#_prime_acquisition_for_new_target()
 			target_unit = targetUnit
 	else:
 		target_unit = null
@@ -664,6 +664,8 @@ func _indices_with_role(role: int) -> Array[int]:
 		i += 1
 	return res
 
+func _on_unit_arrived_at_hex(new_hex: Vector2i):
+	_prime_acquisition_for_new_target()
 
 func _prime_acquisition_for_new_target() -> void:
 	# called whenever target_hex changes
@@ -678,7 +680,10 @@ func _prime_acquisition_for_new_target() -> void:
 		if s.is_alive:
 			#var changed: bool = s.last_target_hex != target_hex
 			#if changed:
-			var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+			var settle_s: float = _calc_acquire_delay(s)
+			if s.weapon.type == WeaponSpec.WeaponType.MG:
+				settle_s += s.weapon.setup_s
+			settle_s *= acquire_mult
 			# add the soldier's fixed cadence phase so first bursts don’t sync
 			settle_s += s.cadence_phase_s
 			s.acquire_start_s = _now_s
