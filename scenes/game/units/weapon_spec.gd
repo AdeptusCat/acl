@@ -35,6 +35,6 @@ enum WeaponType {
 @export var snd_shot: AudioStream = null        # close one-shot muzzle
 @export var snd_mech: AudioStream = null        # mechanical action (bolt, trigger)
 @export var snd_mg_loop: AudioStream = null     # loop for continuous MG fire
-@export var snd_mg_loop_decay = null 
+@export var snd_mg_loop_decay: AudioStream = null 
 @export var snd_reload: AudioStream = null
 @export var snd_distant: AudioStream = null     # low-salience distant thumpse one-shot muzzle

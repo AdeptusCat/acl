@@ -244,7 +244,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		long_range = true
 	
 	# acquisition gate: don’t shoot until settled on the new target
-	if _now_s < s.acquire_ready_s:
+	if _now_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
 		return 0
 	
 	if s.jammed:
@@ -344,10 +344,11 @@ func aim_delay():
 		s.next_ready_s = _now_s + s.next_ready_delta_s
 		s.next_ready_start_s = _now_s
 		# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-		if s.next_ready_s < s.acquire_ready_s:
+		if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
 			s.next_ready_s = s.acquire_ready_s
 			s.next_ready_start_s = _now_s
 			s.next_ready_delta_s = s.acquire_ready_s - _now_s 
+		
 
 
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool):

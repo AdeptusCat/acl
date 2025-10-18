@@ -41,7 +41,6 @@ func play_shot_decay(weapon_spec: WeaponSpec, position: Vector2, is_distant: boo
 			#return
 	# close shot
 	if weapon_spec.snd_mg_loop_decay != null:
-		pass
 		var p2: float = _rand_pitch()
 		audio_pool.play_one_shot(weapon_spec.snd_mg_loop_decay, position, 0.0, p2, "SFX_Close")
 	else:
@@ -67,6 +66,7 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	ap.volume_db = -6
 	ap.play()
 	ap.name = "mg_loop_%s" % str(owner_id)
+
 
 func stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D) -> void:
 	var node_name: String = "mg_loop_%s" % str(owner_id)

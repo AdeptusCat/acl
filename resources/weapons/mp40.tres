@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://btw7qmulsva7g"]
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://btw7qmulsva7g"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_6grgc"]
+[ext_resource type="AudioStream" uid="uid://cldl11tg1pce1" path="res://assets/audio/fx/weapons/mp40/mp40.mp3" id="2_colei"]
+[ext_resource type="AudioStream" uid="uid://cw1curep26uid" path="res://assets/audio/fx/weapons/mp40/mp40_decay.mp3" id="3_hxtgg"]
 
 [resource]
 script = ExtResource("1_6grgc")
@@ -16,4 +18,6 @@ type = 2
 priority = 6
 raise_s = 0.8
 aim_s = 0.2
+snd_mg_loop = ExtResource("2_colei")
+snd_mg_loop_decay = ExtResource("3_hxtgg")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

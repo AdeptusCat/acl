@@ -1,12 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cwhe3w1khnk8d"]
+[gd_scene load_steps=2 format=3 uid="uid://cwhe3w1khnk8d"]
 
 [ext_resource type="Script" uid="uid://dkwdkpkekc5le" path="res://weapon_audio.gd" id="1_623ho"]
-[ext_resource type="AudioStream" uid="uid://cna0vcw1drxve" path="res://assets/audio/fx/weapons/gun.mp3" id="2_j7ck7"]
-[ext_resource type="AudioStream" uid="uid://b1mc87y47r38b" path="res://assets/audio/fx/weapons/mg34.mp3" id="3_imrg5"]
-[ext_resource type="AudioStream" uid="uid://dmlnuwxxuy54d" path="res://assets/audio/fx/weapons/mg34_decay.mp3" id="4_5c7w1"]
 
 [node name="WeaponAudio" type="Node2D"]
 script = ExtResource("1_623ho")
-snd_shot_default = ExtResource("2_j7ck7")
-snd_mg_loop_default = ExtResource("3_imrg5")
-snd_mg_loop_decay_default = ExtResource("4_5c7w1")

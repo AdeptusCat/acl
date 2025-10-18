@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://bvg8b7n4h7vbj"]
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://bvg8b7n4h7vbj"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_amuyw"]
+[ext_resource type="AudioStream" uid="uid://y76kx0cbr80n" path="res://assets/audio/fx/weapons/m1918a1_bar/m1918a1_bar.mp3" id="2_c7ut7"]
+[ext_resource type="AudioStream" uid="uid://c4gh3ya22xp41" path="res://assets/audio/fx/weapons/m1918a1_bar/m1918a1_bar_decay.mp3" id="3_h8oav"]
 
 [resource]
 script = ExtResource("1_amuyw")
@@ -18,4 +20,6 @@ priority = 10
 raise_s = 0.2
 aim_s = 0.8
 setup_s = 6.0
+snd_mg_loop = ExtResource("2_c7ut7")
+snd_mg_loop_decay = ExtResource("3_h8oav")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"
