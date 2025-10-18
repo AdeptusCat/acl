@@ -38,3 +38,4 @@ enum WeaponType {
 @export var snd_mg_loop_decay: AudioStream = null 
 @export var snd_reload: AudioStream = null
 @export var snd_distant: AudioStream = null     # low-salience distant thumpse one-shot muzzle
+@export var volume_db: float = 0.0

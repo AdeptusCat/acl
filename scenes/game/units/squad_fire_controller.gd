@@ -703,9 +703,7 @@ func _prime_acquisition_for_new_target() -> void:
 	while i < soldiers.size():
 		var s: Soldier = soldiers[i]
 		if s.is_alive:
-			#var changed: bool = s.last_target_hex != target_hex
-			#if changed:
-			var settle_s: float = _calc_acquire_delay(s)
+			var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 			if s.weapon.type == WeaponSpec.WeaponType.MG:
 				settle_s += s.weapon.setup_s
 			settle_s *= acquire_mult

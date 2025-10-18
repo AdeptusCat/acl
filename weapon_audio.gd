@@ -17,6 +17,7 @@ func _rand_pitch() -> float:
 	return 1.0 + delta
 
 func play_shot(weapon_spec: WeaponSpec, position: Vector2, is_distant: bool = false) -> void:
+	#return
 	if is_distant:
 		if weapon_spec.snd_distant != null:
 			var p: float = _rand_pitch()
@@ -63,7 +64,7 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	ap.autoplay = false
 	position_node.add_child(ap)
 	ap.position = Vector2.ZERO
-	ap.volume_db = -6
+	ap.volume_db = weapon_spec.volume_db
 	ap.play()
 	ap.name = "mg_loop_%s" % str(owner_id)
 

@@ -29,7 +29,7 @@ var last_target_hex: Vector2i = Vector2i(-9999, -9999)
 
 # per-soldier constants (can be exported where your Soldier is created)
 var base_acquire_s: float = 0.35      # default settle time for rifles
-var aim_jitter_s: float = 0.25        # extra random on each target pick
+var aim_jitter_s: float = 2.0        # extra random on each target pick
 var cadence_phase_s: float = 0.0      # fixed per-soldier desync in cadence
 
 func _init(_id: int, _name: String, _rank_grade: int, _role: int, _weapon: WeaponSpec) -> void:
