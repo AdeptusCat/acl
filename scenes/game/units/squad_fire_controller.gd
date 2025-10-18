@@ -288,8 +288,11 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	# emit shots immediately into current window
 	_add_rounds_to_hex(target_hex, shots)
 	#fire_shot.emit()
-	_on_fire_weapon(s.weapon, unit.position, false, 1, unit)
-	fire_shots(shots, s.weapon.rpm)
+	var auto_fire: bool = false
+	if s.weapon.type == WeaponSpec.WeaponType.MG:
+		auto_fire = true
+	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
+	fire_shots(s, shots, s.weapon.rpm, auto_fire)
 
 	# apply jam chance
 	var k: int = 0
@@ -347,11 +350,13 @@ func aim_delay():
 			s.next_ready_delta_s = s.acquire_ready_s - _now_s 
 
 
-func fire_shots(shots: int, rpm: float):
+func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool):
 	var interval: float = 60.0 / rpm
 	for shot in shots:
 		fire_shot.emit()
 		await get_tree().create_timer(interval).timeout
+	if auto_fire:
+		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
 
 func fire_at(total_rounds: int, long_range: bool) -> void:
 	var terrain_defense_bonus: float = target_cover
@@ -736,3 +741,7 @@ func _on_fire_weapon(weapon_spec: WeaponSpec, pos: Vector2, is_auto: bool, owner
 		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
 	else:
 		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
+
+func _on_stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D):
+	$"../WeaponAudio".stop_mg_loop(weapon_spec, position, owner_id, position_node)
+	
