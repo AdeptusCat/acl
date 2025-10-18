@@ -268,11 +268,9 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 				crew_mult = s.weapon.undercrew_penalty_mult
 
 	# determine burst size for this weapon
-	var shots: int = s.weapon.burst_rounds
-	if shots < 1:
-		shots = 1
-	if shots > s.rounds_in_mag:
-		shots = s.rounds_in_mag
+	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
+	
+	
 
 	if shots <= 0:
 		# reload
@@ -332,6 +330,58 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	var delta: float = s.next_ready_s - _now_s # debug
 	fire_at(shots, long_range)
 	return shots
+
+
+# Util: returns a single normally-distributed sample (mean 0, stddev 1)
+func _rand_normal() -> float:
+	var u1: float = 0.0
+	var u2: float = 0.0
+	# avoid log(0)
+	u1 = randf()
+	while u1 <= 0.0:
+		u1 = randf()
+	u2 = randf()
+	var z0: float = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2)
+	return z0
+
+
+# Determine burst size with sensible variance and clamping
+func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
+	# base nominal
+	var base: int = int(weapon.burst_rounds)
+	if base < 1:
+		base = 1
+
+	# choose variance fraction by weapon class (tune these constants as you wish)
+	var variance_fraction: float = 0.25        # default: ±25%
+	if weapon.type == WeaponSpec.WeaponType.SMG:
+		variance_fraction = 0.35               # SMGs are a bit more 'spray-y'
+	elif weapon.type == WeaponSpec.WeaponType.MG:
+		variance_fraction = 0.40               # MGs have larger variability
+
+	# compute stddev in rounds (at least 1 round)
+	var stddev: float = max(1.0, float(base) * variance_fraction)
+
+	# draw a gaussian offset, round to integer
+	var gauss: float = _rand_normal()
+	var sample: float = float(base) + gauss * stddev
+	var shots: int = int(round(sample))
+
+	# clamp to sensible bounds
+	if shots < 1:
+		shots = 1
+	if shots > rounds_in_mag:
+		shots = rounds_in_mag
+
+	# extra logic for MG/SMG long-burst tendency (optional)
+	if weapon.type == WeaponSpec.WeaponType.MG:
+		# small chance to produce a sustained longer burst (suppression)
+		var r: float = randf()
+		if r < 0.10: # 10% chance
+			shots = min(rounds_in_mag, shots + int(round(float(weapon.burst_rounds) * 0.75)))
+			
+	return shots
+
 
 func aim_delay():
 	var state_idx: int = stress_controller.state

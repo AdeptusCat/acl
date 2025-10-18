@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="WeaponSpec" load_steps=3 format=3 uid="uid://iovefgg2ny4g"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_ec0dn"]
-[ext_resource type="AudioStream" uid="uid://blkc1gxj21tqh" path="res://assets/audio/fx/weapons/kar98/kar98.mp3" id="2_r4ed1"]
+[ext_resource type="AudioStream" uid="uid://dsiugpr0vj757" path="res://assets/audio/fx/weapons/kar98/kar98_01.mp3" id="2_byysb"]
 
 [resource]
 script = ExtResource("1_ec0dn")
 name = "Karabiner 98k"
-snd_shot = ExtResource("2_r4ed1")
+snd_shot = ExtResource("2_byysb")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

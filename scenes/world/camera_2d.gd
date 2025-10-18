@@ -42,7 +42,7 @@ func _physics_process(delta):
 	if direction != Vector2.ZERO:
 		direction = direction.normalized() 
 		var pos = position + direction * speed * delta
-		pos = pos.clamp(Vector2(map_size.x/4, 0), Vector2(map_size.x/2, map_size.y))
+		#pos = pos.clamp(Vector2(map_size.x/4, 0), Vector2(map_size.x/2, map_size.y))
 		position = pos
 	#print(global_position)
 	camera_moved.emit()

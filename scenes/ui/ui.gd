@@ -73,6 +73,9 @@ func _ready() -> void:
 	$TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
 	$TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
 	$TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+	var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
+	var ratio = pow(10.0, db / 20.0)
+	$VBoxContainer/VolumeSlider.value = ratio
 
 
 func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
@@ -273,3 +276,25 @@ func show_tile_data(result: Dictionary):
 
 func _on_try_again_button_pressed() -> void:
 	try_again.emit()
+
+
+func _db_to_ratio(db: float) -> float:
+	# Convert dB (-80..0) to 0–1 range for slider
+	return pow(10.0, db / 20.0)
+
+func _ratio_to_db(ratio: float) -> float:
+	# Convert slider ratio (0–1) back to dB
+	var db: float
+	if ratio <= 0.0001:
+		db = -80.0
+	else:
+		db = 20.0 * log(ratio)
+	return db
+
+
+func _on_volume_slider_value_changed(value: float) -> void:
+	var idx: int = AudioServer.get_bus_index("Master")
+	if idx == -1:
+		push_warning("No Master bus found!")
+		return
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($VBoxContainer/VolumeSlider.value))

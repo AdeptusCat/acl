@@ -26,10 +26,10 @@ func play_shot(weapon_spec: WeaponSpec, position: Vector2, is_distant: bool = fa
 	# close shot
 	if weapon_spec.snd_shot != null:
 		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(weapon_spec.snd_shot, position, 0.0, p2, "SFX_Close")
+		audio_pool.play_one_shot(weapon_spec.snd_shot, position, -6.0, p2, "SFX_Close")
 	else:
 		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(snd_shot_default, position, 0.0, p2, "SFX_Close")
+		audio_pool.play_one_shot(snd_shot_default, position, -6.0, p2, "SFX_Close")
 	# mechanical click
 	if weapon_spec.snd_mech != null:
 		audio_pool.play_one_shot(weapon_spec.snd_mech, position, -2.0, 1.0, "SFX_Close")
@@ -63,13 +63,14 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	ap.bus = "SFX_Close"
 	ap.autoplay = false
 	position_node.add_child(ap)
-	ap.position = Vector2.ZERO
+	ap.position = position_node.position
 	ap.volume_db = weapon_spec.volume_db
 	ap.play()
 	ap.name = "mg_loop_%s" % str(owner_id)
 
 
 func stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D) -> void:
+	#return
 	var node_name: String = "mg_loop_%s" % str(owner_id)
 	var n: Node = position_node.get_node_or_null(node_name)
 	if n != null:
