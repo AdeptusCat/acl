@@ -187,18 +187,20 @@ func _on_unit_arrived_at_hex(hex):
 
 
 func started_moving(broken: bool, surrendered: bool):
+	$Timer.stop()
 	for child in unit_status_control.get_children():
 		child.visible = false
 	if broken:
 		routing_texture_rect.visible = true
 	else:
 		moving_texture_rect.visible = true
-	$Timer.stop()
+	
 	if detail_ui:
 		detail_ui.started_moving(broken, surrendered)
 
 
 func stopped_moving(broken: bool, surrendered: bool):
+	$Timer.stop()
 	for child in unit_status_control.get_children():
 		child.visible = false
 	if broken == true:
@@ -209,19 +211,17 @@ func stopped_moving(broken: bool, surrendered: bool):
 		idle_texture_rect.visible = false
 		broken_texture_rect.visible = false
 		surrendered_texture_rect.visible = true
-	
-	$Timer.stop()
 	if detail_ui:
 		detail_ui.stopped_moving(broken, surrendered)
 
 
 func _on_morale_breaks():
+	$Timer.stop()
 	#broken_label.visible = true
 	show_failure()
 	for child in unit_status_control.get_children():
 		child.visible = false
 	broken_texture_rect.visible = true
-	$Timer.stop()
 	if detail_ui:
 		detail_ui._on_morale_breaks()
 
@@ -358,7 +358,7 @@ func die():
 
 
 func _on_timer_timeout() -> void:
-	if surrendered_texture_rect.visible == true or broken_texture_rect.visible:
+	if surrendered_texture_rect.visible == true or broken_texture_rect.visible or routing_texture_rect.visible:
 		return
 	for child in unit_status_control.get_children():
 		child.visible = false

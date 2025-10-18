@@ -433,6 +433,10 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 			p_hit_per_round *= 2.0
 		else:
 			p_hit_per_round *= 1.0
+		
+		var state: STATES.MoraleState = u.stress_system.state
+		if state == STATES.MoraleState.PANIC:
+			p_hit_per_round *= 4
 
 		p_hit_per_round = clamp(p_hit_per_round, 0.002, 0.95)
 		p_hit_per_target.append(p_hit_per_round)
