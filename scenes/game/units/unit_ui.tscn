@@ -202,9 +202,9 @@ expand_mode = 3
 [node name="Cover" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 13.0
-offset_top = 47.0
+offset_top = 59.0
 offset_right = 53.0
-offset_bottom = 57.0
+offset_bottom = 69.0
 alignment = 1
 
 [node name="Timer" type="Timer" parent="."]
