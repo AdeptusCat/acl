@@ -553,6 +553,7 @@ func receive_fire(terrain_defense_bonus: float):
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -> void:
 	if casualties > 0:
 		_apply_casualties(casualties)
+		ui.show_casualty()
 	stress_system.apply_stress(df, ds)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()

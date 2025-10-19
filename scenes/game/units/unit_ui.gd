@@ -284,6 +284,10 @@ func _on_cover_updated(cover_value: int) -> void:
 		detail_ui._on_cover_updated(cover_value)
 
 
+func show_casualty():
+	_spawn_popup("casualty")
+
+
 func show_failure():
 	_spawn_popup("failure")
 	_spawn_flash("failure")
@@ -302,11 +306,18 @@ func show_success():
 func _spawn_popup(type: String):
 	var popup = morale_popup_scene.instantiate()
 	add_child(popup)
-	popup.position = position + Vector2(0, -20)
-	if type == "failure":
-		popup.start_failure()
-	else:
-		popup.start_success()
+	#popup.position = position + Vector2(0, -20)
+	match type:
+		"failure":
+			popup.start_failure()
+		"casualty":
+			popup.start_casualty()
+		_:
+			popup.start_success()
+	#if type == "failure":
+		#popup.start_failure()
+	#else:
+		#popup.start_success()
 	if detail_ui:
 		detail_ui._spawn_popup(type)
 
