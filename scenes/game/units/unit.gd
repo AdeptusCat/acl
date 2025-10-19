@@ -72,6 +72,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 @onready var combat: UnitCombat = $Combat
 @onready var leader_aura: LeaderAura = $LeaderAura
 @onready var squad_fire: SquadFireController = $SquadFireController
+@onready var weapon_audio: SquadFireController = $WeaponAudio
 
 # === Classes ===
 #@onready var morale_system := UnitMorale.new(self)
@@ -622,6 +623,9 @@ func _apply_casualties(n: int) -> void:
 				dropped_support.append(s.weapon)
 		c += 1
 	
+	for soldier in casualties:
+		weapon_audio._on_stop_mg_loop(soldier.weapon, position, soldier.id, self)
+	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
@@ -645,7 +649,7 @@ func _apply_casualties(n: int) -> void:
 	# 1) replace leader if needed: ASL first, else any SOLDIER
 	if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
 		_promote_new_leader()
-
+	
 	# 2) re-crew any dropped guns (e.g., MG) — loader preferred as new gunner
 	var g: int = 0
 	while g < dropped_support.size():
