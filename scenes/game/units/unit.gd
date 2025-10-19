@@ -72,7 +72,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 @onready var combat: UnitCombat = $Combat
 @onready var leader_aura: LeaderAura = $LeaderAura
 @onready var squad_fire: SquadFireController = $SquadFireController
-@onready var weapon_audio: SquadFireController = $WeaponAudio
+@onready var weapon_audio: WeaponAudio = $WeaponAudio
 
 # === Classes ===
 #@onready var morale_system := UnitMorale.new(self)
@@ -371,6 +371,7 @@ func _make_rifle_squad(v: bool) -> void:
 				i += 1
 		notify_property_list_changed()
 
+
 func _make_light_mg_team(v: bool) -> void:
 	if v:
 		make_light_mg_team = false
@@ -381,7 +382,7 @@ func _make_light_mg_team(v: bool) -> void:
 			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/kar98.tres")
 			smg = preload("res://resources/weapons/mp40.tres")
-			mg = preload("res://resources/weapons/mg34.tres")
+			mg = preload("res://resources/weapons/mg34_heavy.tres")
 			_resize_loadouts(group_size)
 			var i: int = 0
 			var leader: SoldierLoadout = loadouts[i]
@@ -402,13 +403,19 @@ func _make_light_mg_team(v: bool) -> void:
 			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
-			while i < group_size:
-				var L: SoldierLoadout = loadouts[i]
-				L.role = RankGrades.Role.SOLDIER
-				L.nickname = "Rifle %d" % int(i + 1)
-				L.rank_grade = RankGrades.Grade.SOLDIER
-				L.weapon = rifle
+			while i < group_size - 1:
+				var assistant: SoldierLoadout = loadouts[i]
+				assistant.role = RankGrades.Role.ASSISTANT
+				assistant.nickname = "Ass. %d" % int(i + 1)
+				assistant.rank_grade = RankGrades.Grade.SOLDIER
+				assistant.weapon = rifle
 				i += 1
+			var L: SoldierLoadout = loadouts[i]
+			L.role = RankGrades.Role.SOLDIER
+			L.nickname = "Rifle %d" % int(i + 1)
+			L.rank_grade = RankGrades.Grade.SOLDIER
+			L.weapon = rifle
+			i += 1
 		else:
 			var group_size: int = 5
 			var rifle: WeaponSpec
@@ -437,8 +444,8 @@ func _make_light_mg_team(v: bool) -> void:
 			i += 1
 			while i < group_size:
 				var L: SoldierLoadout = loadouts[i]
-				L.role = RankGrades.Role.SOLDIER
-				L.nickname = "Rifle %d" % int(i + 1)
+				L.role = RankGrades.Role.ASSISTANT
+				L.nickname = "Ass. %d" % int(i + 1)
 				L.rank_grade = RankGrades.Grade.SOLDIER
 				L.weapon = rifle
 				i += 1
@@ -624,7 +631,7 @@ func _apply_casualties(n: int) -> void:
 		c += 1
 	
 	for soldier in casualties:
-		weapon_audio._on_stop_mg_loop(soldier.weapon, position, soldier.id, self)
+		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
 	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
@@ -704,10 +711,19 @@ func _assign_gunner_and_loader_for_weapon(wp: WeaponSpec) -> void:
 
 	# ensure loader if weapon wants a crew
 	if wp.crew_required > 1:
-		var loader_idx: int = _find_first_SOLDIER_excluding([gunner_idx])
+		var loader_idx: int = _find_first_SOLDIER_OR_ASSISTANT_excluding([gunner_idx])
 		if loader_idx != -1:
 			var loader: Soldier = squad_fire.soldiers[loader_idx]
 			loader.role = RankGrades.Role.LOADER
+			# loaders generally don’t carry the weapon object; the gun sits on the gunner
+		else:
+			# under-crewed; your fire calc should already scale with wp.undercrew_penalty_exp
+			pass
+	if wp.support_crew_optimal > 0:
+		var support_idx: int = _find_first_SOLDIER_OR_ASSISTANT_excluding([gunner_idx])
+		if support_idx != -1:
+			var support: Soldier = squad_fire.soldiers[support_idx]
+			support.role = RankGrades.Role.ASSISTANT
 			# loaders generally don’t carry the weapon object; the gun sits on the gunner
 		else:
 			# under-crewed; your fire calc should already scale with wp.undercrew_penalty_exp
@@ -724,7 +740,7 @@ func _fill_missing_loaders_for_existing_guns() -> void:
 		var s: Soldier = squad_fire.soldiers[i]
 		if s.role == RankGrades.Role.GUNNER and s.weapon != null:
 			if s.weapon.crew_required > 1:
-				var idx: int = _find_first_SOLDIER_excluding([i])
+				var idx: int = _find_first_SOLDIER_OR_ASSISTANT_excluding([i])
 				if idx != -1:
 					var loader: Soldier = squad_fire.soldiers[idx]
 					loader.role = RankGrades.Role.LOADER
@@ -756,12 +772,12 @@ func _find_first_SOLDIER() -> int:
 		i += 1
 	return -1
 
-func _find_first_SOLDIER_excluding(exclude: Array[int]) -> int:
+func _find_first_SOLDIER_OR_ASSISTANT_excluding(exclude: Array[int]) -> int:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
 		if not exclude.has(i):
 			var s: Soldier = squad_fire.soldiers[i]
-			if s.role == RankGrades.Role.SOLDIER:
+			if s.role == RankGrades.Role.SOLDIER or s.role == RankGrades.Role.ASSISTANT:
 				return i
 		i += 1
 	return -1

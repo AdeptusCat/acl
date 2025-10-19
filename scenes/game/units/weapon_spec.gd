@@ -26,6 +26,7 @@ enum WeaponType {
 @export var kind: WeaponKind = WeaponKind.PERSONAL
 @export var type: WeaponType = WeaponType.Rifle
 @export var crew_required: int = 1             # MG typically 2
+@export var support_crew_optimal: int = 0             
 @export var undercrew_penalty_mult: float = 1.6  # >1 slows ROF if under-crewed
 @export var priority: int = 1  # 10 meaning that it has to me manned first
 @export var raise_s: float = 1.5   # shoulder weapon

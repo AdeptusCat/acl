@@ -192,6 +192,7 @@ func _tick_soldiers(delta: float) -> void:
 
 	# count available crew for MGs
 	var crew_available: int = _count_role(RankGrades.Role.LOADER)
+	var support_crew_available: int = _count_role(RankGrades.Role.ASSISTANT)
 	var gunners: Array[int] = _indices_with_role(RankGrades.Role.GUNNER)
 
 	# handle gunners first (crew-served)
@@ -200,7 +201,7 @@ func _tick_soldiers(delta: float) -> void:
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
-			rounds_emitted += _try_fire_soldier(s, true, crew_available)
+			rounds_emitted += _try_fire_soldier(s, true, crew_available, support_crew_available)
 			if rounds_emitted > 0:
 				pass
 			if rounds_emitted >= max_shots_per_tick:
@@ -213,12 +214,12 @@ func _tick_soldiers(delta: float) -> void:
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
 			if s2.role != RankGrades.Role.GUNNER:
-				rounds_emitted += _try_fire_soldier(s2, false, 0)
+				rounds_emitted += _try_fire_soldier(s2, false, 0, 0)
 				if rounds_emitted >= max_shots_per_tick:
 					return
 		i += 1
 
-func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) -> int:
+func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
 	s.now_s = _now_s
 	if target_hex == Vector2i.ZERO:
 		return 0
@@ -233,6 +234,10 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 						batch_targets.append(u)
 	if batch_targets.is_empty():
 		set_target_unit(null)
+		return 0
+	
+	# Loader dont fire their weapon
+	if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 		return 0
 	
 	if target_distance > s.weapon.range_hexes * 2:
@@ -266,6 +271,9 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 			var ok: bool = crew_available >= (s.weapon.crew_required - 1)
 			if not ok:
 				crew_mult = s.weapon.undercrew_penalty_mult
+	var efficiency_mult: float = compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal)
+	if efficiency_mult < 1.0:
+		pass
 
 	# determine burst size for this weapon
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
@@ -312,7 +320,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 		rps = 1.0
 	var fire_time_s: float = float(shots) / rps
 	var pause_s: float = s.weapon.burst_pause_s
-	var total_cadence_s: float = (fire_time_s + pause_s) * crew_mult / s.rof_mult
+	var total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
 
 	# keep a little persistent desync in the rhythm
 	var phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
@@ -323,7 +331,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
 	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-	s.next_ready_delta_s = total_cadence_s + phase_bump + settle_s
+	s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s) / efficiency_mult / crew_mult
 	s.next_ready_s = _now_s + s.next_ready_delta_s
 	s.next_ready_start_s = _now_s
 	
@@ -331,6 +339,22 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	fire_at(shots, long_range)
 	return shots
 
+
+func compute_support_efficiency(support_crew_available: int, support_crew_optimal: int) -> float:
+	var ratio: float = 1.0
+	if support_crew_optimal > 0:
+		ratio = float(support_crew_available) / float(support_crew_optimal)
+	
+	# clamp ratio to [0, 1]
+	if ratio < 0.0:
+		ratio = 0.0
+	else:
+		if ratio > 1.0:
+			ratio = 1.0
+	
+	# 0 helpers -> 0.5, full helpers -> 1.0
+	var multiplier: float = 0.5 + 0.5 * ratio
+	return multiplier
 
 # Util: returns a single normally-distributed sample (mean 0, stddev 1)
 func _rand_normal() -> float:
