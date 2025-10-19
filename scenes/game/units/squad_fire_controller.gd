@@ -427,7 +427,7 @@ func aim_delay():
 
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool):
 	var interval: float = 60.0 / rpm
-	for shot in shots:
+	for shot in range(shots):
 		fire_shot.emit()
 		await get_tree().create_timer(interval).timeout
 	if auto_fire:

@@ -8,6 +8,8 @@ var audio_pool: AudioPool
 @export var snd_mg_loop_default: AudioStream = null   
 @export var snd_mg_loop_decay_default: AudioStream = null   
 
+var _mg_loops: Dictionary = {}         # owner_id:int -> AudioStreamPlayer2D
+
 func _ready() -> void:
 	audio_pool = get_node("/root/Main/World/AudioPool") as AudioPool
 
@@ -52,6 +54,11 @@ func play_shot_decay(weapon_spec: WeaponSpec, position: Vector2, is_distant: boo
 # For MG start/stop looped sound: keep a node per firing source
 func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D) -> void:
 	var existing: Node = get_node_or_null("mg_loop_%s" % str(owner_id))
+	
+	if _mg_loops.has(owner_id):
+		_mg_loops[owner_id].stop()
+		_mg_loops[owner_id].queue_free()
+	
 	if existing != null:
 		return
 	
@@ -67,15 +74,21 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	ap.volume_db = weapon_spec.volume_db
 	ap.play()
 	ap.name = "mg_loop_%s" % str(owner_id)
+	_mg_loops[owner_id] = ap
+	
+	# watchdog: kill if somehow not stopped within N seconds
+	var timer: SceneTreeTimer = get_tree().create_timer(6.0)
+	timer.timeout.connect(func() -> void:
+		if is_instance_valid(ap):
+			if ap.playing:
+				stop_mg_loop(weapon_spec, position_node.position, owner_id, position_node)
+	)
 
 
 func stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D) -> void:
-	#return
-	var node_name: String = "mg_loop_%s" % str(owner_id)
-	var n: Node = position_node.get_node_or_null(node_name)
-	if n != null:
-		# fade out to avoid clicks
-		var ap: AudioStreamPlayer2D = n as AudioStreamPlayer2D
+	var ap: AudioStreamPlayer2D = _mg_loops.get(owner_id, null) as AudioStreamPlayer2D
+	if ap != null and is_instance_valid(ap):
 		ap.stop()
 		ap.queue_free()
+	_mg_loops.erase(owner_id)
 	play_shot_decay(weapon_spec, position)
