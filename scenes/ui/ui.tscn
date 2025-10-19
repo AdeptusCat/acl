@@ -237,9 +237,19 @@ layout_mode = 2
 [node name="Label2" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
-text = "Volume:"
+text = "Master Volume:"
 
 [node name="VolumeSlider" type="HSlider" parent="VBoxContainer"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Label4" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Music Volume:"
+
+[node name="VolumeSlider2" type="HSlider" parent="VBoxContainer"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
@@ -313,4 +323,5 @@ custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 
 [connection signal="value_changed" from="VBoxContainer/VolumeSlider" to="." method="_on_volume_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/VolumeSlider2" to="." method="_on_volume_slider_2_value_changed"]
 [connection signal="pressed" from="MarginContainer/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]

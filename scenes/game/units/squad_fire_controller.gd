@@ -287,7 +287,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int) ->
 	_add_rounds_to_hex(target_hex, shots)
 	#fire_shot.emit()
 	var auto_fire: bool = false
-	if s.weapon.type == WeaponSpec.WeaponType.MG:
+	if s.weapon.type == WeaponSpec.WeaponType.MG or s.weapon.type == WeaponSpec.WeaponType.SMG:
 		auto_fire = true
 	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
 	fire_shots(s, shots, s.weapon.rpm, auto_fire)

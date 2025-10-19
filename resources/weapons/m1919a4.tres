@@ -24,4 +24,5 @@ aim_s = 0.8
 setup_s = 6.0
 snd_mg_loop = ExtResource("2_0x148")
 snd_mg_loop_decay = ExtResource("3_0kjp7")
+volume_db = -3.0
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

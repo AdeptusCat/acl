@@ -76,6 +76,7 @@ func _ready() -> void:
 	var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
 	var ratio = pow(10.0, db / 20.0)
 	$VBoxContainer/VolumeSlider.value = ratio
+	$VBoxContainer/VolumeSlider2.value = ratio
 
 
 func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
@@ -298,3 +299,11 @@ func _on_volume_slider_value_changed(value: float) -> void:
 		push_warning("No Master bus found!")
 		return
 	AudioServer.set_bus_volume_db(idx, _ratio_to_db($VBoxContainer/VolumeSlider.value))
+
+
+func _on_volume_slider_2_value_changed(value: float) -> void:
+	var idx: int = AudioServer.get_bus_index("Music")
+	if idx == -1:
+		push_warning("No Music bus found!")
+		return
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($VBoxContainer/VolumeSlider2.value))

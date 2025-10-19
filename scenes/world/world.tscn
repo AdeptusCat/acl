@@ -1,4 +1,4 @@
-[gd_scene load_steps=224 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=225 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -65,6 +65,7 @@
 [ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
 [ext_resource type="PackedScene" uid="uid://pt85xx5fagwx" path="res://scenes/game/audio/audio_pool.tscn" id="65_hpffo"]
+[ext_resource type="AudioStream" uid="uid://bp1oqubv3pxu0" path="res://assets/audio/music/litt.mp3" id="66_hnqnj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
 resource_name = "Road"
@@ -1579,6 +1580,11 @@ text = "Start Area"
 
 [node name="AudioPool" parent="." instance=ExtResource("65_hpffo")]
 position = Vector2(1139, 792)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("66_hnqnj")
+autoplay = true
+bus = &"Music"
 
 [connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]
 [connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
