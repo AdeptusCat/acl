@@ -15,7 +15,8 @@ func _init(_plugin: EditorPlugin) -> void:
 
 func _populate_menu():
 	popup.id_pressed.connect(_on_pressed)
-	popup.about_to_popup.connect(func(): popup.get_window().min_size.x = 250)
+	#popup.about_to_popup.connect(func(): popup.get_window().min_size.x = 250)
+	popup.about_to_popup.connect(_on_popup_about_to_popup, Object.CONNECT_ONE_SHOT)
 	var fix_layout = PopupMenu.new()
 	fix_layout.add_item("Was Stacked", TileSet.TILE_LAYOUT_STACKED)
 	fix_layout.add_item("Was Stacked Offset", TileSet.TILE_LAYOUT_STACKED_OFFSET)
@@ -25,6 +26,12 @@ func _populate_menu():
 	fix_layout.add_item("Was Diamond Down", TileSet.TILE_LAYOUT_DIAMOND_DOWN)
 	fix_layout.id_pressed.connect(_on_fix_layout_pressed)
 	popup.add_submenu_node_item("Fix tile layout", fix_layout)
+
+
+func _on_popup_about_to_popup() -> void:
+	if not is_instance_valid(popup):
+		return
+	popup.get_window().min_size.x = 250
 
 
 func _on_pressed(id: int):

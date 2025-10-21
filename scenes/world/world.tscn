@@ -670,11 +670,11 @@ shader_parameter/scroll_speed = Vector2(0.02, 0.01)
 shader_parameter/texture_scale = Vector2(1, 1)
 shader_parameter/opacity = 0.2
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sar2w"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_4jq4u"]
 shader = ExtResource("41_j0rhc")
 shader_parameter/grain_strength = 0.35
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_sar2w"]
 
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
@@ -1398,15 +1398,6 @@ size_flags_vertical = 3
 texture = ExtResource("3_sar2w")
 stretch_mode = 1
 
-[node name="CanvasLayer2" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer2"]
-material = SubResource("ShaderMaterial_4jq4u")
-offset_right = 419.0
-offset_bottom = 329.0
-mouse_filter = 2
-
 [node name="CanvasLayer3" type="CanvasLayer" parent="."]
 visible = false
 
@@ -1414,6 +1405,15 @@ visible = false
 material = SubResource("ShaderMaterial_sar2w")
 offset_right = 306.0
 offset_bottom = 439.0
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="CanvasLayer3"]
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer3/CanvasLayer2"]
+material = SubResource("ShaderMaterial_4jq4u")
+offset_right = 419.0
+offset_bottom = 329.0
+mouse_filter = 2
 
 [node name="StartScreen" parent="." instance=ExtResource("21_1cxds")]
 visible = false
@@ -1442,6 +1442,7 @@ time_left_seconds = 180.0
 position = Vector2(1088, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
+has_support_weapon_mg = true
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1136, 704)
@@ -1452,6 +1453,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubRes
 position = Vector2(1040, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubResource("Resource_6a7tq"), SubResource("Resource_wo74w"), SubResource("Resource_l34gv"), SubResource("Resource_425aq"), SubResource("Resource_ayaol"), SubResource("Resource_ecm30")])
+has_support_weapon_mg = true
 
 [node name="AxisRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1232, 768)
@@ -1485,6 +1487,7 @@ position = Vector2(800, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubResource("Resource_5vtr0"), SubResource("Resource_xmq5n"), SubResource("Resource_1e8o5"), SubResource("Resource_k0giv")])
+has_support_weapon_mg = true
 
 [node name="AlliesMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(512, 608)
@@ -1492,6 +1495,7 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubResource("Resource_0n6td"), SubResource("Resource_j3x8u"), SubResource("Resource_l72hy"), SubResource("Resource_6eles")])
+has_support_weapon_mg = true
 
 [node name="AlliesPlatoonLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(704, 544)

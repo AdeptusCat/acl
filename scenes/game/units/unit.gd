@@ -54,6 +54,8 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 var original_size := 10
 var leader_alive := true
 
+@export var has_support_weapon_mg: bool = false
+
 # === Signals ===
 signal moved_to_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
@@ -84,7 +86,7 @@ signal unit_entered_new_hex(new_hex: Vector2i)
 
 # === Ready ===
 func _ready():
-	update_team_sprite(team)
+	
 	connect("retreat_complete", _on_retreat_complete)
 	#morale_system.morale_breaks.connect(_on_morale_breaks)
 	#morale_system.morale_recovered.connect(_on_morale_recovered)
@@ -139,6 +141,8 @@ func _ready():
 	_refresh_leader_aura()
 	
 	ui.set_loadout(squad_fire.soldiers)
+	
+	update_team_sprite(team, has_support_weapon_mg)
 
 
 
@@ -373,6 +377,7 @@ func _make_rifle_squad(v: bool) -> void:
 
 
 func _make_light_mg_team(v: bool) -> void:
+	has_support_weapon_mg = true
 	if v:
 		make_light_mg_team = false
 		if team == 0:
@@ -530,11 +535,11 @@ func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
 
 func set_team(new_team: int):
 	team = new_team
-	update_team_sprite(team)
+	update_team_sprite(team, has_support_weapon_mg)
 
 
-func update_team_sprite(team: int):
-	ui.update_team_sprite(team)
+func update_team_sprite(team: int, _has_support_weapon_mg: bool):
+	ui.update_team_sprite(team, _has_support_weapon_mg)
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):

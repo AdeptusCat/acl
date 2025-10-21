@@ -113,9 +113,10 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 
 
 func set_support_weapons(support_weapons: int):
-	var support_weapon_slots: Array = [$"SupportWeapons/VBoxContainer/SupportWeapon#1", $"SupportWeapons/VBoxContainer/SupportWeapon#2"]
-	for i in support_weapons:
-		support_weapon_slots[i].show()
+	return
+	#var support_weapon_slots: Array = [$"SupportWeapons/VBoxContainer/SupportWeapon#1", $"SupportWeapons/VBoxContainer/SupportWeapon#2"]
+	#for i in support_weapons:
+		#support_weapon_slots[i].show()
 
 
 func select():
@@ -148,7 +149,7 @@ func state_changed(next:int):
 			$UnitStates/StateTexture.texture = combat_ineffective_texture
 
 
-func update_team_sprite(team : int, leader: bool = false):
+func update_team_sprite(team : int, mg: bool = false):
 	if not sprite_node:
 		return
 	match team:
@@ -156,7 +157,7 @@ func update_team_sprite(team : int, leader: bool = false):
 			sprite_node.texture = sprite_team_0
 		1:
 			sprite_node.texture = sprite_team_1
-	unit_status_control.set_status_image(team, leader)
+	unit_status_control.set_status_image(team, mg)
 	if detail_ui:
 		detail_ui.update_team_sprite(team)
 

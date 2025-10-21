@@ -77,12 +77,19 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	_mg_loops[owner_id] = ap
 	
 	# watchdog: kill if somehow not stopped within N seconds
-	var timer: SceneTreeTimer = get_tree().create_timer(6.0)
-	timer.timeout.connect(func() -> void:
-		if is_instance_valid(ap):
-			if ap.playing:
-				stop_mg_loop(weapon_spec, position_node.position, owner_id, position_node)
-	)
+	var t: SceneTreeTimer = get_tree().create_timer(6.0)
+	await t.timeout
+	if is_instance_valid(ap):
+		if ap.playing:
+			stop_mg_loop(weapon_spec, position_node.position, owner_id, position_node)
+			
+	## watchdog: kill if somehow not stopped within N seconds
+	#var timer: SceneTreeTimer = get_tree().create_timer(6.0)
+	#timer.timeout.connect(func() -> void:
+		#if is_instance_valid(ap):
+			#if ap.playing:
+				#stop_mg_loop(weapon_spec, position_node.position, owner_id, position_node)
+	#)
 
 
 func stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D) -> void:

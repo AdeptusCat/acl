@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=52 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -40,7 +40,11 @@
 [ext_resource type="Texture2D" uid="uid://exhrcthwaa2g" path="res://assets/status/surrendered_us.png" id="17_dlbli"]
 [ext_resource type="Texture2D" uid="uid://0q7pnwss3tkm" path="res://assets/weapons/mg42.png" id="33_eilf2"]
 [ext_resource type="Texture2D" uid="uid://crjhtiymtndlu" path="res://assets/ranks/2nd_lieutenant.png" id="35_755va"]
+[ext_resource type="Texture2D" uid="uid://csetmwqg22cac" path="res://assets/status/ger/infantry/mg/idle_ger.png" id="36_pjyrh"]
+[ext_resource type="Texture2D" uid="uid://cwi424itlgwij" path="res://assets/status/ger/infantry/mg/shooting_ger.png" id="37_eiylv"]
 [ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/soldier_detail.tscn" id="38_qfgpo"]
+[ext_resource type="Texture2D" uid="uid://dfe3g06je63w0" path="res://assets/status/us/infantry/mg/idle_us.png" id="38_wb6dq"]
+[ext_resource type="Texture2D" uid="uid://c6t15chhylcy4" path="res://assets/status/us/infantry/mg/shooting_us.png" id="39_773ej"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
@@ -143,6 +147,10 @@ broken_ger = ExtResource("14_kswga")
 broken_us = ExtResource("15_pi8vb")
 surrendered_ger = ExtResource("16_8rtsn")
 surrendered_us = ExtResource("17_dlbli")
+idle_mg_ger = ExtResource("36_pjyrh")
+shooting_mg_ger = ExtResource("37_eiylv")
+idle_mg_us = ExtResource("38_wb6dq")
+shooting_mg_us = ExtResource("39_773ej")
 
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
 visible = false

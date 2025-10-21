@@ -9,10 +9,10 @@ var soldier: Soldier
 func set_soldier_detail(_soldier: Soldier):
 	soldier = _soldier
 	$HBoxContainer/ProgressBar.value = 0.0
-	match soldier.weapon.type:
-		WeaponSpec.WeaponType.MG:
-			$HBoxContainer/WeaponTexture.texture = mg_texture
-			$HBoxContainer/WeaponTexture.show()
+	#match soldier.weapon.type:
+		#WeaponSpec.WeaponType.MG:
+			#$HBoxContainer/WeaponTexture.texture = mg_texture
+			#$HBoxContainer/WeaponTexture.show()
 			
 	$HBoxContainer/WeaponName.text = soldier.weapon.name
 	$HBoxContainer/RoleName.text = RankGrades.get_role_name(soldier.role)
