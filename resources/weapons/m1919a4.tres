@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://bn7tg73bvhpsv"]
 
-[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_m165w"]
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_m165w"]
 [ext_resource type="AudioStream" uid="uid://cjpnfa6jdjlen" path="res://assets/audio/fx/weapons/m1919a4/m1919a4.mp3" id="2_0x148"]
 [ext_resource type="AudioStream" uid="uid://cccnvink62fda" path="res://assets/audio/fx/weapons/m1919a4/m1919a4_decay.mp3" id="3_0kjp7"]
 
@@ -16,6 +16,7 @@ range_hexes = 8
 accuracy_base = 0.52
 kind = 1
 type = 1
+fire_mode = 1
 crew_required = 2
 support_crew_optimal = 2
 undercrew_penalty_mult = 2.0

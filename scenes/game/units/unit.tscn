@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://rsqpaeas8ic5"]
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
-[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="2_h0ojj"]
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="2_h0ojj"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
 [ext_resource type="PackedScene" uid="uid://c24n2ejqyspj8" path="res://scenes/game/units/unit_combat.tscn" id="6_sh6c0"]
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]

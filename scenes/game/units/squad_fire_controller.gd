@@ -295,7 +295,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	_add_rounds_to_hex(target_hex, shots)
 	#fire_shot.emit()
 	var auto_fire: bool = false
-	if s.weapon.type == WeaponSpec.WeaponType.MG or s.weapon.type == WeaponSpec.WeaponType.SMG:
+	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
 		auto_fire = true
 	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
 	fire_shots(s, shots, s.weapon.rpm, auto_fire)
@@ -378,10 +378,10 @@ func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
 
 	# choose variance fraction by weapon class (tune these constants as you wish)
 	var variance_fraction: float = 0.25        # default: ±25%
-	if weapon.type == WeaponSpec.WeaponType.SMG:
+	if weapon.fire_mode == WeaponSpec.FireMode.BURST:
 		variance_fraction = 0.35               # SMGs are a bit more 'spray-y'
-	elif weapon.type == WeaponSpec.WeaponType.MG:
-		variance_fraction = 0.40               # MGs have larger variability
+	#elif weapon.type == WeaponSpec.WeaponType.MG:
+		#variance_fraction = 0.40               # MGs have larger variability
 
 	# compute stddev in rounds (at least 1 round)
 	var stddev: float = max(1.0, float(base) * variance_fraction)
@@ -398,7 +398,7 @@ func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
 		shots = rounds_in_mag
 
 	# extra logic for MG/SMG long-burst tendency (optional)
-	if weapon.type == WeaponSpec.WeaponType.MG:
+	if weapon.fire_mode == WeaponSpec.FireMode.BURST:
 		# small chance to produce a sustained longer burst (suppression)
 		var r: float = randf()
 		if r < 0.10: # 10% chance
@@ -782,8 +782,7 @@ func _prime_acquisition_for_new_target() -> void:
 		var s: Soldier = soldiers[i]
 		if s.is_alive:
 			var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-			if s.weapon.type == WeaponSpec.WeaponType.MG:
-				settle_s += s.weapon.setup_s
+			settle_s += s.weapon.setup_s
 			settle_s *= acquire_mult
 			# add the soldier's fixed cadence phase so first bursts don’t sync
 			settle_s += s.cadence_phase_s

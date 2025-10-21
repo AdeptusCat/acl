@@ -13,6 +13,8 @@ enum WeaponType {
 	SMG
 }
 
+enum Family { SMALL_ARM, LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
+enum FireMode { SINGLE, BURST, MANUAL }
 
 @export var name: String = "Rifle"
 @export var rpm: float = 600.0
@@ -25,13 +27,15 @@ enum WeaponType {
 @export var accuracy_base: float = 0.6
 @export var kind: WeaponKind = WeaponKind.PERSONAL
 @export var type: WeaponType = WeaponType.Rifle
+@export var family: Family = Family.SMALL_ARM
+@export var fire_mode: FireMode = FireMode.SINGLE
 @export var crew_required: int = 1             # MG typically 2
 @export var support_crew_optimal: int = 0             
 @export var undercrew_penalty_mult: float = 1.6  # >1 slows ROF if under-crewed
 @export var priority: int = 1  # 10 meaning that it has to me manned first
 @export var raise_s: float = 1.5   # shoulder weapon
 @export var aim_s: float = 0.5     # acquire/sight picture
-@export var setup_s: float = 0.5     # setup weapon
+@export var setup_s: float = 0.0     # setup weapon
 
 @export var snd_shot: AudioStream = null        # close one-shot muzzle
 @export var snd_mech: AudioStream = null        # mechanical action (bolt, trigger)

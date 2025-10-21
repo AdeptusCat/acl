@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="WeaponSpec" load_steps=3 format=3 uid="uid://dmn373dp04x33"]
 
-[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://scenes/game/units/weapon_spec.gd" id="1_vn361"]
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_vn361"]
 [ext_resource type="AudioStream" uid="uid://ccoia7ye3j25i" path="res://assets/audio/fx/weapons/m1_garand/m1_garand.mp3" id="2_momxg"]
 
 [resource]
