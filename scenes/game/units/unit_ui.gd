@@ -335,19 +335,39 @@ func _spawn_flash(type: String):
 		detail_ui._spawn_flash(type)
 
 
-func shoot(from_pos: Vector2, to_pos):
+func shoot(from_pos: Vector2, to_pos, weapon_spec: WeaponSpec):
 	var tracer = tracer_scene.instantiate() as Node2D
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
 	for child in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
-	await tracer.shoot(from_pos, to_pos)
+	await tracer.shoot(from_pos, to_pos, weapon_spec)
 	$Timer.start()
 	if detail_ui:
 		for child in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
+
+
+func shoot_riflegrenade(from_pos: Vector2, to_pos, weapon_spec: WeaponSpec):
+	var tracer = tracer_scene.instantiate() as Node2D
+	tracer.speed = 200
+	tracer.tracer_texture = tracer_texture
+	get_tree().current_scene.add_child(tracer)
+	for child in unit_status_control.get_children():
+		child.visible = false
+	shooting_texture_rect.visible = true
+	await tracer.shoot(from_pos, to_pos, weapon_spec, true)
+	$Timer.start()
+	if detail_ui:
+		for child in detail_ui.unit_status_control.get_children():
+			child.visible = false
+		detail_ui.shooting_texture_rect.visible = true
+
+
+func riflegrenade_explosion(target_pos: Vector2):
+	pass
 
 
 func surrender():

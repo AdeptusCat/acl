@@ -1,4 +1,4 @@
-[gd_scene load_steps=226 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=227 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -64,6 +64,7 @@
 [ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="55_hpffo"]
 [ext_resource type="Texture2D" uid="uid://vabbhirvnspe" path="res://assets/target_area.png" id="56_phx5y"]
 [ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
+[ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="57_tj3jo"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
 [ext_resource type="PackedScene" uid="uid://pt85xx5fagwx" path="res://scenes/game/audio/audio_pool.tscn" id="65_hpffo"]
 [ext_resource type="AudioStream" uid="uid://bp1oqubv3pxu0" path="res://assets/audio/music/litt.mp3" id="66_hnqnj"]
@@ -1011,21 +1012,19 @@ is_key_role = true
 [sub_resource type="Resource" id="Resource_1xiqq"]
 script = ExtResource("50_hph6x")
 nickname = "Gunner"
-rank_grade = 2
 role = 1
 weapon = ExtResource("57_hnqnj")
 
 [sub_resource type="Resource" id="Resource_n3r5j"]
 script = ExtResource("50_hph6x")
 nickname = "Loader"
-rank_grade = 1
 role = 2
 weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_icsua"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 5"
-weapon = ExtResource("58_7lp0r")
+nickname = "Riflegrenadier"
+weapon = ExtResource("57_tj3jo")
 
 [sub_resource type="Resource" id="Resource_bj2ac"]
 script = ExtResource("50_hph6x")
@@ -1081,21 +1080,19 @@ is_key_role = true
 [sub_resource type="Resource" id="Resource_y0kmp"]
 script = ExtResource("50_hph6x")
 nickname = "Gunner"
-rank_grade = 2
 role = 1
 weapon = ExtResource("57_hnqnj")
 
 [sub_resource type="Resource" id="Resource_vn2as"]
 script = ExtResource("50_hph6x")
 nickname = "Loader"
-rank_grade = 1
 role = 2
 weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_umxri"]
 script = ExtResource("50_hph6x")
-nickname = "Rifle 5"
-weapon = ExtResource("58_7lp0r")
+nickname = "Riflegrenadier"
+weapon = ExtResource("57_tj3jo")
 
 [sub_resource type="Resource" id="Resource_03pw5"]
 script = ExtResource("50_hph6x")

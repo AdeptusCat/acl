@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://btrms0ms8el2w"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_1hi5c"]
+[ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="1_agyg1"]
+[ext_resource type="AudioStream" uid="uid://c37qrb7gyk5t0" path="res://assets/audio/fx/weapons/riflegrenade_launch.mp3" id="2_t4u0y"]
+
+[resource]
+script = ExtResource("1_1hi5c")
+name = "Springfield 1903 Rilegrenade"
+burst_pause_s = 0.85
+reload_s = 3.0
+range_hexes = 7
+accuracy_base = 0.68
+undercrew_penalty_mult = 1.0
+raise_s = 1.6
+aim_s = 0.6
+can_fire_riflegrenades = true
+riflegrenade_shot = ExtResource("2_t4u0y")
+riflegrenade_hit = ExtResource("1_agyg1")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

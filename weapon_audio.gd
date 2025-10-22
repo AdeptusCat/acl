@@ -26,12 +26,20 @@ func play_shot(weapon_spec: WeaponSpec, position: Vector2, is_distant: bool = fa
 			audio_pool.play_one_shot(weapon_spec.snd_distant, position, -6.0, p, "SFX_Distant")
 			return
 	# close shot
-	if weapon_spec.snd_shot != null:
-		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(weapon_spec.snd_shot, position, -6.0, p2, "SFX_Close")
+	if weapon_spec.can_fire_riflegrenades:
+		if weapon_spec.riflegrenade_shot != null:
+			var p2: float = _rand_pitch()
+			audio_pool.play_one_shot(weapon_spec.riflegrenade_shot, position, 6.0, p2, "SFX_Close")
+		else:
+			var p2: float = _rand_pitch()
+			audio_pool.play_one_shot(snd_shot_default, position, -6.0, p2, "SFX_Close")
 	else:
-		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(snd_shot_default, position, -6.0, p2, "SFX_Close")
+		if weapon_spec.snd_shot != null:
+			var p2: float = _rand_pitch()
+			#audio_pool.play_one_shot(weapon_spec.snd_shot, position, -6.0, p2, "SFX_Close")
+		else:
+			var p2: float = _rand_pitch()
+			audio_pool.play_one_shot(snd_shot_default, position, -6.0, p2, "SFX_Close")
 	# mechanical click
 	if weapon_spec.snd_mech != null:
 		audio_pool.play_one_shot(weapon_spec.snd_mech, position, -2.0, 1.0, "SFX_Close")

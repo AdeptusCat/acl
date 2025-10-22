@@ -134,6 +134,7 @@ func _ready():
 	ui.set_support_weapons(machine_guns)
 	
 	squad_fire.fire_shot.connect(_on_fire_shot)
+	squad_fire.fire_riflegrenade.connect(_on_fire_riflegrenade)
 	
 	members_alive = loadouts.size()
 	ui.set_memebers_alive(loadouts.size())
@@ -148,9 +149,15 @@ func _ready():
 
 
 
-func _on_fire_shot():
+func _on_fire_shot(weapon_spec: WeaponSpec):
 	if squad_fire.target_unit:
-		ui.shoot(global_position, squad_fire.target_unit.global_position)
+		ui.shoot(global_position, squad_fire.target_unit.global_position, weapon_spec)
+
+
+func _on_fire_riflegrenade(weapon_spec: WeaponSpec):
+	if squad_fire.target_unit:
+		ui.shoot_riflegrenade(global_position, squad_fire.target_unit.global_position, weapon_spec)
+
 
 
 func _on_new_target_unit(unit: Unit):
@@ -283,12 +290,13 @@ func _resize_loadouts(n: int) -> void:
 			L.is_key_role = true
 		loadouts.append(L)
 		i += 1
-	# shrink
+	# shrinkf
 	while loadouts.size() > n:
 		loadouts.pop_back()
 
 # template builders (run in editor by ticking the bool, it resets to false)
 func _make_rifle_squad(v: bool) -> void:
+	has_support_weapon_mg = false
 	if v:
 		make_rifle_squad = false
 		if team == 0:
@@ -338,6 +346,7 @@ func _make_rifle_squad(v: bool) -> void:
 			var smg: WeaponSpec
 			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/m1_garand.tres")
+			var riflegrenade: WeaponSpec = preload("res://resources/weapons/springfield_1903_riflegrenade.tres")
 			smg = preload("res://resources/weapons/m3_grease_gun.tres")
 			mg = preload("res://resources/weapons/m1918a1_bar.tres")
 			_resize_loadouts(group_size)
@@ -365,6 +374,12 @@ func _make_rifle_squad(v: bool) -> void:
 			loader.nickname = "Loader"
 			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
+			i += 1
+			var riflegrenadier: SoldierLoadout = loadouts[i]
+			riflegrenadier.role = RankGrades.Role.SOLDIER
+			riflegrenadier.nickname = "Riflegrenadier"
+			riflegrenadier.rank_grade = RankGrades.Grade.SOLDIER
+			riflegrenadier.weapon = riflegrenade
 			i += 1
 			while i < group_size:
 				var L: SoldierLoadout = loadouts[i]

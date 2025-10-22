@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_qmbp3")
+name = "Springfield 1903"
 burst_pause_s = 0.85
 reload_s = 3.0
 range_hexes = 7
