@@ -36,7 +36,7 @@ func play_shot(weapon_spec: WeaponSpec, position: Vector2, is_distant: bool = fa
 	else:
 		if weapon_spec.snd_shot != null:
 			var p2: float = _rand_pitch()
-			#audio_pool.play_one_shot(weapon_spec.snd_shot, position, -6.0, p2, "SFX_Close")
+			audio_pool.play_one_shot(weapon_spec.snd_shot, position, -6.0, p2, "SFX_Close")
 		else:
 			var p2: float = _rand_pitch()
 			audio_pool.play_one_shot(snd_shot_default, position, -6.0, p2, "SFX_Close")
