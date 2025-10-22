@@ -1447,7 +1447,7 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 
 [node name="AxisMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1040, 704)
+position = Vector2(1136, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubResource("Resource_6a7tq"), SubResource("Resource_wo74w"), SubResource("Resource_l34gv"), SubResource("Resource_425aq"), SubResource("Resource_ayaol"), SubResource("Resource_ecm30")])
 has_support_weapon_mg = true
@@ -1474,13 +1474,13 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
 
 [node name="AlliesRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(848, 512)
+position = Vector2(944, 512)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
 
 [node name="AlliesMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(800, 544)
+position = Vector2(704, 672)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubResource("Resource_5vtr0"), SubResource("Resource_xmq5n"), SubResource("Resource_1e8o5"), SubResource("Resource_k0giv")])

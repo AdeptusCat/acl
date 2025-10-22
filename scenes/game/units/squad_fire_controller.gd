@@ -58,7 +58,7 @@ var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput
 @export var stress_cover_slow_min: float = 0.65   # floor at max cover (slow dread never 0)
 @export var stress_cover_gamma: float = 1.2       # curvature; >1 gives diminishing returns
 
-const MIN_HIT_MULT: float = 0.35   # floor at extreme cover
+const MIN_HIT_MULT: float = 0.1   # floor at extreme cover
 const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to the floor
 
 # Soldiers
@@ -76,6 +76,16 @@ var unit_visible_enemies: Dictionary
 
 signal fire_shot
 signal fire_riflegrenade
+
+
+#func _ready() -> void:
+	#var cover: float = 0.0 
+	#cover = cover_multiplier_exp(1.0)
+	#cover = cover_multiplier_exp(2.0)
+	#cover = cover_multiplier_exp(3.0)
+	#cover = cover_multiplier_exp(4.0)
+	#cover = cover_multiplier_exp(5.0)
+
 
 func set_soldiers(list: Array[Soldier]) -> void:
 	soldiers = list
@@ -202,7 +212,7 @@ func _tick_soldiers(delta: float) -> void:
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
-			rounds_emitted += _try_fire_soldier(s, true, crew_available, support_crew_available)
+			rounds_emitted += await _try_fire_soldier(s, true, crew_available, support_crew_available)
 			if rounds_emitted > 0:
 				pass
 			if rounds_emitted >= max_shots_per_tick:
@@ -215,7 +225,7 @@ func _tick_soldiers(delta: float) -> void:
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
 			if s2.role != RankGrades.Role.GUNNER:
-				rounds_emitted += _try_fire_soldier(s2, false, 0, 0)
+				rounds_emitted += await _try_fire_soldier(s2, false, 0, 0)
 				if rounds_emitted >= max_shots_per_tick:
 					return
 		i += 1
@@ -297,11 +307,16 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
 		auto_fire = true
 	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
+	
+	var dist: float = unit.position.distance_to(target_unit.position)
+	var life: float = dist / s.weapon.projectile_speed      # seconds
 	if s.weapon.can_fire_riflegrenades:
-		#var target_pos: Vector2 = LOSHelper.ground_layer.map_to_local(target_hex)
+		life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
 		fire_riflegrenades(s)
 	else:
 		fire_shots(s, shots, s.weapon.rpm, auto_fire)
+	
+	
 
 	# apply jam chance
 	var k: int = 0
@@ -343,7 +358,9 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	s.next_ready_start_s = _now_s
 	
 	var delta: float = s.next_ready_s - _now_s # debug
-	fire_at(shots, long_range)
+	
+	await get_tree().create_timer(life).timeout
+	fire_at(shots, long_range, s.weapon)
 	return shots
 
 
@@ -445,7 +462,7 @@ func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
 
-func fire_at(total_rounds: int, long_range: bool) -> void:
+func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
 	var terrain_defense_bonus: float = target_cover
 	# --- range gating & power falloff ---
 
@@ -466,9 +483,11 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 		cover_norm = 1.0
 	if cover_norm < 0.0:
 		cover_norm = 0.0
+	
 	# the idea here is that hard cover also modifies lethallity and not just accuracy, but needs rework
 	#var lethality_cover_mult: float = lerp(lethality_cover_min, lethality_cover_max, 1.0 - cover_norm)
 	var lethality_cover_mult: float = 1.0
+	lethality_cover_mult *= lerp(0.6, 1.0, 1.0 - (target_cover / 5)) # what does this?
 	
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
 	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
@@ -476,7 +495,7 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 	var state_mod: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
 	var acc: float = base_accuracy * float(state_mod.acc)
 	acc *= clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
-	acc *= lerp(0.6, 1.0, 1.0 - target_cover) # what does this?
+	acc *= lerp(0.6, 1.0, 1.0 - (target_cover / 10)) # what does this?
 	var shooter_stress: float = 0.0
 	if unit and "stress_system" in unit:
 		shooter_stress = float(unit.stress_system.S_eff)
@@ -485,7 +504,7 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 	if long_range:
 		acc *= 0.5
 
-	var is_point_blank: bool = int(target_distance) == 1
+	var is_point_blank: bool = target_distance == 1
 
 	var n_targets: int = batch_targets.size()
 	var p_hit_per_target: Array = []
@@ -513,7 +532,8 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 		target_cover_vals.append(cover_pts)
 
 		var p_hit_per_round: float = acc * exposure
-		p_hit_per_round *= cover_multiplier_exp(cover_pts)
+		var cover_multiplier: float = cover_multiplier_exp(cover_pts)
+		p_hit_per_round *= cover_multiplier
 
 		if is_point_blank:
 			p_hit_per_round *= 2.0
@@ -523,7 +543,13 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 		var state: STATES.MoraleState = u.stress_system.state
 		if state == STATES.MoraleState.PANIC:
 			p_hit_per_round *= 4
-
+		
+		if weapon.can_fire_riflegrenades:
+			if target_distance <= weapon.riflegrenade_range:
+				p_hit_per_round *= 4
+			else:
+				p_hit_per_round *= 2
+		
 		p_hit_per_round = clamp(p_hit_per_round, 0.002, 0.95)
 		p_hit_per_target.append(p_hit_per_round)
 		i += 1
@@ -535,25 +561,39 @@ func fire_at(total_rounds: int, long_range: bool) -> void:
 	while i < n_targets:
 		hits_per_target.append(0)
 		i += 1
-
+	
 	i = 0
-	while i < total_rounds:
-		# pick recipient squad
-		var idx: int = randi() % n_targets
-		# roll hit with that squad's p
-		var p_hit: float = float(p_hit_per_target[idx])
-		if randf() < p_hit:
-			hits_per_target[idx] = int(hits_per_target[idx]) + 1
-		i += 1
+	if weapon.can_fire_riflegrenades:
+		while i < n_targets:
+			var ii: int = 0
+			while ii < 4:
+				var p_hit: float = float(p_hit_per_target[i])
+				if randf() < p_hit:
+					hits_per_target[i] = int(hits_per_target[i]) + 1
+				ii += 1
+			i += 1
+	else:
+		i = 0
+		while i < total_rounds:
+			# pick recipient squad
+			var idx: int = randi() % n_targets
+			# roll hit with that squad's p
+			var p_hit: float = float(p_hit_per_target[idx])
+			if randf() < p_hit:
+				hits_per_target[idx] = int(hits_per_target[idx]) + 1
+			i += 1
 
 	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
 	# Decide per-hit disable based on weapon; here we default to rifle numbers
 	var base_p_disable: float = 0.12
+	if weapon.can_fire_riflegrenades:
+		base_p_disable = 0.5
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
+	# this should not matter when firing explosives
 	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.range))
-	
-	
+	if weapon.can_fire_riflegrenades:
+		lethality_range_mult = 1.0
 
 	# Final per-hit disable after all throttles
 	var p_disable_final: float = base_p_disable * lethality_range_mult * lethality_cover_mult * casualty_scale

@@ -37,6 +37,8 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var aim_s: float = 0.5     # acquire/sight picture
 @export var setup_s: float = 0.0     # setup weapon
 
+@export var projectile_speed: int = 600
+
 @export var can_fire_riflegrenades: bool = false
 @export var setup_riflegrenade_s: float = 5.0     # setup weapon
 @export var raise_riflegrenade_s: float = 2.0   # shoulder weapon
@@ -53,3 +55,5 @@ enum FireMode { SINGLE, BURST, MANUAL }
 
 @export var riflegrenade_shot: AudioStream = null
 @export var riflegrenade_hit: AudioStream = null     # low-salience distant thumpse one-shot muzzle
+@export var riflegrenade_projectile_speed: int = 200
+@export var riflegrenade_range: int = 3
