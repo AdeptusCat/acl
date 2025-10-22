@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=53 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -45,6 +45,7 @@
 [ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/soldier_detail.tscn" id="38_qfgpo"]
 [ext_resource type="Texture2D" uid="uid://dfe3g06je63w0" path="res://assets/status/us/infantry/mg/idle_us.png" id="38_wb6dq"]
 [ext_resource type="Texture2D" uid="uid://c6t15chhylcy4" path="res://assets/status/us/infantry/mg/shooting_us.png" id="39_773ej"]
+[ext_resource type="Texture2D" uid="uid://cw7ie1fi14f0t" path="res://icon.svg" id="46_wb6dq"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
@@ -355,6 +356,11 @@ offset_top = -13.0
 offset_right = 158.0
 offset_bottom = 18.0
 text = "Kill Soldier"
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(3.1229057, 3.1229057, 3.1229057, 1)
+texture = ExtResource("46_wb6dq")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="KillSoldier" to="." method="_on_kill_soldier_pressed"]

@@ -58,7 +58,11 @@ func shoot(from: Vector2, to: Vector2, weapon_spec: WeaponSpec, rilflegrenade: b
 			var p2: float = _rand_pitch()
 			audio_pool.play_one_shot(weapon_spec.riflegrenade_hit, position, 6.0, p2, "SFX_Close")
 		#var end_pos: Vector2 = predict_end_position(from, to, speed, particles.lifetime)
-		explosion_particles.global_position = to
+		var v: Vector2 = Vector2(
+		randf_range(-16.0, 16.0),
+		randf_range(-16.0, 16.0)
+		)
+		explosion_particles.global_position = to + v
 		explosion_particles.emitting = true
 		await get_tree().create_timer(explosion_particles.lifetime).timeout
 	queue_free()
