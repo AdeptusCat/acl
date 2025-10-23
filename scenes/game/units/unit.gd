@@ -3,6 +3,13 @@
 extends Node2D
 class_name Unit
 
+
+enum SquadType {
+	Rifle,
+	MG,
+	ANTITANK,
+}
+
 # === Exported ===
 @export var snap_to_grid := true
 @export var ground_map: HexagonTileMapLayer
@@ -30,6 +37,8 @@ class_name Unit
 # convenience buttons (toggle to run in-editor)
 @export var make_rifle_squad: bool = false : set = _make_rifle_squad
 @export var make_light_mg_team: bool = false : set = _make_light_mg_team
+@export var make_anti_tank_squad: bool = false : set = _make_anti_tank_squad
+
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -54,7 +63,7 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 var original_size := 10
 var leader_alive := true
 
-@export var has_support_weapon_mg: bool = false
+var squadType: SquadType = SquadType.Rifle
 
 # === Signals ===
 signal moved_to_hex(new_hex: Vector2i)
@@ -143,7 +152,7 @@ func _ready():
 	
 	ui.set_loadout(squad_fire.soldiers)
 	
-	update_team_sprite(team, has_support_weapon_mg)
+	update_team_sprite(team, squadType)
 
 
 
@@ -300,7 +309,7 @@ func _resize_loadouts(n: int) -> void:
 
 # template builders (run in editor by ticking the bool, it resets to false)
 func _make_rifle_squad(v: bool) -> void:
-	has_support_weapon_mg = false
+	squadType = SquadType.Rifle
 	if v:
 		make_rifle_squad = false
 		if team == 0:
@@ -403,7 +412,7 @@ func _make_rifle_squad(v: bool) -> void:
 
 
 func _make_light_mg_team(v: bool) -> void:
-	has_support_weapon_mg = true
+	squadType = SquadType.MG
 	if v:
 		make_light_mg_team = false
 		if team == 0:
@@ -480,6 +489,51 @@ func _make_light_mg_team(v: bool) -> void:
 				L.rank_grade = RankGrades.Grade.SOLDIER
 				L.weapon = rifle
 				i += 1
+		notify_property_list_changed()
+
+
+func _make_anti_tank_squad(v: bool) -> void:
+	squadType = SquadType.ANTITANK
+	if v:
+		make_anti_tank_squad = false
+		if team == 0:
+			var group_size: int = 2
+			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
+			var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			var antitank_weapon: WeaponSpec = preload("res://resources/weapons/rpzb_54_panzerschreck.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = antitank_weapon
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
+		else:
+			var group_size: int = 2
+			var rifle: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
+			var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			var antitank_weapon: WeaponSpec = preload("res://resources/weapons/m1a1_bazooka.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = antitank_weapon
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
 		notify_property_list_changed()
 
 
@@ -561,11 +615,11 @@ func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
 
 func set_team(new_team: int):
 	team = new_team
-	update_team_sprite(team, has_support_weapon_mg)
+	update_team_sprite(team, squadType)
 
 
-func update_team_sprite(team: int, _has_support_weapon_mg: bool):
-	ui.update_team_sprite(team, _has_support_weapon_mg)
+func update_team_sprite(team: int, _squadType: SquadType):
+	ui.update_team_sprite(team, _squadType)
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):

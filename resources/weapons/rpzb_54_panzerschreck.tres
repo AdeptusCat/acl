@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://bvfu54bdgx837"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_kmfw1"]
+[ext_resource type="AudioStream" uid="uid://dwddexsv5q8ce" path="res://assets/audio/fx/weapons/m1a1_bazooka/m1a1_bazooka_hit.mp3" id="2_2vvn3"]
+[ext_resource type="AudioStream" uid="uid://crhmbefe31bou" path="res://assets/audio/fx/weapons/m1a1_bazooka/m1a1_bazooka_launch.mp3" id="3_tspwy"]
+
+[resource]
+script = ExtResource("1_kmfw1")
+name = "RPzB 54 Panzerschreck"
+mag_capacity = 1
+reload_s = 5.0
+range_hexes = 2
+kind = 1
+family = 2
+ammo_type = 1
+crew_required = 2
+priority = 8
+raise_s = 2.0
+aim_s = 1.0
+projectile_speed = 100
+snd_shot = ExtResource("3_tspwy")
+snd_hit = ExtResource("2_2vvn3")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

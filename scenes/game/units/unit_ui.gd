@@ -149,7 +149,7 @@ func state_changed(next:int):
 			$UnitStates/StateTexture.texture = combat_ineffective_texture
 
 
-func update_team_sprite(team : int, mg: bool = false):
+func update_team_sprite(team : int, _squadType: Unit.SquadType):
 	if not sprite_node:
 		return
 	match team:
@@ -157,7 +157,7 @@ func update_team_sprite(team : int, mg: bool = false):
 			sprite_node.texture = sprite_team_0
 		1:
 			sprite_node.texture = sprite_team_1
-	unit_status_control.set_status_image(team, mg)
+	unit_status_control.set_status_image(team, _squadType)
 	if detail_ui:
 		detail_ui.update_team_sprite(team)
 

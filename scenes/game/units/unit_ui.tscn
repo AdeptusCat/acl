@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=57 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -42,9 +42,13 @@
 [ext_resource type="Texture2D" uid="uid://crjhtiymtndlu" path="res://assets/ranks/2nd_lieutenant.png" id="35_755va"]
 [ext_resource type="Texture2D" uid="uid://csetmwqg22cac" path="res://assets/status/ger/infantry/mg/idle_ger.png" id="36_pjyrh"]
 [ext_resource type="Texture2D" uid="uid://cwi424itlgwij" path="res://assets/status/ger/infantry/mg/shooting_ger.png" id="37_eiylv"]
+[ext_resource type="Texture2D" uid="uid://bfxfj31hvfo00" path="res://assets/status/ger/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png" id="38_n3nxe"]
 [ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/soldier_detail.tscn" id="38_qfgpo"]
 [ext_resource type="Texture2D" uid="uid://dfe3g06je63w0" path="res://assets/status/us/infantry/mg/idle_us.png" id="38_wb6dq"]
+[ext_resource type="Texture2D" uid="uid://di4i1mfxju1xs" path="res://assets/status/ger/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png" id="39_0fjve"]
 [ext_resource type="Texture2D" uid="uid://c6t15chhylcy4" path="res://assets/status/us/infantry/mg/shooting_us.png" id="39_773ej"]
+[ext_resource type="Texture2D" uid="uid://bvhivdaoxde2" path="res://assets/status/us/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png" id="42_r88sf"]
+[ext_resource type="Texture2D" uid="uid://4l285jjrw0fv" path="res://assets/status/us/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png" id="43_tywqg"]
 [ext_resource type="Texture2D" uid="uid://cw7ie1fi14f0t" path="res://icon.svg" id="46_wb6dq"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
@@ -150,8 +154,12 @@ surrendered_ger = ExtResource("16_8rtsn")
 surrendered_us = ExtResource("17_dlbli")
 idle_mg_ger = ExtResource("36_pjyrh")
 shooting_mg_ger = ExtResource("37_eiylv")
+idle_antitank_ger = ExtResource("38_n3nxe")
+shooting_antitank_ger = ExtResource("39_0fjve")
 idle_mg_us = ExtResource("38_wb6dq")
 shooting_mg_us = ExtResource("39_773ej")
+idle_antitank_us = ExtResource("42_r88sf")
+shooting_antitank_us = ExtResource("43_tywqg")
 
 [node name="Broken" type="TextureRect" parent="UnitStatus"]
 visible = false

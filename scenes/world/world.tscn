@@ -1,4 +1,4 @@
-[gd_scene load_steps=235 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=238 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -68,6 +68,7 @@
 [ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="57_tj3jo"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
+[ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="62_124cm"]
 [ext_resource type="PackedScene" uid="uid://pt85xx5fagwx" path="res://scenes/game/audio/audio_pool.tscn" id="65_hpffo"]
 [ext_resource type="AudioStream" uid="uid://bp1oqubv3pxu0" path="res://assets/audio/music/litt.mp3" id="66_hnqnj"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="69_j3x8u"]
@@ -1346,15 +1347,33 @@ metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
 [sub_resource type="Resource" id="Resource_4eul6"]
 script = ExtResource("50_hph6x")
+nickname = "Gunner"
+rank_grade = 1
 role = 1
 weapon = ExtResource("61_6eles")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
 [sub_resource type="Resource" id="Resource_h8caq"]
 script = ExtResource("50_hph6x")
+nickname = "Loader"
 role = 2
 weapon = ExtResource("55_hpffo")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_bqfdu"]
+script = ExtResource("50_hph6x")
+nickname = "Gunner"
+rank_grade = 1
+role = 1
+weapon = ExtResource("62_124cm")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_0cp2s"]
+script = ExtResource("50_hph6x")
+nickname = "Loader"
+role = 2
+weapon = ExtResource("52_dhssw")
+is_key_role = true
 
 [sub_resource type="Environment" id="Environment_tj3jo"]
 background_mode = 3
@@ -1475,52 +1494,58 @@ time_left_seconds = 180.0
 position = Vector2(1088, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
-has_support_weapon_mg = true
+make_anti_tank_squad = false
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 704)
+position = Vector2(896, 736)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
+make_anti_tank_squad = false
 
 [node name="AxisMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubResource("Resource_6a7tq"), SubResource("Resource_wo74w"), SubResource("Resource_l34gv"), SubResource("Resource_425aq"), SubResource("Resource_ayaol"), SubResource("Resource_ecm30")])
-has_support_weapon_mg = true
+make_anti_tank_squad = false
 
 [node name="AxisRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1328, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2qot8"), SubResource("Resource_sfox1"), SubResource("Resource_nmgud"), SubResource("Resource_le7yh"), SubResource("Resource_wfk0w"), SubResource("Resource_qitea"), SubResource("Resource_6xqbw"), SubResource("Resource_6jobc"), SubResource("Resource_f3kq1"), SubResource("Resource_di5vm")])
+make_anti_tank_squad = false
 
 [node name="AxisPlatoonLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1232, 704)
+position = Vector2(896, 864)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2"), SubResource("Resource_mdkuk"), SubResource("Resource_mrxq0"), SubResource("Resource_i1y2t")])
+make_anti_tank_squad = false
 
 [node name="AxisCompanyLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1184, 864)
+position = Vector2(1232, 768)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ghkdt"), SubResource("Resource_s64j0"), SubResource("Resource_jtcuk"), SubResource("Resource_k6jmd"), SubResource("Resource_pyabd"), SubResource("Resource_qjyj0"), SubResource("Resource_do88p"), SubResource("Resource_j8f2q"), SubResource("Resource_pnq3x"), SubResource("Resource_8b617")])
+make_anti_tank_squad = false
 
 [node name="AlliesRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(512, 672)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
+make_anti_tank_squad = false
 
 [node name="AlliesRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(848, 512)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
+make_anti_tank_squad = false
 
 [node name="AlliesMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(800, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubResource("Resource_5vtr0"), SubResource("Resource_xmq5n"), SubResource("Resource_1e8o5"), SubResource("Resource_k0giv")])
-has_support_weapon_mg = true
+make_anti_tank_squad = false
 
 [node name="AlliesMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(512, 608)
@@ -1528,36 +1553,47 @@ ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubResource("Resource_0n6td"), SubResource("Resource_j3x8u"), SubResource("Resource_l72hy"), SubResource("Resource_6eles")])
-has_support_weapon_mg = true
+make_anti_tank_squad = false
 
 [node name="AlliesPlatoonLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(752, 512)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubResource("Resource_7qc1y"), SubResource("Resource_dobo0"), SubResource("Resource_1ppj3"), SubResource("Resource_tpqd7"), SubResource("Resource_o0evn"), SubResource("Resource_qytxv"), SubResource("Resource_cv01b"), SubResource("Resource_61cyd"), SubResource("Resource_7frv1"), SubResource("Resource_ikqac"), SubResource("Resource_bad7w")])
+make_anti_tank_squad = false
 
 [node name="AlliesCompanyLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(464, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7o8ut"), SubResource("Resource_a5636"), SubResource("Resource_jhdiv"), SubResource("Resource_4ln07"), SubResource("Resource_yr5cl"), SubResource("Resource_x77xw"), SubResource("Resource_pkfnk"), SubResource("Resource_5obl8"), SubResource("Resource_bmoad"), SubResource("Resource_mb8w1"), SubResource("Resource_mmesd"), SubResource("Resource_2t505")])
+make_anti_tank_squad = false
 
 [node name="DummyGer" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1520, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_k375o")])
+make_anti_tank_squad = false
 
 [node name="DummyUs" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(368, 576)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_e58rx")])
+make_anti_tank_squad = false
 
-[node name="Bazooka" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(944, 512)
+[node name="BazookaTeam" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(896, 480)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_4eul6"), SubResource("Resource_h8caq")])
+make_anti_tank_squad = false
+
+[node name="PanzerschreckTeam" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(1088, 544)
+ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_bqfdu"), SubResource("Resource_0cp2s")])
+make_anti_tank_squad = false
 
 [node name="InputManager" parent="GameController" instance=ExtResource("24_x0nq1")]
 

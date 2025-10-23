@@ -20,10 +20,16 @@ extends Control
 @export var idle_mg_ger: Texture2D
 @export var shooting_mg_ger: Texture2D
 
+@export var idle_antitank_ger: Texture2D
+@export var shooting_antitank_ger: Texture2D
+
 @export var idle_mg_us: Texture2D
 @export var shooting_mg_us: Texture2D
 
-func set_status_image(team, mg: bool = false):
+@export var idle_antitank_us: Texture2D
+@export var shooting_antitank_us: Texture2D
+
+func set_status_image(team, _squadType: Unit.SquadType):
 	if team == 0:
 		$Idle.texture = idle_ger
 		$Moving.texture = moving_ger
@@ -32,9 +38,14 @@ func set_status_image(team, mg: bool = false):
 		$Pinned.texture = pinned_ger
 		$Broken.texture = broken_ger
 		$Surrendered.texture = surrendered_ger
-		if mg:
-			$Idle.texture = idle_mg_ger
-			$Shooting.texture = shooting_mg_ger
+		match _squadType:
+			Unit.SquadType.MG:
+				$Idle.texture = idle_mg_ger
+				$Shooting.texture = shooting_mg_ger
+			Unit.SquadType.ANTITANK:
+				$Idle.texture = idle_antitank_ger
+				$Shooting.texture = shooting_antitank_ger
+		
 	if team == 1:
 		$Idle.texture = idle_us
 		$Moving.texture = moving_us
@@ -43,6 +54,10 @@ func set_status_image(team, mg: bool = false):
 		$Pinned.texture = pinned_us
 		$Broken.texture = broken_us
 		$Surrendered.texture = surrendered_us
-		if mg:
-			$Idle.texture = idle_mg_us
-			$Shooting.texture = shooting_mg_us
+		match _squadType:
+			Unit.SquadType.MG:
+				$Idle.texture = idle_mg_us
+				$Shooting.texture = shooting_mg_us
+			Unit.SquadType.ANTITANK:
+				$Idle.texture = idle_antitank_us
+				$Shooting.texture = shooting_antitank_us

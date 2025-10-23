@@ -60,5 +60,5 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var volume_db: float = 0.0
 
 @export var riflegrenade_shot: AudioStream = null
-@export var riflegrenade_hit: AudioStream = null     # low-salience distant thumpse one-shot muzzle
+@export var riflegrenade_hit: AudioStream = null     
 @export var riflegrenade_projectile_speed: int = 200
