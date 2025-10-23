@@ -23,11 +23,17 @@ extends Control
 @export var idle_antitank_ger: Texture2D
 @export var shooting_antitank_ger: Texture2D
 
+@export var idle_mortar_ger: Texture2D
+@export var shooting_mortar_ger: Texture2D
+
 @export var idle_mg_us: Texture2D
 @export var shooting_mg_us: Texture2D
 
 @export var idle_antitank_us: Texture2D
 @export var shooting_antitank_us: Texture2D
+
+@export var idle_mortar_us: Texture2D
+@export var shooting_mortar_us: Texture2D
 
 func set_status_image(team, _squadType: Unit.SquadType):
 	if team == 0:
@@ -45,7 +51,9 @@ func set_status_image(team, _squadType: Unit.SquadType):
 			Unit.SquadType.ANTITANK:
 				$Idle.texture = idle_antitank_ger
 				$Shooting.texture = shooting_antitank_ger
-		
+			Unit.SquadType.MORTAR:
+				$Idle.texture = idle_mortar_ger
+				$Shooting.texture = shooting_mortar_ger
 	if team == 1:
 		$Idle.texture = idle_us
 		$Moving.texture = moving_us
@@ -61,3 +69,6 @@ func set_status_image(team, _squadType: Unit.SquadType):
 			Unit.SquadType.ANTITANK:
 				$Idle.texture = idle_antitank_us
 				$Shooting.texture = shooting_antitank_us
+			Unit.SquadType.MORTAR:
+				$Idle.texture = idle_mortar_us
+				$Shooting.texture = shooting_mortar_us

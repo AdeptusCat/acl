@@ -195,15 +195,18 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 	var map_hex = ground_layer.local_to_map(event_pos)
 	
 	if selected_unit:
-		var units: Array[Node2D] = _find_units_at(map_hex)
-		for unit in units:
-			if not unit.team == Globals.team_player:
-				selected_unit.combat.set_target_unit(unit)
-				var local_pos = ground_layer.map_to_local(map_hex)
-				hex_glow(local_pos)
-				return
-		move_sys._on_move_requested(selected_unit, map_hex)
-		#_deselect_unit(selected_unit)
+		if selected_unit.squadType == Unit.SquadType.MORTAR:
+			selected_unit.fire_mortar(map_hex)
+		else:
+			var units: Array[Node2D] = _find_units_at(map_hex)
+			for unit in units:
+				if not unit.team == Globals.team_player:
+					selected_unit.combat.set_target_unit(unit)
+					var local_pos = ground_layer.map_to_local(map_hex)
+					hex_glow(local_pos)
+					return
+			move_sys._on_move_requested(selected_unit, map_hex)
+			#_deselect_unit(selected_unit)
 		var local_pos = ground_layer.map_to_local(map_hex)
 		hex_glow(local_pos)
 	

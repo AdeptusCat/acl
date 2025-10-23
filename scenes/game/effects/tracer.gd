@@ -58,7 +58,7 @@ func shoot_rocket_launcher(from: Vector2, to: Vector2, weapon: WeaponSpec):
 	# queue_free when it’s done
 	await get_tree().create_timer(particles.lifetime).timeout
 	
-	if weapon.snd_hit != null:
+	if weapon.snd_hit != null and audio_pool != null:
 		var p2: float = _rand_pitch()
 		audio_pool.play_one_shot(weapon.snd_hit, position, 0.0, p2, "SFX_Close")
 	#var end_pos: Vector2 = predict_end_position(from, to, speed, particles.lifetime)
@@ -94,7 +94,7 @@ func shoot(from: Vector2, to: Vector2, weapon_spec: WeaponSpec, rilflegrenade: b
 	await get_tree().create_timer(particles.lifetime).timeout
 	
 	if rilflegrenade:
-		if weapon_spec.riflegrenade_hit != null:
+		if weapon_spec.riflegrenade_hit != null and audio_pool != null:
 			var p2: float = _rand_pitch()
 			audio_pool.play_one_shot(weapon_spec.riflegrenade_hit, position, 6.0, p2, "SFX_Close")
 		#var end_pos: Vector2 = predict_end_position(from, to, speed, particles.lifetime)

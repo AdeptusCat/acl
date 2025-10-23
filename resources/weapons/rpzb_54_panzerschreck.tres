@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("1_kmfw1")
-name = "RPzB 54 Panzerschreck"
+name = "RPzB 54 "
 mag_capacity = 1
 reload_s = 5.0
 range_hexes = 2

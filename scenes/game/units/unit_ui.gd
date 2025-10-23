@@ -349,6 +349,24 @@ func shoot_rocket_launcher(from_pos: Vector2, to_pos, weapon: WeaponSpec):
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
+
+func shoot_mortar(from_pos: Vector2, to_pos, weapon: WeaponSpec):
+	var tracer = tracer_scene.instantiate() as Node2D
+	tracer.speed = weapon.projectile_speed
+	tracer.tracer_texture = tracer_texture
+	get_tree().current_scene.add_child(tracer)
+	for child in unit_status_control.get_children():
+		child.visible = false
+	shooting_texture_rect.visible = true
+	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
+	$Timer.start()
+	if detail_ui:
+		for child in detail_ui.unit_status_control.get_children():
+			child.visible = false
+		detail_ui.shooting_texture_rect.visible = true
+
+
+
 func shoot(from_pos: Vector2, to_pos, weapon: WeaponSpec):
 	var tracer = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed

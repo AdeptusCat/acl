@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://jga6pmhrhmus"]
+
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_b6iss"]
+[ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2_3atm5"]
+[ext_resource type="AudioStream" uid="uid://ckfcdihaq1min" path="res://assets/audio/fx/weapons/mortar/mortar-96223.mp3" id="3_3w4dv"]
+
+[resource]
+script = ExtResource("1_b6iss")
+name = "Granatwerfer 34 (81 mm)"
+mag_capacity = 1
+range_hexes = 20
+kind = 1
+family = 3
+ammo_type = 1
+crew_required = 2
+support_crew_optimal = 5
+projectile_speed = 100
+snd_shot = ExtResource("3_3w4dv")
+snd_hit = ExtResource("2_3atm5")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"

@@ -8,6 +8,8 @@ enum SquadType {
 	Rifle,
 	MG,
 	ANTITANK,
+	MORTAR,
+	
 }
 
 # === Exported ===
@@ -38,6 +40,8 @@ enum SquadType {
 @export var make_rifle_squad: bool = false : set = _make_rifle_squad
 @export var make_light_mg_team: bool = false : set = _make_light_mg_team
 @export var make_anti_tank_squad: bool = false : set = _make_anti_tank_squad
+@export var make_light_mortar_squad: bool = false : set = _make_light_mortar_squad
+@export var make_medium_mortar_squad: bool = false : set = _make_medium_mortar_squad
 
 
 # === Runtime State ===
@@ -63,7 +67,7 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 var original_size := 10
 var leader_alive := true
 
-var squadType: SquadType = SquadType.Rifle
+@export var squadType: SquadType = SquadType.Rifle
 
 # === Signals ===
 signal moved_to_hex(new_hex: Vector2i)
@@ -155,16 +159,30 @@ func _ready():
 	update_team_sprite(team, squadType)
 
 
-
+func fire_mortar(map_hex: Vector2i):
+	squad_fire.fire_mortar(map_hex)
 
 
 func _on_fire_shot(weapon: WeaponSpec):
-	if squad_fire.target_unit:
+	#if squad_fire.target_unit:
+	if squad_fire.target_hex:
+		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.target_hex)
 		match weapon.family: 
 			WeaponSpec.Family.SMALL_ARM:
-				ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
+				ui.shoot(global_position, pos, weapon)
 			WeaponSpec.Family.ROCKET_LAUNCHER:
-				ui.shoot_rocket_launcher(global_position, squad_fire.target_unit.global_position, weapon)
+				ui.shoot_rocket_launcher(global_position, pos, weapon)
+	if squad_fire.mortar_target_hex:
+		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.mortar_target_hex)
+		if weapon.family == WeaponSpec.Family.MORTAR:
+				ui.shoot_mortar(global_position, pos, weapon)
+		#match weapon.family: 
+			#WeaponSpec.Family.SMALL_ARM:
+				#ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
+			#WeaponSpec.Family.ROCKET_LAUNCHER:
+				#ui.shoot_rocket_launcher(global_position, squad_fire.target_unit.global_position, weapon)
+			#WeaponSpec.Family.MORTAR:
+				#ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
 
 
 func _on_fire_riflegrenade(weapon_spec: WeaponSpec):
@@ -309,8 +327,8 @@ func _resize_loadouts(n: int) -> void:
 
 # template builders (run in editor by ticking the bool, it resets to false)
 func _make_rifle_squad(v: bool) -> void:
-	squadType = SquadType.Rifle
 	if v:
+		squadType = SquadType.Rifle
 		make_rifle_squad = false
 		if team == 0:
 			var group_size: int = 10
@@ -412,8 +430,8 @@ func _make_rifle_squad(v: bool) -> void:
 
 
 func _make_light_mg_team(v: bool) -> void:
-	squadType = SquadType.MG
 	if v:
+		squadType = SquadType.MG
 		make_light_mg_team = false
 		if team == 0:
 			var group_size: int = 7
@@ -493,13 +511,13 @@ func _make_light_mg_team(v: bool) -> void:
 
 
 func _make_anti_tank_squad(v: bool) -> void:
-	squadType = SquadType.ANTITANK
 	if v:
+		squadType = SquadType.ANTITANK
 		make_anti_tank_squad = false
 		if team == 0:
 			var group_size: int = 2
 			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
-			var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
 			var antitank_weapon: WeaponSpec = preload("res://resources/weapons/rpzb_54_panzerschreck.tres")
 			_resize_loadouts(group_size)
 			var i: int = 0
@@ -518,7 +536,7 @@ func _make_anti_tank_squad(v: bool) -> void:
 		else:
 			var group_size: int = 2
 			var rifle: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
-			var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
 			var antitank_weapon: WeaponSpec = preload("res://resources/weapons/m1a1_bazooka.tres")
 			_resize_loadouts(group_size)
 			var i: int = 0
@@ -534,6 +552,148 @@ func _make_anti_tank_squad(v: bool) -> void:
 			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
 			i += 1
+		notify_property_list_changed()
+
+
+func _make_light_mortar_squad(v: bool) -> void:
+	if v:
+		squadType = SquadType.MORTAR
+		make_anti_tank_squad = false
+		if team == 0:
+			var group_size: int = 5
+			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			var mortar: WeaponSpec = preload("res://resources/weapons/granatwerfer_36.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.TEAM_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.TEAM_LEADER
+			leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = mortar
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.ASSISTANT
+				L.nickname = "Ass. %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 3
+			var rifle: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			var mortar: WeaponSpec = preload("res://resources/weapons/m2_60mm_mortar.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.TEAM_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.TEAM_LEADER
+			leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = mortar
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.ASSISTANT
+				L.nickname = "Ass. %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		notify_property_list_changed()
+
+
+func _make_medium_mortar_squad(v: bool) -> void:
+	if v:
+		squadType = SquadType.MORTAR
+		make_anti_tank_squad = false
+		if team == 0:
+			var group_size: int = 8
+			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			var mortar: WeaponSpec = preload("res://resources/weapons/granatwerfer_34.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = mortar
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.ASSISTANT
+				L.nickname = "Ass. %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 9
+			var rifle: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			var mortar: WeaponSpec = preload("res://resources/weapons/m1_81mm_mortar.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Squad Leader"
+			leader.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			leader.weapon = rifle
+			i += 1
+			var gunner: SoldierLoadout = loadouts[i]
+			gunner.role = RankGrades.Role.GUNNER
+			gunner.nickname = "Gunner"
+			gunner.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			gunner.weapon = mortar
+			i += 1
+			var loader: SoldierLoadout = loadouts[i]
+			loader.role = RankGrades.Role.LOADER
+			loader.nickname = "Loader"
+			loader.rank_grade = RankGrades.Grade.SOLDIER
+			loader.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.ASSISTANT
+				L.nickname = "Ass. %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
 		notify_property_list_changed()
 
 
@@ -618,8 +778,8 @@ func set_team(new_team: int):
 	update_team_sprite(team, squadType)
 
 
-func update_team_sprite(team: int, _squadType: SquadType):
-	ui.update_team_sprite(team, _squadType)
+func update_team_sprite(team: int, squadType: SquadType):
+	ui.update_team_sprite(team, squadType)
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
@@ -858,6 +1018,7 @@ func _find_first_SOLDIER() -> int:
 		i += 1
 	return -1
 
+
 func _find_first_SOLDIER_OR_ASSISTANT_excluding(exclude: Array[int]) -> int:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
@@ -867,7 +1028,7 @@ func _find_first_SOLDIER_OR_ASSISTANT_excluding(exclude: Array[int]) -> int:
 				return i
 		i += 1
 	return -1
-	
+
 
 func remove_indices(target: Array, indices: Array[int]) -> void:
 	# Sort descending so the higher indices go first

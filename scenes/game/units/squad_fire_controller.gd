@@ -68,6 +68,7 @@ var _accum_window_s: float = 0.0
 
 # Targeting
 var target_hex: Vector2i
+var mortar_target_hex: Vector2i
 var target_cover: float
 var target_unit: Unit
 var target_distance: int
@@ -122,6 +123,7 @@ func _physics_process(delta: float) -> void:
 	_tick_soldiers(delta)
 	if target_unit:
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+		target_hex = target_unit.current_hex
 
 	if _accum_window_s >= burst_window_s:
 		_flush_burst_window()
@@ -200,6 +202,11 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 				break
 
 
+func fire_mortar(map_hex: Vector2i):
+	mortar_target_hex = map_hex
+	
+
+
 func _tick_soldiers(delta: float) -> void:
 	var rounds_emitted: int = 0
 
@@ -234,9 +241,13 @@ func _tick_soldiers(delta: float) -> void:
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
 	s.now_s = _now_s
-	if target_hex == Vector2i.ZERO:
+	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
 	
+	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
+		return 0
+	
+	var _mortar_target_hex: Vector2i = mortar_target_hex
 	var batch_targets: Array = []
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
@@ -245,7 +256,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 				if not u.surrendered:
 					if u.current_hex == target_hex:
 						batch_targets.append(u)
-	if batch_targets.is_empty():
+	if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		set_target_unit(null)
 		return 0
 	
@@ -323,10 +334,13 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		auto_fire = true
 	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
 	
-	var dist: float = unit.position.distance_to(target_unit.position)
+	var _target_hex = target_hex
+	if s.weapon.family == WeaponSpec.Family.MORTAR:
+		_target_hex = _mortar_target_hex
+	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
 	var life: float = dist / s.weapon.projectile_speed      # seconds
 	if riflegrenade == true:
-		life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
+		#life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
 		fire_riflegrenades(s)
 	else:
 		fire_shots(s, shots, s.weapon.rpm, auto_fire)
@@ -387,7 +401,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	var delta: float = s.next_ready_s - _now_s # debug
 	
 	await get_tree().create_timer(life).timeout
-	fire_at(shots, long_range, s.weapon, riflegrenade)
+	fire_at(shots, long_range, s.weapon, riflegrenade, _mortar_target_hex)
 	return shots
 
 
@@ -489,20 +503,31 @@ func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
 
-func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrenade: bool) -> void:
+func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i) -> void:
 	#return
 	var terrain_defense_bonus: float = target_cover
+	if weapon.family == WeaponSpec.Family.MORTAR:
+		terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_mortar_target_hex))
 	# --- range gating & power falloff ---
 
 	# --- collect all enemy squads in the target hex ---
 	var batch_targets: Array = []
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
-	for u in visible_enemies:
-		if is_instance_valid(u):
-			if u.alive:
-				if not u.surrendered:
-					if u.current_hex == target_hex:
-						batch_targets.append(u)
+	if weapon.family == WeaponSpec.Family.MORTAR:
+		var units: Array[Unit] = get_parent().units
+		for u in units:
+			if is_instance_valid(u):
+				if u.alive:
+					if not u.surrendered:
+						if u.current_hex == _mortar_target_hex:
+							batch_targets.append(u)
+	else:
+		for u in visible_enemies:
+			if is_instance_valid(u):
+				if u.alive:
+					if not u.surrendered:
+						if u.current_hex == target_hex:
+							batch_targets.append(u)
 	if batch_targets.is_empty():
 		return
 	
