@@ -13,7 +13,8 @@ enum WeaponType {
 	SMG
 }
 
-enum Family { SMALL_ARM, LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
+enum AmmoType {BULLET, HE, AP}
+enum Family { SMALL_ARM, SPIGOT_LAUNCHER, ROCKET_LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
 enum FireMode { SINGLE, BURST, MANUAL }
 
 @export var name: String = "Rifle"
@@ -28,6 +29,7 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var kind: WeaponKind = WeaponKind.PERSONAL
 @export var type: WeaponType = WeaponType.Rifle
 @export var family: Family = Family.SMALL_ARM
+@export var ammo_type: AmmoType = AmmoType.BULLET
 @export var fire_mode: FireMode = FireMode.SINGLE
 @export var crew_required: int = 1             # MG typically 2
 @export var support_crew_optimal: int = 0             

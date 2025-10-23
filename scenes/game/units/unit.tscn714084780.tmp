@@ -1,0 +1,63 @@
+[gd_scene load_steps=14 format=3 uid="uid://rsqpaeas8ic5"]
+
+[ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="2_h0ojj"]
+[ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
+[ext_resource type="PackedScene" uid="uid://c24n2ejqyspj8" path="res://scenes/game/units/unit_combat.tscn" id="6_sh6c0"]
+[ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
+[ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="8_b5oeb"]
+[ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="8_v8x2n"]
+[ext_resource type="PackedScene" uid="uid://cb28roffrjgwu" path="res://scenes/game/units/squad_fire_controller.tscn" id="9_b5oeb"]
+[ext_resource type="PackedScene" uid="uid://cwhe3w1khnk8d" path="res://scenes/game/audio/weapon_audio.tscn" id="10_7ghvu"]
+[ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
+
+[sub_resource type="Resource" id="Resource_v8x2n"]
+script = ExtResource("2_h0ojj")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_b5oeb"]
+script = ExtResource("2_h0ojj")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_ga1pk"]
+script = ExtResource("2_h0ojj")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[node name="Unit" type="Node2D" groups=["units"]]
+script = ExtResource("1_btf8p")
+retreat_speed = 100.0
+fire_rate = 1.5
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+
+[node name="UnitUi" parent="." instance=ExtResource("10_ga1pk")]
+offset_left = -33.0
+offset_top = -32.0
+offset_right = 7.0
+offset_bottom = 8.0
+morale_popup_scene = ExtResource("5_djab4")
+morale_flash_scene = ExtResource("5_djab4")
+metadata/_edit_use_anchors_ = true
+
+[node name="UnitStressController" parent="." instance=ExtResource("7_v8x2n")]
+
+[node name="UnitMovement" parent="." instance=ExtResource("8_v8x2n")]
+
+[node name="Combat" parent="." instance=ExtResource("6_sh6c0")]
+
+[node name="LeaderAura" parent="." instance=ExtResource("8_b5oeb")]
+aura_radius_hexes = 2
+leadership_bonus = 0.15
+rally_bonus = 0.1
+cohesion_mult = 1.05
+scan_interval_s = 0.25
+
+[node name="SquadFireController" parent="." node_paths=PackedStringArray("unit", "combat", "stress_controller") instance=ExtResource("9_b5oeb")]
+unit = NodePath("..")
+combat = NodePath("../Combat")
+stress_controller = NodePath("../UnitStressController")
+
+[node name="WeaponAudio" parent="." instance=ExtResource("10_7ghvu")]
+
+[connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]

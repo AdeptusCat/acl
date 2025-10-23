@@ -6,13 +6,17 @@
 
 [resource]
 script = ExtResource("1_64fyq")
+name = "M1A1 Bazooka"
 mag_capacity = 1
-reload_s = 1.0
+reload_s = 5.0
 range_hexes = 2
 kind = 1
-family = 1
+family = 2
+ammo_type = 1
 crew_required = 2
 priority = 8
+raise_s = 2.0
+aim_s = 1.0
 projectile_speed = 100
 snd_shot = ExtResource("2_2gmky")
 snd_hit = ExtResource("2_uery4")

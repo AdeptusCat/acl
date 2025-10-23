@@ -578,6 +578,12 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 			else:
 				p_hit_per_round *= 2
 		
+		if weapon.family == WeaponSpec.Family.SPIGOT_LAUNCHER or weapon.family == WeaponSpec.Family.ROCKET_LAUNCHER or weapon.family == WeaponSpec.Family.MORTAR:
+			if target_distance <= weapon.range_hexes:
+				p_hit_per_round *= 4
+			else:
+				p_hit_per_round *= 2
+		
 		p_hit_per_round = clamp(p_hit_per_round, 0.002, 0.95)
 		p_hit_per_target.append(p_hit_per_round)
 		i += 1
@@ -591,7 +597,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 		i += 1
 	
 	i = 0
-	if riflegrenade == true:
+	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
 		while i < n_targets:
 			var ii: int = 0
 			while ii < 4:
@@ -614,13 +620,13 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
 	# Decide per-hit disable based on weapon; here we default to rifle numbers
 	var base_p_disable: float = 0.12
-	if riflegrenade == true:
+	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
 		base_p_disable = 0.5
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
 	# this should not matter when firing explosives
 	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.range))
-	if riflegrenade == true:
+	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
 		lethality_range_mult = 1.0
 
 	# Final per-hit disable after all throttles

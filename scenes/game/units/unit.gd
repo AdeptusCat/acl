@@ -154,7 +154,7 @@ func _on_fire_shot(weapon: WeaponSpec):
 		match weapon.family: 
 			WeaponSpec.Family.SMALL_ARM:
 				ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
-			WeaponSpec.Family.LAUNCHER:
+			WeaponSpec.Family.ROCKET_LAUNCHER:
 				ui.shoot_rocket_launcher(global_position, squad_fire.target_unit.global_position, weapon)
 
 

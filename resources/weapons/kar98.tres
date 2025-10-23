@@ -5,6 +5,6 @@
 
 [resource]
 script = ExtResource("1_ec0dn")
-name = "Karabiner 98k (Schießbecher)"
+name = "Karabiner 98k"
 snd_shot = ExtResource("2_byysb")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"
