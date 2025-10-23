@@ -287,6 +287,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		pass
 
 	# determine burst size for this weapon
+	var rounds_in_mag: int = s.rounds_in_mag
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
 	
 	if shots <= 0:
@@ -353,9 +354,16 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	if s.weapon.can_fire_riflegrenades:
 		settle_s += s.weapon.reload_riflegrenade_s
 	
-	s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s) / efficiency_mult / crew_mult
+	var reload_time_s: float = 0
+	if s.rounds_in_mag <= 0:
+		reload_time_s = s.weapon.reload_s
+		s.rounds_in_mag = s.weapon.mag_capacity
+	
+	s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
 	s.next_ready_s = _now_s + s.next_ready_delta_s
 	s.next_ready_start_s = _now_s
+	
+	
 	
 	var delta: float = s.next_ready_s - _now_s # debug
 	
@@ -400,33 +408,33 @@ func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
 	if base < 1:
 		base = 1
 
-	# choose variance fraction by weapon class (tune these constants as you wish)
-	var variance_fraction: float = 0.25        # default: ±25%
+	var shots: int = base
 	if weapon.fire_mode == WeaponSpec.FireMode.BURST:
-		variance_fraction = 0.35               # SMGs are a bit more 'spray-y'
-	#elif weapon.type == WeaponSpec.WeaponType.MG:
-		#variance_fraction = 0.40               # MGs have larger variability
+		# choose variance fraction by weapon class (tune these constants as you wish)
+		var variance_fraction: float = 0.25        # default: ±25%
+		if weapon.fire_mode == WeaponSpec.FireMode.BURST:
+			variance_fraction = 0.35               # SMGs are a bit more 'spray-y'
+		#elif weapon.type == WeaponSpec.WeaponType.MG:
+			#variance_fraction = 0.40               # MGs have larger variability
 
-	# compute stddev in rounds (at least 1 round)
-	var stddev: float = max(1.0, float(base) * variance_fraction)
+		# compute stddev in rounds (at least 1 round)
+		var stddev: float = max(1.0, float(base) * variance_fraction)
 
-	# draw a gaussian offset, round to integer
-	var gauss: float = _rand_normal()
-	var sample: float = float(base) + gauss * stddev
-	var shots: int = int(round(sample))
+		# draw a gaussian offset, round to integer
+		var gauss: float = _rand_normal()
+		var sample: float = float(base) + gauss * stddev
+		shots = int(round(sample))
+		
+		# small chance to produce a sustained longer burst (suppression)
+		var r: float = randf()
+		if r < 0.10: # 10% chance
+			shots = min(rounds_in_mag, shots + int(round(float(weapon.burst_rounds) * 0.75)))
 
 	# clamp to sensible bounds
 	if shots < 1:
 		shots = 1
 	if shots > rounds_in_mag:
 		shots = rounds_in_mag
-
-	# extra logic for MG/SMG long-burst tendency (optional)
-	if weapon.fire_mode == WeaponSpec.FireMode.BURST:
-		# small chance to produce a sustained longer burst (suppression)
-		var r: float = randf()
-		if r < 0.10: # 10% chance
-			shots = min(rounds_in_mag, shots + int(round(float(weapon.burst_rounds) * 0.75)))
 			
 	return shots
 
@@ -463,6 +471,7 @@ func fire_riflegrenades(s: Soldier):
 
 
 func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
+	#return
 	var terrain_defense_bonus: float = target_cover
 	# --- range gating & power falloff ---
 

@@ -18,6 +18,7 @@ colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="Tracer" type="Node2D"]
 script = ExtResource("1_yt2qg")
+tracer_texture = ExtResource("2_oxgep")
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="."]
 modulate = Color(18.031, 11.303, 6.597, 1)
