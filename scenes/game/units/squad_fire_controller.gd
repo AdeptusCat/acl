@@ -120,6 +120,8 @@ func _physics_process(delta: float) -> void:
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
+	if target_unit:
+		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 
 	if _accum_window_s >= burst_window_s:
 		_flush_burst_window()
@@ -274,6 +276,11 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 
 	if s.next_ready_s > _now_s:
 		return 0
+	
+	var riflegrenade: bool = false
+	if s.weapon.riflegrenade_loaded == true:
+		riflegrenade = true
+		s.weapon.riflegrenade_loaded = false
 
 	# check crew requirement
 	var crew_mult: float = 1.0
@@ -292,10 +299,17 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	
 	if shots <= 0:
 		# reload
-		s.next_ready_delta_s = s.weapon.reload_s / s.rof_mult
-		s.next_ready_s = _now_s + s.next_ready_delta_s
-		s.next_ready_start_s = _now_s
-		s.rounds_in_mag = s.weapon.mag_capacity
+		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
+			s.next_ready_delta_s = s.weapon.reload_riflegrenade_s / s.rof_mult
+			s.next_ready_s = _now_s + s.next_ready_delta_s
+			s.next_ready_start_s = _now_s
+			s.rounds_in_mag = 1
+			s.weapon.riflegrenade_loaded = true
+		else:
+			s.next_ready_delta_s = s.weapon.reload_s / s.rof_mult
+			s.next_ready_s = _now_s + s.next_ready_delta_s
+			s.next_ready_start_s = _now_s
+			s.rounds_in_mag = s.weapon.mag_capacity
 		return 0
 	
 	if shots > 1:
@@ -311,7 +325,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	
 	var dist: float = unit.position.distance_to(target_unit.position)
 	var life: float = dist / s.weapon.projectile_speed      # seconds
-	if s.weapon.can_fire_riflegrenades:
+	if riflegrenade == true:
 		life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
 		fire_riflegrenades(s)
 	else:
@@ -351,7 +365,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		acquire_mult = state_acquire_mults[state_idx]
 	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 	
-	if s.weapon.can_fire_riflegrenades:
+	if riflegrenade == true:
 		settle_s += s.weapon.reload_riflegrenade_s
 	
 	var reload_time_s: float = 0
@@ -359,16 +373,21 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		reload_time_s = s.weapon.reload_s
 		s.rounds_in_mag = s.weapon.mag_capacity
 	
-	s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
-	s.next_ready_s = _now_s + s.next_ready_delta_s
-	s.next_ready_start_s = _now_s
-	
-	
+	if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
+		s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
+		s.next_ready_s = _now_s + s.next_ready_delta_s
+		s.next_ready_start_s = _now_s
+		s.rounds_in_mag += 1
+		s.weapon.riflegrenade_loaded = true
+	else:
+		s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
+		s.next_ready_s = _now_s + s.next_ready_delta_s
+		s.next_ready_start_s = _now_s
 	
 	var delta: float = s.next_ready_s - _now_s # debug
 	
 	await get_tree().create_timer(life).timeout
-	fire_at(shots, long_range, s.weapon)
+	fire_at(shots, long_range, s.weapon, riflegrenade)
 	return shots
 
 
@@ -470,7 +489,7 @@ func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
 
-func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
+func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrenade: bool) -> void:
 	#return
 	var terrain_defense_bonus: float = target_cover
 	# --- range gating & power falloff ---
@@ -553,7 +572,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
 		if state == STATES.MoraleState.PANIC:
 			p_hit_per_round *= 4
 		
-		if weapon.can_fire_riflegrenades:
+		if riflegrenade == true:
 			if target_distance <= weapon.riflegrenade_range:
 				p_hit_per_round *= 4
 			else:
@@ -572,7 +591,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
 		i += 1
 	
 	i = 0
-	if weapon.can_fire_riflegrenades:
+	if riflegrenade == true:
 		while i < n_targets:
 			var ii: int = 0
 			while ii < 4:
@@ -595,13 +614,13 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec) -> void:
 	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
 	# Decide per-hit disable based on weapon; here we default to rifle numbers
 	var base_p_disable: float = 0.12
-	if weapon.can_fire_riflegrenades:
+	if riflegrenade == true:
 		base_p_disable = 0.5
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
 	# this should not matter when firing explosives
 	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.range))
-	if weapon.can_fire_riflegrenades:
+	if riflegrenade == true:
 		lethality_range_mult = 1.0
 
 	# Final per-hit disable after all throttles
@@ -842,7 +861,7 @@ func _prime_acquisition_for_new_target() -> void:
 	while i < soldiers.size():
 		var s: Soldier = soldiers[i]
 		if s.is_alive:
-			if s.weapon.can_fire_riflegrenades:
+			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
 				var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 				settle_s += s.weapon.setup_riflegrenade_s
 				settle_s *= acquire_mult
@@ -856,6 +875,7 @@ func _prime_acquisition_for_new_target() -> void:
 				if s.next_ready_s < s.acquire_ready_s:
 					s.next_ready_s = s.acquire_ready_s
 					s.next_ready_start_s = _now_s
+				s.weapon.riflegrenade_loaded = true
 			else:
 				var settle_s: float = _calc_acquire_delay(s) * acquire_mult
 				settle_s += s.weapon.setup_s
@@ -877,7 +897,7 @@ func _calc_acquire_delay(s: Soldier) -> float:
 	# prefer weapon raise/aim timings if available; else use soldier base
 	var base: float = s.base_acquire_s
 	if s.weapon != null:
-		if s.weapon.can_fire_riflegrenades:
+		if s.weapon.riflegrenade_loaded == true:
 			var has_raise: bool = s.weapon.raise_riflegrenade_s > 0.0
 			var has_aim: bool = s.weapon.aim_riflegrenade_s > 0.0
 			if has_raise or has_aim:

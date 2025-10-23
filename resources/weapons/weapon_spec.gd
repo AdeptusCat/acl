@@ -40,10 +40,13 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var projectile_speed: int = 600
 
 @export var can_fire_riflegrenades: bool = false
+@export var riflegrenade_loaded: bool = false
 @export var setup_riflegrenade_s: float = 5.0     # setup weapon
 @export var raise_riflegrenade_s: float = 2.0   # shoulder weapon
 @export var aim_riflegrenade_s: float = 2.0     # acquire/sight picture
 @export var reload_riflegrenade_s: float = 3.6
+@export var riflegrenade_range: int = 3
+
 
 @export var snd_shot: AudioStream = null        # close one-shot muzzle
 @export var snd_mech: AudioStream = null        # mechanical action (bolt, trigger)
@@ -51,9 +54,9 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var snd_mg_loop_decay: AudioStream = null 
 @export var snd_reload: AudioStream = null
 @export var snd_distant: AudioStream = null     # low-salience distant thumpse one-shot muzzle
+@export var snd_hit: AudioStream = null     
 @export var volume_db: float = 0.0
 
 @export var riflegrenade_shot: AudioStream = null
 @export var riflegrenade_hit: AudioStream = null     # low-salience distant thumpse one-shot muzzle
 @export var riflegrenade_projectile_speed: int = 200
-@export var riflegrenade_range: int = 3

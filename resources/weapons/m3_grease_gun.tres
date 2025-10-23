@@ -19,6 +19,7 @@ fire_mode = 1
 priority = 5
 raise_s = 0.9
 aim_s = 0.25
+projectile_speed = 300
 snd_mg_loop = ExtResource("2_kt2pm")
 snd_mg_loop_decay = ExtResource("3_ibjxt")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

@@ -12,6 +12,7 @@ reload_s = 3.0
 range_hexes = 7
 accuracy_base = 0.68
 undercrew_penalty_mult = 1.0
+priority = 6
 raise_s = 1.6
 aim_s = 0.6
 can_fire_riflegrenades = true

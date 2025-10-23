@@ -19,6 +19,7 @@ fire_mode = 1
 priority = 6
 raise_s = 0.8
 aim_s = 0.2
+projectile_speed = 300
 snd_mg_loop = ExtResource("2_colei")
 snd_mg_loop_decay = ExtResource("3_hxtgg")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

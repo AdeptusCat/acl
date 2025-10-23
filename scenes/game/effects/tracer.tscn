@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://f0alj1u01yb5"]
+[gd_scene load_steps=7 format=3 uid="uid://f0alj1u01yb5"]
 
 [ext_resource type="Script" uid="uid://dhgn3ugjdh5p1" path="res://scenes/game/effects/tracer.gd" id="1_yt2qg"]
 [ext_resource type="Texture2D" uid="uid://gn37ek8rfqmy" path="res://assets/effects/tracer - Kopie.png" id="2_oxgep"]
@@ -15,6 +15,10 @@ point_count = 3
 [sub_resource type="Gradient" id="Gradient_njtwl"]
 offsets = PackedFloat32Array(0.45637584, 1)
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="Curve" id="Curve_c6nyu"]
+_data = [Vector2(0.015432097, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="Tracer" type="Node2D"]
 script = ExtResource("1_yt2qg")
@@ -47,3 +51,18 @@ linear_accel_curve = SubResource("Curve_njtwl")
 scale_amount_max = 3.0
 scale_amount_curve = SubResource("Curve_oxgep")
 color_ramp = SubResource("Gradient_njtwl")
+
+[node name="RocketExhaust" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 32
+lifetime = 0.5
+one_shot = true
+direction = Vector2(-1, 0)
+spread = 5.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 100.0
+initial_velocity_max = 100.0
+scale_amount_min = 3.0
+scale_amount_max = 3.0
+scale_amount_curve = SubResource("Curve_c6nyu")
+color = Color(15.303791, 2.6870396, 3.3018296, 1)

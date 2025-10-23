@@ -149,9 +149,13 @@ func _ready():
 
 
 
-func _on_fire_shot(weapon_spec: WeaponSpec):
+func _on_fire_shot(weapon: WeaponSpec):
 	if squad_fire.target_unit:
-		ui.shoot(global_position, squad_fire.target_unit.global_position, weapon_spec)
+		match weapon.family: 
+			WeaponSpec.Family.SMALL_ARM:
+				ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
+			WeaponSpec.Family.LAUNCHER:
+				ui.shoot_rocket_launcher(global_position, squad_fire.target_unit.global_position, weapon)
 
 
 func _on_fire_riflegrenade(weapon_spec: WeaponSpec):
@@ -305,6 +309,7 @@ func _make_rifle_squad(v: bool) -> void:
 			var smg: WeaponSpec
 			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/kar98.tres")
+			var riflegrenade: WeaponSpec = preload("res://resources/weapons/kar98_riflegrenade.tres")
 			smg = preload("res://resources/weapons/mp40.tres")
 			mg = preload("res://resources/weapons/mg34.tres")
 			_resize_loadouts(group_size)
@@ -332,6 +337,12 @@ func _make_rifle_squad(v: bool) -> void:
 			loader.nickname = "Loader"
 			loader.rank_grade = RankGrades.Grade.SOLDIER
 			loader.weapon = rifle
+			i += 1
+			var riflegrenadier: SoldierLoadout = loadouts[i]
+			riflegrenadier.role = RankGrades.Role.SOLDIER
+			riflegrenadier.nickname = "Riflegrenadier"
+			riflegrenadier.rank_grade = RankGrades.Grade.SOLDIER
+			riflegrenadier.weapon = riflegrenade
 			i += 1
 			while i < group_size:
 				var L: SoldierLoadout = loadouts[i]
