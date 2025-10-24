@@ -163,7 +163,7 @@ func fire_mortar(map_hex: Vector2i):
 	squad_fire.fire_mortar(map_hex)
 
 
-func _on_fire_shot(weapon: WeaponSpec):
+func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i):
 	#if squad_fire.target_unit:
 	if squad_fire.target_hex:
 		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.target_hex)
@@ -172,9 +172,10 @@ func _on_fire_shot(weapon: WeaponSpec):
 				ui.shoot(global_position, pos, weapon)
 			WeaponSpec.Family.ROCKET_LAUNCHER:
 				ui.shoot_rocket_launcher(global_position, pos, weapon)
-	if squad_fire.mortar_target_hex:
-		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.mortar_target_hex)
+	if not mortar_target_hex == Vector2i.ZERO:
+		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(mortar_target_hex)
 		if weapon.family == WeaponSpec.Family.MORTAR:
+				ui.set_ammunition_left(weapon.ammunition)
 				ui.shoot_mortar(global_position, pos, weapon)
 		#match weapon.family: 
 			#WeaponSpec.Family.SMALL_ARM:
@@ -290,6 +291,8 @@ func _setup_runtime_soldiers() -> void:
 		)
 		if s.role == RankGrades.Role.GUNNER:
 			machine_guns += 1
+		if spec.family == WeaponSpec.Family.MORTAR:
+			ui.set_ammunition_left(spec.ammunition)
 		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
 		list.append(s)
 		i += 1

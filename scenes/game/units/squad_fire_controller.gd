@@ -75,7 +75,7 @@ var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 var unit_visible_enemies: Dictionary
 
-signal fire_shot
+signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
 
 
@@ -101,16 +101,24 @@ func set_target_unit(targetUnit: Unit) -> void:
 	var hex: Vector2i = Vector2i.ZERO
 	target_cover = 0
 	if targetUnit:
-		hex = targetUnit.current_hex
-		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
-		if cover_map and cover_map.has(targetUnit.current_hex):
-			var data = cover_map[targetUnit.current_hex]
-			target_cover = data["target_cover"]
-		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
-		if not target_unit == targetUnit:
-			#_prime_acquisition_for_new_target()
-			aim_delay()
-			target_unit = targetUnit
+		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+		var has_range: bool = false
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if soldier.weapon.range_hexes >= distance:
+				has_range = true
+		if has_range:
+			hex = targetUnit.current_hex
+			var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+			if cover_map and cover_map.has(targetUnit.current_hex):
+				var data = cover_map[targetUnit.current_hex]
+				target_cover = data["target_cover"]
+			target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+			if not target_unit == targetUnit:
+				#_prime_acquisition_for_new_target()
+				aim_delay()
+				target_unit = targetUnit
+		else:
+			target_unit = null
 	else:
 		target_unit = null
 	target_hex = hex
@@ -203,6 +211,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 
 
 func fire_mortar(map_hex: Vector2i):
+	aim_delay()
 	mortar_target_hex = map_hex
 	
 
@@ -247,7 +256,15 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
 	
+	if s.weapon.ammunition <= 0:
+		return 0
+	
+	if target_distance > s.weapon.range_hexes * 2:
+		#set_target_unit(null) # this should only happen if none have range
+		return 0
+	
 	var _mortar_target_hex: Vector2i = mortar_target_hex
+	
 	var batch_targets: Array = []
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
@@ -262,10 +279,6 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	
 	# Loader dont fire their weapon
 	if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
-		return 0
-	
-	if target_distance > s.weapon.range_hexes * 2:
-		#set_target_unit(null) # this should only happen if none have range
 		return 0
 	
 	var long_range: bool = false
@@ -287,6 +300,8 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 
 	if s.next_ready_s > _now_s:
 		return 0
+	
+	mortar_target_hex = Vector2i.ZERO
 	
 	var riflegrenade: bool = false
 	if s.weapon.riflegrenade_loaded == true:
@@ -334,6 +349,10 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		auto_fire = true
 	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
 	
+	# spend ammo
+	s.rounds_in_mag -= shots
+	s.weapon.ammunition -= shots
+	
 	var _target_hex = target_hex
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = _mortar_target_hex
@@ -343,7 +362,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		#life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
 		fire_riflegrenades(s)
 	else:
-		fire_shots(s, shots, s.weapon.rpm, auto_fire)
+		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
 	
 	
 
@@ -357,9 +376,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		k += 1
 	if jammed_now:
 		s.jammed = true
-
-	# spend ammo
-	s.rounds_in_mag -= shots
+	
 	
 	# cadence to next burst (respect soldier’s rof and crew)
 	var rps: float = s.weapon.rpm / 60.0
@@ -490,10 +507,10 @@ func aim_delay():
 		
 
 
-func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool):
+func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_target_hex: Vector2i):
 	var interval: float = 60.0 / rpm
 	for shot in range(shots):
-		fire_shot.emit(s.weapon)
+		fire_shot.emit(s.weapon, _mortar_target_hex)
 		await get_tree().create_timer(interval).timeout
 	if auto_fire:
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)

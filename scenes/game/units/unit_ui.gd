@@ -48,6 +48,9 @@ var _surrendered: bool = false
 
 signal debug_kill_soldier
 
+func set_ammunition_left(ammo: int):
+	$AmmunitionLeft.text = str(ammo)
+
 func set_loadout(soldiers: Array[Soldier]):
 	if detail_ui:
 		soldiers_detail_container.hide()

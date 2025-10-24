@@ -30,6 +30,7 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var type: WeaponType = WeaponType.Rifle
 @export var family: Family = Family.SMALL_ARM
 @export var ammo_type: AmmoType = AmmoType.BULLET
+@export var ammunition: int = 9223372036854775807
 @export var fire_mode: FireMode = FireMode.SINGLE
 @export var crew_required: int = 1             # MG typically 2
 @export var support_crew_optimal: int = 0             

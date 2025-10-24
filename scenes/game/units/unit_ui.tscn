@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://c4cp2gctv8fgk"]
+[gd_scene load_steps=63 format=3 uid="uid://c4cp2gctv8fgk"]
 
 [ext_resource type="Script" uid="uid://b3b2kl4oyu7iq" path="res://scenes/game/units/unit_ui.gd" id="1_wym2j"]
 [ext_resource type="Texture2D" uid="uid://d1tllsoygn50c" path="res://assets/units/unit_ta_border.png" id="2_pi8vb"]
@@ -75,6 +75,14 @@ outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_eilf2"]
 outline_size = 3
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_k7h5o"]
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_awis6"]
+outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [node name="UnitUi" type="Control"]
@@ -327,6 +335,7 @@ offset_top = 40.0
 offset_right = 56.0
 offset_bottom = 63.0
 text = "+"
+label_settings = SubResource("LabelSettings_k7h5o")
 horizontal_alignment = 1
 
 [node name="LeadershipRank" type="Label" parent="."]
@@ -377,6 +386,15 @@ text = "Kill Soldier"
 visible = false
 modulate = Color(3.1229057, 3.1229057, 3.1229057, 1)
 texture = ExtResource("46_wb6dq")
+
+[node name="AmmunitionLeft" type="Label" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 28.0
+offset_right = 56.0
+offset_bottom = 51.0
+label_settings = SubResource("LabelSettings_awis6")
+horizontal_alignment = 2
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="KillSoldier" to="." method="_on_kill_soldier_pressed"]

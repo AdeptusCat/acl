@@ -11,6 +11,7 @@ mag_capacity = 1
 range_hexes = 20
 family = 3
 ammo_type = 1
+ammunition = 16
 crew_required = 3
 support_crew_optimal = 5
 projectile_speed = 100
