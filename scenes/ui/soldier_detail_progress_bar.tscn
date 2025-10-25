@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b0skff6y3jfq5"]
+
+[node name="SoldierDetailProgressBar" type="ProgressBar"]
+custom_minimum_size = Vector2(50, 15)
+max_value = 1.0
+show_percentage = false

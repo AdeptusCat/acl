@@ -26,7 +26,8 @@ signal update_timer_label(time_left_seconds: float)
 signal show_winner(team: int)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
-
+signal show_unit_details_in_ui(unit: Unit)
+signal hide_unit_details_in_ui
 
 var end_game_handled: bool = false
 
@@ -228,6 +229,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if units.is_empty():
 		if not selected_unit == null:
 			_deselect_unit(selected_unit)
+			hide_unit_details_in_ui.emit()
 		return
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
@@ -235,8 +237,10 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if unit and unit.team == Globals.team_player and not unit.broken and not unit.surrendered:
 		if unit == selected_unit:
 			_deselect_unit(unit)
+			hide_unit_details_in_ui.emit()
 		else:
 			_select_unit(unit)
+			show_unit_details_in_ui.emit(unit)
 			LOSHelper.clear_los()
 
 

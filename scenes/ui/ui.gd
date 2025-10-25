@@ -32,6 +32,8 @@ extends CanvasLayer
 @onready var firepower_label = $TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
 @onready var distance_label = $TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
 
+@onready var soldiers_grid_container = $UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer
+@onready var unit_details = $UnitDetails
 
 signal try_again
 
@@ -77,6 +79,8 @@ func _ready() -> void:
 	var ratio = pow(10.0, db / 20.0)
 	$VBoxContainer/VolumeSlider.value = ratio
 	$VBoxContainer/VolumeSlider2.value = ratio
+	
+	unit_details.hide()
 
 
 func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
@@ -119,19 +123,29 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 	for unit in units:
 		if not LOSHelper.visible_hexes[Globals.team_player].has(unit.current_hex):
 			continue
-		var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
-		unit_stats_container.add_child(unit_ui)
+		#var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
+		#unit_stats_container.add_child(unit_ui)
 		#var unit_detail_container = unit_ui.soldiers_detail_container.duplicate()
 		#unit_stats_container.add_child(unit_detail_container)
 		#var unit_stats_details = unit_stats_details_scene.instantiate()
 		#unit_stats_details.set_details(unit)
 		#unit_stats_container.add_child(unit_stats_details)
-		unit.ui.detail_ui = unit_ui
-		unit_ui._set_loadout(unit.squad_fire.soldiers)
-		unit_detail_counter += 1
+		
+		#unit.ui.detail_ui = unit_ui
+		#unit_ui._set_loadout(unit.squad_fire.soldiers)
+		#unit_detail_counter += 1
 	if unit_detail_counter == 0:
 		unit_stats.visible = false
-	
+
+
+func _on_show_unit_details(unit: Unit):
+	soldiers_grid_container.show_unit_detail(unit)
+	unit_details.show()
+
+
+func _on_hide_unit_details():
+	soldiers_grid_container.hide_unit_detail()
+	unit_details.hide()
 
 func show_tile_data(result: Dictionary):
 	#print(result)

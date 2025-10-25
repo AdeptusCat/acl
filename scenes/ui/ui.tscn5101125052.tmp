@@ -326,45 +326,41 @@ text = "456"
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 
-[node name="UnitDetails" type="MarginContainer" parent="."]
+[node name="Soldiers" type="MarginContainer" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -192.0
-offset_top = -50.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="ColorRect" type="ColorRect" parent="UnitDetails"]
+[node name="ColorRect" type="ColorRect" parent="Soldiers"]
 layout_mode = 2
 color = Color(0, 0, 0, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="UnitDetails"]
+[node name="MarginContainer" type="MarginContainer" parent="Soldiers"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="SoldiersContainer" type="VBoxContainer" parent="UnitDetails/MarginContainer"]
+[node name="SoldiersContainer" type="VBoxContainer" parent="Soldiers/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 2
 
-[node name="SoldierDetail" parent="UnitDetails/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
-visible = false
+[node name="SoldierDetail" parent="Soldiers/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
 layout_mode = 2
 
-[node name="WeaponName" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail/HBoxContainer" index="3"]
+[node name="WeaponName" parent="Soldiers/MarginContainer/SoldiersContainer/SoldierDetail/HBoxContainer" index="3"]
 text = "asdfasdas"
 
-[node name="SoldierDetail2" parent="UnitDetails/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
-visible = false
+[node name="SoldierDetail2" parent="Soldiers/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
 layout_mode = 2
 
-[node name="SoldiersGridContainer" type="GridContainer" parent="UnitDetails/MarginContainer/SoldiersContainer"]
+[node name="SoldiersGridContainer" type="GridContainer" parent="Soldiers/MarginContainer/SoldiersContainer"]
 layout_mode = 2
 columns = 4
 script = ExtResource("9_y220t")
@@ -375,5 +371,5 @@ soldier_detail_progress_bar_scene = ExtResource("11_hl07w")
 [connection signal="value_changed" from="VBoxContainer/VolumeSlider2" to="." method="_on_volume_slider_2_value_changed"]
 [connection signal="pressed" from="MarginContainer/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]
 
-[editable path="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail"]
-[editable path="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail2"]
+[editable path="Soldiers/MarginContainer/SoldiersContainer/SoldierDetail"]
+[editable path="Soldiers/MarginContainer/SoldiersContainer/SoldierDetail2"]
