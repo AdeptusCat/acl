@@ -273,24 +273,27 @@ layout_mode = 2
 max_value = 1.0
 step = 0.01
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="PanelContainer" parent="."]
 offset_right = 105.0
 offset_bottom = 51.0
+theme_override_styles/panel = ExtResource("15_mgwkc")
 
 [node name="ColorRect" type="ColorRect" parent="MarginContainer"]
+visible = false
 layout_mode = 2
 color = Color(0.233925, 0.233925, 0.233925, 1)
 
+[node name="TryAgainButton" type="Button" parent="MarginContainer"]
+layout_mode = 2
+text = "Try Again!"
+
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
-
-[node name="TryAgainButton" type="Button" parent="MarginContainer/MarginContainer"]
-layout_mode = 2
-text = "Try Again!"
 
 [node name="Label" type="Label" parent="."]
 offset_left = 78.0
@@ -485,7 +488,7 @@ autowrap_mode = 2
 
 [connection signal="value_changed" from="PanelContainer/VBoxContainer/VolumeSlider" to="." method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="PanelContainer/VBoxContainer/VolumeSlider2" to="." method="_on_volume_slider_2_value_changed"]
-[connection signal="pressed" from="MarginContainer/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]
+[connection signal="pressed" from="MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]
 [connection signal="mouse_entered" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" method="_on_mouse_entered"]

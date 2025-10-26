@@ -3,11 +3,11 @@ extends CanvasLayer
 signal game_started(team : int)
 signal hover_start_button(team: int)
 
-@onready var objective_label = $CenterContainer/VBoxContainer/ObjectiveLabel
-@onready var start_as_axis_button = $CenterContainer/VBoxContainer/StartAsAxisButton
-@onready var start_as_allies_button = $CenterContainer/VBoxContainer/StartAsAlliesButton
+@onready var objective_label = $CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectiveLabel
+@onready var start_as_axis_button = $CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAxisButton
+@onready var start_as_allies_button = $CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAlliesButton
 @onready var animation_player = $AnimationPlayer
-@onready var time_spinbox = $HBoxContainer/SpinBox
+@onready var time_spinbox = $CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
 
 
 var time: float
