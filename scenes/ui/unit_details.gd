@@ -4,7 +4,7 @@ extends PanelContainer
 @export var soldier_detail_progress_bar_scene: PackedScene
 
 @onready var unit_grid_container: GridContainer = $MarginContainer/SoldiersContainer/UnitGridContainer
-@onready var soldiers_grid_container: GridContainer = $MarginContainer/SoldiersContainer/SoldiersGridContainer
+@onready var soldiers_grid_container: GridContainer = $MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer
 @onready var unit_status_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus
 @onready var unit_type_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitType
 @onready var leadership_bonud_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus
@@ -119,14 +119,17 @@ func show_unit_detail(_unit: Unit):
 	unit_type_label.text = unit.get_squad_type_name(unit.squadType)
 	
 	show()
+	#await get_tree().process_frame
+	#reset_size()
 
 func hide_unit_detail():
 	hide()
 	if is_instance_valid(unit): 
-		unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
-		unit.soldiers_changed.disconnect(_on_soldiers_changed)
-		unit.state_chaged.disconnect(_on_state_chaged)
-		unit.unit_died.disconnect(_on_unit_died)
+		if unit.stress_system.leadership_changed.is_connected(_on_leadership_changed):
+			unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
+			unit.soldiers_changed.disconnect(_on_soldiers_changed)
+			unit.state_chaged.disconnect(_on_state_chaged)
+			unit.unit_died.disconnect(_on_unit_died)
 		unit = null
 
 func _on_unit_died(_unit: Unit):

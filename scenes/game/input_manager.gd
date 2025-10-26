@@ -10,10 +10,11 @@ signal zoom_out
 func set_input(enabled: bool):
 	set_process_input(enabled)
 
-
-func _input(event):
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_LEFT:
 		mouse_button_left_pressed.emit(event.position)
+func _input(event):
+	
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_RIGHT:
 		mouse_button_right_pressed.emit(event.position)
 	if event is InputEventMouseMotion:

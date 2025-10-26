@@ -32,7 +32,6 @@ extends CanvasLayer
 @onready var firepower_label = $TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
 @onready var distance_label = $TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
 
-@onready var soldiers_grid_container = $UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer
 @onready var unit_details = $UnitDetails
 
 signal try_again

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=18 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/UnitStatsDetails.tscn" id="5_0dwhk"]
 [ext_resource type="Texture2D" uid="uid://g6cb5rq3k4fd" path="res://assets/status/firepower.png" id="6_7vp6q"]
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
-[ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/soldier_detail.tscn" id="8_uegxj"]
 [ext_resource type="Script" uid="uid://oximlus24eji" path="res://scenes/ui/unit_details.gd" id="8_y220t"]
 [ext_resource type="PackedScene" uid="uid://8nx12bvlbyki" path="res://scenes/ui/soldier_detail_label.tscn" id="10_4kltc"]
 [ext_resource type="PackedScene" uid="uid://b0skff6y3jfq5" path="res://scenes/ui/soldier_detail_progress_bar.tscn" id="11_hl07w"]
@@ -198,6 +197,7 @@ visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="UnitStats" type="MarginContainer" parent="."]
+visible = false
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -307,6 +307,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TargetCoverDistance"]
 layout_mode = 0
@@ -314,12 +315,15 @@ offset_left = 26.0
 offset_top = -26.0
 offset_right = 81.0
 offset_bottom = 43.0
+mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="TargetCoverDistance/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="TargetCoverDistance/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 texture = ExtResource("6_7vp6q")
 expand_mode = 3
 
@@ -330,9 +334,11 @@ text = "123"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="TargetCoverDistance/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="TargetCoverDistance/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
+mouse_filter = 2
 texture = ExtResource("7_jcn1r")
 expand_mode = 3
 
@@ -343,17 +349,17 @@ text = "456"
 [node name="Cover" type="HBoxContainer" parent="TargetCoverDistance/VBoxContainer"]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="UnitDetails" type="PanelContainer" parent="."]
-anchors_preset = 3
+anchors_preset = -1
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -295.0
-offset_top = -144.0
 grow_horizontal = 0
 grow_vertical = 0
+mouse_filter = 1
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("8_y220t")
 soldier_detail_label_scene = ExtResource("10_4kltc")
@@ -370,23 +376,13 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 alignment = 2
 
-[node name="SoldierDetail" parent="UnitDetails/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
-visible = false
-layout_mode = 2
-
-[node name="WeaponName" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail/HBoxContainer" index="3"]
-text = "asdfasdas"
-
-[node name="SoldierDetail2" parent="UnitDetails/MarginContainer/SoldiersContainer" instance=ExtResource("8_uegxj")]
-visible = false
-layout_mode = 2
-
 [node name="UnitGridContainer" type="GridContainer" parent="UnitDetails/MarginContainer/SoldiersContainer"]
 layout_mode = 2
 
 [node name="TypeHeader" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 1
 text = "Type:"
 
 [node name="UnitType" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
@@ -399,6 +395,7 @@ script = ExtResource("12_hc5d0")
 [node name="StatusHeader" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 1
 text = "Status:"
 
 [node name="UnitStatus" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
@@ -410,6 +407,7 @@ script = ExtResource("13_0i47d")
 [node name="LeadershipHeader" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 1
 text = "Leadership Bonus:"
 
 [node name="LeadershipBonus" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
@@ -419,30 +417,52 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Type"
 script = ExtResource("14_mgwkc")
 
-[node name="SoldiersGridContainer" type="GridContainer" parent="UnitDetails/MarginContainer/SoldiersContainer"]
+[node name="FoldableContainer" type="FoldableContainer" parent="UnitDetails/MarginContainer/SoldiersContainer"]
+layout_mode = 2
+mouse_filter = 1
+title = "Soldier Details"
+
+[node name="SoldiersGridContainer" type="GridContainer" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer"]
 layout_mode = 2
 columns = 5
 
-[node name="Name" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer"]
+[node name="Name" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Name"
 
-[node name="Role" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer"]
+[node name="Role" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Role"
 
-[node name="Rank" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer"]
+[node name="Rank" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 1
 text = "Rank"
 
-[node name="Weapon" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer"]
+[node name="Weapon" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Weapon"
 
-[node name="Progress" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/SoldiersGridContainer"]
+[node name="Progress" type="Label" parent="UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
 layout_mode = 2
+mouse_filter = 1
 text = "Progress"
+
+[node name="Control2" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="Tooltip" type="PanelContainer" parent="."]
 offset_left = 45.0
@@ -495,6 +515,3 @@ autowrap_mode = 2
 [connection signal="mouse_exited" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" to="UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" method="_on_mouse_exited"]
-
-[editable path="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail"]
-[editable path="UnitDetails/MarginContainer/SoldiersContainer/SoldierDetail2"]

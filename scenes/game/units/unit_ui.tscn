@@ -91,6 +91,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 65.0
 offset_bottom = 65.0
+mouse_filter = 2
 script = ExtResource("1_wym2j")
 sprite_team_0 = ExtResource("2_pi8vb")
 sprite_team_1 = ExtResource("3_djxcy")
@@ -116,6 +117,7 @@ material = SubResource("ShaderMaterial_6v8n0")
 layout_mode = 0
 offset_right = 64.0
 offset_bottom = 64.0
+mouse_filter = 2
 texture = ExtResource("3_djxcy")
 expand_mode = 3
 
@@ -123,6 +125,7 @@ expand_mode = 3
 custom_minimum_size = Vector2(65, 10)
 layout_mode = 0
 scale = Vector2(1e-05, 1)
+mouse_filter = 2
 color = Color(0, 0.556863, 0, 1)
 
 [node name="CoverLabel" type="Label" parent="."]
@@ -140,6 +143,7 @@ text = "Broken
 [node name="UnitSelectedSprite" type="TextureRect" parent="."]
 visible = false
 layout_mode = 0
+mouse_filter = 2
 texture = ExtResource("4_3gpgx")
 
 [node name="UnitStatus" type="Control" parent="."]
@@ -148,6 +152,7 @@ offset_left = 14.0
 offset_top = 12.0
 offset_right = 14.0
 offset_bottom = 12.0
+mouse_filter = 2
 script = ExtResource("5_xe57g")
 idle_ger = ExtResource("6_sw8nw")
 idle_leader_ger = ExtResource("15_fekhn")
@@ -182,6 +187,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("8_3avcp")
 expand_mode = 3
 
@@ -190,6 +196,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("8_3avcp")
 expand_mode = 3
 
@@ -198,6 +205,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("9_kue5q")
 expand_mode = 3
 
@@ -206,6 +214,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = SubResource("CompressedTexture2D_8rtsn")
 expand_mode = 3
 
@@ -214,6 +223,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("10_sw8nw")
 expand_mode = 3
 
@@ -222,6 +232,7 @@ visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("11_87qi7")
 expand_mode = 3
 
@@ -229,6 +240,7 @@ expand_mode = 3
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 texture = ExtResource("12_sw8nw")
 expand_mode = 3
 
@@ -238,6 +250,7 @@ offset_left = 13.0
 offset_top = 59.0
 offset_right = 53.0
 offset_bottom = 69.0
+mouse_filter = 2
 alignment = 1
 
 [node name="Timer" type="Timer" parent="."]
@@ -246,11 +259,13 @@ alignment = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 
 [node name="StateTexture" type="TextureRect" parent="UnitStates"]
 layout_mode = 0
 offset_right = 20.0
 offset_bottom = 20.0
+mouse_filter = 2
 expand_mode = 1
 
 [node name="MembersCount" type="Label" parent="."]
@@ -292,15 +307,18 @@ offset_left = 10.0
 offset_top = 24.0
 offset_right = 10.0
 offset_bottom = 24.0
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SupportWeapons"]
 layout_mode = 0
 offset_right = 10.0
 offset_bottom = 24.0
+mouse_filter = 2
 
 [node name="SupportWeapon#1" type="MarginContainer" parent="SupportWeapons/VBoxContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#1"]
 layout_mode = 2
@@ -316,6 +334,7 @@ stretch_mode = 4
 [node name="SupportWeapon#2" type="MarginContainer" parent="SupportWeapons/VBoxContainer"]
 visible = false
 layout_mode = 2
+mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#2"]
 layout_mode = 2
@@ -353,6 +372,7 @@ offset_left = 39.0
 offset_top = -1.0
 offset_right = 59.0
 offset_bottom = 19.0
+mouse_filter = 2
 texture = ExtResource("35_755va")
 expand_mode = 1
 stretch_mode = 5
@@ -367,9 +387,11 @@ offset_top = 3.0
 offset_right = 63.0
 offset_bottom = 3.0
 grow_vertical = 0
+mouse_filter = 2
 
 [node name="SoldiersContainer" type="VBoxContainer" parent="Soldiers"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 0
 alignment = 2
 
@@ -380,6 +402,7 @@ offset_left = 68.0
 offset_top = -13.0
 offset_right = 158.0
 offset_bottom = 18.0
+mouse_filter = 2
 text = "Kill Soldier"
 
 [node name="Sprite2D2" type="Sprite2D" parent="."]

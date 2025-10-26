@@ -294,17 +294,17 @@ func show_casualty():
 
 func show_failure():
 	_spawn_popup("failure")
-	_spawn_flash("failure")
-	if detail_ui:
-		detail_ui.show_failure()
+	#_spawn_flash("failure")
+	#if detail_ui:
+		#detail_ui.show_failure()
 
 
 func show_success():
 	update_bar(0, 100)
 	_spawn_popup("success")
 	_spawn_flash("success")
-	if detail_ui:
-		detail_ui.show_success()
+	#if detail_ui:
+		#detail_ui.show_success()
 
 
 func _spawn_popup(type: String):
