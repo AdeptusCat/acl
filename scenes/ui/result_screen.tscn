@@ -1,63 +1,75 @@
-[gd_scene load_steps=3 format=3 uid="uid://b84f65gu8hp6e"]
+[gd_scene load_steps=4 format=3 uid="uid://b84f65gu8hp6e"]
 
 [ext_resource type="Script" uid="uid://bj7ycyqixb6gq" path="res://scenes/ui/result_screen.gd" id="1_e2y21"]
+[ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="2_gm1r0"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2_vmyrh"]
 
 [node name="ResultScreen" type="CanvasLayer"]
 script = ExtResource("1_e2y21")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_gm1r0")
+
+[node name="CenterContainer" type="CenterContainer" parent="Control"]
+layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -28.5
-offset_top = -20.0
-offset_right = 28.5
-offset_bottom = 20.0
+offset_left = -139.0
+offset_top = -54.5
+offset_right = 139.0
+offset_bottom = 54.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
 layout_mode = 2
 theme_override_styles/panel = ExtResource("2_vmyrh")
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="ResultLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ResultLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Winner"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="TryAgain" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="TryAgain" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Try Again"
 
-[node name="KeepPlaying" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="KeepPlaying" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Keep Playing"
 
-[node name="MarginContainer2" type="MarginContainer" parent="CenterContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="Control/CenterContainer"]
 visible = false
 layout_mode = 2
 
-[node name="ColorRect" type="ColorRect" parent="CenterContainer/MarginContainer2"]
+[node name="ColorRect" type="ColorRect" parent="Control/CenterContainer/MarginContainer2"]
 layout_mode = 2
 color = Color(0.65917045, 0.26540613, 0.0678071, 1)
 
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/TryAgain" to="." method="_on_try_again_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/KeepPlaying" to="." method="_on_keep_playing_pressed"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/TryAgain" to="." method="_on_try_again_pressed"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/KeepPlaying" to="." method="_on_keep_playing_pressed"]

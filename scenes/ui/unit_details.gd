@@ -8,7 +8,10 @@ extends PanelContainer
 @onready var unit_status_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus
 @onready var unit_type_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitType
 @onready var leadership_bonud_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus
+@onready var panel: PanelContainer = self
 
+
+var opacity_tween: Tween = null
 
 enum Entry { NAME, ROLE, RANK, WEAPON, PROGRESS_BAR }
 
@@ -16,7 +19,6 @@ var unit: Unit
 var soldiers: Array[Soldier]
 var soldier_entries_by_soldier: Dictionary[Soldier, Dictionary]
 var soldiers_entries: Array[Dictionary]
-@onready var panel: PanelContainer = self
 
 
 func _ready() -> void:
@@ -77,6 +79,9 @@ func show_unit_detail(_unit: Unit):
 	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
+	modulate.a = 0.0
+	tween_opacity(1.0)
+	
 	soldiers = _unit.squad_fire.soldiers
 	var i: int = 0
 	soldier_entries_by_soldier.clear()
@@ -126,6 +131,7 @@ func show_unit_detail(_unit: Unit):
 	#reset_size()
 
 func hide_unit_detail():
+	await tween_opacity(0.0).finished
 	#hide()
 	# this hides it effectively
 	panel.grow_horizontal = Control.GROW_DIRECTION_END
@@ -198,3 +204,12 @@ func stress_to_plus_string(value: float) -> String:
 			#result += "+"
 			#i += 1
 	return result
+
+
+
+func tween_opacity(to: float):
+	if opacity_tween: 
+		opacity_tween.kill()
+	opacity_tween = get_tree().create_tween()
+	opacity_tween.tween_property(self, 'modulate:a', to, 0.3)
+	return opacity_tween

@@ -3,36 +3,36 @@ extends CanvasLayer
 @export var ground_layer : HexagonTileMapLayer
 @export var unit_stats_details_scene : PackedScene
 
-@onready var timer_label = $HBoxContainer/TimerLabel
+@onready var timer_label = $Control/HBoxContainer/TimerLabel
 
-@onready var ground_sprite = $Node2D/GroundSprite
-@onready var wall_sprite = $Node2D/WallSprite
-@onready var building_sprite = $Node2D/BuildingSprite
-@onready var terrain_sprite = $Node2D/TerrainSprite
+@onready var ground_sprite = $Control/Node2D/GroundSprite
+@onready var wall_sprite = $Control/Node2D/WallSprite
+@onready var building_sprite = $Control/Node2D/BuildingSprite
+@onready var terrain_sprite = $Control/Node2D/TerrainSprite
 
-@onready var wall_n_sprite = $Node2D/WallNSprite
-@onready var wall_ne_sprite = $Node2D/WallNESprite
-@onready var wall_se_sprite = $Node2D/WallSESprite
-@onready var wall_s_sprite = $Node2D/WallSSprite
-@onready var wall_sw_sprite = $Node2D/WallSWSprite
-@onready var wall_nw_sprite = $Node2D/WallNWSprite
+@onready var wall_n_sprite = $Control/Node2D/WallNSprite
+@onready var wall_ne_sprite = $Control/Node2D/WallNESprite
+@onready var wall_se_sprite = $Control/Node2D/WallSESprite
+@onready var wall_s_sprite = $Control/Node2D/WallSSprite
+@onready var wall_sw_sprite = $Control/Node2D/WallSWSprite
+@onready var wall_nw_sprite = $Control/Node2D/WallNWSprite
 
-@onready var coverHBoxContainer = $Control/CoverHBoxContainer
+@onready var coverHBoxContainer = $Control/Control/CoverHBoxContainer
 
-@onready var terrainDetail = $Node2D
+@onready var terrainDetail = $Control/Node2D
 
 @onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
 
-@onready var tile_stats = $TileStats
-@onready var unit_stats = $UnitStats
-@onready var unit_stats_container = $UnitStats/MarginContainer/VBoxContainer/UnitStatsContainer
+@onready var tile_stats = $Control/TileStats
+@onready var unit_stats = $Control/UnitStats
+@onready var unit_stats_container = $Control/UnitStats/MarginContainer/VBoxContainer/UnitStatsContainer
 
-@onready var target_cover_distance = $TargetCoverDistance
-@onready var cover_container = $TargetCoverDistance/VBoxContainer/Cover
-@onready var firepower_label = $TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
-@onready var distance_label = $TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
+@onready var target_cover_distance = $Control/TargetCoverDistance
+@onready var cover_container = $Control/TargetCoverDistance/VBoxContainer/Cover
+@onready var firepower_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
+@onready var distance_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
 
-@onready var unit_details = $UnitDetails
+@onready var unit_details = $Control/UnitDetails
 
 signal try_again
 
@@ -53,31 +53,31 @@ func _ready() -> void:
 	terrainDetail.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
 	terrainDetail.position.y -= terrainDetail.size.y + terrainDetail.size.x / 10
 	terrainDetail.position.x += terrainDetail.size.x / 5
-	$Control.position.y = terrainDetail.position.y + terrainDetail.size.y / 2.5
-	$Control.position.x = terrainDetail.position.x + terrainDetail.size.x / 5
+	$Control/Control.position.y = terrainDetail.position.y + terrainDetail.size.y / 2.5
+	$Control/Control.position.x = terrainDetail.position.x + terrainDetail.size.x / 5
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
-	$TileStats/Blocked.scale = detail_zoom_factor * 0.02
-	$TileStats/Hindrance.scale = detail_zoom_factor * 0.02
-	$TileStats/Blocked.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
-	$TileStats/Hindrance.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
-	$TileStats/CoverN1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, 0)
-	$TileStats/CoverN2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , 0)
-	$TileStats/CoverNW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4)
-	$TileStats/CoverNW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
-	$TileStats/CoverSW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4 * 3)
-	$TileStats/CoverSW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
-	$TileStats/CoverS1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, terrainDetail.size.y)
-	$TileStats/CoverS2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , terrainDetail.size.y)
-	$TileStats/CoverSE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4 * 3)
-	$TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
-	$TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
-	$TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+	$Control/TileStats/Blocked.scale = detail_zoom_factor * 0.02
+	$Control/TileStats/Hindrance.scale = detail_zoom_factor * 0.02
+	$Control/TileStats/Blocked.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
+	$Control/TileStats/Hindrance.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
+	$Control/TileStats/CoverN1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, 0)
+	$Control/TileStats/CoverN2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , 0)
+	$Control/TileStats/CoverNW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4)
+	$Control/TileStats/CoverNW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+	$Control/TileStats/CoverSW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4 * 3)
+	$Control/TileStats/CoverSW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
+	$Control/TileStats/CoverS1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, terrainDetail.size.y)
+	$Control/TileStats/CoverS2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , terrainDetail.size.y)
+	$Control/TileStats/CoverSE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4 * 3)
+	$Control/TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
+	$Control/TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
+	$Control/TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
 	var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
 	var ratio = pow(10.0, db / 20.0)
-	$PanelContainer/VBoxContainer/VolumeSlider.value = ratio
-	$PanelContainer/VBoxContainer/VolumeSlider2.value = ratio
+	$Control/PanelContainer/VBoxContainer/VolumeSlider.value = ratio
+	$Control/PanelContainer/VBoxContainer/VolumeSlider2.value = ratio
 	
 	unit_details.hide()
 
@@ -102,7 +102,7 @@ func hide_target_hex_cover_distance():
 
 
 func _on_update_timer_label(time_left_seconds : float):
-	$HBoxContainer.visible = true
+	$Control/HBoxContainer.visible = true
 	var minutes = int(time_left_seconds) / 60
 	var seconds = int(time_left_seconds) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
@@ -157,51 +157,51 @@ func show_tile_data(result: Dictionary):
 	result.hindrance
 	result.tile_name
 	
-	$Label.text = result.tile_name
+	$Control/Label.text = result.tile_name
 	for child in tile_stats.get_children():
 		child.visible = false
 	
 	if result.hindrance == true:
-		$TileStats/Hindrance.visible = true
+		$Control/TileStats/Hindrance.visible = true
 	
 	if result.blocking == true:
-		$TileStats/Blocked.visible = true
+		$Control/TileStats/Blocked.visible = true
 	
 	if result.cover_n == 1:
-		$TileStats/CoverN1.visible = true
+		$Control/TileStats/CoverN1.visible = true
 	elif result.cover_n == 2:
-		$TileStats/CoverN1.visible = true
-		$TileStats/CoverN2.visible = true
+		$Control/TileStats/CoverN1.visible = true
+		$Control/TileStats/CoverN2.visible = true
 	
 	if result.cover_ne == 1:
-		$TileStats/CoverNE1.visible = true
+		$Control/TileStats/CoverNE1.visible = true
 	elif result.cover_ne == 2:
-		$TileStats/CoverNE1.visible = true
-		$TileStats/CoverNE2.visible = true
+		$Control/TileStats/CoverNE1.visible = true
+		$Control/TileStats/CoverNE2.visible = true
 	
 	if result.cover_se == 1:
-		$TileStats/CoverSE1.visible = true
+		$Control/TileStats/CoverSE1.visible = true
 	elif result.cover_se == 2:
-		$TileStats/CoverSE1.visible = true
-		$TileStats/CoverSE2.visible = true
+		$Control/TileStats/CoverSE1.visible = true
+		$Control/TileStats/CoverSE2.visible = true
 	
 	if result.cover_s == 1:
-		$TileStats/CoverS2.visible = true
+		$Control/TileStats/CoverS2.visible = true
 	elif result.cover_s == 2:
-		$TileStats/CoverS1.visible = true
-		$TileStats/CoverS2.visible = true
+		$Control/TileStats/CoverS1.visible = true
+		$Control/TileStats/CoverS2.visible = true
 	
 	if result.cover_sw == 1:
-		$TileStats/CoverSW2.visible = true
+		$Control/TileStats/CoverSW2.visible = true
 	elif result.cover_sw == 2:
-		$TileStats/CoverSW1.visible = true
-		$TileStats/CoverSW2.visible = true
+		$Control/TileStats/CoverSW1.visible = true
+		$Control/TileStats/CoverSW2.visible = true
 	
 	if result.cover_nw == 1:
-		$TileStats/CoverNW2.visible = true
+		$Control/TileStats/CoverNW2.visible = true
 	elif result.cover_nw == 2:
-		$TileStats/CoverNW1.visible = true
-		$TileStats/CoverNW2.visible = true
+		$Control/TileStats/CoverNW1.visible = true
+		$Control/TileStats/CoverNW2.visible = true
 	
 	for child in coverHBoxContainer.get_children():
 		child.visible = false
@@ -309,7 +309,7 @@ func _on_volume_slider_value_changed(value: float) -> void:
 	if idx == -1:
 		push_warning("No Master bus found!")
 		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($PanelContainer/VBoxContainer/VolumeSlider.value))
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($Control/PanelContainer/VBoxContainer/VolumeSlider.value))
 
 
 func _on_volume_slider_2_value_changed(value: float) -> void:
@@ -317,4 +317,4 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 	if idx == -1:
 		push_warning("No Music bus found!")
 		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($PanelContainer/VBoxContainer/VolumeSlider2.value))
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($Control/PanelContainer/VBoxContainer/VolumeSlider2.value))

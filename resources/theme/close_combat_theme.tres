@@ -1,0 +1,36 @@
+[gd_resource type="Theme" load_steps=7 format=3]
+
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jowd1"]
+bg_color = Color(0.267, 0.251, 0.184, 1.0) # #44402f
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.420, 0.404, 0.282, 1.0) # #6b6748
+
+
+[resource]
+
+# Global fallbacks
+colors/font_color = Color(0.839, 0.827, 0.761, 1.0)         # #d6d3c2
+colors/font_disabled_color = Color(0.478, 0.467, 0.416, 1.0) # #7a776a
+
+# Label
+Label/colors/font_color = Color(0.839, 0.827, 0.761, 1.0)
+Label/colors/font_disabled_color = Color(0.478, 0.467, 0.416, 1.0)
+Label/font_sizes/font_size = 16
+
+# Button
+Button/styles/normal = SubResource("StyleBoxFlat_jowd1")
+Button/styles/hover = SubResource("StyleBoxFlat_jowd1")
+Button/colors/font_color = Color(0.839, 0.827, 0.761, 1.0)
+Button/colors/font_hover_color = Color(0.839, 0.827, 0.761, 1.0)
+Button/colors/font_pressed_color = Color(0.839, 0.827, 0.761, 1.0)
+Button/colors/font_disabled_color = Color(0.478, 0.467, 0.416, 1.0)
+Button/font_sizes/font_size = 16
+

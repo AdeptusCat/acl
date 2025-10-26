@@ -65,9 +65,8 @@ func toggle_on(tooltip: TooltipSignals.Tooltip):
 	reset_size()
 
 func toggle_off():
-		modulate.a = 0.0
-		await tween_opacity(0.0).finished
-		hide()
+	await tween_opacity(0.0).finished
+	hide()
 		
 
 func tween_opacity(to: float):

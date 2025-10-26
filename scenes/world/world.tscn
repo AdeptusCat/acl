@@ -1519,7 +1519,6 @@ offset_bottom = 329.0
 mouse_filter = 2
 
 [node name="StartScreen" parent="." instance=ExtResource("21_1cxds")]
-visible = false
 
 [node name="ResultScreen" parent="." instance=ExtResource("22_2m0ga")]
 visible = false
