@@ -1,8 +1,8 @@
 [gd_scene load_steps=7 format=3 uid="uid://yvtxxd7huor6"]
 
-[ext_resource type="Script" uid="uid://bpfe3c7qj66kp" path="res://morale_flash.gd" id="1_efqsh"]
-[ext_resource type="Texture2D" uid="uid://7enhj63c8t76" path="res://assets/green_flash.png" id="2_o3n17"]
-[ext_resource type="Texture2D" uid="uid://d2jsgtia0rjdj" path="res://assets/red_flash.png" id="3_o066e"]
+[ext_resource type="Script" uid="uid://bpfe3c7qj66kp" path="res://scenes/game/effects/morale_flash.gd" id="1_efqsh"]
+[ext_resource type="Texture2D" uid="uid://7enhj63c8t76" path="res://assets/effects/green_flash.png" id="2_o3n17"]
+[ext_resource type="Texture2D" uid="uid://d2jsgtia0rjdj" path="res://assets/effects/red_flash.png" id="3_o066e"]
 
 [sub_resource type="Animation" id="Animation_o066e"]
 length = 0.001
