@@ -78,7 +78,6 @@ var unit_visible_enemies: Dictionary
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
 
-
 #func _ready() -> void:
 	#var cover: float = 0.0 
 	#cover = cover_multiplier_exp(1.0)

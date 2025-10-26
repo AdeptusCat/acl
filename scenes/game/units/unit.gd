@@ -9,8 +9,13 @@ enum SquadType {
 	MG,
 	ANTITANK,
 	MORTAR,
-	
+	PLATOON_HEADQUARTERS,
+	COMPANY_HEADQUARTERS,
 }
+
+enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
+
+
 
 # === Exported ===
 @export var snap_to_grid := true
@@ -38,6 +43,8 @@ enum SquadType {
 
 # convenience buttons (toggle to run in-editor)
 @export var make_rifle_squad: bool = false : set = _make_rifle_squad
+@export var make_platoon_headquarters_squad: bool = false : set = _make_platoon_headquarters_squad
+@export var make_company_headquarters_squad: bool = false : set = _make_company_headquarters_squad
 @export var make_light_mg_team: bool = false : set = _make_light_mg_team
 @export var make_anti_tank_squad: bool = false : set = _make_anti_tank_squad
 @export var make_light_mortar_squad: bool = false : set = _make_light_mortar_squad
@@ -79,6 +86,10 @@ signal deselect_unit(unit)
 signal started_moving
 signal unit_surrendered
 signal unit_entered_new_hex(new_hex: Vector2i)
+
+# unit details signals
+signal soldiers_changed
+signal state_chaged(state: int)
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -428,6 +439,190 @@ func _make_rifle_squad(v: bool) -> void:
 				L.nickname = "Rifle %d" % int(i + 1)
 				L.rank_grade = RankGrades.Grade.SOLDIER
 				L.weapon = rifle
+				i += 1
+		notify_property_list_changed()
+
+
+func _make_platoon_headquarters_squad(v: bool) -> void:
+	if v:
+		squadType = SquadType.PLATOON_HEADQUARTERS
+		make_rifle_squad = false
+		if team == 0:
+			var group_size: int = 7
+			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
+			var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			#var mg: WeaponSpec = preload("res://resources/weapons/mg34.tres")
+			#var riflegrenade: WeaponSpec = preload("res://resources/weapons/kar98_riflegrenade.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Zugführer"
+			leader.rank_grade = RankGrades.Grade.PLATOON_LEADER
+			leader.weapon = smg
+			i += 1
+			var platoon_seargeant: SoldierLoadout = loadouts[i]
+			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_seargeant.nickname = "Zugtruppführer"
+			platoon_seargeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_seargeant.weapon = smg
+			i += 1
+			var platoon_guide: SoldierLoadout = loadouts[i]
+			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide.nickname = "Melder"
+			platoon_guide.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_guide.weapon = rifle
+			i += 1
+			var platoon_guide1: SoldierLoadout = loadouts[i]
+			platoon_guide1.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide1.nickname = "Sanitäter"
+			platoon_guide1.rank_grade = RankGrades.Grade.TEAM_LEADER
+			platoon_guide1.weapon = rifle
+			i += 1
+			var platoon_guide2: SoldierLoadout = loadouts[i]
+			platoon_guide2.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide2.nickname = "Funker"
+			platoon_guide2.rank_grade = RankGrades.Grade.SOLDIER
+			platoon_guide2.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Messenger %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 5
+			var rifle: WeaponSpec = preload("res://resources/weapons/m1_garand.tres")
+			var carbine: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
+			var riflegrenade: WeaponSpec = preload("res://resources/weapons/springfield_1903_riflegrenade.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			#var mg: WeaponSpec = preload("res://resources/weapons/m1918a1_bar.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Platoon Leader"
+			leader.rank_grade = RankGrades.Grade.PLATOON_LEADER
+			leader.weapon = carbine
+			i += 1
+			var platoon_seargeant: SoldierLoadout = loadouts[i]
+			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_seargeant.nickname = "Platoon Seargeant"
+			platoon_seargeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_seargeant.weapon = rifle
+			i += 1
+			var platoon_guide: SoldierLoadout = loadouts[i]
+			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide.nickname = "Platoon Guide"
+			platoon_guide.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_guide.weapon = riflegrenade
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Messenger %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		notify_property_list_changed()
+
+
+func _make_company_headquarters_squad(v: bool) -> void:
+	if v:
+		squadType = SquadType.COMPANY_HEADQUARTERS
+		make_rifle_squad = false
+		if team == 0:
+			var group_size: int = 7
+			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
+			var smg: WeaponSpec = preload("res://resources/weapons/mp40.tres")
+			#var mg: WeaponSpec = preload("res://resources/weapons/mg34.tres")
+			#var riflegrenade: WeaponSpec = preload("res://resources/weapons/kar98_riflegrenade.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Kompaniechef"
+			leader.rank_grade = RankGrades.Grade.COMPANY_LEADER
+			leader.weapon = smg
+			i += 1
+			var platoon_seargeant: SoldierLoadout = loadouts[i]
+			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_seargeant.nickname = "Zugführer"
+			platoon_seargeant.rank_grade = RankGrades.Grade.PLATOON_LEADER
+			platoon_seargeant.weapon = smg
+			i += 1
+			var platoon_guide: SoldierLoadout = loadouts[i]
+			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide.nickname = "Hauptfeldwebel"
+			platoon_guide.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_guide.weapon = smg
+			i += 1
+			var platoon_guide2: SoldierLoadout = loadouts[i]
+			platoon_guide2.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide2.nickname = "Melderführer"
+			platoon_guide2.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_guide2.weapon = smg
+			i += 1
+			var platoon_guide3: SoldierLoadout = loadouts[i]
+			platoon_guide3.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			platoon_guide3.nickname = "Funker"
+			platoon_guide3.rank_grade = RankGrades.Grade.TEAM_LEADER
+			platoon_guide3.weapon = rifle
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Messenger %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = rifle
+				i += 1
+		else:
+			var group_size: int = 8
+			#var rifle: WeaponSpec = preload("res://resources/weapons/m1_garand.tres")
+			var carbine: WeaponSpec = preload("res://resources/weapons/m1_carbine.tres")
+			var riflegrenade: WeaponSpec = preload("res://resources/weapons/springfield_1903_riflegrenade.tres")
+			#var smg: WeaponSpec = preload("res://resources/weapons/m3_grease_gun.tres")
+			#var mg: WeaponSpec = preload("res://resources/weapons/m1918a1_bar.tres")
+			_resize_loadouts(group_size)
+			var i: int = 0
+			var leader: SoldierLoadout = loadouts[i]
+			leader.role = RankGrades.Role.SQUAD_LEADER
+			leader.nickname = "Company Commander"
+			leader.rank_grade = RankGrades.Grade.COMPANY_LEADER
+			leader.weapon = carbine
+			i += 1
+			var company_executive_officer: SoldierLoadout = loadouts[i]
+			company_executive_officer.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			company_executive_officer.nickname = "Executive Officer"
+			company_executive_officer.rank_grade = RankGrades.Grade.PLATOON_LEADER
+			company_executive_officer.weapon = carbine
+			i += 1
+			var company_first_sergeant: SoldierLoadout = loadouts[i]
+			company_first_sergeant.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			company_first_sergeant.nickname = "First Sergeant"
+			company_first_sergeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			company_first_sergeant.weapon = carbine
+			i += 1
+			var communications_sergeant: SoldierLoadout = loadouts[i]
+			communications_sergeant.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			communications_sergeant.nickname = "First Sergeant"
+			communications_sergeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			communications_sergeant.weapon = riflegrenade
+			i += 1
+			var bugler: SoldierLoadout = loadouts[i]
+			bugler.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
+			bugler.nickname = "Bugler"
+			bugler.rank_grade = RankGrades.Grade.ASSISTANT_TEAM_LEADER
+			bugler.weapon = riflegrenade
+			i += 1
+			while i < group_size:
+				var L: SoldierLoadout = loadouts[i]
+				L.role = RankGrades.Role.SOLDIER
+				L.nickname = "Messenger %d" % int(i + 1)
+				L.rank_grade = RankGrades.Grade.SOLDIER
+				L.weapon = carbine
 				i += 1
 		notify_property_list_changed()
 
@@ -802,6 +997,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -
 	if casualties > 0:
 		_apply_casualties(casualties)
 		ui.show_casualty()
+		soldiers_changed.emit()
 	stress_system.apply_stress(df, ds)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()
@@ -1061,6 +1257,28 @@ func _set_combat_ineffective():
 	#emit_signal("state_changed",
 		#StressController.MoraleState.PANIC, stress_system.state)
 
+func get_state_name(state: MoraleState) -> String:
+	match state:
+		MoraleState.NORMAL: return "Ok"
+		MoraleState.CAUTIOUS: return "Cautious"
+		MoraleState.PINNED: return "Pinned"
+		MoraleState.PANIC: return "Panic"
+		MoraleState.COMBAT_INEFFECTIVE: return "Combat Ineffective"
+		_: return "Unknown"
+		
+
+
+func get_squad_type_name(type: SquadType) -> String:
+	match type:
+		SquadType.Rifle: return "Rifle Squad"
+		SquadType.MG: return "Machine Gun Squad"
+		SquadType.ANTITANK: return "Antitank Team"
+		SquadType.MORTAR: return "Mortar Squad"
+		SquadType.PLATOON_HEADQUARTERS: return "Platoon Headquarters"
+		SquadType.COMPANY_HEADQUARTERS: return "Company Headquarters"
+		_: return "Unknown"
+		
+
 func surrender():
 	movement.move_to_hex(current_hex)
 	surrendered = true
@@ -1072,7 +1290,7 @@ func surrender():
 
 func die():
 	alive = false
-	emit_signal("unit_died", self)
+	unit_died.emit(self)
 	await ui.die()
 	queue_free()
 
@@ -1098,7 +1316,7 @@ func _on_stress_changed(stress: float):
 	ui.update_bar(int(stress), 100)
 
 
-enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
+
 # Single, merged handler — keep ONLY this one in unit.gd
 func _on_state_changed(prev:int, next:int) -> void:
 	
@@ -1121,6 +1339,8 @@ func _on_state_changed(prev:int, next:int) -> void:
 
 	## 3) Visuals/pose
 	ui.state_changed(next)
+	
+	state_chaged.emit(next)
 
 
 func _on_unit_ui_debug_kill_soldier() -> void:

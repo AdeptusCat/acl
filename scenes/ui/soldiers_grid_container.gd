@@ -13,6 +13,7 @@ var soldiers_entries: Array[Dictionary]
 
 
 func _ready() -> void:
+	
 	for i in range(12):
 		var soldier_entries: Dictionary[Entry, Control]
 		
@@ -42,7 +43,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if unit:
+	if is_instance_valid(unit):
 		for s in soldier_entries_by_soldier:
 			var progress_bar: ProgressBar = soldier_entries_by_soldier[s][Entry.PROGRESS_BAR]
 			if s:
@@ -89,7 +90,13 @@ func show_unit_detail(_unit: Unit):
 		for entry in entries.values():
 			entry.hide()
 		i += 1
-
+	
+	unit.soldiers_changed.connect(_on_soldiers_changed)
 
 func hide_unit_detail():
+	unit.soldiers_changed.disconnect(_on_soldiers_changed)
 	unit = null
+
+func _on_soldiers_changed():
+	if is_instance_valid(unit):
+		show_unit_detail(unit)

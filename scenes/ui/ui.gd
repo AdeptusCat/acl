@@ -77,8 +77,8 @@ func _ready() -> void:
 	$TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
 	var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
 	var ratio = pow(10.0, db / 20.0)
-	$VBoxContainer/VolumeSlider.value = ratio
-	$VBoxContainer/VolumeSlider2.value = ratio
+	$PanelContainer/VBoxContainer/VolumeSlider.value = ratio
+	$PanelContainer/VBoxContainer/VolumeSlider2.value = ratio
 	
 	unit_details.hide()
 
@@ -139,13 +139,11 @@ func show_unit_data(map_hex: Vector2i, units: Array):
 
 
 func _on_show_unit_details(unit: Unit):
-	soldiers_grid_container.show_unit_detail(unit)
-	unit_details.show()
+	unit_details.show_unit_detail(unit)
 
 
 func _on_hide_unit_details():
-	soldiers_grid_container.hide_unit_detail()
-	unit_details.hide()
+	unit_details.hide_unit_detail()
 
 func show_tile_data(result: Dictionary):
 	#print(result)
@@ -312,7 +310,7 @@ func _on_volume_slider_value_changed(value: float) -> void:
 	if idx == -1:
 		push_warning("No Master bus found!")
 		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($VBoxContainer/VolumeSlider.value))
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($PanelContainer/VBoxContainer/VolumeSlider.value))
 
 
 func _on_volume_slider_2_value_changed(value: float) -> void:
@@ -320,4 +318,4 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 	if idx == -1:
 		push_warning("No Music bus found!")
 		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($VBoxContainer/VolumeSlider2.value))
+	AudioServer.set_bus_volume_db(idx, _ratio_to_db($PanelContainer/VBoxContainer/VolumeSlider2.value))

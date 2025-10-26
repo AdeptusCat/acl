@@ -22,6 +22,7 @@ LOSHelper="*res://scenes/game/los/los_helper.tscn"
 Globals="*res://autoloads/globals.gd"
 STATES="*res://autoloads/unit_states.gd"
 RankGrades="*res://autoloads/rank_grades.gd"
+TooltipSignals="*res://autoloads/tooltip_signals.gd"
 
 [display]
 
