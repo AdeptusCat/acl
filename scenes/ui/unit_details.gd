@@ -16,7 +16,7 @@ var unit: Unit
 var soldiers: Array[Soldier]
 var soldier_entries_by_soldier: Dictionary[Soldier, Dictionary]
 var soldiers_entries: Array[Dictionary]
-
+@onready var panel: PanelContainer = self
 
 
 func _ready() -> void:
@@ -73,6 +73,9 @@ func get_makeready_progress(soldier: Soldier) -> float:
 
 
 func show_unit_detail(_unit: Unit):
+	# this shows the panel without weird resizing issue when using hiding()/showing()
+	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
 	soldiers = _unit.squad_fire.soldiers
 	var i: int = 0
@@ -123,7 +126,11 @@ func show_unit_detail(_unit: Unit):
 	#reset_size()
 
 func hide_unit_detail():
-	hide()
+	#hide()
+	# this hides it effectively
+	panel.grow_horizontal = Control.GROW_DIRECTION_END
+	panel.grow_vertical = Control.GROW_DIRECTION_END
+	
 	if is_instance_valid(unit): 
 		if unit.stress_system.leadership_changed.is_connected(_on_leadership_changed):
 			unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
