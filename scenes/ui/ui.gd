@@ -285,8 +285,8 @@ func show_tile_data(result: Dictionary):
 	else:
 		terrain_sprite.texture = null
 	
-	#for child in terrainDetail.get_children():
-		#child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
+	for child in terrainDetail.get_children():
+		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
 
 
 func _on_try_again_button_pressed() -> void:

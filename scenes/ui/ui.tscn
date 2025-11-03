@@ -100,8 +100,6 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = 608.0
-offset_bottom = 608.0
 grow_vertical = 0
 
 [node name="GroundSprite" type="Sprite2D" parent="Control/Node2D"]

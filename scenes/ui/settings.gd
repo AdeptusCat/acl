@@ -18,3 +18,7 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 		return
 	SessionAudio.set_music_linear(value)
 	SessionAudio.sync_sliders([s1, s2])
+
+
+func _on_foldable_container_folding_changed(is_folded: bool) -> void:
+	size.y = 0
