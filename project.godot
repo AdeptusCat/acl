@@ -13,7 +13,7 @@ config_version=5
 config/name="AdvancedCompanyLeader"
 run/main_scene="uid://dbbh255dq65on"
 config/features=PackedStringArray("4.5", "Forward Plus")
-boot_splash/image="uid://bdoualdhfv04b"
+boot_splash/image="uid://dxadjck0dj44"
 config/icon="res://icon.svg"
 
 [autoload]
@@ -23,6 +23,7 @@ Globals="*res://autoloads/globals.gd"
 STATES="*res://autoloads/unit_states.gd"
 RankGrades="*res://autoloads/rank_grades.gd"
 TooltipSignals="*res://autoloads/tooltip_signals.gd"
+SessionAudio="*res://autoloads/session_audio.gd"
 
 [display]
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=20 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/UnitStatsDetails.tscn" id="5_0dwhk"]
 [ext_resource type="Texture2D" uid="uid://g6cb5rq3k4fd" path="res://assets/status/firepower.png" id="6_7vp6q"]
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
+[ext_resource type="Script" uid="uid://dk7d80ay1lo81" path="res://scenes/ui/settings.gd" id="8_4w2x3"]
 [ext_resource type="Script" uid="uid://oximlus24eji" path="res://scenes/ui/unit_details.gd" id="8_y220t"]
 [ext_resource type="PackedScene" uid="uid://8nx12bvlbyki" path="res://scenes/ui/soldier_detail_label.tscn" id="10_4kltc"]
 [ext_resource type="PackedScene" uid="uid://b0skff6y3jfq5" path="res://scenes/ui/soldier_detail_progress_bar.tscn" id="11_hl07w"]
@@ -247,7 +248,7 @@ layout_mode = 2
 [node name="UnitStatsContainer" type="HBoxContainer" parent="Control/UnitStats/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Control"]
+[node name="Settings" type="PanelContainer" parent="Control"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -256,11 +257,16 @@ offset_left = -189.0
 offset_bottom = 165.0
 grow_horizontal = 0
 theme_override_styles/panel = ExtResource("15_mgwkc")
+script = ExtResource("8_4w2x3")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/PanelContainer"]
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/Settings"]
+layout_mode = 2
+title = "Settings"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Settings/FoldableContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Controls:
@@ -269,28 +275,30 @@ right click - move/attack unit
 WASD move camera
 mouse wheel - zoom"
 
-[node name="Label3" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+[node name="Label3" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+[node name="Label2" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Master Volume:"
 
-[node name="VolumeSlider" type="HSlider" parent="Control/PanelContainer/VBoxContainer"]
+[node name="VolumeSlider" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
+value = 1.0
 
-[node name="Label4" type="Label" parent="Control/PanelContainer/VBoxContainer"]
+[node name="Label4" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Music Volume:"
 
-[node name="VolumeSlider2" type="HSlider" parent="Control/PanelContainer/VBoxContainer"]
+[node name="VolumeSlider2" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
+value = 1.0
 
 [node name="MarginContainer" type="PanelContainer" parent="Control"]
 layout_mode = 0
@@ -532,8 +540,9 @@ The Moral Status of the selected Squad"
 fit_content = true
 autowrap_mode = 2
 
-[connection signal="value_changed" from="Control/PanelContainer/VBoxContainer/VolumeSlider" to="." method="_on_volume_slider_value_changed"]
-[connection signal="value_changed" from="Control/PanelContainer/VBoxContainer/VolumeSlider2" to="." method="_on_volume_slider_2_value_changed"]
+[connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
+[connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
+[connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
 [connection signal="pressed" from="Control/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]
 [connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_exited"]

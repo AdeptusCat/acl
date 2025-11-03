@@ -12,6 +12,7 @@ range_hexes = 20
 kind = 1
 family = 3
 ammo_type = 1
+ammunition_start = 16
 ammunition = 16
 crew_required = 2
 support_crew_optimal = 5

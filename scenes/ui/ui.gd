@@ -74,12 +74,15 @@ func _ready() -> void:
 	$Control/TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
 	$Control/TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
 	$Control/TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
-	var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
-	var ratio = pow(10.0, db / 20.0)
-	$Control/PanelContainer/VBoxContainer/VolumeSlider.value = ratio
-	$Control/PanelContainer/VBoxContainer/VolumeSlider2.value = ratio
+	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
+	##var db = -2
+	#var ratio = pow(10.0, db / 20.0)
+	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider.value = ratio
+	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2.value = ratio
 	
 	unit_details.hide()
+
+
 
 
 func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
@@ -282,8 +285,8 @@ func show_tile_data(result: Dictionary):
 	else:
 		terrain_sprite.texture = null
 	
-	for child in terrainDetail.get_children():
-		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
+	#for child in terrainDetail.get_children():
+		#child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
 
 
 func _on_try_again_button_pressed() -> void:
@@ -302,19 +305,3 @@ func _ratio_to_db(ratio: float) -> float:
 	else:
 		db = 20.0 * log(ratio)
 	return db
-
-
-func _on_volume_slider_value_changed(value: float) -> void:
-	var idx: int = AudioServer.get_bus_index("Master")
-	if idx == -1:
-		push_warning("No Master bus found!")
-		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($Control/PanelContainer/VBoxContainer/VolumeSlider.value))
-
-
-func _on_volume_slider_2_value_changed(value: float) -> void:
-	var idx: int = AudioServer.get_bus_index("Music")
-	if idx == -1:
-		push_warning("No Music bus found!")
-		return
-	AudioServer.set_bus_volume_db(idx, _ratio_to_db($Control/PanelContainer/VBoxContainer/VolumeSlider2.value))

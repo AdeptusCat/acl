@@ -302,6 +302,7 @@ func _setup_runtime_soldiers() -> void:
 		)
 		if s.role == RankGrades.Role.GUNNER:
 			machine_guns += 1
+		spec.ammunition = spec.ammunition_start
 		if spec.family == WeaponSpec.Family.MORTAR:
 			ui.set_ammunition_left(spec.ammunition)
 		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
