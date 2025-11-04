@@ -34,6 +34,7 @@ func _ready():
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)
 	game_controller.update_timer_label.connect(ui._on_update_timer_label)
+	game_controller.game_started_through_moving_unit.connect(ui._on_game_started_through_moving_unit)
 	game_controller.show_unit_details_in_ui.connect(ui._on_show_unit_details)
 	game_controller.hide_unit_details_in_ui.connect(ui._on_hide_unit_details)
 	game_controller.show_winner.connect(result_screen._on_show_winner)

@@ -3,8 +3,7 @@ extends CanvasLayer
 @export var ground_layer : HexagonTileMapLayer
 @export var unit_stats_details_scene : PackedScene
 
-@onready var timer_label = $Control/HBoxContainer/TimerLabel
-
+@onready var countdown_panel_container = $Control/Countdown
 @onready var ground_sprite = $Control/Node2D/GroundSprite
 @onready var wall_sprite = $Control/Node2D/WallSprite
 @onready var building_sprite = $Control/Node2D/BuildingSprite
@@ -104,11 +103,12 @@ func hide_target_hex_cover_distance():
 	target_cover_distance.hide()
 
 
+func _on_game_started_through_moving_unit():
+	countdown_panel_container.set_countdown(true)
+
+
 func _on_update_timer_label(time_left_seconds : float):
-	$Control/HBoxContainer.visible = true
-	var minutes = int(time_left_seconds) / 60
-	var seconds = int(time_left_seconds) % 60
-	timer_label.text = "%02d:%02d" % [minutes, seconds]
+	countdown_panel_container.update_timer_label(time_left_seconds)
 
 
 func mouse_event_position_changed(event_pos: Vector2):

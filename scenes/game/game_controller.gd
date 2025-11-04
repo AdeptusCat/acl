@@ -28,6 +28,7 @@ signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
 signal show_unit_details_in_ui(unit: Unit)
 signal hide_unit_details_in_ui
+signal game_started_through_moving_unit
 
 var end_game_handled: bool = false
 
@@ -421,6 +422,8 @@ func index_to_char(i: int) -> String:
 
 
 func _on_started_moving():
+	if not timer_running:
+		game_started_through_moving_unit.emit()
 	timer_running = true
 
 var last_unit_hex: Vector2i
@@ -432,7 +435,7 @@ func _process(delta):
 			time_left_seconds = 0
 			timer_running = false
 			end_game_check()
-		update_timer_label.emit(time_left_seconds)
+	update_timer_label.emit(time_left_seconds)
 	
 	var mouse_or_unit_position_changed: bool = false
 	var pos = get_local_mouse_position()

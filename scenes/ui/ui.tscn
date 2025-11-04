@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=21 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
@@ -6,6 +6,7 @@
 [ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="3_mgwkc"]
 [ext_resource type="Texture2D" uid="uid://by1gy1h45ih3g" path="res://assets/status/cover.png" id="4_pfayw"]
 [ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/UnitStatsDetails.tscn" id="5_0dwhk"]
+[ext_resource type="Script" uid="uid://cug54uuykli2b" path="res://scenes/ui/countdown.gd" id="5_svq4k"]
 [ext_resource type="Texture2D" uid="uid://g6cb5rq3k4fd" path="res://assets/status/firepower.png" id="6_7vp6q"]
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
 [ext_resource type="Script" uid="uid://dk7d80ay1lo81" path="res://scenes/ui/settings.gd" id="8_4w2x3"]
@@ -38,29 +39,40 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("3_mgwkc")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
-visible = false
+[node name="Countdown" type="PanelContainer" parent="Control"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_right = 149.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -115.0
+offset_right = 115.0
 offset_bottom = 23.0
 grow_horizontal = 2
+theme_override_styles/panel = ExtResource("15_mgwkc")
+script = ExtResource("5_svq4k")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Countdown"]
+layout_mode = 2
 alignment = 1
 
-[node name="Label2" type="Label" parent="Control/HBoxContainer"]
+[node name="Label2" type="Label" parent="Control/Countdown/HBoxContainer"]
 layout_mode = 2
 text = "Time left: "
 
-[node name="TimerLabel" type="Label" parent="Control/HBoxContainer"]
+[node name="TimerLabel" type="Label" parent="Control/Countdown/HBoxContainer"]
 layout_mode = 2
 text = "10:00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Control/HBoxContainer"]
+[node name="Label" type="Label" parent="Control/Countdown/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Minutes"
+
+[node name="Timer" type="Timer" parent="Control/Countdown"]
+one_shot = true
+autostart = true
 
 [node name="GroundTexture" type="TextureRect" parent="Control"]
 layout_mode = 0
@@ -538,6 +550,7 @@ The Moral Status of the selected Squad"
 fit_content = true
 autowrap_mode = 2
 
+[connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
 [connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
