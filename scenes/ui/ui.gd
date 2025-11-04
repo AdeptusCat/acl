@@ -4,21 +4,21 @@ extends CanvasLayer
 @export var unit_stats_details_scene : PackedScene
 
 @onready var countdown_panel_container = $Control/Countdown
-@onready var ground_sprite = $Control/Node2D/GroundSprite
-@onready var wall_sprite = $Control/Node2D/WallSprite
-@onready var building_sprite = $Control/Node2D/BuildingSprite
-@onready var terrain_sprite = $Control/Node2D/TerrainSprite
+@onready var ground_sprite = $Control/TileDetails/GroundSprite
+@onready var wall_sprite = $Control/TileDetails/WallSprite
+@onready var building_sprite = $Control/TileDetails/BuildingSprite
+@onready var terrain_sprite = $Control/TileDetails/TerrainSprite
 
-@onready var wall_n_sprite = $Control/Node2D/WallNSprite
-@onready var wall_ne_sprite = $Control/Node2D/WallNESprite
-@onready var wall_se_sprite = $Control/Node2D/WallSESprite
-@onready var wall_s_sprite = $Control/Node2D/WallSSprite
-@onready var wall_sw_sprite = $Control/Node2D/WallSWSprite
-@onready var wall_nw_sprite = $Control/Node2D/WallNWSprite
+@onready var wall_n_sprite = $Control/TileDetails/WallNSprite
+@onready var wall_ne_sprite = $Control/TileDetails/WallNESprite
+@onready var wall_se_sprite = $Control/TileDetails/WallSESprite
+@onready var wall_s_sprite = $Control/TileDetails/WallSSprite
+@onready var wall_sw_sprite = $Control/TileDetails/WallSWSprite
+@onready var wall_nw_sprite = $Control/TileDetails/WallNWSprite
 
 @onready var coverHBoxContainer = $Control/Control/CoverHBoxContainer
 
-@onready var terrainDetail = $Control/Node2D
+@onready var tileDetails = $Control/TileDetails
 
 @onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
 
@@ -49,30 +49,30 @@ var detail_tile_offset : Vector2
 func _ready() -> void:
 	tile_size = ground_layer.tile_set.tile_size
 	detail_tile_offset = (Vector2(tile_size) * detail_zoom_factor) * 0.2
-	terrainDetail.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
-	terrainDetail.position.y -= terrainDetail.size.y + terrainDetail.size.x / 10
-	terrainDetail.position.x += terrainDetail.size.x / 5
-	$Control/Control.position.y = terrainDetail.position.y + terrainDetail.size.y / 2.5
-	$Control/Control.position.x = terrainDetail.position.x + terrainDetail.size.x / 5
+	tileDetails.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
+	tileDetails.position.y -= tileDetails.size.y + tileDetails.size.x / 10
+	tileDetails.position.x += tileDetails.size.x / 5
+	$Control/Control.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
+	$Control/Control.position.x = tileDetails.position.x + tileDetails.size.x / 5
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
 	$Control/TileStats/Blocked.scale = detail_zoom_factor * 0.02
 	$Control/TileStats/Hindrance.scale = detail_zoom_factor * 0.02
-	$Control/TileStats/Blocked.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
-	$Control/TileStats/Hindrance.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2, terrainDetail.size.y / 4)
-	$Control/TileStats/CoverN1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, 0)
-	$Control/TileStats/CoverN2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , 0)
-	$Control/TileStats/CoverNW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4)
-	$Control/TileStats/CoverNW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
-	$Control/TileStats/CoverSW1.position = terrainDetail.position + Vector2(0, terrainDetail.size.y / 4 * 3)
-	$Control/TileStats/CoverSW2.position = terrainDetail.position + Vector2(0 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
-	$Control/TileStats/CoverS1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 - terrainDetail.size.x / 10, terrainDetail.size.y)
-	$Control/TileStats/CoverS2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 2 + terrainDetail.size.x / 10 , terrainDetail.size.y)
-	$Control/TileStats/CoverSE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4 * 3)
-	$Control/TileStats/CoverSE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4 * 3)
-	$Control/TileStats/CoverNE1.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5, terrainDetail.size.y / 4)
-	$Control/TileStats/CoverNE2.position = terrainDetail.position + Vector2(terrainDetail.size.x / 6 * 5 + terrainDetail.size.x / 7, terrainDetail.size.y / 4)
+	$Control/TileStats/Blocked.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
+	$Control/TileStats/Hindrance.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
+	$Control/TileStats/CoverN1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, 0)
+	$Control/TileStats/CoverN2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , 0)
+	$Control/TileStats/CoverNW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4)
+	$Control/TileStats/CoverNW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4)
+	$Control/TileStats/CoverSW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4 * 3)
+	$Control/TileStats/CoverSW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
+	$Control/TileStats/CoverS1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, tileDetails.size.y)
+	$Control/TileStats/CoverS2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , tileDetails.size.y)
+	$Control/TileStats/CoverSE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4 * 3)
+	$Control/TileStats/CoverSE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
+	$Control/TileStats/CoverNE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4)
+	$Control/TileStats/CoverNE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4)
 	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
 	##var db = -2
 	#var ratio = pow(10.0, db / 20.0)
@@ -285,7 +285,7 @@ func show_tile_data(result: Dictionary):
 	else:
 		terrain_sprite.texture = null
 	
-	for child in terrainDetail.get_children():
+	for child in tileDetails.get_children():
 		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
 
 

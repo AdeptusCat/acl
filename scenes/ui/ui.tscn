@@ -74,39 +74,7 @@ text = "Minutes"
 one_shot = true
 autostart = true
 
-[node name="GroundTexture" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 38.0
-offset_right = 78.0
-offset_bottom = 78.0
-scale = Vector2(1.5, 1.5)
-
-[node name="GroundTexture2" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 38.0
-offset_right = 78.0
-offset_bottom = 78.0
-scale = Vector2(1.5, 1.5)
-
-[node name="GroundTexture3" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 38.0
-offset_right = 78.0
-offset_bottom = 78.0
-scale = Vector2(1.5, 1.5)
-
-[node name="GroundTexture4" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_left = 38.0
-offset_top = 38.0
-offset_right = 78.0
-offset_bottom = 78.0
-scale = Vector2(1.5, 1.5)
-
-[node name="Node2D" type="Control" parent="Control"]
+[node name="TileDetails" type="Control" parent="Control"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 2
@@ -114,26 +82,26 @@ anchor_top = 1.0
 anchor_bottom = 1.0
 grow_vertical = 0
 
-[node name="GroundSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="GroundSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallSprite" type="Sprite2D" parent="Control/TileDetails"]
 scale = Vector2(1, -1)
 
-[node name="BuildingSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="BuildingSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="TerrainSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="TerrainSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallNESprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallNESprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallNSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallNSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallSESprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallSESprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallSSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallSSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallSWSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallSWSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="WallNWSprite" type="Sprite2D" parent="Control/Node2D"]
+[node name="WallNWSprite" type="Sprite2D" parent="Control/TileDetails"]
 
 [node name="Control" type="Control" parent="Control"]
 anchors_preset = 0
