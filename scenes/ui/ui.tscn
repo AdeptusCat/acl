@@ -103,30 +103,30 @@ scale = Vector2(1, -1)
 
 [node name="WallNWSprite" type="Sprite2D" parent="Control/TileDetails"]
 
-[node name="Control" type="Control" parent="Control"]
+[node name="TileCover" type="Control" parent="Control"]
 anchors_preset = 0
 offset_left = 38.0
 offset_top = 558.0
 offset_right = 304.0
 offset_bottom = 645.0
 
-[node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/Control"]
+[node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/TileCover"]
 layout_mode = 1
 scale = Vector2(0.02, 0.02)
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="Cover1" type="TextureRect" parent="Control/Control/CoverHBoxContainer"]
+[node name="Cover1" type="TextureRect" parent="Control/TileCover/CoverHBoxContainer"]
 visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 
-[node name="Cover2" type="TextureRect" parent="Control/Control/CoverHBoxContainer"]
+[node name="Cover2" type="TextureRect" parent="Control/TileCover/CoverHBoxContainer"]
 visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
 
-[node name="Cover3" type="TextureRect" parent="Control/Control/CoverHBoxContainer"]
+[node name="Cover3" type="TextureRect" parent="Control/TileCover/CoverHBoxContainer"]
 visible = false
 layout_mode = 2
 texture = ExtResource("4_pfayw")
@@ -192,39 +192,13 @@ texture = ExtResource("4_pfayw")
 visible = false
 texture = ExtResource("4_pfayw")
 
-[node name="UnitStats" type="MarginContainer" parent="Control"]
-visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 179.0
-offset_top = 402.0
-offset_right = 329.0
-offset_bottom = 592.0
-grow_vertical = 0
-
-[node name="ColorRect" type="ColorRect" parent="Control/UnitStats"]
-layout_mode = 2
-color = Color(0.43519253, 0.4351922, 0.43519226, 1)
-
-[node name="MarginContainer" type="MarginContainer" parent="Control/UnitStats"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 10
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/UnitStats/MarginContainer"]
-custom_minimum_size = Vector2(0, 140)
-layout_mode = 2
-alignment = 2
-
-[node name="Label" type="Label" parent="Control/UnitStats/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="UnitStatsContainer" type="HBoxContainer" parent="Control/UnitStats/MarginContainer/VBoxContainer"]
-layout_mode = 2
+[node name="TileName" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 89.0
+offset_top = 624.0
+offset_right = 129.0
+offset_bottom = 642.0
+horizontal_alignment = 1
 
 [node name="Settings" type="PanelContainer" parent="Control"]
 layout_mode = 1
@@ -278,36 +252,28 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="MarginContainer" type="PanelContainer" parent="Control"]
+[node name="TryAgain" type="PanelContainer" parent="Control"]
 layout_mode = 0
 offset_right = 135.0
 offset_bottom = 51.0
 theme_override_styles/panel = ExtResource("15_mgwkc")
 
-[node name="ColorRect" type="ColorRect" parent="Control/MarginContainer"]
+[node name="ColorRect" type="ColorRect" parent="Control/TryAgain"]
 visible = false
 layout_mode = 2
 color = Color(0.233925, 0.233925, 0.233925, 1)
 
-[node name="TryAgainButton" type="Button" parent="Control/MarginContainer"]
+[node name="TryAgainButton" type="Button" parent="Control/TryAgain"]
 layout_mode = 2
 text = "Try Again!"
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/MarginContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/TryAgain"]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
-
-[node name="Label" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = 78.0
-offset_top = 622.0
-offset_right = 118.0
-offset_bottom = 645.0
-horizontal_alignment = 1
 
 [node name="TargetCoverDistance" type="Control" parent="Control"]
 anchors_preset = 0
@@ -461,20 +427,6 @@ layout_mode = 2
 mouse_filter = 1
 text = "Progress"
 
-[node name="Control2" type="Control" parent="Control"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 1072.0
-offset_top = 568.0
-offset_right = 1112.0
-offset_bottom = 608.0
-grow_horizontal = 0
-grow_vertical = 0
-
 [node name="Tooltip" type="PanelContainer" parent="Control"]
 layout_mode = 0
 offset_left = 45.0
@@ -522,7 +474,7 @@ autowrap_mode = 2
 [connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
-[connection signal="pressed" from="Control/MarginContainer/TryAgainButton" to="." method="_on_try_again_button_pressed"]
+[connection signal="pressed" from="Control/TryAgain/TryAgainButton" to="." method="_on_try_again_button_pressed"]
 [connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" method="_on_mouse_entered"]

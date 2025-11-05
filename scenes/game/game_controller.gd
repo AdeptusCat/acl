@@ -29,6 +29,7 @@ signal mouse_event_position_changed(event_pos)
 signal show_unit_details_in_ui(unit: Unit)
 signal hide_unit_details_in_ui
 signal game_started_through_moving_unit
+signal hex_selected(map_hex: Vector2i, event_pos: Vector2)
 
 var end_game_handled: bool = false
 
@@ -155,7 +156,7 @@ func _on_unit_moved(unit, vector: Vector2i):
 	for _unit in units:
 		if _unit.current_hex == map_hex: 
 			_units.append(_unit)
-	get_parent().ui.show_unit_data(map_hex, _units)
+	#get_parent().ui.show_unit_data(map_hex, _units)
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
 			#fog_of_war_layer.set_cell(Vector2(x, y), -1)
@@ -224,6 +225,7 @@ var selected_hex_index: int = 0
 func _on_mouse_button_left_pressed(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
+	hex_selected.emit(map_hex, event_pos)
 	if previous_selected_hex == map_hex:
 		selected_hex_index += 1
 	else:

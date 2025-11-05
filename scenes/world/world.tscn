@@ -1,4 +1,4 @@
-[gd_scene load_steps=243 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=247 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -51,7 +51,9 @@
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
 [ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
 [ext_resource type="Script" uid="uid://c11s1s4ounucd" path="res://scenes/world/camera_2d.gd" id="29_wnndm"]
+[ext_resource type="Texture2D" uid="uid://cs8ro143x7nw6" path="res://assets/tiles/ground/base_tile1 - Kopie.png" id="40_ij5nj"]
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
+[ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="41_n78lu"]
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="50_hph6x"]
@@ -648,6 +650,17 @@ sources/0 = SubResource("TileSetAtlasSource_wnndm")
 [sub_resource type="GDScript" id="GDScript_jyr8v"]
 script/source = "extends HexagonTileMapLayer
 "
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1o6i5"]
+texture = ExtResource("40_ij5nj")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_7o8ut"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_1o6i5")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k73cj"]
 texture = ExtResource("20_7mx70")
@@ -1470,6 +1483,11 @@ metadata/_edit_lock_ = true
 tile_set = SubResource("TileSet_26xou")
 script = SubResource("GDScript_jyr8v")
 metadata/_edit_lock_ = true
+
+[node name="SelectedTileMapLayer" type="TileMapLayer" parent="TileMapLayers"]
+tile_set = SubResource("TileSet_7o8ut")
+script = ExtResource("41_n78lu")
+metadata/_custom_type_script = "uid://buj6ft1vvdf2f"
 
 [node name="AxisObjectiveTileMapLayer" type="TileMapLayer" parent="TileMapLayers" groups=["tilemaplayers"]]
 visible = false

@@ -5,6 +5,7 @@ extends Node2D
 @onready var building_layer : HexagonTileMapLayer = $TileMapLayers/BuildingTileMapLayer
 @onready var wall_layer : HexagonTileMapLayer = $TileMapLayers/WallTileMapLayer
 @onready var terrain_layer : HexagonTileMapLayer = $TileMapLayers/TerrainTileMapLayer
+@onready var selected_hex_layer : HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
@@ -39,6 +40,7 @@ func _ready():
 	game_controller.hide_unit_details_in_ui.connect(ui._on_hide_unit_details)
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
+	game_controller.hex_selected.connect(_on_hex_selected)
 	
 	game_controller.setup_game()
 	
@@ -69,6 +71,17 @@ func _ready():
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 
+var selected_hex: Vector2i 
+
+func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2):
+	if map_hex == selected_hex:
+		return
+	selected_hex_layer.set_cell(selected_hex, -1, Vector2i(0, 0))  # Clear selected cell
+	selected_hex = map_hex
+	selected_hex_layer.set_cell(selected_hex, 0, Vector2i(0, 0))  # Set selected tile with ID 1
+	calc_unit_data_for_ui(event_pos)
+
+
 func copy_astar(source: AStar2D) -> AStar2D:
 	var copy := AStar2D.new()
 
@@ -91,11 +104,12 @@ func copy_astar(source: AStar2D) -> AStar2D:
 
 
 func _on_mouse_event_position_changed(event_pos: Vector2):
-	event_pos = get_local_mouse_position()
-	var map_hex = ground_layer.local_to_map(event_pos)
-	if not map_hex == mouse_hover_hex:
-		mouse_hover_hex = map_hex
-		calc_unit_data_for_ui(event_pos)
+	return
+	#event_pos = get_local_mouse_position()
+	#var map_hex = ground_layer.local_to_map(event_pos)
+	#if not map_hex == mouse_hover_hex:
+		#mouse_hover_hex = map_hex
+		#calc_unit_data_for_ui(event_pos)
 
 
 func calc_unit_data_for_ui(event_pos: Vector2):
@@ -190,12 +204,12 @@ func calc_unit_data_for_ui(event_pos: Vector2):
 	result.terrain_texture_transform = get_tilemaplayer_texture_transform(map_hex, terrain_layer)
 	ui.show_tile_data(result)
 	
-	var units: Array
-	for unit in game_controller.units:
-		if unit.current_hex == map_hex: 
-			units.append(unit)
-	
-	ui.show_unit_data(map_hex, units)
+	# legacy code that shows unit details
+	#var units: Array
+	#for unit in game_controller.units:
+		#if unit.current_hex == map_hex: 
+			#units.append(unit)
+	#ui.show_unit_data(map_hex, units)
 
 func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)

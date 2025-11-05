@@ -16,15 +16,13 @@ extends CanvasLayer
 @onready var wall_sw_sprite = $Control/TileDetails/WallSWSprite
 @onready var wall_nw_sprite = $Control/TileDetails/WallNWSprite
 
-@onready var coverHBoxContainer = $Control/Control/CoverHBoxContainer
+@onready var coverHBoxContainer = $Control/TileCover/CoverHBoxContainer
 
 @onready var tileDetails = $Control/TileDetails
 
 @onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
 
 @onready var tile_stats = $Control/TileStats
-@onready var unit_stats = $Control/UnitStats
-@onready var unit_stats_container = $Control/UnitStats/MarginContainer/VBoxContainer/UnitStatsContainer
 
 @onready var target_cover_distance = $Control/TargetCoverDistance
 @onready var cover_container = $Control/TargetCoverDistance/VBoxContainer/Cover
@@ -52,8 +50,8 @@ func _ready() -> void:
 	tileDetails.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
 	tileDetails.position.y -= tileDetails.size.y + tileDetails.size.x / 10
 	tileDetails.position.x += tileDetails.size.x / 5
-	$Control/Control.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
-	$Control/Control.position.x = tileDetails.position.x + tileDetails.size.x / 5
+	$Control/TileCover.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
+	$Control/TileCover.position.x = tileDetails.position.x + tileDetails.size.x / 5
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
@@ -114,30 +112,30 @@ func _on_update_timer_label(time_left_seconds : float):
 func mouse_event_position_changed(event_pos: Vector2):
 	pass
 
-
-func show_unit_data(map_hex: Vector2i, units: Array):
-	unit_stats.visible = true
-	var unit_detail_counter: int = 0
-	for child in unit_stats_container.get_children():
-		if "detail_ui" in child:
-			child.detail_ui = null
-		child.queue_free()
-	for unit in units:
-		if not LOSHelper.visible_hexes[Globals.team_player].has(unit.current_hex):
-			continue
-		#var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
-		#unit_stats_container.add_child(unit_ui)
-		#var unit_detail_container = unit_ui.soldiers_detail_container.duplicate()
-		#unit_stats_container.add_child(unit_detail_container)
-		#var unit_stats_details = unit_stats_details_scene.instantiate()
-		#unit_stats_details.set_details(unit)
-		#unit_stats_container.add_child(unit_stats_details)
-		
-		#unit.ui.detail_ui = unit_ui
-		#unit_ui._set_loadout(unit.squad_fire.soldiers)
-		#unit_detail_counter += 1
-	if unit_detail_counter == 0:
-		unit_stats.visible = false
+# legacy code that shows unit details
+#func show_unit_data(map_hex: Vector2i, units: Array):
+	#unit_stats.visible = true
+	#var unit_detail_counter: int = 0
+	#for child in unit_stats_container.get_children():
+		#if "detail_ui" in child:
+			#child.detail_ui = null
+		#child.queue_free()
+	#for unit in units:
+		#if not LOSHelper.visible_hexes[Globals.team_player].has(unit.current_hex):
+			#continue
+		##var unit_ui = unit.ui.duplicate(Node.DuplicateFlags.DUPLICATE_SIGNALS | Node.DuplicateFlags.DUPLICATE_GROUPS | Node.DuplicateFlags.DUPLICATE_SCRIPTS)
+		##unit_stats_container.add_child(unit_ui)
+		##var unit_detail_container = unit_ui.soldiers_detail_container.duplicate()
+		##unit_stats_container.add_child(unit_detail_container)
+		##var unit_stats_details = unit_stats_details_scene.instantiate()
+		##unit_stats_details.set_details(unit)
+		##unit_stats_container.add_child(unit_stats_details)
+		#
+		##unit.ui.detail_ui = unit_ui
+		##unit_ui._set_loadout(unit.squad_fire.soldiers)
+		##unit_detail_counter += 1
+	#if unit_detail_counter == 0:
+		#unit_stats.visible = false
 
 
 func _on_show_unit_details(unit: Unit):
@@ -160,7 +158,7 @@ func show_tile_data(result: Dictionary):
 	result.hindrance
 	result.tile_name
 	
-	$Control/Label.text = result.tile_name
+	$Control/TileName.text = result.tile_name
 	for child in tile_stats.get_children():
 		child.visible = false
 	
