@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 @export var unit_stats_details_scene : PackedScene
+@export var ground_layer : HexagonTileMapLayer
 
 @onready var countdown_panel_container = $Control/Countdown
 
@@ -13,6 +14,7 @@ extends CanvasLayer
 @onready var distance_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
 
 @onready var unit_details = $Control/UnitDetails
+@onready var tile_details = $Control/TileDetails
 
 signal try_again
 
@@ -31,10 +33,11 @@ func _ready() -> void:
 	#var ratio = pow(10.0, db / 20.0)
 	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider.value = ratio
 	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2.value = ratio
-	
+	tile_details.set_ground_layer(ground_layer)
 	unit_details.hide()
 
-
+func show_tile_data(result: Dictionary):
+	tile_details.show_tile_data(result)
 
 
 func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):

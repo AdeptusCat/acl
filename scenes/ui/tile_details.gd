@@ -1,7 +1,7 @@
 extends PanelContainer
 
 
-@export var ground_layer : HexagonTileMapLayer
+var ground_layer : HexagonTileMapLayer
 
 
 @onready var ground_sprite = $TileDetails/GroundSprite
@@ -29,7 +29,9 @@ var detail_zoom_factor : Vector2 = Vector2(2, 2)
 var detail_tile_offset : Vector2 
 
 
-func _ready() -> void:
+	
+func set_ground_layer(_ground_layer: HexagonTileMapLayer):
+	ground_layer = _ground_layer
 	tile_size = ground_layer.tile_set.tile_size
 	detail_tile_offset = (Vector2(tile_size) * detail_zoom_factor) * 0.2
 	tileDetails.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
@@ -58,7 +60,6 @@ func _ready() -> void:
 	$TileStats/CoverNE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4)
 
 
-
 func show_tile_data(result: Dictionary):
 	#print(result)
 	result.cover_in_hex
@@ -83,40 +84,40 @@ func show_tile_data(result: Dictionary):
 		$TileStats/Blocked.visible = true
 	
 	if result.cover_n == 1:
-		$Control/TileStats/CoverN1.visible = true
+		$TileStats/CoverN1.visible = true
 	elif result.cover_n == 2:
-		$Control/TileStats/CoverN1.visible = true
-		$Control/TileStats/CoverN2.visible = true
+		$TileStats/CoverN1.visible = true
+		$TileStats/CoverN2.visible = true
 	
 	if result.cover_ne == 1:
-		$Control/TileStats/CoverNE1.visible = true
+		$TileStats/CoverNE1.visible = true
 	elif result.cover_ne == 2:
-		$Control/TileStats/CoverNE1.visible = true
-		$Control/TileStats/CoverNE2.visible = true
+		$TileStats/CoverNE1.visible = true
+		$TileStats/CoverNE2.visible = true
 	
 	if result.cover_se == 1:
-		$Control/TileStats/CoverSE1.visible = true
+		$TileStats/CoverSE1.visible = true
 	elif result.cover_se == 2:
-		$Control/TileStats/CoverSE1.visible = true
-		$Control/TileStats/CoverSE2.visible = true
+		$TileStats/CoverSE1.visible = true
+		$TileStats/CoverSE2.visible = true
 	
 	if result.cover_s == 1:
-		$Control/TileStats/CoverS2.visible = true
+		$TileStats/CoverS2.visible = true
 	elif result.cover_s == 2:
-		$Control/TileStats/CoverS1.visible = true
-		$Control/TileStats/CoverS2.visible = true
+		$TileStats/CoverS1.visible = true
+		$TileStats/CoverS2.visible = true
 	
 	if result.cover_sw == 1:
-		$Control/TileStats/CoverSW2.visible = true
+		$TileStats/CoverSW2.visible = true
 	elif result.cover_sw == 2:
-		$Control/TileStats/CoverSW1.visible = true
-		$Control/TileStats/CoverSW2.visible = true
+		$TileStats/CoverSW1.visible = true
+		$TileStats/CoverSW2.visible = true
 	
 	if result.cover_nw == 1:
-		$Control/TileStats/CoverNW2.visible = true
+		$TileStats/CoverNW2.visible = true
 	elif result.cover_nw == 2:
-		$Control/TileStats/CoverNW1.visible = true
-		$Control/TileStats/CoverNW2.visible = true
+		$TileStats/CoverNW1.visible = true
+		$TileStats/CoverNW2.visible = true
 	
 	for child in coverHBoxContainer.get_children():
 		child.visible = false
