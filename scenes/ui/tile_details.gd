@@ -3,6 +3,9 @@ extends PanelContainer
 
 var ground_layer : HexagonTileMapLayer
 
+@onready var cover1 = $FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer/Cover1
+@onready var cover2 = $FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer/Cover2
+@onready var cover3 = $FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer/Cover3
 
 
 @onready var coverHBoxContainer = $FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer
@@ -31,10 +34,16 @@ func set_ground_layer(_ground_layer: HexagonTileMapLayer):
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
-	var offset: Vector2 = (Vector2(tile_size) * detail_zoom_factor / 2) + (detail_tile_offset / 2)
-	tile_stats.set_offset_position(offset, Vector2.ZERO, detail_zoom_factor)
+	var offset: Vector2 = (Vector2(tile_size) * detail_zoom_factor / 2)# + (detail_tile_offset / 2)
+	tile_stats.set_offset_position(detail_tile_offset, offset, Vector2(tile_size) * detail_zoom_factor, detail_zoom_factor)
 	panel_size_expanded = size
-
+	cover1.mouse_entered.connect(_on_texture_rect_mouse_entered.bind(TooltipSignals.Tooltip.COVER))
+	cover2.mouse_entered.connect(_on_texture_rect_mouse_entered.bind(TooltipSignals.Tooltip.COVER))
+	cover3.mouse_entered.connect(_on_texture_rect_mouse_entered.bind(TooltipSignals.Tooltip.COVER))
+	cover1.mouse_exited.connect(_on_texture_rect_mouse_exited)
+	cover2.mouse_exited.connect(_on_texture_rect_mouse_exited)
+	cover3.mouse_exited.connect(_on_texture_rect_mouse_exited)
+	
 func show_tile_data(result: Dictionary):
 	#print(result)
 	result.cover_in_hex
@@ -67,3 +76,11 @@ func show_tile_data(result: Dictionary):
 func _on_foldable_container_folding_changed(_is_folded: bool) -> void:
 	size = Vector2.ZERO
 	set_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+
+
+func _on_texture_rect_mouse_entered(tooltip: TooltipSignals.Tooltip) -> void:
+	TooltipSignals.mouse_entered.emit(tooltip)
+
+
+func _on_texture_rect_mouse_exited() -> void:
+	TooltipSignals.mouse_exited.emit()

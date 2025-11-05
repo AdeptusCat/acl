@@ -56,6 +56,18 @@ func toggle_on(tooltip: TooltipSignals.Tooltip):
 		TooltipSignals.Tooltip.LEADERSHIP_BONUS:
 			header = "Leadership Bonus"
 			text = "Represents morale and coordination influence from nearby leaders"
+		TooltipSignals.Tooltip.LOS_HINDRANCE:
+			header = "Line of Sight Hindrance"
+			text = "This Terrain makes it harder to see and hit the enemy"
+		TooltipSignals.Tooltip.LOS_BLOCKED:
+			header = "Line of Sight Blocked"
+			text = "This Terrain Blocks the Line of Sight"
+		TooltipSignals.Tooltip.LOS_WALL:
+			header = "Wall or Hedge"
+			text = "This Wall or Hedge blocks the Line of Sight and gives cover"
+		TooltipSignals.Tooltip.COVER:
+			header = "Cover"
+			text = "This Terrain gives Cover to any unit in the hex"
 	$VBoxContainer/HBoxContainer/TooltipHeader.text = header
 	$VBoxContainer/TooltipText.text = text
 	show()
