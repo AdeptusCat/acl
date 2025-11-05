@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene load_steps=26 format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cug54uuykli2b" path="res://scenes/ui/countdown.gd" id="5_svq4k"]
 [ext_resource type="Texture2D" uid="uid://g6cb5rq3k4fd" path="res://assets/status/firepower.png" id="6_7vp6q"]
 [ext_resource type="Script" uid="uid://mw6wyu2oieck" path="res://scenes/ui/tile_details.gd" id="6_ygedu"]
+[ext_resource type="Texture2D" uid="uid://7vvsl5cw0hib" path="res://assets/status/cover_outline.png" id="7_26a3v"]
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
 [ext_resource type="Script" uid="uid://dk7d80ay1lo81" path="res://scenes/ui/settings.gd" id="8_4w2x3"]
 [ext_resource type="Script" uid="uid://l767yhx40ual" path="res://scenes/ui/tile_textures.gd" id="8_qmss2"]
@@ -22,6 +23,10 @@
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="13_swkix"]
 [ext_resource type="Script" uid="uid://btiijdapor3eh" path="res://scenes/ui/leadership_bonus.gd" id="14_mgwkc"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="15_mgwkc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_26a3v"]
+outline_size = 10
+outline_color = Color(0.27022192, 0.27022192, 0.2702219, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_hl07w"]
 font_size = 24
@@ -78,6 +83,7 @@ one_shot = true
 autostart = true
 
 [node name="TileDetails" type="PanelContainer" parent="Control"]
+visible = false
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -103,6 +109,8 @@ horizontal_alignment = 1
 
 [node name="TileName" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
 layout_mode = 2
+text = "asdassda"
+label_settings = SubResource("LabelSettings_26a3v")
 horizontal_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
@@ -117,26 +125,42 @@ vertical_alignment = 1
 [node name="TileCover" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover"]
 layout_mode = 0
+offset_right = 150.0
+offset_bottom = 15.0
 theme_override_constants/separation = 0
 alignment = 1
 
 [node name="Cover1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
-visible = false
+texture_filter = 4
+custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
-texture = ExtResource("4_pfayw")
+texture = ExtResource("7_26a3v")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="Cover2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
-visible = false
+texture_filter = 4
+custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
-texture = ExtResource("4_pfayw")
+texture = ExtResource("7_26a3v")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="Cover3" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
-visible = false
+texture_filter = 4
+custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
-texture = ExtResource("4_pfayw")
+texture = ExtResource("7_26a3v")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="TileName3" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
 
 [node name="Tile" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
 custom_minimum_size = Vector2(150, 160)

@@ -915,9 +915,9 @@ func _on_rout_failed():
 
 
 func _on_morale_breaks():
-	if selected:
-		deselect_unit.emit(self)
-		deselect()
+	#if selected:
+		#deselect_unit.emit(self)
+		#deselect()
 	broken = true
 
 

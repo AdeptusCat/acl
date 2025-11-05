@@ -31,7 +31,7 @@ func set_ground_layer(_ground_layer: HexagonTileMapLayer):
 	#tileDetails.position.x += tileDetails.size.x / 5
 	#$FoldableContainer/TileCover.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
 	#$FoldableContainer/TileCover.position.x = tileDetails.position.x + tileDetails.size.x / 5
-	coverHBoxContainer.scale = detail_zoom_factor * 0.015
+	#coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
 	var offset: Vector2 = (Vector2(tile_size) * detail_zoom_factor / 2)# + (detail_tile_offset / 2)
@@ -45,6 +45,7 @@ func set_ground_layer(_ground_layer: HexagonTileMapLayer):
 	cover3.mouse_exited.connect(_on_texture_rect_mouse_exited)
 	
 func show_tile_data(result: Dictionary):
+	show()
 	#print(result)
 	result.cover_in_hex
 	result.blocking
@@ -68,7 +69,6 @@ func show_tile_data(result: Dictionary):
 	for cover in range(result.cover_in_hex):
 		coverHBoxContainer.get_children()[cover].visible = true
 		
-	
 	tile_textures.show_textures(result, detail_zoom_factor, tile_size, detail_tile_offset)
 	
 
