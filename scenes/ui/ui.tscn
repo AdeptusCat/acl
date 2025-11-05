@@ -76,22 +76,26 @@ one_shot = true
 autostart = true
 
 [node name="TileDetails" type="PanelContainer" parent="Control"]
-custom_minimum_size = Vector2(200, 200)
-layout_mode = 0
-offset_left = 4.0
-offset_top = 434.0
-offset_right = 204.0
-offset_bottom = 634.0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -46.0
+offset_right = 162.0
+grow_vertical = 0
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("6_ygedu")
 
 [node name="FoldableContainer" type="FoldableContainer" parent="Control/TileDetails"]
 layout_mode = 2
+folded = true
 title = "Hex Details"
 title_position = 1
 
 [node name="TileDetails" type="Control" parent="Control/TileDetails/FoldableContainer"]
+visible = false
 clip_contents = true
+custom_minimum_size = Vector2(250, 250)
 layout_mode = 2
 
 [node name="GroundSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/TileDetails"]
@@ -116,6 +120,7 @@ scale = Vector2(1, -1)
 [node name="WallNWSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/TileDetails"]
 
 [node name="TileCover" type="Control" parent="Control/TileDetails/FoldableContainer"]
+visible = false
 layout_mode = 2
 
 [node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/TileCover"]
@@ -140,6 +145,7 @@ layout_mode = 2
 texture = ExtResource("4_pfayw")
 
 [node name="TileStats" type="Control" parent="Control/TileDetails/FoldableContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Blocked" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/TileStats"]
@@ -199,6 +205,7 @@ visible = false
 texture = ExtResource("4_pfayw")
 
 [node name="TileName" type="Label" parent="Control/TileDetails/FoldableContainer"]
+visible = false
 layout_mode = 2
 horizontal_alignment = 1
 
@@ -473,6 +480,7 @@ fit_content = true
 autowrap_mode = 2
 
 [connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
+[connection signal="folding_changed" from="Control/TileDetails/FoldableContainer" to="Control/TileDetails" method="_on_foldable_container_folding_changed"]
 [connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]

@@ -4,30 +4,30 @@ extends PanelContainer
 var ground_layer : HexagonTileMapLayer
 
 
-@onready var ground_sprite = $TileDetails/GroundSprite
-@onready var wall_sprite = $TileDetails/WallSprite
-@onready var building_sprite = $TileDetails/BuildingSprite
-@onready var terrain_sprite = $TileDetails/TerrainSprite
+@onready var ground_sprite = $FoldableContainer/TileDetails/GroundSprite
+@onready var wall_sprite = $FoldableContainer/TileDetails/WallSprite
+@onready var building_sprite = $FoldableContainer/TileDetails/BuildingSprite
+@onready var terrain_sprite = $FoldableContainer/TileDetails/TerrainSprite
 
-@onready var wall_n_sprite = $TileDetails/WallNSprite
-@onready var wall_ne_sprite = $TileDetails/WallNESprite
-@onready var wall_se_sprite = $TileDetails/WallSESprite
-@onready var wall_s_sprite = $TileDetails/WallSSprite
-@onready var wall_sw_sprite = $TileDetails/WallSWSprite
-@onready var wall_nw_sprite = $TileDetails/WallNWSprite
+@onready var wall_n_sprite = $FoldableContainer/TileDetails/WallNSprite
+@onready var wall_ne_sprite = $FoldableContainer/TileDetails/WallNESprite
+@onready var wall_se_sprite = $FoldableContainer/TileDetails/WallSESprite
+@onready var wall_s_sprite = $FoldableContainer/TileDetails/WallSSprite
+@onready var wall_sw_sprite = $FoldableContainer/TileDetails/WallSWSprite
+@onready var wall_nw_sprite = $FoldableContainer/TileDetails/WallNWSprite
 
-@onready var coverHBoxContainer = $TileCover/CoverHBoxContainer
+@onready var coverHBoxContainer = $FoldableContainer/TileCover/CoverHBoxContainer
 
-@onready var tileDetails = $TileDetails
+@onready var tileDetails = $FoldableContainer/TileDetails
 
 
-@onready var tile_stats = $TileStats
+@onready var tile_stats = $FoldableContainer/TileStats
 
 
 var tile_size : Vector2i 
 var detail_zoom_factor : Vector2 = Vector2(2, 2)
 var detail_tile_offset : Vector2 
-
+@onready var panel_size_expanded: Vector2 = Vector2.ZERO
 
 	
 func set_ground_layer(_ground_layer: HexagonTileMapLayer):
@@ -37,28 +37,29 @@ func set_ground_layer(_ground_layer: HexagonTileMapLayer):
 	tileDetails.size = Vector2(tile_size) * detail_zoom_factor + detail_tile_offset
 	tileDetails.position.y -= tileDetails.size.y + tileDetails.size.x / 10
 	tileDetails.position.x += tileDetails.size.x / 5
-	$TileCover.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
-	$TileCover.position.x = tileDetails.position.x + tileDetails.size.x / 5
+	$FoldableContainer/TileCover.position.y = tileDetails.position.y + tileDetails.size.y / 2.5
+	$FoldableContainer/TileCover.position.x = tileDetails.position.x + tileDetails.size.x / 5
 	coverHBoxContainer.scale = detail_zoom_factor * 0.015
 	for child in tile_stats.get_children():
 		child.scale = detail_zoom_factor * 0.015
-	$TileStats/Blocked.scale = detail_zoom_factor * 0.02
-	$TileStats/Hindrance.scale = detail_zoom_factor * 0.02
-	$TileStats/Blocked.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
-	$TileStats/Hindrance.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
-	$TileStats/CoverN1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, 0)
-	$TileStats/CoverN2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , 0)
-	$TileStats/CoverNW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4)
-	$TileStats/CoverNW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4)
-	$TileStats/CoverSW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4 * 3)
-	$TileStats/CoverSW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
-	$TileStats/CoverS1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, tileDetails.size.y)
-	$TileStats/CoverS2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , tileDetails.size.y)
-	$TileStats/CoverSE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4 * 3)
-	$TileStats/CoverSE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
-	$TileStats/CoverNE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4)
-	$TileStats/CoverNE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4)
-
+	$FoldableContainer/TileStats/Blocked.scale = detail_zoom_factor * 0.02
+	$FoldableContainer/TileStats/Hindrance.scale = detail_zoom_factor * 0.02
+	$FoldableContainer/TileStats/Blocked.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
+	$FoldableContainer/TileStats/Hindrance.position = tileDetails.position + Vector2(tileDetails.size.x / 2, tileDetails.size.y / 4)
+	$FoldableContainer/TileStats/CoverN1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, 0)
+	$FoldableContainer/TileStats/CoverN2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , 0)
+	$FoldableContainer/TileStats/CoverNW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4)
+	$FoldableContainer/TileStats/CoverNW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4)
+	$FoldableContainer/TileStats/CoverSW1.position = tileDetails.position + Vector2(0, tileDetails.size.y / 4 * 3)
+	$FoldableContainer/TileStats/CoverSW2.position = tileDetails.position + Vector2(0 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
+	$FoldableContainer/TileStats/CoverS1.position = tileDetails.position + Vector2(tileDetails.size.x / 2 - tileDetails.size.x / 10, tileDetails.size.y)
+	$FoldableContainer/TileStats/CoverS2.position = tileDetails.position + Vector2(tileDetails.size.x / 2 + tileDetails.size.x / 10 , tileDetails.size.y)
+	$FoldableContainer/TileStats/CoverSE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4 * 3)
+	$FoldableContainer/TileStats/CoverSE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4 * 3)
+	$FoldableContainer/TileStats/CoverNE1.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5, tileDetails.size.y / 4)
+	$FoldableContainer/TileStats/CoverNE2.position = tileDetails.position + Vector2(tileDetails.size.x / 6 * 5 + tileDetails.size.x / 7, tileDetails.size.y / 4)
+	
+	panel_size_expanded = size
 
 func show_tile_data(result: Dictionary):
 	#print(result)
@@ -73,51 +74,51 @@ func show_tile_data(result: Dictionary):
 	result.hindrance
 	result.tile_name
 	
-	$TileName.text = result.tile_name
+	$FoldableContainer/TileName.text = result.tile_name
 	for child in tile_stats.get_children():
 		child.visible = false
 	
 	if result.hindrance == true:
-		$TileStats/Hindrance.visible = true
+		$FoldableContainer/TileStats/Hindrance.visible = true
 	
 	if result.blocking == true:
-		$TileStats/Blocked.visible = true
+		$FoldableContainer/TileStats/Blocked.visible = true
 	
 	if result.cover_n == 1:
-		$TileStats/CoverN1.visible = true
+		$FoldableContainer/TileStats/CoverN1.visible = true
 	elif result.cover_n == 2:
-		$TileStats/CoverN1.visible = true
-		$TileStats/CoverN2.visible = true
+		$FoldableContainer/TileStats/CoverN1.visible = true
+		$FoldableContainer/TileStats/CoverN2.visible = true
 	
 	if result.cover_ne == 1:
-		$TileStats/CoverNE1.visible = true
+		$FoldableContainer/TileStats/CoverNE1.visible = true
 	elif result.cover_ne == 2:
-		$TileStats/CoverNE1.visible = true
-		$TileStats/CoverNE2.visible = true
+		$FoldableContainer/TileStats/CoverNE1.visible = true
+		$FoldableContainer/TileStats/CoverNE2.visible = true
 	
 	if result.cover_se == 1:
-		$TileStats/CoverSE1.visible = true
+		$FoldableContainer/TileStats/CoverSE1.visible = true
 	elif result.cover_se == 2:
-		$TileStats/CoverSE1.visible = true
-		$TileStats/CoverSE2.visible = true
+		$FoldableContainer/TileStats/CoverSE1.visible = true
+		$FoldableContainer/TileStats/CoverSE2.visible = true
 	
 	if result.cover_s == 1:
-		$TileStats/CoverS2.visible = true
+		$FoldableContainer/TileStats/CoverS2.visible = true
 	elif result.cover_s == 2:
-		$TileStats/CoverS1.visible = true
-		$TileStats/CoverS2.visible = true
+		$FoldableContainer/TileStats/CoverS1.visible = true
+		$FoldableContainer/TileStats/CoverS2.visible = true
 	
 	if result.cover_sw == 1:
-		$TileStats/CoverSW2.visible = true
+		$FoldableContainer/TileStats/CoverSW2.visible = true
 	elif result.cover_sw == 2:
-		$TileStats/CoverSW1.visible = true
-		$TileStats/CoverSW2.visible = true
+		$FoldableContainer/TileStats/CoverSW1.visible = true
+		$FoldableContainer/TileStats/CoverSW2.visible = true
 	
 	if result.cover_nw == 1:
-		$TileStats/CoverNW2.visible = true
+		$FoldableContainer/TileStats/CoverNW2.visible = true
 	elif result.cover_nw == 2:
-		$TileStats/CoverNW1.visible = true
-		$TileStats/CoverNW2.visible = true
+		$FoldableContainer/TileStats/CoverNW1.visible = true
+		$FoldableContainer/TileStats/CoverNW2.visible = true
 	
 	for child in coverHBoxContainer.get_children():
 		child.visible = false
@@ -200,3 +201,8 @@ func show_tile_data(result: Dictionary):
 	
 	for child in tileDetails.get_children():
 		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)
+
+
+func _on_foldable_container_folding_changed(_is_folded: bool) -> void:
+	size = Vector2.ZERO
+	set_offsets_preset(Control.PRESET_BOTTOM_LEFT)
