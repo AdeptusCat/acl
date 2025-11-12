@@ -120,3 +120,8 @@ func _ratio_to_db(ratio: float) -> float:
 	else:
 		db = 20.0 * log(ratio)
 	return db
+
+
+func _on_start_screen_time_changed(_time: float) -> void:
+	if countdown_panel_container:
+		countdown_panel_container.update_timer_label(_time * 60.0)

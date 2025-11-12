@@ -437,7 +437,7 @@ func _process(delta):
 			time_left_seconds = 0
 			timer_running = false
 			end_game_check()
-	update_timer_label.emit(time_left_seconds)
+		update_timer_label.emit(time_left_seconds)
 	
 	var mouse_or_unit_position_changed: bool = false
 	var pos = get_local_mouse_position()

@@ -58,7 +58,10 @@ func show_tile_data(result: Dictionary):
 	result.hindrance
 	result.tile_name
 	
-	$FoldableContainer/VBoxContainer/TileName.text = result.tile_name
+	var tile_name: String = result.tile_name
+	if result.tile_name == "":
+		tile_name = "Open Ground"
+	$FoldableContainer/VBoxContainer/TileName.text = tile_name
 	
 	tile_stats.show_stats(result)
 	

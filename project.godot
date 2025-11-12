@@ -24,6 +24,7 @@ STATES="*res://autoloads/unit_states.gd"
 RankGrades="*res://autoloads/rank_grades.gd"
 TooltipSignals="*res://autoloads/tooltip_signals.gd"
 SessionAudio="*res://autoloads/session_audio.gd"
+SessionSettings="*res://autoloads/session_settings.gd"
 
 [display]
 

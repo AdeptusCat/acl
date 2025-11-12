@@ -1749,6 +1749,7 @@ visible = false
 position = Vector2(626, 904)
 
 [connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]
+[connection signal="time_changed" from="StartScreen" to="Ui" method="_on_start_screen_time_changed"]
 [connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]
 
