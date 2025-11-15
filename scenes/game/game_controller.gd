@@ -103,6 +103,8 @@ func _ready():
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.GRID_SIZE_X, LOSHelper.GRID_SIZE_Y)
 	camera.set_camera_limit(map_size) 
 	
+	Globals.movement_system = move_sys
+	
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
 			#fog_of_war_layer.set_cell(Vector2i(x, y), 0)
@@ -189,6 +191,7 @@ func set_objective_cells(team: int):
 	var cells = objective_tilemap.get_used_cells() 
 	if cells.size() > 0:
 		objective_hex = cells[0]
+		Globals.objective_hex = objective_hex
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
@@ -207,7 +210,9 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 			var units: Array[Node2D] = _find_units_at(map_hex)
 			for unit in units:
 				if not unit.team == Globals.team_player:
-					selected_unit.combat.set_target_unit(unit)
+					var path: Array[Vector3i] = []
+					selected_unit.give_attack_hex_order(unit.current_hex, path, path)
+					#selected_unit.combat.set_target_unit(unit)
 					var local_pos = ground_layer.map_to_local(map_hex)
 					hex_glow(local_pos)
 					return
@@ -426,6 +431,7 @@ func index_to_char(i: int) -> String:
 func _on_started_moving():
 	if not timer_running:
 		game_started_through_moving_unit.emit()
+		Globals.game_started = true
 	timer_running = true
 
 var last_unit_hex: Vector2i

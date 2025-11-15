@@ -55,7 +55,7 @@ var units: Array[Node2D]
 @onready var combat: Node = $Combat
 @onready var aura: LeaderAura = $LeaderAura
 
-@onready var base_spv: float = combat.seconds_per_volley
+#@onready var base_spv: float = combat.seconds_per_volley
 
 #signal leader_killed(leader: Leader)
 signal moved_to_hex(new_hex: Vector2i)
@@ -318,7 +318,7 @@ func die():
 
 
 func _on_morale_failed(_known_enemies: Array) -> void:
-	var known_enemies: Array[Node2D]
+	var known_enemies: Array[Unit]
 	for unit in units:
 		if not unit.team == team and not unit.surrendered:
 			known_enemies.append(unit)
@@ -355,7 +355,7 @@ func _on_state_changed(prev:int, next:int) -> void:
 	var m = STATES.STATE_MOD[next]
 	## guard against silly zeros
 	var rof_mult: float = max(float(m.rof), 0.05)
-	combat.seconds_per_volley = base_spv / rof_mult
+	combat.seconds_per_volley = combat.base_seconds_per_volley / rof_mult
 	combat.accuracy_multiplier = m.acc
 
 	## 3) Visuals/pose

@@ -122,6 +122,13 @@ func set_target_unit(targetUnit: Unit) -> void:
 		target_unit = null
 	target_hex = hex
 
+
+func set_target_hex(_target_hex: Vector2i):
+	target_hex = _target_hex
+
+
+
+
 func _physics_process(delta: float) -> void:
 	_now_s += delta
 	_accum_window_s += delta

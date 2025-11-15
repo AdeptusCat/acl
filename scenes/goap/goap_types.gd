@@ -1,0 +1,70 @@
+# goap_types.gd
+class_name GoapTypes
+extends Resource
+
+enum SquadOrderType {
+	NONE,
+	DEFEND_LINE,
+	BASE_OF_FIRE,
+	ASSAULT_ROUTE,
+	SCREEN_AXIS,
+	WITHDRAW_TO,
+	REST,
+	REORGANIZE_MERGE,
+}
+
+enum SquadOrderStatus {
+	IDLE,
+	IN_PROGRESS,
+	ACHIEVED,
+	FAILED,
+	BROKEN,
+}
+
+enum FormationMissionMode {
+	DEFEND,
+	ATTACK,
+	DELAY,
+	PROBE_ONLY,
+}
+
+enum WorldELevel {
+	HIGH,
+	MED,
+	LOW,
+}
+
+enum WorldAmmoLevel {
+	OK,
+	LOW,
+	CRITICAL,
+}
+
+enum WorldProbeResult {
+	UNKNOWN,
+	FOUND_ENEMY,
+	CLEAR,
+}
+
+enum FormationGoalId {
+	MAINTAIN_DEFENSE,
+	CAPTURE_OBJECTIVE,
+	DELAY_ENEMY,
+	GAIN_INFORMATION,
+	IMPROVE_SITUATION,
+	}
+
+enum FormationActionId {
+	ESTABLISH_DEFENSE_LINE,
+	ASSIGN_BASE_OF_FIRE,
+	COVER_FLANK,
+	WITHDRAW_TO_FALLBACK,
+	REORGANIZE_AND_MERGE,
+	PROBE_AXIS,
+	PREPARE_ASSAULT,
+	LAUNCH_ASSAULT,
+	SHIFT_AXIS,
+	COMMIT_RESERVE,
+	ROTATE_SQUADS_IN_LINE,
+	REST_AND_RESUPPLY,
+}

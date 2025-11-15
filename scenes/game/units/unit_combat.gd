@@ -7,6 +7,7 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 @export var base_accuracy := 0.35
 @export var volley_size := 1               # rounds per burst
 @export var seconds_per_volley := 1.2
+@export var base_seconds_per_volley := 1.2
 
 @export var stress_scale := 1.0             # global tuning
 @export var stress_fast_base: float = 8.0       # baseline shock of “being shot at”

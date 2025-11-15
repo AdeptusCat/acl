@@ -1,5 +1,6 @@
 @tool
 extends Control
+class_name UnitUi
 
 var detail_ui = null
 

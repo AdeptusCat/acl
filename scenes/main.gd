@@ -11,6 +11,7 @@ func _ready() -> void:
 
 
 func _on_try_again():
+	Globals.game_started = false
 	world.queue_free()
 
 

@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdfg22jl48bbp"]
+
+[ext_resource type="Script" uid="uid://boy1ymhdr1xgc" path="res://scenes/goap/formation_ai_controller.gd" id="1_yfmdm"]
+
+[node name="FormationAIController" type="Node"]
+script = ExtResource("1_yfmdm")
+mission_mode = null
+formation_id = null

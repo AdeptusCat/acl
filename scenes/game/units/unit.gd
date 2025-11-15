@@ -51,6 +51,15 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 @export var make_medium_mortar_squad: bool = false : set = _make_medium_mortar_squad
 
 
+# === GOAP ===
+#const GoapTypes := preload("res://scenes/goap/goap_types.gd")
+#const SquadOrder := preload("res://scenes/goap/squad_order.gd")
+var enemies_reported: Array[Unit]
+var has_reported_contact: bool = false
+@export var formation_id: int = 0
+var current_order: SquadOrder = SquadOrder.new()
+var current_order_status: int = GoapTypes.SquadOrderStatus.IDLE
+
 # === Runtime State ===
 var morale_meter_current: int = 0
 var path_hexes: Array[Vector2i] = []
@@ -86,6 +95,7 @@ signal deselect_unit(unit)
 signal started_moving
 signal unit_surrendered
 signal unit_entered_new_hex(new_hex: Vector2i)
+signal contacts_reported(unit: Unit, contact: Array[Unit])
 
 # unit details signals
 signal soldiers_changed
@@ -99,17 +109,22 @@ signal state_chaged(state: int)
 @onready var leader_aura: LeaderAura = $LeaderAura
 @onready var squad_fire: SquadFireController = $SquadFireController
 @onready var weapon_audio: WeaponAudio = $WeaponAudio
+@onready var action_fsm: SquadActionController = $SquadActionController
+
+# === DEBUG ===
+@onready var action_label := $ActionLabel
 
 # === Classes ===
 #@onready var morale_system := UnitMorale.new(self)
 #@onready var morale_ui := UnitMoraleUI.new(self)
 #@onready var movement := UnitMovement.new(self)
 #@onready var combat := UnitCombat.new()
-@onready var base_spv: float = combat.seconds_per_volley
+#@onready var base_spv: float = combat.seconds_per_volley
 
 
 # === Ready ===
 func _ready():
+	action_fsm.init(self, movement, squad_fire, stress_system, ui, combat)
 	
 	connect("retreat_complete", _on_retreat_complete)
 	#morale_system.morale_breaks.connect(_on_morale_breaks)
@@ -132,6 +147,7 @@ func _ready():
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
 	unit_arrived_at_hex.connect(squad_fire._on_unit_arrived_at_hex)
+	unit_arrived_at_hex.connect(_on_unit_arrived_at_hex)
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	combat.shoot.connect(ui.shoot)
@@ -172,6 +188,13 @@ func _ready():
 
 func fire_mortar(map_hex: Vector2i):
 	squad_fire.fire_mortar(map_hex)
+
+
+func is_good_order() -> bool:
+	if surrendered or not alive or broken:
+		return false
+	else:
+		return true 
 
 
 func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i):
@@ -902,11 +925,18 @@ func _on_started_moving():
 	started_moving.emit()
 	combat.set_target_unit(null)
 	squad_fire.set_target_unit(null)
+	action_fsm.on_started_moving()
 
 
 func _on_stopped_moving():
 	moving = false
 	ui.stopped_moving(broken, surrendered)
+	action_fsm.on_stopped_moving()
+	
+
+
+func _on_unit_arrived_at_hex(new_hex: Vector2i):
+	action_fsm.on_reached_hex(new_hex)
 
 
 func _on_rout_failed():
@@ -923,10 +953,13 @@ func _on_morale_breaks():
 
 func _on_morale_recovered():
 	broken = false
+	_on_new_order_received()
 
 
 # === Process Loop ===
+
 func _process(delta):
+	_check_contacts()
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
 			return
@@ -945,6 +978,32 @@ func _process(delta):
 	#morale_system._process_recovery(delta)
 	
 	#movement.process(delta)
+
+
+func _check_contacts() -> void:
+	if not "unit_visible_enemies" in squad_fire:
+		return
+	var raw: Array = squad_fire.unit_visible_enemies.get(self, [])
+	
+	var enemies: Array[Unit] = []
+
+	for unit in raw:
+		enemies.append(unit)
+
+	if enemies.is_empty():
+		has_reported_contact = false
+	else:
+		has_reported_contact = true
+
+	if enemies_reported == enemies:
+		return
+	enemies_reported = enemies
+	# Option: halt movement temporarily until formation reacts
+	#if action_fsm.action_state == SquadActionController.SquadActionState.ADVANCING:
+		#action_fsm.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+
+	contacts_reported.emit(self, enemies)
+
 
 
 # === Utility ===
@@ -1297,7 +1356,7 @@ func die():
 
 
 func _on_morale_failed(_known_enemies: Array) -> void:
-	var known_enemies: Array[Node2D]
+	var known_enemies: Array[Unit]
 	for unit in units:
 		if not unit.team == team and not unit.surrendered:
 			known_enemies.append(unit)
@@ -1311,6 +1370,7 @@ func _on_retreat_complete(retreat_hex) -> void:
 	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
 	moved_to_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
+	action_fsm.on_retreat_complete(retreat_hex)
 
 
 func _on_stress_changed(stress: float):
@@ -1335,13 +1395,14 @@ func _on_state_changed(prev:int, next:int) -> void:
 	var m = STATES.STATE_MOD[next]
 	## guard against silly zeros
 	var rof_mult: float = max(float(m.rof), 0.05)
-	combat.seconds_per_volley = base_spv / rof_mult
+	combat.seconds_per_volley = combat.base_seconds_per_volley / rof_mult
 	combat.accuracy_multiplier = m.acc
 
 	## 3) Visuals/pose
 	ui.state_changed(next)
 	
 	state_chaged.emit(next)
+	action_fsm.on_morale_state_changed(prev, next)
 
 
 func _on_unit_ui_debug_kill_soldier() -> void:
@@ -1351,3 +1412,149 @@ func _on_unit_ui_debug_kill_soldier() -> void:
 	_refresh_leader_aura()
 	leader_aura._affected.erase(self)
 	leader_aura._apply_to(self)
+
+
+
+# Thin forwarding API for higher-level AI / UI:
+
+func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	action_fsm.give_defend_area_order(target_hex, path)
+	action_label.text = "defend"
+
+
+func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
+	action_fsm.give_move_to_hex_order(target_hex, path, take_and_hold)
+	action_label.text = "move"
+
+
+func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
+	action_fsm.give_attack_hex_order(target_hex, covered_path, exposed_segment)
+	action_label.text = "attack"
+
+
+func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	action_fsm.give_withdraw_to_hex_order(target_hex, path)
+	action_label.text = "withdraw"
+
+
+func give_hold_order() -> void:
+	action_fsm.give_hold_order()
+	action_label.text = "hold"
+
+
+func clear_orders() -> void:
+	action_fsm.clear_orders()
+	action_label.text = "clear order"
+
+
+# === GOAP ===
+
+
+func set_order_resource(order: SquadOrder) -> void:
+	current_order = order
+	current_order_status = GoapTypes.SquadOrderStatus.IN_PROGRESS
+	_on_new_order_received()
+
+func _on_new_order_received() -> void:
+	match current_order.order_type:
+		GoapTypes.SquadOrderType.DEFEND_LINE:
+			_start_defend_line()
+		GoapTypes.SquadOrderType.BASE_OF_FIRE:
+			_start_base_of_fire()
+		GoapTypes.SquadOrderType.ASSAULT_ROUTE:
+			_start_assault_route()
+		GoapTypes.SquadOrderType.SCREEN_AXIS:
+			pass
+			#_start_screen_axis()
+		GoapTypes.SquadOrderType.WITHDRAW_TO:
+			_start_withdraw()
+		GoapTypes.SquadOrderType.REST:
+			#_start_rest()
+			pass
+		GoapTypes.SquadOrderType.REORGANIZE_MERGE:
+			#_start_reorganize()
+			pass
+		_:
+			current_order_status = GoapTypes.SquadOrderStatus.IDLE
+			action_fsm.action_state = SquadActionController.SquadActionState.NO_ORDER
+
+
+func _start_defend_line() -> void:
+	# Use current_order.target_hexes or line/sector mapping to hexes
+	var defend_hex: Vector2i = Vector2i.ZERO#_pick_defend_hex_for_this_squad()
+	movement.set_path_to_hex(defend_hex)
+	action_fsm.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+
+
+func _start_base_of_fire() -> void:
+	var firebase_hex: Vector2i
+	var visible_hexes_to_target = LOSHelper.los_lookup.get(current_order.target_hexes[0], [])
+	var closest_distance: int = 1000
+	for hex in visible_hexes_to_target:
+		var target_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+		var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, target_cube)
+		if distance < closest_distance:
+			closest_distance = distance
+			firebase_hex = hex
+	current_order.target_hexes.append(firebase_hex)
+	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, firebase_hex, team)
+	give_move_to_hex_order(firebase_hex, path, false)
+	action_fsm.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+
+
+func _start_assault_route() -> void:
+	# current_order.target_hexes should hold route
+	if current_order.target_hexes.is_empty():
+		# optional: derive a simple fallback from current position if formation gave no path
+		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
+		#movement.set_route(fallback_route)
+		current_order.target_hexes.append(Globals.objective_hex)
+	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+	give_move_to_hex_order(current_order.target_hexes[0], path, false)
+	
+	action_fsm.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+
+func _start_withdraw() -> void:
+	if current_order.target_hexes.is_empty():
+		# optional: derive a simple fallback from current position if formation gave no path
+		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
+		#movement.set_route(fallback_route)
+		current_order.target_hexes.append(Vector2i(25,14))
+	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+	give_move_to_hex_order(current_order.target_hexes[0], path, false)
+
+	action_fsm.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+
+
+func _complete_order_success() -> void:
+	current_order_status = GoapTypes.SquadOrderStatus.ACHIEVED
+	action_fsm.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+
+func _fail_order() -> void:
+	current_order_status = GoapTypes.SquadOrderStatus.FAILED
+
+func _break_order() -> void:
+	current_order_status = GoapTypes.SquadOrderStatus.BROKEN
+
+func get_formation_id() -> int:
+	return formation_id
+
+func get_effectiveness() -> float:
+	# Plug in your existing E calculation
+	var combat_effectiveness: float = 1.0
+	return combat_effectiveness
+
+func is_alive() -> bool:
+	return members_alive > 0
+
+func is_reserve_candidate() -> bool:
+	# Simple version: any alive squad not currently in heavy contact
+	var in_front_line: bool = false
+	return not in_front_line
+
+func is_probe_candidate() -> bool:
+	# Pick light infantry with decent E
+	return is_alive() and not is_mg_team()
+
+func is_mg_team() -> bool:
+	return squadType == Unit.SquadType.MG
