@@ -27,6 +27,8 @@ var objective_clear: bool = false
 var route_to_objective_secure: bool = false
 var probe_result: int = GoapTypes.WorldProbeResult.UNKNOWN
 
+var has_enemy_contacts: bool = false
+
 func clone() -> FormationWorldState:
 	var s: FormationWorldState = FormationWorldState.new()
 	s.mission_mode = mission_mode
@@ -48,4 +50,5 @@ func clone() -> FormationWorldState:
 	s.objective_clear = objective_clear
 	s.route_to_objective_secure = route_to_objective_secure
 	s.probe_result = probe_result
+	s.has_enemy_contacts = has_enemy_contacts
 	return s

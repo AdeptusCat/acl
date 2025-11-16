@@ -62,6 +62,8 @@ func _state_equals(a: FormationWorldState, b: FormationWorldState) -> bool:
 		return false
 	if a.probe_result != b.probe_result:
 		return false
+	if a.has_enemy_contacts != b.has_enemy_contacts:
+		return false
 	return true
 
 func plan(start_state: FormationWorldState, goal: GoapGoal, actions: Array[GoapAction]) -> Array[GoapAction]:

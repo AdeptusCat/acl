@@ -27,6 +27,8 @@ func are_preconditions_met(state: FormationWorldState) -> bool:
 		GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE:
 			if not state.line_established:
 				return false
+			if not state.has_enemy_contacts:
+				return false
 			return true
 
 		GoapTypes.FormationActionId.COVER_FLANK:
@@ -54,8 +56,9 @@ func are_preconditions_met(state: FormationWorldState) -> bool:
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
 			if state.mission_mode != GoapTypes.FormationMissionMode.ATTACK:
 				return false
-			#if not state.base_of_fire_established:
-				#return false
+			if state.has_enemy_contacts: 
+				if not state.base_of_fire_established:
+					return false
 			return true
 
 		GoapTypes.FormationActionId.LAUNCH_ASSAULT:

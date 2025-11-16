@@ -31,7 +31,6 @@ fire_rate = 1.5
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
-formation_id = null
 
 [node name="UnitUi" parent="." instance=ExtResource("10_ga1pk")]
 offset_left = -33.0

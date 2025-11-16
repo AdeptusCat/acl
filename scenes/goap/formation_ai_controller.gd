@@ -19,6 +19,9 @@ var planner: GoapPlanner = GoapPlanner.new()
 var replan_cooldown: float = 0.0
 var replan_interval: float = 3.0
 
+var enemy_contacts: Array[Unit]
+
+
 func _ready() -> void:
 	_refresh_squad_list()
 	_select_goal(null)
@@ -56,6 +59,10 @@ func _on_squad_contact_reported(unit: Unit, contacts: Array[Unit]):
 	if contacts.is_empty():
 		return
 	
+	for contact in contacts:
+		if not enemy_contacts.has(contact):
+			enemy_contacts.append(contact)
+	
 	_assign_contact_reaction(unit, contacts[0].current_hex)
 
 
@@ -69,8 +76,10 @@ func _assign_contact_reaction(bo_f_squad: Unit, contact_hex: Vector2i) -> void:
 	#BASE_OF_FIRE,  2
 	#ASSAULT_ROUTE, 3
 	
-	if not bo_f_squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
+	if bo_f_squad.tactical_state.is_free():
 		# 1. Base-of-fire order for reporting squad
+		bo_f_squad.tactical_state.formation_role = bo_f_squad.tactical_state.FormationRole.BASE_OF_FIRE
+		
 		var bof_order: SquadOrder = SquadOrder.new()
 		bof_order.target_hexes.clear()
 		bof_order.target_hexes.append(contact_hex)
@@ -82,7 +91,7 @@ func _assign_contact_reaction(bo_f_squad: Unit, contact_hex: Vector2i) -> void:
 		_set_squad_order(bo_f_squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, bof_order)
 
 	# 2. Find an assault buddy
-	var assault_squad: Node = _pick_assault_partner(bo_f_squad)
+	var assault_squad: Unit = _pick_assault_partner(bo_f_squad)
 	if assault_squad == null:
 		return
 	
@@ -90,9 +99,10 @@ func _assign_contact_reaction(bo_f_squad: Unit, contact_hex: Vector2i) -> void:
 	var current_ass_order_type: GoapTypes.SquadOrderType = assault_squad.current_order.order_type
 	
 	
-	if not assault_squad.current_order.order_type == GoapTypes.SquadOrderType.ASSAULT_ROUTE:
+	if assault_squad.tactical_state.is_free():
 		# 3. Build a simple assault route: from assault squad position to objective via cover.
 		#var assault_route: Array[Vector2i] = _build_assault_route(assault_squad, contact_hex)
+		assault_squad.tactical_state.formation_role = assault_squad.tactical_state.FormationRole.ASSAULT
 
 		var assault_order: SquadOrder = SquadOrder.new()
 		#assault_order.target_hexes = assault_route
@@ -197,7 +207,16 @@ func _build_world_state() -> FormationWorldState:
 	# Placeholder hooks for now
 	s.line_established = true
 	s.fallback_line_available = true
+	
+	s.has_enemy_contacts = false
+	if not enemy_contacts.is_empty():
+		s.has_enemy_contacts = true
+	
 	s.base_of_fire_established = false
+	for squad in squads:
+		if squad.tactical_state:
+			if squad.tactical_state.formation_role == squad.tactical_state.FormationRole.BASE_OF_FIRE:
+				s.base_of_fire_established = true
 	
 	s.assault_element_ready = false
 	for squad in squads:
@@ -390,7 +409,7 @@ func _dispatch_action(action: GoapAction) -> void:
 		GoapTypes.FormationActionId.REST_AND_RESUPPLY:
 			_assign_rest_orders()
 
-func _set_squad_order(squad: Node, order_type: int, params: SquadOrder) -> void:
+func _set_squad_order(squad: Unit, order_type: int, params: SquadOrder) -> void:
 	if not squad.has_method("set_order_resource"):
 		return
 	params.order_type = order_type
@@ -403,10 +422,12 @@ func _assign_defense_orders() -> void:
 
 func _assign_base_of_fire_orders() -> void:
 	for squad in squads:
-		if squad.has_method("is_mg_team") and squad.is_mg_team():
+		#if squad.has_method("is_mg_team") and squad.is_mg_team():
+		if squad.tactical_state.is_free():
 			var order: SquadOrder = SquadOrder.new()
 			order.aggressiveness = 1.0
 			_set_squad_order(squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, order)
+			break
 
 func _assign_cover_flank_orders(left_side: bool) -> void:
 	for squad in squads:
@@ -435,13 +456,21 @@ func _assign_probe_orders() -> void:
 
 func _assign_prepare_assault_orders() -> void:
 	for squad in squads:
-		var order: SquadOrder = SquadOrder.new()
-		order.aggressiveness = 0.8
-		_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+		#if squad.tactical_state.is_free():
+		if not squad.tactical_state.formation_role == squad.tactical_state.FormationRole.BASE_OF_FIRE:
+			var order: SquadOrder = SquadOrder.new()
+			order.aggressiveness = 0.8
+			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+		else:
+			if not squad.has_reported_contact:
+				var order: SquadOrder = SquadOrder.new()
+				order.aggressiveness = 0.8
+				_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+
 
 func _assign_launch_assault_orders() -> void:
 	for squad in squads:
-		if squad.has_method("has_assault_role") and squad.has_assault_role():
+		if squad.tactical_state.formation_role == squad.tactical_state.FormationRole.ASSAULT:
 			var order: SquadOrder = SquadOrder.new()
 			order.aggressiveness = 1.2
 			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
