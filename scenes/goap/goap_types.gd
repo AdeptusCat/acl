@@ -55,6 +55,7 @@ enum FormationGoalId {
 	}
 
 enum FormationActionId {
+	MOVE_TO_OBJECTIVE,
 	ESTABLISH_DEFENSE_LINE,
 	ASSIGN_BASE_OF_FIRE,
 	COVER_FLANK,
