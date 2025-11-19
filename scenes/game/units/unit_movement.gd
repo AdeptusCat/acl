@@ -63,6 +63,7 @@ func _process(delta: float) -> void:
 # ----------------------------------------------------------------------
 
 func stop():
+	path_index = 0
 	move_to_hex(unit.current_hex)
 
 

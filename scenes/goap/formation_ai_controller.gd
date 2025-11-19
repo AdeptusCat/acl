@@ -33,6 +33,7 @@ func _process(delta: float) -> void:
 	if replan_cooldown <= 0.0:
 		_run_goap_cycle()
 		replan_cooldown = replan_interval
+		
 
 func _refresh_squad_list() -> void:
 	squads.clear()
@@ -49,6 +50,12 @@ func _refresh_squad_list() -> void:
 		if not squad.contacts_reported.is_connected(_on_squad_contact_reported):
 			squad.contacts_reported.connect(_on_squad_contact_reported)
 
+func _refresh_enemy_contacts() -> void:
+	enemy_contacts.clear()
+	for squad in squads:
+		for enemy_contact in squad.enemies_reported:
+			if not enemy_contacts.has(enemy_contact):
+				enemy_contacts.append(enemy_contact)
 
 func _on_squad_contact_reported(unit: Unit, contacts: Array[Unit]):
 	if not is_instance_valid(unit):
@@ -59,9 +66,9 @@ func _on_squad_contact_reported(unit: Unit, contacts: Array[Unit]):
 	if contacts.is_empty():
 		return
 	
-	for contact in contacts:
-		if not enemy_contacts.has(contact):
-			enemy_contacts.append(contact)
+	#for contact in contacts:
+		#if not enemy_contacts.has(contact):
+			#enemy_contacts.append(contact)
 	
 	_assign_contact_reaction(unit, contacts[0].current_hex)
 
@@ -187,53 +194,23 @@ func _build_world_state() -> FormationWorldState:
 		if squad.has_method("is_reserve_candidate") and squad.is_reserve_candidate():
 			reserve_count += 1
 
-
-	if alive_count > 0:
-		var avg_E: float = total_E / float(alive_count)
-		if avg_E > 0.66:
-			s.friendly_E_level = GoapTypes.WorldELevel.HIGH
-		elif avg_E > 0.33:
-			s.friendly_E_level = GoapTypes.WorldELevel.MED
-		else:
-			s.friendly_E_level = GoapTypes.WorldELevel.LOW
-	else:
-		s.friendly_E_level = GoapTypes.WorldELevel.LOW
-
-	if reserve_count > 0:
-		s.reserve_present = true
-	else:
-		s.reserve_present = false
-
-	# Placeholder hooks for now
-	s.line_established = true
-	s.fallback_line_available = true
-	
 	s.has_enemy_contacts = false
 	if not enemy_contacts.is_empty():
 		s.has_enemy_contacts = true
 	
-	s.base_of_fire_established = false
-	for squad in squads:
-		if squad.tactical_state:
-			if squad.tactical_state.formation_role == squad.tactical_state.FormationRole.BASE_OF_FIRE:
-				s.base_of_fire_established = true
+	#s.base_of_fire_established = false
+	#for squad in squads:
+		#if squad.tactical_state:
+			#if squad.tactical_state.formation_role == squad.tactical_state.FormationRole.BASE_OF_FIRE:
+				#s.base_of_fire_established = true
 	
-	s.assault_element_ready = false
+	s.assault_plan_ready = false
 	for squad in squads:
 		if not is_instance_valid(squad):
 			break
 		if squad.current_order.order_type == GoapTypes.SquadOrderType.ASSAULT_ROUTE:
-			s.assault_element_ready = true
+			s.assault_plan_ready = true
 	
-	s.left_flank_exposed = true
-	s.right_flank_exposed = true
-	s.contact_uncertain = true
-	s.enemy_E_on_main_axis = GoapTypes.WorldELevel.MED
-	s.casualty_level = GoapTypes.WorldELevel.LOW
-	s.ammo_state_global = GoapTypes.WorldAmmoLevel.OK
-	s.time_pressure_high = false
-	
-	s.objective_clear = false
 	s.objective_held = false
 	var occupying_units : Array
 	for squad in squads:
@@ -244,12 +221,6 @@ func _build_world_state() -> FormationWorldState:
 	for squad in occupying_units:
 		if not squad.is_good_order():
 			s.objective_held = true
-			s.objective_clear = true
-	
-	s.objective_contested = false
-	
-	s.route_to_objective_secure = false
-	s.probe_result = GoapTypes.WorldProbeResult.UNKNOWN
 
 	return s
 
@@ -303,36 +274,41 @@ func _select_goal(state: FormationWorldState) -> void:
 func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
 	var actions: Array[GoapAction] = []
 
-	var a_def: GoapAction = GoapAction.new()
-	a_def.action_id = GoapTypes.FormationActionId.ESTABLISH_DEFENSE_LINE
-	a_def.base_cost = 1.0
-	actions.append(a_def)
+	#var a_def: GoapAction = GoapAction.new()
+	#a_def.action_id = GoapTypes.FormationActionId.ESTABLISH_DEFENSE_LINE
+	#a_def.base_cost = 1.0
+	#actions.append(a_def)
+#
+	#var a_bof: GoapAction = GoapAction.new()
+	#a_bof.action_id = GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE
+	#a_bof.base_cost = 1.0
+	#actions.append(a_bof)
+#
+	#var a_flank: GoapAction = GoapAction.new()
+	#a_flank.action_id = GoapTypes.FormationActionId.COVER_FLANK
+	#a_flank.base_cost = 1.0
+	#a_flank.flank_side_left = true
+	#actions.append(a_flank)
+#
+	#var a_wd: GoapAction = GoapAction.new()
+	#a_wd.action_id = GoapTypes.FormationActionId.WITHDRAW_TO_FALLBACK
+	#a_wd.base_cost = 2.0
+	#actions.append(a_wd)
+#
+	#var a_reorg: GoapAction = GoapAction.new()
+	#a_reorg.action_id = GoapTypes.FormationActionId.REORGANIZE_AND_MERGE
+	#a_reorg.base_cost = 2.0
+	#actions.append(a_reorg)
+#
+	#var a_probe: GoapAction = GoapAction.new()
+	#a_probe.action_id = GoapTypes.FormationActionId.PROBE_AXIS
+	#a_probe.base_cost = 1.0
+	#actions.append(a_probe)
 
-	var a_bof: GoapAction = GoapAction.new()
-	a_bof.action_id = GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE
-	a_bof.base_cost = 1.0
-	actions.append(a_bof)
-
-	var a_flank: GoapAction = GoapAction.new()
-	a_flank.action_id = GoapTypes.FormationActionId.COVER_FLANK
-	a_flank.base_cost = 1.0
-	a_flank.flank_side_left = true
-	actions.append(a_flank)
-
-	var a_wd: GoapAction = GoapAction.new()
-	a_wd.action_id = GoapTypes.FormationActionId.WITHDRAW_TO_FALLBACK
-	a_wd.base_cost = 2.0
-	actions.append(a_wd)
-
-	var a_reorg: GoapAction = GoapAction.new()
-	a_reorg.action_id = GoapTypes.FormationActionId.REORGANIZE_AND_MERGE
-	a_reorg.base_cost = 2.0
-	actions.append(a_reorg)
-
-	var a_probe: GoapAction = GoapAction.new()
-	a_probe.action_id = GoapTypes.FormationActionId.PROBE_AXIS
-	a_probe.base_cost = 1.0
-	actions.append(a_probe)
+	var a_move: GoapAction = GoapAction.new()
+	a_move.action_id = GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE
+	a_move.base_cost = 2.0
+	actions.append(a_move)
 
 	var a_prep: GoapAction = GoapAction.new()
 	a_prep.action_id = GoapTypes.FormationActionId.PREPARE_ASSAULT
@@ -343,31 +319,32 @@ func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
 	a_launch.action_id = GoapTypes.FormationActionId.LAUNCH_ASSAULT
 	a_launch.base_cost = 4.0
 	actions.append(a_launch)
-
-	var a_shift: GoapAction = GoapAction.new()
-	a_shift.action_id = GoapTypes.FormationActionId.SHIFT_AXIS
-	a_shift.base_cost = 2.0
-	actions.append(a_shift)
-
-	var a_commit: GoapAction = GoapAction.new()
-	a_commit.action_id = GoapTypes.FormationActionId.COMMIT_RESERVE
-	a_commit.base_cost = 3.0
-	actions.append(a_commit)
-
-	var a_rotate: GoapAction = GoapAction.new()
-	a_rotate.action_id = GoapTypes.FormationActionId.ROTATE_SQUADS_IN_LINE
-	a_rotate.base_cost = 1.0
-	actions.append(a_rotate)
-
-	var a_rest: GoapAction = GoapAction.new()
-	a_rest.action_id = GoapTypes.FormationActionId.REST_AND_RESUPPLY
-	a_rest.base_cost = 1.0
-	actions.append(a_rest)
+#
+	#var a_shift: GoapAction = GoapAction.new()
+	#a_shift.action_id = GoapTypes.FormationActionId.SHIFT_AXIS
+	#a_shift.base_cost = 2.0
+	#actions.append(a_shift)
+#
+	#var a_commit: GoapAction = GoapAction.new()
+	#a_commit.action_id = GoapTypes.FormationActionId.COMMIT_RESERVE
+	#a_commit.base_cost = 3.0
+	#actions.append(a_commit)
+#
+	#var a_rotate: GoapAction = GoapAction.new()
+	#a_rotate.action_id = GoapTypes.FormationActionId.ROTATE_SQUADS_IN_LINE
+	#a_rotate.base_cost = 1.0
+	#actions.append(a_rotate)
+#
+	#var a_rest: GoapAction = GoapAction.new()
+	#a_rest.action_id = GoapTypes.FormationActionId.REST_AND_RESUPPLY
+	#a_rest.base_cost = 1.0
+	#actions.append(a_rest)
 
 	return actions
 
 func _run_goap_cycle() -> void:
 	_refresh_squad_list()
+	_refresh_enemy_contacts()
 	
 	var state: FormationWorldState = _build_world_state()
 
@@ -384,30 +361,32 @@ func _run_goap_cycle() -> void:
 
 func _dispatch_action(action: GoapAction) -> void:
 	match action.action_id:
-		GoapTypes.FormationActionId.ESTABLISH_DEFENSE_LINE:
-			_assign_defense_orders()
-		GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE:
-			_assign_base_of_fire_orders()
-		GoapTypes.FormationActionId.COVER_FLANK:
-			_assign_cover_flank_orders(action.flank_side_left)
-		GoapTypes.FormationActionId.WITHDRAW_TO_FALLBACK:
-			_assign_withdraw_orders()
-		GoapTypes.FormationActionId.REORGANIZE_AND_MERGE:
-			_assign_reorganize_orders()
-		GoapTypes.FormationActionId.PROBE_AXIS:
-			_assign_probe_orders()
+		#GoapTypes.FormationActionId.ESTABLISH_DEFENSE_LINE:
+			#_assign_defense_orders()
+		#GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE:
+			#_assign_base_of_fire_orders()
+		#GoapTypes.FormationActionId.COVER_FLANK:
+			#_assign_cover_flank_orders(action.flank_side_left)
+		#GoapTypes.FormationActionId.WITHDRAW_TO_FALLBACK:
+			#_assign_withdraw_orders()
+		#GoapTypes.FormationActionId.REORGANIZE_AND_MERGE:
+			#_assign_reorganize_orders()
+		#GoapTypes.FormationActionId.PROBE_AXIS:
+			#_assign_probe_orders()
+		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
+			_assign_move_to_objective()
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
 			_assign_prepare_assault_orders()
 		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
 			_assign_launch_assault_orders()
-		GoapTypes.FormationActionId.SHIFT_AXIS:
-			_assign_shift_axis_orders()
-		GoapTypes.FormationActionId.COMMIT_RESERVE:
-			_assign_commit_reserve_orders()
-		GoapTypes.FormationActionId.ROTATE_SQUADS_IN_LINE:
-			_assign_rotate_line_orders()
-		GoapTypes.FormationActionId.REST_AND_RESUPPLY:
-			_assign_rest_orders()
+		#GoapTypes.FormationActionId.SHIFT_AXIS:
+			#_assign_shift_axis_orders()
+		#GoapTypes.FormationActionId.COMMIT_RESERVE:
+			#_assign_commit_reserve_orders()
+		#GoapTypes.FormationActionId.ROTATE_SQUADS_IN_LINE:
+			#_assign_rotate_line_orders()
+		#GoapTypes.FormationActionId.REST_AND_RESUPPLY:
+			#_assign_rest_orders()
 
 func _set_squad_order(squad: Unit, order_type: int, params: SquadOrder) -> void:
 	if not squad.has_method("set_order_resource"):
@@ -453,6 +432,14 @@ func _assign_probe_orders() -> void:
 			order.aggressiveness = 0.5
 			_set_squad_order(squad, GoapTypes.SquadOrderType.SCREEN_AXIS, order)
 			break
+
+func _assign_move_to_objective() -> void:
+	for squad in squads:
+		#if squad.tactical_state.is_free():
+		var order: SquadOrder = SquadOrder.new()
+		order.aggressiveness = 0.8
+		_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+
 
 func _assign_prepare_assault_orders() -> void:
 	for squad in squads:

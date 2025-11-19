@@ -998,11 +998,10 @@ func _check_contacts() -> void:
 	else:
 		has_reported_contact = true
 
-	if enemies_reported == enemies:
-		return
+	if not enemies_reported == enemies:
+		movement.stop()
 	enemies_reported = enemies
 	
-	movement.stop()
 	# Option: halt movement temporarily until formation reacts
 	#if action_controller.action_state == SquadActionController.SquadActionState.ADVANCING:
 		#action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
