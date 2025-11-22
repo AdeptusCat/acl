@@ -1,0 +1,31 @@
+UI
+
+start axis allies nebeneinander nicht untereinander
++ bild axis/allies beim startbild aber auch beim ende
+
+wünscht sich pause weil er sonst nicht genug befehle auf einmal geben kann
+besser: gruppen aufgaben und mit einem mal ausführen
+
+stress Mechanik muss verständlich sein!!! wie kann ich das gut darstellen?
+
+bass bei waffen kann höher
+
+Deckung ist nicht klar dass die auch einen Effekt hat
+
+Effektivität der Squads beim hovern anzeigen (0-100%) damit spiel leichter zu verstehen ist, bzw damit man versteht warum was klappt oder nicht, ist es glück oder skill
+
+commander hat outline damit influence gezeigt wird
+
+selber rausfinden ob etwas funktioniert oder nicht sollte akzeptable zeit dauern. ansonsten wird sich keiner so viel zeit nehmen. oder es wird klarer durch das ui.
+
+das Spielfeld ändern. häuser zerstören. Granattrichter. 
+evtl Deckung zerstören 
+
+Artillerie
+
+sandsäcke/gräben plazieren
+
+bock macht:
+fast pased
+fühlt sich an wie casual wargame, nicht so sweaty. 
+

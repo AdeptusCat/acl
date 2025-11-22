@@ -17,8 +17,6 @@ func are_preconditions_met(state: FormationWorldState) -> bool:
 		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
 			if state.has_enemy_contacts:
 				return false
-			if state.enemy_holds_objective:
-				return false
 			return true
 		
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
@@ -28,10 +26,27 @@ func are_preconditions_met(state: FormationWorldState) -> bool:
 				return false
 			return true
 		
-		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
+		GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE:
+			if not state.assault_plan_ready:
+				return false
+			return true
+			
+		GoapTypes.FormationActionId.POSITION_ASSAULT_ELEMENT:
+			if not state.assault_plan_ready:
+				return false
+			return true
+			
+		GoapTypes.FormationActionId.GAIN_FIRE_SUPERIORITY:
+			if not state.base_of_fire_ready:
+				return false
 			if not state.has_enemy_contacts:
 				return false
-			if not state.assault_plan_ready:
+			return true
+		
+		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
+			if not state.assault_element_ready:
+				return false
+			if not state.fire_superiority:
 				return false
 			if state.objective_held:
 				return false
@@ -48,7 +63,12 @@ func apply_effects(input_state: FormationWorldState) -> FormationWorldState:
 		
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
 			s.assault_plan_ready = true
-
+		GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE:
+			s.base_of_fire_ready = true
+		GoapTypes.FormationActionId.POSITION_ASSAULT_ELEMENT:
+			s.assault_element_ready = true
+		GoapTypes.FormationActionId.GAIN_FIRE_SUPERIORITY:
+			s.fire_superiority = true
 		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
 			s.enemy_holds_objective = false
 			s.objective_held = true
@@ -63,6 +83,12 @@ func get_cost(state: FormationWorldState) -> float:
 		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
 			cost += 5.0
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
+			cost += 5.0
+		GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE:
+			cost += 5.0
+		GoapTypes.FormationActionId.POSITION_ASSAULT_ELEMENT:
+			cost += 5.0
+		GoapTypes.FormationActionId.GAIN_FIRE_SUPERIORITY:
 			cost += 5.0
 		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
 			cost += 5.0

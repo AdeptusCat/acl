@@ -27,8 +27,12 @@ var mission_mode: int = GoapTypes.FormationMissionMode.DEFEND
 
 var objective_held: bool = false
 var enemy_holds_objective: bool = false
+var base_of_fire_ready: bool = false
+var assault_element_ready: bool = false
+var fire_superiority: bool = true
 var assault_plan_ready: bool = false
 var has_enemy_contacts: bool = false
+
 
 func clone() -> FormationWorldState:
 	var s: FormationWorldState = FormationWorldState.new()
@@ -37,4 +41,7 @@ func clone() -> FormationWorldState:
 	s.enemy_holds_objective = enemy_holds_objective
 	s.assault_plan_ready = assault_plan_ready
 	s.has_enemy_contacts = has_enemy_contacts
+	s.base_of_fire_ready = base_of_fire_ready
+	s.assault_element_ready = assault_element_ready
+	s.fire_superiority = fire_superiority
 	return s

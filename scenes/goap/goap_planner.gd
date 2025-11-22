@@ -24,32 +24,13 @@ func _find_lowest_cost(open_list: Array[NodeState]) -> int:
 func _state_equals(a: FormationWorldState, b: FormationWorldState) -> bool:
 	if a.mission_mode != b.mission_mode:
 		return false
-	#if a.line_established != b.line_established:
-		#return false
-	#if a.fallback_line_available != b.fallback_line_available:
-		#return false
-	#if a.reserve_present != b.reserve_present:
-		#return false
-	#if a.base_of_fire_established != b.base_of_fire_established:
-		#return false
-	#if a.assault_element_ready != b.assault_element_ready:
-		#return false
-	#if a.left_flank_exposed != b.left_flank_exposed:
-		#return false
-	#if a.right_flank_exposed != b.right_flank_exposed:
-		#return false
-	#if a.contact_uncertain != b.contact_uncertain:
-		#return false
-	#if a.friendly_E_level != b.friendly_E_level:
-		#return false
-	#if a.enemy_E_on_main_axis != b.enemy_E_on_main_axis:
-		#return false
-	#if a.casualty_level != b.casualty_level:
-		#return false
-	#if a.ammo_state_global != b.ammo_state_global:
-		#return false
-	#if a.time_pressure_high != b.time_pressure_high:
-		#return false
+
+	if a.base_of_fire_ready != b.base_of_fire_ready:
+		return false
+	if a.assault_element_ready != b.assault_element_ready:
+		return false
+	if a.fire_superiority != b.fire_superiority:
+		return false
 	if a.assault_plan_ready != b.assault_plan_ready:
 		return false
 	if a.enemy_holds_objective != b.enemy_holds_objective:
@@ -58,14 +39,7 @@ func _state_equals(a: FormationWorldState, b: FormationWorldState) -> bool:
 		return false
 	if a.objective_held != b.objective_held:
 		return false
-	#if a.objective_contested != b.objective_contested:
-		#return false
-	#if a.objective_clear != b.objective_clear:
-		#return false
-	#if a.route_to_objective_secure != b.route_to_objective_secure:
-		#return false
-	#if a.probe_result != b.probe_result:
-		#return false
+
 	return true
 
 func plan(start_state: FormationWorldState, goal: GoapGoal, actions: Array[GoapAction]) -> Array[GoapAction]:

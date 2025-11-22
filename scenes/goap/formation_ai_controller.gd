@@ -274,37 +274,6 @@ func _select_goal(state: FormationWorldState) -> void:
 func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
 	var actions: Array[GoapAction] = []
 
-	#var a_def: GoapAction = GoapAction.new()
-	#a_def.action_id = GoapTypes.FormationActionId.ESTABLISH_DEFENSE_LINE
-	#a_def.base_cost = 1.0
-	#actions.append(a_def)
-#
-	#var a_bof: GoapAction = GoapAction.new()
-	#a_bof.action_id = GoapTypes.FormationActionId.ASSIGN_BASE_OF_FIRE
-	#a_bof.base_cost = 1.0
-	#actions.append(a_bof)
-#
-	#var a_flank: GoapAction = GoapAction.new()
-	#a_flank.action_id = GoapTypes.FormationActionId.COVER_FLANK
-	#a_flank.base_cost = 1.0
-	#a_flank.flank_side_left = true
-	#actions.append(a_flank)
-#
-	#var a_wd: GoapAction = GoapAction.new()
-	#a_wd.action_id = GoapTypes.FormationActionId.WITHDRAW_TO_FALLBACK
-	#a_wd.base_cost = 2.0
-	#actions.append(a_wd)
-#
-	#var a_reorg: GoapAction = GoapAction.new()
-	#a_reorg.action_id = GoapTypes.FormationActionId.REORGANIZE_AND_MERGE
-	#a_reorg.base_cost = 2.0
-	#actions.append(a_reorg)
-#
-	#var a_probe: GoapAction = GoapAction.new()
-	#a_probe.action_id = GoapTypes.FormationActionId.PROBE_AXIS
-	#a_probe.base_cost = 1.0
-	#actions.append(a_probe)
-
 	var a_move: GoapAction = GoapAction.new()
 	a_move.action_id = GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE
 	a_move.base_cost = 2.0
@@ -314,31 +283,26 @@ func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
 	a_prep.action_id = GoapTypes.FormationActionId.PREPARE_ASSAULT
 	a_prep.base_cost = 2.0
 	actions.append(a_prep)
+	
+	var a_bof: GoapAction = GoapAction.new()
+	a_bof.action_id = GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE
+	a_bof.base_cost = 2.0
+	actions.append(a_bof)
+
+	var a_ass: GoapAction = GoapAction.new()
+	a_ass.action_id = GoapTypes.FormationActionId.POSITION_ASSAULT_ELEMENT
+	a_ass.base_cost = 2.0
+	actions.append(a_ass)
+
+	var a_fs: GoapAction = GoapAction.new()
+	a_fs.action_id = GoapTypes.FormationActionId.GAIN_FIRE_SUPERIORITY
+	a_fs.base_cost = 3.0
+	actions.append(a_fs)
 
 	var a_launch: GoapAction = GoapAction.new()
 	a_launch.action_id = GoapTypes.FormationActionId.LAUNCH_ASSAULT
 	a_launch.base_cost = 4.0
 	actions.append(a_launch)
-#
-	#var a_shift: GoapAction = GoapAction.new()
-	#a_shift.action_id = GoapTypes.FormationActionId.SHIFT_AXIS
-	#a_shift.base_cost = 2.0
-	#actions.append(a_shift)
-#
-	#var a_commit: GoapAction = GoapAction.new()
-	#a_commit.action_id = GoapTypes.FormationActionId.COMMIT_RESERVE
-	#a_commit.base_cost = 3.0
-	#actions.append(a_commit)
-#
-	#var a_rotate: GoapAction = GoapAction.new()
-	#a_rotate.action_id = GoapTypes.FormationActionId.ROTATE_SQUADS_IN_LINE
-	#a_rotate.base_cost = 1.0
-	#actions.append(a_rotate)
-#
-	#var a_rest: GoapAction = GoapAction.new()
-	#a_rest.action_id = GoapTypes.FormationActionId.REST_AND_RESUPPLY
-	#a_rest.base_cost = 1.0
-	#actions.append(a_rest)
 
 	return actions
 
@@ -377,6 +341,12 @@ func _dispatch_action(action: GoapAction) -> void:
 			_assign_move_to_objective()
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
 			_assign_prepare_assault_orders()
+		GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE:
+			_assign_position_base_of_fire()
+		GoapTypes.FormationActionId.POSITION_ASSAULT_ELEMENT:
+			_assign_position_assault_element()
+		GoapTypes.FormationActionId.GAIN_FIRE_SUPERIORITY:
+			_assign_gain_fire_superiority()
 		GoapTypes.FormationActionId.LAUNCH_ASSAULT:
 			_assign_launch_assault_orders()
 		#GoapTypes.FormationActionId.SHIFT_AXIS:
@@ -394,44 +364,48 @@ func _set_squad_order(squad: Unit, order_type: int, params: SquadOrder) -> void:
 	params.order_type = order_type
 	squad.set_order_resource(params)
 
-func _assign_defense_orders() -> void:
-	for squad in squads:
-		var order: SquadOrder = SquadOrder.new()
-		_set_squad_order(squad, GoapTypes.SquadOrderType.DEFEND_LINE, order)
 
-func _assign_base_of_fire_orders() -> void:
+func _assign_prepare_assault_orders() -> void:
+	var i: int = 0
 	for squad in squads:
-		#if squad.has_method("is_mg_team") and squad.is_mg_team():
-		if squad.tactical_state.is_free():
+		if i == 0:
 			var order: SquadOrder = SquadOrder.new()
-			order.aggressiveness = 1.0
+			order.aggressiveness = 0.8
+			# need to set order.target_hexes here so the squad knows where to go and start firing
 			_set_squad_order(squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, order)
-			break
-
-func _assign_cover_flank_orders(left_side: bool) -> void:
-	for squad in squads:
-		if squad.has_method("is_reserve_candidate") and squad.is_reserve_candidate():
+		else:
+			#if not squad.has_reported_contact:
 			var order: SquadOrder = SquadOrder.new()
-			_set_squad_order(squad, GoapTypes.SquadOrderType.DEFEND_LINE, order)
-			break
+			order.aggressiveness = 0.8
+			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+		i += 1
 
-func _assign_withdraw_orders() -> void:
+func _assign_position_base_of_fire() -> void:
+	var base_of_fire_squads: Array[Unit]
 	for squad in squads:
-		var order: SquadOrder = SquadOrder.new()
-		_set_squad_order(squad, GoapTypes.SquadOrderType.WITHDRAW_TO, order)
+		if squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
+			base_of_fire_squads.append(squad)
+	var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemy_contacts[0].current_hex, [])
+	for squad in base_of_fire_squads:
+		var closest_distance: int = 1000
+		var closest_hex: Vector2i
+		for hex in visible_hexes_by_enemy:
+			var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+			var distance: int = LOSHelper.ground_layer.cube_distance(squad.current_cube, cube)
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+		_set_squad_order(squad, GoapTypes.SquadOrderType.MOVE_TO, order)
 
-func _assign_reorganize_orders() -> void:
-	for squad in squads:
-		var order: SquadOrder = SquadOrder.new()
-		_set_squad_order(squad, GoapTypes.SquadOrderType.REORGANIZE_MERGE, order)
+func _assign_position_assault_element() -> void:
+	pass
 
-func _assign_probe_orders() -> void:
-	for squad in squads:
-		if squad.has_method("is_probe_candidate") and squad.is_probe_candidate():
-			var order: SquadOrder = SquadOrder.new()
-			order.aggressiveness = 0.5
-			_set_squad_order(squad, GoapTypes.SquadOrderType.SCREEN_AXIS, order)
-			break
+func _assign_gain_fire_superiority() -> void:
+	pass
+
+
+
+
 
 func _assign_move_to_objective() -> void:
 	for squad in squads:
@@ -441,19 +415,6 @@ func _assign_move_to_objective() -> void:
 		_set_squad_order(squad, GoapTypes.SquadOrderType.MOVE_TO, order)
 
 
-func _assign_prepare_assault_orders() -> void:
-	for squad in squads:
-		#if squad.tactical_state.is_free():
-		if not squad.tactical_state.formation_role == squad.tactical_state.FormationRole.BASE_OF_FIRE:
-			var order: SquadOrder = SquadOrder.new()
-			order.aggressiveness = 0.8
-			# need to set order.target_hexes here so the squad knows where to go and start firing
-			_set_squad_order(squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, order)
-		else:
-			if not squad.has_reported_contact:
-				var order: SquadOrder = SquadOrder.new()
-				order.aggressiveness = 0.8
-				_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
 
 
 func _assign_launch_assault_orders() -> void:
@@ -463,23 +424,11 @@ func _assign_launch_assault_orders() -> void:
 			order.aggressiveness = 1.2
 			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
 
-func _assign_shift_axis_orders() -> void:
-	_assign_prepare_assault_orders()
-
-func _assign_commit_reserve_orders() -> void:
-	for squad in squads:
-		if squad.has_method("is_reserve_candidate") and squad.is_reserve_candidate():
-			var order: SquadOrder = SquadOrder.new()
-			order.aggressiveness = 1.2
-			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
-
-func _assign_rotate_line_orders() -> void:
-	# Placeholder: swap tired vs fresh squads on line
-	pass
-
-func _assign_rest_orders() -> void:
-	for squad in squads:
-		if squad.has_method("is_tired") and squad.is_tired():
-			var order: SquadOrder = SquadOrder.new()
-			order.aggressiveness = 0.0
-			_set_squad_order(squad, GoapTypes.SquadOrderType.REST, order)
+#func _assign_base_of_fire_orders() -> void:
+	#for squad in squads:
+		##if squad.has_method("is_mg_team") and squad.is_mg_team():
+		#if squad.tactical_state.is_free():
+			#var order: SquadOrder = SquadOrder.new()
+			#order.aggressiveness = 1.0
+			#_set_squad_order(squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, order)
+			#break
