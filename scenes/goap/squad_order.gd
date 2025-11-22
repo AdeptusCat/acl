@@ -2,8 +2,6 @@
 class_name SquadOrder
 extends Resource
 
-const GoapTypes = preload("res://scenes/goap/goap_types.gd")
-
 var order_type: GoapTypes.SquadOrderType = GoapTypes.SquadOrderType.NONE
 var target_line_id: int = -1
 var sector_index: int = -1

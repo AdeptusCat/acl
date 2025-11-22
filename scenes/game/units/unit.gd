@@ -1463,6 +1463,8 @@ func _on_new_order_received() -> void:
 	match current_order.order_type:
 		GoapTypes.SquadOrderType.DEFEND_LINE:
 			_start_defend_line()
+		GoapTypes.SquadOrderType.MOVE_TO:
+			_start_move_to()
 		GoapTypes.SquadOrderType.BASE_OF_FIRE:
 			_start_base_of_fire()
 		GoapTypes.SquadOrderType.ASSAULT_ROUTE:
@@ -1487,6 +1489,19 @@ func _start_defend_line() -> void:
 	# Use current_order.target_hexes or line/sector mapping to hexes
 	var defend_hex: Vector2i = Vector2i.ZERO#_pick_defend_hex_for_this_squad()
 	movement.set_path_to_hex(defend_hex)
+	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+
+
+func _start_move_to() -> void:
+	# current_order.target_hexes should hold route
+	if current_order.target_hexes.is_empty():
+		# optional: derive a simple fallback from current position if formation gave no path
+		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
+		#movement.set_route(fallback_route)
+		current_order.target_hexes.append(Globals.objective_hex)
+	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+	give_move_to_hex_order(current_order.target_hexes[0], path, false)
+	
 	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 
 

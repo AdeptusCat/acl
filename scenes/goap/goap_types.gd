@@ -5,6 +5,7 @@ extends Resource
 enum SquadOrderType {
 	NONE,
 	DEFEND_LINE,
+	MOVE_TO,
 	BASE_OF_FIRE,
 	ASSAULT_ROUTE,
 	SCREEN_AXIS,
