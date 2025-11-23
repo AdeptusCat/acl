@@ -377,10 +377,12 @@ func _assign_prepare_assault_orders() -> void:
 			#if not squad.has_reported_contact:
 			var order: SquadOrder = SquadOrder.new()
 			order.aggressiveness = 0.8
-			_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
+			_set_squad_order(squad, GoapTypes.SquadOrderType.BASE_OF_FIRE, order)
+			#_set_squad_order(squad, GoapTypes.SquadOrderType.ASSAULT_ROUTE, order)
 		i += 1
 
 func _assign_position_base_of_fire() -> void:
+	return
 	var base_of_fire_squads: Array[Unit]
 	for squad in squads:
 		if squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
@@ -395,6 +397,7 @@ func _assign_position_base_of_fire() -> void:
 			if distance < closest_distance:
 				closest_distance = distance
 				closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+		var order: SquadOrder = SquadOrder.new()
 		_set_squad_order(squad, GoapTypes.SquadOrderType.MOVE_TO, order)
 
 func _assign_position_assault_element() -> void:
@@ -408,6 +411,7 @@ func _assign_gain_fire_superiority() -> void:
 
 
 func _assign_move_to_objective() -> void:
+	#return
 	for squad in squads:
 		#if squad.tactical_state.is_free():
 		var order: SquadOrder = SquadOrder.new()

@@ -86,7 +86,10 @@ func follow_cube_path(cube_path: Array[Vector3i]) -> void:
 	if path_hexes.size() > 1:
 		path_index = 1
 		move_to_hex(path_hexes[path_index])
-
+	elif path_hexes.size() == 1:
+		path_index = 0
+		move_to_hex(path_hexes[0])
+	
 
 # ----------------------------------------------------------------------
 # ATTACK-MOVE PATH SUPPORT

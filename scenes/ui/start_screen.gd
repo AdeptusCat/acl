@@ -5,8 +5,8 @@ signal hover_start_button(team: int)
 signal time_changed(_time: float)
 
 @onready var objective_label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectiveLabel
-@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAxisButton
-@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAlliesButton
+@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton
+@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton
 @onready var animation_player = $AnimationPlayer
 @onready var time_spinbox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
 

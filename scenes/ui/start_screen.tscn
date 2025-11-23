@@ -1,8 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://dry4o5rpga2ec"]
+[gd_scene load_steps=10 format=3 uid="uid://dry4o5rpga2ec"]
 
 [ext_resource type="Script" uid="uid://cu06jcpwigm47" path="res://scenes/ui/start_screen.gd" id="1_ncxyx"]
 [ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="2_ihgl4"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2_m7t1o"]
+[ext_resource type="Texture2D" uid="uid://bvwf141gyghuq" path="res://assets/ui/axis_flag.png" id="4_adf7y"]
+[ext_resource type="Texture2D" uid="uid://blvkk161reu30" path="res://assets/ui/us_flag.png" id="5_a1ei0"]
 
 [sub_resource type="Animation" id="Animation_afy8x"]
 length = 0.001
@@ -117,13 +119,23 @@ alignment = 1
 [node name="ObjectiveLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="StartAsAxisButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
-text = "Start as Axis"
+alignment = 1
 
-[node name="StartAsAlliesButton" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
+[node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
-text = "Start as Allies"
+texture_normal = ExtResource("4_adf7y")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 100)
+layout_mode = 2
+texture_normal = ExtResource("5_a1ei0")
+ignore_texture_size = true
+stretch_mode = 4
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Control/FadeRect")
@@ -132,7 +144,7 @@ libraries = {
 }
 
 [connection signal="value_changed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]

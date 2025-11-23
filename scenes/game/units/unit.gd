@@ -125,6 +125,8 @@ signal state_chaged(state: int)
 @onready var tactical_state: SquadTacticalState = SquadTacticalState.new()
 
 
+
+
 # === Ready ===
 func _ready():
 	action_controller.init(self, movement, squad_fire, stress_system, ui, combat)
@@ -986,12 +988,15 @@ func _process(delta):
 func _check_contacts() -> void:
 	if not "unit_visible_enemies" in squad_fire:
 		return
+	if not is_good_order():
+		return
 	var raw: Array = squad_fire.unit_visible_enemies.get(self, [])
 	
 	var enemies: Array[Unit] = []
 
 	for unit in raw:
-		enemies.append(unit)
+		if is_instance_valid(unit):
+			enemies.append(unit)
 
 	if enemies.is_empty():
 		has_reported_contact = false
@@ -1506,21 +1511,42 @@ func _start_move_to() -> void:
 
 
 func _start_base_of_fire() -> void:
-	if current_order.target_hexes.is_empty():
+	#var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
+	if enemies_reported.is_empty():
 		return
-	var firebase_hex: Vector2i
-	var visible_hexes_to_target = LOSHelper.los_lookup.get(current_order.target_hexes[0], [])
+	if not LOSHelper.los_lookup.has(enemies_reported[0].current_hex):
+		return
+	var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
+	
 	var closest_distance: int = 1000
-	for hex in visible_hexes_to_target:
-		var target_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-		var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, target_cube)
+	var closest_hex: Vector2i
+	for hex in visible_hexes_by_enemy.keys():
+		var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+		var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
 		if distance < closest_distance:
 			closest_distance = distance
-			firebase_hex = hex
-	current_order.target_hexes.append(firebase_hex)
-	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, firebase_hex, team)
-	give_move_to_hex_order(firebase_hex, path, false)
-	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+			closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+	if not moving and current_hex == closest_hex:
+		return
+	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
+	give_move_to_hex_order(closest_hex, path, false)
+		
+	#return
+	#if current_order.target_hexes.is_empty():
+		#return
+	#var firebase_hex: Vector2i
+	#var visible_hexes_to_target = LOSHelper.los_lookup.get(current_order.target_hexes[0], [])
+	#var closest_distance: int = 1000
+	#for hex in visible_hexes_to_target:
+		#var target_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+		#var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, target_cube)
+		#if distance < closest_distance:
+			#closest_distance = distance
+			#firebase_hex = hex
+	#current_order.target_hexes.append(firebase_hex)
+	#var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, firebase_hex, team)
+	#give_move_to_hex_order(firebase_hex, path, false)
+	#action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 
 
 func _start_assault_route() -> void:

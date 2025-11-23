@@ -1538,6 +1538,7 @@ offset_bottom = 329.0
 mouse_filter = 2
 
 [node name="StartScreen" parent="." instance=ExtResource("21_1cxds")]
+visible = false
 
 [node name="ResultScreen" parent="." instance=ExtResource("22_2m0ga")]
 visible = false
@@ -1559,6 +1560,10 @@ time_left_seconds = 180.0
 mission_mode = 1
 formation_id = 1
 
+[node name="FormationAIController2" parent="GameController" instance=ExtResource("51_n78lu")]
+mission_mode = 1
+formation_id = 2
+
 [node name="DebugParkingLot" type="Node2D" parent="GameController"]
 
 [node name="UnitContainer" type="Node2D" parent="GameController"]
@@ -1567,6 +1572,7 @@ formation_id = 1
 position = Vector2(1088, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
+formation_id = 1
 squadType = 1
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
@@ -1579,13 +1585,14 @@ formation_id = 1
 position = Vector2(1040, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubResource("Resource_6a7tq"), SubResource("Resource_wo74w"), SubResource("Resource_l34gv"), SubResource("Resource_425aq"), SubResource("Resource_ayaol"), SubResource("Resource_ecm30")])
+formation_id = 2
 squadType = 1
 
 [node name="AxisRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(896, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2qot8"), SubResource("Resource_sfox1"), SubResource("Resource_nmgud"), SubResource("Resource_le7yh"), SubResource("Resource_wfk0w"), SubResource("Resource_qitea"), SubResource("Resource_6xqbw"), SubResource("Resource_6jobc"), SubResource("Resource_f3kq1"), SubResource("Resource_di5vm")])
-formation_id = 1
+formation_id = 2
 
 [node name="AxisPlatoonLeader" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(944, 832)
@@ -1606,7 +1613,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
 
 [node name="AlliesRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(128, -160)
+position = Vector2(512, 608)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
@@ -1619,7 +1626,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubRes
 squadType = 1
 
 [node name="AlliesMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, -128)
+position = Vector2(704, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 members_alive = 2
