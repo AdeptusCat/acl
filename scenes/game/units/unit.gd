@@ -167,6 +167,7 @@ func _ready():
 	
 	stress_system.state_changed.connect(_on_state_changed)
 	stress_system.stress_changed.connect(_on_stress_changed)
+	stress_system.stress_changed.connect(ui._on_stress_changed)
 	
 	
 	

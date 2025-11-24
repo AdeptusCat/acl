@@ -72,9 +72,14 @@ func _set_loadout(soldiers: Array[Soldier]):
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
 	var txt: String# = "%0.2f" % leadership_bonus
-	txt += stress_to_plus_string(leadership_bonus)
+	txt += leadership_to_plus_string(leadership_bonus)
 	$LeadershipBonus.text = txt
-	
+
+func _on_stress_changed(stress: float) -> void:
+	var txt: String# = "%0.2f" % leadership_bonus
+	txt += stress_to_plus_string(stress)
+	$StressLevel.text = txt
+
 
 func stress_to_plus_string(value: float) -> String:
 	#Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
@@ -84,12 +89,36 @@ func stress_to_plus_string(value: float) -> String:
 	#Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
 	#Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
 	var result: String = ""
+	if value >= 60.0:
+		result = "<<<"
+	elif value >= 30.0:
+		result = "<<"
+	elif value > 0.0:
+		result = "<"
+	#var result: String = ""
+	#if value > 0.0:
+		#var count: int = int(floor(value / 0.09))
+		#var i: int = 0
+		#while i < count:
+			#result += "+"
+			#i += 1
+	return result
+
+
+func leadership_to_plus_string(value: float) -> String:
+	#Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
+	#Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
+	#Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
+	#Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 0, "coh_mult": 1.04 },
+	#Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
+	#Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
+	var result: String = ""
 	if value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.COMPANY_LEADER].lead:
-		result = "+++"
+		result = ">>>"
 	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.PLATOON_LEADER].lead:
-		result = "++"
+		result = ">>"
 	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.SQUAD_LEADER].lead:
-		result = "+"
+		result = ">"
 	#var result: String = ""
 	#if value > 0.0:
 		#var count: int = int(floor(value / 0.09))
@@ -268,12 +297,13 @@ func update_bar(current: int, max: int):
 		var ratio = clamp(float(current) / float(max), 0.0, 1.0)
 		morale_bar.scale.x = ratio
 
-		if ratio < 0.5:
-			morale_bar.color = Color(0, 1, 0)
-		elif ratio < 0.8:
-			morale_bar.color = Color(1, 1, 0)
-		else:
-			morale_bar.color = Color(1, 0, 0)
+		#morale_bar.color = Color(1, 0, 0)
+		#if ratio < 0.5:
+			#morale_bar.color = Color(0, 1, 0)
+		#elif ratio < 0.8:
+			#morale_bar.color = Color(1, 1, 0)
+		#else:
+			#morale_bar.color = Color(1, 0, 0)
 	if detail_ui:
 		detail_ui.update_bar(current, max)
 		
