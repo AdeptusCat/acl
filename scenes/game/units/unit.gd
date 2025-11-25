@@ -1430,32 +1430,32 @@ func _on_unit_ui_debug_kill_soldier() -> void:
 
 func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
 	action_controller.give_defend_area_order(target_hex, path)
-	action_label.text = "defend"
+	#action_label.text = "defend"
 
 
 func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
 	action_controller.give_move_to_hex_order(target_hex, path, take_and_hold)
-	action_label.text = "move"
+	#action_label.text = "move"
 
 
 func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
 	action_controller.give_attack_hex_order(target_hex, covered_path, exposed_segment)
-	action_label.text = "attack"
+	#action_label.text = "attack"
 
 
 func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
 	action_controller.give_withdraw_to_hex_order(target_hex, path)
-	action_label.text = "withdraw"
+	#action_label.text = "withdraw"
 
 
 func give_hold_order() -> void:
 	action_controller.give_hold_order()
-	action_label.text = "hold"
+	#action_label.text = "hold"
 
 
 func clear_orders() -> void:
 	action_controller.clear_orders()
-	action_label.text = "clear order"
+	#action_label.text = "clear order"
 
 
 # === GOAP ===
@@ -1503,7 +1503,8 @@ func _start_move_to() -> void:
 		# optional: derive a simple fallback from current position if formation gave no path
 		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
 		#movement.set_route(fallback_route)
-		current_order.target_hexes.append(Globals.objective_hex)
+		
+		current_order.target_hexes.append(Globals.objective_hexes[team][0])
 	if moving == false and current_order.target_hexes[0] == current_hex:
 		return
 	if not movement.path_hexes.is_empty():
@@ -1516,7 +1517,7 @@ func _start_move_to() -> void:
 			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
 			give_move_to_hex_order(current_order.target_hexes[0], path, false)
 			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-
+	action_label.text = "move to" + str(current_order.target_hexes[0])
 
 func _start_base_of_fire() -> void:
 	#var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
@@ -1556,7 +1557,7 @@ func _start_base_of_fire() -> void:
 		if not current_hex == closest_hex:
 			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
 			give_move_to_hex_order(closest_hex, path, false)
-		
+	action_label.text = "base of fire" + str(closest_hex)
 	#return
 	#if current_order.target_hexes.is_empty():
 		#return
@@ -1581,7 +1582,7 @@ func _start_assault_route() -> void:
 		# optional: derive a simple fallback from current position if formation gave no path
 		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
 		#movement.set_route(fallback_route)
-		current_order.target_hexes.append(Globals.objective_hex)
+		current_order.target_hexes.append(Globals.objective_hexes[team][0])
 	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
 	give_move_to_hex_order(current_order.target_hexes[0], path, false)
 	

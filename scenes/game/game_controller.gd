@@ -13,7 +13,6 @@ extends Node2D
 @export var fog_of_war_layer : HexagonTileMapLayer
 @export var glow_maker_scene: PackedScene
 
-var objective_hex : Vector2i = Vector2.ZERO
 @export var time_left_seconds: float = 120.0  
 var timer_running := false
 
@@ -178,20 +177,22 @@ func setup_game():
 		unit.visible = false
 
 
-func set_objective_cells(team: int): 
+func set_objective_cells(team: Globals.Team): 
 	var objective_tilemap: TileMapLayer
-	if team == 0:
+	if Globals.team_player == Globals.Team.AXIS:
 		objective_tilemap = axis_objective_tilemap
 		axis_objective_tilemap.visible = true
 		allies_objective_tilemap.visible = false
-	else:
+	elif Globals.team_player == Globals.Team.ALLIES:
 		objective_tilemap = allies_objective_tilemap
 		axis_objective_tilemap.visible = false
 		allies_objective_tilemap.visible = true
 	var cells = objective_tilemap.get_used_cells() 
 	if cells.size() > 0:
-		objective_hex = cells[0]
-		Globals.objective_hex = objective_hex
+		for cell in cells:
+			if not Globals.objective_hexes.has(team):
+				Globals.objective_hexes[team] = []
+			Globals.objective_hexes[team].append(cell)
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
@@ -401,7 +402,8 @@ func _on_unit_died(unit):
 
 func start_game(team: int, time: float):
 	time_left_seconds = time * 60.0
-	set_objective_cells(team)
+	set_objective_cells(Globals.Team.AXIS)
+	set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	Globals.team_player = team
 	input_mgr.set_input(true)
@@ -464,7 +466,7 @@ func end_game_check():
 	end_game_handled = true
 	var occupying_units : Array
 	for unit in unit_container.get_children():
-		if unit.current_hex == objective_hex:
+		if unit.current_hex == Globals.objective_hexes[unit.team][0]:
 			occupying_units.append(unit)
 	for unit in occupying_units:
 		if not unit.broken:

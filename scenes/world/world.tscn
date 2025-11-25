@@ -1623,7 +1623,6 @@ visible = false
 visible = false
 
 [node name="Ui" parent="." node_paths=PackedStringArray("ground_layer") instance=ExtResource("23_ues17")]
-visible = false
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 
 [node name="DummyNode2D" type="Node2D" parent="."]

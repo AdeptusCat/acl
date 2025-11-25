@@ -21,6 +21,8 @@ enum MoraleState {
 	COMBAT_INEFFECTIVE,
 }
 
+var objective_hex: Vector2i
+
 var unit: Unit
 var movement: UnitMovement
 var squad_fire: SquadFireController
@@ -31,7 +33,6 @@ var combat: UnitCombat
 var action_state: int = SquadActionState.NO_ORDER
 var action_order_id: int = 0
 
-var objective_hex: Vector2i = Vector2i.ZERO
 var withdraw_hex: Vector2i = Vector2i.ZERO
 var attack_hex: Vector2i = Vector2i.ZERO
 
@@ -108,7 +109,9 @@ func _enter_action_state(prev: int, state: int) -> void:
 			if attack_hex != Vector2i.ZERO:
 				squad_fire.set_target_hex(attack_hex)
 			else:
-				squad_fire.set_target_hex(objective_hex)
+				#squad_fire.set_target_hex(Globals.objective_hexes[unit.team][0])
+				squad_fire.set_target_hex(Vector2i.ZERO)
+				
 		
 		SquadActionState.ADVANCING:
 			pass

@@ -204,6 +204,8 @@ func _process_movement(delta: float) -> void:
 		moving = false
 		stopped_moving.emit()
 		
+		# here somethings off, the target target_position is where the unit is but the path is another 
+		# or it already passed points in the path and is already at target hex but the path is still full of hexes in between
 		if path_index < path_hexes.size() - 1:
 			path_index += 1
 			move_to_hex(path_hexes[path_index])

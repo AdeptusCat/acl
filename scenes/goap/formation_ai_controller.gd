@@ -57,7 +57,7 @@ func _refresh_enemy_contacts() -> void:
 	enemy_contacts.clear()
 	for squad in squads:
 		for enemy_contact in squad.enemies_reported:
-			if not enemy_contacts.has(enemy_contact):
+			if not enemy_contacts.has(enemy_contact) and enemy_contact.is_good_order():
 				enemy_contacts.append(enemy_contact)
 	for squad in squads:
 		squad.enemies_reported_from_formation = enemy_contacts
@@ -221,8 +221,10 @@ func _build_world_state() -> FormationWorldState:
 	for squad in squads:
 		if not is_instance_valid(squad):
 			break
-		if squad.current_hex == Globals.objective_hex:
-			occupying_units.append(squad)
+		if Globals.objective_hexes.has(squad.team):
+			if not Globals.objective_hexes[squad.team].is_empty():
+				if squad.current_hex == Globals.objective_hexes[squad.team][0]:
+					occupying_units.append(squad)
 	for squad in occupying_units:
 		if not squad.is_good_order():
 			s.objective_held = true
