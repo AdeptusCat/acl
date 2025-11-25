@@ -9,6 +9,7 @@ extends Node
 #const GoapPlanner = preload("res://scenes/goap/goap_planner.gd")
 #const SquadOrder = preload("res://scenes/goap/squad_order.gd")
 
+@export var active: bool = 0
 @export var mission_mode: GoapTypes.FormationMissionMode = GoapTypes.FormationMissionMode.DEFEND
 @export var team: Globals.Team = Globals.Team.AXIS
 @export var formation_id: int = 0
@@ -28,6 +29,8 @@ func _ready() -> void:
 	_select_goal(null)
 
 func _process(delta: float) -> void:
+	if not active:
+		return
 	if not Globals.game_started:
 		return
 	replan_cooldown -= delta

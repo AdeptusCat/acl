@@ -1636,6 +1636,7 @@ glow_maker_scene = ExtResource("45_q3hpu")
 time_left_seconds = 180.0
 
 [node name="FormationAIController" parent="GameController" instance=ExtResource("51_n78lu")]
+active = true
 mission_mode = 1
 formation_id = 1
 

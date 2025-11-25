@@ -65,6 +65,7 @@ func _process(delta: float) -> void:
 func stop():
 	if moving:
 		path_index = 0
+		path_hexes.clear()
 		move_to_hex(unit.current_hex)
 
 
@@ -186,6 +187,7 @@ func begin_retreat(target_hex: Vector2i) -> void:
 # ----------------------------------------------------------------------
 
 func _process_movement(delta: float) -> void:
+	
 	var dir: Vector2 = (target_position - unit.position).normalized()
 	var dist: float = unit.position.distance_to(target_position)
 	var step: float = move_speed * terrain_mult * delta

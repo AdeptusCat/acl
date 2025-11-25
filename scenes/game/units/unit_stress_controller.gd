@@ -448,6 +448,7 @@ func _rate_to_prob(rate_per_sec: float, dt: float) -> float:
 	return 1.0 - exp(-rate_per_sec * dt)
 
 func _set_state(next: int) -> void:
+	return
 	if next == state:
 		return
 	var prev: int = state
