@@ -125,6 +125,14 @@ mouse_filter = 2
 texture = ExtResource("3_djxcy")
 expand_mode = 3
 
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 52.0
+offset_right = 61.0
+offset_bottom = 64.0
+color = Color(0, 0, 0, 1)
+
 [node name="MoraleBarDefault" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(55, 10)
 layout_mode = 0
@@ -161,13 +169,12 @@ horizontal_alignment = 2
 [node name="LeadershipBonus" type="Label" parent="."]
 modulate = Color(0.012920001, 0.9754234, 0.33003333, 1)
 layout_mode = 0
-offset_left = -12.0
+offset_left = 6.0
 offset_top = 46.0
-offset_right = 35.0
+offset_right = 53.0
 offset_bottom = 69.0
 text = ">"
 label_settings = SubResource("LabelSettings_k7h5o")
-horizontal_alignment = 1
 
 [node name="CoverLabel" type="Label" parent="."]
 visible = false

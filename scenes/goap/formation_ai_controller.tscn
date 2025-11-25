@@ -4,5 +4,3 @@
 
 [node name="FormationAIController" type="Node"]
 script = ExtResource("1_yfmdm")
-mission_mode = null
-formation_id = null

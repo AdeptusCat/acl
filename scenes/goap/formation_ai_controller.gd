@@ -10,6 +10,7 @@ extends Node
 #const SquadOrder = preload("res://scenes/goap/squad_order.gd")
 
 @export var mission_mode: GoapTypes.FormationMissionMode = GoapTypes.FormationMissionMode.DEFEND
+@export var team: Globals.Team = Globals.Team.AXIS
 @export var formation_id: int = 0
 
 var squads: Array[Unit] = []
@@ -42,8 +43,10 @@ func _refresh_squad_list() -> void:
 		var squad: Node = n
 		if squad.has_method("get_formation_id"):
 			var f_id: int = squad.get_formation_id()
-			if f_id == formation_id:
-				squads.append(squad)
+			var s_team: Globals.Team = squad.team
+			if f_id == formation_id and s_team == team:
+				if squad.is_good_order():
+					squads.append(squad)
 	for squad in squads:
 		if not is_instance_valid(squad):
 			continue
@@ -56,6 +59,8 @@ func _refresh_enemy_contacts() -> void:
 		for enemy_contact in squad.enemies_reported:
 			if not enemy_contacts.has(enemy_contact):
 				enemy_contacts.append(enemy_contact)
+	for squad in squads:
+		squad.enemies_reported_from_formation = enemy_contacts
 
 func _on_squad_contact_reported(unit: Unit, contacts: Array[Unit]):
 	if not is_instance_valid(unit):
@@ -368,6 +373,8 @@ func _set_squad_order(squad: Unit, order_type: int, params: SquadOrder) -> void:
 func _assign_prepare_assault_orders() -> void:
 	var i: int = 0
 	for squad in squads:
+		if not squad.is_good_order():
+			continue
 		if i == 0:
 			var order: SquadOrder = SquadOrder.new()
 			order.aggressiveness = 0.8
@@ -385,6 +392,8 @@ func _assign_position_base_of_fire() -> void:
 	return
 	var base_of_fire_squads: Array[Unit]
 	for squad in squads:
+		if not squad.is_good_order():
+			continue
 		if squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
 			base_of_fire_squads.append(squad)
 	var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemy_contacts[0].current_hex, [])
@@ -413,6 +422,8 @@ func _assign_gain_fire_superiority() -> void:
 func _assign_move_to_objective() -> void:
 	#return
 	for squad in squads:
+		if not squad.is_good_order():
+			continue
 		#if squad.tactical_state.is_free():
 		var order: SquadOrder = SquadOrder.new()
 		order.aggressiveness = 0.8
@@ -423,6 +434,8 @@ func _assign_move_to_objective() -> void:
 
 func _assign_launch_assault_orders() -> void:
 	for squad in squads:
+		if not squad.is_good_order():
+			continue
 		if squad.tactical_state.formation_role == squad.tactical_state.FormationRole.ASSAULT:
 			var order: SquadOrder = SquadOrder.new()
 			order.aggressiveness = 1.2

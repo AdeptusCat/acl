@@ -63,8 +63,9 @@ func _process(delta: float) -> void:
 # ----------------------------------------------------------------------
 
 func stop():
-	path_index = 0
-	move_to_hex(unit.current_hex)
+	if moving:
+		path_index = 0
+		move_to_hex(unit.current_hex)
 
 
 func move_to_hex(new_hex: Vector2i) -> void:

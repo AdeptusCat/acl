@@ -93,7 +93,7 @@ func stress_to_plus_string(value: float) -> String:
 		result = "<<<"
 	elif value >= 30.0:
 		result = "<<"
-	elif value > 0.0:
+	elif value > 5.0:
 		result = "<"
 	#var result: String = ""
 	#if value > 0.0:

@@ -30,7 +30,7 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 @export var base_death_chance: float = 0.1
 @export var broken_death_multiplier: float = 2.0
 @export var recovery_time_max: float = 5.0
-@export var team: int = 0
+@export var team: Globals.Team = 0
 @export var retreat_distance := 3
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
@@ -57,6 +57,7 @@ enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 #const GoapTypes := preload("res://scenes/goap/goap_types.gd")
 #const SquadOrder := preload("res://scenes/goap/squad_order.gd")
 var enemies_reported: Array[Unit]
+var enemies_reported_from_formation: Array[Unit]
 var has_reported_contact: bool = false
 @export var formation_id: int = 0
 var current_order: SquadOrder = SquadOrder.new()
@@ -1478,8 +1479,6 @@ func _on_new_order_received() -> void:
 		GoapTypes.SquadOrderType.SCREEN_AXIS:
 			pass
 			#_start_screen_axis()
-		GoapTypes.SquadOrderType.WITHDRAW_TO:
-			_start_withdraw()
 		GoapTypes.SquadOrderType.REST:
 			#_start_rest()
 			pass
@@ -1505,19 +1504,39 @@ func _start_move_to() -> void:
 		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
 		#movement.set_route(fallback_route)
 		current_order.target_hexes.append(Globals.objective_hex)
-	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
-	give_move_to_hex_order(current_order.target_hexes[0], path, false)
-	
-	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+	if moving == false and current_order.target_hexes[0] == current_hex:
+		return
+	if not movement.path_hexes.is_empty():
+		if not movement.path_hexes[-1] == current_order.target_hexes[0]:
+			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+			give_move_to_hex_order(current_order.target_hexes[0], path, false)
+			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+	else:
+		if not current_hex == current_order.target_hexes[0]:
+			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+			give_move_to_hex_order(current_order.target_hexes[0], path, false)
+			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 
 
 func _start_base_of_fire() -> void:
 	#var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
-	if enemies_reported.is_empty():
+	var enemies: Array[Unit]
+	
+	if not enemies_reported.is_empty():
+		enemies = enemies_reported
+	else:
+		enemies = enemies_reported_from_formation
+	
+	if enemies.is_empty():
 		return
-	if not LOSHelper.los_lookup.has(enemies_reported[0].current_hex):
+	
+	if not is_instance_valid(enemies[0]):
 		return
-	var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
+	
+	if not LOSHelper.los_lookup.has(enemies[0].current_hex):
+		return
+	
+	var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemies[0].current_hex, [])
 	
 	var closest_distance: int = 1000
 	var closest_hex: Vector2i
@@ -1529,8 +1548,14 @@ func _start_base_of_fire() -> void:
 			closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
 	if not moving and current_hex == closest_hex:
 		return
-	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
-	give_move_to_hex_order(closest_hex, path, false)
+	if not movement.path_hexes.is_empty():
+		if not movement.path_hexes[-1] == closest_hex:
+			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
+			give_move_to_hex_order(closest_hex, path, false)
+	else:
+		if not current_hex == closest_hex:
+			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
+			give_move_to_hex_order(closest_hex, path, false)
 		
 	#return
 	#if current_order.target_hexes.is_empty():
@@ -1560,17 +1585,6 @@ func _start_assault_route() -> void:
 	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
 	give_move_to_hex_order(current_order.target_hexes[0], path, false)
 	
-	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-
-func _start_withdraw() -> void:
-	if current_order.target_hexes.is_empty():
-		# optional: derive a simple fallback from current position if formation gave no path
-		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
-		#movement.set_route(fallback_route)
-		current_order.target_hexes.append(Vector2i(25,14))
-	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
-	give_move_to_hex_order(current_order.target_hexes[0], path, false)
-
 	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 
 
