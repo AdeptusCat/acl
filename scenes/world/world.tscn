@@ -1635,23 +1635,30 @@ fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 glow_maker_scene = ExtResource("45_q3hpu")
 time_left_seconds = 180.0
 
-[node name="FormationAIController" parent="GameController" instance=ExtResource("51_n78lu")]
+[node name="AlliesFormationAIControllers" type="Node" parent="GameController"]
+
+[node name="FormationAIController3" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
+active = true
+mission_mode = 1
+team = 1
+formation_id = 1
+
+[node name="FormationAIController4" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
+active = true
+mission_mode = 1
+team = 1
+formation_id = 2
+
+[node name="AxisFormationAIControllers" type="Node" parent="GameController"]
+
+[node name="FormationAIController" parent="GameController/AxisFormationAIControllers" instance=ExtResource("51_n78lu")]
 active = true
 mission_mode = 1
 formation_id = 1
 
-[node name="FormationAIController2" parent="GameController" instance=ExtResource("51_n78lu")]
+[node name="FormationAIController2" parent="GameController/AxisFormationAIControllers" instance=ExtResource("51_n78lu")]
+active = true
 mission_mode = 1
-formation_id = 2
-
-[node name="FormationAIController3" parent="GameController" instance=ExtResource("51_n78lu")]
-mission_mode = 1
-team = 1
-formation_id = 1
-
-[node name="FormationAIController4" parent="GameController" instance=ExtResource("51_n78lu")]
-mission_mode = 1
-team = 1
 formation_id = 2
 
 [node name="DebugParkingLot" type="Node2D" parent="GameController"]

@@ -64,6 +64,7 @@ stress_controller = NodePath("../UnitStressController")
 [node name="SquadActionController" parent="." instance=ExtResource("11_7ghvu")]
 
 [node name="ActionLabel" type="Label" parent="."]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 text = "#"

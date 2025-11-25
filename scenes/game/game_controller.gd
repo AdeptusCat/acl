@@ -6,6 +6,8 @@ extends Node2D
 @onready var combat_sys     = $CombatSystem
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
+@onready var axis_formation_ai_controllers := $AxisFormationAIControllers
+@onready var allies_formation_ai_controllers := $AlliesFormationAIControllers
 
 @export var allies_objective_tilemap : TileMapLayer
 @export var axis_objective_tilemap : TileMapLayer
@@ -179,12 +181,14 @@ func setup_game():
 
 func set_objective_cells(team: Globals.Team): 
 	var objective_tilemap: TileMapLayer
-	if Globals.team_player == Globals.Team.AXIS:
+	if team == Globals.Team.AXIS:
 		objective_tilemap = axis_objective_tilemap
+	if team == Globals.Team.ALLIES:
+		objective_tilemap = allies_objective_tilemap
+	if Globals.team_player == Globals.Team.AXIS:
 		axis_objective_tilemap.visible = true
 		allies_objective_tilemap.visible = false
 	elif Globals.team_player == Globals.Team.ALLIES:
-		objective_tilemap = allies_objective_tilemap
 		axis_objective_tilemap.visible = false
 		allies_objective_tilemap.visible = true
 	var cells = objective_tilemap.get_used_cells() 
@@ -400,12 +404,13 @@ func _on_unit_died(unit):
 	#unit.queue_free()
 
 
-func start_game(team: int, time: float):
+func start_game(team: Globals.Team, time: float):
 	time_left_seconds = time * 60.0
+	Globals.team_player = team
 	set_objective_cells(Globals.Team.AXIS)
 	set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
-	Globals.team_player = team
+	
 	input_mgr.set_input(true)
 	
 	var i_team_0: int = 0
@@ -423,6 +428,20 @@ func start_game(team: int, time: float):
 	update_visible_hexes()
 	draw_fog()
 	show_visible_units()
+	
+	var axis_ai_active: bool = false
+	var allies_ai_active: bool = false
+	if team == Globals.Team.ALLIES:
+		axis_ai_active = true
+	else:
+		allies_ai_active = true
+		
+	for formation_ai_controller in axis_formation_ai_controllers.get_children():
+		var controller: FormationAIController = formation_ai_controller
+		controller.active = axis_ai_active
+	for formation_ai_controller in allies_formation_ai_controllers.get_children():
+		var controller: FormationAIController = formation_ai_controller
+		controller.active = allies_ai_active
 
 
 func index_to_char(i: int) -> String:

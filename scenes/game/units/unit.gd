@@ -86,6 +86,7 @@ var moving: bool = false
 var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
 var units: Array[Unit]
+var effective_range: int = 0
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
@@ -324,6 +325,7 @@ func _highest_grade_from_loadouts() -> int:
 	return best
 	
 func _setup_runtime_soldiers() -> void:
+	effective_range = 0
 	if squad_fire == null:
 		return
 	var list: Array[Soldier] = []
@@ -347,6 +349,8 @@ func _setup_runtime_soldiers() -> void:
 			ui.set_ammunition_left(spec.ammunition)
 		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
 		list.append(s)
+		if spec.range_hexes > effective_range:
+			effective_range = spec.range_hexes
 		i += 1
 	squad_fire.set_soldiers(list)
 
@@ -1041,21 +1045,20 @@ func remember_enemy(enemy: Unit) -> void:
 
 
 func cleanup_enemy_memory() -> void:
+	var new_memory: Dictionary[Unit, Dictionary] = {}
 	var now: float = _now()
 	var keys: Array = enemy_memory.keys()
 	var count: int = keys.size()
 	var i: int = 0
 
 	while i < count:
-		var enemy: Unit = keys[i]
-		var info: Dictionary = enemy_memory[enemy]
-		var age: float = now - float(info["last_seen_time"])
-		var expired: bool = age > ENEMY_MEMORY_LIFETIME
-		var invalid: bool = not is_instance_valid(enemy)
-
-		if expired or invalid:
-			enemy_memory.erase(enemy)
-
+		if is_instance_valid(keys[i]):
+			var unit: Unit = keys[i]
+			var info: Dictionary = enemy_memory.get(unit, null)
+			if info != null:
+				var age: float = now - float(info["last_seen_time"])
+				if age <= ENEMY_MEMORY_LIFETIME:
+					new_memory[unit] = info
 		i += 1
 
 func _get_enemy_hex_for_cover(enemy: Unit) -> Vector2i:
@@ -1208,6 +1211,11 @@ func _apply_casualties(n: int) -> void:
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
+	
+	effective_range = 0
+	for soldier in squad_fire.soldiers:
+		if soldier.weapon.range_hexes > effective_range:
+			effective_range = soldier.weapon.range_hexes
 
 	# debug
 	if n != casualty_indexes.size():
@@ -1583,21 +1591,39 @@ func _start_base_of_fire() -> void:
 		enemies = enemy_memory.keys()
 	
 	if not enemies_reported.is_empty():
-		enemies = enemies_reported
+		for enemy in enemies_reported:
+			if not enemies.has(enemy):
+				enemies.append(enemy)
 	else:
-		enemies = enemies_reported_from_formation
+		for enemy in enemies_reported_from_formation:
+			if not enemies.has(enemy):
+					enemies.append(enemy)
 	
 	if enemies.is_empty():
 		return
 	
+	var closest_distance_to_cover: int = 1000
+	var closest_hex: Vector2i
+	
 	var closest_enemy: Unit
 	var closest_distance_to_enemy: int = 1000
 	for enemy in enemies:
-		var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, enemy.current_cube)
-		if distance < closest_distance_to_enemy:
-			if is_instance_valid(enemy):
-				closest_distance_to_enemy = distance
-				closest_enemy = enemy
+		if is_instance_valid(enemy):
+			var distance_to_enemy: int = LOSHelper.ground_layer.cube_distance(current_cube, enemy.current_cube)
+			if distance_to_enemy <= closest_distance_to_enemy:
+			
+				closest_distance_to_enemy = distance_to_enemy
+				
+				var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemy.current_hex, [])
+	
+				for hex in visible_hexes_by_enemy.keys():
+					var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+					var distance_to_cover: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
+					if visible_hexes_by_enemy[hex]["target_cover"] > 0:
+						if distance_to_cover < closest_distance_to_cover and distance_to_enemy <= effective_range:
+							closest_distance_to_cover = distance_to_cover
+							closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+							closest_enemy = enemy
 	
 	if not closest_enemy:
 		return
@@ -1610,17 +1636,8 @@ func _start_base_of_fire() -> void:
 		#return
 	#var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemy_hex, {})
 	
-	var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(closest_enemy.current_hex, [])
 	
-	var closest_distance: int = 1000
-	var closest_hex: Vector2i
-	for hex in visible_hexes_by_enemy.keys():
-		var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-		var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
-		if visible_hexes_by_enemy[hex]["target_cover"] > 0:
-			if distance < closest_distance:
-				closest_distance = distance
-				closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+	
 	if not moving and current_hex == closest_hex:
 		return
 	if not movement.path_hexes.is_empty():
