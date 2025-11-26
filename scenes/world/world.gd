@@ -259,7 +259,8 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 	return res.wall_cover
 
 
-func _on_game_started(team : int):
+func _on_game_started(team : int, game_mode: Globals.GameMode):
+	Globals.game_mode = game_mode
 	target_area.hide()
 	game_controller.start_game(team, start_screen.time)
 

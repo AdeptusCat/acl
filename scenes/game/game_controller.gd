@@ -14,6 +14,8 @@ extends Node2D
 @export var ground_layer : HexagonTileMapLayer
 @export var fog_of_war_layer : HexagonTileMapLayer
 @export var glow_maker_scene: PackedScene
+@export var unit_scene: PackedScene
+@export var formation_ai_controller_scene: PackedScene
 
 @export var time_left_seconds: float = 120.0  
 var timer_running := false
@@ -68,6 +70,7 @@ func draw_threat(_threat_weights: Dictionary[int, Dictionary]):
 	queue_redraw()
 
 func _ready():
+	
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
 	input_mgr.mouse_button_right_pressed.connect(_on_mouse_button_right_pressed)
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
@@ -112,9 +115,101 @@ func _ready():
 	
 	#fog_of_war_layer.set_cell(Vector2i(1, 1), 0)
 	#fog_of_war_layer.set_cell(tile_map_layer, new_tile_map_cell_position, tile_map_cell_source_id, tile_map_cell_atlas_coords, tile_map_cell_alternative)
+
+func spawn_formation():
+	var team: Globals.Team
+	var location: Vector2i
+	var roll: int = randi_range(0, 4)
+	
+	match Globals.team_player:
+		Globals.Team.AXIS:
+			team = Globals.Team.ALLIES
+			if roll == 0:
+				location = Vector2i(21, 20)
+			elif roll == 1:
+				location = Vector2i(6, 16)
+			elif roll == 2:
+				location = Vector2i(12, 10)
+			elif roll == 3:
+				location = Vector2i(31, 1)
+			else:
+				location = Vector2i(16, 7)
+		Globals.Team.ALLIES:
+			team = Globals.Team.AXIS
+			if roll == 0:
+				location = Vector2i(27,7)
+			elif roll == 1:
+				location = Vector2i(22,12)
+			elif roll == 2:
+				location = Vector2i(9,17)
+			elif roll == 3:
+				location = Vector2i(11,0)
+			else:
+				location = Vector2i(19,12)
+
+	var formation_ai_controller: FormationAIController = formation_ai_controller_scene.instantiate()
+	formation_ai_controller.active = true
+	formation_ai_controller.mission_mode = GoapTypes.FormationMissionMode.ATTACK
+	formation_ai_controller.team = team
+	var formation_id: int
+	match Globals.team_player:
+		Globals.Team.AXIS:
+			formation_id = $AlliesFormationAIControllers.get_child_count() + 1
+			formation_ai_controller.formation_id = formation_id
+			$AlliesFormationAIControllers.add_child(formation_ai_controller)
+		Globals.Team.ALLIES:
+			formation_id = $AxisFormationAIControllers.get_child_count() + 1
+			formation_ai_controller.formation_id = formation_id
+			$AxisFormationAIControllers.add_child(formation_ai_controller)
+	
+	spawn_unit(team, location, Unit.SquadType.Rifle, formation_id)
+	spawn_unit(team, location, Unit.SquadType.MG, formation_id)
+	spawn_unit(team, location, Unit.SquadType.PLATOON_HEADQUARTERS, formation_id)
 	
 	
+
+
+func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadType, formation_id: int):
+	var unit: Unit = unit_scene.instantiate()
+	unit.ground_map = ground_layer
+	unit.team = team
+	match squad_type:
+		Unit.SquadType.Rifle:
+			unit.make_rifle_squad = true
+		Unit.SquadType.MG:
+			unit.make_light_mg_team = true
+		Unit.SquadType.PLATOON_HEADQUARTERS:
+			unit.make_platoon_headquarters_squad = true
 	
+	unit.formation_id = formation_id 
+	#$UnitContainer.add_child(unit)
+	unit.position = ground_layer.map_to_local(location)
+	
+	var map_coords = ground_layer.local_to_map(ground_layer.map_to_local(location))
+	unit.position = ground_layer.map_to_local(map_coords)
+	unit.current_hex = map_coords
+	unit.current_cube = ground_layer.map_to_cube(map_coords)
+	
+	$UnitContainer.add_child(unit)
+	
+	unit.set_team(team)
+	
+	units.append(unit)
+	unit.units = units
+	unit.unit_died.connect(_on_unit_died)
+	unit.moved_to_hex.connect(combat_sys._on_unit_moved)
+	unit.moved_to_hex.connect(_on_unit_moved)
+	unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
+	unit.current_hex = ground_layer.local_to_map(unit.global_position)
+	unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
+	unit.deselect_unit.connect(_deselect_unit)
+	unit.started_moving.connect(_on_started_moving)
+	unit.unit_surrendered.connect(_on_unit_surrendered)
+	unit.squad_fire.unit_visible_enemies = unit_visible_enemies
+	
+	combat_sys.units = units
+	move_sys.units = units
+
 func draw_fog():
 	var used_cells := fog_of_war_layer.get_used_cells()
 	for cell in used_cells:
@@ -179,24 +274,49 @@ func setup_game():
 		unit.visible = false
 
 
-func set_objective_cells(team: Globals.Team): 
-	var objective_tilemap: TileMapLayer
-	if team == Globals.Team.AXIS:
-		objective_tilemap = axis_objective_tilemap
-	if team == Globals.Team.ALLIES:
-		objective_tilemap = allies_objective_tilemap
-	if Globals.team_player == Globals.Team.AXIS:
-		axis_objective_tilemap.visible = true
-		allies_objective_tilemap.visible = false
-	elif Globals.team_player == Globals.Team.ALLIES:
-		axis_objective_tilemap.visible = false
-		allies_objective_tilemap.visible = true
-	var cells = objective_tilemap.get_used_cells() 
+func set_objective_cells(player_team: Globals.Team): 
+	var player_objective_tilemap: TileMapLayer
+	var ai_objective_tilemap: TileMapLayer
+	var tilemap_dict: Dictionary[Globals.Team, TileMapLayer] = 
+	if player_team == Globals.Team.AXIS:
+		match Globals.game_mode:
+			Globals.GameMode.DEFEND:
+				player_objective_tilemap = allies_objective_tilemap
+				ai_objective_tilemap = allies_objective_tilemap
+			Globals.GameMode.ATTACK:
+				player_objective_tilemap = axis_objective_tilemap
+				ai_objective_tilemap = axis_objective_tilemap
+	if player_team == Globals.Team.ALLIES:
+		match Globals.game_mode:
+			Globals.GameMode.DEFEND:
+				player_objective_tilemap = axis_objective_tilemap
+				ai_objective_tilemap = axis_objective_tilemap
+			Globals.GameMode.ATTACK:
+				player_objective_tilemap = allies_objective_tilemap
+				ai_objective_tilemap = allies_objective_tilemap
+	if player_team == Globals.Team.AXIS:
+		match Globals.game_mode:
+			Globals.GameMode.DEFEND:
+				axis_objective_tilemap.visible = false
+				allies_objective_tilemap.visible = true
+			Globals.GameMode.ATTACK:
+				axis_objective_tilemap.visible = true
+				allies_objective_tilemap.visible = false
+	elif player_team == Globals.Team.ALLIES:
+		match Globals.game_mode:
+			Globals.GameMode.DEFEND:
+				axis_objective_tilemap.visible = true
+				allies_objective_tilemap.visible = false
+			Globals.GameMode.ATTACK:
+				axis_objective_tilemap.visible = false
+				allies_objective_tilemap.visible = true
+	
+	var cells = player_objective_tilemap.get_used_cells() 
 	if cells.size() > 0:
 		for cell in cells:
-			if not Globals.objective_hexes.has(team):
-				Globals.objective_hexes[team] = []
-			Globals.objective_hexes[team].append(cell)
+			if not Globals.objective_hexes.has(player_team):
+				Globals.objective_hexes[player_team] = []
+			Globals.objective_hexes[player_team].append(cell)
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
@@ -216,8 +336,8 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 			for unit in units:
 				if not unit.team == Globals.team_player:
 					var path: Array[Vector3i] = []
-					selected_unit.give_attack_hex_order(unit.current_hex, path, path)
-					#selected_unit.combat.set_target_unit(unit)
+					#selected_unit.give_attack_hex_order(unit.current_hex, path, path)
+					selected_unit.combat.set_target_unit(unit)
 					var local_pos = ground_layer.map_to_local(map_hex)
 					hex_glow(local_pos)
 					return
@@ -407,8 +527,8 @@ func _on_unit_died(unit):
 func start_game(team: Globals.Team, time: float):
 	time_left_seconds = time * 60.0
 	Globals.team_player = team
-	set_objective_cells(Globals.Team.AXIS)
-	set_objective_cells(Globals.Team.ALLIES)
+	set_objective_cells(team)
+	#set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	
 	input_mgr.set_input(true)
@@ -435,13 +555,24 @@ func start_game(team: Globals.Team, time: float):
 		axis_ai_active = true
 	else:
 		allies_ai_active = true
+	
+	var ai_mission_mode: GoapTypes.FormationMissionMode
+	match Globals.game_mode:
+		Globals.GameMode.DEFEND:
+			ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
+		Globals.GameMode.ATTACK:
+			ai_mission_mode = GoapTypes.FormationMissionMode.DEFEND
 		
 	for formation_ai_controller in axis_formation_ai_controllers.get_children():
 		var controller: FormationAIController = formation_ai_controller
-		controller.active = axis_ai_active
+		if controller.active:
+			controller.active = axis_ai_active
+			controller.mission_mode = ai_mission_mode
 	for formation_ai_controller in allies_formation_ai_controllers.get_children():
 		var controller: FormationAIController = formation_ai_controller
-		controller.active = allies_ai_active
+		if controller.active:
+			controller.active = allies_ai_active
+			controller.mission_mode = ai_mission_mode
 
 
 func index_to_char(i: int) -> String:
@@ -457,14 +588,15 @@ func _on_started_moving():
 
 var last_unit_hex: Vector2i
 var last_mouse_position: Vector2
+var time_left_seconds_test = 2
 func _process(delta):
 	if timer_running:
-		time_left_seconds -= delta
-		if time_left_seconds <= 0:
-			time_left_seconds = 0
+		time_left_seconds_test -= delta
+		if time_left_seconds_test <= 0:
+			time_left_seconds_test = 0
 			timer_running = false
 			end_game_check()
-		update_timer_label.emit(time_left_seconds)
+		update_timer_label.emit(time_left_seconds_test)
 	
 	var mouse_or_unit_position_changed: bool = false
 	var pos = get_local_mouse_position()
@@ -480,8 +612,8 @@ func _process(delta):
 
 
 func end_game_check():
-	if end_game_handled:
-		return
+	#if end_game_handled:
+		#return
 	end_game_handled = true
 	var occupying_units : Array
 	for unit in unit_container.get_children():
@@ -489,7 +621,19 @@ func end_game_check():
 			occupying_units.append(unit)
 	for unit in occupying_units:
 		if not unit.broken:
-			show_winner.emit(unit.team)
+			var winning_team: Globals.Team = Globals.Team.AXIS
+			match Globals.game_mode:
+				Globals.GameMode.DEFEND:
+					if unit.team == Globals.Team.AXIS:
+						winning_team = Globals.Team.AXIS
+					if unit.team == Globals.Team.ALLIES:
+						winning_team = Globals.Team.ALLIES
+				Globals.GameMode.ATTACK:
+					if unit.team == Globals.Team.ALLIES:
+						winning_team = Globals.Team.AXIS
+					if unit.team == Globals.Team.AXIS:
+						winning_team = Globals.Team.ALLIES
+			show_winner.emit(winning_team)
 			return
 	show_winner.emit(-1)
 
@@ -500,3 +644,7 @@ func _on_zoom_in():
 
 func _on_zoom_out():
 	camera.zoom_out()
+
+
+func _on_spawn_timer_timeout() -> void:
+	spawn_formation()

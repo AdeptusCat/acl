@@ -114,7 +114,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 			target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 			if not target_unit == targetUnit:
 				#_prime_acquisition_for_new_target()
-				aim_delay()
+				#aim_delay()
 				target_unit = targetUnit
 		else:
 			target_unit = null
@@ -129,7 +129,7 @@ func set_target_hex(_target_hex: Vector2i):
 
 
 
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	_now_s += delta
 	_accum_window_s += delta
 

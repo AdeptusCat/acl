@@ -1,4 +1,4 @@
-[gd_scene load_steps=260 format=4 uid="uid://cq2fy70xef7ei"]
+[gd_scene load_steps=261 format=4 uid="uid://cq2fy70xef7ei"]
 
 [ext_resource type="Script" uid="uid://xx1wiov37kjh" path="res://scenes/world/world.gd" id="1_6hctx"]
 [ext_resource type="PackedScene" uid="uid://dh4bkj6mne23j" path="res://scenes/game/maps/ground_tile_map_layer.tscn" id="2_ues17"]
@@ -57,6 +57,7 @@
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="50_hph6x"]
+[ext_resource type="PackedScene" uid="uid://vrnwdhsu251x" path="res://scenes/world/formation_ai_controllers.tscn" id="51_1o6i5"]
 [ext_resource type="Resource" uid="uid://ber2oq0vvl7pp" path="res://resources/weapons/mg34.tres" id="51_kngxi"]
 [ext_resource type="PackedScene" uid="uid://bdfg22jl48bbp" path="res://scenes/goap/formation_ai_controller.tscn" id="51_n78lu"]
 [ext_resource type="Resource" uid="uid://bs4o437s5ifcu" path="res://resources/weapons/mg34_heavy.tres" id="52_7lp0r"]
@@ -1633,23 +1634,27 @@ axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
 ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 glow_maker_scene = ExtResource("45_q3hpu")
+unit_scene = ExtResource("19_sh7a8")
+formation_ai_controller_scene = ExtResource("51_n78lu")
 time_left_seconds = 180.0
 
-[node name="AlliesFormationAIControllers" type="Node" parent="GameController"]
+[node name="AlliesFormationAIControllers" parent="GameController" instance=ExtResource("51_1o6i5")]
+active = true
 
-[node name="FormationAIController3" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
+[node name="FormationAIController5" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
 active = true
 mission_mode = 1
 team = 1
 formation_id = 1
 
-[node name="FormationAIController4" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
+[node name="FormationAIController6" parent="GameController/AlliesFormationAIControllers" instance=ExtResource("51_n78lu")]
 active = true
 mission_mode = 1
 team = 1
 formation_id = 2
 
-[node name="AxisFormationAIControllers" type="Node" parent="GameController"]
+[node name="AxisFormationAIControllers" parent="GameController" instance=ExtResource("51_1o6i5")]
+active = true
 
 [node name="FormationAIController" parent="GameController/AxisFormationAIControllers" instance=ExtResource("51_n78lu")]
 active = true
@@ -1666,34 +1671,34 @@ formation_id = 2
 [node name="UnitContainer" type="Node2D" parent="GameController"]
 
 [node name="AxisMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1088, 800)
+position = Vector2(1136, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
 formation_id = 1
 squadType = 1
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 704)
+position = Vector2(1232, 640)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 formation_id = 1
 
 [node name="AxisPlatoonLeader1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 768)
+position = Vector2(1136, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
 formation_id = 1
 squadType = 4
 
 [node name="AxisMg2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(992, 736)
+position = Vector2(848, 768)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubResource("Resource_6a7tq"), SubResource("Resource_wo74w"), SubResource("Resource_l34gv"), SubResource("Resource_425aq"), SubResource("Resource_ayaol"), SubResource("Resource_ecm30")])
 formation_id = 2
 squadType = 1
 
 [node name="AxisRifle2" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(896, 800)
+position = Vector2(944, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2qot8"), SubResource("Resource_sfox1"), SubResource("Resource_nmgud"), SubResource("Resource_le7yh"), SubResource("Resource_wfk0w"), SubResource("Resource_qitea"), SubResource("Resource_6xqbw"), SubResource("Resource_6jobc"), SubResource("Resource_f3kq1"), SubResource("Resource_di5vm")])
 formation_id = 2
@@ -1771,13 +1776,13 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_4eul6"), SubRes
 squadType = 2
 
 [node name="PanzerschreckTeam" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(992, 672)
+position = Vector2(1376, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_bqfdu"), SubResource("Resource_0cp2s")])
 squadType = 2
 
 [node name="GerMortar81mm" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1280, 800)
+position = Vector2(1184, 864)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2oqoe"), SubResource("Resource_ua878"), SubResource("Resource_v6xt8"), SubResource("Resource_tb5gq"), SubResource("Resource_qdc15"), SubResource("Resource_k375o"), SubResource("Resource_e58rx"), SubResource("Resource_4nb4u")])
 squadType = 3
@@ -1811,6 +1816,10 @@ speed = 800.0
 [node name="AudioListener2D" type="AudioListener2D" parent="GameController/Camera2D"]
 position = Vector2(720, 369)
 current = true
+
+[node name="SpawnTimer" type="Timer" parent="GameController"]
+wait_time = 30.0
+autostart = true
 
 [node name="TargetArea" type="Node2D" parent="."]
 script = ExtResource("55_7rtjl")
@@ -1884,5 +1893,6 @@ position = Vector2(626, 904)
 [connection signal="time_changed" from="StartScreen" to="Ui" method="_on_start_screen_time_changed"]
 [connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]
+[connection signal="timeout" from="GameController/SpawnTimer" to="GameController" method="_on_spawn_timer_timeout"]
 
 [editable path="Tracer"]

@@ -35,6 +35,7 @@ func _process(delta: float) -> void:
 		return
 	replan_cooldown -= delta
 	if replan_cooldown <= 0.0:
+		_refresh_squad_list()
 		_run_goap_cycle()
 		replan_cooldown = replan_interval
 		
@@ -55,6 +56,14 @@ func _refresh_squad_list() -> void:
 			continue
 		if not squad.contacts_reported.is_connected(_on_squad_contact_reported):
 			squad.contacts_reported.connect(_on_squad_contact_reported)
+		if not squad.new_target_hex.is_connected(_on_new_target_hex):
+			squad.new_target_hex.connect(_on_new_target_hex)
+		squad.formation_squads = squads.duplicate()
+
+
+func _on_new_target_hex(unit: Unit, end_of_path_hex: Vector2i):
+	return
+
 
 func _refresh_enemy_contacts() -> void:
 	enemy_contacts.clear()

@@ -10,6 +10,7 @@ var path_index: int = 0
 var target_position: Vector2
 var moving: bool = false
 var move_speed: float = 30.0
+var target_hex: Vector2i
 @export var base_speed: float = 30.0
 
 # Attack-move specific
@@ -22,6 +23,7 @@ signal started_moving
 signal stopped_moving
 signal rout_failed
 signal crossing_exposed_started
+signal new_target_hex(hex: Vector2i)
 
 # Retreat state
 var retreating: bool = false
@@ -67,6 +69,8 @@ func stop():
 		path_index = 0
 		path_hexes.clear()
 		move_to_hex(unit.current_hex)
+		target_hex = unit.current_hex
+		new_target_hex.emit(target_hex)
 
 
 func move_to_hex(new_hex: Vector2i) -> void:
@@ -91,7 +95,9 @@ func follow_cube_path(cube_path: Array[Vector3i]) -> void:
 	elif path_hexes.size() == 1:
 		path_index = 0
 		move_to_hex(path_hexes[0])
-	
+	if not path_hexes.is_empty():
+		target_hex = path_hexes[-1]
+		new_target_hex.emit(target_hex)
 
 # ----------------------------------------------------------------------
 # ATTACK-MOVE PATH SUPPORT

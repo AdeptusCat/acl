@@ -114,10 +114,39 @@ text = "Minutes"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_constants/separation = 20
 alignment = 1
 
 [node name="ObjectiveLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Game Mode: "
+
+[node name="GameMode" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Attack"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Attack" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Attack"
+
+[node name="Defend" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Defend"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -144,6 +173,8 @@ libraries = {
 }
 
 [connection signal="value_changed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Attack" to="." method="_on_attack_pressed"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Defend" to="." method="_on_defend_pressed"]
 [connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
 [connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
 [connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]

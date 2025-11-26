@@ -81,6 +81,8 @@ var current_cover_bonus: int = 0
 var current_hex: Vector2i
 var current_cube: Vector3i
 var goal_hex: Vector2i
+var target_hex: Vector2i # where the movement will end e.g. end of path
+var formation_squads: Array[Unit]
 var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
@@ -110,6 +112,7 @@ signal contacts_reported(unit: Unit, contact: Array[Unit])
 # unit details signals
 signal soldiers_changed
 signal state_chaged(state: int)
+signal new_target_hex(unit: Unit, hex: Vector2i)
 
 # === Nodes ===
 @onready var ui := $UnitUi
@@ -198,7 +201,12 @@ func _ready():
 	ui.set_loadout(squad_fire.soldiers)
 	
 	update_team_sprite(team, squadType)
+	movement.new_target_hex.connect(_on_new_target_hex)
 
+
+func _on_new_target_hex(end_of_path_hex: Vector2i):
+	target_hex = end_of_path_hex
+	new_target_hex.emit(self, target_hex)
 
 func _now() -> float:
 	return float(Engine.get_physics_frames()) * PHYSICS_DT
@@ -1027,8 +1035,8 @@ func _check_contacts() -> void:
 		remember_enemy(enemy_squad)
 	
 	#if not enemies_reported == enemies:
-	if new_enemy:
-		movement.stop()
+	#if new_enemy and not team == Globals.team_player:
+		#movement.stop()
 	enemies_reported = enemies
 	
 	# Option: halt movement temporarily until formation reacts
@@ -1101,13 +1109,13 @@ func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
 	return unit_visible_enemies.get(self, [])
 
 
-func set_team(new_team: int):
+func set_team(new_team: Globals.Team):
 	team = new_team
 	update_team_sprite(team, squadType)
 
 
-func update_team_sprite(team: int, squadType: SquadType):
-	ui.update_team_sprite(team, squadType)
+func update_team_sprite(_team: Globals.Team, _squadType: SquadType):
+	ui.update_team_sprite(_team, _squadType)
 
 
 func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
@@ -1415,6 +1423,7 @@ func get_squad_type_name(type: SquadType) -> String:
 		
 
 func surrender():
+	return
 	movement.move_to_hex(current_hex)
 	surrendered = true
 	#alive = false
@@ -1592,12 +1601,14 @@ func _start_base_of_fire() -> void:
 	
 	if not enemies_reported.is_empty():
 		for enemy in enemies_reported:
-			if not enemies.has(enemy):
-				enemies.append(enemy)
+			if is_instance_valid(enemy):
+				if not enemies.has(enemy):
+					enemies.append(enemy)
 	else:
 		for enemy in enemies_reported_from_formation:
-			if not enemies.has(enemy):
-					enemies.append(enemy)
+			if is_instance_valid(enemy):
+				if not enemies.has(enemy):
+						enemies.append(enemy)
 	
 	if enemies.is_empty():
 		return
@@ -1620,7 +1631,13 @@ func _start_base_of_fire() -> void:
 					var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
 					var distance_to_cover: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
 					if visible_hexes_by_enemy[hex]["target_cover"] > 0:
-						if distance_to_cover < closest_distance_to_cover and distance_to_enemy <= effective_range:
+						var hex_already_taken_by_squad_mate: bool = false
+						for squad in formation_squads:
+							if is_instance_valid(squad):
+								if not squad == self:
+									if squad.target_hex == hex:
+										hex_already_taken_by_squad_mate = true
+						if distance_to_cover < closest_distance_to_cover and distance_to_enemy <= effective_range and not hex_already_taken_by_squad_mate:
 							closest_distance_to_cover = distance_to_cover
 							closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
 							closest_enemy = enemy

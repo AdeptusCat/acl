@@ -1,8 +1,12 @@
 extends CanvasLayer
 
+var game_mode: Globals.GameMode = Globals.GameMode.ATTACK
+
 signal game_started(team : int)
 signal hover_start_button(team: int)
 signal time_changed(_time: float)
+
+
 
 @onready var objective_label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectiveLabel
 @onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton
@@ -32,14 +36,14 @@ func _on_start_as_axis_pressed():
 	animation_player.play("fade_out")
 	await animation_player.animation_finished
 	visible = false
-	game_started.emit(0)
+	game_started.emit(Globals.Team.AXIS, game_mode)
 
 
 func _on_start_as_allies_pressed():
 	animation_player.play("fade_out")
 	await animation_player.animation_finished
 	visible = false
-	game_started.emit(1)
+	game_started.emit(Globals.Team.ALLIES, game_mode)
 
 
 func _on_spin_box_value_changed(value: float) -> void:
@@ -62,3 +66,13 @@ func _on_start_as_allies_button_mouse_entered() -> void:
 
 func _on_start_as_allies_button_mouse_exited() -> void:
 	hover_start_button.emit(-1)
+
+
+func _on_attack_pressed() -> void:
+	game_mode = Globals.GameMode.ATTACK
+	$Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameMode.text = "Attack"
+
+
+func _on_defend_pressed() -> void:
+	game_mode = Globals.GameMode.DEFEND
+	$Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameMode.text = "Defend"
