@@ -1,10 +1,16 @@
-[gd_scene load_steps=10 format=3 uid="uid://dry4o5rpga2ec"]
+[gd_scene load_steps=11 format=3 uid="uid://dry4o5rpga2ec"]
 
 [ext_resource type="Script" uid="uid://cu06jcpwigm47" path="res://scenes/ui/start_screen.gd" id="1_ncxyx"]
 [ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="2_ihgl4"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2_m7t1o"]
 [ext_resource type="Texture2D" uid="uid://bvwf141gyghuq" path="res://assets/ui/axis_flag.png" id="4_adf7y"]
 [ext_resource type="Texture2D" uid="uid://blvkk161reu30" path="res://assets/ui/us_flag.png" id="5_a1ei0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_adf7y"]
+font_size = 32
+font_color = Color(0.5721713, 0.2615138, 0.11267393, 1)
+outline_size = 9
+outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="Animation" id="Animation_afy8x"]
 length = 0.001
@@ -123,16 +129,28 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Game Mode: "
+horizontal_alignment = 1
 
-[node name="GameMode" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
+alignment = 1
+
+[node name="GameModeAttack" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Attack"
+label_settings = SubResource("LabelSettings_adf7y")
+horizontal_alignment = 1
+
+[node name="GameModeDefend" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Defend"
+label_settings = SubResource("LabelSettings_adf7y")
+horizontal_alignment = 1
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
@@ -148,18 +166,26 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Defend"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Team:"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2"]
 layout_mode = 2
 alignment = 1
 
-[node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer"]
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
 texture_normal = ExtResource("4_adf7y")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer"]
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
 texture_normal = ExtResource("5_a1ei0")
@@ -175,7 +201,7 @@ libraries = {
 [connection signal="value_changed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
 [connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Attack" to="." method="_on_attack_pressed"]
 [connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Defend" to="." method="_on_defend_pressed"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]

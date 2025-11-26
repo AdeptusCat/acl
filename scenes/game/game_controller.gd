@@ -117,6 +117,8 @@ func _ready():
 	#fog_of_war_layer.set_cell(tile_map_layer, new_tile_map_cell_position, tile_map_cell_source_id, tile_map_cell_atlas_coords, tile_map_cell_alternative)
 
 func spawn_formation():
+	if Globals.game_mode == Globals.GameMode.ATTACK:
+		return
 	var team: Globals.Team
 	var location: Vector2i
 	var roll: int = randi_range(0, 4)
@@ -190,6 +192,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	unit.current_hex = map_coords
 	unit.current_cube = ground_layer.map_to_cube(map_coords)
 	
+	unit.hide()
 	$UnitContainer.add_child(unit)
 	
 	unit.set_team(team)
@@ -275,9 +278,15 @@ func setup_game():
 
 
 func set_objective_cells(player_team: Globals.Team): 
+	Globals.objective_hexes.clear()
 	var player_objective_tilemap: TileMapLayer
 	var ai_objective_tilemap: TileMapLayer
-	var tilemap_dict: Dictionary[Globals.Team, TileMapLayer] = 
+	var ai_team: Globals.Team
+	if player_team == Globals.Team.AXIS:
+		ai_team = Globals.Team.ALLIES
+	else:
+		ai_team = Globals.Team.AXIS
+		
 	if player_team == Globals.Team.AXIS:
 		match Globals.game_mode:
 			Globals.GameMode.DEFEND:
@@ -319,7 +328,15 @@ func set_objective_cells(player_team: Globals.Team):
 			Globals.objective_hexes[player_team].append(cell)
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
-
+	
+	cells = ai_objective_tilemap.get_used_cells() 
+	if cells.size() > 0:
+		for cell in cells:
+			if not Globals.objective_hexes.has(ai_team):
+				Globals.objective_hexes[ai_team] = []
+			Globals.objective_hexes[ai_team].append(cell)
+	else:
+		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
 func _on_mouse_button_right_pressed(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
@@ -591,12 +608,12 @@ var last_mouse_position: Vector2
 var time_left_seconds_test = 2
 func _process(delta):
 	if timer_running:
-		time_left_seconds_test -= delta
-		if time_left_seconds_test <= 0:
-			time_left_seconds_test = 0
+		time_left_seconds -= delta
+		if time_left_seconds <= 0:
+			time_left_seconds = 0
 			timer_running = false
 			end_game_check()
-		update_timer_label.emit(time_left_seconds_test)
+		update_timer_label.emit(time_left_seconds)
 	
 	var mouse_or_unit_position_changed: bool = false
 	var pos = get_local_mouse_position()
@@ -612,8 +629,8 @@ func _process(delta):
 
 
 func end_game_check():
-	#if end_game_handled:
-		#return
+	if end_game_handled:
+		return
 	end_game_handled = true
 	var occupying_units : Array
 	for unit in unit_container.get_children():
@@ -630,9 +647,9 @@ func end_game_check():
 						winning_team = Globals.Team.ALLIES
 				Globals.GameMode.ATTACK:
 					if unit.team == Globals.Team.ALLIES:
-						winning_team = Globals.Team.AXIS
-					if unit.team == Globals.Team.AXIS:
 						winning_team = Globals.Team.ALLIES
+					if unit.team == Globals.Team.AXIS:
+						winning_team = Globals.Team.AXIS
 			show_winner.emit(winning_team)
 			return
 	show_winner.emit(-1)

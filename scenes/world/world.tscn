@@ -1671,7 +1671,7 @@ formation_id = 2
 [node name="UnitContainer" type="Node2D" parent="GameController"]
 
 [node name="AxisMg1" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 640)
+position = Vector2(1040, 704)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
 formation_id = 1
@@ -1769,14 +1769,14 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7o8ut"), SubResource("Resource_a5636"), SubResource("Resource_jhdiv"), SubResource("Resource_4ln07"), SubResource("Resource_yr5cl"), SubResource("Resource_x77xw"), SubResource("Resource_pkfnk"), SubResource("Resource_5obl8"), SubResource("Resource_bmoad"), SubResource("Resource_mb8w1"), SubResource("Resource_mmesd"), SubResource("Resource_2t505")])
 
 [node name="BazookaTeam" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(32, -32)
+position = Vector2(704, 544)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_4eul6"), SubResource("Resource_h8caq")])
 squadType = 2
 
 [node name="PanzerschreckTeam" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1376, 800)
+position = Vector2(992, 800)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_bqfdu"), SubResource("Resource_0cp2s")])
 squadType = 2
@@ -1788,7 +1788,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2oqoe"), SubRes
 squadType = 3
 
 [node name="AlliesMortar60mm" parent="GameController/UnitContainer" node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(-304, -64)
+position = Vector2(416, 608)
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubResource("Resource_4gywt"), SubResource("Resource_3un1a")])
