@@ -449,6 +449,7 @@ func state_changed(next: int) -> void:
 	match next:
 		STATES.MoraleState.PANIC:
 			var known_enemies: Array[Unit] = []
+			
 			for u in unit.units:
 				if u.team != unit.team and u.surrendered == false:
 					known_enemies.append(u)

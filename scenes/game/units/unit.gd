@@ -1132,6 +1132,8 @@ func receive_fire(terrain_defense_bonus: float):
 		#movement.recalc_path()
 
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -> void:
+	if Debug.no_damage:
+		return
 	if casualties > 0:
 		_apply_casualties(casualties)
 		ui.show_casualty()
@@ -1423,7 +1425,7 @@ func get_squad_type_name(type: SquadType) -> String:
 		
 
 func surrender():
-	return
+	#return
 	movement.move_to_hex(current_hex)
 	surrendered = true
 	#alive = false

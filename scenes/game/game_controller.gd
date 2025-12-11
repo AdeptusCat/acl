@@ -351,7 +351,7 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 		else:
 			var units: Array[Node2D] = _find_units_at(map_hex)
 			for unit in units:
-				if not unit.team == Globals.team_player:
+				if not unit.team == Globals.team_player or Debug.enemy_selectable:
 					var path: Array[Vector3i] = []
 					#selected_unit.give_attack_hex_order(unit.current_hex, path, path)
 					selected_unit.combat.set_target_unit(unit)
@@ -387,7 +387,9 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
 	var unit = units[selected_hex_index]
-	if unit and unit.team == Globals.team_player and not unit.surrendered: # and not unit.broken 
+	if unit and not unit.surrendered: # and not unit.broken 
+		if not unit.team == Globals.team_player and not Debug.enemy_selectable:
+			return
 		if unit == selected_unit:
 			_deselect_unit(unit)
 			hide_unit_details_in_ui.emit()

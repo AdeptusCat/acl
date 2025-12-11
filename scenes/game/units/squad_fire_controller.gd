@@ -103,7 +103,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 		var has_range: bool = false
 		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.weapon.range_hexes >= distance:
+			if soldier.weapon.range_hexes * 2 >= distance:
 				has_range = true
 		if has_range:
 			hex = targetUnit.current_hex
@@ -180,7 +180,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 				var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 				var has_range: bool = false
 				for soldier: Soldier in unit.squad_fire.soldiers:
-					if soldier.weapon.range_hexes >= distance:
+					if soldier.weapon.range_hexes * 2 >= distance:
 						has_range = true
 				if has_range:
 					var cover_map = LOSHelper.los_lookup.get(current_hex, null)
@@ -205,7 +205,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, enemy.current_cube)
 			var has_range: bool = false
 			for soldier: Soldier in unit.squad_fire.soldiers:
-				if soldier.weapon.range_hexes >= distance:
+				if soldier.weapon.range_hexes * 2 >= distance:
 					has_range = true
 			if has_range:
 				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
