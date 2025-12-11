@@ -14,6 +14,16 @@ var base_cost: float = 1.0
 
 func are_preconditions_met(state: FormationWorldState) -> bool:
 	match action_id:
+		GoapTypes.FormationActionId.DEFEND_POSITION:
+			if state.enemy_close_to_objective:
+				return false
+			return true
+		GoapTypes.FormationActionId.DEFEND_OBJECTIVE:
+			if not state.enemy_close_to_objective:
+				return false
+			return true
+		
+		
 		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
 			if state.has_enemy_contacts:
 				return false
@@ -58,9 +68,13 @@ func apply_effects(input_state: FormationWorldState) -> FormationWorldState:
 	var s: FormationWorldState = input_state.clone()
 
 	match action_id:
-		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
+		GoapTypes.FormationActionId.DEFEND_POSITION:
+			s.position_held = true
+		GoapTypes.FormationActionId.DEFEND_OBJECTIVE:
 			s.objective_held = true
 		
+		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
+			s.objective_held = true
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
 			s.assault_plan_ready = true
 		GoapTypes.FormationActionId.POSITION_BASE_OF_FIRE:
@@ -80,6 +94,11 @@ func get_cost(state: FormationWorldState) -> float:
 	var cost: float = base_cost
 
 	match action_id:
+		GoapTypes.FormationActionId.DEFEND_POSITION:
+			cost += 5.0
+		GoapTypes.FormationActionId.DEFEND_OBJECTIVE:
+			cost += 5.0
+		
 		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
 			cost += 5.0
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:

@@ -25,6 +25,12 @@ func _state_equals(a: FormationWorldState, b: FormationWorldState) -> bool:
 	if a.mission_mode != b.mission_mode:
 		return false
 
+	if a.enemy_close_to_objective != b.enemy_close_to_objective:
+		return false
+	if a.position_held != b.position_held:
+		return false
+
+
 	if a.base_of_fire_ready != b.base_of_fire_ready:
 		return false
 	if a.assault_element_ready != b.assault_element_ready:

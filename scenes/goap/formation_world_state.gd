@@ -25,6 +25,9 @@ var mission_mode: int = GoapTypes.FormationMissionMode.DEFEND
 #var route_to_objective_secure: bool = false
 #var probe_result: int = GoapTypes.WorldProbeResult.UNKNOWN
 
+var enemy_close_to_objective: bool = false
+var position_held: bool = false
+
 var objective_held: bool = false
 var enemy_holds_objective: bool = false
 var base_of_fire_ready: bool = false
@@ -37,6 +40,10 @@ var has_enemy_contacts: bool = false
 func clone() -> FormationWorldState:
 	var s: FormationWorldState = FormationWorldState.new()
 	s.mission_mode = mission_mode
+	
+	s.enemy_close_to_objective = enemy_close_to_objective
+	s.position_held = position_held
+	
 	s.objective_held = objective_held
 	s.enemy_holds_objective = enemy_holds_objective
 	s.assault_plan_ready = assault_plan_ready

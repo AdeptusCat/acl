@@ -4,7 +4,8 @@ extends Resource
 
 enum SquadOrderType {
 	NONE,
-	DEFEND_LINE,
+	DEFEND_POSITION,
+	DEFEND_OBJECTIVE,
 	MOVE_TO,
 	BASE_OF_FIRE,
 	ASSAULT_ROUTE,
@@ -56,6 +57,9 @@ enum FormationGoalId {
 	}
 
 enum FormationActionId {
+	DEFEND_POSITION,
+	DEFEND_OBJECTIVE,
+	
 	MOVE_TO_OBJECTIVE,
 	#ESTABLISH_DEFENSE_LINE,
 	#ASSIGN_BASE_OF_FIRE,

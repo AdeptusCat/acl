@@ -9,16 +9,16 @@ var units: Array[Unit] = []
 signal draw_los_to_enemy(from_hex, to_hex)
 
 
-func _process(delta: float) -> void:
-	if not enabled:
-		return
-	for unit in units:
-		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
-			continue
-		else:
-			#if unit.team == Globals.team_player:
-			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+#func _process(delta: float) -> void:
+	#if not enabled:
+		#return
+	#for unit in units:
+		#if unit.moving or not unit.alive or unit.broken or unit.surrendered:
+			#continue
+		#else:
+			##if unit.team == Globals.team_player:
+			##unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			#unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			
 func _on_unit_moved(unit: Unit, vector):
 	if not enabled:

@@ -1541,8 +1541,10 @@ func set_order_resource(order: SquadOrder) -> void:
 
 func _on_new_order_received() -> void:
 	match current_order.order_type:
-		GoapTypes.SquadOrderType.DEFEND_LINE:
-			_start_defend_line()
+		GoapTypes.SquadOrderType.DEFEND_POSITION:
+			_start_defend_position()
+		GoapTypes.SquadOrderType.DEFEND_OBJECTIVE:
+			_start_defend_objective()
 		GoapTypes.SquadOrderType.MOVE_TO:
 			_start_move_to()
 		GoapTypes.SquadOrderType.BASE_OF_FIRE:
@@ -1568,6 +1570,13 @@ func _start_defend_line() -> void:
 	var defend_hex: Vector2i = Vector2i.ZERO#_pick_defend_hex_for_this_squad()
 	movement.set_path_to_hex(defend_hex)
 	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+	
+func _start_defend_position():
+	pass
+
+
+func  _start_defend_objective():
+	pass
 
 
 func _start_move_to() -> void:
@@ -1630,7 +1639,7 @@ func _start_base_of_fire() -> void:
 				for hex in visible_hexes_by_enemy.keys():
 					var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
 					var distance_to_cover: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
-					if visible_hexes_by_enemy[hex]["target_cover"] > 0:
+					if visible_hexes_by_enemy[hex]["target_cover"] > 0: # visible_hexes_by_enemy[hex]["shooter_cover"]
 						var hex_already_taken_by_squad_mate: bool = false
 						for squad in formation_squads:
 							if is_instance_valid(squad):

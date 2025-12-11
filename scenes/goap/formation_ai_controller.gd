@@ -224,21 +224,23 @@ func _build_world_state() -> FormationWorldState:
 	s.assault_plan_ready = false
 	for squad in squads:
 		if not is_instance_valid(squad):
-			break
+			continue
 		if squad.current_order.order_type == GoapTypes.SquadOrderType.ASSAULT_ROUTE:
 			s.assault_plan_ready = true
 	
 	s.objective_held = false
 	var occupying_units : Array
-	for squad in squads:
+	for squad in get_parent().get_parent().units:
 		if not is_instance_valid(squad):
-			break
+			continue
+		if not squad.team == team:
+			continue
 		if Globals.objective_hexes.has(squad.team):
 			if not Globals.objective_hexes[squad.team].is_empty():
 				if squad.current_hex == Globals.objective_hexes[squad.team][0]:
 					occupying_units.append(squad)
 	for squad in occupying_units:
-		if not squad.is_good_order():
+		if squad.is_good_order():
 			s.objective_held = true
 
 	return s
@@ -292,6 +294,16 @@ func _select_goal(state: FormationWorldState) -> void:
 
 func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
 	var actions: Array[GoapAction] = []
+	
+	var a_def_pos: GoapAction = GoapAction.new()
+	a_def_pos.action_id = GoapTypes.FormationActionId.DEFEND_POSITION
+	a_def_pos.base_cost = 2.0
+	actions.append(a_def_pos)
+	
+	var a_def_obj: GoapAction = GoapAction.new()
+	a_def_obj.action_id = GoapTypes.FormationActionId.DEFEND_OBJECTIVE
+	a_def_obj.base_cost = 2.0
+	actions.append(a_def_obj)
 
 	var a_move: GoapAction = GoapAction.new()
 	a_move.action_id = GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE
@@ -356,6 +368,10 @@ func _dispatch_action(action: GoapAction) -> void:
 			#_assign_reorganize_orders()
 		#GoapTypes.FormationActionId.PROBE_AXIS:
 			#_assign_probe_orders()
+		GoapTypes.FormationActionId.DEFEND_OBJECTIVE:
+			_assign_defend_objective()
+		GoapTypes.FormationActionId.DEFEND_POSITION:
+			_assign_defend_position()
 		GoapTypes.FormationActionId.MOVE_TO_OBJECTIVE:
 			_assign_move_to_objective()
 		GoapTypes.FormationActionId.PREPARE_ASSAULT:
@@ -431,6 +447,30 @@ func _assign_gain_fire_superiority() -> void:
 
 
 
+func _assign_defend_objective():
+	var i: int = 0
+	for squad in squads:
+		if not squad.is_good_order():
+			continue
+		if i == 0:
+			var order: SquadOrder = SquadOrder.new()
+			order.aggressiveness = 0.8
+			# need to set order.target_hexes here so the squad knows where to go and start firing
+			_set_squad_order(squad, GoapTypes.SquadOrderType.DEFEND_POSITION, order)
+		i += 1
+
+
+func _assign_defend_position():
+	var i: int = 0
+	for squad in squads:
+		if not squad.is_good_order():
+			continue
+		if i == 0:
+			var order: SquadOrder = SquadOrder.new()
+			order.aggressiveness = 0.8
+			# need to set order.target_hexes here so the squad knows where to go and start firing
+			_set_squad_order(squad, GoapTypes.SquadOrderType.DEFEND_OBJECTIVE, order)
+		i += 1
 
 
 func _assign_move_to_objective() -> void:

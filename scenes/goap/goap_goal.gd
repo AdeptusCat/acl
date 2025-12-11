@@ -8,7 +8,10 @@ var base_priority: float = 1.0
 func is_satisfied(state: FormationWorldState) -> bool:
 	match goal_id:
 		GoapTypes.FormationGoalId.MAINTAIN_DEFENSE:
-			if not state.enemy_holds_objective:
+			# this is stupid and has to go
+			# the goal should not be dependend on the following
+			# but how?
+			if state.objective_held and state.position_held == true:
 				return true
 			return false
 

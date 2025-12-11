@@ -132,6 +132,15 @@ func set_target_hex(_target_hex: Vector2i):
 func _process(delta: float) -> void:
 	_now_s += delta
 	_accum_window_s += delta
+	
+	var visible_enemies1: Array = unit_visible_enemies.get(unit, [])
+	if not visible_enemies1.is_empty() and target_hex == Vector2i.ZERO:
+		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
+			return
+		else:
+			#if unit.team == Globals.team_player:
+			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
@@ -165,34 +174,31 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 
 	if target_unit:
 		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
-		if not visible_enemies.has(target_unit):
-			target_unit = null
-			set_target_unit(target_unit)
-			return
-		if target_unit and target_unit.alive and not target_unit.surrendered:
-			#var distance = current_hex.distance_to(target_unit.current_hex)
-			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-			var has_range: bool = false
-			for soldier: Soldier in unit.squad_fire.soldiers:
-				if soldier.weapon.range_hexes >= distance:
-					has_range = true
-			if has_range:
-				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
-				var targetCover = 0
-				if cover_map and cover_map.has(target_unit.current_hex):
-					var data = cover_map[target_unit.current_hex]
-					targetCover = data["target_cover"]
-				
-				target_unit.set_cover(targetCover)
-				#fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
-				fire_timer = fire_rate
-				return
+		if visible_enemies.has(target_unit):
+			if target_unit and target_unit.alive and not target_unit.surrendered:
+				#var distance = current_hex.distance_to(target_unit.current_hex)
+				var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+				var has_range: bool = false
+				for soldier: Soldier in unit.squad_fire.soldiers:
+					if soldier.weapon.range_hexes >= distance:
+						has_range = true
+				if has_range:
+					var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+					var targetCover = 0
+					if cover_map and cover_map.has(target_unit.current_hex):
+						var data = cover_map[target_unit.current_hex]
+						targetCover = data["target_cover"]
+					
+					target_unit.set_cover(targetCover)
+					#fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+					fire_timer = fire_rate
+					return
+				else:
+					target_unit = null
+					set_target_unit(target_unit)
 			else:
 				target_unit = null
 				set_target_unit(target_unit)
-		else:
-			target_unit = null
-			set_target_unit(target_unit)
 	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
@@ -223,6 +229,8 @@ func fire_mortar(map_hex: Vector2i):
 
 
 func _tick_soldiers(delta: float) -> void:
+	
+		
 	var rounds_emitted: int = 0
 
 	# count available crew for MGs
@@ -255,9 +263,13 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
+	
+	
 	s.now_s = _now_s
 	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
+	
+	
 	
 	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
