@@ -1443,9 +1443,13 @@ func die():
 
 func _on_morale_failed(_known_enemies: Array) -> void:
 	var known_enemies: Array[Unit]
-	for unit in units:
-		if not unit.team == team and not unit.surrendered:
-			known_enemies.append(unit)
+	#for unit in units:
+		#if not unit.team == team and not unit.surrendered:
+			#known_enemies.append(unit)
+	var visible_enemies1: Array = squad_fire.unit_visible_enemies.get(self, [])
+	for u in visible_enemies1: # unit.units:
+		if u.team != team and u.surrendered == false:
+			known_enemies.append(u)
 	movement.rout(current_hex, known_enemies, retreat_distance)
 	
 

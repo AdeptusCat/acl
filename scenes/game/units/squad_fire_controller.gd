@@ -264,6 +264,8 @@ func _tick_soldiers(delta: float) -> void:
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
 	
+	if s.next_ready_s == INF:
+		pass
 	
 	s.now_s = _now_s
 	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
@@ -303,8 +305,13 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	if target_distance > s.weapon.range_hexes:
 		long_range = true
 	
+	var acquire_ready_s: float = s.acquire_ready_s
+	
+	
 	# acquisition gate: don’t shoot until settled on the new target
-	if _now_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
+	if _now_s < acquire_ready_s and not acquire_ready_s == INF:
+		#print(" now ", _now_s, " acquire_ready_s ", acquire_ready_s)
+		#print(self)
 		return 0
 	
 	if s.jammed:
@@ -938,7 +945,7 @@ func _prime_acquisition_for_new_target() -> void:
 				s.acquire_ready_s = _now_s + s.next_ready_delta_s
 				s.last_target_hex = target_hex
 				# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				if s.next_ready_s < s.acquire_ready_s:
+				if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
 					s.next_ready_s = s.acquire_ready_s
 					s.next_ready_start_s = _now_s
 				s.weapon.riflegrenade_loaded = true
@@ -953,7 +960,7 @@ func _prime_acquisition_for_new_target() -> void:
 				s.acquire_ready_s = _now_s + s.next_ready_delta_s
 				s.last_target_hex = target_hex
 				# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				if s.next_ready_s < s.acquire_ready_s:
+				if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
 					s.next_ready_s = s.acquire_ready_s
 					s.next_ready_start_s = _now_s
 		i += 1

@@ -58,6 +58,9 @@ func _process(_delta: float) -> void:
 			if s:
 				var p2: float = get_makeready_progress(s)
 				progress_bar.value = p2
+				#if p2 >= 1.0:
+					#var string: String = str(unit)
+					#print(string)
 
 
 func get_makeready_progress(soldier: Soldier) -> float:
