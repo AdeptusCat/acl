@@ -550,20 +550,6 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast_final, s_slow_final, self)
 		i += 1
 
-	# --- visuals use TOTAL rounds so it looks right noisy ---
-	#fire_burst(shooter, current_hex, batch_targets[0], individual_rounds, fire_rate, unit_visible_enemies)
-	#animate_mg_bursts(
-		#shooter,
-		#target,
-		#burst_rounds,
-		#700,
-		#4,
-		#0.35,
-		#"instant",                # or "per_burst" if timing should affect results
-		#unit_visible_enemies,
-		#fire_rate
-	#)
-
 
 func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
 	# cover_norm: 0 = open, 1 = best cover
