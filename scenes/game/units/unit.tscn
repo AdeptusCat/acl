@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cb28roffrjgwu" path="res://scenes/game/units/squad_fire_controller.tscn" id="9_b5oeb"]
 [ext_resource type="PackedScene" uid="uid://cwhe3w1khnk8d" path="res://scenes/game/audio/weapon_audio.tscn" id="10_7ghvu"]
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
-[ext_resource type="PackedScene" path="res://scenes/game/units/squad_action_controller.tscn" id="11_7ghvu"]
+[ext_resource type="PackedScene" uid="uid://iyamws00k7as" path="res://scenes/game/units/squad_action_controller.tscn" id="11_7ghvu"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
 script = ExtResource("2_h0ojj")

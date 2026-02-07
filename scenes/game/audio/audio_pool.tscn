@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://pt85xx5fagwx"]
+[gd_scene format=3 uid="uid://pt85xx5fagwx"]
 
-[ext_resource type="Script" uid="uid://b3iu6ybyyf8yo" path="res://audio_pool.gd" id="1_qny2m"]
+[ext_resource type="Script" uid="uid://b3iu6ybyyf8yo" path="res://scenes/game/audio/audio_pool.gd" id="1_qny2m"]
 
-[node name="AudioPool" type="Node2D"]
+[node name="AudioPool" type="Node2D" unique_id=867714192]
 script = ExtResource("1_qny2m")
 
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=593250569]
