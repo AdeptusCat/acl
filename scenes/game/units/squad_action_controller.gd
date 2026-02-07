@@ -28,7 +28,6 @@ var movement: UnitMovement
 var squad_fire: SquadFireController
 var stress: StressController
 var ui: UnitUi
-var combat: UnitCombat
 
 var action_state: int = SquadActionState.NO_ORDER
 var action_order_id: int = 0

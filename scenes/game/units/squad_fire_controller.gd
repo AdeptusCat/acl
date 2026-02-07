@@ -4,7 +4,6 @@ class_name SquadFireController
 
 # Wiring
 @export var unit: Unit
-@export var combat: UnitCombat
 @export var stress_controller: StressController
 
 # Timing
@@ -168,8 +167,6 @@ func _process(delta: float) -> void:
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 		target_hex = target_unit.current_hex
 
-	if _accum_window_s >= burst_window_s:
-		_flush_burst_window()
 
 func _update_state_multipliers() -> void:
 	var state_idx: int = stress_controller.state
@@ -892,24 +889,6 @@ func _add_rounds_to_hex(hx: Vector2i, n: int) -> void:
 	if _pending_rounds_by_hex.has(hx):
 		cur = int(_pending_rounds_by_hex[hx])
 	_pending_rounds_by_hex[hx] = cur + n
-
-func _flush_burst_window() -> void:
-	_accum_window_s = 0.0
-	for hx in _pending_rounds_by_hex.keys():
-		var rounds: int = int(_pending_rounds_by_hex[hx])
-		if rounds > 0:
-			_emit_burst_to_combat(hx, rounds)
-	_pending_rounds_by_hex.clear()
-
-func _emit_burst_to_combat(hx: Vector2i, rounds: int) -> void:
-	if combat == null:
-		return
-	# Call your existing burst/volley entrypoint.
-	# Expectation from earlier: resolve TOTAL rounds once per volley for that hex.
-	if combat.has_method("fire_burst_total_rounds"):
-		combat.call("fire_burst_total_rounds", unit, hx, rounds)
-		return
-	# Fallback: if you only have fire_at(), you can adapt it or add a proper method.
 
 
 func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
