@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="2_h0ojj"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
-[ext_resource type="PackedScene" uid="uid://c24n2ejqyspj8" path="res://scenes/game/units/unit_combat.tscn" id="6_sh6c0"]
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="8_b5oeb"]
 [ext_resource type="PackedScene" uid="uid://bjltvr578vstw" path="res://scenes/game/units/unit_movement.tscn" id="8_v8x2n"]
@@ -45,8 +44,6 @@ metadata/_edit_use_anchors_ = true
 
 [node name="UnitMovement" parent="." unique_id=710416825 instance=ExtResource("8_v8x2n")]
 
-[node name="Combat" parent="." unique_id=1914579547 instance=ExtResource("6_sh6c0")]
-
 [node name="LeaderAura" parent="." unique_id=1606307028 instance=ExtResource("8_b5oeb")]
 aura_radius_hexes = 2
 leadership_bonus = 0.15
@@ -56,7 +53,7 @@ scan_interval_s = 0.25
 
 [node name="SquadFireController" parent="." unique_id=1396863061 node_paths=PackedStringArray("unit", "combat", "stress_controller") instance=ExtResource("9_b5oeb")]
 unit = NodePath("..")
-combat = NodePath("../Combat")
+combat = NodePath("")
 stress_controller = NodePath("../UnitStressController")
 
 [node name="WeaponAudio" parent="." unique_id=2131531682 instance=ExtResource("10_7ghvu")]

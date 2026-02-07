@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://c24n2ejqyspj8"]
-
-[ext_resource type="Script" uid="uid://dfw734w77xpxk" path="res://scenes/game/units/unit_combat.gd" id="1_p3j20"]
-
-[node name="UnitCombat" type="Node" unique_id=2071033167]
-script = ExtResource("1_p3j20")

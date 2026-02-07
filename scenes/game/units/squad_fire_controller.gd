@@ -27,6 +27,11 @@ class_name SquadFireController
 @onready var calc: SquadFireCalculator = SquadFireCalculator.new()
 var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput.new()
 
+@export var base_accuracy := 0.35
+@export var volley_size := 1               # rounds per burst
+@export var seconds_per_volley := 1.2
+@export var base_seconds_per_volley := 1.2
+var accuracy_multiplier: float = 1.0
 
 @export var stress_scale := 1.0             # global tuning
 @export var stress_fast_base: float = 8.0       # baseline shock of “being shot at”
@@ -84,6 +89,22 @@ signal fire_riflegrenade
 	#cover = cover_multiplier_exp(3.0)
 	#cover = cover_multiplier_exp(4.0)
 	#cover = cover_multiplier_exp(5.0)
+
+
+func set_mg(machinge_guns : int):
+	for i in machinge_guns:
+		# Define the MG (crew-served)
+		var mg: WeaponSpec = WeaponSpec.new()
+		mg.name = "GPMG"
+		mg.kind = WeaponSpec.WeaponKind.CREW_SERVED
+		mg.rpm = 700.0
+		mg.burst_rounds = 4           # “short bursts”, aye
+		mg.burst_pause_s = 0.35
+		mg.crew_required = 2          # gunner + loader
+		mg.undercrew_penalty_mult = 1.6
+		mg.priority = 10              # gets crew before anything else
+		var mg_eq: SquadFireCalculator.EquipmentInstance = SquadFireCalculator.EquipmentInstance.new(mg, 1)
+		fin.crew_equipment.append(mg_eq)
 
 
 func set_soldiers(list: Array[Soldier]) -> void:

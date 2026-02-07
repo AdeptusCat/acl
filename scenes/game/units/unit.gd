@@ -116,7 +116,6 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 @onready var ui := $UnitUi
 @onready var stress_system: StressController = $UnitStressController
 @onready var movement:UnitMovement = $UnitMovement
-@onready var combat: UnitCombat = $Combat
 @onready var leader_aura: LeaderAura = $LeaderAura
 @onready var squad_fire: SquadFireController = $SquadFireController
 @onready var weapon_audio: WeaponAudio = $WeaponAudio
@@ -138,7 +137,7 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 
 # === Ready ===
 func _ready():
-	action_controller.init(self, movement, squad_fire, stress_system, ui, combat)
+	action_controller.init(self, movement, squad_fire, stress_system, ui)
 	
 	connect("retreat_complete", _on_retreat_complete)
 	#morale_system.morale_breaks.connect(_on_morale_breaks)
@@ -164,8 +163,6 @@ func _ready():
 	unit_arrived_at_hex.connect(_on_unit_arrived_at_hex)
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
-	combat.shoot.connect(ui.shoot)
-	
 	movement.unit = self
 	movement.ground_map = ground_map
 
@@ -181,7 +178,7 @@ func _ready():
 	
 	stress_system.leadership_changed.connect(ui._on_leadership_changed)
 	
-	combat.set_mg(machine_guns)
+	squad_fire.set_mg(machine_guns)
 	
 	#_resize_loadouts(members_count)
 	_setup_runtime_soldiers()
@@ -209,7 +206,6 @@ func order(cmd: Globals.UnitCmd, parameter):
 				fire_mortar(map_hex)
 			else:
 				var enemy_unit: Unit = parameter as Unit
-				combat.set_target_unit(enemy_unit)
 				squad_fire.set_target_unit(enemy_unit)
 		Globals.UnitCmd.MOVE:
 			var to_hex: Vector2i = parameter as Vector2i
@@ -968,7 +964,6 @@ func _on_started_moving():
 	moving = true
 	ui.started_moving(broken, surrendered)
 	started_moving.emit()
-	combat.set_target_unit(null)
 	squad_fire.set_target_unit(null)
 	action_controller.on_started_moving()
 
@@ -1489,14 +1484,13 @@ func _on_state_changed(prev:int, next:int) -> void:
 		_on_morale_recovered()
 	# 1) Movement & internal combat state
 	movement.state_changed(next)
-	combat.current_state = next
 	
 	## 2) ROF/accuracy from state table
 	var m = STATES.STATE_MOD[next]
 	## guard against silly zeros
 	var rof_mult: float = max(float(m.rof), 0.05)
-	combat.seconds_per_volley = combat.base_seconds_per_volley / rof_mult
-	combat.accuracy_multiplier = m.acc
+	squad_fire.seconds_per_volley = squad_fire.base_seconds_per_volley / rof_mult
+	squad_fire.accuracy_multiplier = m.acc
 
 	## 3) Visuals/pose
 	ui.state_changed(next)

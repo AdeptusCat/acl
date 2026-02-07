@@ -47,13 +47,12 @@ var regroup_timer: Timer
 signal action_state_changed(prev: int, next: int)
 
 
-func init(p_unit: Unit, p_movement: UnitMovement, p_squad_fire: SquadFireController, p_stress: StressController, p_ui: UnitUi, p_combat: UnitCombat) -> void:
+func init(p_unit: Unit, p_movement: UnitMovement, p_squad_fire: SquadFireController, p_stress: StressController, p_ui: UnitUi) -> void:
 	unit = p_unit
 	movement = p_movement
 	squad_fire = p_squad_fire
 	stress = p_stress
 	ui = p_ui
-	combat = p_combat
 	
 	establishing_timer = Timer.new()
 	establishing_timer.one_shot = true
@@ -322,7 +321,6 @@ func _on_regroup_timer_timeout() -> void:
 
 func on_morale_state_changed(prev: int, next: int) -> void:
 	ui.state_changed(next)
-	combat.current_state = next
 	
 	var rof_mult: float = 1.0
 	if next == MoraleState.NORMAL:
@@ -339,7 +337,7 @@ func on_morale_state_changed(prev: int, next: int) -> void:
 	if rof_mult < 0.05:
 		rof_mult = 0.05
 	
-	combat.seconds_per_volley = combat.base_seconds_per_volley / rof_mult
+	squad_fire.seconds_per_volley = squad_fire.base_seconds_per_volley / rof_mult
 	
 	if next == MoraleState.PANIC:
 		if action_state != SquadActionState.ROUTING:
