@@ -81,7 +81,7 @@ func _ready():
 		if unit is Unit:
 			Globals.units.append(unit)
 			unit.unit_died.connect(_on_unit_died)
-			unit.unit_entered_hex.connect(combat_sys._on_unit_entered_hex)
+			unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 			unit.unit_entered_hex.connect(_on_unit_entered_hex)
 			unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
@@ -90,7 +90,7 @@ func _ready():
 			unit.started_moving.connect(_on_started_moving)
 			unit.unit_surrendered.connect(_on_unit_surrendered)
 	
-	combat_sys.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
+	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	update_timer_label.emit(time_left_seconds)
 	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	input_mgr.set_input(false)

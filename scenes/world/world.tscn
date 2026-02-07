@@ -48,7 +48,6 @@
 [ext_resource type="Texture2D" uid="uid://cjrrdpi6l47tv" path="res://assets/tiles/walls/hedge_w.png" id="25_q3hpu"]
 [ext_resource type="PackedScene" uid="uid://dy2ockn75uonw" path="res://scenes/game/game_controller.tscn" id="25_rwifv"]
 [ext_resource type="PackedScene" uid="uid://cf17qriycv82p" path="res://scenes/game/los_renderer.tscn" id="26_rwifv"]
-[ext_resource type="PackedScene" uid="uid://c5bxatxtl1pha" path="res://scenes/game/combat_system.tscn" id="27_jyr8v"]
 [ext_resource type="Script" uid="uid://c11s1s4ounucd" path="res://scenes/world/camera_2d.gd" id="29_wnndm"]
 [ext_resource type="Texture2D" uid="uid://cs8ro143x7nw6" path="res://assets/tiles/ground/base_tile1 - Kopie.png" id="40_ij5nj"]
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
@@ -1793,8 +1792,6 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubRes
 squadType = 3
 
 [node name="InputManager" parent="GameController" unique_id=2029001427 instance=ExtResource("24_x0nq1")]
-
-[node name="CombatSystem" parent="GameController" unique_id=408212869 instance=ExtResource("27_jyr8v")]
 
 [node name="LOSRenderer" parent="GameController" unique_id=1408803359 instance=ExtResource("26_rwifv")]
 

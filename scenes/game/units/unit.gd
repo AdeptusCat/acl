@@ -1004,7 +1004,7 @@ func _on_morale_recovered():
 # === Process Loop ===
 
 func _process(delta):
-	_check_contacts()
+	
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
 			return
@@ -1017,6 +1017,7 @@ func _process(delta):
 		set_team(team)
 		return
 
+	_check_contacts()
 	if not alive:
 		return
 
