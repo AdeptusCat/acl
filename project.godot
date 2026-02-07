@@ -8,11 +8,15 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="AdvancedCompanyLeader"
 run/main_scene="uid://dbbh255dq65on"
-config/features=PackedStringArray("4.5", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 boot_splash/image="uid://dxadjck0dj44"
 config/icon="res://icon.svg"
 
@@ -26,6 +30,7 @@ TooltipSignals="*res://autoloads/tooltip_signals.gd"
 SessionAudio="*res://autoloads/session_audio.gd"
 SessionSettings="*res://autoloads/session_settings.gd"
 Debug="*res://autoloads/debug.gd"
+MovementSystem="*uid://dla50r83yg10r"
 
 [display]
 

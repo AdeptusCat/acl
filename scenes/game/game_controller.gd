@@ -2,7 +2,6 @@ extends Node2D
 
 @onready var input_mgr      = $InputManager
 @onready var unit_container = $UnitContainer
-@onready var move_sys       = $MovementSystem
 @onready var combat_sys     = $CombatSystem
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
@@ -21,8 +20,6 @@ extends Node2D
 var timer_running := false
 
 var selected_unit: Unit = null
-var units: Array[Unit] = []
-var unit_visible_enemies: Dictionary
 
 
 signal update_timer_label(time_left_seconds: float)
@@ -64,13 +61,13 @@ func _normalize_weight(w, min_w, max_w):
 		return 0.0
 	return clamp((w - min_w) / (max_w - min_w), 0.0, 1.0)
 	
-func draw_threat(_threat_weights: Dictionary[int, Dictionary]):
-	return #debug
+func _on_draw_threat(_threat_weights: Dictionary[int, Dictionary]):
+	# return #debug
 	threat_weights = _threat_weights[Globals.team_player]
 	queue_redraw()
 
 func _ready():
-	
+	MovementSystem.draw_threat.connect(_on_draw_threat)
 	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
 	input_mgr.mouse_button_right_pressed.connect(_on_mouse_button_right_pressed)
 	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
@@ -82,23 +79,17 @@ func _ready():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is Unit:
-			units.append(unit)
-			unit.units = units
+			Globals.units.append(unit)
 			unit.unit_died.connect(_on_unit_died)
-			unit.moved_to_hex.connect(combat_sys._on_unit_moved)
-			unit.moved_to_hex.connect(_on_unit_moved)
-			unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
+			unit.unit_entered_hex.connect(combat_sys._on_unit_entered_hex)
+			unit.unit_entered_hex.connect(_on_unit_entered_hex)
+			unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
 			unit.current_hex = ground_layer.local_to_map(unit.global_position)
 			unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
 			unit.deselect_unit.connect(_deselect_unit)
 			unit.started_moving.connect(_on_started_moving)
 			unit.unit_surrendered.connect(_on_unit_surrendered)
-			unit.squad_fire.unit_visible_enemies = unit_visible_enemies
-			
-	combat_sys.unit_visible_enemies = unit_visible_enemies
-	combat_sys.units = units
-	move_sys.unit_visible_enemies = unit_visible_enemies
-	move_sys.units = units
+	
 	combat_sys.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	update_timer_label.emit(time_left_seconds)
 	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
@@ -106,8 +97,6 @@ func _ready():
 	
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.GRID_SIZE_X, LOSHelper.GRID_SIZE_Y)
 	camera.set_camera_limit(map_size) 
-	
-	Globals.movement_system = move_sys
 	
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
@@ -197,21 +186,16 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	
 	unit.set_team(team)
 	
-	units.append(unit)
-	unit.units = units
+	Globals.units.append(unit)
 	unit.unit_died.connect(_on_unit_died)
-	unit.moved_to_hex.connect(combat_sys._on_unit_moved)
-	unit.moved_to_hex.connect(_on_unit_moved)
-	unit.unit_arrived_at_hex.connect(move_sys._on_arrived)
+	unit.unit_entered_hex.connect(combat_sys._on_unit_moved)
+	unit.unit_entered_hex.connect(_on_unit_entered_hex)
+	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
 	unit.current_hex = ground_layer.local_to_map(unit.global_position)
 	unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
 	unit.deselect_unit.connect(_deselect_unit)
 	unit.started_moving.connect(_on_started_moving)
 	unit.unit_surrendered.connect(_on_unit_surrendered)
-	unit.squad_fire.unit_visible_enemies = unit_visible_enemies
-	
-	combat_sys.units = units
-	move_sys.units = units
 
 func draw_fog():
 	var used_cells := fog_of_war_layer.get_used_cells()
@@ -227,7 +211,7 @@ func draw_fog():
 
 
 func show_visible_units():
-	for u in units:
+	for u in Globals.units:
 		if not u.team == Globals.team_player:
 			if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
 				u.visible = true
@@ -238,7 +222,7 @@ func show_visible_units():
 func update_visible_hexes():
 	for array in LOSHelper.visible_hexes.values():
 		array.clear()
-	for u in units:
+	for u in Globals.units:
 		var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
 		for hex in unit_visible:
 			if not LOSHelper.visible_hexes[u.team].has(hex):
@@ -247,14 +231,14 @@ func update_visible_hexes():
 			LOSHelper.visible_hexes[u.team].append(u.current_hex)
 
 
-func _on_unit_moved(unit, vector: Vector2i):
+func _on_unit_entered_hex(unit, vector: Vector2i):
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
 	
 	var map_hex: Vector2i = ground_layer.local_to_map(get_local_mouse_position())
 	var _units: Array
-	for _unit in units:
+	for _unit in Globals.units:
 		if _unit.current_hex == map_hex: 
 			_units.append(_unit)
 	#get_parent().ui.show_unit_data(map_hex, _units)
@@ -347,18 +331,20 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 			selected_unit.ui.show_failure()
 			return
 		if selected_unit.squadType == Unit.SquadType.MORTAR:
-			selected_unit.fire_mortar(map_hex)
+			selected_unit.order(Globals.UnitCmd.ATTACK, map_hex)
 		else:
 			var units: Array[Node2D] = _find_units_at(map_hex)
 			for unit in units:
 				if not unit.team == Globals.team_player or Debug.enemy_selectable:
 					var path: Array[Vector3i] = []
 					#selected_unit.give_attack_hex_order(unit.current_hex, path, path)
-					selected_unit.combat.set_target_unit(unit)
+					selected_unit.order(Globals.UnitCmd.ATTACK, unit)
+					
 					var local_pos = ground_layer.map_to_local(map_hex)
 					hex_glow(local_pos)
 					return
-			move_sys._on_move_requested(selected_unit, map_hex)
+			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
+			#move_sys._on_move_requested(selected_unit, map_hex)
 			#_deselect_unit(selected_unit)
 		var local_pos = ground_layer.map_to_local(map_hex)
 		hex_glow(local_pos)
@@ -535,8 +521,8 @@ func _on_unit_surrendered(unit):
 
 
 func _on_unit_died(unit):
-	units.erase(unit)
-	unit_visible_enemies.erase(unit)
+	Globals.units.erase(unit)
+	Globals.unit_visible_enemies.erase(unit)
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()

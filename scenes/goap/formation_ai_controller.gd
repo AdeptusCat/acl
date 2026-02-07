@@ -234,7 +234,7 @@ func _build_world_state() -> FormationWorldState:
 	
 	s.objective_held = false
 	var occupying_units : Array
-	for squad in get_parent().get_parent().units:
+	for squad in Globals.units:
 		if not is_instance_valid(squad):
 			continue
 		if not squad.team == team:

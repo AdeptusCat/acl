@@ -34,8 +34,7 @@ func animate_mg_bursts(
 		rpm: float,
 		burst_size: int,
 		burst_pause_s: float,
-		resolve_mode: String,
-		unit_visible_enemies: Dictionary
+		resolve_mode: String
 	) -> void:
 	
 	if total_rounds <= 0:

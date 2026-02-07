@@ -26,7 +26,7 @@ signal morale_breaks
 func _init(_unit: Node2D):
 	unit = _unit
 
-func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
+func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonus: float):
 	if not unit.alive or unit.surrendered:
 		return
 
@@ -53,10 +53,10 @@ func receive_fire(incoming_firepower: int, is_moving: bool, terrain_defense_bonu
 	morale_updated.emit(morale_meter_current, morale_meter_max)
 
 	if morale_meter_current >= morale_meter_max:
-		make_morale_check(unit_visible_enemies)
+		make_morale_check()
 
 
-func make_morale_check(unit_visible_enemies: Dictionary):
+func make_morale_check():
 	return
 	var death_chance = base_death_chance
 	if unit.broken:
@@ -76,7 +76,7 @@ func make_morale_check(unit_visible_enemies: Dictionary):
 			# think about it
 			return
 		unit.broken = true
-		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 		morale_breaks.emit()
 		unit._on_morale_failed(visible_enemies)
 		recovery_timer_current = 0.0

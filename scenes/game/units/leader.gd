@@ -66,7 +66,7 @@ signal cover_updated(value: float)
 signal deselect_unit(unit)
 signal started_moving
 signal unit_surrendered
-signal unit_entered_new_hex(new_hex: Vector2i)
+signal unit_entered_hex(new_hex: Vector2i)
 
 func _ready() -> void:
 	add_to_group("leader")
@@ -247,8 +247,8 @@ func set_cover(cover_value: int) -> void:
 	ui.set_cover(cover_value)
 
 
-func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
-	return unit_visible_enemies.get(self, [])
+func get_visible_enemies() -> Array:
+	return Globals.unit_visible_enemies.get(self, [])
 
 
 func set_team(new_team: int):
@@ -329,7 +329,7 @@ func _on_morale_failed(_known_enemies: Array) -> void:
 func _on_retreat_complete(retreat_hex) -> void:
 	movement.moving = false
 	current_hex = retreat_hex
-	moved_to_hex.emit(self, current_hex)
+	unit_entered_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
 
 

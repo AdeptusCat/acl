@@ -4,8 +4,6 @@ extends Node
 
 @export var enabled: bool = true
 
-var unit_visible_enemies: Dictionary
-var units: Array[Unit] = []
 signal draw_los_to_enemy(from_hex, to_hex)
 
 
@@ -20,7 +18,7 @@ signal draw_los_to_enemy(from_hex, to_hex)
 			##unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			#unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			
-func _on_unit_moved(unit: Unit, vector):
+func _on_unit_entered_hex(unit: Unit, vector):
 	if not enabled:
 		return
 	if not unit.alive or unit.surrendered:
@@ -29,16 +27,16 @@ func _on_unit_moved(unit: Unit, vector):
 	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
 	
 	# Clear old visibility info for this unit
-	unit_visible_enemies[unit] = []
+	Globals.unit_visible_enemies[unit] = []
 
-	for enemy_unit in units:
+	for enemy_unit in Globals.units:
 		if enemy_unit == unit:
 			continue
 		if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
 			draw_los_to_enemy.emit(unit.current_hex, enemy_unit.current_hex)
-			if not unit_visible_enemies.has(unit):
+			if not Globals.unit_visible_enemies.has(unit):
 				continue
-			unit_visible_enemies[unit].append(enemy_unit)
+			Globals.unit_visible_enemies[unit].append(enemy_unit)
 
 			# Fire immediately if stationary (optional fast reaction shot)
 			if enemy_unit.moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
@@ -60,7 +58,7 @@ func _on_unit_moved(unit: Unit, vector):
 
 				# now display it
 				unit.set_cover(targetCover)
-				enemy_unit.squad_fire.set_target_unit(unit)
+				enemy_unit.order(Globals.UnitCmd.ATTACK, unit)
 				#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 
 	# 🔥 Update LOS for all units too (global re-check)
@@ -68,14 +66,14 @@ func _on_unit_moved(unit: Unit, vector):
 
 
 func update_all_unit_visibilities():
-	for unit in units:
+	for unit in Globals.units:
 		if not unit.alive:
 			continue
 		var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
-		unit_visible_enemies[unit] = []
+		Globals.unit_visible_enemies[unit] = []
 
-		for enemy_unit in units:
+		for enemy_unit in Globals.units:
 			if enemy_unit == unit or not enemy_unit.alive:
 				continue
 			if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
-				unit_visible_enemies[unit].append(enemy_unit)
+				Globals.unit_visible_enemies[unit].append(enemy_unit)

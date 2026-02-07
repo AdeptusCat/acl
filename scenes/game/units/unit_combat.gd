@@ -199,56 +199,60 @@ func set_target_unit(unit: Unit):
 	target_unit = unit
 	new_target_unit.emit(unit)
 
+#
+#func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
+	## revise this!
+	## also exists in squad_fire_controller why?
+	## its not called anyway
+	#return
+	#fire_timer -= delta
+	#if fire_timer > 0.0:
+		#return  # Still waiting for next shot
+#
+	#if target_unit:
+		#var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		#if not visible_enemies.has(target_unit):
+			#target_unit = null
+			#new_target_unit.emit(target_unit)
+			#return
+		#if target_unit and target_unit.alive and not target_unit.surrendered:
+			#var distance = current_hex.distance_to(target_unit.current_hex)
+			#if distance <= range * 2:
+				#var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				#var targetCover = 0
+				#if cover_map and cover_map.has(target_unit.current_hex):
+					#var data = cover_map[target_unit.current_hex]
+					#targetCover = data["target_cover"]
+				#
+				#target_unit.set_cover(targetCover)
+				##fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+				#fire_timer = fire_rate
+				#return
+			#else:
+				#target_unit = null
+				#new_target_unit.emit(target_unit)
+		#else:
+			#target_unit = null
+			#new_target_unit.emit(target_unit)
+	#var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	#for enemy in visible_enemies:
+		#if enemy and enemy.alive and not enemy.surrendered:
+			#var distance = current_hex.distance_to(enemy.current_hex)
+			#if distance <= range * 2:
+				#var cover_map = LOSHelper.los_lookup.get(current_hex, null)
+				#var targetCover = 0
+				#if cover_map and cover_map.has(enemy.current_hex):
+					#var data = cover_map[enemy.current_hex]
+					#targetCover = data["target_cover"]
+#
+				#set_target_unit(enemy)
+				#enemy.set_cover(targetCover)
+				##fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
+				#fire_timer = fire_rate
+				#
+				#break
 
-func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
-	fire_timer -= delta
-	if fire_timer > 0.0:
-		return  # Still waiting for next shot
-
-	if target_unit:
-		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
-		if not visible_enemies.has(target_unit):
-			target_unit = null
-			new_target_unit.emit(target_unit)
-			return
-		if target_unit and target_unit.alive and not target_unit.surrendered:
-			var distance = current_hex.distance_to(target_unit.current_hex)
-			if distance <= range * 2:
-				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
-				var targetCover = 0
-				if cover_map and cover_map.has(target_unit.current_hex):
-					var data = cover_map[target_unit.current_hex]
-					targetCover = data["target_cover"]
-				
-				target_unit.set_cover(targetCover)
-				#fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
-				fire_timer = fire_rate
-				return
-			else:
-				target_unit = null
-				new_target_unit.emit(target_unit)
-		else:
-			target_unit = null
-			new_target_unit.emit(target_unit)
-	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
-	for enemy in visible_enemies:
-		if enemy and enemy.alive and not enemy.surrendered:
-			var distance = current_hex.distance_to(enemy.current_hex)
-			if distance <= range * 2:
-				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
-				var targetCover = 0
-				if cover_map and cover_map.has(enemy.current_hex):
-					var data = cover_map[enemy.current_hex]
-					targetCover = data["target_cover"]
-
-				set_target_unit(enemy)
-				enemy.set_cover(targetCover)
-				#fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
-				fire_timer = fire_rate
-				
-				break
-
-func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower: float, range, unit_visible_enemies: Dictionary, fire_rate) -> void:
+func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: int, terrain_defense_bonus: float, firepower: float, range, fire_rate) -> void:
 	# --- range gating & power falloff ---
 	var actual_firepower: float = firepower
 	if distance_in_hexes > range:
@@ -260,7 +264,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	# --- collect all enemy squads in the target hex ---
 	var target_hex = target.current_hex
 	var batch_targets: Array = []
-	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
 		if is_instance_valid(u):
 			if u.alive:
@@ -332,7 +336,7 @@ func fire_at(shooter: Node2D, target: Node2D, current_hex, distance_in_hexes: in
 	while i < n_targets:
 		var u: Node = batch_targets[i]
 		u.set_cover(terrain_defense_bonus)  # keep your existing hook
-		u.receive_fire(actual_firepower, terrain_defense_bonus, unit_visible_enemies)
+		u.receive_fire(actual_firepower, terrain_defense_bonus)
 
 		var exposure: float = 1.0
 		var cover_pts: float = float(terrain_defense_bonus)
@@ -608,7 +612,7 @@ func _stress_cover_mult(cover_norm: float, min_floor: float) -> float:
 	#fire_burst(shooter, current_hex, batch_targets[0], 8, fire_rate, unit_visible_enemies)
 
 
-func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float, unit_visible_enemies: Dictionary) -> void:
+func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bullets_per_sec: float) -> void:
 	var interval = bullets_per_sec / rounds
 	var from_pos = LOSHelper.ground_layer.map_to_local(current_hex)
 	
@@ -616,7 +620,7 @@ func fire_burst(shooter: Node2D, current_hex, target: Node2D, rounds: int, bulle
 		if not is_instance_valid(shooter) or not is_instance_valid(target):
 			target_unit = null
 			return
-		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 		if not visible_enemies.has(target):
 			target_unit = null
 			return
@@ -667,7 +671,6 @@ func animate_mg_bursts(
 		burst_size: int,
 		burst_pause_s: float,
 		resolve_mode: String,
-		unit_visible_enemies: Dictionary,
 		fire_rate: float
 	) -> void:
 	

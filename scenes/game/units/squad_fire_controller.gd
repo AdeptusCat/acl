@@ -73,7 +73,6 @@ var target_cover: float
 var target_unit: Unit
 var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
-var unit_visible_enemies: Dictionary
 
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
@@ -133,14 +132,14 @@ func _process(delta: float) -> void:
 	_now_s += delta
 	_accum_window_s += delta
 	
-	var visible_enemies1: Array = unit_visible_enemies.get(unit, [])
+	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 	if not visible_enemies1.is_empty() and target_hex == Vector2i.ZERO:
 		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
 			return
 		else:
 			#if unit.team == Globals.team_player:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			unit.squad_fire.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			unit.squad_fire.handle_auto_fire(delta, unit, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
@@ -167,13 +166,13 @@ func _update_state_multipliers() -> void:
 		i += 1
 
 var fire_timer: float = 0.0
-func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, current_hex, range, fire_rate, firepower):
+func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, firepower):
 	fire_timer -= delta
 	if fire_timer > 0.0:
 		return  # Still waiting for next shot
 
 	if target_unit:
-		var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+		var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 		if visible_enemies.has(target_unit):
 			if target_unit and target_unit.alive and not target_unit.surrendered:
 				#var distance = current_hex.distance_to(target_unit.current_hex)
@@ -199,7 +198,7 @@ func handle_auto_fire(delta, shooter: Node2D, unit_visible_enemies: Dictionary, 
 			else:
 				target_unit = null
 				set_target_unit(target_unit)
-	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
 			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, enemy.current_cube)
@@ -263,7 +262,6 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
-	
 	if s.next_ready_s == INF:
 		pass
 	
@@ -286,7 +284,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 	var _mortar_target_hex: Vector2i = mortar_target_hex
 	
 	var batch_targets: Array = []
-	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
 		if is_instance_valid(u):
 			if u.alive:
@@ -554,10 +552,9 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 
 	# --- collect all enemy squads in the target hex ---
 	var batch_targets: Array = []
-	var visible_enemies: Array = unit_visible_enemies.get(get_parent(), [])
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	if weapon.family == WeaponSpec.Family.MORTAR:
-		var units: Array[Unit] = get_parent().units
-		for u in units:
+		for u in Globals.units:
 			if is_instance_valid(u):
 				if u.alive:
 					if not u.surrendered:

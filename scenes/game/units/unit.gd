@@ -87,7 +87,6 @@ var selected: bool = false
 var moving: bool = false
 var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
-var units: Array[Unit]
 var effective_range: int = 0
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
@@ -98,7 +97,7 @@ var leader_alive := true
 @export var squadType: SquadType = SquadType.Rifle
 
 # === Signals ===
-signal moved_to_hex(new_hex: Vector2i)
+signal unit_entered_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit)
 signal retreat_complete(retreat_hex: Vector2i)
@@ -106,7 +105,6 @@ signal cover_updated(value: float)
 signal deselect_unit(unit)
 signal started_moving
 signal unit_surrendered
-signal unit_entered_new_hex(new_hex: Vector2i)
 signal contacts_reported(unit: Unit, contact: Array[Unit])
 
 # unit details signals
@@ -167,7 +165,6 @@ func _ready():
 	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	combat.shoot.connect(ui.shoot)
-	combat.new_target_unit.connect(_on_new_target_unit)
 	
 	movement.unit = self
 	movement.ground_map = ground_map
@@ -202,6 +199,25 @@ func _ready():
 	
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
+
+
+func order(cmd: Globals.UnitCmd, parameter):
+	match cmd:
+		Globals.UnitCmd.ATTACK:
+			if squadType == Unit.SquadType.MORTAR:
+				var map_hex: Vector2i = parameter as Vector2i
+				fire_mortar(map_hex)
+			else:
+				var enemy_unit: Unit = parameter as Unit
+				combat.set_target_unit(enemy_unit)
+				squad_fire.set_target_unit(enemy_unit)
+		Globals.UnitCmd.MOVE:
+			var to_hex: Vector2i = parameter as Vector2i
+			if not current_hex == to_hex:
+				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team)
+				give_move_to_hex_order(to_hex, path, false)
+			else:
+				movement.move_to_hex(to_hex)
 
 
 func _on_new_target_hex(end_of_path_hex: Vector2i):
@@ -1011,11 +1027,9 @@ func _process(delta):
 
 func _check_contacts() -> void:
 	cleanup_enemy_memory()
-	if not "unit_visible_enemies" in squad_fire:
-		return
 	if not is_good_order():
 		return
-	var raw: Array = squad_fire.unit_visible_enemies.get(self, [])
+	var raw: Array = Globals.unit_visible_enemies.get(self, [])
 	
 	var enemies: Array[Unit] = []
 
@@ -1105,8 +1119,8 @@ func set_cover(cover_value: int) -> void:
 	ui.set_cover(cover_value)
 
 
-func get_visible_enemies(unit_visible_enemies: Dictionary) -> Array:
-	return unit_visible_enemies.get(self, [])
+func get_visible_enemies() -> Array:
+	return Globals.unit_visible_enemies.get(self, [])
 
 
 func set_team(new_team: Globals.Team):
@@ -1446,7 +1460,7 @@ func _on_morale_failed(_known_enemies: Array) -> void:
 	#for unit in units:
 		#if not unit.team == team and not unit.surrendered:
 			#known_enemies.append(unit)
-	var visible_enemies1: Array = squad_fire.unit_visible_enemies.get(self, [])
+	var visible_enemies1: Array = Globals.unit_visible_enemies.get(self, [])
 	for u in visible_enemies1: # unit.units:
 		if u.team != team and u.surrendered == false:
 			known_enemies.append(u)
@@ -1458,7 +1472,7 @@ func _on_retreat_complete(retreat_hex) -> void:
 	movement.moving = false
 	current_hex = retreat_hex
 	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
-	moved_to_hex.emit(self, current_hex)
+	unit_entered_hex.emit(self, current_hex)
 	#emit_signal("moved_to_hex", self, current_hex)
 	action_controller.on_retreat_complete(retreat_hex)
 
@@ -1597,12 +1611,12 @@ func _start_move_to() -> void:
 		return
 	if not movement.path_hexes.is_empty():
 		if not movement.path_hexes[-1] == current_order.target_hexes[0]:
-			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
 			give_move_to_hex_order(current_order.target_hexes[0], path, false)
 			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 	else:
 		if not current_hex == current_order.target_hexes[0]:
-			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
 			give_move_to_hex_order(current_order.target_hexes[0], path, false)
 			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
 	action_label.text = "move to" + str(current_order.target_hexes[0])
@@ -1674,11 +1688,11 @@ func _start_base_of_fire() -> void:
 		return
 	if not movement.path_hexes.is_empty():
 		if not movement.path_hexes[-1] == closest_hex:
-			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
+			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, closest_hex, team)
 			give_move_to_hex_order(closest_hex, path, false)
 	else:
 		if not current_hex == closest_hex:
-			var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, closest_hex, team)
+			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, closest_hex, team)
 			give_move_to_hex_order(closest_hex, path, false)
 	action_label.text = "base of fire" + str(closest_hex)
 	#return
@@ -1706,7 +1720,7 @@ func _start_assault_route() -> void:
 		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
 		#movement.set_route(fallback_route)
 		current_order.target_hexes.append(Globals.objective_hexes[team][0])
-	var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, current_order.target_hexes[0], team)
+	var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
 	give_move_to_hex_order(current_order.target_hexes[0], path, false)
 	
 	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION

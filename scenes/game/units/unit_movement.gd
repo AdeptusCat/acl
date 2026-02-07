@@ -205,7 +205,7 @@ func _process_movement(delta: float) -> void:
 			if unit.current_hex != path_hexes[path_index]:
 				unit.current_hex = path_hexes[path_index]
 				unit.current_cube = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
-				unit.moved_to_hex.emit(unit, path_hexes[path_index])
+				unit.unit_entered_hex.emit(unit, path_hexes[path_index])
 	
 	if dist <= step:
 		unit.position = target_position
@@ -449,7 +449,7 @@ func state_changed(next: int) -> void:
 	match next:
 		STATES.MoraleState.PANIC:
 			var known_enemies: Array[Unit] = []
-			var visible_enemies1: Array = unit.squad_fire.unit_visible_enemies.get(unit, [])
+			var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 			for u in visible_enemies1: # unit.units:
 				if u.team != unit.team and u.surrendered == false:
 					known_enemies.append(u)

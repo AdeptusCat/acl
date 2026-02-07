@@ -361,7 +361,7 @@ func _start_rout() -> void:
 		#if u.team != unit.team and u.surrendered == false:
 			#known_enemies.append(u)
 		#i += 1
-	var visible_enemies1: Array = unit.squad_fire.unit_visible_enemies.get(unit, [])
+	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 	for u in visible_enemies1: # unit.units:
 		if u.team != unit.team and u.surrendered == false:
 			known_enemies.append(u)

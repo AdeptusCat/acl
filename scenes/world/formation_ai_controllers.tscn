@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://vrnwdhsu251x"]
+[gd_scene format=3 uid="uid://vrnwdhsu251x"]
 
 [ext_resource type="Script" uid="uid://cljhk032qpytk" path="res://scenes/world/formation_ai_controllers.gd" id="1_1x7gl"]
 

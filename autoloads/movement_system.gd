@@ -1,8 +1,18 @@
 extends Node
-class_name MovementSystem
 
-var unit_visible_enemies: Dictionary
-var units: Array[Unit] = []
+
+var thread: Thread
+var result_ready := false
+var current_threat_maps: Dictionary[int, Dictionary] 
+
+var pending_visible_hexes: Dictionary[int, Array]
+var pending_lookup: Dictionary = {}
+
+var update_interval := 0.25  # seconds
+var update_timer := 0.0
+
+
+signal draw_threat(current_threat_maps: Dictionary[int, Dictionary])
 
 
 func _on_move_requested(selected_unit, to_hex):
@@ -48,7 +58,7 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 	var observed_hexes_by_enemy = pending_visible_hexes.get(enemy_team, [])
 	
 	if observed_hexes_by_enemy.has(hex):
-		for unit in units:
+		for unit in Globals.units:
 			if not unit.team == enemy_team:
 				continue
 			var o_hex = unit.current_hex
@@ -65,16 +75,6 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 
 	return weight
 
-
-var thread: Thread
-var result_ready := false
-var current_threat_maps: Dictionary[int, Dictionary] 
-
-var pending_visible_hexes: Dictionary[int, Array]
-var pending_lookup: Dictionary = {}
-
-var update_interval := 0.25  # seconds
-var update_timer := 0.0
 
 
 func request_threat_update(visible_hexes: Array, lookup_data: Dictionary):
@@ -98,7 +98,8 @@ func _exit_tree():
 func _set_threat_map_result(result: Dictionary[int, Dictionary]):
 	#current_threat_map = result
 	current_threat_maps = result
-	get_parent().draw_threat(current_threat_maps)
+	draw_threat.emit(current_threat_maps)
+	# get_parent().draw_threat(current_threat_maps)
 	result_ready = true
 
 
@@ -205,7 +206,7 @@ func _on_arrived(hex):
 func _restack_units_in_hex(hex: Vector2i):
 	# collect alive units in this hex
 	var stack := []
-	for u in units:
+	for u in Globals.units:
 		if u.alive and u.current_hex == hex:
 			stack.append(u)
 
@@ -235,7 +236,7 @@ func _restack_units_in_hex(hex: Vector2i):
 func _restack_units():
 	# 1) Group units by their current_hex
 	var groups := {}
-	for u in units:
+	for u in Globals.units:
 		if not u.alive:
 			continue
 		var h = u.current_hex
