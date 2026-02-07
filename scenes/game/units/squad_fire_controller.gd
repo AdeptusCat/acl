@@ -139,7 +139,7 @@ func _process(delta: float) -> void:
 		else:
 			#if unit.team == Globals.team_player:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			unit.squad_fire.handle_auto_fire(delta, unit, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			handle_auto_fire(delta, unit, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
@@ -189,7 +189,6 @@ func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, fir
 						targetCover = data["target_cover"]
 					
 					target_unit.set_cover(targetCover)
-					#fire_at(shooter, target_unit, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 					fire_timer = fire_rate
 					return
 				else:
@@ -218,7 +217,6 @@ func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, fir
 				#set_target_unit(enemy)
 				unit.order(Globals.UnitCmd.ATTACK, enemy)
 				enemy.set_cover(targetCover)
-				#fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate
 				
 				break

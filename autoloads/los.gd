@@ -45,7 +45,6 @@ func _on_unit_entered_hex(unit: Unit, vector):
 				# now display it
 				unit.set_cover(targetCover)
 				enemy_unit.order(Globals.UnitCmd.ATTACK, unit)
-				#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 
 	# 🔥 Update LOS for all units too (global re-check)
 	update_all_unit_visibilities()

@@ -428,7 +428,6 @@ func _on_mouse_event_position_changed(event_pos: Vector2):
 			
 			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
 			#selected_unit.set_cover(targetCover)
-			#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 	else:
 		get_parent().ui.hide_target_hex_cover_distance()
 
@@ -470,7 +469,6 @@ func handle_mouse_event_position_changed(event_pos: Vector2):
 			
 			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
 			#selected_unit.set_cover(targetCover)
-			#enemy_unit.fire_at(unit, distance, targetCover, unit_visible_enemies)
 	else:
 		get_parent().ui.hide_target_hex_cover_distance()
 

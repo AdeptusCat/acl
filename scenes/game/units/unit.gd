@@ -1133,11 +1133,6 @@ func update_team_sprite(_team: Globals.Team, _squadType: SquadType):
 	ui.update_team_sprite(_team, _squadType)
 
 
-func fire_at(target: Node2D, distance_in_hexes: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
-	if not alive or surrendered:
-		return
-	# combat.fire_at(self, target, current_hex, distance_in_hexes, terrain_defense_bonus, firepower, range, unit_visible_enemies, fire_rate, )
-
 
 #func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 func receive_fire(terrain_defense_bonus: float):
