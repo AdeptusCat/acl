@@ -194,10 +194,12 @@ func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, fir
 					return
 				else:
 					target_unit = null
-					set_target_unit(target_unit)
+					unit.order(Globals.UnitCmd.ATTACK, target_unit)
+					#set_target_unit(target_unit)
 			else:
 				target_unit = null
-				set_target_unit(target_unit)
+				unit.order(Globals.UnitCmd.ATTACK, target_unit)
+				#set_target_unit(target_unit)
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
@@ -213,7 +215,8 @@ func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, fir
 					var data = cover_map[enemy.current_hex]
 					targetCover = data["target_cover"]
 				
-				set_target_unit(enemy)
+				#set_target_unit(enemy)
+				unit.order(Globals.UnitCmd.ATTACK, enemy)
 				enemy.set_cover(targetCover)
 				#fire_at(shooter, enemy, current_hex, distance, targetCover, firepower, range, unit_visible_enemies, fire_rate)
 				fire_timer = fire_rate

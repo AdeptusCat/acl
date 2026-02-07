@@ -59,6 +59,8 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 	
 	if observed_hexes_by_enemy.has(hex):
 		for unit in Globals.units:
+			if not is_instance_valid(unit):
+				continue
 			if not unit.team == enemy_team:
 				continue
 			var o_hex = unit.current_hex
