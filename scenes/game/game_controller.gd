@@ -2,7 +2,6 @@ extends Node2D
 
 @onready var input_mgr      = $InputManager
 @onready var unit_container = $UnitContainer
-@onready var combat_sys     = $CombatSystem
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
 @onready var axis_formation_ai_controllers := $AxisFormationAIControllers
@@ -188,7 +187,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	
 	Globals.units.append(unit)
 	unit.unit_died.connect(_on_unit_died)
-	unit.unit_entered_hex.connect(combat_sys._on_unit_moved)
+	unit.unit_entered_hex.connect(LOS._on_unit_moved)
 	unit.unit_entered_hex.connect(_on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
 	unit.current_hex = ground_layer.local_to_map(unit.global_position)
