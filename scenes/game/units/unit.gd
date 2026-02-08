@@ -60,8 +60,6 @@ const PHYSICS_DT: float = 1.0 / 60.0
 
 
 # === GOAP ===
-#const GoapTypes := preload("res://scenes/goap/goap_types.gd")
-#const SquadOrder := preload("res://scenes/goap/squad_order.gd")
 var enemies_reported: Array[Unit]
 var enemies_reported_from_formation: Array[Unit]
 var has_reported_contact: bool = false
@@ -125,11 +123,6 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 @onready var action_label := $ActionLabel
 
 # === Classes ===
-#@onready var morale_system := UnitMorale.new(self)
-#@onready var morale_ui := UnitMoraleUI.new(self)
-#@onready var movement := UnitMovement.new(self)
-#@onready var combat := UnitCombat.new()
-#@onready var base_spv: float = combat.seconds_per_volley
 @onready var tactical_state: SquadTacticalState = SquadTacticalState.new()
 
 
@@ -137,23 +130,11 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 
 # === Ready ===
 func _ready():
-	action_controller.init(self, movement, squad_fire, stress_system, ui)
-	
-	connect("retreat_complete", _on_retreat_complete)
-	#morale_system.morale_breaks.connect(_on_morale_breaks)
-	#morale_system.morale_recovered.connect(_on_morale_recovered)
-	#morale_system.unit_recovers.connect(_on_unit_recovers)
-	
-	#morale_system.morale_updated.connect(ui._on_morale_updated)
-	#morale_system.morale_failure.connect(ui._on_morale_failure)
-	#morale_system.morale_success.connect(ui._on_morale_success)
-	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
-	#morale_system.morale_breaks.connect(ui._on_morale_breaks)
-	
-	
-	
 	if Engine.is_editor_hint():
 		return
+	
+	action_controller.init(self, movement, squad_fire, stress_system, ui)
+	retreat_complete.connect(_on_retreat_complete)
 	cover_updated.connect(ui._on_cover_updated)
 	
 	current_cube = ground_map.map_to_cube(current_hex)
@@ -161,10 +142,8 @@ func _ready():
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
 	unit_arrived_at_hex.connect(squad_fire._on_unit_arrived_at_hex)
 	unit_arrived_at_hex.connect(_on_unit_arrived_at_hex)
-	#morale_system.morale_recovered.connect(ui._on_morale_recovered)
 	
 	movement.unit = self
-	movement.ground_map = ground_map
 
 	movement.started_moving.connect(_on_started_moving)
 	movement.stopped_moving.connect(_on_stopped_moving)
