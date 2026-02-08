@@ -51,9 +51,8 @@ rally_bonus = 0.1
 cohesion_mult = 1.05
 scan_interval_s = 0.25
 
-[node name="SquadFireController" parent="." unique_id=1396863061 node_paths=PackedStringArray("unit", "combat", "stress_controller") instance=ExtResource("9_b5oeb")]
+[node name="SquadFireController" parent="." unique_id=1396863061 node_paths=PackedStringArray("unit", "stress_controller") instance=ExtResource("9_b5oeb")]
 unit = NodePath("..")
-combat = NodePath("")
 stress_controller = NodePath("../UnitStressController")
 
 [node name="WeaponAudio" parent="." unique_id=2131531682 instance=ExtResource("10_7ghvu")]

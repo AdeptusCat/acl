@@ -995,10 +995,6 @@ func _process(delta):
 	if not alive:
 		return
 
-	#morale_system._process_recovery(delta)
-	
-	#movement.process(delta)
-
 
 func _check_contacts() -> void:
 	cleanup_enemy_memory()
@@ -1110,7 +1106,6 @@ func update_team_sprite(_team: Globals.Team, _squadType: SquadType):
 
 #func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 func receive_fire(terrain_defense_bonus: float):
-	#morale_system.receive_fire(incoming_firepower, movement.moving, terrain_defense_bonus, unit_visible_enemies)
 	cover_updated.emit(int(terrain_defense_bonus))
 	#if moving and not broken and not surrendered:
 		#movement.recalc_path()
@@ -1423,19 +1418,6 @@ func die():
 	unit_died.emit(self)
 	await ui.die()
 	queue_free()
-
-
-func _on_morale_failed(_known_enemies: Array) -> void:
-	var known_enemies: Array[Unit]
-	#for unit in units:
-		#if not unit.team == team and not unit.surrendered:
-			#known_enemies.append(unit)
-	var visible_enemies1: Array = Globals.unit_visible_enemies.get(self, [])
-	for u in visible_enemies1: # unit.units:
-		if u.team != team and u.surrendered == false:
-			known_enemies.append(u)
-	movement.rout(current_hex, known_enemies, retreat_distance)
-	
 
 
 func _on_retreat_complete(retreat_hex) -> void:
