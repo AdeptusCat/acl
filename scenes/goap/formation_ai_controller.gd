@@ -65,7 +65,7 @@ func _refresh_squad_list() -> void:
 		squad.formation_squads = squads.duplicate()
 
 
-func _on_new_target_hex(unit: Unit, end_of_path_hex: Vector2i):
+func _on_new_target_hex(_unit: Unit, _end_of_path_hex: Vector2i):
 	return
 
 
@@ -94,12 +94,12 @@ func _on_squad_contact_reported(unit: Unit, contacts: Array[Unit]):
 	_assign_contact_reaction(unit, contacts[0].current_hex)
 
 
-func _assign_contact_reaction(bo_f_squad: Unit, contact_hex: Vector2i) -> void:
+func _assign_contact_reaction(bo_f_squad: Unit, _contact_hex: Vector2i) -> void:
 	if not is_instance_valid(bo_f_squad):
 		return
 	
-	var curr_bof_order: SquadOrder = bo_f_squad.current_order
-	var current_bof_order_type: GoapTypes.SquadOrderType = bo_f_squad.current_order.order_type
+	var _curr_bof_order: SquadOrder = bo_f_squad.current_order
+	var _current_bof_order_type: GoapTypes.SquadOrderType = bo_f_squad.current_order.order_type
 	
 	#BASE_OF_FIRE,  2
 	#ASSAULT_ROUTE, 3
@@ -192,10 +192,10 @@ func _build_world_state() -> FormationWorldState:
 	var s: FormationWorldState = FormationWorldState.new()
 	s.mission_mode = mission_mode
 
-	var total_E: float = 0.0
-	var alive_count: int = 0
-	var reserve_count: int = 0
-	var low_E_count: int = 0
+	var _total_E: float = 0.0
+	var _alive_count: int = 0
+	var _reserve_count: int = 0
+	var _low_E_count: int = 0
 
 	for squad in squads:
 		if not is_instance_valid(squad):
@@ -204,16 +204,16 @@ func _build_world_state() -> FormationWorldState:
 		if not squad.has_method("is_alive") or not squad.is_alive():
 			continue
 
-		alive_count += 1
+		_alive_count += 1
 
 		if squad.has_method("get_effectiveness"):
 			var e_value: float = squad.get_effectiveness()
-			total_E += e_value
+			_total_E += e_value
 			if e_value < 0.3:
-				low_E_count += 1
+				_low_E_count += 1
 
 		if squad.has_method("is_reserve_candidate") and squad.is_reserve_candidate():
-			reserve_count += 1
+			_reserve_count += 1
 
 	s.has_enemy_contacts = false
 	if not enemy_contacts.is_empty():
@@ -296,7 +296,7 @@ func _select_goal(state: FormationWorldState) -> void:
 
 	current_goal = best_goal
 
-func _build_action_set(state: FormationWorldState) -> Array[GoapAction]:
+func _build_action_set(_state: FormationWorldState) -> Array[GoapAction]:
 	var actions: Array[GoapAction] = []
 	
 	var a_def_pos: GoapAction = GoapAction.new()
@@ -397,7 +397,7 @@ func _dispatch_action(action: GoapAction) -> void:
 		#GoapTypes.FormationActionId.REST_AND_RESUPPLY:
 			#_assign_rest_orders()
 
-func _set_squad_order(squad: Unit, order_type: int, params: SquadOrder) -> void:
+func _set_squad_order(squad: Unit, order_type: GoapTypes.SquadOrderType, params: SquadOrder) -> void:
 	if not squad.has_method("set_order_resource"):
 		return
 	params.order_type = order_type
@@ -424,24 +424,24 @@ func _assign_prepare_assault_orders() -> void:
 
 func _assign_position_base_of_fire() -> void:
 	return
-	var base_of_fire_squads: Array[Unit]
-	for squad in squads:
-		if not squad.is_good_order():
-			continue
-		if squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
-			base_of_fire_squads.append(squad)
-	var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemy_contacts[0].current_hex, [])
-	for squad in base_of_fire_squads:
-		var closest_distance: int = 1000
-		var closest_hex: Vector2i
-		for hex in visible_hexes_by_enemy:
-			var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-			var distance: int = LOSHelper.ground_layer.cube_distance(squad.current_cube, cube)
-			if distance < closest_distance:
-				closest_distance = distance
-				closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
-		var order: SquadOrder = SquadOrder.new()
-		_set_squad_order(squad, GoapTypes.SquadOrderType.MOVE_TO, order)
+	#var base_of_fire_squads: Array[Unit]
+	#for squad in squads:
+		#if not squad.is_good_order():
+			#continue
+		#if squad.current_order.order_type == GoapTypes.SquadOrderType.BASE_OF_FIRE:
+			#base_of_fire_squads.append(squad)
+	#var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemy_contacts[0].current_hex, [])
+	#for squad in base_of_fire_squads:
+		#var closest_distance: int = 1000
+		#var closest_hex: Vector2i
+		#for hex in visible_hexes_by_enemy:
+			#var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+			#var distance: int = LOSHelper.ground_layer.cube_distance(squad.current_cube, cube)
+			#if distance < closest_distance:
+				#closest_distance = distance
+				#closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
+		#var order: SquadOrder = SquadOrder.new()
+		#_set_squad_order(squad, GoapTypes.SquadOrderType.MOVE_TO, order)
 
 func _assign_position_assault_element() -> void:
 	pass

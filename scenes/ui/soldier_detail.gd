@@ -18,7 +18,7 @@ func set_soldier_detail(_soldier: Soldier):
 	$HBoxContainer/RoleName.text = RankGrades.get_role_name(soldier.role)
 	$HBoxContainer/Nickname.text = soldier.name
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if soldier:
 		#var p: float = get_acquire_progress()
 		#$HBoxContainer/ProgressBar.value = p

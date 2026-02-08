@@ -20,5 +20,5 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 	SessionAudio.sync_sliders([s1, s2])
 
 
-func _on_foldable_container_folding_changed(is_folded: bool) -> void:
+func _on_foldable_container_folding_changed(_is_folded: bool) -> void:
 	size.y = 0

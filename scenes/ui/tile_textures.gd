@@ -41,7 +41,7 @@ func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : 
 		wall_ne_sprite.transform = result.wall_ne_texture_transform
 		wall_ne_sprite.scale = wall_ne_sprite.scale * detail_zoom_factor
 		wall_ne_sprite.position.x += tile_size.x * detail_zoom_factor.x / 1.5
-		wall_ne_sprite.position.y -= tile_size.y / 2 * detail_zoom_factor.y
+		wall_ne_sprite.position.y -= tile_size.y / 2.0 * detail_zoom_factor.y
 	else:
 		wall_ne_sprite.texture = null
 	if not result.wall_se_texture == null:
@@ -49,7 +49,7 @@ func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : 
 		wall_se_sprite.transform = result.wall_se_texture_transform
 		wall_se_sprite.scale = wall_se_sprite.scale * detail_zoom_factor
 		wall_se_sprite.position.x += tile_size.x  * detail_zoom_factor.x / 1.5
-		wall_se_sprite.position.y += tile_size.y / 2 * detail_zoom_factor.y
+		wall_se_sprite.position.y += tile_size.y / 2.0 * detail_zoom_factor.y
 	else:
 		wall_se_sprite.texture = null
 	if not result.wall_s_texture == null:
@@ -64,7 +64,7 @@ func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : 
 		wall_sw_sprite.transform = result.wall_sw_texture_transform
 		wall_sw_sprite.scale = wall_sw_sprite.scale * detail_zoom_factor
 		wall_sw_sprite.position.x -= tile_size.x  * detail_zoom_factor.x / 1.5
-		wall_sw_sprite.position.y += tile_size.y / 2 * detail_zoom_factor.y
+		wall_sw_sprite.position.y += tile_size.y / 2.0 * detail_zoom_factor.y
 	else:
 		wall_sw_sprite.texture = null
 	if not result.wall_nw_texture == null:
@@ -72,7 +72,7 @@ func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : 
 		wall_nw_sprite.transform = result.wall_nw_texture_transform
 		wall_nw_sprite.scale = wall_nw_sprite.scale * detail_zoom_factor
 		wall_nw_sprite.position.x -= tile_size.x  * detail_zoom_factor.x / 1.5
-		wall_nw_sprite.position.y -= tile_size.y / 2 * detail_zoom_factor.y
+		wall_nw_sprite.position.y -= tile_size.y / 2.0 * detail_zoom_factor.y
 	else:
 		wall_nw_sprite.texture = null
 	if not result.building_texture == null:

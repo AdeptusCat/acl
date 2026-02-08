@@ -4,7 +4,7 @@ extends Node
 
 signal draw_los_to_enemy(from_hex, to_hex)
 
-func _on_unit_entered_hex(unit: Unit, vector):
+func _on_unit_entered_hex(unit: Unit, _vector):
 	if not enabled:
 		return
 	if not unit.alive or unit.surrendered:
@@ -31,7 +31,7 @@ func _on_unit_entered_hex(unit: Unit, vector):
 					if distance <= 1:
 						enemy_unit.stress_system.state_changed.emit(enemy_unit.stress_system.state, enemy_unit.stress_system.state)
 			else:
-				var distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
+				var _distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
 				
 				# safely grab the inner dict for this shooter-hex
 				var cover_map = LOSHelper.los_lookup.get(enemy_unit.current_hex, null)

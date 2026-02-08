@@ -47,16 +47,16 @@ func set_ground_layer(_ground_layer: HexagonTileMapLayer):
 func show_tile_data(result: Dictionary):
 	show()
 	#print(result)
-	result.cover_in_hex
-	result.blocking
-	result.cover_n
-	result.cover_ne
-	result.cover_se
-	result.cover_s
-	result.cover_sw
-	result.cover_nw
-	result.hindrance
-	result.tile_name
+	#result.cover_in_hex
+	#result.blocking
+	#result.cover_n
+	#result.cover_ne
+	#result.cover_se
+	#result.cover_s
+	#result.cover_sw
+	#result.cover_nw
+	#result.hindrance
+	#result.tile_name
 	
 	var tile_name: String = result.tile_name
 	if result.tile_name == "":

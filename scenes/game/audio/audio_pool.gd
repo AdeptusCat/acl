@@ -22,9 +22,9 @@ func _get_free_player() -> AudioStreamPlayer2D:
 	# fallback: reuse first player (still safe)
 	return pool[0]
 
-func play_one_shot(stream: AudioStream, position: Vector2, volume_db: float = 0.0, pitch_scale: float = 1.0, bus: String = "") -> void:
+func play_one_shot(stream: AudioStream, _position: Vector2, volume_db: float = 0.0, pitch_scale: float = 1.0, bus: String = "") -> void:
 	var player: AudioStreamPlayer2D = _get_free_player()
-	player.position = position
+	player.position = _position
 	player.stream = stream
 	player.volume_db = volume_db
 	player.pitch_scale = pitch_scale

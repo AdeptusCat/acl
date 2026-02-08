@@ -169,7 +169,7 @@ func _process(delta: float) -> void:
 
 
 func _update_state_multipliers() -> void:
-	var state_idx: int = stress_controller.state
+	var _state_idx: int = stress_controller.state
 	var acc_mult: float = 1.0
 	var rof_mult: float = 1.0
 	acc_mult = UnitStates.STATE_MOD[stress_controller.state]["acc"]
@@ -184,13 +184,13 @@ func _update_state_multipliers() -> void:
 		i += 1
 
 var fire_timer: float = 0.0
-func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, firepower):
+func handle_auto_fire(delta, _shooter: Node2D, current_hex, _range, fire_rate, _firepower):
 	fire_timer -= delta
 	if fire_timer > 0.0:
 		return  # Still waiting for next shot
-
+		
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
 	if target_unit:
-		var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 		if visible_enemies.has(target_unit):
 			if target_unit and target_unit.alive and not target_unit.surrendered:
 				#var distance = current_hex.distance_to(target_unit.current_hex)
@@ -217,7 +217,6 @@ func handle_auto_fire(delta, shooter: Node2D, current_hex, range, fire_rate, fir
 				target_unit = null
 				unit.order(Globals.UnitCmd.ATTACK, target_unit)
 				#set_target_unit(target_unit)
-	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for enemy in visible_enemies:
 		if enemy and enemy.alive and not enemy.surrendered:
 			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, enemy.current_cube)
@@ -246,7 +245,7 @@ func fire_mortar(map_hex: Vector2i):
 	
 
 
-func _tick_soldiers(delta: float) -> void:
+func _tick_soldiers(_delta: float) -> void:
 	
 		
 	var rounds_emitted: int = 0
@@ -457,7 +456,7 @@ func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, su
 		s.next_ready_s = _now_s + s.next_ready_delta_s
 		s.next_ready_start_s = _now_s
 	
-	var delta: float = s.next_ready_s - _now_s # debug
+	var _delta: float = s.next_ready_s - _now_s # debug
 	
 	await get_tree().create_timer(life).timeout
 	fire_at(shots, long_range, s.weapon, riflegrenade, _mortar_target_hex)
@@ -602,7 +601,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
 	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
-	var base_accuracy := 0.35
+	var _base_accuracy := 0.35
 	var state_mod: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
 	var acc: float = base_accuracy * float(state_mod.acc)
 	acc *= clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
@@ -721,9 +720,9 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	# lambda = hits * p_disable_final;  p_cas = 1 - exp(-lambda)
 	# This scales gently and avoids huge spikes.
 	var casualties_per_target: Array = []
-	var ii: int = 0
-	while ii < n_targets:
-		var hits_i: int = int(hits_per_target[ii])
+	var target_i: int = 0
+	while target_i < n_targets:
+		var hits_i: int = int(hits_per_target[target_i])
 		var casualties_i: int = 0
 
 		if hits_i > 0:
@@ -739,13 +738,13 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 				d += 1
 
 		# Never exceed living heads, if present
-		var u_chk: Node = batch_targets[ii]
+		var u_chk: Node = batch_targets[target_i]
 		if "members_alive" in u_chk:
 			if casualties_i > int(u_chk.members_alive):
 				casualties_i = int(u_chk.members_alive)
 
 		casualties_per_target.append(casualties_i)
-		ii += 1
+		target_i += 1
 
 
 	# --- compute ONE shared stress payload (equal for all squads) ---
@@ -918,7 +917,7 @@ func _indices_with_role(role: int) -> Array[int]:
 		i += 1
 	return res
 
-func _on_unit_arrived_at_hex(new_hex: Vector2i):
+func _on_unit_arrived_at_hex(_new_hex: Vector2i):
 	_prime_acquisition_for_new_target()
 
 func _prime_acquisition_for_new_target() -> void:

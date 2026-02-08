@@ -67,7 +67,7 @@ func _on_update_timer_label(time_left_seconds : float):
 	countdown_panel_container.update_timer_label(time_left_seconds)
 
 
-func mouse_event_position_changed(event_pos: Vector2):
+func mouse_event_position_changed(_event_pos: Vector2):
 	pass
 
 # legacy code that shows unit details

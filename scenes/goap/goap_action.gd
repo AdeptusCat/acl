@@ -90,7 +90,7 @@ func apply_effects(input_state: FormationWorldState) -> FormationWorldState:
 	return s
 
 
-func get_cost(state: FormationWorldState) -> float:
+func get_cost(_state: FormationWorldState) -> float:
 	var cost: float = base_cost
 
 	match action_id:

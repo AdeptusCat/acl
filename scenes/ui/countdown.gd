@@ -21,7 +21,7 @@ func set_countdown(_started: bool):
 
 
 func update_timer_label(time_left_seconds: float):
-	var minutes: int = int(time_left_seconds) / 60
+	var minutes: int = int(time_left_seconds / 60.0)
 	var seconds: int = int(time_left_seconds) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
 	if time_left_seconds < alert_threshold_s:

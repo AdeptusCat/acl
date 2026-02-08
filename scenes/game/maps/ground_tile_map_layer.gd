@@ -1,17 +1,17 @@
-#@tool
+@tool
 extends HexagonTileMapLayer
 
 # ─── store the two map coords the user clicks ──────────────────────────
 var _selected_map_hexes: Array[Vector2i] = []
-var _selected_cube_hexes: Array[Vector3i] = []
+#var _selected_cube_hexes: Array[Vector3i] = []
 
 # Customize pathfinding weights (optional)
-func _pathfinding_get_tile_weight(coords: Vector2i) -> float:
+func _pathfinding_get_tile_weight(_coords: Vector2i) -> float:
 		# Return custom weight value (default is 1.0)
 		return 1.0
 
 # Customize pathfinding connections (optional)
-func _pathfinding_does_tile_connect(tile: Vector2i, neighbor: Vector2i) -> bool:
+func _pathfinding_does_tile_connect(_tile: Vector2i, _neighbor: Vector2i) -> bool:
 		# Return whether tiles should be connected (default is true)
 		return true
 
@@ -25,7 +25,7 @@ func _ready():
 	var cube_clicks : Array = []
 	cube_clicks.append(map_to_cube(Vector2i(1,1)))
 	cube_clicks.append(map_to_cube(Vector2i(0,1)))
-	var na = cube_direction_name(cube_clicks[0], cube_clicks[1])
+	var _na = cube_direction_name(cube_clicks[0], cube_clicks[1])
 	#print(na)
 	# Enable pathfinding
 	
@@ -53,7 +53,7 @@ func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> String:
 
 
 # ─── catch clicks in the editor ────────────────────────────────────────
-func forward_canvas_gui_input(event: InputEvent) -> void:
+func forward_canvas_gui_input(_event: InputEvent) -> void:
 	print("lul")
 	if not Engine.is_editor_hint():
 		return

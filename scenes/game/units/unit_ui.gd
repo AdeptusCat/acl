@@ -71,12 +71,12 @@ func _set_loadout(soldiers: Array[Soldier]):
 		soldiers_detail_container.add_child(soldier_detail)
 
 func _on_leadership_changed(leadership_bonus: float) -> void:
-	var txt: String# = "%0.2f" % leadership_bonus
+	var txt: String = ""# = "%0.2f" % leadership_bonus
 	txt += leadership_to_plus_string(leadership_bonus)
 	$LeadershipBonus.text = txt
 
 func _on_stress_changed(stress: float) -> void:
-	var txt: String# = "%0.2f" % leadership_bonus
+	var txt: String = ""# = "%0.2f" % leadership_bonus
 	txt += stress_to_plus_string(stress)
 	$StressLevel.text = txt
 
@@ -145,12 +145,6 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 			rank_texture_rect.texture = captain_texture
 
 
-func set_support_weapons(support_weapons: int):
-	return
-	#var support_weapon_slots: Array = [$"SupportWeapons/VBoxContainer/SupportWeapon#1", $"SupportWeapons/VBoxContainer/SupportWeapon#2"]
-	#for i in support_weapons:
-		#support_weapon_slots[i].show()
-
 
 func select():
 	unit_selected_sprite.visible = true
@@ -214,7 +208,7 @@ func set_unit_designation(designation: String):
 	unit_designation_label.text = designation
 
 
-func _on_unit_arrived_at_hex(hex):
+func _on_unit_arrived_at_hex(_hex):
 	pass
 	if detail_ui:
 		pass
@@ -274,10 +268,10 @@ func _on_morale_recovered():
 		detail_ui._on_morale_recovered()
 
 
-func _on_morale_updated(current, max):
-	update_bar(current, max)
+func _on_morale_updated(current, _max):
+	update_bar(current, _max)
 	if detail_ui:
-		detail_ui._on_morale_updated(current, max)
+		detail_ui._on_morale_updated(current, _max)
 
 
 func _on_morale_failure():
@@ -292,9 +286,9 @@ func _on_morale_success():
 		detail_ui._on_morale_success()
 
 
-func update_bar(current: int, max: int):
+func update_bar(current: int, _max: int):
 	if morale_bar:
-		var ratio = clamp(float(current) / float(max), 0.0, 1.0)
+		var ratio = clamp(float(current) / float(_max), 0.0, 1.0)
 		morale_bar.scale.x = ratio
 
 		#morale_bar.color = Color(1, 0, 0)
@@ -305,7 +299,7 @@ func update_bar(current: int, max: int):
 		#else:
 			#morale_bar.color = Color(1, 0, 0)
 	if detail_ui:
-		detail_ui.update_bar(current, max)
+		detail_ui.update_bar(current, _max)
 		
 
 func _on_cover_updated(cover_value: int) -> void:
@@ -433,7 +427,7 @@ func shoot_riflegrenade(from_pos: Vector2, to_pos, weapon: WeaponSpec):
 		detail_ui.shooting_texture_rect.visible = true
 
 
-func riflegrenade_explosion(target_pos: Vector2):
+func riflegrenade_explosion(_target_pos: Vector2):
 	pass
 
 

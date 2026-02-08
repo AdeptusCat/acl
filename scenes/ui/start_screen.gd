@@ -35,7 +35,7 @@ func _ready():
 	time_changed.emit.call_deferred(time)
 
 
-func _on_set_objective_text(hex: String):
+func _on_set_objective_text(_hex: String):
 	objective_label.text = "Hold objective (red circle) with an unbroken unit when the time runs out!"
 
 

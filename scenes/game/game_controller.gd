@@ -230,7 +230,7 @@ func update_visible_hexes():
 			LOSHelper.visible_hexes[u.team].append(u.current_hex)
 
 
-func _on_unit_entered_hex(unit, vector: Vector2i):
+func _on_unit_entered_hex(__unit, _vector: Vector2i):
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
@@ -329,23 +329,20 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 		if selected_unit.broken:
 			selected_unit.ui.show_failure()
 			return
+		var local_pos: Vector2
 		if selected_unit.squadType == Unit.SquadType.MORTAR:
 			selected_unit.order(Globals.UnitCmd.ATTACK, map_hex)
 		else:
 			var units: Array[Node2D] = _find_units_at(map_hex)
 			for unit in units:
 				if not unit.team == Globals.team_player or Debug.enemy_selectable:
-					var path: Array[Vector3i] = []
-					#selected_unit.give_attack_hex_order(unit.current_hex, path, path)
+					var _path: Array[Vector3i] = []
 					selected_unit.order(Globals.UnitCmd.ATTACK, unit)
-					
-					var local_pos = ground_layer.map_to_local(map_hex)
+					local_pos = ground_layer.map_to_local(map_hex)
 					hex_glow(local_pos)
 					return
 			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
-			#move_sys._on_move_requested(selected_unit, map_hex)
-			#_deselect_unit(selected_unit)
-		var local_pos = ground_layer.map_to_local(map_hex)
+		local_pos = ground_layer.map_to_local(map_hex)
 		hex_glow(local_pos)
 	
 
@@ -389,47 +386,47 @@ var target_hex
 var targetCover
 var distance
 var firepower
-func _on_mouse_event_position_changed(event_pos: Vector2):
+func _on_mouse_event_position_changed(_event_pos: Vector2):
 	return
-	mouse_event_position_changed.emit(event_pos)
-	if selected_unit:
-		var unit_pos = selected_unit.position
-		var local_event_pos = get_local_mouse_position()
-		LOSHelper.draw_los(unit_pos, local_event_pos)
-		
-		var screen_pos = get_viewport().get_mouse_position()
-		if (target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and origin_hex == selected_unit.current_hex):
-			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
-		else:
-			origin_hex = selected_unit.current_hex
-			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
-			#distance = int(origin_hex.distance_to(target_hex))
-			var origin_cube: Vector3i = selected_unit.current_cube
-			var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
-			distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
-			# safely grab the inner dict for this shooter-hex
-			var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
-			if cover_map and cover_map.has(target_hex):
-				var data        = cover_map[target_hex]
-				targetCover 	= data["target_cover"]
-			else:
-				targetCover = 0  # no LOS or no cover entry
-				get_parent().ui.hide_target_hex_cover_distance()
-				target_hex = null
-				origin_hex = null
-				return
-			# now display it
-			firepower = selected_unit.firepower
-			if distance > selected_unit.range:
-				if distance <= selected_unit.range * 2:
-					firepower = firepower / 2
-				else:
-					firepower = 0
-			
-			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
-			#selected_unit.set_cover(targetCover)
-	else:
-		get_parent().ui.hide_target_hex_cover_distance()
+	#mouse_event_position_changed.emit(event_pos)
+	#if selected_unit:
+		#var unit_pos = selected_unit.position
+		#var local_event_pos = get_local_mouse_position()
+		#LOSHelper.draw_los(unit_pos, local_event_pos)
+		#
+		#var screen_pos = get_viewport().get_mouse_position()
+		#if (target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and origin_hex == selected_unit.current_hex):
+			#get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+		#else:
+			#origin_hex = selected_unit.current_hex
+			#target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
+			##distance = int(origin_hex.distance_to(target_hex))
+			#var origin_cube: Vector3i = selected_unit.current_cube
+			#var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
+			#distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
+			## safely grab the inner dict for this shooter-hex
+			#var cover_map = LOSHelper.los_lookup.get(origin_hex, null)
+			#if cover_map and cover_map.has(target_hex):
+				#var data        = cover_map[target_hex]
+				#targetCover 	= data["target_cover"]
+			#else:
+				#targetCover = 0  # no LOS or no cover entry
+				#get_parent().ui.hide_target_hex_cover_distance()
+				#target_hex = null
+				#origin_hex = null
+				#return
+			## now display it
+			#firepower = selected_unit.firepower
+			#if distance > selected_unit.range:
+				#if distance <= selected_unit.range * 2:
+					#firepower = firepower / 2
+				#else:
+					#firepower = 0
+			#
+			#get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
+			##selected_unit.set_cover(targetCover)
+	#else:
+		#get_parent().ui.hide_target_hex_cover_distance()
 
 
 func handle_mouse_event_position_changed(event_pos: Vector2):
@@ -487,7 +484,7 @@ func hex_glow(pos: Vector2):
 	add_child(glow)
 
 
-func _on_key_space_pressed(event_pos: Vector2):
+func _on_key_space_pressed(_event_pos: Vector2):
 	pass
 
 
@@ -513,7 +510,7 @@ func _find_units_at(hex: Vector2i) -> Array[Node2D]:
 	return units
 
 
-func _on_unit_surrendered(unit):
+func _on_unit_surrendered(_unit):
 	pass
 
 

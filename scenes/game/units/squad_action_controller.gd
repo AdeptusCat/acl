@@ -91,7 +91,7 @@ func _exit_action_state(state: int) -> void:
 			pass
 
 
-func _enter_action_state(prev: int, state: int) -> void:
+func _enter_action_state(_prev: int, state: int) -> void:
 	match state:
 		SquadActionState.NO_ORDER:
 			_clear_order_context()
@@ -294,7 +294,7 @@ func on_reached_hex(hex: Vector2i) -> void:
 			_set_action_state(SquadActionState.ESTABLISHING_POSITION)
 
 
-func on_retreat_complete(retreat_hex: Vector2i) -> void:
+func on_retreat_complete(_retreat_hex: Vector2i) -> void:
 	if action_state == SquadActionState.ROUTING:
 		_set_action_state(SquadActionState.REGROUPING)
 
@@ -320,7 +320,7 @@ func _on_regroup_timer_timeout() -> void:
 # MORALE INTEGRATION
 # ----------------------------------------------------------------------
 
-func on_morale_state_changed(prev: int, next: int) -> void:
+func on_morale_state_changed(_prev: int, next: int) -> void:
 	ui.state_changed(next)
 	
 	var rof_mult: float = 1.0
@@ -381,7 +381,7 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 
 var allowed_hexes: Array[Vector2i] = []
 
-func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], steps: int) -> Vector2i:
+func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], _steps: int) -> Vector2i:
 	var retreat_hex: Vector2i = Vector2i.ZERO
 	allowed_hexes.clear()
 	allowed_hexes.append(origin_hex)
@@ -405,7 +405,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], steps
 	var visited := {}
 	var queue: Array[Vector2i] = [origin_hex]
 	visited[origin_hex] = true
-	var ring: int = 0
+	var _ring: int = 0
 	
 	while queue.size() > 0 and retreat_hex == Vector2i.ZERO:
 		var level_size: int = queue.size()
@@ -466,7 +466,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], steps
 		
 		if added_any == false:
 			break
-		ring += 1
+		_ring += 1
 	
 	return retreat_hex
 
@@ -508,7 +508,7 @@ func _start_rout() -> void:
 
 
 
-func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
+func create_restricted_astar(_allowed_hexes: Array[Vector2i]) -> AStar2D:
 	var new_astar: AStar2D = AStar2D.new()
 	var original: AStar2D = Globals.astars[unit.team]
 	

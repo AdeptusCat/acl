@@ -71,7 +71,7 @@ func stop():
 
 
 func move_to_hex(new_hex: Vector2i) -> void:
-	get_terrain_multiplier()
+	_get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
 	moving = true
@@ -219,14 +219,14 @@ func _process_movement(delta: float) -> void:
 		unit.position += dir * step
 		# debug
 		if unit.stress_system.state != STATES.MoraleState.NORMAL:
-			var state: int = unit.stress_system.state
+			var _state: int = unit.stress_system.state
 
 
 # ----------------------------------------------------------------------
 # TERRAIN MULTIPLIER
 # ----------------------------------------------------------------------
 
-func get_terrain_multiplier() -> void:
+func _get_terrain_multiplier() -> void:
 	if path_hexes.is_empty():
 		terrain_mult = 1.0
 		return
@@ -241,7 +241,7 @@ func get_terrain_multiplier() -> void:
 		if cover_dict.wall_cover > 0:
 			mf_total += 1.0
 	
-	terrain_mult = mf_to_speed_mult(mf_total)
+	terrain_mult = _mf_to_speed_mult(mf_total)
 
 
 # ----------------------------------------------------------------------
@@ -257,10 +257,6 @@ func _apply_speed(v: float) -> void:
 	move_speed = v
 
 
-func _set_stance(s: int) -> void:
-	stance = s
-
-
 # ----------------------------------------------------------------------
 # TERRAIN / MF HELPERS
 # ----------------------------------------------------------------------
@@ -272,7 +268,7 @@ func _get_terrain_type(hex: Vector2i) -> int:
 	return terrain_type
 
 
-func mf_to_speed_mult(mf_total: float) -> float:
+func _mf_to_speed_mult(mf_total: float) -> float:
 	var safe_mf: float = mf_total
 	if safe_mf < 0.001:
 		safe_mf = 0.001
@@ -293,23 +289,15 @@ func _terrain_mf(t: int) -> float:
 	return float(mf_by_terrain[idx])
 
 
-func _blend_mult(cur_mult: float, next_mult: float, alpha: float) -> float:
-	if alpha < 0.0:
-		alpha = 0.0
-	if alpha > 1.0:
-		alpha = 1.0
-	return cur_mult * (1.0 - alpha) + next_mult * alpha
-
-
-func _using_road_rate(cur_hex: Vector2i, next_hex: Vector2i) -> bool:
+func _using_road_rate(_cur_hex: Vector2i, _next_hex: Vector2i) -> bool:
 	return false
 
 
-func _crest_uphill_between(cur_hex: Vector2i, next_hex: Vector2i) -> bool:
+func _crest_uphill_between(_cur_hex: Vector2i, _next_hex: Vector2i) -> bool:
 	return false
 
 
-func _hexside_cost(cur_hex: Vector2i, next_hex: Vector2i) -> float:
+func _hexside_cost(_cur_hex: Vector2i, _next_hex: Vector2i) -> float:
 	var cost: float = 0.0
 	var has_wall: bool = false
 	if has_wall:
@@ -317,23 +305,23 @@ func _hexside_cost(cur_hex: Vector2i, next_hex: Vector2i) -> float:
 	return cost
 
 
-func _entering_smoke(next_hex: Vector2i) -> bool:
+func _entering_smoke(_next_hex: Vector2i) -> bool:
 	return false
 
 
-func compute_total_mf(cur_hex: Vector2i, next_hex: Vector2i, next_terr: int) -> float:
+func compute_total_mf(_cur_hex: Vector2i, _next_hex: Vector2i, _next_terr: int) -> float:
 	var mf_base: float
-	if _using_road_rate(cur_hex, next_hex):
+	if _using_road_rate(_cur_hex, _next_hex):
 		mf_base = 1.0
 	else:
-		mf_base = _terrain_mf(next_terr)
+		mf_base = _terrain_mf(_next_terr)
 	
-	var mf_add: float = _hexside_cost(cur_hex, next_hex)
-	if _entering_smoke(next_hex):
+	var mf_add: float = _hexside_cost(_cur_hex, _next_hex)
+	if _entering_smoke(_next_hex):
 		mf_add += mf_smoke_enter
 	
 	var mf_total: float = mf_base + mf_add
-	if _crest_uphill_between(cur_hex, next_hex):
+	if _crest_uphill_between(_cur_hex, _next_hex):
 		mf_total *= crest_uphill_mult
 	
 	return mf_total

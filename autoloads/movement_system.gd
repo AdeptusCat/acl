@@ -15,12 +15,6 @@ var update_timer := 0.0
 signal draw_threat(current_threat_maps: Dictionary[int, Dictionary])
 
 
-func _on_move_requested(selected_unit, to_hex):
-	if not selected_unit.current_hex == to_hex:
-		var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex, selected_unit.team)
-		selected_unit.give_move_to_hex_order(to_hex, path, false)
-	else:
-		selected_unit.movement.move_to_hex(to_hex)
 
 var threat_weights = {}
 
@@ -49,12 +43,12 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3
 	return cube_path
 
 
-func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pending_visible_hexes: Dictionary[int, Array], team: int) -> float:
+func _calculate_threat_weight(hex: Vector2i, _pending_los_lookup: Dictionary, _pending_visible_hexes: Dictionary[int, Array], team: int) -> float:
 	var weight = 1.0  # Start with neutral weight scale
 
 	var enemy_team = Globals.Team.AXIS if team == Globals.Team.ALLIES else Globals.Team.ALLIES
 	
-	var observed_hexes_by_enemy = pending_visible_hexes.get(enemy_team, [])
+	var observed_hexes_by_enemy = _pending_visible_hexes.get(enemy_team, [])
 	
 	if observed_hexes_by_enemy.has(hex):
 		for unit in Globals.units:
@@ -63,8 +57,8 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 			if not unit.team == enemy_team:
 				continue
 			var o_hex = unit.current_hex
-			if pending_los_lookup.has(o_hex) and pending_los_lookup[o_hex].has(hex):
-				var cover = pending_los_lookup[o_hex][hex].target_cover
+			if _pending_los_lookup.has(o_hex) and _pending_los_lookup[o_hex].has(hex):
+				var cover = _pending_los_lookup[o_hex][hex].target_cover
 				weight += max((6.0 - float(cover)), 1.0) * 0.3  # Adjust scaling if needed
 	##for o_hex in observed_hexes_by_enemy:
 	#for o_hex in units:
@@ -78,7 +72,7 @@ func _calculate_threat_weight(hex: Vector2i, pending_los_lookup: Dictionary, pen
 
 
 
-func request_threat_update(visible_hexes: Array, lookup_data: Dictionary):
+func request_threat_update(visible_hexes: Array, _lookup_data: Dictionary):
 	if thread and thread.is_alive():
 		return
 	pending_visible_hexes.clear()
@@ -104,7 +98,7 @@ func _set_threat_map_result(result: Dictionary[int, Dictionary]):
 	result_ready = true
 
 
-func _threaded_update_threat_map(pending_lookup: Dictionary, pending_visible_hexes: Dictionary[int, Array]):
+func _threaded_update_threat_map(_pending_lookup: Dictionary, _pending_visible_hexes: Dictionary[int, Array]):
 	var temp_threat_maps: Dictionary[int, Dictionary]
 	temp_threat_maps[Globals.Team.AXIS] = {}
 	temp_threat_maps[Globals.Team.ALLIES] = {}
@@ -114,7 +108,7 @@ func _threaded_update_threat_map(pending_lookup: Dictionary, pending_visible_hex
 		for point_id in Globals.astars[team].get_point_ids():
 			var world_pos = Globals.astars[team].get_point_position(point_id)
 			var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-			var weight = _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
+			var weight = _calculate_threat_weight(hex_map, _pending_lookup, _pending_visible_hexes, team)
 			temp_threat_maps[team][hex_map] = weight
 
 	call_deferred("_set_threat_map_result", temp_threat_maps)
@@ -247,7 +241,7 @@ func _restack_units():
 
 	# 2) For each hex, if there’s 1 unit keep it centered;
 	#    if >1, spread them in a little circle.
-	var center_offset = Vector2.ZERO
+	var _center_offset = Vector2.ZERO
 	for h in groups.keys():
 		var group = groups[h]
 		var base_pos = LOSHelper.ground_layer.map_to_local(h)

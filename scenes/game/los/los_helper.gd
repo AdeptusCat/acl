@@ -222,8 +222,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var target_height = calculate_absolute_height(target_elevation, target_story)
 
 	var delta = target_pos - origin_pos
-	var distance = delta.length()
-	var direction = delta.normalized()
+	var _distance = delta.length()
+	var _direction = delta.normalized()
 
 	var origin_hex_map : Vector2i = ground_layer.local_to_map(origin_pos)
 	var target_hex_map : Vector2i = ground_layer.local_to_map(target_pos)
@@ -236,7 +236,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	
 	var n = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
 	
-	var is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
+	var _is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
 	
 	var direction_between_axes = check_dir_between_axes(origin_hex_map, target_hex_map)
 	match direction_between_axes:
@@ -362,35 +362,36 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	for i in range(steps):
 		var t := float(i) / float(steps - 1)
 		var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
-		var los_height_at_sample = lerp(shooter_height, target_height, t)
+		var _los_height_at_sample = lerp(shooter_height, target_height, t)
 		var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
 		var sample_hex_cube: Vector3i = hexes[i]
 		
+		var _wall_result: Dictionary
+		_wall_result.clear()
 		if sample_hex_map == target_hex_map:
-			var wall_result
-			wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
-			if wall_result.size() > 0:
-				if wall_result.cover > result.target_cover:
-					result.target_cover = wall_result.cover
+			_wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			if _wall_result.size() > 0:
+				if _wall_result.cover > result.target_cover:
+					result.target_cover = _wall_result.cover
 
-			wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
-			if wall_result.size() > 0:
-				if wall_result.cover > result.target_cover:
-					result.target_cover = wall_result.cover
+			_wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			if _wall_result.size() > 0:
+				if _wall_result.cover > result.target_cover:
+					result.target_cover = _wall_result.cover
 		
+		_wall_result.clear()
 		if prev_hex_map == origin_hex_map:
-			var wall_result
-			wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
-			if wall_result.size() > 0:
-				result.wall_cover = wall_result.cover
-				if wall_result.cover > result.shooter_cover:
-					result.shooter_cover = wall_result.cover
+			_wall_result = is_wall_cover(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
+			if _wall_result.size() > 0:
+				result.wall_cover = _wall_result.cover
+				if _wall_result.cover > result.shooter_cover:
+					result.shooter_cover = _wall_result.cover
 
-			wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
-			if wall_result.size() > 0:
-				result.wall_cover = wall_result.cover
-				if wall_result.cover > result.shooter_cover:
-					result.shooter_cover = wall_result.cover
+			_wall_result = is_wall_cover(sample_hex_cube, prev_hex_cube, sample_hex_map, sample_point)
+			if _wall_result.size() > 0:
+				result.wall_cover = _wall_result.cover
+				if _wall_result.cover > result.shooter_cover:
+					result.shooter_cover = _wall_result.cover
 		
 		# skip the target-hex center check
 		if sample_hex_map == target_hex_map:
@@ -711,7 +712,7 @@ func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLa
 		return false
 
 	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var tex_size = texture.get_size()
+	var _tex_size = texture.get_size()
 	var image = texture.get_image()
 	if image == null:
 		return false
@@ -775,7 +776,7 @@ func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileM
 		return false
 
 	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var tex_size = texture.get_size()
+	var _tex_size = texture.get_size()
 	var image = texture.get_image()
 	if image == null:
 		return false
@@ -799,7 +800,7 @@ func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileM
 		return true
 
 
-func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
+func _check_building_block(_sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
 	# Compute sub-sampled points just before and after the hit
 	var t1: float = float(i - 1) / float(steps - 1)
 	var t2: float = float(i + 1) / float(steps - 1)
@@ -814,7 +815,7 @@ func _check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_
 	return result
 
 
-func check_building_block(sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
+func check_building_block(_sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
 	# Compute sub-sampled points just before and after the hit
 	var t1: float = float(i - 1) / float(steps - 1)
 	var t2: float = float(i + 1) / float(steps - 1)
@@ -843,7 +844,7 @@ func is_wall_cover(
 		from_cube: Vector3i,
 		to_cube:   Vector3i,
 		from_map:  Vector2i,
-		sample_pt: Vector2
+		_sample_pt: Vector2
 	) -> Dictionary:
 	var result := {}
 	# early out if there's no tile here or it's the origin tile
@@ -955,8 +956,6 @@ func is_sample_point_blocked_by_crest(sample_point: Vector2, los_height_at_sampl
 
 		if los_height_at_sample < crest_elevation:
 			return true
-	return false
-
 	return false
 
 #func _ready():
@@ -1130,17 +1129,17 @@ func check_dir_between_axes(a: Vector2i, b: Vector2i) -> BetweenAxis:
 	var ca: Vector3i = ground_layer.map_to_cube(a)
 	var cb: Vector3i = ground_layer.map_to_cube(b)
 
-	var dx = cb.x - ca.x
-	var dy = cb.y - ca.y
-	var dz = cb.z - ca.z
+	var dx: float = cb.x - ca.x
+	var dy: float = cb.y - ca.y
+	var dz: float = cb.z - ca.z
 
-	var gcd_val = gcd(abs(dx), gcd(abs(dy), abs(dz)))
+	var gcd_val: float = gcd(abs(dx), gcd(abs(dy), abs(dz)))
 	if gcd_val == 0:
 		return BetweenAxis.NONE
 
-	var ndx = dx / gcd_val
-	var ndy = dy / gcd_val
-	var ndz = dz / gcd_val
+	var ndx: int = int(dx / gcd_val)
+	var ndy: int = int(dy / gcd_val)
+	var ndz: int = int(dz / gcd_val)
 
 	if ndx == ndy and ndz == -2 * ndx:
 		return BetweenAxis.X_Y_POS if ndx > 0 else BetweenAxis.X_Y_NEG

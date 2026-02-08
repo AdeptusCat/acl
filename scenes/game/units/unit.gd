@@ -29,14 +29,14 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var snap_to_grid := true
 @export var ground_map: HexagonTileMapLayer
 @export var firepower: int = 4
-@export var range: int = 6
+@export var weapon_range: int = 6
 @export var morale: int = 7
 @export var has_support_weapon: bool = false
 @export var morale_meter_max: int = 100
 @export var base_death_chance: float = 0.1
 @export var broken_death_multiplier: float = 2.0
 @export var recovery_time_max: float = 5.0
-@export var team: Globals.Team = 0
+@export var team: Globals.Team = Globals.Team.AXIS
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
@@ -160,7 +160,6 @@ func _ready():
 	
 	#_resize_loadouts(members_count)
 	_setup_runtime_soldiers()
-	ui.set_support_weapons(machine_guns)
 	
 	squad_fire.fire_shot.connect(_on_fire_shot)
 	squad_fire.fire_riflegrenade.connect(_on_fire_riflegrenade)
@@ -258,7 +257,7 @@ func _refresh_leader_aura() -> void:
 	#if squad_fire != null:
 		#if squad_fire.soldiers.size() > 0:
 	grade = _highest_grade_from_runtime()
-	highest_rank_grade = (grade)
+	highest_rank_grade = grade as RankGrades.Grade
 	#grade = _highest_grade_from_loadouts()
 	if grade >= 0:
 		found = true
@@ -336,8 +335,8 @@ func _setup_runtime_soldiers() -> void:
 		var s: Soldier = Soldier.new(
 			i,
 			L.nickname,
-			int(L.rank_grade),
-			int(_map_role(L.role)),   # if your Soldier.Role differs
+			L.rank_grade,
+			_map_role(L.role),   # if your Soldier.Role differs
 			spec
 		)
 		if s.role == RankGrades.Role.GUNNER:
@@ -438,11 +437,11 @@ func _make_rifle_squad(v: bool) -> void:
 		else:
 			var group_size: int = 12
 			var rifle: WeaponSpec
-			var smg: WeaponSpec
+			var _smg: WeaponSpec
 			var mg: WeaponSpec
 			rifle = preload("res://resources/weapons/m1_garand.tres")
 			var riflegrenade: WeaponSpec = preload("res://resources/weapons/springfield_1903_riflegrenade.tres")
-			smg = preload("res://resources/weapons/m3_grease_gun.tres")
+			_smg = preload("res://resources/weapons/m3_grease_gun.tres")
 			mg = preload("res://resources/weapons/m1918a1_bar.tres")
 			_resize_loadouts(group_size)
 			var i: int = 0
@@ -976,7 +975,7 @@ func _on_morale_recovered():
 
 # === Process Loop ===
 
-func _process(delta):
+func _process(_delta):
 	
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
@@ -1012,10 +1011,10 @@ func _check_contacts() -> void:
 	else:
 		has_reported_contact = true
 	
-	var new_enemy: bool = false
+	var _new_enemy: bool = false
 	for enemy_squad in enemies:
 		if not enemy_squad in enemies_reported and not enemy_memory.has(enemy_squad):
-			new_enemy = true
+			_new_enemy = true
 		remember_enemy(enemy_squad)
 	
 	#if not enemies_reported == enemies:
@@ -1109,7 +1108,7 @@ func receive_fire(terrain_defense_bonus: float):
 	#if moving and not broken and not surrendered:
 		#movement.recalc_path()
 
-func _on_incoming_fire_effect(casualties:int, df:float, ds:float, source:Node) -> void:
+func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) -> void:
 	if Debug.no_damage:
 		return
 	if casualties > 0:
@@ -1364,10 +1363,10 @@ func remove_indices(target: Array, indices: Array[int]) -> void:
 			target.remove_at(idx)
 		i += 1
 
-func get_unique_random_ints(n: int, max: int) -> Array[int]:
+func get_unique_random_ints(n: int, _max: int) -> Array[int]:
 	var all_nums: Array[int] = []
 	var i: int = 0
-	while i < max:
+	while i < _max:
 		all_nums.append(i)
 		i += 1
 	all_nums.shuffle()
@@ -1471,23 +1470,23 @@ func _on_unit_ui_debug_kill_soldier() -> void:
 
 # Thin forwarding API for higher-level AI / UI:
 
-func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
-	action_controller.give_defend_area_order(target_hex, path)
+func give_defend_area_order(_target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	action_controller.give_defend_area_order(_target_hex, path)
 	#action_label.text = "defend"
 
 
-func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
-	action_controller.give_move_to_hex_order(target_hex, path, take_and_hold)
+func give_move_to_hex_order(_target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
+	action_controller.give_move_to_hex_order(_target_hex, path, take_and_hold)
 	#action_label.text = "move"
 
 
-func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
-	action_controller.give_attack_hex_order(target_hex, covered_path, exposed_segment)
+func give_attack_hex_order(_target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
+	action_controller.give_attack_hex_order(_target_hex, covered_path, exposed_segment)
 	#action_label.text = "attack"
 
 
-func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
-	action_controller.give_withdraw_to_hex_order(target_hex, path)
+func give_withdraw_to_hex_order(_target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	action_controller.give_withdraw_to_hex_order(_target_hex, path)
 	#action_label.text = "withdraw"
 
 
@@ -1504,8 +1503,8 @@ func clear_orders() -> void:
 # === GOAP ===
 
 
-func set_order_resource(order: SquadOrder) -> void:
-	current_order = order
+func set_order_resource(_order: SquadOrder) -> void:
+	current_order = _order
 	current_order_status = GoapTypes.SquadOrderStatus.IN_PROGRESS
 	_on_new_order_received()
 

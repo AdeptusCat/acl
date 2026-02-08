@@ -103,7 +103,7 @@ func copy_astar(source: AStar2D) -> AStar2D:
 	return copy
 
 
-func _on_mouse_event_position_changed(event_pos: Vector2):
+func _on_mouse_event_position_changed(_event_pos: Vector2):
 	return
 	#event_pos = get_local_mouse_position()
 	#var map_hex = ground_layer.local_to_map(event_pos)

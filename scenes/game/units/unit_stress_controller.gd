@@ -131,20 +131,20 @@ func remove_leadership_source(source_id: int) -> void:
 		_recompute_leadership()
 
 func _recompute_leadership() -> void:
-	var total_bonus: float = 0.0
-	var total_rally: float = 0.0
-	var total_cohesion_mult: float = 1.0
+	#var total_bonus: float = 0.0
+	#var total_rally: float = 0.0
+	#var total_cohesion_mult: float = 1.0
 	var max_total_bonus: float = 0.0
-	var max_rally: float = 0.0
+	#var max_rally: float = 0.0
 	var max_cohesion_mult: float = 1.0
 	for lm in _leadership_sources.values():
 		if lm.bonus > max_total_bonus:
 			max_total_bonus = lm.bonus
 		if lm.cohesion_mult > max_total_bonus:
 			max_cohesion_mult = lm.cohesion_mult
-		total_bonus += lm.bonus
-		total_rally += lm.rally
-		total_cohesion_mult *= lm.cohesion_mult
+		#total_bonus += lm.bonus
+		#total_rally += lm.rally
+		#total_cohesion_mult *= lm.cohesion_mult
 	#leadership_bonus = total_bonus
 	leadership_bonus = max_total_bonus
 	#cohesion = clamp(cohesion * total_cohesion_mult, 0.0, 1.5)
@@ -249,7 +249,7 @@ func _physics_process(delta: float) -> void:
 
 	# effective stress with leadership & cohesion softening
 	#var softener: float = 1.0 - clamp(0.5 * leadership_bonus + 0.3 * cohesion, 0.0, 0.6)
-	var softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
+	var _softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
 	S_eff = (w_fast * stress_fast + w_slow * stress_slow) # * softener
 	if S_eff < 0.0:
 		S_eff = 0.0
