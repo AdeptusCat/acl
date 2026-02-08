@@ -80,6 +80,7 @@ var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
+signal draw_los_to_target_unit(from_hex, to_hex)
 
 #func _ready() -> void:
 	#var cover: float = 0.0 
@@ -140,6 +141,11 @@ func set_target_unit(targetUnit: Unit) -> void:
 	else:
 		target_unit = null
 	target_hex = hex
+	
+	var draw_los_to: Vector2i = target_hex
+	if target_hex == Vector2i.ZERO:
+		draw_los_to =unit.current_hex
+	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 
 
 func set_target_hex(_target_hex: Vector2i):
@@ -159,7 +165,7 @@ func _process(delta: float) -> void:
 		else:
 			#if unit.team == Globals.team_player:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			handle_auto_fire(delta, unit, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
+			handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
@@ -707,7 +713,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
 	# this should not matter when firing explosives
-	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.range))
+	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.weapon_range))
 	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
 		lethality_range_mult = 1.0
 

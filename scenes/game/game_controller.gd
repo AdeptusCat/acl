@@ -88,8 +88,11 @@ func _ready():
 			unit.deselect_unit.connect(_deselect_unit)
 			unit.started_moving.connect(_on_started_moving)
 			unit.unit_surrendered.connect(_on_unit_surrendered)
+			unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
+			unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
 	
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
+	
 	update_timer_label.emit(time_left_seconds)
 	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	input_mgr.set_input(false)
@@ -458,8 +461,8 @@ func handle_mouse_event_position_changed(event_pos: Vector2):
 				return
 			# now display it
 			firepower = selected_unit.firepower
-			if distance > selected_unit.range:
-				if distance <= selected_unit.range * 2:
+			if distance > selected_unit.weapon_range:
+				if distance <= selected_unit.weapon_range * 2:
 					firepower = firepower / 2
 				else:
 					firepower = 0

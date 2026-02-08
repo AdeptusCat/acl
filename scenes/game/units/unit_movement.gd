@@ -22,6 +22,7 @@ signal started_moving
 signal stopped_moving
 signal crossing_exposed_started
 signal new_target_hex(hex: Vector2i)
+signal draw_movement_path(from_hex: Vector2i,path: Array[Vector2i])
 
 # Retreat state
 var retreating: bool = false
@@ -76,6 +77,7 @@ func move_to_hex(new_hex: Vector2i) -> void:
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
 	moving = true
 	started_moving.emit()
+	draw_movement_path.emit(unit.current_hex, path_hexes)
 
 
 func follow_cube_path(cube_path: Array[Vector3i]) -> void:
