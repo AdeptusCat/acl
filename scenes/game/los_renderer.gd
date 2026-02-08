@@ -108,5 +108,14 @@ func _process(delta):
 	)
 	
 	
+	for line in movement_path:
+		line["timer"] += delta
+
+	# Remove fully expired lines
+	movement_path = movement_path.filter(func(line):
+		return line["timer"] < line["duration"]
+	)
+	
+	
 
 	queue_redraw()  # Always request redraw if lines change
