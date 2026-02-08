@@ -20,14 +20,12 @@ var exposed_path_hexes: Array[Vector2i] = []
 
 signal started_moving
 signal stopped_moving
-signal rout_failed
 signal crossing_exposed_started
 signal new_target_hex(hex: Vector2i)
 
 # Retreat state
 var retreating: bool = false
 var retreat_distance: int = 3
-var retreat_target_hex: Vector2i = Vector2i.ZERO
 
 var obey_player_orders: bool = true
 var stance: int = 0  # 0 stand, 1 crouch, 2 prone, 3 run, 4 withdraw
@@ -176,6 +174,7 @@ func _process_movement(delta: float) -> void:
 	var dist: float = unit.position.distance_to(target_position)
 	var step: float = move_speed * terrain_mult * delta
 	
+	# check if unit entered hex
 	if path_index < path_hexes.size():
 		var closest_cube: Vector3i = LOSHelper.ground_layer.get_closest_cell_from_local(unit.position)
 		var next_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
@@ -185,7 +184,9 @@ func _process_movement(delta: float) -> void:
 				unit.current_cube = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
 				unit.unit_entered_hex.emit(unit, path_hexes[path_index])
 	
+	# check if arrived at hex
 	if dist <= step:
+		# arrive at hex
 		unit.position = target_position
 		moving = false
 		stopped_moving.emit()
@@ -193,13 +194,14 @@ func _process_movement(delta: float) -> void:
 		# here somethings off, the target target_position is where the unit is but the path is another 
 		# or it already passed points in the path and is already at target hex but the path is still full of hexes in between
 		if path_index < path_hexes.size() - 1:
+			# move to next hex
 			path_index += 1
 			move_to_hex(path_hexes[path_index])
 		else:
-			# end of this segment
+			# end movement here
 			if retreating:
 				retreating = false
-				unit.emit_signal("retreat_complete", unit.current_hex)
+				unit.retreat_complete.emit(unit.current_hex)
 			
 			# If we are in an attack-move and just finished COVERED, go to EXPOSED
 			if attack_in_progress and in_exposed_phase == false and not exposed_path_hexes.is_empty():
@@ -213,10 +215,11 @@ func _process_movement(delta: float) -> void:
 			path_index = 0
 			unit.unit_arrived_at_hex.emit(unit.current_hex)
 	else:
+		# keep moving
 		unit.position += dir * step
+		# debug
 		if unit.stress_system.state != STATES.MoraleState.NORMAL:
 			var state: int = unit.stress_system.state
-			# hook if needed
 
 
 # ----------------------------------------------------------------------
@@ -239,181 +242,6 @@ func get_terrain_multiplier() -> void:
 			mf_total += 1.0
 	
 	terrain_mult = mf_to_speed_mult(mf_total)
-
-
-# ----------------------------------------------------------------------
-# ROUT / RETREAT (unchanged except for types)
-# ----------------------------------------------------------------------
-
-func rout(current_hex: Vector2i, known_enemies: Array[Unit], retreat_distance: int) -> void:
-	var retreat_hex: Vector2i = compute_retreat_hex(current_hex, known_enemies, retreat_distance)
-	if retreat_hex == Vector2i.ZERO:
-		rout_failed.emit()
-		return
-	
-	retreating = true
-	retreat_target_hex = retreat_hex
-	
-	var restricted_astar: AStar2D = create_restricted_astar(allowed_hexes)
-	var from_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(current_hex))
-	var to_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(retreat_hex))
-	var id_path: PackedInt64Array = restricted_astar.get_id_path(from_id, to_id)
-	
-	var cube_path: Array[Vector3i] = []
-	var i: int = 0
-	while i < id_path.size():
-		var pid: int = id_path[i]
-		var pos: Vector2 = restricted_astar.get_point_position(pid)
-		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
-		i += 1
-	
-	follow_cube_path(cube_path)
-
-
-var allowed_hexes: Array[Vector2i] = []
-
-func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], steps: int) -> Vector2i:
-	var retreat_hex: Vector2i = Vector2i.ZERO
-	allowed_hexes.clear()
-	allowed_hexes.append(origin_hex)
-	var ground_layer = LOSHelper.ground_layer
-	var building_layer = LOSHelper.building_layer
-	var origin_cube: Vector3i = ground_layer.map_to_cube(origin_hex)
-	
-	var immediate_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, origin_cube, known_enemies)
-	for neighbor_hex in immediate_neighbors:
-		if building_layer.get_cell_source_id(neighbor_hex) != -1:
-			var visible_by_enemy: bool = false
-			for enemy in known_enemies:
-				var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
-				if visible_hexes.has(neighbor_hex):
-					visible_by_enemy = true
-					break
-			if visible_by_enemy == false:
-				allowed_hexes.append(neighbor_hex)
-				return neighbor_hex
-	
-	var visited := {}
-	var queue: Array[Vector2i] = [origin_hex]
-	visited[origin_hex] = true
-	var ring: int = 0
-	
-	while queue.size() > 0 and retreat_hex == Vector2i.ZERO:
-		var level_size: int = queue.size()
-		var added_any: bool = false
-		
-		var li: int = 0
-		while li < level_size:
-			var current: Vector2i = queue.pop_front()
-			var current_cube: Vector3i = ground_layer.map_to_cube(current)
-			
-			var next_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, current_cube, known_enemies)
-			for neighbor in next_neighbors:
-				if visited.has(neighbor):
-					continue
-				visited[neighbor] = true
-				added_any = true
-				
-				var neighbor_cube: Vector3i = ground_layer.map_to_cube(neighbor)
-				var adjacent_hexes: Array[Vector2i] = []
-				for direction_index in [
-					TileSet.CELL_NEIGHBOR_TOP_SIDE,
-					TileSet.CELL_NEIGHBOR_TOP_RIGHT_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE,
-					TileSet.CELL_NEIGHBOR_TOP_LEFT_SIDE,
-				]:
-					var offset: Vector3i = ground_layer.cube_direction(direction_index)
-					var adjacent_cube: Vector3i = neighbor_cube + offset
-					adjacent_hexes.append(ground_layer.cube_to_map(adjacent_cube))
-				
-				var is_adjacent_to_enemy: bool = false
-				for enemy in known_enemies:
-					if adjacent_hexes.has(enemy.current_hex):
-						is_adjacent_to_enemy = true
-						break
-				if is_adjacent_to_enemy:
-					continue
-				
-				allowed_hexes.append(neighbor)
-				
-				if building_layer.get_cell_source_id(neighbor) != -1:
-					var visible_by_enemy: bool = false
-					for enemy in known_enemies:
-						var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
-						if visible_hexes.has(neighbor):
-							visible_by_enemy = true
-							break
-					if visible_by_enemy == false:
-						retreat_hex = neighbor
-						break
-				queue.append(neighbor)
-			
-			if retreat_hex != Vector2i.ZERO:
-				break
-			
-			li += 1
-		
-		if added_any == false:
-			break
-		ring += 1
-	
-	return retreat_hex
-
-
-func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_check: Vector3i, known_enemies: Array[Unit]) -> Array[Vector2i]:
-	var neighbor_hexes: Array[Vector2i] = []
-	var directions: Array[int] = [
-		TileSet.CELL_NEIGHBOR_TOP_SIDE,
-		TileSet.CELL_NEIGHBOR_TOP_RIGHT_SIDE,
-		TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE,
-		TileSet.CELL_NEIGHBOR_BOTTOM_SIDE,
-		TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE,
-		TileSet.CELL_NEIGHBOR_TOP_LEFT_SIDE,
-	]
-	var ground_layer = LOSHelper.ground_layer
-	
-	for direction_index in directions:
-		var direction_cube: Vector3i = ground_layer.cube_direction(direction_index)
-		var neighbor_cube: Vector3i = next_cube_to_check + direction_cube
-		var closer_to_enemy: bool = false
-		for enemy in known_enemies:
-			var enemy_pos_cube: Vector3i = ground_layer.map_to_cube(enemy.current_hex)
-			var distance_to_unit_from_origin: int = ground_layer.cube_distance(origin_cube, enemy_pos_cube)
-			var distance_to_unit_from_target: int = ground_layer.cube_distance(neighbor_cube, enemy_pos_cube)
-			if distance_to_unit_from_target < distance_to_unit_from_origin:
-				closer_to_enemy = true
-		if closer_to_enemy == false:
-			neighbor_hexes.append(ground_layer.cube_to_map(neighbor_cube))
-	
-	return neighbor_hexes
-
-
-func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
-	var new_astar: AStar2D = AStar2D.new()
-	var original: AStar2D = Globals.astars[unit.team]
-	
-	var allowed_ids: Array[int] = []
-	var i: int = 0
-	while i < allowed_hexes.size():
-		allowed_ids.append(LOSHelper.ground_layer.pathfinding_get_point_id(allowed_hexes[i]))
-		i += 1
-	
-	for id in allowed_ids:
-		var pos: Vector2 = original.get_point_position(id)
-		new_astar.add_point(id, pos)
-	
-	for id in allowed_ids:
-		var connected_ids: PackedInt64Array = original.get_point_connections(id)
-		var j: int = 0
-		while j < connected_ids.size():
-			var conn_id: int = connected_ids[j]
-			if allowed_ids.has(conn_id) and new_astar.are_points_connected(id, conn_id) == false:
-				new_astar.connect_points(id, conn_id, false)
-			j += 1
-	
-	return new_astar
 
 
 # ----------------------------------------------------------------------

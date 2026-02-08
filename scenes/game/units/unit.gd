@@ -37,7 +37,6 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var broken_death_multiplier: float = 2.0
 @export var recovery_time_max: float = 5.0
 @export var team: Globals.Team = 0
-@export var retreat_distance := 3
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
@@ -147,7 +146,7 @@ func _ready():
 
 	movement.started_moving.connect(_on_started_moving)
 	movement.stopped_moving.connect(_on_stopped_moving)
-	movement.rout_failed.connect(_on_rout_failed)
+	action_controller.rout_failed.connect(_on_rout_failed)
 	
 	stress_system.state_changed.connect(_on_state_changed)
 	stress_system.stress_changed.connect(_on_stress_changed)
