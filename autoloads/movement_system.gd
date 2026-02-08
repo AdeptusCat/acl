@@ -19,7 +19,6 @@ func _on_move_requested(selected_unit, to_hex):
 	if not selected_unit.current_hex == to_hex:
 		var path: Array[Vector3i] = _compute_path(selected_unit.current_hex, to_hex, selected_unit.team)
 		selected_unit.give_move_to_hex_order(to_hex, path, false)
-		#selected_unit.movement.follow_cube_path(path)
 	else:
 		selected_unit.movement.move_to_hex(to_hex)
 

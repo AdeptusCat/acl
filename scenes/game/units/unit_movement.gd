@@ -164,27 +164,6 @@ func _start_exposed_phase() -> void:
 	crossing_exposed_started.emit()
 
 
-# ----------------------------------------------------------------------
-# RETREAT
-# ----------------------------------------------------------------------
-
-func begin_retreat(target_hex: Vector2i) -> void:
-	retreat_target_hex = target_hex
-	retreating = true
-	
-	var from_id: int = LOSHelper.ground_layer.pathfinding_get_point_id(unit.current_hex)
-	var to_id: int = Globals.astars[unit.team].pathfinding_get_point_id(target_hex)
-	var id_path: Array[int] = Globals.astars[unit.team].get_id_path(from_id, to_id)
-	
-	var cube_path: Array[Vector3i] = []
-	var i: int = 0
-	while i < id_path.size():
-		var pid: int = id_path[i]
-		var pos: Vector2 = Globals.astars[unit.team].get_point_position(pid)
-		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
-		i += 1
-	
-	follow_cube_path(cube_path)
 
 
 # ----------------------------------------------------------------------
@@ -444,15 +423,6 @@ func create_restricted_astar(allowed_hexes: Array[Vector2i]) -> AStar2D:
 func state_changed(next: int) -> void:
 	var move_mult: float = float(STATES.STATE_MOD[next]["move"])
 	_apply_speed(base_speed * move_mult)
-	
-	match next:
-		STATES.MoraleState.PANIC:
-			var known_enemies: Array[Unit] = []
-			var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
-			for u in visible_enemies1: # unit.units:
-				if u.team != unit.team and u.surrendered == false:
-					known_enemies.append(u)
-			rout(unit.current_hex, known_enemies, unit.retreat_distance)
 
 
 func _apply_speed(v: float) -> void:
