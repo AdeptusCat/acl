@@ -5,7 +5,8 @@ enum SoldierAction {
 	SETUP_WEAPON,
 	ACQUIRE_TARGET,
 	RELOAD,
-	FIRE_WEAPON
+	FIRE_WEAPON,
+	ASSIST,
 }
 
 var type: SoldierAction
@@ -31,6 +32,8 @@ func _init(t: SoldierAction) -> void: # , r: float, tid: Unit = null
 			task_name = "Reloading"
 		SoldierAction.FIRE_WEAPON:
 			task_name = "Fire Weapon"
+		SoldierAction.ASSIST:
+			task_name = "Assisting"
 	#remaining_time_s = r
 	#target_id = tid
 	#done = false

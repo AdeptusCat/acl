@@ -65,7 +65,9 @@ func _process(_delta: float) -> void:
 				#if p2 >= 1.0:
 					#var string: String = str(unit)
 					#print(string)
-					
+				if unit.moving:
+					set_progress_bar(s, "Moving", 0, 0)
+					continue
 				if not s.is_weapon_setup_done(0.0):
 					set_progress_bar(s, s.setup_weapon_task.task_name, s.setup_weapon_task.start_time_s, s.setup_weapon_task.remaining_time_s)
 					continue
@@ -75,6 +77,10 @@ func _process(_delta: float) -> void:
 				if not s.is_acquiring_target_done(0.0):
 					set_progress_bar(s, s.aquire_target_task.task_name, s.aquire_target_task.start_time_s, s.aquire_target_task.remaining_time_s)
 					continue
+				if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+					set_progress_bar(s, s.assist_task.task_name, 0, 0)
+					continue
+				set_progress_bar(s, "Idle", 0, 0)
 
 func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):
 	var progress_bar: ProgressBar = soldier_entries_by_soldier[s][Entry.PROGRESS_BAR]

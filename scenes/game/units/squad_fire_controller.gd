@@ -117,7 +117,6 @@ func set_soldiers(list: Array[Soldier]) -> void:
 					#targetCover = data["target_cover"]
 					
 func set_target_unit(targetUnit: Unit) -> void:
-	var new_target: bool = false
 	var hex: Vector2i = Vector2i.ZERO
 	target_cover = 0
 	if targetUnit:
@@ -134,7 +133,6 @@ func set_target_unit(targetUnit: Unit) -> void:
 				target_cover = data["target_cover"]
 			target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 			if not target_unit == targetUnit:
-				new_target = true
 				#_prime_acquisition_for_new_target()
 				#aim_delay()
 				target_unit = targetUnit
@@ -150,6 +148,8 @@ func set_target_unit(targetUnit: Unit) -> void:
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 	
 	for s in soldiers:
+		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+			continue
 		if not s.aquire_target_task.target_id == target_unit:
 			s.aquire_target_task.target_id = target_unit
 			s.aquire_target_task.done = false
@@ -372,12 +372,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		s.weapon.riflegrenade_loaded = false
 
 	# check crew requirement
-	var crew_mult: float = 1.0
+	var _crew_mult: float = 1.0
 	if is_crew_served:
 		if s.weapon.crew_required > 1:
 			var ok: bool = crew_available >= (s.weapon.crew_required - 1)
 			if not ok:
-				crew_mult = s.weapon.undercrew_penalty_mult
+				_crew_mult = s.weapon.undercrew_penalty_mult
 	var efficiency_mult: float = compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal)
 	if efficiency_mult < 1.0:
 		pass
@@ -456,20 +456,20 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		rps = 1.0
 	var fire_time_s: float = float(shots) / rps
 	var pause_s: float = s.weapon.burst_pause_s
-	var total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
+	var _total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
 
 	# keep a little persistent desync in the rhythm
-	var phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
+	var _phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
 	
 	
 	var state_idx: int = stress_controller.state
 	var acquire_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
-	var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+	var _settle_s: float = _calc_acquire_delay(s) * acquire_mult
 	
 	if riflegrenade == true:
-		settle_s += s.weapon.reload_riflegrenade_s
+		_settle_s += s.weapon.reload_riflegrenade_s
 	
 	#var reload_time_s: float = 0
 	#if s.rounds_in_mag <= 0:
@@ -487,9 +487,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		#s.next_ready_s = _now_s + s.next_ready_delta_s
 		#s.next_ready_start_s = _now_s
 	
-	s.aquire_target_task.target_id = target_unit
-	s.aquire_target_task.done = false
-	s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+	if not s.weapon.family == WeaponSpec.Family.MORTAR:
+		s.aquire_target_task.target_id = target_unit
+		s.aquire_target_task.done = false
+		s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
 	
 	# reload
 	if s.rounds_in_mag <= 0:
@@ -584,6 +585,8 @@ func aim_delay():
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
 	for s in soldiers:
+		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+			continue
 		s.aquire_target_task.done = false
 		s.aquire_target_task.start_time_s = _calc_acquire_delay(s) * acquire_mult
 				

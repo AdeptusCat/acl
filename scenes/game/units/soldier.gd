@@ -11,6 +11,7 @@ var setup_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.S
 var aquire_target_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.ACQUIRE_TARGET)
 var reload_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.RELOAD)
 var fire_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.FIRE_WEAPON)
+var assist_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.ASSIST)
 
 var id: int
 var name: String
@@ -48,6 +49,8 @@ func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGr
 	role = _role
 	weapon = _weapon
 	rounds_in_mag = weapon.mag_capacity
+	assist_task.done = true
+	
 
 
 func is_weapon_setup_done(delta: float) -> bool:

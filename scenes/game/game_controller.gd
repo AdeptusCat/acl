@@ -225,6 +225,8 @@ func update_visible_hexes():
 	for array in LOSHelper.visible_hexes.values():
 		array.clear()
 	for u in Globals.units:
+		if not is_instance_valid(u):
+			continue
 		var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
 		for hex in unit_visible:
 			if not LOSHelper.visible_hexes[u.team].has(hex):
