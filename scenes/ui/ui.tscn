@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://jdf7ewo2axfy"]
+[gd_scene format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 [ext_resource type="Texture2D" uid="uid://dew4omhel3wor" path="res://assets/status/los_blocked.png" id="2_g5kmx"]
@@ -34,11 +34,11 @@ font_size = 24
 outline_size = 16
 outline_color = Color(0, 0, 0, 1)
 
-[node name="Ui" type="CanvasLayer"]
+[node name="Ui" type="CanvasLayer" unique_id=2069341874]
 script = ExtResource("1_u7n8c")
 unit_stats_details_scene = ExtResource("5_0dwhk")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=1453572020]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -48,7 +48,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("3_mgwkc")
 
-[node name="Countdown" type="PanelContainer" parent="Control"]
+[node name="Countdown" type="PanelContainer" parent="Control" unique_id=192447120]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -60,30 +60,30 @@ grow_horizontal = 2
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("5_svq4k")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/Countdown"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Countdown" unique_id=1844887456]
 layout_mode = 2
 alignment = 1
 
-[node name="Label2" type="Label" parent="Control/Countdown/HBoxContainer"]
+[node name="Label2" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=208135704]
 layout_mode = 2
 text = "Time left: "
 
-[node name="TimerLabel" type="Label" parent="Control/Countdown/HBoxContainer"]
+[node name="TimerLabel" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=898658969]
 layout_mode = 2
 text = "10:00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Control/Countdown/HBoxContainer"]
+[node name="Label" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=1821792669]
 visible = false
 layout_mode = 2
 text = "Minutes"
 
-[node name="Timer" type="Timer" parent="Control/Countdown"]
+[node name="Timer" type="Timer" parent="Control/Countdown" unique_id=1589187607]
 one_shot = true
 autostart = true
 
-[node name="TileDetails" type="PanelContainer" parent="Control"]
+[node name="TileDetails" type="PanelContainer" parent="Control" unique_id=200690569]
 visible = false
 layout_mode = 1
 anchors_preset = 2
@@ -95,47 +95,47 @@ grow_vertical = 0
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("6_ygedu")
 
-[node name="FoldableContainer" type="FoldableContainer" parent="Control/TileDetails"]
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/TileDetails" unique_id=1678769246]
 layout_mode = 2
 title = "Hex Details"
 title_position = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/TileDetails/FoldableContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/TileDetails/FoldableContainer" unique_id=2103160651]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="TileName2" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+[node name="TileName2" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer" unique_id=497999778]
 layout_mode = 2
 horizontal_alignment = 1
 
-[node name="TileName" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+[node name="TileName" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer" unique_id=883333198]
 layout_mode = 2
 text = "asdassda"
 label_settings = SubResource("LabelSettings_26a3v")
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer" unique_id=2069719150]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer" unique_id=323485125]
 visible = false
 layout_mode = 2
 text = "Base Cover:"
 vertical_alignment = 1
 
-[node name="TileCover" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer"]
+[node name="TileCover" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer" unique_id=752941812]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover"]
+[node name="CoverHBoxContainer" type="HBoxContainer" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover" unique_id=682955776]
 layout_mode = 0
 offset_right = 150.0
 offset_bottom = 15.0
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="Cover1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
+[node name="Cover1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer" unique_id=1662030600]
 texture_filter = 4
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
@@ -143,7 +143,7 @@ texture = ExtResource("7_26a3v")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="Cover2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
+[node name="Cover2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer" unique_id=1292603674]
 texture_filter = 4
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
@@ -151,7 +151,7 @@ texture = ExtResource("7_26a3v")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="Cover3" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer"]
+[node name="Cover3" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/HBoxContainer/TileCover/CoverHBoxContainer" unique_id=1150271131]
 texture_filter = 4
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
@@ -159,129 +159,129 @@ texture = ExtResource("7_26a3v")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="TileName3" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+[node name="TileName3" type="Label" parent="Control/TileDetails/FoldableContainer/VBoxContainer" unique_id=797505223]
 layout_mode = 2
 horizontal_alignment = 1
 
-[node name="Tile" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer"]
+[node name="Tile" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer" unique_id=1404899927]
 custom_minimum_size = Vector2(150, 160)
 layout_mode = 2
 
-[node name="TileTextures" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile"]
+[node name="TileTextures" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile" unique_id=676714077]
 clip_contents = true
 anchors_preset = 0
 script = ExtResource("8_qmss2")
 
-[node name="GroundSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="GroundSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1573968941]
 
-[node name="WallSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1668033273]
 scale = Vector2(1, -1)
 
-[node name="BuildingSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="BuildingSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1388017887]
 
-[node name="TerrainSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="TerrainSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1215504065]
 
-[node name="WallNESprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallNESprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=23477918]
 
-[node name="WallNSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallNSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1923904957]
 
-[node name="WallSESprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallSESprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=40298548]
 
-[node name="WallSSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallSSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=492950994]
 
-[node name="WallSWSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallSWSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1443703224]
 
-[node name="WallNWSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures"]
+[node name="WallNWSprite" type="Sprite2D" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileTextures" unique_id=1208297669]
 
-[node name="TileStats" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile"]
+[node name="TileStats" type="Control" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile" unique_id=2008998282]
 anchors_preset = 0
 script = ExtResource("9_26a3v")
 
-[node name="Blocked" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="Blocked" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=787654621]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("2_g5kmx")
 
-[node name="Hindrance" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="Hindrance" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=2014792755]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("3_0dwhk")
 
-[node name="CoverN1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverN1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1399421536]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverN2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverN2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1669649085]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverNE1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverNE1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1593318233]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverNE2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverNE2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1593039410]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverSE1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverSE1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=2130951415]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverSE2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverSE2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1810430428]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverS1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverS1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1274030255]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverS2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverS2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1881529433]
 layout_mode = 0
 offset_right = 1024.0
 offset_bottom = 1024.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverSW1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverSW1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1956545928]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverSW2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverSW2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1504242781]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverNW1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverNW1" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=1713919538]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("4_pfayw")
 
-[node name="CoverNW2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats"]
+[node name="CoverNW2" type="TextureRect" parent="Control/TileDetails/FoldableContainer/VBoxContainer/Tile/TileStats" unique_id=337372879]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("4_pfayw")
 
-[node name="Settings" type="PanelContainer" parent="Control"]
+[node name="Settings" type="PanelContainer" parent="Control" unique_id=1578816844]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -292,14 +292,14 @@ grow_horizontal = 0
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("8_4w2x3")
 
-[node name="FoldableContainer" type="FoldableContainer" parent="Control/Settings"]
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/Settings" unique_id=417972358]
 layout_mode = 2
 title = "Settings"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/Settings/FoldableContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Settings/FoldableContainer" unique_id=1254553002]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=732099031]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Controls:
@@ -308,47 +308,47 @@ right click - move/attack unit
 WASD move camera
 mouse wheel - zoom"
 
-[node name="Label3" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="Label3" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1797015844]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="Label2" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=249884744]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Master Volume:"
 
-[node name="VolumeSlider" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="VolumeSlider" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1374941297]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="Label4" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="Label4" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=406234290]
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "Music Volume:"
 
-[node name="VolumeSlider2" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer"]
+[node name="VolumeSlider2" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=839974223]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="TryAgain" type="PanelContainer" parent="Control"]
+[node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
 layout_mode = 0
 offset_right = 135.0
 offset_bottom = 51.0
 theme_override_styles/panel = ExtResource("15_mgwkc")
 
-[node name="ColorRect" type="ColorRect" parent="Control/TryAgain"]
+[node name="ColorRect" type="ColorRect" parent="Control/TryAgain" unique_id=1726606033]
 visible = false
 layout_mode = 2
 color = Color(0.233925, 0.233925, 0.233925, 1)
 
-[node name="TryAgainButton" type="Button" parent="Control/TryAgain"]
+[node name="TryAgainButton" type="Button" parent="Control/TryAgain" unique_id=567185487]
 layout_mode = 2
 text = "Try Again!"
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/TryAgain"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/TryAgain" unique_id=2091473546]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 10
@@ -356,13 +356,13 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="TargetCoverDistance" type="Control" parent="Control"]
+[node name="TargetCoverDistance" type="Control" parent="Control" unique_id=891986501]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/TargetCoverDistance"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/TargetCoverDistance" unique_id=1859238228]
 layout_mode = 0
 offset_left = 26.0
 offset_top = -26.0
@@ -370,41 +370,41 @@ offset_right = 81.0
 offset_bottom = 43.0
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer" unique_id=1305537861]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer" unique_id=1301001837]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("6_7vp6q")
 expand_mode = 3
 
-[node name="FirepowerLabel" type="Label" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer"]
+[node name="FirepowerLabel" type="Label" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer" unique_id=1285223268]
 visible = false
 layout_mode = 2
 text = "123"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer" unique_id=437589477]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect2" type="TextureRect" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer2"]
+[node name="TextureRect2" type="TextureRect" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer2" unique_id=229964417]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("7_jcn1r")
 expand_mode = 3
 
-[node name="DistanceLabel" type="Label" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer2"]
+[node name="DistanceLabel" type="Label" parent="Control/TargetCoverDistance/VBoxContainer/HBoxContainer2" unique_id=596863530]
 layout_mode = 2
 text = "456"
 
-[node name="Cover" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer"]
+[node name="Cover" type="HBoxContainer" parent="Control/TargetCoverDistance/VBoxContainer" unique_id=225247442]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="UnitDetails" type="PanelContainer" parent="Control"]
+[node name="UnitDetails" type="PanelContainer" parent="Control" unique_id=1487157420]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -421,94 +421,99 @@ script = ExtResource("8_y220t")
 soldier_detail_label_scene = ExtResource("10_4kltc")
 soldier_detail_progress_bar_scene = ExtResource("11_hl07w")
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/UnitDetails"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/UnitDetails" unique_id=189767881]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="SoldiersContainer" type="VBoxContainer" parent="Control/UnitDetails/MarginContainer"]
+[node name="SoldiersContainer" type="VBoxContainer" parent="Control/UnitDetails/MarginContainer" unique_id=1630736296]
 layout_mode = 2
 alignment = 2
 
-[node name="UnitGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer"]
+[node name="UnitGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer" unique_id=1008426924]
 layout_mode = 2
 
-[node name="TypeHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="TypeHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=524235969]
 visible = false
 layout_mode = 2
 mouse_filter = 1
 text = "Type:"
 
-[node name="UnitType" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="UnitType" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=287085267]
 layout_mode = 2
 mouse_filter = 1
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Type"
 script = ExtResource("12_hc5d0")
 
-[node name="StatusHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="StatusHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=935126612]
 visible = false
 layout_mode = 2
 mouse_filter = 1
 text = "Status:"
 
-[node name="UnitStatus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="UnitStatus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=666228423]
 layout_mode = 2
 mouse_filter = 1
 text = "Status"
 script = ExtResource("13_0i47d")
 
-[node name="LeadershipHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="LeadershipHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=845361490]
 visible = false
 layout_mode = 2
 mouse_filter = 1
 text = "Leadership Bonus:"
 
-[node name="LeadershipBonus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer"]
+[node name="LeadershipBonus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=323951193]
 layout_mode = 2
 mouse_filter = 1
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Type"
 script = ExtResource("14_mgwkc")
 
-[node name="FoldableContainer" type="FoldableContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer"]
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer" unique_id=1064376729]
 layout_mode = 2
 mouse_filter = 1
 title = "Soldier Details"
 
-[node name="SoldiersGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer"]
+[node name="SoldiersGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer" unique_id=1527755368]
 layout_mode = 2
-columns = 5
+columns = 6
 
-[node name="Name" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
+[node name="Name" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1600495833]
 layout_mode = 2
 mouse_filter = 1
 text = "Name"
 
-[node name="Role" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
+[node name="Role" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=874649583]
 layout_mode = 2
 mouse_filter = 1
 text = "Role"
 
-[node name="Rank" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
+[node name="Rank" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1517727341]
 visible = false
 layout_mode = 2
 mouse_filter = 1
 text = "Rank"
 
-[node name="Weapon" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
+[node name="Weapon" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1943715512]
 layout_mode = 2
 mouse_filter = 1
 text = "Weapon"
 
-[node name="Progress" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer"]
+[node name="Task" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1996109464]
+layout_mode = 2
+mouse_filter = 1
+text = "Task"
+
+[node name="Progress" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1475222940]
 layout_mode = 2
 mouse_filter = 1
 text = "Progress"
 
-[node name="Tooltip" type="PanelContainer" parent="Control"]
+[node name="Tooltip" type="PanelContainer" parent="Control" unique_id=784359479]
 layout_mode = 0
 offset_left = 45.0
 offset_top = 70.0
@@ -518,29 +523,29 @@ mouse_filter = 2
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("12_hl07w")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/Tooltip"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Tooltip" unique_id=115991343]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/Tooltip/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Tooltip/VBoxContainer" unique_id=882565347]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="Control/Tooltip/VBoxContainer/HBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="Control/Tooltip/VBoxContainer/HBoxContainer" unique_id=1646175099]
 layout_mode = 2
 texture = ExtResource("13_swkix")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="TooltipHeader" type="Label" parent="Control/Tooltip/VBoxContainer/HBoxContainer"]
+[node name="TooltipHeader" type="Label" parent="Control/Tooltip/VBoxContainer/HBoxContainer" unique_id=1847268092]
 layout_mode = 2
 text = "Squad Status"
 label_settings = SubResource("LabelSettings_hl07w")
 
-[node name="TooltipText" type="Label" parent="Control/Tooltip/VBoxContainer"]
+[node name="TooltipText" type="Label" parent="Control/Tooltip/VBoxContainer" unique_id=1776387298]
 layout_mode = 2
 text = "The Moral Status of the selected Squad"
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Control/Tooltip/VBoxContainer"]
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/Tooltip/VBoxContainer" unique_id=1501650455]
 visible = false
 layout_mode = 2
 mouse_filter = 2
@@ -551,7 +556,7 @@ The Moral Status of the selected Squad"
 fit_content = true
 autowrap_mode = 2
 
-[node name="Debug" type="PanelContainer" parent="Control"]
+[node name="Debug" type="PanelContainer" parent="Control" unique_id=367192536]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -563,14 +568,14 @@ grow_vertical = 2
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("24_fv78h")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/Debug"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Debug" unique_id=593117933]
 layout_mode = 2
 
-[node name="EnemySelectable" type="CheckBox" parent="Control/Debug/VBoxContainer"]
+[node name="EnemySelectable" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=139947713]
 layout_mode = 2
 text = "Enemy Selectable"
 
-[node name="NoDamage" type="CheckBox" parent="Control/Debug/VBoxContainer"]
+[node name="NoDamage" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=252701230]
 layout_mode = 2
 text = "No Damage"
 
