@@ -13,6 +13,8 @@ enum WeaponType {
 	SMG
 }
 
+var is_setup: bool = false
+
 enum AmmoType {BULLET, HE, AP}
 enum Family { SMALL_ARM, SPIGOT_LAUNCHER, ROCKET_LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
 enum FireMode { SINGLE, BURST, MANUAL }

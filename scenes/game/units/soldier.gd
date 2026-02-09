@@ -3,6 +3,15 @@ class_name Soldier
 extends RefCounted
 
 
+var tasks: Array[SoldierTask]
+var target_id: Unit = null
+var target_acquired: bool = false
+
+var setup_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.SETUP_WEAPON)
+var aquire_target_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.ACQUIRE_TARGET)
+var reload_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.RELOAD)
+var fire_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.FIRE_WEAPON)
+
 var id: int
 var name: String
 var rank_grade: RankGrades.Grade
@@ -39,3 +48,33 @@ func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGr
 	role = _role
 	weapon = _weapon
 	rounds_in_mag = weapon.mag_capacity
+
+
+func is_weapon_setup_done(delta: float) -> bool:
+	if setup_weapon_task.done:
+		return true
+	if setup_weapon_task.remaining_time_s <= 0:
+		setup_weapon_task.done = true
+		return true
+	setup_weapon_task.remaining_time_s -= delta
+	return false
+
+
+func is_weapon_reload_done(delta: float):
+	if reload_task.done:
+		return true
+	if reload_task.remaining_time_s <= 0:
+		reload_task.done = true
+		return true
+	reload_task.remaining_time_s -= delta
+	return false
+
+
+func is_acquiring_target_done(delta: float):
+	if aquire_target_task.done:
+		return true
+	if aquire_target_task.remaining_time_s <= 0:
+		aquire_target_task.done = true
+		return true
+	aquire_target_task.remaining_time_s -= delta
+	return false

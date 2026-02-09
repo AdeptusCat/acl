@@ -117,6 +117,7 @@ func set_soldiers(list: Array[Soldier]) -> void:
 					#targetCover = data["target_cover"]
 					
 func set_target_unit(targetUnit: Unit) -> void:
+	var new_target: bool = false
 	var hex: Vector2i = Vector2i.ZERO
 	target_cover = 0
 	if targetUnit:
@@ -133,6 +134,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 				target_cover = data["target_cover"]
 			target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 			if not target_unit == targetUnit:
+				new_target = true
 				#_prime_acquisition_for_new_target()
 				#aim_delay()
 				target_unit = targetUnit
@@ -146,6 +148,13 @@ func set_target_unit(targetUnit: Unit) -> void:
 	if target_hex == Vector2i.ZERO:
 		draw_los_to =unit.current_hex
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
+	
+	for s in soldiers:
+		if not s.aquire_target_task.target_id == target_unit:
+			s.aquire_target_task.target_id = target_unit
+			s.aquire_target_task.done = false
+			s.aquire_target_task.remaining_time_s = _calc_acquire_delay(s)
+			
 
 
 func set_target_hex(_target_hex: Vector2i):
@@ -251,7 +260,7 @@ func fire_mortar(map_hex: Vector2i):
 	
 
 
-func _tick_soldiers(_delta: float) -> void:
+func _tick_soldiers(delta: float) -> void:
 	
 		
 	var rounds_emitted: int = 0
@@ -267,7 +276,7 @@ func _tick_soldiers(_delta: float) -> void:
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
-			rounds_emitted += await _try_fire_soldier(s, true, crew_available, support_crew_available)
+			rounds_emitted += await _try_fire_soldier(delta, s, true, crew_available, support_crew_available)
 			if rounds_emitted > 0:
 				pass
 			if rounds_emitted >= max_shots_per_tick:
@@ -280,12 +289,19 @@ func _tick_soldiers(_delta: float) -> void:
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
 			if s2.role != RankGrades.Role.GUNNER:
-				rounds_emitted += await _try_fire_soldier(s2, false, 0, 0)
+				rounds_emitted += await _try_fire_soldier(delta, s2, false, 0, 0)
 				if rounds_emitted >= max_shots_per_tick:
 					return
 		i += 1
 
-func _try_fire_soldier(s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
+func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
+	if not s.is_weapon_setup_done(delta):
+		return 0
+	if not s.is_weapon_reload_done(delta):
+		return 0
+	if not s.is_acquiring_target_done(delta):
+		return 0
+	
 	if s.next_ready_s == INF:
 		pass
 	
@@ -924,9 +940,9 @@ func _indices_with_role(role: int) -> Array[int]:
 	return res
 
 func _on_unit_arrived_at_hex(_new_hex: Vector2i):
-	_prime_acquisition_for_new_target()
+	_setup_after_arriving_at_hex()
 
-func _prime_acquisition_for_new_target() -> void:
+func _setup_after_arriving_at_hex() -> void:
 	# called whenever target_hex changes
 	var state_idx: int = stress_controller.state
 	var acquire_mult: float = 1.0
@@ -936,6 +952,7 @@ func _prime_acquisition_for_new_target() -> void:
 	var i: int = 0
 	while i < soldiers.size():
 		var s: Soldier = soldiers[i]
+		s.tasks.clear()
 		if s.is_alive:
 			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
 				var settle_s: float = _calc_acquire_delay(s) * acquire_mult
@@ -966,6 +983,9 @@ func _prime_acquisition_for_new_target() -> void:
 				if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
 					s.next_ready_s = s.acquire_ready_s
 					s.next_ready_start_s = _now_s
+				
+				s.setup_weapon_task.done = false
+				s.setup_weapon_task.remaining_time_s = s.weapon.setup_s
 		i += 1
 
 

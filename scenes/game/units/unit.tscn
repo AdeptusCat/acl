@@ -25,7 +25,6 @@ metadata/_custom_type_script = "uid://bikdnoi2rxdle"
 
 [node name="Unit" type="Node2D" unique_id=437630089 groups=["units"]]
 script = ExtResource("1_btf8p")
-weapon_range = null
 retreat_speed = 100.0
 fire_rate = 1.5
 default_rifle = SubResource("Resource_v8x2n")
