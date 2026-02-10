@@ -64,11 +64,27 @@ func prebake_los():
 			for tx in range(GRID_SIZE_X):
 				for ty in range(GRID_SIZE_Y):
 					var t_hex = Vector2i(tx, ty)
+					if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
+						pass
+					if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
+						pass
 					if o_hex == t_hex:
 						continue
-
+					
 					var t_pos = ground_layer.map_to_local(t_hex)
 					var los = check_los(o_pos, t_pos, 1, 0, 1, 0)
+					
+					if not los["blocked"]:
+						if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
+							pass
+						if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
+							pass
+					else:
+						if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
+							pass
+						if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
+							pass
+					
 					if not los["blocked"]:
 						# store both cover values under t_hex
 						los_lookup[o_hex][t_hex] = {

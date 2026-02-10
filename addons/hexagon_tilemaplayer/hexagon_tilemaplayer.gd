@@ -265,6 +265,7 @@ func _draw_debug():
 func _pathfinding_create_points():
 	astar.clear()
 	var cells := get_used_cells()
+
 	# Why 1.12 ? See https://github.com/godotengine/godot/issues/102612#issuecomment-2702275926
 	var needed_space = cells.size() * 1.12
 	if astar.get_point_capacity() < needed_space:
