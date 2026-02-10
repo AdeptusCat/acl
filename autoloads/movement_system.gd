@@ -127,8 +127,8 @@ func _process(delta: float) -> void:
 	if update_timer >= update_interval:
 		update_timer = 0.0
 		
-		if Debug.draw_thread_map:
-			await _start_threat_map_update()
+		#if Debug.draw_thread_map:
+		await _start_threat_map_update()
 		
 		#var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.ALLIES
 		#var observers: Array = LOSHelper.visible_hexes.get(enemy_team, [])
