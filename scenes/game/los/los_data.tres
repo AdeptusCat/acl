@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LosLookupData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="LosLookupData" format=3]
 
 [ext_resource type="Script" path="res://scenes/game/los/los_lookup_data.gd" id="1_in5m1"]
 
