@@ -26,7 +26,7 @@ func play_shot(weapon_spec: WeaponSpec, _position: Vector2, is_distant: bool = f
 			audio_pool.play_one_shot(weapon_spec.snd_distant, _position, -6.0, p, "SFX_Distant")
 			return
 	# close shot
-	if weapon_spec.can_fire_riflegrenades:
+	if weapon_spec.can_fire_riflegrenades and weapon_spec.riflegrenade_loaded:
 		if weapon_spec.riflegrenade_shot != null:
 			var p2: float = _rand_pitch()
 			audio_pool.play_one_shot(weapon_spec.riflegrenade_shot, _position, 6.0, p2, "SFX_Close")

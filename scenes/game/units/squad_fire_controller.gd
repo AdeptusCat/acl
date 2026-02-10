@@ -370,7 +370,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		pass
 	
 	var riflegrenade: bool = false
-	if s.weapon.riflegrenade_loaded == true:
+	if s.weapon.riflegrenade_loaded == true and target_distance <= s.weapon.riflegrenade_range:
 		riflegrenade = true
 		s.weapon.riflegrenade_loaded = false
 
@@ -423,6 +423,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		fire_riflegrenades(s)
 	else:
 		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
+	
+	
+	
+	
+	
 	
 	# apply jam chance
 	#var k: int = 0
@@ -948,14 +953,8 @@ func _setup_after_arriving_at_hex() -> void:
 		var s: Soldier = soldiers[i]
 		s.tasks.clear()
 		if s.is_alive:
-			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-				s.rounds_in_mag = 1
-				s.setup_weapon_task.done = false
-				s.setup_weapon_task.start_time_s = s.weapon.setup_s
-				s.weapon.riflegrenade_loaded = true
-			else:
-				s.setup_weapon_task.done = false
-				s.setup_weapon_task.start_time_s = s.weapon.setup_s
+			s.setup_weapon_task.done = false
+			s.setup_weapon_task.start_time_s = s.weapon.setup_s
 		i += 1
 
 
