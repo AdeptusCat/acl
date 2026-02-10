@@ -1305,10 +1305,10 @@ func _fill_missing_loaders_for_existing_guns() -> void:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
 		var s: Soldier = squad_fire.soldiers[i]
-		if s.role == RankGrades.Role.GUNNER and s.weapon != null:
+		if s.role == RankGrades.Role.GUNNER and not s.weapon == null:
 			if s.weapon.crew_required > 1:
 				var idx: int = _find_first_SOLDIER_OR_ASSISTANT_excluding([i])
-				if idx != -1:
+				if not idx == -1:
 					var loader: Soldier = squad_fire.soldiers[idx]
 					loader.role = RankGrades.Role.LOADER
 				# if still none, we stay under-crewed
@@ -1326,7 +1326,8 @@ func _index_of_role(role: int) -> int:
 func _has_role(role: int) -> bool:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
-		if squad_fire.soldiers[i].role == role:
+		var s: Soldier = squad_fire.soldiers[i]
+		if s.role == role:
 			return true
 		i += 1
 	return false
@@ -1334,8 +1335,10 @@ func _has_role(role: int) -> bool:
 func _find_first_SOLDIER() -> int:
 	var i: int = 0
 	while i < squad_fire.soldiers.size():
-		if squad_fire.soldiers[i].role == RankGrades.Role.SOLDIER:
-			return i
+		var s: Soldier = squad_fire.soldiers[i]
+		if s.role == RankGrades.Role.SOLDIER:
+			if not s.weapon.can_fire_riflegrenades:
+				return i
 		i += 1
 	return -1
 
@@ -1346,7 +1349,8 @@ func _find_first_SOLDIER_OR_ASSISTANT_excluding(exclude: Array[int]) -> int:
 		if not exclude.has(i):
 			var s: Soldier = squad_fire.soldiers[i]
 			if s.role == RankGrades.Role.SOLDIER or s.role == RankGrades.Role.ASSISTANT:
-				return i
+				if not s.weapon.can_fire_riflegrenades:
+					return i
 		i += 1
 	return -1
 

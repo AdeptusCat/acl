@@ -121,12 +121,13 @@ func set_soldiers(list: Array[Soldier]) -> void:
 					
 func set_target_unit(targetUnit: Unit) -> void:
 	var hex: Vector2i = Vector2i.ZERO
+	var distance: int = INF
 	target_cover = 0
 	if targetUnit:
-		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+		distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 		var has_range: bool = false
 		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.weapon.range_hexes * 2 >= distance:
+			if soldier.weapon.range_hexes >= distance:
 				has_range = true
 		if has_range:
 			hex = targetUnit.current_hex
@@ -153,11 +154,22 @@ func set_target_unit(targetUnit: Unit) -> void:
 	for s in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
+		
 		if not s.aquire_target_task.target_id == target_unit:
-			s.aquire_target_task.target_id = target_unit
-			s.aquire_target_task.done = false
-			s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
-			
+			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
+				s.reload_task.done = false
+				s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
+				s.rounds_in_mag = 1
+				s.weapon.riflegrenade_loaded = true
+				
+				s.aquire_target_task.target_id = target_unit
+				s.aquire_target_task.done = false
+				s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+			else:
+				if s.weapon.range_hexes >= distance:
+					s.aquire_target_task.target_id = target_unit
+					s.aquire_target_task.done = false
+					s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
 
 
 func set_target_hex(_target_hex: Vector2i):
@@ -215,7 +227,7 @@ func handle_auto_fire(delta, _shooter: Node2D, current_hex, _range, fire_rate, _
 				var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 				var has_range: bool = false
 				for soldier: Soldier in unit.squad_fire.soldiers:
-					if soldier.weapon.range_hexes * 2 >= distance:
+					if soldier.weapon.range_hexes >= distance:
 						has_range = true
 				if has_range:
 					var cover_map = LOSHelper.los_lookup.get(current_hex, null)
@@ -240,7 +252,7 @@ func handle_auto_fire(delta, _shooter: Node2D, current_hex, _range, fire_rate, _
 			var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, enemy.current_cube)
 			var has_range: bool = false
 			for soldier: Soldier in unit.squad_fire.soldiers:
-				if soldier.weapon.range_hexes * 2 >= distance:
+				if soldier.weapon.range_hexes >= distance:
 					has_range = true
 			if has_range:
 				var cover_map = LOSHelper.los_lookup.get(current_hex, null)
@@ -308,14 +320,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if not s.is_acquiring_target_done(delta_mod):
 		return 0
 	
-	#if s.next_ready_s == INF:
-		#pass
-	
-	#s.now_s = _now_s
 	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
-	
-	
 	
 	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
@@ -323,7 +329,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.weapon.ammunition <= 0:
 		return 0
 	
-	if target_distance > s.weapon.range_hexes * 2:
+	if target_distance > s.weapon.range_hexes:
 		#set_target_unit(null) # this should only happen if none have range
 		return 0
 	
@@ -349,15 +355,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if target_distance > s.weapon.range_hexes:
 		long_range = true
 	
-	#var acquire_ready_s: float = s.acquire_ready_s
-	
-	
-	# acquisition gate: don’t shoot until settled on the new target
-	#if _now_s < acquire_ready_s and not acquire_ready_s == INF:
-		#print(" now ", _now_s, " acquire_ready_s ", acquire_ready_s)
-		#print(self)
-		#return 0
-	
 	#if s.jammed:
 		## simple unjam: use reload time as clear jam delay
 		#if s.next_ready_s <= _now_s:
@@ -366,11 +363,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			#s.next_ready_s = _now_s + s.next_ready_delta_s
 			#s.next_ready_start_s = _now_s
 		#return 0
-
-	#if s.next_ready_s > _now_s:
-		#return 0
 	
 	mortar_target_hex = Vector2i.ZERO
+	
+	if s.weapon.can_fire_riflegrenades:
+		pass
 	
 	var riflegrenade: bool = false
 	if s.weapon.riflegrenade_loaded == true:
@@ -395,22 +392,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if shots <= 0:
 		# reload
 		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
-			#s.next_ready_delta_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-			#s.next_ready_s = _now_s + s.next_ready_delta_s
-			#s.next_ready_start_s = _now_s
-			#s.rounds_in_mag = 1
-			#s.weapon.riflegrenade_loaded = true
-			
 			s.reload_task.done = false
 			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
 			s.rounds_in_mag = 1
 			s.weapon.riflegrenade_loaded = true
 		else:
-			#s.next_ready_delta_s = s.weapon.reload_s / s.rof_mult
-			#s.next_ready_s = _now_s + s.next_ready_delta_s
-			#s.next_ready_start_s = _now_s
-			#s.rounds_in_mag = s.weapon.mag_capacity
-			
 			s.reload_task.done = false
 			s.reload_task.start_time_s = s.weapon.reload_s / s.rof_mult
 			s.rounds_in_mag = s.weapon.mag_capacity
@@ -431,71 +417,39 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	s.rounds_in_mag -= shots
 	s.weapon.ammunition -= shots
 	
-	var _target_hex = target_hex
-	if s.weapon.family == WeaponSpec.Family.MORTAR:
-		_target_hex = _mortar_target_hex
-	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
-	var life: float = dist / s.weapon.projectile_speed      # seconds
+	
+	
 	if riflegrenade == true:
-		#life = dist / s.weapon.riflegrenade_projectile_speed      # seconds
 		fire_riflegrenades(s)
 	else:
 		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
 	
-	
-
 	# apply jam chance
-	var k: int = 0
-	var jammed_now: bool = false
-	while k < shots:
-		var r: float = randf()
-		if r < s.weapon.jam_per_shot:
-			jammed_now = true
-		k += 1
-	if jammed_now:
-		s.jammed = true
-	
-	
-	# cadence to next burst (respect soldier’s rof and crew)
-	var rps: float = s.weapon.rpm / 60.0
-	if rps < 1.0:
-		rps = 1.0
-	var fire_time_s: float = float(shots) / rps
-	var pause_s: float = s.weapon.burst_pause_s
-	var _total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
-
-	# keep a little persistent desync in the rhythm
-	var _phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
-	
-	
-	var acquire_mult: float = 1.0
-	if state_idx >= 0 and state_idx < state_acquire_mults.size():
-		acquire_mult = state_acquire_mults[state_idx]
-	var _settle_s: float = _calc_acquire_delay(s) 
-	
-	if riflegrenade == true:
-		_settle_s += s.weapon.reload_riflegrenade_s
-	
-	#var reload_time_s: float = 0
-	#if s.rounds_in_mag <= 0:
-		#reload_time_s = s.weapon.reload_s
-		#s.rounds_in_mag = s.weapon.mag_capacity
-	#
-	#if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
-		#s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
-		#s.next_ready_s = _now_s + s.next_ready_delta_s
-		#s.next_ready_start_s = _now_s
-		#s.rounds_in_mag += 1
-		#s.weapon.riflegrenade_loaded = true
-	#else:
-		#s.next_ready_delta_s = (total_cadence_s + phase_bump + settle_s + reload_time_s) / efficiency_mult / crew_mult
-		#s.next_ready_s = _now_s + s.next_ready_delta_s
-		#s.next_ready_start_s = _now_s
+	#var k: int = 0
+	#var jammed_now: bool = false
+	#while k < shots:
+		#var r: float = randf()
+		#if r < s.weapon.jam_per_shot:
+			#jammed_now = true
+		#k += 1
+	#if jammed_now:
+		#s.jammed = true
 	
 	if not s.weapon.family == WeaponSpec.Family.MORTAR:
+		if not is_instance_valid(target_unit):
+			target_unit = null
+		
+		# cadence to next burst (respect soldier’s rof and crew)
+		var rps: float = s.weapon.rpm / 60.0
+		if rps < 1.0:
+			rps = 1.0
+		var fire_time_s: float = float(shots) / rps
+		var pause_s: float = s.weapon.burst_pause_s
+		var _total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
+		
 		s.aquire_target_task.target_id = target_unit
 		s.aquire_target_task.done = false
-		s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+		s.aquire_target_task.start_time_s = _calc_acquire_delay(s) + _total_cadence_s
 	
 	# reload
 	if s.rounds_in_mag <= 0:
@@ -510,8 +464,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			s.rounds_in_mag = s.weapon.mag_capacity
 		return 0
 	
-	var _delta: float = s.next_ready_s - _now_s # debug
-	
+	var _target_hex = target_hex
+	if s.weapon.family == WeaponSpec.Family.MORTAR:
+		_target_hex = _mortar_target_hex
+	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
+	var life: float = dist / s.weapon.projectile_speed      # seconds
 	await get_tree().create_timer(life).timeout
 	fire_at(shots, long_range, s.weapon, riflegrenade, _mortar_target_hex)
 	return shots
@@ -992,34 +949,38 @@ func _setup_after_arriving_at_hex() -> void:
 		s.tasks.clear()
 		if s.is_alive:
 			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
-				var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-				settle_s += s.weapon.setup_riflegrenade_s
-				settle_s *= acquire_mult
-				# add the soldier's fixed cadence phase so first bursts don’t sync
-				settle_s += s.cadence_phase_s
-				s.acquire_start_s = _now_s
-				s.next_ready_delta_s = settle_s / s.rof_mult
-				s.acquire_ready_s = _now_s + s.next_ready_delta_s
-				s.last_target_hex = target_hex
-				# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
-					s.next_ready_s = s.acquire_ready_s
-					s.next_ready_start_s = _now_s
+				#var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+				#settle_s += s.weapon.setup_riflegrenade_s
+				#settle_s *= acquire_mult
+				## add the soldier's fixed cadence phase so first bursts don’t sync
+				#settle_s += s.cadence_phase_s
+				#s.acquire_start_s = _now_s
+				#s.next_ready_delta_s = settle_s / s.rof_mult
+				#s.acquire_ready_s = _now_s + s.next_ready_delta_s
+				#s.last_target_hex = target_hex
+				## ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
+				#if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
+					#s.next_ready_s = s.acquire_ready_s
+					#s.next_ready_start_s = _now_s
+				
+				s.rounds_in_mag = 1
+				s.setup_weapon_task.done = false
+				s.setup_weapon_task.start_time_s = s.weapon.setup_s
 				s.weapon.riflegrenade_loaded = true
 			else:
-				var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-				settle_s += s.weapon.setup_s
-				settle_s *= acquire_mult
-				# add the soldier's fixed cadence phase so first bursts don’t sync
-				settle_s += s.cadence_phase_s
-				s.acquire_start_s = _now_s
-				s.next_ready_delta_s = settle_s / s.rof_mult
-				s.acquire_ready_s = _now_s + s.next_ready_delta_s
-				s.last_target_hex = target_hex
-				# ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
-					s.next_ready_s = s.acquire_ready_s
-					s.next_ready_start_s = _now_s
+				#var settle_s: float = _calc_acquire_delay(s) * acquire_mult
+				#settle_s += s.weapon.setup_s
+				#settle_s *= acquire_mult
+				## add the soldier's fixed cadence phase so first bursts don’t sync
+				#settle_s += s.cadence_phase_s
+				#s.acquire_start_s = _now_s
+				#s.next_ready_delta_s = settle_s / s.rof_mult
+				#s.acquire_ready_s = _now_s + s.next_ready_delta_s
+				#s.last_target_hex = target_hex
+				## ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
+				#if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
+					#s.next_ready_s = s.acquire_ready_s
+					#s.next_ready_start_s = _now_s
 				
 				s.setup_weapon_task.done = false
 				s.setup_weapon_task.start_time_s = s.weapon.setup_s
