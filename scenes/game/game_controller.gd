@@ -76,6 +76,7 @@ func _ready():
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
+	Globals.units.clear()
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is Unit:
 			Globals.units.append(unit)
@@ -214,6 +215,8 @@ func draw_fog():
 
 func show_visible_units():
 	for u in Globals.units:
+		if not is_instance_valid(u):
+			continue
 		if not u.team == Globals.team_player:
 			if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
 				u.visible = true
