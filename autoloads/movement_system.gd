@@ -71,18 +71,18 @@ func _calculate_threat_weight(hex: Vector2i, _pending_los_lookup: Dictionary, _p
 	return weight
 
 
-
-func request_threat_update(visible_hexes: Array, _lookup_data: Dictionary):
-	if thread and thread.is_alive():
-		return
-	pending_visible_hexes.clear()
-	for k in LOSHelper.visible_hexes.keys():
-		pending_visible_hexes[k] = LOSHelper.visible_hexes[k].duplicate()
-	pending_lookup.clear()
-	for k in LOSHelper.los_lookup.keys():
-		pending_lookup[k] = LOSHelper.los_lookup[k].duplicate()
-	thread = Thread.new()
-	thread.start(_threaded_update_threat_map.bind(pending_lookup, pending_visible_hexes))
+# not used?
+#func request_threat_update(visible_hexes: Array, _lookup_data: Dictionary):
+	#if thread and thread.is_alive():
+		#return
+	#pending_visible_hexes.clear()
+	#for k in LOSHelper.visible_hexes.keys():
+		#pending_visible_hexes[k] = LOSHelper.visible_hexes[k].duplicate()
+	#pending_lookup.clear()
+	#for k in LOSHelper.los_lookup.keys():
+		#pending_lookup[k] = LOSHelper.los_lookup[k].duplicate()
+	#thread = Thread.new()
+	#thread.start(_threaded_update_threat_map.bind(pending_lookup, pending_visible_hexes))
 
 
 func _exit_tree():
@@ -98,21 +98,22 @@ func _set_threat_map_result(result: Dictionary[int, Dictionary]):
 	result_ready = true
 
 
-func _threaded_update_threat_map(_pending_lookup: Dictionary, _pending_visible_hexes: Dictionary[int, Array]):
-	var temp_threat_maps: Dictionary[int, Dictionary]
-	temp_threat_maps[Globals.Team.AXIS] = {}
-	temp_threat_maps[Globals.Team.ALLIES] = {}
-	#temp_threat_map[Vector2i(12, 12)] =  _calculate_threat_weight(Vector2i(12, 12), pending_lookup, pending_visible_hexes)
-	#temp_threat_map[Vector2i(15, 9)] =  _calculate_threat_weight(Vector2i(15, 9), pending_lookup, pending_visible_hexes)
-	for team in Globals.Team.values():
-		for point_id in Globals.astars[team].get_point_ids():
-			var world_pos = Globals.astars[team].get_point_position(point_id)
-			var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-			var weight = _calculate_threat_weight(hex_map, _pending_lookup, _pending_visible_hexes, team)
-			temp_threat_maps[team][hex_map] = weight
-
-	call_deferred("_set_threat_map_result", temp_threat_maps)
-	call_deferred("thread_done")
+# not used?
+#func _threaded_update_threat_map(_pending_lookup: Dictionary, _pending_visible_hexes: Dictionary[int, Array]):
+	#var temp_threat_maps: Dictionary[int, Dictionary]
+	#temp_threat_maps[Globals.Team.AXIS] = {}
+	#temp_threat_maps[Globals.Team.ALLIES] = {}
+	##temp_threat_map[Vector2i(12, 12)] =  _calculate_threat_weight(Vector2i(12, 12), pending_lookup, pending_visible_hexes)
+	##temp_threat_map[Vector2i(15, 9)] =  _calculate_threat_weight(Vector2i(15, 9), pending_lookup, pending_visible_hexes)
+	#for team in Globals.Team.values():
+		#for point_id in Globals.astars[team].get_point_ids():
+			#var world_pos = Globals.astars[team].get_point_position(point_id)
+			#var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
+			#var weight = _calculate_threat_weight(hex_map, _pending_lookup, _pending_visible_hexes, team)
+			#temp_threat_maps[team][hex_map] = weight
+#
+	#call_deferred("_set_threat_map_result", temp_threat_maps)
+	#call_deferred("thread_done")
 
 
 func thread_done():
@@ -126,7 +127,8 @@ func _process(delta: float) -> void:
 	if update_timer >= update_interval:
 		update_timer = 0.0
 		
-		await _start_threat_map_update()
+		if Debug.draw_thread_map:
+			await _start_threat_map_update()
 		
 		#var enemy_team = Globals.Team.AXIS if Globals.team_player == Globals.Team.ALLIES else Globals.Team.ALLIES
 		#var observers: Array = LOSHelper.visible_hexes.get(enemy_team, [])

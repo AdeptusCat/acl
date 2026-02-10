@@ -1,6 +1,7 @@
 extends Node
 
 var team_player: Team
+var team_enemy: Team
 var astars: Dictionary[int, AStar2D]
 var game_started: bool = false
 var objective_hexes: Dictionary[Team, Array]

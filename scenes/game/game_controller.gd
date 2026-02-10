@@ -62,8 +62,13 @@ func _normalize_weight(w, min_w, max_w):
 	
 func _on_draw_threat(_threat_weights: Dictionary[int, Dictionary]):
 	# return #debug
-	threat_weights = _threat_weights[Globals.team_player]
-	queue_redraw()
+	if Debug.draw_thread_map:
+		if Debug.draw_thread_map_enemy:
+			threat_weights = _threat_weights[Globals.team_enemy]
+		else:
+			threat_weights = _threat_weights[Globals.team_player]#
+		queue_redraw()
+	
 
 func _ready():
 	MovementSystem.draw_threat.connect(_on_draw_threat)
@@ -534,6 +539,11 @@ func _on_unit_died(unit):
 func start_game(team: Globals.Team, time: float):
 	time_left_seconds = time * 60.0
 	Globals.team_player = team
+	if team == Globals.Team.AXIS:
+		Globals.team_enemy = Globals.Team.ALLIES
+	else:
+		Globals.team_enemy = Globals.Team.AXIS
+		
 	set_objective_cells(team)
 	#set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
@@ -616,6 +626,11 @@ func _process(delta):
 			last_unit_hex = selected_unit.current_hex
 	if mouse_or_unit_position_changed:
 		handle_mouse_event_position_changed(pos)
+		
+	if not Debug.draw_thread_map:
+		if not threat_weights.is_empty():
+			threat_weights.clear()
+			queue_redraw()
 
 
 func end_game_check():
