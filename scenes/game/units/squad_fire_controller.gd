@@ -369,10 +369,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.weapon.can_fire_riflegrenades:
 		pass
 	
-	var riflegrenade: bool = false
-	if s.weapon.riflegrenade_loaded == true and target_distance <= s.weapon.riflegrenade_range:
-		riflegrenade = true
-		s.weapon.riflegrenade_loaded = false
+	
 
 	# check crew requirement
 	var _crew_mult: float = 1.0
@@ -385,9 +382,40 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if efficiency_mult < 1.0:
 		pass
 
+	if s.weapon.riflegrenade_loaded == true and target_distance > s.weapon.riflegrenade_range:
+		s.rounds_in_mag = 0
+
 	# determine burst size for this weapon
 	var rounds_in_mag: int = s.rounds_in_mag
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
+	
+	
+
+	# emit shots immediately into current window
+	_add_rounds_to_hex(target_hex, shots)
+	#fire_shot.emit()
+	var auto_fire: bool = false
+	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
+		auto_fire = true
+	if shots > 0:
+		_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
+	
+	# spend ammo
+	s.rounds_in_mag -= shots
+	s.weapon.ammunition -= shots
+	
+	var riflegrenade: bool = false
+	if s.weapon.riflegrenade_loaded == true and target_distance <= s.weapon.riflegrenade_range:
+		riflegrenade = true
+	
+	if riflegrenade == true:
+		fire_riflegrenades(s)
+		s.weapon.riflegrenade_loaded = false
+	else:
+		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
+	
+	#if riflegrenade:
+		#s.weapon.riflegrenade_loaded = false
 	
 	if shots <= 0:
 		# reload
@@ -404,28 +432,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	if shots > 1:
 		pass
-
-	# emit shots immediately into current window
-	_add_rounds_to_hex(target_hex, shots)
-	#fire_shot.emit()
-	var auto_fire: bool = false
-	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
-		auto_fire = true
-	_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
-	
-	# spend ammo
-	s.rounds_in_mag -= shots
-	s.weapon.ammunition -= shots
-	
-	
-	
-	if riflegrenade == true:
-		fire_riflegrenades(s)
-	else:
-		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
-	
-	
-	
 	
 	
 	
