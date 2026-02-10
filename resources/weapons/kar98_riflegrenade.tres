@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=5 format=3 uid="uid://cbxllfdsgrv68"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://cbxllfdsgrv68"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_b3g1r"]
 [ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="1_bxsl1"]
@@ -8,7 +8,9 @@
 [resource]
 script = ExtResource("1_b3g1r")
 name = "Karabiner 98k (Schießbecher)"
+range_hexes = 5
 can_fire_riflegrenades = true
+riflegrenade_range = 4
 snd_shot = ExtResource("2_0xp34")
 riflegrenade_shot = ExtResource("2_2buh7")
 riflegrenade_hit = ExtResource("1_bxsl1")

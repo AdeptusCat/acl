@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=2 format=3 uid="uid://dujtlnhry73n4"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://dujtlnhry73n4"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_7a7ov"]
 
@@ -6,4 +6,5 @@
 script = ExtResource("1_7a7ov")
 name = "Enfield No 4"
 mag_capacity = 10
+range_hexes = 5
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

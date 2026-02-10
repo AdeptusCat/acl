@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=3 format=3 uid="uid://dmn373dp04x33"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://dmn373dp04x33"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_vn361"]
 [ext_resource type="AudioStream" uid="uid://ccoia7ye3j25i" path="res://assets/audio/fx/weapons/m1_garand/m1_garand.mp3" id="2_momxg"]
@@ -10,6 +10,7 @@ rpm = 400.0
 burst_pause_s = 0.25
 mag_capacity = 8
 reload_s = 2.8
+range_hexes = 5
 accuracy_base = 0.7
 priority = 3
 raise_s = 1.2

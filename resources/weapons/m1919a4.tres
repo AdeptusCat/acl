@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://bn7tg73bvhpsv"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://bn7tg73bvhpsv"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_m165w"]
 [ext_resource type="AudioStream" uid="uid://cjpnfa6jdjlen" path="res://assets/audio/fx/weapons/m1919a4/m1919a4.mp3" id="2_0x148"]
@@ -12,7 +12,7 @@ burst_rounds = 8
 burst_pause_s = 0.5
 mag_capacity = 250
 reload_s = 6.0
-range_hexes = 8
+range_hexes = 12
 accuracy_base = 0.52
 kind = 1
 type = 1

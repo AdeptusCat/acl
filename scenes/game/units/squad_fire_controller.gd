@@ -391,7 +391,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	if shots <= 0:
 		# reload
-		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
+		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
 			s.reload_task.done = false
 			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
 			s.rounds_in_mag = 1
@@ -453,7 +453,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	# reload
 	if s.rounds_in_mag <= 0:
-		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
+		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
 			s.reload_task.done = false
 			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
 			s.rounds_in_mag = 1
@@ -948,40 +948,12 @@ func _setup_after_arriving_at_hex() -> void:
 		var s: Soldier = soldiers[i]
 		s.tasks.clear()
 		if s.is_alive:
-			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range * 2:
-				#var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-				#settle_s += s.weapon.setup_riflegrenade_s
-				#settle_s *= acquire_mult
-				## add the soldier's fixed cadence phase so first bursts don’t sync
-				#settle_s += s.cadence_phase_s
-				#s.acquire_start_s = _now_s
-				#s.next_ready_delta_s = settle_s / s.rof_mult
-				#s.acquire_ready_s = _now_s + s.next_ready_delta_s
-				#s.last_target_hex = target_hex
-				## ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				#if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
-					#s.next_ready_s = s.acquire_ready_s
-					#s.next_ready_start_s = _now_s
-				
+			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
 				s.rounds_in_mag = 1
 				s.setup_weapon_task.done = false
 				s.setup_weapon_task.start_time_s = s.weapon.setup_s
 				s.weapon.riflegrenade_loaded = true
 			else:
-				#var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-				#settle_s += s.weapon.setup_s
-				#settle_s *= acquire_mult
-				## add the soldier's fixed cadence phase so first bursts don’t sync
-				#settle_s += s.cadence_phase_s
-				#s.acquire_start_s = _now_s
-				#s.next_ready_delta_s = settle_s / s.rof_mult
-				#s.acquire_ready_s = _now_s + s.next_ready_delta_s
-				#s.last_target_hex = target_hex
-				## ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-				#if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
-					#s.next_ready_s = s.acquire_ready_s
-					#s.next_ready_start_s = _now_s
-				
 				s.setup_weapon_task.done = false
 				s.setup_weapon_task.start_time_s = s.weapon.setup_s
 		i += 1

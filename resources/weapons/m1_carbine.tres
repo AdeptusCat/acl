@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=3 format=3 uid="uid://cpg80ftqo60wb"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://cpg80ftqo60wb"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_484ug"]
 [ext_resource type="AudioStream" uid="uid://f2uvwvtyn0ts" path="res://assets/audio/fx/weapons/m1_carbine/m1_carbine.mp3" id="2_qr05n"]
@@ -10,7 +10,7 @@ rpm = 450.0
 burst_pause_s = 0.25
 mag_capacity = 15
 reload_s = 1.8
-range_hexes = 5
+range_hexes = 4
 accuracy_base = 0.62
 raise_s = 0.9
 aim_s = 0.35

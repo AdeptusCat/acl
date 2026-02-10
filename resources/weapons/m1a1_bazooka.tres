@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://dqnegkv72tu3g"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://dqnegkv72tu3g"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_64fyq"]
 [ext_resource type="AudioStream" uid="uid://crhmbefe31bou" path="res://assets/audio/fx/weapons/m1a1_bazooka/m1a1_bazooka_launch.mp3" id="2_2gmky"]
@@ -9,7 +9,7 @@ script = ExtResource("1_64fyq")
 name = "M1A1 Bazooka"
 mag_capacity = 1
 reload_s = 5.0
-range_hexes = 2
+range_hexes = 3
 kind = 1
 family = 2
 ammo_type = 1

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://ber2oq0vvl7pp"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://ber2oq0vvl7pp"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_au1le"]
 [ext_resource type="AudioStream" uid="uid://b1mc87y47r38b" path="res://assets/audio/fx/weapons/mg34/mg34.mp3" id="2_cdb51"]
@@ -12,7 +12,7 @@ burst_rounds = 4
 burst_pause_s = 0.3
 mag_capacity = 50
 reload_s = 4.0
-range_hexes = 7
+range_hexes = 8
 accuracy_base = 0.56
 kind = 1
 type = 1
