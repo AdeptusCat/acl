@@ -15,7 +15,10 @@ class_name SquadFireController
 #@export var state_rof_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.85, 0.35, 0.0, 0.0])
 
 # NEW: state influence on target acquisition time (Normal..CombatIneffective)
-@export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 1.15, 1.6, 9999.0, 9999.0])
+#@export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 1.15, 1.6, 9999.0, 9999.0])
+#enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
+@export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.8, 0.5, 0.0, 0.0])
+
 # panic/CI effectively “never acquire”
 
 # Crew-served behaviour
@@ -295,11 +298,14 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
-	if not s.is_weapon_setup_done(delta):
+	var state_idx: int = stress_controller.state
+	var delta_multiplyer: float = state_acquire_mults[state_idx]
+	var delta_mod: float = delta * delta_multiplyer 
+	if not s.is_weapon_setup_done(delta_mod):
 		return 0
-	if not s.is_weapon_reload_done(delta):
+	if not s.is_weapon_reload_done(delta_mod):
 		return 0
-	if not s.is_acquiring_target_done(delta):
+	if not s.is_acquiring_target_done(delta_mod):
 		return 0
 	
 	#if s.next_ready_s == INF:
@@ -462,11 +468,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var _phase_bump: float = s.cadence_phase_s * 0.20  # small influence after first burst
 	
 	
-	var state_idx: int = stress_controller.state
 	var acquire_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
-	var _settle_s: float = _calc_acquire_delay(s) * acquire_mult
+	var _settle_s: float = _calc_acquire_delay(s) 
 	
 	if riflegrenade == true:
 		_settle_s += s.weapon.reload_riflegrenade_s

@@ -65,6 +65,9 @@ func _process(_delta: float) -> void:
 				#if p2 >= 1.0:
 					#var string: String = str(unit)
 					#print(string)
+				if not unit.is_good_order():
+					set_progress_bar(s, "Panicking", 0, 0)
+					continue
 				if unit.moving:
 					set_progress_bar(s, "Moving", 0, 0)
 					continue
