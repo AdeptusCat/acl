@@ -36,8 +36,8 @@ var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput
 var accuracy_multiplier: float = 1.0
 
 @export var stress_scale := 1.0             # global tuning
-@export var stress_fast_base: float = 8.0       # baseline shock of “being shot at”
-@export var stress_fast_hit_factor: float = 12.0# adds with mean p_hit (0..1)
+@export var stress_fast_base: float = 12.0       # baseline shock of “being shot at” 8
+@export var stress_fast_hit_factor: float = 20.0# adds with mean p_hit (0..1) 12
 @export var stress_slow_per_round: float = 0.6  # accrues with volume
 @export var stress_point_blank_bonus: float = 1.5 # extra fear at 1 hex
 @export var stress_crossfire_bonus: float = 0.15    # e.g. 0.15 if multiple sources
@@ -45,7 +45,7 @@ var accuracy_multiplier: float = 1.0
 @export var weapon_stress_mult: float = 1.0   # MGs 1.2–1.4, rifles 1.0
 @export var stress_resilience: float = 1.0    # better-trained squads 0.8–0.9
 
-@export var casualty_scale: float = 0.75      # lower than 1.0 to reduce deaths overall
+@export var casualty_scale: float = 1.0      # lower than 1.0 to reduce deaths overall
 @export var p_disable_rifle: float = 0.12     # was 0.5; rifles should be low
 @export var p_disable_mg: float = 0.18        # MGs a tad higher than rifles
 @export var lethality_cap_per_volley: int = 2 # per target, per volley; 1 keeps spikes down
@@ -351,9 +351,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 		return 0
 	
-	var long_range: bool = false
-	if target_distance > s.weapon.range_hexes:
-		long_range = true
 	
 	#if s.jammed:
 		## simple unjam: use reload time as clear jam delay
@@ -392,11 +389,15 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 
 	# emit shots immediately into current window
+	# visual
 	_add_rounds_to_hex(target_hex, shots)
 	#fire_shot.emit()
+	
+	# audio
 	var auto_fire: bool = false
 	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
 		auto_fire = true
+	# audio
 	if shots > 0:
 		_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
 	
@@ -404,6 +405,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	s.rounds_in_mag -= shots
 	s.weapon.ammunition -= shots
 	
+	# handle riflegrenades
 	var riflegrenade: bool = false
 	if s.weapon.riflegrenade_loaded == true and target_distance <= s.weapon.riflegrenade_range:
 		riflegrenade = true
@@ -414,8 +416,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	else:
 		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
 	
-	#if riflegrenade:
-		#s.weapon.riflegrenade_loaded = false
 	
 	if shots <= 0:
 		# reload
@@ -433,8 +433,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if shots > 1:
 		pass
 	
-	
-	
 	# apply jam chance
 	#var k: int = 0
 	#var jammed_now: bool = false
@@ -446,6 +444,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	#if jammed_now:
 		#s.jammed = true
 	
+	# mortar reload
 	if not s.weapon.family == WeaponSpec.Family.MORTAR:
 		if not is_instance_valid(target_unit):
 			target_unit = null
@@ -481,7 +480,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
 	var life: float = dist / s.weapon.projectile_speed      # seconds
 	await get_tree().create_timer(life).timeout
-	fire_at(shots, long_range, s.weapon, riflegrenade, _mortar_target_hex)
+	
+	# handle result on enemy unit
+	fire_at(shots, s.weapon, riflegrenade, _mortar_target_hex)
 	return shots
 
 
@@ -588,12 +589,11 @@ func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
 
-func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i) -> void:
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i) -> void:
 	#return
 	var terrain_defense_bonus: float = target_cover
 	if weapon.family == WeaponSpec.Family.MORTAR:
 		terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_mortar_target_hex))
-	# --- range gating & power falloff ---
 
 	# --- collect all enemy squads in the target hex ---
 	var batch_targets: Array = []
@@ -613,6 +613,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 						if u.current_hex == target_hex:
 							batch_targets.append(u)
 	if batch_targets.is_empty():
+		# no enemys to be hit
 		return
 	
 	var cover_norm: float = float(terrain_defense_bonus) / max_cover_pts
@@ -621,31 +622,47 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	if cover_norm < 0.0:
 		cover_norm = 0.0
 	
-	# the idea here is that hard cover also modifies lethallity and not just accuracy, but needs rework
-	#var lethality_cover_mult: float = lerp(lethality_cover_min, lethality_cover_max, 1.0 - cover_norm)
-	var lethality_cover_mult: float = 1.0
-	lethality_cover_mult *= lerp(0.6, 1.0, 1.0 - (target_cover / 5)) # what does this?
+
 	
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
 	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
-	var _base_accuracy := 0.35
+	var _base_accuracy: float = 0.35
+	
 	var state_mod: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
-	var acc: float = base_accuracy * float(state_mod.acc)
-	acc *= clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
-	acc *= lerp(0.6, 1.0, 1.0 - (target_cover / 10)) # what does this?
+	var state_acc_mod: float = state_mod.acc
+	
+	var distance_mod: float = clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
+	
+	var cover_mod: float = cover_multiplier_exp(terrain_defense_bonus)
+	
+	var is_point_blank: bool = target_distance == 1
+	
 	var shooter_stress: float = 0.0
 	if unit and "stress_system" in unit:
 		shooter_stress = float(unit.stress_system.S_eff)
-	var shooter_stress_multiplier: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
-	acc *= shooter_stress_multiplier
-	if long_range:
-		acc *= 0.5
-
-	var is_point_blank: bool = target_distance == 1
-
+	var shooter_stress_mod: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
+	
+	var chance_to_hit: float = base_accuracy * state_acc_mod
+	chance_to_hit *= distance_mod
+	chance_to_hit *= cover_mod
+	chance_to_hit *= shooter_stress_mod
+	if is_point_blank:
+		chance_to_hit *= 2.0
+	else:
+		chance_to_hit *= 1.0
+	if riflegrenade == true:
+		if target_distance <= weapon.riflegrenade_range:
+			chance_to_hit *= 4
+		else:
+			chance_to_hit *= 2
+	if weapon.family == WeaponSpec.Family.SPIGOT_LAUNCHER or weapon.family == WeaponSpec.Family.ROCKET_LAUNCHER or weapon.family == WeaponSpec.Family.MORTAR:
+		if target_distance <= weapon.range_hexes:
+			chance_to_hit *= 4
+		else:
+			chance_to_hit *= 2
+	
 	var n_targets: int = batch_targets.size()
-	var p_hit_per_target: Array = []
-	var target_cover_vals: Array = []
+	var chance_to_hit_per_target: Array = []
 	
 	# --- slower recovery while under fire ---
 	var pressure_rps: float = float(total_rounds)   # or total_rounds / volley_dt if you track it
@@ -660,41 +677,20 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 
 	var i: int = 0
 	while i < n_targets:
-		var u: Node = batch_targets[i]
-		u.set_cover(terrain_defense_bonus)  # keep your existing hook
+		var u: Unit = batch_targets[i]
+		
+		# only visual update
+		u.set_cover(terrain_defense_bonus)
 		u.receive_fire(terrain_defense_bonus)
-
-		var exposure: float = 1.0
-		var cover_pts: float = float(terrain_defense_bonus)
-		target_cover_vals.append(cover_pts)
-
-		var p_hit_per_round: float = acc * exposure
-		var cover_multiplier: float = cover_multiplier_exp(cover_pts)
-		p_hit_per_round *= cover_multiplier
-
-		if is_point_blank:
-			p_hit_per_round *= 2.0
-		else:
-			p_hit_per_round *= 1.0
 		
 		var state: STATES.MoraleState = u.stress_system.state
 		if state == STATES.MoraleState.PANIC:
-			p_hit_per_round *= 4
+			chance_to_hit *= 4
+		if state == STATES.MoraleState.PINNED:
+			chance_to_hit *= 0.5
 		
-		if riflegrenade == true:
-			if target_distance <= weapon.riflegrenade_range:
-				p_hit_per_round *= 4
-			else:
-				p_hit_per_round *= 2
-		
-		if weapon.family == WeaponSpec.Family.SPIGOT_LAUNCHER or weapon.family == WeaponSpec.Family.ROCKET_LAUNCHER or weapon.family == WeaponSpec.Family.MORTAR:
-			if target_distance <= weapon.range_hexes:
-				p_hit_per_round *= 4
-			else:
-				p_hit_per_round *= 2
-		
-		p_hit_per_round = clamp(p_hit_per_round, 0.002, 0.95)
-		p_hit_per_target.append(p_hit_per_round)
+		chance_to_hit = clamp(chance_to_hit, 0.002, 0.95)
+		chance_to_hit_per_target.append(chance_to_hit)
 		i += 1
 
 	# --- assign each round to ONE squad and roll the hit there ---
@@ -710,7 +706,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 		while i < n_targets:
 			var ii: int = 0
 			while ii < 4:
-				var p_hit: float = float(p_hit_per_target[i])
+				var p_hit: float = float(chance_to_hit_per_target[i])
 				if randf() < p_hit:
 					hits_per_target[i] = int(hits_per_target[i]) + 1
 				ii += 1
@@ -721,16 +717,16 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 			# pick recipient squad
 			var idx: int = randi() % n_targets
 			# roll hit with that squad's p
-			var p_hit: float = float(p_hit_per_target[idx])
+			var p_hit: float = float(chance_to_hit_per_target[idx])
 			if randf() < p_hit:
 				hits_per_target[idx] = int(hits_per_target[idx]) + 1
 			i += 1
 
 	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
 	# Decide per-hit disable based on weapon; here we default to rifle numbers
-	var base_p_disable: float = 0.12
+	var chance_to_disable: float = 0.12
 	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
-		base_p_disable = 0.5
+		chance_to_disable = 0.5
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
 	# this should not matter when firing explosives
@@ -738,10 +734,16 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
 		lethality_range_mult = 1.0
 
+	# the idea here is that hard cover also modifies lethallity and not just accuracy, but needs rework
+	#var lethality_cover_mult: float = lerp(lethality_cover_min, lethality_cover_max, 1.0 - cover_norm)
+	#var lethality_cover_mult: float = lerp(0.6, 1.0, 1.0 - (target_cover / 5)) # what does this?
+	var lethality_cover_mult: float = cover_multiplier_exp(terrain_defense_bonus)
+	#lethality_cover_mult *= lethality_cover_mult
+
 	# Final per-hit disable after all throttles
-	var p_disable_final: float = base_p_disable * lethality_range_mult * lethality_cover_mult * casualty_scale
-	if p_disable_final < 0.01:
-		p_disable_final = 0.01  # tiny floor so hits can still matter
+	chance_to_disable = chance_to_disable * lethality_range_mult * lethality_cover_mult * casualty_scale
+	if chance_to_disable < 0.01:
+		chance_to_disable = 0.01  # tiny floor so hits can still matter
 
 	# Convert hits → casualties with a capped, smooth hazard form
 	# lambda = hits * p_disable_final;  p_cas = 1 - exp(-lambda)
@@ -753,7 +755,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 		var casualties_i: int = 0
 
 		if hits_i > 0:
-			var lambda_val: float = float(hits_i) * p_disable_final
+			var lambda_val: float = float(hits_i) * chance_to_disable
 			var p_cas: float = 1.0 - exp(-lambda_val)
 
 			var d: int = 0
@@ -778,7 +780,7 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	var mean_p_hit: float = 0.0
 	var iii: int = 0
 	while iii < n_targets:
-		mean_p_hit += float(p_hit_per_target[iii])
+		mean_p_hit += float(chance_to_hit_per_target[iii])
 		iii += 1
 	if n_targets > 0:
 		mean_p_hit /= float(n_targets)
@@ -789,11 +791,14 @@ func fire_at(total_rounds: int, long_range: bool, weapon: WeaponSpec, riflegrena
 	var s_fast: float = stress_fast_base + mean_p_hit * stress_fast_hit_factor
 
 	# slow stress grows with sheer volume; cover damps it
-	var s_slow: float = float(total_rounds) * stress_slow_per_round
+	var s_slow: float = float(total_rounds) #* stress_slow_per_round
 	
 	# apply cover damp to stress (not boost!)
-	s_fast *= _stress_cover_mult(cover_norm, stress_cover_fast_min)
-	s_slow *= _stress_cover_mult(cover_norm, stress_cover_slow_min)
+	var stress_cover_mod: float = cover_multiplier_exp(terrain_defense_bonus) # 1 cover = 1.0; 3 cover = 0.63
+	var stress_cover_fast_mod: float = _stress_cover_mult(cover_norm, stress_cover_fast_min) # 1 cover = 1.0; 3 cover = 0.63
+	var stress_cover_slow_mod: float = _stress_cover_mult(cover_norm, stress_cover_slow_min) # 1 cover = 1.0; 3 cover = 0.76
+	s_fast *= stress_cover_mod
+	s_slow *= stress_cover_mod
 
 	# point-blank fear spike
 	if int(target_distance) == 1:
