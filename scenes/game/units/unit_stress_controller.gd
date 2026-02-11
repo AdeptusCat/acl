@@ -103,6 +103,12 @@ var _how_long_under_fire_util_rout_s: float = 4.0
 var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
 
+var stress_window_duration: float = 10.0
+var stress_time_accumulator: float = 0.0
+
+var stress_buckets: Array[float] = []
+var bucket_times: Array[float] = []
+
 # --- SIGNALS ---
 signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
@@ -160,115 +166,163 @@ func get_rally_bonus() -> float:
 	return s
 
 
-func _physics_process(delta: float) -> void:
-	match state:
-		STATES.MoraleState.CAUTIOUS:
-			_repin_since_unpin += delta
-		STATES.MoraleState.PINNED:
-			_since_pinned += delta
-		STATES.MoraleState.PANIC:
-			if _how_long_under_fire_s > _how_long_under_fire_util_rout_s:
-				state_changed.emit(state, state)
-				_how_long_under_fire_s = 0.0
+func get_average_stress_rate() -> float:
+	var total: float = 0.0
+	var i: int = 0
+	while i < stress_buckets.size():
+		total += stress_buckets[i]
+		i += 1
+	if total > 0.0:
+		pass
+	return total / stress_window_duration
+
+
+func _process(delta: float) -> void:
+	#match state:
+		#STATES.MoraleState.CAUTIOUS:
+			#_repin_since_unpin += delta
+		#STATES.MoraleState.PINNED:
+			#_since_pinned += delta
+		#STATES.MoraleState.PANIC:
+			#if _how_long_under_fire_s > _how_long_under_fire_util_rout_s:
+				#state_changed.emit(state, state)
+				#_how_long_under_fire_s = 0.0
+	#
+	#if not state == STATES.MoraleState.PANIC:
+		#_how_long_under_fire_s = 0.0
 	
-	if not state == STATES.MoraleState.PANIC:
-		_how_long_under_fire_s = 0.0
+	## decay using exponential form so we can scale the *rate* cleanly
+	#var ln2: float = 0.69314718056
+	#var lambda_fast: float = 0.0
+	#var lambda_slow: float = 0.0
+#
+	#if half_life_fast > 0.0:
+		#lambda_fast = ln2 * delta / half_life_fast
+	#if half_life_slow > 0.0:
+		#lambda_slow = ln2 * delta / half_life_slow
+#
+	## global recovery scaling
+	#if recovery_scale < 0.0:
+		#recovery_scale = 0.0
+	#lambda_fast *= recovery_scale
+	#lambda_slow *= recovery_scale
+#
+	## slower decay while under fire
+	#if _under_fire_t > 0.0:
+		#_how_long_under_fire_s += delta
+		#var x: float = 0.0
+		#if pressure_ref_rps > 0.0:
+			#x = clamp(_last_pressure_rps / pressure_ref_rps, 0.0, 1.0)
+		## map pressure to a rate multiplier between light and heavy slowdowns
+		#var rate_mult: float = lerp(slowdown_light, slowdown_heavy, x)
+		#if rate_mult < 0.0:
+			#rate_mult = 0.0
+		#lambda_fast *= rate_mult
+		#lambda_slow *= rate_mult
+		## optional: freeze fast-stress under heavy pressure
+		#if stop_fast_decay_when_heavy:
+			#if _last_pressure_rps >= pressure_ref_rps:
+				#lambda_fast = 0.0
+#
+		#_under_fire_t -= delta
+		#if _under_fire_t < 0.0:
+			#_under_fire_t = 0.0
+#
+	## --- panic slows recovery ---
+	#if state == STATES.MoraleState.PANIC:
+		#var m_slow: float = clamp(panic_decay_mult_slow, 0.0, 1.0)
+		#var m_fast: float = clamp(panic_decay_mult_fast, 0.0, 1.0)
+		#lambda_slow *= m_slow
+		#lambda_fast *= m_fast
+		#if panic_freeze_fast_when_panic:
+			#lambda_fast = 0.0
+		#if get_parent().movement.retreating:
+			#lambda_slow = 0.0
+			#lambda_fast = 0.0
+	## --- leader speeds recovery a touch, still rate-based ---
+	#var decay_boost: float = 1.0 + _leader_effect * 10.0
+	## turn rates into multipliers
+	#var kf: float = 1.0
+	#var ks: float = 1.0
+	#if lambda_fast > 0.0:
+		#lambda_fast *= decay_boost
+		#kf = exp(-lambda_fast)
+	#if lambda_slow > 0.0:
+		#lambda_slow *= decay_boost
+		#ks = exp(-lambda_slow)
+
 	
-	# decay using exponential form so we can scale the *rate* cleanly
-	var ln2: float = 0.69314718056
-	var lambda_fast: float = 0.0
-	var lambda_slow: float = 0.0
-
-	if half_life_fast > 0.0:
-		lambda_fast = ln2 * delta / half_life_fast
-	if half_life_slow > 0.0:
-		lambda_slow = ln2 * delta / half_life_slow
-
-	# global recovery scaling
-	if recovery_scale < 0.0:
-		recovery_scale = 0.0
-	lambda_fast *= recovery_scale
-	lambda_slow *= recovery_scale
-
-	# slower decay while under fire
-	if _under_fire_t > 0.0:
-		_how_long_under_fire_s += delta
-		var x: float = 0.0
-		if pressure_ref_rps > 0.0:
-			x = clamp(_last_pressure_rps / pressure_ref_rps, 0.0, 1.0)
-		# map pressure to a rate multiplier between light and heavy slowdowns
-		var rate_mult: float = lerp(slowdown_light, slowdown_heavy, x)
-		if rate_mult < 0.0:
-			rate_mult = 0.0
-		lambda_fast *= rate_mult
-		lambda_slow *= rate_mult
-		# optional: freeze fast-stress under heavy pressure
-		if stop_fast_decay_when_heavy:
-			if _last_pressure_rps >= pressure_ref_rps:
-				lambda_fast = 0.0
-
-		_under_fire_t -= delta
-		if _under_fire_t < 0.0:
-			_under_fire_t = 0.0
-
-	# --- panic slows recovery ---
-	if state == STATES.MoraleState.PANIC:
-		var m_slow: float = clamp(panic_decay_mult_slow, 0.0, 1.0)
-		var m_fast: float = clamp(panic_decay_mult_fast, 0.0, 1.0)
-		lambda_slow *= m_slow
-		lambda_fast *= m_fast
-		if panic_freeze_fast_when_panic:
-			lambda_fast = 0.0
-		if get_parent().movement.retreating:
-			lambda_slow = 0.0
-			lambda_fast = 0.0
-	# --- leader speeds recovery a touch, still rate-based ---
-	var decay_boost: float = 1.0 + _leader_effect * 10.0
-	# turn rates into multipliers
-	var kf: float = 1.0
-	var ks: float = 1.0
-	if lambda_fast > 0.0:
-		lambda_fast *= decay_boost
-		kf = exp(-lambda_fast)
-	if lambda_slow > 0.0:
-		lambda_slow *= decay_boost
-		ks = exp(-lambda_slow)
-
+	
+	
 	# apply decay
 	#stress_fast *= (kf * (1.0 - leader_presence_strength)  )
 	#stress_slow *= (ks * (1.0 - leader_presence_strength)  )
 	#stress_fast *= (kf * 0.9)
 	#stress_slow *= (ks * 0.9)
-	stress_fast *= kf
-	stress_slow *= ks
+	#stress_fast *= kf
+	#stress_slow *= ks
+	
+	var i: int = 0
+	while i < bucket_times.size():
+		bucket_times[i] += delta
+		i += 1
+
+	# remove entries older than window
+	i = 0
+	while i < bucket_times.size():
+		if bucket_times[i] > stress_window_duration:
+			stress_buckets.remove_at(i)
+			bucket_times.remove_at(i)
+		else:
+			i += 1
+	
+	
+	
 	
 	_clamp_bins()
 	
-	# --- smooth leader effect so it never steps the meter ---
-	var target_leader: float = clamp(leadership_bonus, 0.0, 1.0)
-	var blend: float = 1.0
-	if leader_effect_smooth_s > 0.0:
-		blend = clamp(delta / leader_effect_smooth_s, 0.0, 1.0)
-	_leader_effect = lerp(_leader_effect, target_leader, blend)
-
-	# effective stress with leadership & cohesion softening
-	#var softener: float = 1.0 - clamp(0.5 * leadership_bonus + 0.3 * cohesion, 0.0, 0.6)
-	var _softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
-	S_eff = (w_fast * stress_fast + w_slow * stress_slow) # * softener
-	#S_eff = stress_fast + stress_slow
-	#S_eff *= 4.0
-	#S_eff *= leader_presence_strength
-	#if (leader_presence_strength > 0.0):
-		#print(S_eff)
-	if S_eff > 0:
-		print(S_eff)
+	# - 1.0 stress per seconds
+	var stress_decay_f_per_second: float = leader_presence_strength
+	var stress_decay_s_per_second: float = leader_presence_strength
+	if leader_presence_strength == 0.0:
+		stress_decay_f_per_second = 0.1
+		stress_decay_s_per_second = 0.1
+	var stress_decay_f_with_delta: float = stress_decay_f_per_second * delta
+	var stress_decay_s_with_delta: float = stress_decay_s_per_second * delta
+	stress_fast -= stress_decay_f_with_delta
+	stress_slow -= stress_decay_s_with_delta
+	S_eff = stress_fast + stress_slow
+	
 	if S_eff < 0.0:
 		S_eff = 0.0
 	if S_eff > S_CAP:
 		S_eff = S_CAP
+	
+	if S_eff > 0.0:
+		print(S_eff)
+	var average_stress_rate: float = get_average_stress_rate()
+	if average_stress_rate > 0.0:
+		print(average_stress_rate)
+	
+	## --- smooth leader effect so it never steps the meter ---
+	#var target_leader: float = clamp(leadership_bonus, 0.0, 1.0)
+	#var blend: float = 1.0
+	#if leader_effect_smooth_s > 0.0:
+		#blend = clamp(delta / leader_effect_smooth_s, 0.0, 1.0)
+	#_leader_effect = lerp(_leader_effect, target_leader, blend)
+#
+	## effective stress with leadership & cohesion softening
+	##var softener: float = 1.0 - clamp(0.5 * leadership_bonus + 0.3 * cohesion, 0.0, 0.6)
+	#var _softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
+	##S_eff = (w_fast * stress_fast + w_slow * stress_slow) # * softener
+	##S_eff = stress_fast + stress_slow
+	##S_eff *= 4.0
+	##S_eff *= leader_presence_strength
+	##if (leader_presence_strength > 0.0):
+		##print(S_eff)
 
-	if leadership_bonus > 0.0:
-		pass
+	#if leadership_bonus > 0.0:
+		#pass
 
 	_since_change += delta
 	_maybe_transition(delta)
@@ -297,10 +351,14 @@ func apply_stress(df: float, ds: float) -> void:
 		leader_mult = 1.0
 
 	var eff_scale: float = base_scale * leader_mult
-
+	var stress_fast_added: float = df_in * eff_scale
+	var stress_slow_added: float = ds_in * eff_scale
 	stress_fast += df_in * eff_scale
 	stress_slow += ds_in * eff_scale
 	_clamp_bins()
+	
+	stress_buckets.append(stress_fast_added + stress_slow_added)
+	bucket_times.append(0.0)
 
 
 func _get_current_leader_effect() -> float:
