@@ -1724,5 +1724,4 @@ func _on_command_connectivity_timeout() -> void:
 		command_connectivity.compute_connectivity(self, command_squad)
 		draw_command_link_strength.emit(self.current_hex, command_squad.current_hex, command_connectivity.command_link_strength)
 		draw_leader_presence_strength.emit(self.current_hex, command_squad.current_hex, command_connectivity.leader_presence_strength)
-		print(command_connectivity.leader_presence_strength)
 		stress_system.leader_presence_strength = command_connectivity.leader_presence_strength
