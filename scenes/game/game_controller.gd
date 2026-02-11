@@ -96,6 +96,8 @@ func _ready():
 			unit.unit_surrendered.connect(_on_unit_surrendered)
 			unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
 			unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
+			unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
+			unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
 	
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	

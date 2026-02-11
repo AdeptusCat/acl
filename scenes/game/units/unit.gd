@@ -42,6 +42,7 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var machine_guns: int = 0
 @export var members_alive := 10
 @export var loadouts: Array[SoldierLoadout] = []
+@export var command_squad: Unit = null
 
 # optional defaults to speed setup (assign in the inspector)
 @export var default_rifle: WeaponSpec
@@ -109,6 +110,10 @@ signal soldiers_changed
 signal state_chaged(state: int)
 signal new_target_hex(unit: Unit, hex: Vector2i)
 
+signal draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
+signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
+
+
 # === Nodes ===
 @onready var ui := $UnitUi
 @onready var stress_system: StressController = $UnitStressController
@@ -117,6 +122,7 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 @onready var squad_fire: SquadFireController = $SquadFireController
 @onready var weapon_audio: WeaponAudio = $WeaponAudio
 @onready var action_controller: SquadActionController = $SquadActionController
+@onready var command_connectivity: CommandConnectivity = $CommandConnectivity
 
 # === DEBUG ===
 @onready var action_label := $ActionLabel
@@ -1711,3 +1717,12 @@ func is_probe_candidate() -> bool:
 
 func is_mg_team() -> bool:
 	return squadType == Unit.SquadType.MG
+
+
+func _on_command_connectivity_timeout() -> void:
+	if is_instance_valid(command_squad):
+		command_connectivity.compute_connectivity(self, command_squad)
+		draw_command_link_strength.emit(self.current_hex, command_squad.current_hex, command_connectivity.command_link_strength)
+		draw_leader_presence_strength.emit(self.current_hex, command_squad.current_hex, command_connectivity.leader_presence_strength)
+		print(command_connectivity.leader_presence_strength)
+		stress_system.leader_presence_strength = command_connectivity.leader_presence_strength

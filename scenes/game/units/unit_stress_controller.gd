@@ -108,6 +108,8 @@ signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
 signal leadership_changed(_leadership_bonus: float)
 
+var leader_presence_strength: float = 0.0
+
 class LeadershipMod:
 	var bonus: float
 	var rally: float
@@ -247,7 +249,12 @@ func _physics_process(delta: float) -> void:
 	# effective stress with leadership & cohesion softening
 	#var softener: float = 1.0 - clamp(0.5 * leadership_bonus + 0.3 * cohesion, 0.0, 0.6)
 	var _softener: float = 1.0 - clamp(0.5 * leadership_bonus, 0.0, 0.6)
-	S_eff = (w_fast * stress_fast + w_slow * stress_slow) # * softener
+	S_eff = (w_fast * stress_fast + w_slow * stress_slow) * (1.0 - leader_presence_strength)  # * softener
+	
+	#S_eff *= leader_presence_strength
+	if (leader_presence_strength > 0.0):
+		print(S_eff)
+	
 	if S_eff < 0.0:
 		S_eff = 0.0
 	if S_eff > S_CAP:

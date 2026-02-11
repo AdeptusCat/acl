@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cwhe3w1khnk8d" path="res://scenes/game/audio/weapon_audio.tscn" id="10_7ghvu"]
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
 [ext_resource type="PackedScene" uid="uid://iyamws00k7as" path="res://scenes/game/units/squad_action_controller.tscn" id="11_7ghvu"]
+[ext_resource type="PackedScene" uid="uid://b3mkn0m2t3v1t" path="res://scenes/game/units/command_connectivity.tscn" id="11_kkgbq"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
 script = ExtResource("2_h0ojj")
@@ -65,4 +66,10 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "#"
 
+[node name="CommandConnectivity" parent="." unique_id=1170922127 instance=ExtResource("11_kkgbq")]
+
+[node name="CommandConnectivityTimer" type="Timer" parent="." unique_id=236328625]
+autostart = true
+
 [connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]
+[connection signal="timeout" from="CommandConnectivityTimer" to="." method="_on_command_connectivity_timeout"]
