@@ -121,7 +121,7 @@ func set_soldiers(list: Array[Soldier]) -> void:
 					
 func set_target_unit(targetUnit: Unit) -> void:
 	var hex: Vector2i = Vector2i.ZERO
-	var distance: int = INF
+	var distance: int
 	target_cover = 0
 	if targetUnit:
 		distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
@@ -680,7 +680,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 		var u: Unit = batch_targets[i]
 		
 		# only visual update
-		u.set_cover(terrain_defense_bonus)
+		u.set_cover(int(terrain_defense_bonus))
 		u.receive_fire(terrain_defense_bonus)
 		
 		var state: STATES.MoraleState = u.stress_system.state

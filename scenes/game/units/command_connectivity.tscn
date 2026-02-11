@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b3mkn0m2t3v1t"]
+
+[ext_resource type="Script" uid="uid://ch1irbld7ktos" path="res://scenes/game/units/command_connectivity.gd" id="1_il8hv"]
+
+[node name="CommandConnectivity" type="Node" unique_id=1170922127]
+script = ExtResource("1_il8hv")

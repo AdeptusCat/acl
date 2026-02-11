@@ -1377,7 +1377,7 @@ func get_unique_random_ints(n: int, _max: int) -> Array[int]:
 	return all_nums.slice(0, n)
 
 func _set_combat_ineffective():
-	stress_system.state = StressController.MoraleState.COMBAT_INEFFECTIVE
+	stress_system.state = STATES.MoraleState.COMBAT_INEFFECTIVE
 	ui.state_changed(stress_system.state)
 	die()
 	#emit_signal("state_changed",
