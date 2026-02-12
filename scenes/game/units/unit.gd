@@ -198,8 +198,12 @@ func order(cmd: Globals.UnitCmd, parameter):
 	match cmd:
 		Globals.UnitCmd.ATTACK:
 			if squadType == Unit.SquadType.MORTAR:
-				var map_hex: Vector2i = parameter as Vector2i
-				fire_mortar(map_hex)
+				if parameter is Unit:
+					var enemy_unit: Unit = parameter as Unit
+					squad_fire.set_target_unit(enemy_unit)
+				else:
+					var map_hex: Vector2i = parameter as Vector2i
+					fire_mortar(map_hex)
 			else:
 				var enemy_unit: Unit = parameter as Unit
 				squad_fire.set_target_unit(enemy_unit)

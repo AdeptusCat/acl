@@ -11,6 +11,7 @@ var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.CAUTIOUS : 0.9,
 		STATES.MoraleState.PINNED : 0.5,
 		STATES.MoraleState.PANIC : 0.0,
+		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
 	}
 var _command_unit_state: STATES.MoraleState
 
