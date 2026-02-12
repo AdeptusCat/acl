@@ -6,9 +6,27 @@ var _voice_range_to_leader: bool = false
 var _runner_chain_to_leader: bool = false
 var _radio_link_to_leader: bool = false
 
+var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
+		STATES.MoraleState.NORMAL : 1.0,
+		STATES.MoraleState.CAUTIOUS : 0.9,
+		STATES.MoraleState.PINNED : 0.5,
+		STATES.MoraleState.PANIC : 0.0,
+	}
+var _command_unit_state: STATES.MoraleState
+
 var command_link_strength: float = 0.0
 var leader_presence_strength: float = 0.0
 
+
+var command_unit_state: STATES.MoraleState:
+	set(value):
+		if _command_unit_state == value:
+			return
+		_command_unit_state = value
+		update_command_link_strength()
+		compute_morale_link_strength()
+	get:
+		return _command_unit_state
 
 var los_to_leader: bool:
 	set(value):
@@ -67,8 +85,9 @@ func update_command_link_strength() -> void:
 					strength = 0.4
 				else:
 					strength = 0.0
-
-	command_link_strength = strength
+	
+	var _state_mod: float = _state_mod_dict[_command_unit_state]
+	command_link_strength = strength * _state_mod
 
 
 func compute_morale_link_strength() -> void:
@@ -94,11 +113,13 @@ func compute_morale_link_strength() -> void:
 					else:
 						best = 0.0
 	
-	leader_presence_strength = best
+	var _state_mod: float = _state_mod_dict[_command_unit_state]
+	leader_presence_strength = best * _state_mod
 
 
 func compute_connectivity(unit: Unit, command_squad: Unit):
 	if is_instance_valid(command_squad):
+		command_unit_state = command_squad.stress_system.state
 		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, command_squad.current_cube)
 		
 		var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, [])

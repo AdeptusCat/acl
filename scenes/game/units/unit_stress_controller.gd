@@ -282,8 +282,8 @@ func _process(delta: float) -> void:
 	_clamp_bins()
 	
 	# - 1.0 stress per seconds
-	var stress_decay_f_per_second: float = leader_presence_strength
-	var stress_decay_s_per_second: float = leader_presence_strength
+	var stress_decay_f_per_second: float = leader_presence_strength * 5.0
+	var stress_decay_s_per_second: float = leader_presence_strength * 5.0
 	if leader_presence_strength == 0.0:
 		stress_decay_f_per_second = 0.1
 		stress_decay_s_per_second = 0.1
@@ -298,11 +298,11 @@ func _process(delta: float) -> void:
 	if S_eff > S_CAP:
 		S_eff = S_CAP
 	
-	if S_eff > 0.0:
-		print(S_eff)
+	#if S_eff > 0.0:
+		#print(S_eff)
 	var average_stress_rate: float = get_average_stress_rate()
-	if average_stress_rate > 0.0:
-		print(average_stress_rate)
+	#if average_stress_rate > 0.0:
+		#print(average_stress_rate)
 	
 	## --- smooth leader effect so it never steps the meter ---
 	#var target_leader: float = clamp(leadership_bonus, 0.0, 1.0)
@@ -387,12 +387,12 @@ func _get_current_leader_effect() -> float:
 func on_casualty_event(n: int, leader_down: bool = false) -> void:
 	if n < 0:
 		n = 0
-	stress_fast += 18.0 * float(n)
-	stress_slow += 6.0 * float(n)
-	if leader_down:
-		stress_fast += 22.0
-		stress_slow += 10.0
-	_clamp_bins()
+	#stress_fast += 10.0 * float(n) * leader_presence_strength
+	#stress_slow += 4.0 * float(n) * leader_presence_strength
+	#if leader_down:
+		#stress_fast += 20.0 * leader_presence_strength
+		#stress_slow += 8.0 * leader_presence_strength
+	#_clamp_bins()
 
 # call this whenever rounds crack overhead (per volley)
 func mark_under_fire(pressure_rps: float) -> void:

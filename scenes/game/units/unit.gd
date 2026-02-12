@@ -13,6 +13,19 @@ enum SquadType {
 	COMPANY_HEADQUARTERS,
 }
 
+enum Company {
+	A,
+	B,
+	C,
+	D,
+	E,
+	F,
+}
+
+@export var squad: int = 0
+@export var platoon: int = 0
+@export var company: Company = Company.A
+
 enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 
 const ENEMY_MEMORY_LIFETIME: float = 6.0

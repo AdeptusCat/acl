@@ -98,6 +98,16 @@ func _ready():
 			unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
 			unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
 			unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
+			Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
+			
+	for unit in Globals.units:
+		if unit is Unit:
+			# assign platoon headquarter to squad 
+			if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+				unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
+			# assign company headquarter to platoon headquarter 
+			if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+				unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 	
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	

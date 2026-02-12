@@ -36,7 +36,7 @@ var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput
 var accuracy_multiplier: float = 1.0
 
 @export var stress_scale := 1.0             # global tuning
-@export var stress_fast_base: float = 12.0       # baseline shock of “being shot at” 8
+@export var stress_fast_base: float = 10.0       # baseline shock of “being shot at” 
 @export var stress_fast_hit_factor: float = 20.0# adds with mean p_hit (0..1) 12
 @export var stress_slow_per_round: float = 0.6  # accrues with volume
 @export var stress_point_blank_bonus: float = 1.5 # extra fear at 1 hex
@@ -757,7 +757,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 		if hits_i > 0:
 			var lambda_val: float = float(hits_i) * chance_to_disable
 			var p_cas: float = 1.0 - exp(-lambda_val)
-
+			
 			var d: int = 0
 			while d < hits_i:
 				if randf() < p_cas:
@@ -777,18 +777,10 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 
 
 	# --- compute ONE shared stress payload (equal for all squads) ---
-	var mean_p_hit: float = 0.0
-	var iii: int = 0
-	while iii < n_targets:
-		mean_p_hit += float(chance_to_hit_per_target[iii])
-		iii += 1
-	if n_targets > 0:
-		mean_p_hit /= float(n_targets)
-	else:
-		mean_p_hit = 0.0
+	var mean_chance_to_hit: float = _get_mean_change_to_hit(chance_to_hit_per_target, n_targets)
 
 	# base fast shock + how “accurate” incoming fire looks
-	var s_fast: float = stress_fast_base + mean_p_hit * stress_fast_hit_factor
+	var s_fast: float = stress_fast_base + mean_chance_to_hit * stress_fast_hit_factor * float(total_rounds)
 
 	# slow stress grows with sheer volume; cover damps it
 	var s_slow: float = float(total_rounds) #* stress_slow_per_round
@@ -804,21 +796,24 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	if int(target_distance) == 1:
 		s_fast *= stress_point_blank_bonus
 		s_slow *= stress_point_blank_bonus
-	else:
-		s_fast *= 1.0
-		s_slow *= 1.0
+	
+	# distance mod
+	var stress_distance_mod: float = float(target_distance) / float(weapon.range_hexes)
+	stress_distance_mod = 1.0 - 0.5 * stress_distance_mod
+	s_fast *= stress_distance_mod
+	s_slow *= stress_distance_mod
+	
+	## crossfire bonus if you track it outside; else leave 0.0
+	#if stress_crossfire_bonus > 0.0:
+		#s_fast *= (1.0 + stress_crossfire_bonus)
+		#s_slow *= (1.0 + stress_crossfire_bonus)
+	#else:
+		#s_fast *= 1.0
+		#s_slow *= 1.0
 
-	# crossfire bonus if you track it outside; else leave 0.0
-	if stress_crossfire_bonus > 0.0:
-		s_fast *= (1.0 + stress_crossfire_bonus)
-		s_slow *= (1.0 + stress_crossfire_bonus)
-	else:
-		s_fast *= 1.0
-		s_slow *= 1.0
-
-	# weapon flavour & global scale
-	s_fast *= weapon_stress_mult * stress_scale
-	s_slow *= weapon_stress_mult * stress_scale
+	## weapon flavour & global scale
+	#s_fast *= weapon_stress_mult * stress_scale
+	#s_slow *= weapon_stress_mult * stress_scale
 
 	# clamp so one volley can’t nuke morale outright
 	if s_fast > stress_max_per_volley:
@@ -849,20 +844,23 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	var kill_slow: float = 0.0
 	if casualties_total > 0:
 		# fast spike: first KIA hits hardest, the rest add smaller spikes
-		kill_fast = stress_kill_fast_first
-		if casualties_total > 1:
-			kill_fast += float(casualties_total - 1) * stress_kill_fast_each
+		#kill_fast = stress_kill_fast_first
+		#if casualties_total > 1:
+			#kill_fast += float(casualties_total - 1) * stress_kill_fast_each
+		
+		kill_fast = float(casualties_total) * stress_kill_fast_each
+		
 		# slow dread scales with body count
 		kill_slow = float(casualties_total) * stress_kill_slow_each
 
-		# scale by loss ratio (bigger shock for small, mauled groups)
-		var ratio: float = 0.0
-		if members_total_before > 0:
-			ratio = float(casualties_total) / float(members_total_before)
-		var ratio_mult: float = 1.0 + ratio * stress_kill_ratio_bonus
+		## scale by loss ratio (bigger shock for small, mauled groups)
+		#var ratio: float = 0.0
+		#if members_total_before > 0:
+			#ratio = float(casualties_total) / float(members_total_before)
+		#var ratio_mult: float = 1.0 + ratio * stress_kill_ratio_bonus
 
-		kill_fast *= ratio_mult
-		kill_slow *= ratio_mult
+		#kill_fast *= ratio_mult
+		#kill_slow *= ratio_mult
 
 		# per-volley casualty shock caps (separate from your general stress clamp)
 		if kill_fast > stress_kill_max_per_volley:
@@ -880,22 +878,36 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 		var u_apply: Node = batch_targets[i]
 		var cas_i: int = int(casualties_per_target[i])
 
-		var rf: float = 1.0
-		if "stress_resilience" in u_apply:
-			rf = float(u_apply.stress_resilience)
+		#var rf: float = 1.0
+		#if "stress_resilience" in u_apply:
+			#rf = float(u_apply.stress_resilience)
 
-		var s_fast_final: float = s_fast * rf
-		var s_slow_final: float = s_slow * rf
+		#var s_fast_final: float = s_fast * rf
+		#var s_slow_final: float = s_slow * rf
+		#
+		## debug, or rather balance?
+		#s_fast_final *= 0.2
+		#s_slow_final *= 0.2
 		
-		# debug, or rather balance?
-		s_fast_final *= 0.2
-		s_slow_final *= 0.2
-		
-		s_fast_final *= total_rounds
-		s_slow_final *= total_rounds
+		#s_fast *= total_rounds
+		#s_slow *= total_rounds
 
-		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast_final, s_slow_final, self)
+		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast, s_slow, self)
 		i += 1
+
+
+func _get_mean_change_to_hit(chance_to_hit_per_target: Array, n_targets: int) -> float:
+	var mean_p_hit: float = 0.0
+	var iii: int = 0
+	while iii < n_targets:
+		mean_p_hit += float(chance_to_hit_per_target[iii])
+		iii += 1
+	if n_targets > 0:
+		mean_p_hit /= float(n_targets)
+	else:
+		mean_p_hit = 0.0
+	return mean_p_hit
+
 
 func _range_lethality_mult(distance_in_hexes: int, max_range: int) -> float:
 	# 1 hex: 1.0; <= max_range: mid; <= 2x max: far; else 0 (but you don’t shoot then).
