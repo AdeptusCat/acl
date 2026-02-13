@@ -136,6 +136,8 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 @onready var weapon_audio: WeaponAudio = $WeaponAudio
 @onready var action_controller: SquadActionController = $SquadActionController
 @onready var command_connectivity: CommandConnectivity = $CommandConnectivity
+@onready var enemy_visiblity_checker: EnemyVisibilityChecker = $EnemyVisibilityChecker
+
 
 # === DEBUG ===
 @onready var action_label := $ActionLabel
@@ -1742,3 +1744,7 @@ func _on_command_connectivity_timeout() -> void:
 		draw_command_link_strength.emit(team, self.current_hex, command_squad.current_hex, command_connectivity.command_link_strength)
 		draw_leader_presence_strength.emit(team, self.current_hex, command_squad.current_hex, command_connectivity.leader_presence_strength)
 		stress_system.leader_presence_strength = command_connectivity.leader_presence_strength
+
+
+func _on_enemy_visibility_checker_timer_timeout() -> void:
+	enemy_visiblity_checker.check_enemy_visibility(self)

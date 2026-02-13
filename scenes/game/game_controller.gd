@@ -231,14 +231,34 @@ func draw_fog():
 
 
 func show_visible_units():
+	var units_seen: Array = []
+	#for u in Globals.units:
+		#if not is_instance_valid(u):
+			#continue
+		#if not u.team == Globals.team_player:
+			#u.visible = false
 	for u in Globals.units:
 		if not is_instance_valid(u):
 			continue
+		if u.team == Globals.team_player:
+			var units_in_los: Array = Globals.unit_visible_enemies.get(u, [])
+			for unit_in_los in units_in_los:
+				if not units_seen.has(unit_in_los):
+					units_seen.append(unit_in_los)
+	
+	for u in Globals.units:
+		if not is_instance_valid(u):
+				continue
 		if not u.team == Globals.team_player:
-			if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
+			if units_seen.has(u):
 				u.visible = true
 			else:
-				u.visible = false 
+				u.visible = false
+			
+			#if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
+				#u.visible = true
+			#else:
+				#u.visible = false 
 
 
 func update_visible_hexes():
@@ -542,6 +562,7 @@ func _on_unit_surrendered(_unit):
 func _on_unit_died(unit):
 	Globals.units.erase(unit)
 	Globals.unit_visible_enemies.erase(unit)
+	Globals.unit_enemies_in_los.erase(unit)
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
@@ -682,3 +703,35 @@ func _on_zoom_out():
 
 func _on_spawn_timer_timeout() -> void:
 	spawn_formation()
+
+
+func _on_unit_visiblity_checker_timer_timeout() -> void:
+	#for unit in Globals.units:
+		#var enemys_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+		#var enemys_visible: Array = Globals.unit_visible_enemies.get(unit, [])
+		#Globals.unit_visible_enemies[unit] = []
+		#for enemy in enemys_in_los:
+			#if enemys_visible.has(enemy):
+				#continue
+			#Globals.unit_visible_enemies[unit].append(enemy)
+	#show_visible_units()
+	
+	
+	var next_visible: Dictionary = {}
+
+	for unit in Globals.units:
+		if not is_instance_valid(unit):
+			continue
+
+		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+		var filtered: Array = []
+
+		for enemy in enemies_in_los:
+			if not is_instance_valid(enemy):
+				continue
+			filtered.append(enemy)
+
+		next_visible[unit] = filtered
+
+	Globals.unit_visible_enemies = next_visible
+	show_visible_units()

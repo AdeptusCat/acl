@@ -4,3 +4,9 @@
 
 [node name="GameController" type="Node2D" unique_id=41955973]
 script = ExtResource("1_hj0dx")
+
+[node name="UnitVisiblityCheckerTimer" type="Timer" parent="." unique_id=1713787415]
+wait_time = 0.1
+autostart = true
+
+[connection signal="timeout" from="UnitVisiblityCheckerTimer" to="." method="_on_unit_visiblity_checker_timer_timeout"]

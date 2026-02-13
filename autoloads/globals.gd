@@ -7,6 +7,7 @@ var game_started: bool = false
 var objective_hexes: Dictionary[Team, Array]
 var game_mode: GameMode
 var unit_visible_enemies: Dictionary
+var unit_enemies_in_los: Dictionary
 var units: Array[Unit]
 
 

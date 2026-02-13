@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://c4cp2gctv8fgk" path="res://scenes/game/units/unit_ui.tscn" id="10_ga1pk"]
 [ext_resource type="PackedScene" uid="uid://iyamws00k7as" path="res://scenes/game/units/squad_action_controller.tscn" id="11_7ghvu"]
 [ext_resource type="PackedScene" uid="uid://b3mkn0m2t3v1t" path="res://scenes/game/units/command_connectivity.tscn" id="11_kkgbq"]
+[ext_resource type="PackedScene" uid="uid://b7txttbtaphxv" path="res://scenes/game/units/enemy_visibility_checker.tscn" id="12_kkgbq"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
 script = ExtResource("2_h0ojj")
@@ -26,9 +27,6 @@ metadata/_custom_type_script = "uid://bikdnoi2rxdle"
 
 [node name="Unit" type="Node2D" unique_id=437630089 groups=["units"]]
 script = ExtResource("1_btf8p")
-squad = null
-platoon = null
-company = null
 retreat_speed = 100.0
 fire_rate = 1.5
 default_rifle = SubResource("Resource_v8x2n")
@@ -74,5 +72,12 @@ text = "#"
 [node name="CommandConnectivityTimer" type="Timer" parent="." unique_id=236328625]
 autostart = true
 
+[node name="EnemyVisibilityChecker" parent="." unique_id=1906807248 instance=ExtResource("12_kkgbq")]
+
+[node name="EnemyVisibilityCheckerTimer" type="Timer" parent="." unique_id=961635982]
+wait_time = 0.1
+autostart = true
+
 [connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]
 [connection signal="timeout" from="CommandConnectivityTimer" to="." method="_on_command_connectivity_timeout"]
+[connection signal="timeout" from="EnemyVisibilityCheckerTimer" to="." method="_on_enemy_visibility_checker_timer_timeout"]

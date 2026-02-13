@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b7txttbtaphxv"]
+
+[ext_resource type="Script" uid="uid://b35h7xqsaif5y" path="res://scenes/game/units/enemy_visibility_checker.gd" id="1_xt6w0"]
+
+[node name="EnemyVisibilityChecker" type="Node" unique_id=1906807248]
+script = ExtResource("1_xt6w0")
