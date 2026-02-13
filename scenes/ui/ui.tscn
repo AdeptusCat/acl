@@ -333,6 +333,14 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
+[node name="Label5" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1101185111]
+layout_mode = 2
+text = "Overlsays:"
+
+[node name="ShowCmdConnectivity" type="CheckBox" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=15019783]
+layout_mode = 2
+text = "Cmd Connectivity"
+
 [node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
 layout_mode = 0
 offset_right = 135.0
@@ -590,11 +598,16 @@ text = "Thread Map"
 layout_mode = 2
 text = "Enemy"
 
+[node name="ShowEnemyCmdConnectivity" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=911341287]
+layout_mode = 2
+text = "Enemy CMD Conn."
+
 [connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
 [connection signal="folding_changed" from="Control/TileDetails/FoldableContainer" to="Control/TileDetails" method="_on_foldable_container_folding_changed"]
 [connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
+[connection signal="toggled" from="Control/Settings/FoldableContainer/VBoxContainer/ShowCmdConnectivity" to="Control/Settings" method="_on_check_box_toggled"]
 [connection signal="pressed" from="Control/TryAgain/TryAgainButton" to="." method="_on_try_again_button_pressed"]
 [connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_exited"]
@@ -606,3 +619,4 @@ text = "Enemy"
 [connection signal="toggled" from="Control/Debug/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]

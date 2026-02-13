@@ -20,3 +20,7 @@ func _on_thread_map_toggled(toggled_on: bool) -> void:
 
 func _on_enemy_team_toggled(toggled_on: bool) -> void:
 	Debug.draw_thread_map_enemy = toggled_on
+
+
+func _on_show_enemy_cmd_connectivity_toggled(toggled_on: bool) -> void:
+	Debug.showEnemyCmdConnectivity = toggled_on

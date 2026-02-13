@@ -6,10 +6,13 @@ var los_to_target: Array = []
 var movement_path: Array = []
 var chain_of_command: Array = []
 var command_link_strength: Array = []
-var leader_presence_strength: Array = []
+var leader_presence_strength: Dictionary[Globals.Team, Array] = {
+	Globals.Team.AXIS: [],
+	Globals.Team.ALLIES: [],
+}
 
 
-func _on_draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
+func _on_draw_command_link_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
 	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
 	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
 
@@ -24,17 +27,18 @@ func _on_draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, streng
 	queue_redraw()
 
 
-func _on_draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
+func _on_draw_leader_presence_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
 	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
 	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
-
-	leader_presence_strength.append({
+	
+	leader_presence_strength[team].append({
 		"from": from_pos,
 		"to": to_pos,
 		"timer": 0.0,
 		"duration": 1.0,  # Line fades out over 2 seconds
 		"strength": strength
 	})
+
 	queue_redraw()
 
 
@@ -117,8 +121,12 @@ func _draw():
 		draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
 	for los_data in chain_of_command:
 		draw_line(los_data["from"], los_data["to"], Color(0.0, 0.391, 0.122, 1.0), 2.0)
-	for connection in leader_presence_strength:
-		draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), 1.0)
+	if SessionSettings.showCmdConnectivity:
+		if Debug.showEnemyCmdConnectivity:
+			for connection in leader_presence_strength[Globals.team_enemy]:
+				draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), 1.0)
+		for connection in leader_presence_strength[Globals.team_player]:
+			draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), 1.0)
 
 
 func strength_to_color_hsv(strength: float) -> Color:
@@ -167,12 +175,14 @@ func _process(delta):
 	)
 	
 	
-	for line in leader_presence_strength:
-		line["timer"] += delta
+	for team in leader_presence_strength.values():
+		for line in team:
+			line["timer"] += delta
 	# Remove fully expired lines
-	leader_presence_strength = leader_presence_strength.filter(func(line):
-		return line["timer"] < line["duration"]
-	)
+	for team in leader_presence_strength:
+		leader_presence_strength[team] = leader_presence_strength[team].filter(func(line):
+			return line["timer"] < line["duration"]
+		)
 	
 	
 

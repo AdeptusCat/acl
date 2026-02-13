@@ -22,3 +22,7 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 
 func _on_foldable_container_folding_changed(_is_folded: bool) -> void:
 	size.y = 0
+
+
+func _on_check_box_toggled(toggled_on: bool) -> void:
+	SessionSettings.showCmdConnectivity = toggled_on
