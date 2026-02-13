@@ -209,6 +209,7 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				var enemy_unit: Unit = parameter as Unit
 				squad_fire.set_target_unit(enemy_unit)
+				
 		Globals.UnitCmd.MOVE:
 			var to_hex: Vector2i = parameter as Vector2i
 			if not current_hex == to_hex:
