@@ -664,6 +664,46 @@ func _process(delta):
 		if not threat_weights.is_empty():
 			threat_weights.clear()
 			queue_redraw()
+	update_los_time(delta)
+
+func update_los_time(delta: float) -> void:
+	var now_unix: float = Time.get_unix_time_from_system()
+
+	for unit in Globals.units:
+		if not is_instance_valid(unit):
+			continue
+
+
+		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
+
+		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+
+		var seen_this_tick: Dictionary[Unit, bool] = {}
+
+		for enemy in enemies_in_los:
+			if not is_instance_valid(enemy):
+				continue
+
+			seen_this_tick[enemy] = true
+
+			var t: float = time_map.get(enemy, 0.0)
+			t += delta
+			time_map[enemy] = t
+
+			last_seen_map[enemy] = now_unix
+
+		# cleanup: remove entries for dead refs or enemies not seen for a while
+		var units_tracked: Array[Unit] = time_map.keys()
+		for unit_tracked in units_tracked:
+			if not seen_this_tick.has(unit_tracked):
+				var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
+				if now_unix - last_seen > 10.0:
+					time_map.erase(unit_tracked)
+					last_seen_map.erase(unit_tracked)
+
+		Globals.unit_enemy_los_time_s[unit] = time_map
+		Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
 
 
 func end_game_check():
@@ -706,32 +746,39 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _on_unit_visiblity_checker_timer_timeout() -> void:
-	#for unit in Globals.units:
-		#var enemys_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		#var enemys_visible: Array = Globals.unit_visible_enemies.get(unit, [])
-		#Globals.unit_visible_enemies[unit] = []
-		#for enemy in enemys_in_los:
-			#if enemys_visible.has(enemy):
-				#continue
-			#Globals.unit_visible_enemies[unit].append(enemy)
-	#show_visible_units()
-	
-	
 	var next_visible: Dictionary = {}
-
+	
 	for unit in Globals.units:
 		if not is_instance_valid(unit):
 			continue
-
-		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		var filtered: Array = []
-
-		for enemy in enemies_in_los:
-			if not is_instance_valid(enemy):
+		var units_visible: Array = []
+		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {})
+		for unit_tracked in time_map:
+			if not is_instance_valid(unit_tracked):
 				continue
-			filtered.append(enemy)
-
-		next_visible[unit] = filtered
-
+			var time: float = time_map[unit_tracked]
+			if time > 5.0:
+				units_visible.append(unit_tracked)
+		
+		next_visible[unit] = units_visible
 	Globals.unit_visible_enemies = next_visible
 	show_visible_units()
+	
+	#var next_visible: Dictionary = {}
+#
+	#for unit in Globals.units:
+		#if not is_instance_valid(unit):
+			#continue
+#
+		#var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+		#var filtered: Array = []
+#
+		#for enemy in enemies_in_los:
+			#if not is_instance_valid(enemy):
+				#continue
+			#filtered.append(enemy)
+#
+		#next_visible[unit] = filtered
+#
+	#Globals.unit_visible_enemies = next_visible
+	#show_visible_units()

@@ -122,6 +122,9 @@ func set_soldiers(list: Array[Soldier]) -> void:
 func set_target_unit(targetUnit: Unit) -> void:
 	var hex: Vector2i = Vector2i.ZERO
 	var distance: int
+	var had_target_before: bool = false
+	if target_unit:
+		had_target_before = true
 	target_cover = 0
 	if targetUnit:
 		distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
@@ -151,6 +154,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 		draw_los_to =unit.current_hex
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 	
+	
 	for s in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
@@ -168,6 +172,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 			else:
 				if s.weapon.range_hexes >= distance:
 					s.aquire_target_task.target_id = target_unit
+					#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
 					s.aquire_target_task.done = false
 					s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
 

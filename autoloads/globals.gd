@@ -8,6 +8,8 @@ var objective_hexes: Dictionary[Team, Array]
 var game_mode: GameMode
 var unit_visible_enemies: Dictionary
 var unit_enemies_in_los: Dictionary
+var unit_enemy_los_time_s: Dictionary[Unit, Dictionary] = {}
+var unit_enemy_last_seen_unix_s: Dictionary[Unit, Dictionary] = {}
 var units: Array[Unit]
 
 
