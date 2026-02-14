@@ -698,9 +698,9 @@ func update_los_time(delta: float) -> void:
 		for unit_tracked in units_tracked:
 			if not seen_this_tick.has(unit_tracked):
 				var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
-				if now_unix - last_seen > 10.0:
-					time_map.erase(unit_tracked)
-					last_seen_map.erase(unit_tracked)
+				#if now_unix - last_seen > 10.0:
+				time_map.erase(unit_tracked)
+				last_seen_map.erase(unit_tracked)
 
 		Globals.unit_enemy_los_time_s[unit] = time_map
 		Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
@@ -752,14 +752,31 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 		if not is_instance_valid(unit):
 			continue
 		var units_visible: Array = []
-		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {})
-		for unit_tracked in time_map:
-			if not is_instance_valid(unit_tracked):
+		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
+		for enemy_tracked in time_map:
+			if not is_instance_valid(enemy_tracked):
 				continue
-			var time: float = time_map[unit_tracked]
-			if time > 5.0:
-				units_visible.append(unit_tracked)
+			var time: float = time_map[enemy_tracked]
+			
+			var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0) # 1.0 is delta of one second
+			var conf: float = conf_map.get(enemy_tracked, 0.0)
+			var r: float = randf()
+			print(unit, enemy_tracked, conf)
+			if r < p_tick:
+				conf += 0.35
+			#else:
+				#conf -= 0.10 * 1.0 # 1.0 is delta of one second
+			conf = clamp(conf, 0.0, 1.0)
+			conf_map[enemy_tracked] = conf
+			if conf >= 0.55:
+				units_visible.append(enemy_tracked)
+			
+			#if time > 1.0:
+				#print(time)
+				#units_visible.append(enemy_tracked)
 		
+		Globals.unit_enemy_spot_conf[unit] = conf_map
 		next_visible[unit] = units_visible
 	Globals.unit_visible_enemies = next_visible
 	show_visible_units()
@@ -782,3 +799,49 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 #
 	#Globals.unit_visible_enemies = next_visible
 	#show_visible_units()
+
+func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) -> float:
+	var dist: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
+	if dist < 1:
+		dist = 1
+
+	var is_moving: bool = enemy.moving
+
+	var conceal: int = _get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
+
+	# score components (tune)
+	var score: float = 0.0
+
+	# movement: huge
+	if is_moving:
+		score += 3.0
+	else:
+		score += 0.5
+
+	# distance penalty (log-ish)
+	score -= 0.25 * float(dist)
+
+	# concealment penalty
+	score -= 0.8 * float(conceal)
+
+	# convert score -> hazard rate (lambda >= 0)
+	# baseline ensures “sometimes” even if score small
+	var lambda: float = 0.05 + 0.15 * max(score, 0.0)
+
+	var p: float = 1.0 - exp(-lambda * delta)
+	return clamp(p, 0.0, 0.95)
+
+func _get_concealment(current_hex: Variant, enemy: Node) -> int:
+	var cover_map: Variant = LOSHelper.los_lookup.get(current_hex, null)
+	if cover_map == null:
+		return 0
+	if not cover_map.has(enemy.current_hex):
+		return 0
+	var data: Variant = cover_map[enemy.current_hex]
+	if data is Dictionary:
+		if data.has("target_conceal"):
+			return int(data["target_conceal"])
+		if data.has("target_cover"):
+			# fallback if you have nothing else
+			return int(data["target_cover"])
+	return 0
