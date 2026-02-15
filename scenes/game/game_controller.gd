@@ -696,8 +696,16 @@ func update_los_time(delta: float) -> void:
 		# cleanup: remove entries for dead refs or enemies not seen for a while
 		var units_tracked: Array[Unit] = time_map.keys()
 		for unit_tracked in units_tracked:
+			if not is_instance_valid(unit_tracked):
+				continue
 			if not seen_this_tick.has(unit_tracked):
 				var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
+				
+				# E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
+  #<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
+  #<Stack Trace> game_controller.gd:702 @ update_los_time()
+				#game_controller.gd:667 @ _process()
+				
 				#if now_unix - last_seen > 10.0:
 				time_map.erase(unit_tracked)
 				last_seen_map.erase(unit_tracked)
