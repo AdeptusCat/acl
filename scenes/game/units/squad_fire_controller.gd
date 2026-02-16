@@ -87,11 +87,14 @@ signal draw_los_to_target_unit(from_hex, to_hex)
 
 #func _ready() -> void:
 	#var cover: float = 0.0 
+	#cover = cover_multiplier_exp(0.0)
 	#cover = cover_multiplier_exp(1.0)
 	#cover = cover_multiplier_exp(2.0)
 	#cover = cover_multiplier_exp(3.0)
 	#cover = cover_multiplier_exp(4.0)
 	#cover = cover_multiplier_exp(5.0)
+	#cover = cover_multiplier_exp(6.0)
+	#cover = cover_multiplier_exp(6.0)
 
 
 func set_mg(machinge_guns : int):
@@ -125,7 +128,6 @@ func set_target_unit(targetUnit: Unit) -> void:
 	var had_target_before: bool = false
 	if target_unit:
 		had_target_before = true
-	target_cover = 0
 	if targetUnit:
 		if not targetUnit == target_unit:
 			distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
@@ -145,8 +147,10 @@ func set_target_unit(targetUnit: Unit) -> void:
 					#aim_delay()
 					target_unit = targetUnit
 			else:
+				target_cover = 0
 				target_unit = null
 	else:
+		target_cover = 0
 		target_unit = null
 	target_hex = hex
 	
@@ -732,7 +736,9 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	var state_mod: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
 	var state_acc_mod: float = state_mod.acc
 	
-	var distance_mod: float = clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
+	#var to_hit_distance_mod: float = clamp(1.0 - float(target_distance) * 0.002, 0.1, 1.0)
+	var to_hit_distance_mod: float = float(target_distance) / float(weapon.range_hexes)
+	to_hit_distance_mod = clamp(1.0 - to_hit_distance_mod, 0.0, 1.0)
 	
 	var cover_mod: float = cover_multiplier_exp(terrain_defense_bonus)
 	
@@ -744,7 +750,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	var shooter_stress_mod: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
 	
 	var chance_to_hit: float = base_accuracy * state_acc_mod
-	chance_to_hit *= distance_mod
+	chance_to_hit *= to_hit_distance_mod
 	chance_to_hit *= cover_mod
 	chance_to_hit *= shooter_stress_mod
 	if is_point_blank:
@@ -788,9 +794,9 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 		if state == STATES.MoraleState.PANIC:
 			chance_to_hit *= 4
 		if state == STATES.MoraleState.PINNED:
-			chance_to_hit *= 0.5
+			chance_to_hit *= 0.2
 		
-		chance_to_hit = clamp(chance_to_hit, 0.002, 0.95)
+		chance_to_hit = clamp(chance_to_hit, 0.00001, 0.95)
 		chance_to_hit_per_target.append(chance_to_hit)
 		i += 1
 
@@ -822,7 +828,10 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 			if randf() < p_hit:
 				hits_per_target[idx] = int(hits_per_target[idx]) + 1
 			i += 1
-
+	
+	if target_cover == 0.0:
+		pass
+	
 	# --- convert hits → casualties per squad (multi-cas possible, sensible cap) ---
 	# Decide per-hit disable based on weapon; here we default to rifle numbers
 	var chance_to_disable: float = 0.12
@@ -831,9 +840,11 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 
 	# Range and cover reduce *lethality* further (separate from hit chance)
 	# this should not matter when firing explosives
-	var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.weapon_range))
+	#var lethality_range_mult: float = _range_lethality_mult(target_distance, int(unit.weapon_range))
+	var lethality_range_mod: float = float(target_distance) / float(weapon.range_hexes)
+	lethality_range_mod = clamp(1.0 - lethality_range_mod, 0.0, 1.0)
 	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
-		lethality_range_mult = 1.0
+		lethality_range_mod = 1.0
 
 	# the idea here is that hard cover also modifies lethallity and not just accuracy, but needs rework
 	#var lethality_cover_mult: float = lerp(lethality_cover_min, lethality_cover_max, 1.0 - cover_norm)
@@ -842,7 +853,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	#lethality_cover_mult *= lethality_cover_mult
 
 	# Final per-hit disable after all throttles
-	chance_to_disable = chance_to_disable * lethality_range_mult * lethality_cover_mult * casualty_scale
+	chance_to_disable = chance_to_disable * lethality_range_mod * lethality_cover_mult * casualty_scale
 	if chance_to_disable < 0.01:
 		chance_to_disable = 0.01  # tiny floor so hits can still matter
 
@@ -1022,9 +1033,24 @@ func _range_lethality_mult(distance_in_hexes: int, max_range: int) -> float:
 
 
 func cover_multiplier_exp(cover_pts: float) -> float:
-	# Multiplier goes 1.0 → MIN_HIT_MULT with diminishing returns as cover_pts rises
-	var k: float = log(2.0) / HALF_POINT
-	return MIN_HIT_MULT + (1.0 - MIN_HIT_MULT) * exp(-k * max(cover_pts, 0.0))
+	match cover_pts:
+		0.0:
+			return 2.0
+		1.0:
+			return 0.5
+		2.0:
+			return 0.3
+		3.0:
+			return 0.1
+		4.0:
+			return 0.01
+		5.0:
+			return 0.001
+		_:
+			return 0.001
+	## Multiplier goes 1.0 → MIN_HIT_MULT with diminishing returns as cover_pts rises
+	#var k: float = log(2.0) / HALF_POINT
+	#return MIN_HIT_MULT + (1.0 - MIN_HIT_MULT) * exp(-k * max(cover_pts, 0.0))
 
 
 
