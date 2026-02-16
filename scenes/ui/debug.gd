@@ -24,3 +24,7 @@ func _on_enemy_team_toggled(toggled_on: bool) -> void:
 
 func _on_show_enemy_cmd_connectivity_toggled(toggled_on: bool) -> void:
 	Debug.showEnemyCmdConnectivity = toggled_on
+
+
+func _on_dont_fire_weapons_toggled(toggled_on: bool) -> void:
+	Debug.dont_fire_wepaons = toggled_on

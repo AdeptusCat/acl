@@ -815,11 +815,15 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 		if not is_instance_valid(unit):
 			continue
 		var units_visible: Array = []
+		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
 		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
 		var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
 		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
 		for enemy_tracked in time_map_keys_filtered:
 			if not is_instance_valid(enemy_tracked):
+				continue
+			if units_visible_by_this_unit.has(enemy_tracked):
+				units_visible.append(enemy_tracked)
 				continue
 			var time: float = time_map[enemy_tracked]
 			
@@ -828,13 +832,13 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 			var r: float = randf()
 			if r < p_tick:
 				conf += 0.35
-			#else:
-				#conf -= 0.10 * 1.0 # 1.0 is delta of one second
+			else:
+				conf -= 0.10 * 1.0 # 1.0 is delta of one second
 			conf = clamp(conf, 0.0, 1.0)
 			conf_map[enemy_tracked] = conf
+			
 			if conf >= 0.55:
 				units_visible.append(enemy_tracked)
-			
 		
 		Globals.unit_enemy_spot_conf[unit] = conf_map
 		next_visible[unit] = units_visible
@@ -884,13 +888,22 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	score -= 0.25 * float(dist)
 
 	# concealment penalty
-	score -= 0.8 * float(conceal)
-
+	if conceal == 1:
+		score -= 0.8 * float(conceal)
+	if conceal == 0:
+		score += 1
+	
+	# shooting stimulus (0..1) -> add to score
+	var fire_recent: float = enemy.squad_fire.fire_recent
+	var fire_recent_mod: float = 10.0 * fire_recent
+	score += fire_recent_mod
 	# convert score -> hazard rate (lambda >= 0)
 	# baseline ensures “sometimes” even if score small
-	var lambda: float = 0.05 + 0.15 * max(score, 0.0)
-
+	var lambda: float = 0.00 + 0.15 * max(score, 0.0)
 	var p: float = 1.0 - exp(-lambda * delta)
+	if observer.team == Globals.team_player:
+		print(score," ", lambda, " ", p, " ", fire_recent_mod )
+
 	return clamp(p, 0.0, 0.95)
 
 func _get_concealment(current_hex: Variant, enemy: Node) -> int:

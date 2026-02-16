@@ -105,6 +105,7 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 var original_size := 10
 var leader_alive := true
 
+
 @export var squadType: SquadType = SquadType.Rifle
 
 # === Signals ===
@@ -1014,10 +1015,13 @@ func _process(_delta):
 			current_cube = ground_map.map_to_cube(map_coords)
 		set_team(team)
 		return
-
+	
+	
 	_check_contacts()
 	if not alive:
 		return
+
+
 
 
 func _check_contacts() -> void:

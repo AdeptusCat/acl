@@ -607,6 +607,10 @@ text = "Enemy"
 layout_mode = 2
 text = "Enemy CMD Conn."
 
+[node name="DontFireWeapons" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=776047202]
+layout_mode = 2
+text = "Dont Fire Weapons"
+
 [connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
 [connection signal="folding_changed" from="Control/TileDetails/FoldableContainer" to="Control/TileDetails" method="_on_foldable_container_folding_changed"]
 [connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
@@ -626,3 +630,4 @@ text = "Enemy CMD Conn."
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]

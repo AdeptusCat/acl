@@ -73,6 +73,8 @@ var soldiers: Array[Soldier] = []
 var _now_s: float = 0.0
 var _accum_window_s: float = 0.0
 
+var fire_recent: float = 0.0 # 0..1 shows that they were shooting
+
 # Targeting
 var target_hex: Vector2i
 var mortar_target_hex: Vector2i
@@ -153,6 +155,8 @@ func set_target_unit(targetUnit: Unit) -> void:
 		#target_cover = 0
 		target_unit = null
 	
+	target_hex = hex
+	
 	var target_cover: int = 0
 	var target_distance: int = 0
 	
@@ -209,13 +213,21 @@ func _process(delta: float) -> void:
 			#if unit.team == Globals.team_player:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
 			handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
-
+	
+	update_fire_recent(delta)
 	_update_state_multipliers()
 	_tick_soldiers(delta)
 	#if target_unit:
 		#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 		#target_hex = target_unit.current_hex
 
+
+func update_fire_recent(delta: float) -> void:
+	var half_life_s: float = 1.5
+	var k: float = 0.69314718056 / half_life_s
+	fire_recent *= exp(-k * delta)
+	if fire_recent < 0.0:
+		fire_recent = 0.0
 
 func _update_state_multipliers() -> void:
 	var _state_idx: int = stress_controller.state
@@ -441,6 +453,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if not s.is_weapon_reload_done(delta_mod):
 		return 0
 	if not s.is_acquiring_target_done(delta_mod):
+		return 0
+	
+	if Debug.dont_fire_wepaons:
 		return 0
 	
 	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
@@ -711,9 +726,17 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_tar
 func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
+func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
+	var x: float = float(rounds_fired) / float(max_rounds_ref)
+	if x > 1.0:
+		x = 1.0
+	fire_recent += x
+	if fire_recent > 1.0:
+		fire_recent = 1.0
 
 func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i, target_distance: int, target_cover: int) -> void:
 	#return
+	add_fire_impulse(total_rounds, 10)
 	var terrain_defense_bonus: float = target_cover
 	if weapon.family == WeaponSpec.Family.MORTAR:
 		terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_mortar_target_hex))
@@ -738,13 +761,6 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	if batch_targets.is_empty():
 		# no enemys to be hit
 		return
-	
-	var cover_norm: float = float(terrain_defense_bonus) / max_cover_pts
-	if cover_norm > 1.0:
-		cover_norm = 1.0
-	if cover_norm < 0.0:
-		cover_norm = 0.0
-	
 
 	
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
@@ -917,8 +933,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_
 	
 	# apply cover damp to stress (not boost!)
 	var stress_cover_mod: float = cover_multiplier_exp(terrain_defense_bonus) # 1 cover = 1.0; 3 cover = 0.63
-	var stress_cover_fast_mod: float = _stress_cover_mult(cover_norm, stress_cover_fast_min) # 1 cover = 1.0; 3 cover = 0.63
-	var stress_cover_slow_mod: float = _stress_cover_mult(cover_norm, stress_cover_slow_min) # 1 cover = 1.0; 3 cover = 0.76
+	#var stress_cover_fast_mod: float = _stress_cover_mult(cover_norm, stress_cover_fast_min) # 1 cover = 1.0; 3 cover = 0.63
+	#var stress_cover_slow_mod: float = _stress_cover_mult(cover_norm, stress_cover_slow_min) # 1 cover = 1.0; 3 cover = 0.76
 	s_fast *= stress_cover_mod
 	s_slow *= stress_cover_mod
 
@@ -1053,7 +1069,7 @@ func _range_lethality_mult(distance_in_hexes: int, max_range: int) -> float:
 func cover_multiplier_exp(cover_pts: float) -> float:
 	match cover_pts:
 		0.0:
-			return 2.0
+			return 1.5
 		1.0:
 			return 0.5
 		2.0:
