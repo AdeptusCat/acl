@@ -208,7 +208,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	
 	Globals.units.append(unit)
 	unit.unit_died.connect(_on_unit_died)
-	unit.unit_entered_hex.connect(LOS._on_unit_moved)
+	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(_on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
 	unit.current_hex = ground_layer.local_to_map(unit.global_position)
@@ -216,6 +216,18 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	unit.deselect_unit.connect(_deselect_unit)
 	unit.started_moving.connect(_on_started_moving)
 	unit.unit_surrendered.connect(_on_unit_surrendered)
+	unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
+	unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
+	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
+	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
+	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
+			
+	# assign platoon headquarter to squad 
+	if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
+	# assign company headquarter to platoon headquarter 
+	if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 
 func draw_fog():
 	var used_cells := fog_of_war_layer.get_used_cells()
@@ -565,19 +577,22 @@ func _on_unit_died(unit):
 	Globals.unit_enemies_in_los.erase(unit)
 	
 	Globals.unit_enemy_los_time_s.erase(unit)
-	erase_freed_objects_key_from_dict(Globals.unit_enemy_los_time_s)
+	# not working
+	#erase_freed_objects_key_from_dict(Globals.unit_enemy_los_time_s)
 	for _unit in Globals.unit_enemy_los_time_s:
 		if is_instance_valid(_unit):
 			Globals.unit_enemy_los_time_s[_unit].erase(unit)
 	
 	Globals.unit_enemy_spot_conf.erase(unit)
-	erase_freed_objects_key_from_dict(Globals.unit_enemy_spot_conf)
+	# not working
+	#erase_freed_objects_key_from_dict(Globals.unit_enemy_spot_conf)
 	for _unit in Globals.unit_enemy_spot_conf:
 		if is_instance_valid(_unit):
 			Globals.unit_enemy_spot_conf[_unit].erase(unit)
 	
 	Globals.unit_enemy_last_seen_unix_s.erase(unit)
-	erase_freed_objects_key_from_dict(Globals.unit_enemy_last_seen_unix_s)
+	# not working
+	#erase_freed_objects_key_from_dict(Globals.unit_enemy_last_seen_unix_s)
 	for _unit in Globals.unit_enemy_last_seen_unix_s:
 		if is_instance_valid(_unit):
 			Globals.unit_enemy_last_seen_unix_s[_unit].erase(unit)
@@ -593,7 +608,7 @@ func erase_freed_objects_key_from_dict(dict: Dictionary):
 	
 	var i: int = 0
 	while i < keys.size():
-		var k: Variant = keys[i]
+		var k = keys[i]
 
 		if k == null:
 			dict.erase(k)
