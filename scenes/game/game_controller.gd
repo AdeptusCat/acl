@@ -792,7 +792,6 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 			var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0) # 1.0 is delta of one second
 			var conf: float = conf_map.get(enemy_tracked, 0.0)
 			var r: float = randf()
-			print(unit, enemy_tracked, conf)
 			if r < p_tick:
 				conf += 0.35
 			#else:
@@ -802,9 +801,6 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 			if conf >= 0.55:
 				units_visible.append(enemy_tracked)
 			
-			#if time > 1.0:
-				#print(time)
-				#units_visible.append(enemy_tracked)
 		
 		Globals.unit_enemy_spot_conf[unit] = conf_map
 		next_visible[unit] = units_visible
@@ -838,6 +834,8 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	var is_moving: bool = enemy.moving
 
 	var conceal: int = _get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
+	if conceal > 0:
+		conceal = 1
 
 	# score components (tune)
 	var score: float = 0.0
