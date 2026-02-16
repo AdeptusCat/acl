@@ -761,8 +761,9 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 			continue
 		var units_visible: Array = []
 		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
 		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		for enemy_tracked in time_map:
+		for enemy_tracked in time_map_keys_filtered:
 			if not is_instance_valid(enemy_tracked):
 				continue
 			var time: float = time_map[enemy_tracked]
