@@ -563,6 +563,22 @@ func _on_unit_died(unit):
 	Globals.units.erase(unit)
 	Globals.unit_visible_enemies.erase(unit)
 	Globals.unit_enemies_in_los.erase(unit)
+	
+	Globals.unit_enemy_los_time_s.erase(unit)
+	var units_to_erase: Dictionary[Unit, Unit]
+	for _unit in Globals.unit_enemy_los_time_s:
+		Globals.unit_enemy_los_time_s[_unit].erase(unit)
+	
+	Globals.unit_enemy_spot_conf.erase(unit)
+	units_to_erase.clear()
+	for _unit in Globals.unit_enemy_spot_conf:
+		Globals.unit_enemy_spot_conf[_unit].erase(unit)
+	
+	Globals.unit_enemy_last_seen_unix_s.erase(unit)
+	units_to_erase.clear()
+	for _unit in Globals.unit_enemy_last_seen_unix_s:
+		Globals.unit_enemy_last_seen_unix_s[_unit].erase(unit)
+	
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
