@@ -565,24 +565,43 @@ func _on_unit_died(unit):
 	Globals.unit_enemies_in_los.erase(unit)
 	
 	Globals.unit_enemy_los_time_s.erase(unit)
-	var units_to_erase: Dictionary[Unit, Unit]
+	erase_freed_objects_key_from_dict(Globals.unit_enemy_los_time_s)
 	for _unit in Globals.unit_enemy_los_time_s:
-		Globals.unit_enemy_los_time_s[_unit].erase(unit)
+		if is_instance_valid(_unit):
+			Globals.unit_enemy_los_time_s[_unit].erase(unit)
 	
 	Globals.unit_enemy_spot_conf.erase(unit)
-	units_to_erase.clear()
+	erase_freed_objects_key_from_dict(Globals.unit_enemy_spot_conf)
 	for _unit in Globals.unit_enemy_spot_conf:
-		Globals.unit_enemy_spot_conf[_unit].erase(unit)
+		if is_instance_valid(_unit):
+			Globals.unit_enemy_spot_conf[_unit].erase(unit)
 	
 	Globals.unit_enemy_last_seen_unix_s.erase(unit)
-	units_to_erase.clear()
+	erase_freed_objects_key_from_dict(Globals.unit_enemy_last_seen_unix_s)
 	for _unit in Globals.unit_enemy_last_seen_unix_s:
-		Globals.unit_enemy_last_seen_unix_s[_unit].erase(unit)
+		if is_instance_valid(_unit):
+			Globals.unit_enemy_last_seen_unix_s[_unit].erase(unit)
 	
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
 	#unit.queue_free()
+
+
+func erase_freed_objects_key_from_dict(dict: Dictionary):
+	var keys: Array = dict.keys()
+	
+	var i: int = 0
+	while i < keys.size():
+		var k: Variant = keys[i]
+
+		if k == null:
+			dict.erase(k)
+		else:
+			if k is Object:
+				if not is_instance_valid(k):
+					dict.erase(k)
+		i += 1
 
 
 func start_game(team: Globals.Team, time: float):
