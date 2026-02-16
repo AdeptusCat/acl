@@ -681,6 +681,11 @@ func _process(delta):
 			threat_weights.clear()
 			queue_redraw()
 	update_los_time(delta)
+	
+	var units_to_kill: Array = Debug.units_to_kill.duplicate()
+	for unit in units_to_kill:
+		Debug.units_to_kill.erase(unit)
+		unit.die()
 
 func update_los_time(delta: float) -> void:
 	var now_unix: float = Time.get_unix_time_from_system()

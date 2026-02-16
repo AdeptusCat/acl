@@ -127,24 +127,25 @@ func set_target_unit(targetUnit: Unit) -> void:
 		had_target_before = true
 	target_cover = 0
 	if targetUnit:
-		distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
-		var has_range: bool = false
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.weapon.range_hexes >= distance:
-				has_range = true
-		if has_range:
-			hex = targetUnit.current_hex
-			var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
-			if cover_map and cover_map.has(targetUnit.current_hex):
-				var data = cover_map[targetUnit.current_hex]
-				target_cover = data["target_cover"]
-			target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
-			if not target_unit == targetUnit:
-				#_prime_acquisition_for_new_target()
-				#aim_delay()
-				target_unit = targetUnit
-		else:
-			target_unit = null
+		if not targetUnit == target_unit:
+			distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+			var has_range: bool = false
+			for soldier: Soldier in unit.squad_fire.soldiers:
+				if soldier.weapon.range_hexes >= distance:
+					has_range = true
+			if has_range:
+				hex = targetUnit.current_hex
+				var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+				if cover_map and cover_map.has(targetUnit.current_hex):
+					var data = cover_map[targetUnit.current_hex]
+					target_cover = data["target_cover"]
+				target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+				if not target_unit == targetUnit:
+					#_prime_acquisition_for_new_target()
+					#aim_delay()
+					target_unit = targetUnit
+			else:
+				target_unit = null
 	else:
 		target_unit = null
 	target_hex = hex
@@ -312,8 +313,9 @@ func handle_auto_fire(
 			best_cover = int(score_pack["cover"])
 
 	if best_enemy == null:
-		target_unit = null
-		unit.order(Globals.UnitCmd.ATTACK, target_unit)
+		if not unit.squad_fire.target_unit == null:
+			target_unit = null
+			unit.order(Globals.UnitCmd.ATTACK, target_unit)
 		return
 	
 	unit.order(Globals.UnitCmd.ATTACK, best_enemy)
@@ -440,8 +442,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		if is_instance_valid(u):
 			if u.alive:
 				if not u.surrendered:
-					if u.current_hex == target_hex:
-						batch_targets.append(u)
+					#if u.current_hex == target_hex:
+					batch_targets.append(u)
 	if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		set_target_unit(null)
 		return 0

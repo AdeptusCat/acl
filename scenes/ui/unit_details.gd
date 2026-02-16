@@ -9,6 +9,7 @@ extends PanelContainer
 @onready var unit_type_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitType
 @onready var leadership_bonud_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus
 @onready var panel: PanelContainer = self
+@onready var kill_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Kill
 
 
 var opacity_tween: Tween = null
@@ -53,6 +54,7 @@ func _ready() -> void:
 		soldiers_entries.append(soldier_entries)
 		
 	soldiers_grid_container.columns = soldiers_entries[0].size()
+	
 
 
 func _process(_delta: float) -> void:
@@ -160,6 +162,8 @@ func show_unit_detail(_unit: Unit):
 	unit_type_label.text = unit.get_squad_type_name(unit.squadType)
 	
 	show()
+	if OS.is_debug_build():
+		kill_button.show()
 	#await get_tree().process_frame
 	#reset_size()
 
@@ -246,3 +250,7 @@ func tween_opacity(to: float):
 	opacity_tween = get_tree().create_tween()
 	opacity_tween.tween_property(self, 'modulate:a', to, 0.3)
 	return opacity_tween
+
+
+func _on_kill_pressed() -> void:
+	Debug.units_to_kill.append(unit)
