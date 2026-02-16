@@ -76,9 +76,9 @@ var _accum_window_s: float = 0.0
 # Targeting
 var target_hex: Vector2i
 var mortar_target_hex: Vector2i
-var target_cover: float
+#var target_cover: float
 var target_unit: Unit
-var target_distance: int
+#var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
@@ -137,28 +137,37 @@ func set_target_unit(targetUnit: Unit) -> void:
 					has_range = true
 			if has_range:
 				hex = targetUnit.current_hex
-				var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
-				if cover_map and cover_map.has(targetUnit.current_hex):
-					var data = cover_map[targetUnit.current_hex]
-					target_cover = data["target_cover"]
-				target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
+				#var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+				#if cover_map and cover_map.has(targetUnit.current_hex):
+					#var data = cover_map[targetUnit.current_hex]
+					#target_cover = data["target_cover"]
+				#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, targetUnit.current_cube)
 				if not target_unit == targetUnit:
 					#_prime_acquisition_for_new_target()
 					#aim_delay()
 					target_unit = targetUnit
 			else:
-				target_cover = 0
+				#target_cover = 0
 				target_unit = null
 	else:
-		target_cover = 0
+		#target_cover = 0
 		target_unit = null
-	target_hex = hex
+	
+	var target_cover: int = 0
+	var target_distance: int = 0
+	
+	if is_instance_valid(target_unit):
+		target_hex = target_unit.current_hex
+		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+		if cover_map and cover_map.has(target_unit.current_hex):
+			var data = cover_map[target_unit.current_hex]
+			target_cover = data["target_cover"]
+		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 	
 	var draw_los_to: Vector2i = target_hex
 	if target_hex == Vector2i.ZERO:
-		draw_los_to =unit.current_hex
+		draw_los_to = unit.current_hex
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
-	
 	
 	for s in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
@@ -203,9 +212,9 @@ func _process(delta: float) -> void:
 
 	_update_state_multipliers()
 	_tick_soldiers(delta)
-	if target_unit:
-		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-		target_hex = target_unit.current_hex
+	#if target_unit:
+		#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+		#target_hex = target_unit.current_hex
 
 
 func _update_state_multipliers() -> void:
@@ -381,8 +390,17 @@ func fire_mortar(map_hex: Vector2i):
 
 
 func _tick_soldiers(delta: float) -> void:
+	var target_cover: int = 0
+	var target_distance: int = 0
 	
-		
+	if is_instance_valid(target_unit):
+		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+		if cover_map and cover_map.has(target_unit.current_hex):
+			var data = cover_map[target_unit.current_hex]
+			target_cover = data["target_cover"]
+		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+	
+	
 	var rounds_emitted: int = 0
 
 	# count available crew for MGs
@@ -396,7 +414,7 @@ func _tick_soldiers(delta: float) -> void:
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
-			rounds_emitted += await _try_fire_soldier(delta, s, true, crew_available, support_crew_available)
+			rounds_emitted += await _try_fire_soldier(delta, s, true, crew_available, support_crew_available, target_distance, target_cover)
 			if rounds_emitted > 0:
 				pass
 			if rounds_emitted >= max_shots_per_tick:
@@ -409,12 +427,12 @@ func _tick_soldiers(delta: float) -> void:
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
 			if s2.role != RankGrades.Role.GUNNER:
-				rounds_emitted += await _try_fire_soldier(delta, s2, false, 0, 0)
+				rounds_emitted += await _try_fire_soldier(delta, s2, false, 0, 0, target_distance, target_cover)
 				if rounds_emitted >= max_shots_per_tick:
 					return
 		i += 1
 
-func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int) -> int:
+func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
@@ -587,7 +605,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	await get_tree().create_timer(life).timeout
 	
 	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _mortar_target_hex)
+	fire_at(shots, s.weapon, riflegrenade, _mortar_target_hex, target_distance, target_cover)
 	return shots
 
 
@@ -694,7 +712,7 @@ func fire_riflegrenades(s: Soldier):
 	fire_riflegrenade.emit(s.weapon)
 
 
-func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i) -> void:
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _mortar_target_hex: Vector2i, target_distance: int, target_cover: int) -> void:
 	#return
 	var terrain_defense_bonus: float = target_cover
 	if weapon.family == WeaponSpec.Family.MORTAR:
