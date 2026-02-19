@@ -24,6 +24,7 @@
 [ext_resource type="Script" uid="uid://btiijdapor3eh" path="res://scenes/ui/leadership_bonus.gd" id="14_mgwkc"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="15_mgwkc"]
 [ext_resource type="Script" uid="uid://ovp1t711br88" path="res://scenes/ui/debug.gd" id="24_fv78h"]
+[ext_resource type="PackedScene" uid="uid://c6xxmjtgtwwtj" path="res://scenes/ui/selection_wheel.tscn" id="25_o71gb"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_26a3v"]
 outline_size = 10
@@ -610,6 +611,10 @@ text = "Enemy CMD Conn."
 [node name="DontFireWeapons" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=776047202]
 layout_mode = 2
 text = "Dont Fire Weapons"
+
+[node name="SelectionWheel" parent="Control" unique_id=273686875 instance=ExtResource("25_o71gb")]
+visible = false
+layout_mode = 1
 
 [connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
 [connection signal="folding_changed" from="Control/TileDetails/FoldableContainer" to="Control/TileDetails" method="_on_foldable_container_folding_changed"]

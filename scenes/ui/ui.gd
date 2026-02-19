@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var cover_container = $Control/TargetCoverDistance/VBoxContainer/Cover
 @onready var firepower_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
 @onready var distance_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
+@onready var selection_wheel = $Control/SelectionWheel
 
 @onready var unit_details = $Control/UnitDetails
 @onready var tile_details = $Control/TileDetails
@@ -25,7 +26,12 @@ const HEX_DIRECTIONS = [
 ]
 
 
-
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("RIGHT"):
+		selection_wheel.show()
+	elif Input.is_action_just_released("RIGHT"):
+		var option: WheelOption.Option = selection_wheel.close()
+		print(option)
 
 func _ready() -> void:
 	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
