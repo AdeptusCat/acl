@@ -901,8 +901,6 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	# baseline ensures “sometimes” even if score small
 	var lambda: float = 0.00 + 0.15 * max(score, 0.0)
 	var p: float = 1.0 - exp(-lambda * delta)
-	if observer.team == Globals.team_player:
-		print(score," ", lambda, " ", p, " ", fire_recent_mod )
 
 	return clamp(p, 0.0, 0.95)
 
