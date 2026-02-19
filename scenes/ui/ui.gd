@@ -26,12 +26,20 @@ const HEX_DIRECTIONS = [
 ]
 
 
-func _process(delta: float) -> void:
-	if Input.is_action_just_pressed("RIGHT"):
-		selection_wheel.show()
-	elif Input.is_action_just_released("RIGHT"):
-		var option: WheelOption.Option = selection_wheel.close()
-		print(option)
+func _on_right_button_pressed():
+	selection_wheel.show()
+
+
+func _on_right_button_released():
+	var option: WheelOption.Option = selection_wheel.close()
+
+
+#func _process(delta: float) -> void:
+	#if Input.is_action_just_pressed("RIGHT"):
+		#selection_wheel.show()
+	#elif Input.is_action_just_released("RIGHT"):
+		#var option: WheelOption.Option = selection_wheel.close()
+		#print(option)
 
 func _ready() -> void:
 	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))

@@ -1535,6 +1535,8 @@ glow_intensity = 1.0
 [node name="World" type="Node2D" unique_id=154406966]
 script = ExtResource("1_6hctx")
 
+[node name="InputManager" parent="." unique_id=2029001427 instance=ExtResource("24_x0nq1")]
+
 [node name="TileMapLayers" type="Node2D" parent="." unique_id=1263725723]
 
 [node name="GroundTileMapLayer" parent="TileMapLayers" unique_id=2029940749 groups=["tilemaplayers"] instance=ExtResource("2_ues17")]
@@ -1823,8 +1825,6 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubResource("Resource_4gywt"), SubResource("Resource_3un1a")])
 squadType = 3
 
-[node name="InputManager" parent="GameController" unique_id=2029001427 instance=ExtResource("24_x0nq1")]
-
 [node name="LOSRenderer" parent="GameController" unique_id=1408803359 instance=ExtResource("26_rwifv")]
 
 [node name="Camera2D" type="Camera2D" parent="GameController" unique_id=897446119]
@@ -1914,10 +1914,17 @@ environment = SubResource("Environment_tj3jo")
 visible = false
 position = Vector2(626, 904)
 
+[connection signal="key_space_pressed" from="InputManager" to="GameController" method="_on_key_space_pressed"]
+[connection signal="mouse_button_left_pressed" from="InputManager" to="GameController" method="_on_mouse_button_left_pressed"]
+[connection signal="mouse_button_right_pressed" from="InputManager" to="GameController" method="_on_mouse_button_right_pressed"]
+[connection signal="mouse_event_position_changed" from="InputManager" to="GameController" method="_on_mouse_event_position_changed"]
+[connection signal="zoom_in" from="InputManager" to="GameController" method="_on_zoom_in"]
+[connection signal="zoom_out" from="InputManager" to="GameController" method="_on_zoom_out"]
 [connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]
 [connection signal="time_changed" from="StartScreen" to="Ui" method="_on_start_screen_time_changed"]
 [connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]
+[connection signal="start_match" from="GameController" to="InputManager" method="_on_game_controller_start_match"]
 [connection signal="timeout" from="GameController/SpawnTimer" to="GameController" method="_on_spawn_timer_timeout"]
 
 [editable path="Tracer"]

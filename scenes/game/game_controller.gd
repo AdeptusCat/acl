@@ -1,6 +1,5 @@
 extends Node2D
 
-@onready var input_mgr      = $InputManager
 @onready var unit_container = $UnitContainer
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
@@ -29,6 +28,7 @@ signal show_unit_details_in_ui(unit: Unit)
 signal hide_unit_details_in_ui
 signal game_started_through_moving_unit
 signal hex_selected(map_hex: Vector2i, event_pos: Vector2)
+signal start_match
 
 var end_game_handled: bool = false
 
@@ -72,11 +72,6 @@ func _on_draw_threat(_threat_weights: Dictionary[int, Dictionary]):
 
 func _ready():
 	MovementSystem.draw_threat.connect(_on_draw_threat)
-	input_mgr.mouse_button_left_pressed.connect(_on_mouse_button_left_pressed)
-	input_mgr.mouse_button_right_pressed.connect(_on_mouse_button_right_pressed)
-	input_mgr.key_space_pressed.connect(_on_key_space_pressed)
-	input_mgr.zoom_in.connect(_on_zoom_in)
-	input_mgr.zoom_out.connect(_on_zoom_out)
 	#camera.camera_moved.connect(_on_camera_moved)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
@@ -112,8 +107,6 @@ func _ready():
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	
 	update_timer_label.emit(time_left_seconds)
-	input_mgr.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
-	input_mgr.set_input(false)
 	
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.GRID_SIZE_X, LOSHelper.GRID_SIZE_Y)
 	camera.set_camera_limit(map_size) 
@@ -631,7 +624,7 @@ func start_game(team: Globals.Team, time: float):
 	#set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	
-	input_mgr.set_input(true)
+	start_match.emit()
 	
 	var i_team_0: int = 0
 	var i_team_1: int = 0

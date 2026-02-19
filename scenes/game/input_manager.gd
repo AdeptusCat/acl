@@ -7,15 +7,27 @@ signal mouse_event_position_changed(event_pos)
 signal zoom_in
 signal zoom_out
 
-func set_input(enabled: bool):
-	set_process_input(enabled)
+func _ready() -> void:
+	set_process(false)
+
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("RIGHT"):
+		right_button_pressed.emit()
+	elif Input.is_action_just_released("RIGHT"):
+		right_button_released.emit()
+	mouse_event_position_changed.emit(event.position)
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_LEFT:
 		mouse_button_left_pressed.emit(event.position)
 func _input(event):
-	
+	if event is InputEventMouseButton and event and event.button_index == MouseButton.MOUSE_BUTTON_RIGHT:
+		print("released")
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_RIGHT:
+		print("pressed")
+		
 		mouse_button_right_pressed.emit(event.position)
 	if event is InputEventMouseMotion:
 		mouse_event_position_changed.emit(event.position)
@@ -27,3 +39,7 @@ func _input(event):
 		zoom_in.emit()
 	if event.is_action_pressed("zoom_out"):
 		zoom_out.emit()
+
+
+func _on_game_controller_start_match() -> void:
+	set_process_input(true)
