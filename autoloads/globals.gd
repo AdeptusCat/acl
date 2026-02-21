@@ -26,7 +26,8 @@ enum GameMode {
 
 enum UnitCmd {
 	MOVE,
-	ATTACK
+	ATTACK_GROUND,
+	ATTACK_UNIT
 }
 
 const SQUAD_SHIFT: int = 0

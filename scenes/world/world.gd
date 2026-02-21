@@ -11,6 +11,8 @@ extends Node2D
 @onready var ui := $Ui
 @onready var game_controller := $GameController
 @onready var target_area := $TargetArea
+@onready var input_manager := $InputManager
+
 
 signal try_again
 signal fully_freed
@@ -263,6 +265,7 @@ func _on_game_started(team : int, game_mode: Globals.GameMode):
 	Globals.game_mode = game_mode
 	target_area.hide()
 	game_controller.start_game(team, start_screen.time)
+	input_manager.set_process(true)
 
 
 func _on_ui_try_again() -> void:
@@ -275,3 +278,17 @@ func _on_start_screen_hover_start_button(team: int) -> void:
 
 func _on_result_screen_try_again() -> void:
 	try_again.emit()
+
+var selected_map_hex: Vector2i
+
+func _on_input_manager_right_button_pressed() -> void:
+	var mouse_screen_pos: Vector2 = get_viewport().get_mouse_position()
+	var event_pos: Vector2 = get_local_mouse_position()
+	selected_map_hex = ground_layer.local_to_map(event_pos)
+	if selected_map_hex and game_controller.selected_unit:
+		ui.selection_wheel.open(mouse_screen_pos)
+
+
+func _on_input_manager_right_button_released() -> void:
+	var option: WheelOption.Option = ui.selection_wheel.close()
+	game_controller.order_via_option_wheel(selected_map_hex, option)

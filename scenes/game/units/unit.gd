@@ -196,10 +196,16 @@ func _ready():
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
 
+func _find_units_at(hex: Vector2i) -> Array[Node2D]:
+	var units: Array[Node2D]
+	for u in Globals.units:
+		if u.current_hex == hex:
+			units.append(u)
+	return units
 
 func order(cmd: Globals.UnitCmd, parameter):
 	match cmd:
-		Globals.UnitCmd.ATTACK:
+		Globals.UnitCmd.ATTACK_UNIT:
 			if squadType == Unit.SquadType.MORTAR:
 				if parameter is Unit:
 					var enemy_unit: Unit = parameter as Unit
@@ -210,7 +216,22 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				var enemy_unit: Unit = parameter as Unit
 				squad_fire.set_target_unit(enemy_unit)
-				
+
+		Globals.UnitCmd.ATTACK_GROUND:
+			if squadType == Unit.SquadType.MORTAR:
+				if parameter is Unit:
+					var enemy_unit: Unit = parameter as Unit
+					squad_fire.set_target_unit(enemy_unit)
+				else:
+					var map_hex: Vector2i = parameter as Vector2i
+					fire_mortar(map_hex)
+			else:
+				var map_hex: Vector2i = parameter as Vector2i
+				var units: Array[Node2D] = _find_units_at(map_hex)
+				for unit in units:
+					if not unit.team == Globals.team_player or Debug.enemy_selectable:
+						var _path: Array[Vector3i] = []
+						squad_fire.set_target_unit(unit)
 		Globals.UnitCmd.MOVE:
 			var to_hex: Vector2i = parameter as Vector2i
 			if not current_hex == to_hex:

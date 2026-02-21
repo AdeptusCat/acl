@@ -26,14 +26,6 @@ const HEX_DIRECTIONS = [
 ]
 
 
-func _on_right_button_pressed():
-	selection_wheel.show()
-
-
-func _on_right_button_released():
-	var option: WheelOption.Option = selection_wheel.close()
-
-
 #func _process(delta: float) -> void:
 	#if Input.is_action_just_pressed("RIGHT"):
 		#selection_wheel.show()

@@ -340,10 +340,10 @@ func handle_auto_fire(
 	if best_enemy == null:
 		if not unit.squad_fire.target_unit == null:
 			target_unit = null
-			unit.order(Globals.UnitCmd.ATTACK, target_unit)
+			unit.order(Globals.UnitCmd.ATTACK_UNIT, target_unit)
 		return
 	
-	unit.order(Globals.UnitCmd.ATTACK, best_enemy)
+	unit.order(Globals.UnitCmd.ATTACK_UNIT, best_enemy)
 	best_enemy.set_cover(best_cover)
 	fire_timer = fire_rate
 

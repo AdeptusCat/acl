@@ -2,35 +2,30 @@
 
 [ext_resource type="Script" uid="uid://ddy5nqqm5h0d" path="res://scenes/ui/selection_wheel.gd" id="1_5dcvy"]
 [ext_resource type="Script" uid="uid://jcslscqj1lw" path="res://wheel_option.gd" id="2_5vouf"]
-[ext_resource type="Texture2D" uid="uid://5p35bu54hjnp" path="res://assets/tiles/ground/base_tile1.png" id="3_ia5md"]
-[ext_resource type="Texture2D" uid="uid://342c1o0bcc1n" path="res://assets/tiles/ground/base_tile - Kopie.png" id="4_fff2e"]
-[ext_resource type="Texture2D" uid="uid://ceckxks431fw4" path="res://assets/tiles/ground/base_tile.png" id="5_k7i5b"]
-[ext_resource type="Texture2D" uid="uid://d1bbds1iph7gl" path="res://assets/tiles/ground/fog_of_war.png" id="6_e1fsg"]
+[ext_resource type="Texture2D" uid="uid://de0tm7x6agxul" path="res://assets/ui/option_wheel/moving_ger.png" id="4_ia5md"]
+[ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="5_ia5md"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
-atlas = ExtResource("3_ia5md")
+atlas = ExtResource("4_ia5md")
+region = Rect2(0, 0, 64, 0)
 script = ExtResource("2_5vouf")
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_5vouf"]
-atlas = ExtResource("4_fff2e")
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2npqt"]
+load_path = "res://.godot/imported/moving_ger.png-8a57d4315287c6a7a2caaedcab290ec2.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ia5md"]
+atlas = SubResource("CompressedTexture2D_2npqt")
 region = Rect2(0, 0, 64, 64)
 script = ExtResource("2_5vouf")
 option = 1
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_2npqt"]
-atlas = ExtResource("5_k7i5b")
+[sub_resource type="AtlasTexture" id="AtlasTexture_fff2e"]
+atlas = ExtResource("5_ia5md")
 region = Rect2(0, 0, 64, 64)
 script = ExtResource("2_5vouf")
 option = 4
-metadata/_custom_type_script = "uid://jcslscqj1lw"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ia5md"]
-atlas = ExtResource("6_e1fsg")
-region = Rect2(0, 0, 64, 64)
-script = ExtResource("2_5vouf")
-option = 5
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
 [node name="SelectionWheel" type="Control" unique_id=273686875]
@@ -48,4 +43,7 @@ script = ExtResource("1_5dcvy")
 bkg_color = Color(0.20080861, 0.20080864, 0.20080853, 1)
 line_color = Color(0.5963672, 0.59636724, 0.59636724, 1)
 highlight_color = Color(0.326184, 0.326184, 0.32618397, 1)
-options = Array[ExtResource("2_5vouf")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_5vouf"), SubResource("AtlasTexture_2npqt"), SubResource("AtlasTexture_ia5md")])
+outer_radius = 128
+inner_radius = 32
+line_width = 2
+options = Array[ExtResource("2_5vouf")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_fff2e")])

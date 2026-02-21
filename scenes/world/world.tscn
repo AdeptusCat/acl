@@ -1918,6 +1918,8 @@ position = Vector2(626, 904)
 [connection signal="mouse_button_left_pressed" from="InputManager" to="GameController" method="_on_mouse_button_left_pressed"]
 [connection signal="mouse_button_right_pressed" from="InputManager" to="GameController" method="_on_mouse_button_right_pressed"]
 [connection signal="mouse_event_position_changed" from="InputManager" to="GameController" method="_on_mouse_event_position_changed"]
+[connection signal="right_button_pressed" from="InputManager" to="." method="_on_input_manager_right_button_pressed"]
+[connection signal="right_button_released" from="InputManager" to="." method="_on_input_manager_right_button_released"]
 [connection signal="zoom_in" from="InputManager" to="GameController" method="_on_zoom_in"]
 [connection signal="zoom_out" from="InputManager" to="GameController" method="_on_zoom_out"]
 [connection signal="hover_start_button" from="StartScreen" to="." method="_on_start_screen_hover_start_button"]

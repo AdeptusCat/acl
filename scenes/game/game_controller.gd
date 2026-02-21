@@ -371,6 +371,28 @@ func set_objective_cells(player_team: Globals.Team):
 	else:
 		push_error("ObjectiveTileMapLayer has no tiles placed!")
 
+
+func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
+	if not selected_unit:
+		return
+	
+	if selected_unit.broken:
+		selected_unit.ui.show_failure()
+		return
+	
+	match option:
+		WheelOption.Option.NONE:
+			pass
+		WheelOption.Option.MOVE_NORMAL:
+			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
+		WheelOption.Option.FIRE_AT:
+			selected_unit.order(Globals.UnitCmd.ATTACK_GROUND, map_hex)
+		WheelOption.Option.ASSAULT:
+			pass
+	
+	var local_pos: Vector2 = ground_layer.map_to_local(map_hex)
+	hex_glow(local_pos)
+
 func _on_mouse_button_right_pressed(event_pos: Vector2):
 	event_pos = get_local_mouse_position()
 	var map_hex = ground_layer.local_to_map(event_pos)
@@ -381,13 +403,13 @@ func _on_mouse_button_right_pressed(event_pos: Vector2):
 			return
 		var local_pos: Vector2
 		if selected_unit.squadType == Unit.SquadType.MORTAR:
-			selected_unit.order(Globals.UnitCmd.ATTACK, map_hex)
+			selected_unit.order(Globals.UnitCmd.ATTACK_GROUND, map_hex)
 		else:
 			var units: Array[Node2D] = _find_units_at(map_hex)
 			for unit in units:
 				if not unit.team == Globals.team_player or Debug.enemy_selectable:
 					var _path: Array[Vector3i] = []
-					selected_unit.order(Globals.UnitCmd.ATTACK, unit)
+					selected_unit.order(Globals.UnitCmd.ATTACK_UNIT, unit)
 					local_pos = ground_layer.map_to_local(map_hex)
 					hex_glow(local_pos)
 					return
