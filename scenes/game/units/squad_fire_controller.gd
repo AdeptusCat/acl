@@ -344,7 +344,16 @@ func handle_auto_fire(
 			continue
 		if enemy.surrendered:
 			continue
-
+		
+		var units_in_enemy_hex: Array[Unit] = LOSHelper.find_units_at(enemy.current_hex)
+		var has_friendly_in_target_hex: bool = false
+		for _unit in units_in_enemy_hex:
+			if _unit.team == unit.team:
+				has_friendly_in_target_hex = true
+				break
+		if has_friendly_in_target_hex:
+			continue
+		
 		var score_pack: Dictionary = _score_enemy_for_target(unit, enemy, current_hex)
 		var score: float = float(score_pack["score"])
 		
