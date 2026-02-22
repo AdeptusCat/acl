@@ -10,7 +10,9 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 	if not unit.alive or unit.surrendered:
 		return
 	
-	var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
+	var visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
+	var terrain_defence_bonus: int = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
+	visible_hexes[unit.current_hex] = {"shooter_cover" = terrain_defence_bonus, "target_cover" = terrain_defence_bonus}
 	
 	# Clear old visibility info for this unit
 	Globals.unit_enemies_in_los[unit] = []
@@ -54,7 +56,9 @@ func update_all_unit_visibilities():
 	for unit in Globals.units:
 		if not unit.alive:
 			continue
-		var visible_hexes = LOSHelper.los_lookup.get(unit.current_hex, [])
+		var visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
+		var terrain_defence_bonus: int = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
+		visible_hexes[unit.current_hex] = {"shooter_cover" = terrain_defence_bonus, "target_cover" = terrain_defence_bonus}
 		Globals.unit_enemies_in_los[unit] = []
 
 		for enemy_unit in Globals.units:
