@@ -22,6 +22,10 @@ enum Company {
 	F,
 }
 
+enum AttackState { AUTO, MANUAL_GROUND, MANUAL_TRACK }
+var attackState: AttackState = AttackState.AUTO
+var attack_ground_rounds_budget: int = 0
+
 @export var squad: int = 0
 @export var platoon: int = 0
 @export var company: Company = Company.A
@@ -196,28 +200,22 @@ func _ready():
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
 
-func _find_units_at(hex: Vector2i) -> Array[Node2D]:
-	var units: Array[Node2D]
+func _find_units_at(hex: Vector2i) -> Array[Unit]:
+	var units: Array[Unit]
 	for u in Globals.units:
 		if u.current_hex == hex:
 			units.append(u)
 	return units
 
+func setAttackState(_attackState: AttackState):
+	attackState = _attackState
+	match attackState:
+		AttackState.MANUAL_GROUND:
+			attack_ground_rounds_budget = 50
+
 func order(cmd: Globals.UnitCmd, parameter):
 	match cmd:
-		Globals.UnitCmd.ATTACK_UNIT:
-			if squadType == Unit.SquadType.MORTAR:
-				if parameter is Unit:
-					var enemy_unit: Unit = parameter as Unit
-					squad_fire.set_target_unit(enemy_unit)
-				else:
-					var map_hex: Vector2i = parameter as Vector2i
-					fire_mortar(map_hex)
-			else:
-				var enemy_unit: Unit = parameter as Unit
-				squad_fire.set_target_unit(enemy_unit)
-
-		Globals.UnitCmd.ATTACK_GROUND:
+		Globals.UnitCmd.FIRE_AT_HEX:
 			if squadType == Unit.SquadType.MORTAR:
 				if parameter is Unit:
 					var enemy_unit: Unit = parameter as Unit
@@ -227,11 +225,50 @@ func order(cmd: Globals.UnitCmd, parameter):
 					fire_mortar(map_hex)
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
-				var units: Array[Node2D] = _find_units_at(map_hex)
+				#squad_fire.target_hex = map_hex
+				var units: Array[Unit] = _find_units_at(map_hex)
 				for unit in units:
 					if not unit.team == Globals.team_player or Debug.enemy_selectable:
 						var _path: Array[Vector3i] = []
+						setAttackState(AttackState.MANUAL_TRACK)
 						squad_fire.set_target_unit(unit)
+				if not squad_fire.target_unit:
+					setAttackState(AttackState.MANUAL_GROUND)
+					squad_fire.target_hex = map_hex
+				#var enemy_unit: Unit = parameter as Unit
+				#squad_fire.set_target_unit(enemy_unit)
+		Globals.UnitCmd.FIRE_AT_UNIT:
+			var enemy_unit: Unit = parameter as Unit
+			squad_fire.set_target_unit(enemy_unit)
+		
+		
+		#Globals.UnitCmd.ATTACK_UNIT:
+			#if squadType == Unit.SquadType.MORTAR:
+				#if parameter is Unit:
+					#var enemy_unit: Unit = parameter as Unit
+					#squad_fire.set_target_unit(enemy_unit)
+				#else:
+					#var map_hex: Vector2i = parameter as Vector2i
+					#fire_mortar(map_hex)
+			#else:
+				#var enemy_unit: Unit = parameter as Unit
+				#squad_fire.set_target_unit(enemy_unit)
+#
+		#Globals.UnitCmd.ATTACK_GROUND:
+			#if squadType == Unit.SquadType.MORTAR:
+				#if parameter is Unit:
+					#var enemy_unit: Unit = parameter as Unit
+					#squad_fire.set_target_unit(enemy_unit)
+				#else:
+					#var map_hex: Vector2i = parameter as Vector2i
+					#fire_mortar(map_hex)
+			#else:
+				#var map_hex: Vector2i = parameter as Vector2i
+				#var units: Array[Node2D] = _find_units_at(map_hex)
+				#for unit in units:
+					#if not unit.team == Globals.team_player or Debug.enemy_selectable:
+						#var _path: Array[Vector3i] = []
+						#squad_fire.set_target_unit(unit)
 		Globals.UnitCmd.MOVE:
 			var to_hex: Vector2i = parameter as Vector2i
 			if not current_hex == to_hex:
@@ -986,6 +1023,7 @@ func _make_medium_mortar_squad(v: bool) -> void:
 
 
 func _on_started_moving():
+	setAttackState(Unit.AttackState.AUTO)
 	moving = true
 	ui.started_moving(broken, surrendered)
 	started_moving.emit()

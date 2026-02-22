@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://cq4b30mgos8ft"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://cq4b30mgos8ft"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_3htwq"]
 [ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2_ckkmk"]
@@ -14,6 +14,7 @@ ammo_type = 1
 ammunition_start = 26
 ammunition = 26
 crew_required = 2
+setup_s = 10.0
 projectile_speed = 100
 snd_shot = ExtResource("3_y4l6k")
 snd_hit = ExtResource("2_ckkmk")

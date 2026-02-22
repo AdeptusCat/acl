@@ -212,7 +212,8 @@ func _process(delta: float) -> void:
 		else:
 			#if unit.team == Globals.team_player:
 			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
+			if unit.attackState == Unit.AttackState.AUTO:
+				handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
 	
 	update_fire_recent(delta)
 	_update_state_multipliers()
@@ -340,10 +341,10 @@ func handle_auto_fire(
 	if best_enemy == null:
 		if not unit.squad_fire.target_unit == null:
 			target_unit = null
-			unit.order(Globals.UnitCmd.ATTACK_UNIT, target_unit)
+			unit.order(Globals.UnitCmd.FIRE_AT_UNIT, target_unit)
 		return
 	
-	unit.order(Globals.UnitCmd.ATTACK_UNIT, best_enemy)
+	unit.order(Globals.UnitCmd.FIRE_AT_UNIT, best_enemy)
 	best_enemy.set_cover(best_cover)
 	fire_timer = fire_rate
 
@@ -448,6 +449,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
+	
+	if unit.moving:
+		return 0
 	if not s.is_weapon_setup_done(delta_mod):
 		return 0
 	if not s.is_weapon_reload_done(delta_mod):
@@ -457,6 +461,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	if Debug.dont_fire_wepaons:
 		return 0
+	
+	if not target_hex == Vector2i.ZERO:
+		pass
 	
 	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
@@ -481,9 +488,18 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 				if not u.surrendered:
 					#if u.current_hex == target_hex:
 					batch_targets.append(u)
-	if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
+	
+	#if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
+		#set_target_unit(null)
+		#return 0
+	if batch_targets.is_empty() and unit.attackState == Unit.AttackState.AUTO:
 		set_target_unit(null)
 		return 0
+	if batch_targets.is_empty() and unit.attackState == Unit.AttackState.MANUAL_TRACK:
+		unit.setAttackState(Unit.AttackState.AUTO)
+		set_target_unit(null)
+		return 0
+	
 	
 	# Loader dont fire their weapon
 	if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
@@ -499,7 +515,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			#s.next_ready_start_s = _now_s
 		#return 0
 	
-	mortar_target_hex = Vector2i.ZERO
+	#mortar_target_hex = Vector2i.ZERO
 	
 	if s.weapon.can_fire_riflegrenades:
 		pass
@@ -524,8 +540,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var rounds_in_mag: int = s.rounds_in_mag
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
 	
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
+		if unit.attack_ground_rounds_budget <= 0:
+			unit.setAttackState(Unit.AttackState.AUTO)
+		
+		unit.attack_ground_rounds_budget -= shots
 	
-
 	# emit shots immediately into current window
 	# visual
 	_add_rounds_to_hex(target_hex, shots)
