@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://dmt8cvuw8hhn" path="res://scenes/game/units/squad_action_controller.gd" id="1_cf15i"]
 
-[node name="SquadActionController" type="Node"]
+[node name="SquadActionController" type="Node" unique_id=560226592]
 script = ExtResource("1_cf15i")

@@ -200,12 +200,6 @@ func _ready():
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
 
-func _find_units_at(hex: Vector2i) -> Array[Unit]:
-	var units: Array[Unit]
-	for u in Globals.units:
-		if u.current_hex == hex:
-			units.append(u)
-	return units
 
 func setAttackState(_attackState: AttackState):
 	attackState = _attackState
@@ -226,7 +220,7 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
 				#squad_fire.target_hex = map_hex
-				var units: Array[Unit] = _find_units_at(map_hex)
+				var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
 				for unit in units:
 					if not unit.team == Globals.team_player or Debug.enemy_selectable:
 						var _path: Array[Vector3i] = []

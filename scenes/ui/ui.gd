@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var firepower_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
 @onready var distance_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
 @onready var selection_wheel = $Control/SelectionWheel
+@onready var selection_wheel_alt = $Control/SelectionWheelAlt
 
 @onready var unit_details = $Control/UnitDetails
 @onready var tile_details = $Control/TileDetails

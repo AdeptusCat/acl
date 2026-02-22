@@ -286,9 +286,11 @@ func _on_input_manager_right_button_pressed() -> void:
 	var event_pos: Vector2 = get_local_mouse_position()
 	selected_map_hex = ground_layer.local_to_map(event_pos)
 	if selected_map_hex and game_controller.selected_unit:
-		ui.selection_wheel.open(mouse_screen_pos)
+		#ui.selection_wheel.open(mouse_screen_pos)
+		ui.selection_wheel_alt.open(mouse_screen_pos)
 
 
 func _on_input_manager_right_button_released() -> void:
-	var option: WheelOption.Option = ui.selection_wheel.close()
+	#var option: WheelOption.Option = ui.selection_wheel.close()
+	var option: WheelOption.Option = ui.selection_wheel_alt.close()
 	game_controller.order_via_option_wheel(selected_map_hex, option)

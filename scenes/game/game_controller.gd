@@ -433,7 +433,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	else:
 		previous_selected_hex = map_hex
 		selected_hex_index = 0
-	var units: Array[Node2D] = _find_units_at(map_hex)
+	var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
 	if units.is_empty():
 		if not selected_unit == null:
 			_deselect_unit(selected_unit)
@@ -573,14 +573,6 @@ func _deselect_unit(unit):
 		selected_unit.deselect()
 		selected_unit = null
 		LOSHelper.clear_los()
-
-
-func _find_units_at(hex: Vector2i) -> Array[Node2D]:
-	var units: Array[Node2D]
-	for u in unit_container.get_children():
-		if u.current_hex == hex:
-			units.append(u)
-	return units
 
 
 func _on_unit_surrendered(_unit):
