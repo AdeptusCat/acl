@@ -76,7 +76,11 @@ var _accum_window_s: float = 0.0
 var fire_recent: float = 0.0 # 0..1 shows that they were shooting
 
 # Targeting
-var target_hex: Vector2i
+var target_hex: Vector2i:
+	set(value):
+		target_hex = value
+		if unit.attackState == Unit.AttackState.MANUAL_GROUND:
+			pass
 var mortar_target_hex: Vector2i
 #var target_cover: float
 var target_unit: Unit
@@ -218,9 +222,20 @@ func _process(delta: float) -> void:
 	update_fire_recent(delta)
 	_update_state_multipliers()
 	_tick_soldiers(delta)
-	#if target_unit:
-		#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-		#target_hex = target_unit.current_hex
+	
+	if unit.attackState == Unit.AttackState.MANUAL_TRACK:
+		if target_unit:
+			var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
+			if visible_enemies.has(target_unit):
+				if not target_unit.current_hex == target_hex:
+					target_hex = target_unit.current_hex
+			else:
+				unit.setAttackState(Unit.AttackState.AUTO)
+		else:
+			unit.setAttackState(Unit.AttackState.AUTO)
+		#if target_unit:
+			#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
+			#target_hex = target_unit.current_hex
 
 
 func update_fire_recent(delta: float) -> void:
@@ -449,6 +464,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
+	
+	
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
+		pass
 	
 	if unit.moving:
 		return 0

@@ -232,9 +232,29 @@ func order(cmd: Globals.UnitCmd, parameter):
 						var _path: Array[Vector3i] = []
 						setAttackState(AttackState.MANUAL_TRACK)
 						squad_fire.set_target_unit(unit)
-				if not squad_fire.target_unit:
+				if units.is_empty():
 					setAttackState(AttackState.MANUAL_GROUND)
 					squad_fire.target_hex = map_hex
+					for s in squad_fire.soldiers:
+						if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+							continue
+						var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
+						#if not s.aquire_target_task.target_id == target_unit:
+						if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
+							s.reload_task.done = false
+							s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
+							s.rounds_in_mag = 1
+							s.weapon.riflegrenade_loaded = true
+							
+							#s.aquire_target_task.target_id = target_unit
+							s.aquire_target_task.done = false
+							s.aquire_target_task.start_time_s = squad_fire._calc_acquire_delay(s)
+						else:
+							if s.weapon.range_hexes >= target_distance:
+								#s.aquire_target_task.target_id = target_unit
+								#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
+								s.aquire_target_task.done = false
+								s.aquire_target_task.start_time_s = squad_fire._calc_acquire_delay(s)
 				#var enemy_unit: Unit = parameter as Unit
 				#squad_fire.set_target_unit(enemy_unit)
 		Globals.UnitCmd.FIRE_AT_UNIT:
@@ -1034,12 +1054,13 @@ func _on_started_moving():
 func _on_stopped_moving():
 	moving = false
 	ui.stopped_moving(broken, surrendered)
-	action_controller.on_stopped_moving()
+	#action_controller.on_stopped_moving()
 	
 
 
 func _on_unit_arrived_at_hex(new_hex: Vector2i):
-	action_controller.on_reached_hex(new_hex)
+	pass
+	#action_controller.on_reached_hex(new_hex)
 
 
 func _on_rout_failed():
