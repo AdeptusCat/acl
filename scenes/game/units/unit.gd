@@ -219,8 +219,6 @@ func order(cmd: Globals.UnitCmd, parameter):
 					fire_mortar(map_hex)
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
-				#squad_fire.target_hex = map_hex
-				#var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
 				var units: Array = Globals.unit_visible_enemies[self]
 				for unit in units:
 					if unit.current_hex == map_hex:
