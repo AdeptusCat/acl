@@ -249,8 +249,6 @@ func order(cmd: Globals.UnitCmd, parameter):
 								#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
 								s.aquire_target_task.done = false
 								s.aquire_target_task.start_time_s = squad_fire._calc_acquire_delay(s)
-				#var enemy_unit: Unit = parameter as Unit
-				#squad_fire.set_target_unit(enemy_unit)
 		Globals.UnitCmd.FIRE_AT_UNIT:
 			var enemy_unit: Unit = parameter as Unit
 			squad_fire.set_target_unit(enemy_unit)
