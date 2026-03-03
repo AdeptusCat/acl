@@ -220,12 +220,14 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
 				#squad_fire.target_hex = map_hex
-				var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
+				#var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
+				var units: Array = Globals.unit_visible_enemies[self]
 				for unit in units:
-					if not unit.team == Globals.team_player or Debug.enemy_selectable:
-						var _path: Array[Vector3i] = []
-						setAttackState(AttackState.MANUAL_TRACK)
-						squad_fire.set_target_unit(unit)
+					if unit.current_hex == map_hex:
+						if not unit.team == Globals.team_player or Debug.enemy_selectable:
+							var _path: Array[Vector3i] = []
+							setAttackState(AttackState.MANUAL_TRACK)
+							squad_fire.set_target_unit(unit)
 				if units.is_empty():
 					setAttackState(AttackState.MANUAL_GROUND)
 					squad_fire.target_hex = map_hex
@@ -289,7 +291,8 @@ func order(cmd: Globals.UnitCmd, parameter):
 				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team)
 				give_move_to_hex_order(to_hex, path, false)
 			else:
-				movement.move_to_hex(to_hex)
+				movement.stop()
+				#movement.move_to_hex(to_hex)
 
 
 func _on_new_target_hex(end_of_path_hex: Vector2i):

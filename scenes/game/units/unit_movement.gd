@@ -64,6 +64,7 @@ func _process(delta: float) -> void:
 
 func stop():
 	if moving:
+		_get_terrain_multiplier()
 		path_index = 0
 		path_hexes.clear()
 		move_to_hex(unit.current_hex)
@@ -230,7 +231,11 @@ func _process_movement(delta: float) -> void:
 
 func _get_terrain_multiplier() -> void:
 	if path_hexes.is_empty():
-		terrain_mult = 1.0
+		var hex_to_move_to: Vector2i = unit.current_hex
+		var next_terr: int = _get_terrain_type(hex_to_move_to)
+		var mf_base = _terrain_mf(next_terr)
+		terrain_mult = _mf_to_speed_mult(mf_base)
+		#terrain_mult = 1.0
 		return
 	
 	var next_terr: int = _get_terrain_type(path_hexes[path_index])
