@@ -66,3 +66,8 @@ func update_all_unit_visibilities():
 				continue
 			if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
 				Globals.unit_enemies_in_los[unit].append(enemy_unit)
+		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
+		for unit_in_current_hex in units_at_current_hex:
+			if not unit_in_current_hex.team == unit.team:
+				if not Globals.unit_enemies_in_los[unit].has(unit_in_current_hex):
+					Globals.unit_enemies_in_los[unit].append(unit_in_current_hex)

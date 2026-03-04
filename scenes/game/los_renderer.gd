@@ -113,20 +113,22 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
 func _draw():
 	#return
 	# 🔥 New: Draw blue lines to visible enemies
-	for los_data in los_enemy_lines:
-		draw_line(los_data["from"], los_data["to"], Color(0.36, 0.074, 0.005, 1.0), 2.0)
-	for los_data in los_to_target:
-		draw_line(los_data["from"], los_data["to"], Color(0.895, 0.0, 0.316, 1.0), 2.0)
-	for los_data in movement_path:
-		draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
+	if Debug.show_los_lines:
+		for los_data in los_enemy_lines:
+			draw_line(los_data["from"], los_data["to"], Color(0.36, 0.074, 0.005, 1.0), 2.0)
+		for los_data in los_to_target:
+			draw_line(los_data["from"], los_data["to"], Color(0.895, 0.0, 0.316, 1.0), 2.0)
+	if Debug.show_movement_lines:
+		for los_data in movement_path:
+			draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
 	for los_data in chain_of_command:
 		draw_line(los_data["from"], los_data["to"], Color(0.0, 0.391, 0.122, 1.0), 2.0)
 	if SessionSettings.showCmdConnectivity:
 		if Debug.showEnemyCmdConnectivity:
 			for connection in leader_presence_strength[Globals.team_enemy]:
-				draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), 1.0)
+				draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
 		for connection in leader_presence_strength[Globals.team_player]:
-			draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), 1.0)
+			draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
 
 
 func strength_to_color_hsv(strength: float) -> Color:

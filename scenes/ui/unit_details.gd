@@ -18,8 +18,13 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 
 var unit: Unit
 var soldiers: Array[Soldier]
+var casualties: Array[Soldier]
+
 var soldier_entries_by_soldier: Dictionary[Soldier, Dictionary]
 var soldiers_entries: Array[Dictionary]
+
+var casualty_entries_by_casualty: Dictionary[Soldier, Dictionary]
+var casualties_entries: Array[Dictionary]
 
 
 func _ready() -> void:
@@ -73,6 +78,9 @@ func _process(_delta: float) -> void:
 				if unit.moving:
 					set_progress_bar(s, "Moving", 0, 0)
 					continue
+				if unit.in_close_combat:
+					set_progress_bar(s, s.close_combat_task.task_name, 0, 0)
+					continue
 				if not s.is_weapon_setup_done(0.0):
 					set_progress_bar(s, s.setup_weapon_task.task_name, s.setup_weapon_task.start_time_s, s.setup_weapon_task.remaining_time_s)
 					continue
@@ -86,6 +94,9 @@ func _process(_delta: float) -> void:
 					set_progress_bar(s, s.assist_task.task_name, 0, 0)
 					continue
 				set_progress_bar(s, "Idle", 0, 0)
+		for s in casualty_entries_by_casualty:
+			set_casualty_progress_bar(s, "INCAPACITATED", 0, 0)
+
 
 func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):
 	var progress_bar: ProgressBar = soldier_entries_by_soldier[s][Entry.PROGRESS_BAR]
@@ -93,7 +104,18 @@ func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaini
 	progress_bar.value = elapsed_time_s / start_time_s
 	
 	var task_label: Label = soldier_entries_by_soldier[s][Entry.TASK]
+	task_label.remove_theme_color_override("font_color")
 	task_label.text = task_name
+
+func set_casualty_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):
+	var progress_bar: ProgressBar = casualty_entries_by_casualty[s][Entry.PROGRESS_BAR]
+	var elapsed_time_s: float = start_time_s - remaining_time_s
+	progress_bar.value = elapsed_time_s / start_time_s
+	
+	var task_label: Label = casualty_entries_by_casualty[s][Entry.TASK]
+	task_label.add_theme_color_override("font_color", Color.RED)
+	task_label.text = task_name
+
 
 func get_makeready_progress(soldier: Soldier) -> float:
 	# 0.0..1.0 progress bar value
@@ -109,15 +131,17 @@ func get_makeready_progress(soldier: Soldier) -> float:
 	return p
 
 
-func show_unit_detail(_unit: Unit):
+func show_unit_detail(_unit: Unit, tween_on: bool = true):
 	# this shows the panel without weird resizing issue when using hiding()/showing()
 	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
-	modulate.a = 0.0
-	tween_opacity(1.0)
+	if tween_on:
+		modulate.a = 0.0
+		tween_opacity(1.0)
 	
 	soldiers = _unit.squad_fire.soldiers
+	casualties = _unit.squad_fire.casualties
 	var i: int = 0
 	soldier_entries_by_soldier.clear()
 	for s in soldiers:
@@ -130,6 +154,23 @@ func show_unit_detail(_unit: Unit):
 		#entries[Entry.PROGRESS_BAR].value = 0.0
 		
 		soldier_entries_by_soldier[s] = entries
+		
+		for entry in entries.values():
+			entry.show()
+		
+		i += 1
+	
+	casualty_entries_by_casualty.clear()
+	for s in casualties:
+		var entries: Dictionary = soldiers_entries[i]
+		
+		entries[Entry.NAME].text = s.name
+		entries[Entry.ROLE].text = RankGrades.get_role_name(s.role)
+		#entries[Entry.RANK].text = s.name
+		entries[Entry.WEAPON].text = s.weapon.name
+		#entries[Entry.PROGRESS_BAR].value = 0.0
+		
+		casualty_entries_by_casualty[s] = entries
 		
 		for entry in entries.values():
 			entry.show()
@@ -192,7 +233,7 @@ func _on_unit_died(_unit: Unit):
 
 func _on_soldiers_changed():
 	if is_instance_valid(unit):
-		show_unit_detail(unit)
+		show_unit_detail(unit, false)
 
 
 func _on_state_chaged(state: int):

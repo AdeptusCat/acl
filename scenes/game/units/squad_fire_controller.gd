@@ -70,6 +70,8 @@ const HALF_POINT: float = 1.5      # cover points to halve the remaining gap to 
 
 # Soldiers
 var soldiers: Array[Soldier] = []
+var casualties: Array[Soldier] = []
+
 var _now_s: float = 0.0
 var _accum_window_s: float = 0.0
 
@@ -375,8 +377,8 @@ func handle_auto_fire(
 
 func _score_enemy_for_target(shooter_unit: Unit, enemy: Unit, current_hex: Vector2i) -> Dictionary:
 	var distance: int = LOSHelper.ground_layer.cube_distance(shooter_unit.current_cube, enemy.current_cube)
-	if distance < 1:
-		distance = 1
+	if distance < 0:
+		distance = 0
 
 	var best_ratio: float = 0.0
 	var has_range: bool = false
@@ -478,6 +480,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
 		pass
 	
+	if unit.in_close_combat:
+		return 0
 	if unit.moving:
 		return 0
 	if not s.is_weapon_setup_done(delta_mod):

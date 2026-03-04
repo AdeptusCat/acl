@@ -12,7 +12,8 @@ var unit_enemy_los_time_s: Dictionary[Unit, Dictionary] = {}
 var unit_enemy_last_seen_unix_s: Dictionary[Unit, Dictionary] = {}
 var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0..1
 var units: Array[Unit]
-
+var units_in_close_combat: Array[Unit]
+var close_combat_locations: Array[Vector2i]
 
 enum Team {
 	AXIS,

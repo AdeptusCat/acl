@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://mvh7egq8ia5j"]
+
+[ext_resource type="Texture2D" uid="uid://bfqkgoqty8nf8" path="res://assets/ui/close_combat.png" id="1_xvp3f"]
+
+[node name="CloseCombatSign" type="Sprite2D" unique_id=333430845]
+top_level = true
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_xvp3f")

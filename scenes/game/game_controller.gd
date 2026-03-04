@@ -5,6 +5,7 @@ extends Node2D
 @onready var camera 		= $Camera2D
 @onready var axis_formation_ai_controllers := $AxisFormationAIControllers
 @onready var allies_formation_ai_controllers := $AlliesFormationAIControllers
+@onready var close_combat_locations := $CloseCombatLocations
 
 @export var allies_objective_tilemap : TileMapLayer
 @export var axis_objective_tilemap : TileMapLayer
@@ -13,6 +14,8 @@ extends Node2D
 @export var glow_maker_scene: PackedScene
 @export var unit_scene: PackedScene
 @export var formation_ai_controller_scene: PackedScene
+
+@export var close_combat_sign_scene: PackedScene
 
 @export var time_left_seconds: float = 120.0  
 var timer_running := false
@@ -245,6 +248,8 @@ func show_visible_units():
 	for u in Globals.units:
 		if not is_instance_valid(u):
 			continue
+		if u.surrendered:
+			continue
 		if u.team == Globals.team_player:
 			var units_in_los: Array = Globals.unit_visible_enemies.get(u, [])
 			for unit_in_los in units_in_los:
@@ -272,6 +277,8 @@ func update_visible_hexes():
 	for u in Globals.units:
 		if not is_instance_valid(u):
 			continue
+		if u.surrendered:
+			continue
 		var unit_visible = LOSHelper.los_lookup.get(u.current_hex, [])
 		for hex in unit_visible:
 			if not LOSHelper.visible_hexes[u.team].has(hex):
@@ -280,16 +287,38 @@ func update_visible_hexes():
 			LOSHelper.visible_hexes[u.team].append(u.current_hex)
 
 
-func _on_unit_entered_hex(__unit, _vector: Vector2i):
+func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
 	
-	var map_hex: Vector2i = ground_layer.local_to_map(get_local_mouse_position())
-	var _units: Array
-	for _unit in Globals.units:
-		if _unit.current_hex == map_hex: 
-			_units.append(_unit)
+	var units_in_hex: Array = LOSHelper.find_units_at(hex_entered)
+	var min_one_good_order_enemy_unit: bool = false
+	var enemy_present: bool = false
+	for unit: Unit in units_in_hex:
+		if not unit.team == unit_entering_hex.team:
+			enemy_present = true
+			if unit.is_good_order():
+				min_one_good_order_enemy_unit = true
+	if min_one_good_order_enemy_unit:
+		if unit_entering_hex.broken:
+			unit_entering_hex.surrender()
+	else:
+		if enemy_present:
+			if unit_entering_hex.broken:
+				unit_entering_hex.action_controller._start_rout()
+			else:
+				for unit: Unit in units_in_hex:
+					if not unit.team == unit_entering_hex.team:
+						unit.surrender()
+	
+	
+	
+	#var _units: Array
+	#for _unit in Globals.units:
+		#if _unit.current_hex == map_hex: 
+			#_units.append(_unit)
+	
 	#get_parent().ui.show_unit_data(map_hex, _units)
 	#for x in range(LOSHelper.GRID_SIZE_X):
 		#for y in range(LOSHelper.GRID_SIZE_Y):
@@ -302,6 +331,119 @@ func _on_unit_entered_hex(__unit, _vector: Vector2i):
 		#if u.team == current_team:
 			#var visible_hexes_from_unit = LOSHelper.los_lookup.get(unit.current_hex, [])
 			
+
+func set_close_combat_hexes_and_units():
+	Globals.units_in_close_combat.clear()
+	Globals.close_combat_locations.clear()
+	
+	for child in close_combat_locations.get_children():
+		child.queue_free()
+	
+	for unit: Unit in Globals.units:
+		if not unit.is_good_order():
+			continue
+		var mask: int = 0
+		var both_teams_present: bool = false
+		var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
+		for _unit in units_in_hex:
+			if not _unit.is_good_order():
+				continue
+			match _unit.team:
+				Globals.Team.AXIS:
+					mask |= 1
+				Globals.Team.ALLIES:
+					mask |= 2
+			if mask == 3:
+				both_teams_present = true
+		if both_teams_present:
+			for _unit in units_in_hex:
+				_unit.in_close_combat = true
+			var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
+			close_combat_locations.add_child(close_combat_sign)
+			close_combat_sign.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+			if not Globals.close_combat_locations.has(unit.current_hex):
+				Globals.close_combat_locations.append(unit.current_hex)
+			if not Globals.units_in_close_combat.has(unit):
+				Globals.units_in_close_combat.append(unit)
+		else:
+			for _unit in units_in_hex:
+				_unit.in_close_combat = false
+			#Globals.close_combat_locations.erase(unit.current_hex)
+			#Globals.units_in_close_combat.erase(unit)
+	
+	
+	
+	#for unit in Globals.units_in_close_combat:
+		#var mask: int = 0
+		#var both_teams_present: bool = false
+		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
+		#for _unit in units_in_hex:
+			#match unit.team:
+				#Globals.Team.AXIS:
+					#mask |= 1
+				#Globals.Team.ALLIES:
+					#mask |= 2
+			#if mask == 3:
+				#both_teams_present = true
+		#if both_teams_present:
+			#for _unit in units_in_hex:
+				#_unit.in_close_combat = true
+		#else:
+			#for _unit in units_in_hex:
+				#_unit.in_close_combat = false
+	
+	#for child in close_combat_locations.get_children():
+		#var cc_position: Vector2 = child.position
+		#var cc_hex: Vector2i = LOSHelper.ground_layer.local_to_map(cc_position)
+		#
+		#var mask: int = 0
+		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(cc_hex)
+		#var both_teams_present: bool = false
+		#for unit in units_in_hex:
+			#match unit.team:
+				#Globals.Team.AXIS:
+					#mask |= 1
+				#Globals.Team.ALLIES:
+					#mask |= 2
+			#if mask == 3:
+				#both_teams_present = true
+				#
+		#
+		#if not both_teams_present:
+			#Globals.close_combat_locations.erase(cc_hex)
+			#child.queue_free()
+	#
+	#var mask: int = 0
+	#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(hex_entered)
+	#var both_teams_present: bool = false
+	#for unit in units_in_hex:
+		#match unit.team:
+			#Globals.Team.AXIS:
+				#mask |= 1
+			#Globals.Team.ALLIES:
+				#mask |= 2
+		#if mask == 3:
+			#both_teams_present = true
+	#
+	#if both_teams_present:
+		#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
+		#close_combat_locations.add_child(close_combat_sign)
+		#close_combat_sign.position = LOSHelper.ground_layer.map_to_local(hex_entered)
+		#if not Globals.close_combat_locations.has(hex_entered):
+			#Globals.close_combat_locations.append(hex_entered)
+	
+	
+	#for child in close_combat_locations.get_children():
+		#var cc_position: Vector2 = child.position
+		#var cc_hex: Vector2i = LOSHelper.ground_layer.local_to_map(cc_position)
+		#
+		#var _units_in_hex: Array[Unit] = LOSHelper.find_units_at(cc_hex)
+		#for unit in _units_in_hex:
+			#unit.in_close_combat = true
+			#if not Globals.units_in_close_combat.has(unit):
+				#Globals.units_in_close_combat.append(unit)
+	
+
 
 func setup_game():
 	
@@ -847,6 +989,11 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 			
 			if conf >= 0.55:
 				units_visible.append(enemy_tracked)
+		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
+		for unit_in_current_hex in units_at_current_hex:
+			if not unit_in_current_hex.team == unit.team:
+				if not units_visible.has(unit_in_current_hex):
+					units_visible.append(unit_in_current_hex)
 		
 		Globals.unit_enemy_spot_conf[unit] = conf_map
 		next_visible[unit] = units_visible
@@ -926,3 +1073,18 @@ func _get_concealment(current_hex: Variant, enemy: Node) -> int:
 			# fallback if you have nothing else
 			return int(data["target_cover"])
 	return 0
+
+
+func _on_close_combat_resolve_timer_timeout() -> void:
+	var units_to_die: Array[Unit]
+	set_close_combat_hexes_and_units()
+	for unit in Globals.units_in_close_combat:
+		if not is_instance_valid(unit):
+			continue
+		#for s in unit.squad_fire.soldiers:
+			#s
+		var r: float = randf()
+		if r < 0.1:
+			units_to_die.append(unit)
+	for unit in units_to_die:
+		unit.die()

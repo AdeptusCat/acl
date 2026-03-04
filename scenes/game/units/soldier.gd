@@ -12,6 +12,7 @@ var aquire_target_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.
 var reload_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.RELOAD)
 var fire_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.FIRE_WEAPON)
 var assist_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.ASSIST)
+var close_combat_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.CLOSE_COMBAT)
 
 var id: int
 var name: String

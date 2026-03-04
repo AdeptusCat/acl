@@ -103,6 +103,7 @@ var moving: bool = false
 var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
 var effective_range: int = 0
+var in_close_combat: bool = false
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
@@ -208,6 +209,8 @@ func setAttackState(_attackState: AttackState):
 			attack_ground_rounds_budget = 50
 
 func order(cmd: Globals.UnitCmd, parameter):
+	#if in_close_combat:
+		#return
 	match cmd:
 		Globals.UnitCmd.FIRE_AT_HEX:
 			if squadType == Unit.SquadType.MORTAR:
@@ -1298,6 +1301,9 @@ func _apply_casualties(n: int) -> void:
 	for soldier in casualties:
 		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
 	
+	for index in casualty_indexes:
+		squad_fire.casualties.append(squad_fire.soldiers[index])
+	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
 	remove_indices(squad_fire.soldiers, casualty_indexes)
@@ -1510,7 +1516,8 @@ func get_squad_type_name(type: SquadType) -> String:
 
 func surrender():
 	#return
-	movement.move_to_hex(current_hex)
+	#movement.move_to_hex(current_hex)
+	movement.stop()
 	surrendered = true
 	#alive = false
 	broken = false

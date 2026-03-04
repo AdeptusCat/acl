@@ -11,3 +11,4 @@ func check_enemy_visibility(unit: Unit):
 		if enemys_visible.has(enemy):
 			continue
 		Globals.unit_visible_enemies[unit].append(enemy)
+	

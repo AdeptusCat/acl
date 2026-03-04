@@ -28,3 +28,13 @@ func _on_show_enemy_cmd_connectivity_toggled(toggled_on: bool) -> void:
 
 func _on_dont_fire_weapons_toggled(toggled_on: bool) -> void:
 	Debug.dont_fire_wepaons = toggled_on
+
+
+func _on_show_los_lines_toggled(toggled_on: bool) -> void:
+	Debug.show_los_lines = toggled_on
+
+
+func _on_show_movement_lines_toggled(toggled_on: bool) -> void:
+	Debug.show_movement_linesw = toggled_on
+	
+	

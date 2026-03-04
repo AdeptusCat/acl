@@ -613,6 +613,14 @@ text = "Enemy CMD Conn."
 layout_mode = 2
 text = "Dont Fire Weapons"
 
+[node name="ShowLosLines" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=2004144681]
+layout_mode = 2
+text = "Show LOS Lines"
+
+[node name="ShowMovementLines" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=480014847]
+layout_mode = 2
+text = "Show Movement Lines"
+
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1
@@ -641,3 +649,5 @@ layout_mode = 1
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowLosLines" to="Control/Debug" method="_on_show_los_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowMovementLines" to="Control/Debug" method="_on_show_movement_lines_toggled"]

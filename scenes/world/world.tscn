@@ -62,6 +62,7 @@
 [ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="52_dhssw"]
 [ext_resource type="Resource" uid="uid://bn7tg73bvhpsv" path="res://resources/weapons/m1919a4.tres" id="53_cf0uk"]
 [ext_resource type="Resource" uid="uid://btw7qmulsva7g" path="res://resources/weapons/mp40.tres" id="53_dhssw"]
+[ext_resource type="PackedScene" uid="uid://mvh7egq8ia5j" path="res://scenes/ui/close_combat_sign.tscn" id="54_n78lu"]
 [ext_resource type="Script" uid="uid://cwp4yt03yldxu" path="res://scenes/world/target_area.gd" id="55_7rtjl"]
 [ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="55_hpffo"]
 [ext_resource type="Resource" uid="uid://cbxllfdsgrv68" path="res://resources/weapons/kar98_riflegrenade.tres" id="55_l72hy"]
@@ -1636,6 +1637,7 @@ fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 glow_maker_scene = ExtResource("45_q3hpu")
 unit_scene = ExtResource("19_sh7a8")
 formation_ai_controller_scene = ExtResource("51_n78lu")
+close_combat_sign_scene = ExtResource("54_n78lu")
 time_left_seconds = 180.0
 
 [node name="AlliesFormationAIControllers" parent="GameController" unique_id=538941142 instance=ExtResource("51_1o6i5")]
@@ -1681,7 +1683,7 @@ formation_id = 1
 squadType = 1
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" unique_id=1176980552 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(1232, 640)
+position = Vector2(800, 416)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1846,6 +1848,12 @@ current = true
 wait_time = 30.0
 autostart = true
 
+[node name="CloseCombatLocations" type="Node2D" parent="GameController" unique_id=1234195]
+
+[node name="CloseCombatResolveTimer" type="Timer" parent="GameController" unique_id=1869605135]
+wait_time = 0.5
+autostart = true
+
 [node name="TargetArea" type="Node2D" parent="." unique_id=403286200]
 script = ExtResource("55_7rtjl")
 
@@ -1928,5 +1936,6 @@ position = Vector2(626, 904)
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]
 [connection signal="start_match" from="GameController" to="InputManager" method="_on_game_controller_start_match"]
 [connection signal="timeout" from="GameController/SpawnTimer" to="GameController" method="_on_spawn_timer_timeout"]
+[connection signal="timeout" from="GameController/CloseCombatResolveTimer" to="GameController" method="_on_close_combat_resolve_timer_timeout"]
 
 [editable path="Tracer"]
