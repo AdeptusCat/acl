@@ -187,19 +187,19 @@ func show_unit_detail(_unit: Unit, tween_on: bool = true):
 		if is_instance_valid(unit): 
 			unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
 			unit.soldiers_changed.disconnect(_on_soldiers_changed)
-			unit.state_chaged.disconnect(_on_state_chaged)
+			unit.state_changed.disconnect(_on_state_changed)
 			unit.unit_died.disconnect(_on_unit_died)
 		
 		unit = _unit
 		
 		unit.stress_system.leadership_changed.connect(_on_leadership_changed)
 		unit.soldiers_changed.connect(_on_soldiers_changed)
-		unit.state_chaged.connect(_on_state_chaged)
+		unit.state_changed.connect(_on_state_changed)
 		unit.unit_died.connect(_on_unit_died)
 		
 	
 	_on_leadership_changed(unit.stress_system.leadership_bonus)
-	_on_state_chaged(unit.stress_system.state)
+	_on_state_changed(unit.stress_system.state)
 	unit_type_label.text = unit.get_squad_type_name(unit.squadType)
 	
 	show()
@@ -219,7 +219,7 @@ func hide_unit_detail():
 		if unit.stress_system.leadership_changed.is_connected(_on_leadership_changed):
 			unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
 			unit.soldiers_changed.disconnect(_on_soldiers_changed)
-			unit.state_chaged.disconnect(_on_state_chaged)
+			unit.state_changed.disconnect(_on_state_changed)
 			unit.unit_died.disconnect(_on_unit_died)
 		unit = null
 
@@ -227,7 +227,7 @@ func _on_unit_died(_unit: Unit):
 	if is_instance_valid(unit): 
 		_unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
 		_unit.soldiers_changed.disconnect(_on_soldiers_changed)
-		_unit.state_chaged.disconnect(_on_state_chaged)
+		_unit.state_changed.disconnect(_on_state_changed)
 		_unit.unit_died.disconnect(_on_unit_died)
 		hide_unit_detail()
 
@@ -236,7 +236,7 @@ func _on_soldiers_changed():
 		show_unit_detail(unit, false)
 
 
-func _on_state_chaged(state: int):
+func _on_state_changed(state: int):
 	if is_instance_valid(unit):
 		unit_status_label.text = unit.get_state_name(state)
 	var color: Color

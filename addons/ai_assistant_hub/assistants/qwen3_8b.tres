@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AIAssistantResource" format=3 uid="uid://dgamyul2sp06c"]
+
+[ext_resource type="Resource" uid="uid://c0xq2vafep0gu" path="res://addons/ai_assistant_hub/llm_providers/ollama.tres" id="1_ml5if"]
+[ext_resource type="Script" uid="uid://depj203srr6ld" path="res://addons/ai_assistant_hub/quick_prompts/ai_quick_prompt_resource.gd" id="2_favu1"]
+[ext_resource type="Script" uid="uid://beh17onc3x8wb" path="res://addons/ai_assistant_hub/assistants/ai_assistant_resource.gd" id="3_jdoc0"]
+[ext_resource type="Resource" uid="uid://ch48k0tlpy08a" path="res://addons/ai_assistant_hub/quick_prompts/code_review.tres" id="3_x41ah"]
+[ext_resource type="Resource" uid="uid://btghoy8pgxvrm" path="res://addons/ai_assistant_hub/quick_prompts/read.tres" id="4_1i0lu"]
+[ext_resource type="Resource" uid="uid://byd87vx7xjhei" path="res://addons/ai_assistant_hub/quick_prompts/code_it.tres" id="5_o4ij5"]
+
+[resource]
+script = ExtResource("3_jdoc0")
+ai_model = "qwen3:8b"
+llm_provider = ExtResource("1_ml5if")
+ai_description = "You are a useful Godot AI assistant.
+You respond in a concise manner and you can write high quality GSScript code for Godot 4. You are chatting with an experienced developer and every code request you receive is for GDScript."
+quick_prompts = Array[ExtResource("2_favu1")]([ExtResource("3_x41ah"), ExtResource("4_1i0lu"), ExtResource("5_o4ij5")])

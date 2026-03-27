@@ -126,7 +126,7 @@ signal contacts_reported(unit: Unit, contact: Array[Unit])
 
 # unit details signals
 signal soldiers_changed
-signal state_chaged(state: int)
+signal state_changed(state: int)
 signal new_target_hex(unit: Unit, hex: Vector2i)
 
 signal draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
@@ -192,7 +192,7 @@ func _ready():
 	squad_fire.fire_riflegrenade.connect(_on_fire_riflegrenade)
 	
 	members_alive = loadouts.size()
-	ui.set_memebers_alive(loadouts.size())
+	ui.set_members_alive(loadouts.size())
 	
 	_refresh_leader_aura()
 	
@@ -232,26 +232,9 @@ func order(cmd: Globals.UnitCmd, parameter):
 				if units.is_empty():
 					setAttackState(AttackState.MANUAL_GROUND)
 					squad_fire.target_hex = map_hex
-					for s in squad_fire.soldiers:
-						if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
-							continue
-						var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
-						#if not s.aquire_target_task.target_id == target_unit:
-						if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-							s.reload_task.done = false
-							s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-							s.rounds_in_mag = 1
-							s.weapon.riflegrenade_loaded = true
-							
-							#s.aquire_target_task.target_id = target_unit
-							s.aquire_target_task.done = false
-							s.aquire_target_task.start_time_s = squad_fire._calc_acquire_delay(s)
-						else:
-							if s.weapon.range_hexes >= target_distance:
-								#s.aquire_target_task.target_id = target_unit
-								#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
-								s.aquire_target_task.done = false
-								s.aquire_target_task.start_time_s = squad_fire._calc_acquire_delay(s)
+					var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
+					squad_fire.set_soldiers_new_target_task(target_distance)
+					
 		Globals.UnitCmd.FIRE_AT_UNIT:
 			var enemy_unit: Unit = parameter as Unit
 			squad_fire.set_target_unit(enemy_unit)
@@ -604,11 +587,11 @@ func _make_platoon_headquarters_squad(v: bool) -> void:
 			leader.rank_grade = RankGrades.Grade.PLATOON_LEADER
 			leader.weapon = smg
 			i += 1
-			var platoon_seargeant: SoldierLoadout = loadouts[i]
-			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
-			platoon_seargeant.nickname = "Zugtruppführer"
-			platoon_seargeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
-			platoon_seargeant.weapon = smg
+			var platoon_sergeant: SoldierLoadout = loadouts[i]
+			platoon_sergeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_sergeant.nickname = "Zugtruppführer"
+			platoon_sergeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_sergeant.weapon = smg
 			i += 1
 			var platoon_guide: SoldierLoadout = loadouts[i]
 			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
@@ -650,11 +633,11 @@ func _make_platoon_headquarters_squad(v: bool) -> void:
 			leader.rank_grade = RankGrades.Grade.PLATOON_LEADER
 			leader.weapon = carbine
 			i += 1
-			var platoon_seargeant: SoldierLoadout = loadouts[i]
-			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
-			platoon_seargeant.nickname = "Platoon Seargeant"
-			platoon_seargeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
-			platoon_seargeant.weapon = rifle
+			var platoon_sergeant: SoldierLoadout = loadouts[i]
+			platoon_sergeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_sergeant.nickname = "Platoon Seargeant"
+			platoon_sergeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
+			platoon_sergeant.weapon = rifle
 			i += 1
 			var platoon_guide: SoldierLoadout = loadouts[i]
 			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
@@ -690,11 +673,11 @@ func _make_company_headquarters_squad(v: bool) -> void:
 			leader.rank_grade = RankGrades.Grade.COMPANY_LEADER
 			leader.weapon = smg
 			i += 1
-			var platoon_seargeant: SoldierLoadout = loadouts[i]
-			platoon_seargeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
-			platoon_seargeant.nickname = "Zugführer"
-			platoon_seargeant.rank_grade = RankGrades.Grade.PLATOON_LEADER
-			platoon_seargeant.weapon = smg
+			var platoon_sergeant: SoldierLoadout = loadouts[i]
+			platoon_sergeant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			platoon_sergeant.nickname = "Zugführer"
+			platoon_sergeant.rank_grade = RankGrades.Grade.PLATOON_LEADER
+			platoon_sergeant.weapon = smg
 			i += 1
 			var platoon_guide: SoldierLoadout = loadouts[i]
 			platoon_guide.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
@@ -899,7 +882,7 @@ func _make_anti_tank_squad(v: bool) -> void:
 func _make_light_mortar_squad(v: bool) -> void:
 	if v:
 		squadType = SquadType.MORTAR
-		make_anti_tank_squad = false
+		make_light_mortar_squad = false
 		if team == 0:
 			var group_size: int = 5
 			var rifle: WeaponSpec = preload("res://resources/weapons/kar98.tres")
@@ -1240,7 +1223,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 		#stress_system.leadership_bonus = 0.0
 	#stress_system.on_casualty_event(n, leader_down)
 	##emit_signal("casualties_taken", original_size - members_alive)
-	#ui.set_memebers_alive(members_alive)
+	#ui.set_members_alive(members_alive)
 	#var casualties: Array[Soldier]
 	#for i in casualty_indexes:
 		#var soldier: Soldier = squad_fire.soldiers[i]
@@ -1260,7 +1243,6 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 func _apply_casualties(n: int) -> void:
 	var casualty_indexes: Array[int] = get_unique_random_ints(n, members_alive)
 	var members_alive_before: int = members_alive
-	members_alive = max(0, members_alive - n)
 	if n == 0:
 		pass
 
@@ -1320,7 +1302,7 @@ func _apply_casualties(n: int) -> void:
 	# book-keeping and UI
 	members_alive = squad_fire.soldiers.size()
 	stress_system.on_casualty_event(n, leader_down)
-	ui.set_memebers_alive(members_alive)
+	ui.set_members_alive(members_alive)
 
 	if members_alive_before == members_alive:
 		pass
@@ -1568,7 +1550,7 @@ func _on_state_changed(prev:int, next:int) -> void:
 	## 3) Visuals/pose
 	ui.state_changed(next)
 	
-	state_chaged.emit(next)
+	state_changed.emit(next)
 	action_controller.on_morale_state_changed(prev, next)
 
 

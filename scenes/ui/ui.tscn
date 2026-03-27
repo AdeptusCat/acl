@@ -341,6 +341,7 @@ text = "Overlsays:"
 
 [node name="ShowCmdConnectivity" type="CheckBox" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=15019783]
 layout_mode = 2
+button_pressed = true
 text = "Cmd Connectivity"
 
 [node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]

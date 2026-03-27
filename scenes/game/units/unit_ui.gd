@@ -19,7 +19,7 @@ var detail_ui = null
 @export var private_texture: Texture
 @export var private_first_class_texture: Texture
 @export var corporal_texture: Texture
-@export var seargeant_texture: Texture
+@export var sergeant_texture: Texture
 @export var second_lieutenant_texture: Texture
 @export var captain_texture: Texture
 
@@ -138,7 +138,7 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 		RankGrades.Grade.TEAM_LEADER:
 			rank_texture_rect.texture = corporal_texture
 		RankGrades.Grade.SQUAD_LEADER:
-			rank_texture_rect.texture = seargeant_texture
+			rank_texture_rect.texture = sergeant_texture
 		RankGrades.Grade.PLATOON_LEADER:
 			rank_texture_rect.texture = second_lieutenant_texture
 		RankGrades.Grade.COMPANY_LEADER:
@@ -200,7 +200,7 @@ func set_cover(cover_value: int) -> void:
 		detail_ui.set_cover(cover_value)
 
 
-func set_memebers_alive(members_alive: int):
+func set_members_alive(members_alive: int):
 	members_count_label.text = str(members_alive)
 
 

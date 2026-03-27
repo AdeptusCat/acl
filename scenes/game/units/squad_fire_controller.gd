@@ -105,6 +105,27 @@ signal draw_los_to_target_unit(from_hex, to_hex)
 	#cover = cover_multiplier_exp(6.0)
 
 
+func set_soldiers_new_target_task(target_distance: int):
+	for s in soldiers:
+		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+			continue
+		#if not s.aquire_target_task.target_id == target_unit:
+		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
+			s.reload_task.done = false
+			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
+			s.rounds_in_mag = 1
+			s.weapon.riflegrenade_loaded = true
+			
+			#s.aquire_target_task.target_id = target_unit
+			s.aquire_target_task.done = false
+			s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+		else:
+			if s.weapon.range_hexes >= target_distance:
+				#s.aquire_target_task.target_id = target_unit
+				#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
+				s.aquire_target_task.done = false
+				s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+
 func set_mg(machinge_guns : int):
 	for i in machinge_guns:
 		# Define the MG (crew-served)

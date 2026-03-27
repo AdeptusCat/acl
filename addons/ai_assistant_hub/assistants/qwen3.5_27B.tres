@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="AIAssistantResource" format=3 uid="uid://pjjrkfjr4ppw"]
+
+[ext_resource type="Resource" uid="uid://b07y61hy1g6q" path="res://addons/ai_assistant_hub/llm_providers/openwebui.tres" id="1_muiy6"]
+[ext_resource type="Script" uid="uid://depj203srr6ld" path="res://addons/ai_assistant_hub/quick_prompts/ai_quick_prompt_resource.gd" id="2_u0nin"]
+[ext_resource type="Resource" uid="uid://btghoy8pgxvrm" path="res://addons/ai_assistant_hub/quick_prompts/read.tres" id="3_c4q5u"]
+[ext_resource type="Script" uid="uid://beh17onc3x8wb" path="res://addons/ai_assistant_hub/assistants/ai_assistant_resource.gd" id="3_xve83"]
+[ext_resource type="Resource" uid="uid://ch48k0tlpy08a" path="res://addons/ai_assistant_hub/quick_prompts/code_review.tres" id="4_vst4h"]
+[ext_resource type="Resource" uid="uid://byd87vx7xjhei" path="res://addons/ai_assistant_hub/quick_prompts/code_it.tres" id="5_ejnhw"]
+
+[resource]
+script = ExtResource("3_xve83")
+ai_model = "qwen3.5:27B"
+llm_provider = ExtResource("1_muiy6")
+quick_prompts = Array[ExtResource("2_u0nin")]([ExtResource("3_c4q5u"), ExtResource("4_vst4h"), ExtResource("5_ejnhw")])

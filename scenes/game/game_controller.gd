@@ -287,6 +287,7 @@ func update_visible_hexes():
 			LOSHelper.visible_hexes[u.team].append(u.current_hex)
 
 
+
 func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 	update_visible_hexes()
 	show_visible_units()
