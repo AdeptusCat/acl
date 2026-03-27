@@ -369,81 +369,6 @@ func set_close_combat_hexes_and_units():
 		else:
 			for _unit in units_in_hex:
 				_unit.in_close_combat = false
-			#Globals.close_combat_locations.erase(unit.current_hex)
-			#Globals.units_in_close_combat.erase(unit)
-	
-	
-	
-	#for unit in Globals.units_in_close_combat:
-		#var mask: int = 0
-		#var both_teams_present: bool = false
-		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
-		#for _unit in units_in_hex:
-			#match unit.team:
-				#Globals.Team.AXIS:
-					#mask |= 1
-				#Globals.Team.ALLIES:
-					#mask |= 2
-			#if mask == 3:
-				#both_teams_present = true
-		#if both_teams_present:
-			#for _unit in units_in_hex:
-				#_unit.in_close_combat = true
-		#else:
-			#for _unit in units_in_hex:
-				#_unit.in_close_combat = false
-	
-	#for child in close_combat_locations.get_children():
-		#var cc_position: Vector2 = child.position
-		#var cc_hex: Vector2i = LOSHelper.ground_layer.local_to_map(cc_position)
-		#
-		#var mask: int = 0
-		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(cc_hex)
-		#var both_teams_present: bool = false
-		#for unit in units_in_hex:
-			#match unit.team:
-				#Globals.Team.AXIS:
-					#mask |= 1
-				#Globals.Team.ALLIES:
-					#mask |= 2
-			#if mask == 3:
-				#both_teams_present = true
-				#
-		#
-		#if not both_teams_present:
-			#Globals.close_combat_locations.erase(cc_hex)
-			#child.queue_free()
-	#
-	#var mask: int = 0
-	#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(hex_entered)
-	#var both_teams_present: bool = false
-	#for unit in units_in_hex:
-		#match unit.team:
-			#Globals.Team.AXIS:
-				#mask |= 1
-			#Globals.Team.ALLIES:
-				#mask |= 2
-		#if mask == 3:
-			#both_teams_present = true
-	#
-	#if both_teams_present:
-		#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
-		#close_combat_locations.add_child(close_combat_sign)
-		#close_combat_sign.position = LOSHelper.ground_layer.map_to_local(hex_entered)
-		#if not Globals.close_combat_locations.has(hex_entered):
-			#Globals.close_combat_locations.append(hex_entered)
-	
-	
-	#for child in close_combat_locations.get_children():
-		#var cc_position: Vector2 = child.position
-		#var cc_hex: Vector2i = LOSHelper.ground_layer.local_to_map(cc_position)
-		#
-		#var _units_in_hex: Array[Unit] = LOSHelper.find_units_at(cc_hex)
-		#for unit in _units_in_hex:
-			#unit.in_close_combat = true
-			#if not Globals.units_in_close_combat.has(unit):
-				#Globals.units_in_close_combat.append(unit)
-	
 
 
 func setup_game():
@@ -1091,3 +1016,89 @@ func _on_close_combat_resolve_timer_timeout() -> void:
 			units_to_die.append(unit)
 	for unit in units_to_die:
 		unit.die()
+
+
+func update_close_combat(instance: CloseCombatInstance, dt: float) -> void:
+	var ready_attackers: Array[Soldier] = []
+	var ready_defenders: Array[Soldier] = []
+
+	instance.elapsed += dt
+
+	if not instance.opening_shock_done:
+		#resolve_opening_shock(instance)
+		instance.opening_shock_done = true
+
+	collect_ready_fighters(instance.attackers, dt, ready_attackers)
+	collect_ready_fighters(instance.defenders, dt, ready_defenders)
+
+	resolve_ready_group(ready_attackers, instance.defenders)
+	resolve_ready_group(ready_defenders, instance.attackers)
+
+	cleanup_dead(instance.attackers)
+	cleanup_dead(instance.defenders)
+
+	update_close_combat_morale(instance)
+	check_close_combat_end(instance)
+
+
+
+func collect_ready_fighters(
+	group: Array[Soldier],
+	dt: float,
+	ready: Array[Soldier]
+) -> void:
+	for i in range(group.size()):
+		var fighter: Soldier = group[i]
+		if not fighter.alive:
+			continue
+		if fighter.stunned_time > 0.0:
+			fighter.stunned_time -= dt
+			if fighter.stunned_time < 0.0:
+				fighter.stunned_time = 0.0
+			continue
+
+		fighter.cooldown_remaining -= dt
+		if fighter.cooldown_remaining <= 0.0:
+			ready.append(fighter)
+
+
+func resolve_ready_group(
+	actors: Array[Soldier],
+	targets: Array[Soldier]
+) -> void:
+	for i in range(actors.size()):
+		var actor: Soldier = actors[i]
+		var target: Soldier = select_target(actor, targets)
+		if target == null:
+			continue
+
+		resolve_single_attack(actor, target)
+		actor.cooldown_remaining = actor.attack_interval
+
+
+func select_target(
+	actor: Soldier,
+	targets: Array[Soldier]
+) -> Soldier:
+	var best_target: Soldier = null
+	var best_score: float = -1000000.0
+
+	for i in range(targets.size()):
+		var target: Soldier = targets[i]
+		if not target.alive:
+			continue
+
+		var score: float = 0.0
+		score -= compute_defense_power(target)
+
+		if target.stunned_time > 0.0:
+			score += 2.0
+
+		if target.morale_attack_mult < 0.5:
+			score += 1.5
+
+		if score > best_score:
+			best_score = score
+			best_target = target
+
+	return best_target

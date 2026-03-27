@@ -14,6 +14,9 @@ var fire_weapon_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.FI
 var assist_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.ASSIST)
 var close_combat_task: SoldierTask = SoldierTask.new(SoldierTask.SoldierAction.CLOSE_COMBAT)
 
+var unit: Unit
+var team: Globals.Team
+
 var id: int
 var name: String
 var rank_grade: RankGrades.Grade
@@ -43,7 +46,31 @@ var base_acquire_s: float = 0.35      # default settle time for rifles
 var aim_jitter_s: float = 2.0        # extra random on each target pick
 var cadence_phase_s: float = 0.0      # fixed per-soldier desync in cadence
 
-func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGrades.Role, _weapon: WeaponSpec) -> void:
+# close combat
+var is_attacker: bool = false
+var is_defender: bool = false
+
+var base_attack: float = 0.0
+var base_defense: float = 0.0
+
+var weapon_attack: float = 0.0
+var weapon_defense: float = 0.0
+var weapon_shock: float = 0.0
+var attack_interval: float = 0.5
+
+var morale_attack_mult: float = 1.0
+var morale_defense_mult: float = 1.0
+
+var location_attack_mult: float = 1.0
+var location_defense_mult: float = 1.0
+
+var side_attack_bonus: float = 0.0
+var side_defense_bonus: float = 0.0
+
+var cooldown_remaining: float = 0.0
+var stunned_time: float = 0.0
+
+func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGrades.Role, _weapon: WeaponSpec, _unit: Unit, _team: Globals.Team) -> void:
 	id = _id
 	name = _name
 	rank_grade = _rank_grade
@@ -51,6 +78,8 @@ func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGr
 	weapon = _weapon
 	rounds_in_mag = weapon.mag_capacity
 	assist_task.done = true
+	unit = _unit
+	team = _team
 	
 
 

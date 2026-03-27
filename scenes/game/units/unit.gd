@@ -424,7 +424,9 @@ func _setup_runtime_soldiers() -> void:
 			L.nickname,
 			L.rank_grade,
 			_map_role(L.role),   # if your Soldier.Role differs
-			spec
+			spec,
+			self,
+			team
 		)
 		if s.role == RankGrades.Role.GUNNER:
 			machine_guns += 1
