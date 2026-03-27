@@ -275,6 +275,9 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				movement.stop()
 				#movement.move_to_hex(to_hex)
+		Globals.UnitCmd.STOP:
+			movement.stop()
+			setAttackState(AttackState.AUTO)
 
 
 func _on_new_target_hex(end_of_path_hex: Vector2i):

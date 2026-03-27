@@ -8,5 +8,6 @@ enum Option {
 	MOVE_FAST,
 	FIRE_AT,
 	ASSAULT,
+	STOP,
 }
 @export var option: Option = Option.NONE

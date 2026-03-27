@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://jcslscqj1lw" path="res://wheel_option.gd" id="2_qi7m7"]
 [ext_resource type="Texture2D" uid="uid://de0tm7x6agxul" path="res://assets/ui/option_wheel/moving_ger.png" id="3_7182e"]
 [ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="4_440tw"]
+[ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="5_7182e"]
+[ext_resource type="Texture2D" uid="uid://bqxj0vhj8e7xy" path="res://assets/status/shooting_ger.png" id="6_440tw"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
 atlas = ExtResource("3_7182e")
@@ -19,11 +21,15 @@ script = ExtResource("2_qi7m7")
 option = 4
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2npqt"]
-load_path = "res://.godot/imported/moving_ger.png-8a57d4315287c6a7a2caaedcab290ec2.ctex"
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_ia5md"]
-atlas = SubResource("CompressedTexture2D_2npqt")
+atlas = ExtResource("5_7182e")
+region = Rect2(0, 0, 1015, 1023)
+script = ExtResource("2_qi7m7")
+option = 6
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fkrsx"]
+atlas = ExtResource("6_440tw")
 script = ExtResource("2_qi7m7")
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
@@ -45,4 +51,4 @@ highlight_color = Color(0.326184, 0.326184, 0.32618397, 1)
 outer_radius = 128
 inner_radius = 32
 line_width = 2
-options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md")])
+options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_fkrsx")])

@@ -533,6 +533,8 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 			selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
 		WheelOption.Option.ASSAULT:
 			pass
+		WheelOption.Option.STOP:
+			selected_unit.order(Globals.UnitCmd.STOP, map_hex)
 	
 	var local_pos: Vector2 = ground_layer.map_to_local(map_hex)
 	hex_glow(local_pos)

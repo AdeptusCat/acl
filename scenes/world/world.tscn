@@ -1630,15 +1630,15 @@ ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
 [node name="DummyNode2D" type="Node2D" parent="." unique_id=100986594]
 
 [node name="GameController" parent="." unique_id=1013473808 node_paths=PackedStringArray("allies_objective_tilemap", "axis_objective_tilemap", "ground_layer", "fog_of_war_layer") instance=ExtResource("25_rwifv")]
-allies_objective_tilemap = NodePath("../TileMapLayers/AlliesObjectiveTileMapLayer")
-axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
-ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
-fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 glow_maker_scene = ExtResource("45_q3hpu")
 unit_scene = ExtResource("19_sh7a8")
 formation_ai_controller_scene = ExtResource("51_n78lu")
 close_combat_sign_scene = ExtResource("54_n78lu")
 time_left_seconds = 180.0
+allies_objective_tilemap = NodePath("../TileMapLayers/AlliesObjectiveTileMapLayer")
+axis_objective_tilemap = NodePath("../TileMapLayers/AxisObjectiveTileMapLayer")
+ground_layer = NodePath("../TileMapLayers/GroundTileMapLayer")
+fog_of_war_layer = NodePath("../TileMapLayers/FogOfWarTileMapLayer")
 
 [node name="AlliesFormationAIControllers" parent="GameController" unique_id=538941142 instance=ExtResource("51_1o6i5")]
 active = true

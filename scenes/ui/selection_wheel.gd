@@ -17,7 +17,6 @@ const SPRITE_SIZE: Vector2 = Vector2(64, 64)
 
 var selection: int = 0
 
-# TODO: add an option to stop firing, like for motortars
 # TODO: move the loading bar in the splash screen
 
 func open(event_position: Vector2):

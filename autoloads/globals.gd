@@ -30,6 +30,7 @@ enum UnitCmd {
 	FIRE_AT_HEX,
 	FIRE_AT_UNIT,
 	ATTACK_UNIT,
+	STOP,
 }
 
 

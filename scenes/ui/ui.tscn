@@ -26,6 +26,10 @@
 [ext_resource type="Script" uid="uid://ovp1t711br88" path="res://scenes/ui/debug.gd" id="24_fv78h"]
 [ext_resource type="PackedScene" uid="uid://0euyuvdqduxs" path="res://scenes/ui/selection_wheel_alt.tscn" id="25_fqqne"]
 [ext_resource type="PackedScene" uid="uid://c6xxmjtgtwwtj" path="res://scenes/ui/selection_wheel.tscn" id="25_o71gb"]
+[ext_resource type="Script" uid="uid://jcslscqj1lw" path="res://wheel_option.gd" id="26_vnqvi"]
+[ext_resource type="Texture2D" uid="uid://de0tm7x6agxul" path="res://assets/ui/option_wheel/moving_ger.png" id="27_7ygsn"]
+[ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="28_272wc"]
+[ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="29_knhlc"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_26a3v"]
 outline_size = 10
@@ -35,6 +39,35 @@ outline_color = Color(0.27022192, 0.27022192, 0.2702219, 1)
 font_size = 24
 outline_size = 16
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
+atlas = ExtResource("27_7ygsn")
+region = Rect2(0, 0, 64, 64)
+script = ExtResource("26_vnqvi")
+option = 1
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fff2e"]
+atlas = ExtResource("28_272wc")
+region = Rect2(0, 0, 64, 64)
+script = ExtResource("26_vnqvi")
+option = 4
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ia5md"]
+atlas = ExtResource("29_knhlc")
+region = Rect2(0, 0, 1015, 1023)
+script = ExtResource("26_vnqvi")
+option = 6
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_o2sfg"]
+load_path = "res://.godot/imported/moving_ger.png-8a57d4315287c6a7a2caaedcab290ec2.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yy7ol"]
+atlas = SubResource("CompressedTexture2D_o2sfg")
+script = ExtResource("26_vnqvi")
+metadata/_custom_type_script = "uid://jcslscqj1lw"
 
 [node name="Ui" type="CanvasLayer" unique_id=2069341874]
 script = ExtResource("1_u7n8c")
@@ -625,6 +658,7 @@ text = "Show Movement Lines"
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1
+options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol")])
 
 [node name="SelectionWheel" parent="Control" unique_id=266719107 instance=ExtResource("25_o71gb")]
 visible = false
