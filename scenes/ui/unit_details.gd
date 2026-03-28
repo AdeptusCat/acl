@@ -9,6 +9,7 @@ extends PanelContainer
 @onready var unit_type_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/UnitType
 @onready var leadership_bonud_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus
 @onready var panel: PanelContainer = self
+@onready var close_combat_defense_preparedness_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/CCDefensePreparedness
 @onready var kill_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Kill
 
 
@@ -59,7 +60,6 @@ func _ready() -> void:
 		soldiers_entries.append(soldier_entries)
 		
 	soldiers_grid_container.columns = soldiers_entries[0].size()
-	
 
 
 func _process(_delta: float) -> void:
@@ -96,6 +96,8 @@ func _process(_delta: float) -> void:
 				set_progress_bar(s, "Idle", 0, 0)
 		for s in casualty_entries_by_casualty:
 			set_casualty_progress_bar(s, "INCAPACITATED", 0, 0)
+		close_combat_defense_preparedness_label.text = str(unit.close_combat_defense_preparedness)
+		
 
 
 func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):

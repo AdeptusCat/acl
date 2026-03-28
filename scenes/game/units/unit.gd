@@ -25,6 +25,9 @@ enum Company {
 enum AttackState { AUTO, MANUAL_GROUND, MANUAL_TRACK }
 var attackState: AttackState = AttackState.AUTO
 var attack_ground_rounds_budget: int = 0
+var terrain_defense_bonus: int = 0
+
+var close_combat_defense_preparedness: float = 0.0
 
 @export var squad: int = 0
 @export var platoon: int = 0
@@ -200,6 +203,7 @@ func _ready():
 	
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
+	
 
 
 func setAttackState(_attackState: AttackState):
@@ -1820,3 +1824,45 @@ func _on_command_connectivity_timeout() -> void:
 
 func _on_enemy_visibility_checker_timer_timeout() -> void:
 	enemy_visiblity_checker.check_enemy_visibility(self)
+
+
+func update_close_defense_preparedness(unit: Unit, dt: float) -> void:
+	var delta: float = 0.0
+	var terrain_mult: float = get_preparedness_terrain_mult(unit.terrain_defense_bonus)
+	var morale_mult: float = get_preparedness_morale_mult(unit.stress_system.state)
+	#var cohesion_mult: float = clamp(unit.cohesion, 0.0, 1.0)
+
+	if unit.broken:
+		delta = -1.8 * dt
+	elif unit.moving:
+		delta = -0.9 * dt
+	else:
+		delta = 0.25 * dt
+		delta *= terrain_mult
+		delta *= morale_mult
+		#delta *= cohesion_mult
+
+	unit.close_combat_defense_preparedness += delta
+	unit.close_combat_defense_preparedness = clamp(unit.close_combat_defense_preparedness, 0.0, 1.0)
+
+
+func get_preparedness_morale_mult(state: STATES.MoraleState) -> float:
+	if state == STATES.MoraleState.NORMAL:
+		return 1.0
+	if state == STATES.MoraleState.CAUTIOUS:
+		return 0.8
+	if state == STATES.MoraleState.PINNED:
+		return 0.35
+	if state == STATES.MoraleState.PANIC:
+		return 0.0
+	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		return 0.0
+	return 1.0
+
+
+func get_preparedness_terrain_mult(defense_bonus: int) -> float:
+	return clamp(0.25 + float(defense_bonus) * 0.9, 0.25, 1.35)
+
+
+func _on_close_combat_defense_preparedness_timer_timeout() -> void:
+	update_close_defense_preparedness(self, 0.1)

@@ -293,6 +293,8 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 	show_visible_units()
 	draw_fog()
 	
+	unit_entering_hex.terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit_entering_hex.current_hex))
+	
 	var units_in_hex: Array = LOSHelper.find_units_at(hex_entered)
 	var min_one_good_order_enemy_unit: bool = false
 	var enemy_present: bool = false
@@ -1016,7 +1018,8 @@ func _on_close_combat_resolve_timer_timeout() -> void:
 			units_to_die.append(unit)
 	for unit in units_to_die:
 		unit.die()
-
+	
+	
 
 func update_close_combat(instance: CloseCombatInstance, dt: float) -> void:
 	var ready_attackers: Array[Soldier] = []
@@ -1034,11 +1037,11 @@ func update_close_combat(instance: CloseCombatInstance, dt: float) -> void:
 	resolve_ready_group(ready_attackers, instance.defenders)
 	resolve_ready_group(ready_defenders, instance.attackers)
 
-	cleanup_dead(instance.attackers)
-	cleanup_dead(instance.defenders)
-
-	update_close_combat_morale(instance)
-	check_close_combat_end(instance)
+	#cleanup_dead(instance.attackers)
+	#cleanup_dead(instance.defenders)
+#
+	#update_close_combat_morale(instance)
+	#check_close_combat_end(instance)
 
 
 
@@ -1072,7 +1075,7 @@ func resolve_ready_group(
 		if target == null:
 			continue
 
-		resolve_single_attack(actor, target)
+		#resolve_single_attack(actor, target)
 		actor.cooldown_remaining = actor.attack_interval
 
 
@@ -1089,7 +1092,7 @@ func select_target(
 			continue
 
 		var score: float = 0.0
-		score -= compute_defense_power(target)
+		#score -= CloseCombatInstance.compute_defense_power(target)
 
 		if target.stunned_time > 0.0:
 			score += 2.0

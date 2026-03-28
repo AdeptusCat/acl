@@ -514,8 +514,12 @@ text = "Leadership Bonus:"
 layout_mode = 2
 mouse_filter = 1
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Type"
+text = "Leadership Bonus"
 script = ExtResource("14_mgwkc")
+
+[node name="CCDefensePreparedness" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=1010918412]
+layout_mode = 2
+text = "CC Readyness"
 
 [node name="Kill" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=306415407]
 visible = false

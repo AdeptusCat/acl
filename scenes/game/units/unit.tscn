@@ -79,6 +79,11 @@ autostart = true
 wait_time = 0.1
 autostart = true
 
+[node name="CloseCombatDefensePreparednessTimer" type="Timer" parent="." unique_id=109467033]
+wait_time = 0.1
+autostart = true
+
 [connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]
 [connection signal="timeout" from="CommandConnectivityTimer" to="." method="_on_command_connectivity_timeout"]
 [connection signal="timeout" from="EnemyVisibilityCheckerTimer" to="." method="_on_enemy_visibility_checker_timer_timeout"]
+[connection signal="timeout" from="CloseCombatDefensePreparednessTimer" to="." method="_on_close_combat_defense_preparedness_timer_timeout"]

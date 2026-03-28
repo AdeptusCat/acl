@@ -35,6 +35,6 @@ func _on_show_los_lines_toggled(toggled_on: bool) -> void:
 
 
 func _on_show_movement_lines_toggled(toggled_on: bool) -> void:
-	Debug.show_movement_linesw = toggled_on
+	Debug.show_movement_lines = toggled_on
 	
 	
