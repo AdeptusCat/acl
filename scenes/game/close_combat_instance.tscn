@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://4i65t05ch64l"]
+
+[ext_resource type="Script" uid="uid://bjauca16c7g3a" path="res://scenes/game/close_combat_instance.gd" id="1_wh3ml"]
+[ext_resource type="Texture2D" uid="uid://bfqkgoqty8nf8" path="res://assets/ui/close_combat.png" id="2_qcn8m"]
+
+[node name="CloseCombatInstance" type="Node2D" unique_id=486400028]
+script = ExtResource("1_wh3ml")
+
+[node name="Timer" type="Timer" parent="." unique_id=75379611]
+wait_time = 0.1
+autostart = true
+
+[node name="CloseCombatSign" type="Sprite2D" parent="." unique_id=333430845]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_qcn8m")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

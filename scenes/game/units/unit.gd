@@ -203,7 +203,10 @@ func _ready():
 	
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
-	
+
+
+func update_terrain_defense_bonus():
+	terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(current_hex))
 
 
 func setAttackState(_attackState: AttackState):
@@ -1247,6 +1250,85 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 	#if members_alive <= 0:
 		#_set_combat_ineffective()
 
+
+func apply_specific_casualty(casualty: Soldier) -> bool:
+	for soldier in squad_fire.soldiers:
+		if soldier == casualty:
+			var members_alive_before: int = members_alive
+			
+			var leader_down: bool = false
+			
+			# record which non-rifle roles were lost and what crew-served weapons got orphaned
+			var roles_lost: Array[int] = []
+			var dropped_support: Array[WeaponSpec] = []
+			if casualty.role != RankGrades.Role.SOLDIER:
+				if not roles_lost.has(casualty.role):
+					roles_lost.append(casualty.role)
+			if casualty.role == RankGrades.Role.GUNNER:
+				if casualty.weapon != null:
+					dropped_support.append(casualty.weapon)
+			
+			weapon_audio.stop_mg_loop(casualty.weapon, position, soldier.id, self)
+			squad_fire.casualties.append(casualty)
+			
+			# physically remove the fallen from our parallel arrays
+			var loadout_to_remove: SoldierLoadout
+			for loadout in loadouts:
+				if loadout.nickname == casualty.name:
+					loadout_to_remove = loadout
+					break
+			loadouts.erase(loadout_to_remove)
+			squad_fire.soldiers.erase(casualty)
+			
+			effective_range = 0
+			for s in squad_fire.soldiers:
+				if s.weapon.range_hexes > effective_range:
+					effective_range = s.weapon.range_hexes
+
+			## debug
+			#if n != casualty_indexes.size():
+				#pass
+
+			# book-keeping and UI
+			members_alive = squad_fire.soldiers.size()
+			stress_system.on_casualty_event(1, leader_down)
+			ui.set_members_alive(members_alive)
+
+			if members_alive_before == members_alive:
+				pass
+			# if the whole lot’s gone, we’re done
+			if members_alive <= 0:
+				
+				return true
+
+			# 1) replace leader if needed: ASL first, else any SOLDIER
+			if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
+				_promote_new_leader()
+			
+			# 2) re-crew any dropped guns (e.g., MG) — loader preferred as new gunner
+			var g: int = 0
+			while g < dropped_support.size():
+				var wp: WeaponSpec = dropped_support[g]
+				_assign_gunner_and_loader_for_weapon(wp)
+				g += 1
+
+			# 3) if we lost a loader but the gun’s still in the squad, top up loaders
+			if roles_lost.has(RankGrades.Role.LOADER):
+				_fill_missing_loaders_for_existing_guns()
+
+			# optional: if you maintain any cached fire stats, rebuild them now
+			# squad_fire.rebuild_cached_stats()
+			# emit signals as needed
+			# emit_signal("casualties_taken", original_size - members_alive)
+			
+			ui.show_casualty()
+			soldiers_changed.emit()
+			#stress_system.apply_stress(df, ds)
+			ui.set_loadout(squad_fire.soldiers)
+			_refresh_leader_aura()
+			leader_aura._affected.erase(self)
+			leader_aura._apply_to(self)
+	return false
 
 # --- casualties, role replacement, and support-weapon re-crewing ---
 func _apply_casualties(n: int) -> void:

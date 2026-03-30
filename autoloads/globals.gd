@@ -14,6 +14,7 @@ var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0
 var units: Array[Unit]
 var units_in_close_combat: Array[Unit]
 var close_combat_locations: Array[Vector2i]
+var close_combat_instances: Array[CloseCombatInstance]
 
 enum Team {
 	AXIS,

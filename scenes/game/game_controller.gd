@@ -6,6 +6,8 @@ extends Node2D
 @onready var axis_formation_ai_controllers := $AxisFormationAIControllers
 @onready var allies_formation_ai_controllers := $AlliesFormationAIControllers
 @onready var close_combat_locations := $CloseCombatLocations
+@onready var close_combat_instances := $CloseCombatInstances
+
 
 @export var allies_objective_tilemap : TileMapLayer
 @export var axis_objective_tilemap : TileMapLayer
@@ -14,6 +16,7 @@ extends Node2D
 @export var glow_maker_scene: PackedScene
 @export var unit_scene: PackedScene
 @export var formation_ai_controller_scene: PackedScene
+@export var close_combat_instance_scene: PackedScene
 
 @export var close_combat_sign_scene: PackedScene
 
@@ -217,6 +220,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
 	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
 	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
+	unit.update_terrain_defense_bonus()
 			
 	# assign platoon headquarter to squad 
 	if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
@@ -315,6 +319,7 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 					if not unit.team == unit_entering_hex.team:
 						unit.surrender()
 	
+	set_close_combat_hexes_and_units()
 	
 	
 	#var _units: Array
@@ -335,12 +340,13 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 			#var visible_hexes_from_unit = LOSHelper.los_lookup.get(unit.current_hex, [])
 			
 
+
 func set_close_combat_hexes_and_units():
-	Globals.units_in_close_combat.clear()
-	Globals.close_combat_locations.clear()
+	#Globals.units_in_close_combat.clear()
+	#Globals.close_combat_locations.clear()
 	
-	for child in close_combat_locations.get_children():
-		child.queue_free()
+	#for child in close_combat_locations.get_children():
+		#child.queue_free()
 	
 	for unit: Unit in Globals.units:
 		if not unit.is_good_order():
@@ -359,21 +365,78 @@ func set_close_combat_hexes_and_units():
 			if mask == 3:
 				both_teams_present = true
 		if both_teams_present:
+			var close_combat_instance: CloseCombatInstance
+			for close_combat_instance_present in close_combat_instances.get_children():
+				if close_combat_instance_present.hex == unit.current_hex:
+					close_combat_instance = close_combat_instance_present
+					break
+			if not close_combat_instance:
+				close_combat_instance = close_combat_instance_scene.instantiate()
+				close_combat_instance.hex = unit.current_hex
+				close_combat_instance.terrain_defense_value = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
+				
+			for _unit in units_in_hex:
+				if not close_combat_instance.units_by_team[_unit.team].has(_unit):
+					close_combat_instance.add_unit(_unit)
+			
 			for _unit in units_in_hex:
 				_unit.in_close_combat = true
-			var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
-			close_combat_locations.add_child(close_combat_sign)
-			close_combat_sign.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
-			if not Globals.close_combat_locations.has(unit.current_hex):
-				Globals.close_combat_locations.append(unit.current_hex)
-			if not Globals.units_in_close_combat.has(unit):
-				Globals.units_in_close_combat.append(unit)
+			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
+			#close_combat_locations.add_child(close_combat_sign)
+			#if not Globals.close_combat_locations.has(unit.current_hex):
+				#Globals.close_combat_locations.append(unit.current_hex)
+			#if not Globals.units_in_close_combat.has(unit):
+				#Globals.units_in_close_combat.append(unit)
+			
+			if close_combat_instance.get_parent() == null:
+				close_combat_instance.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+				close_combat_instances.add_child(close_combat_instance)
 		else:
 			for _unit in units_in_hex:
 				_unit.in_close_combat = false
 
 
+#func set_close_combat_hexes_and_units():
+	#Globals.units_in_close_combat.clear()
+	#Globals.close_combat_locations.clear()
+	#
+	#for child in close_combat_locations.get_children():
+		#child.queue_free()
+	#
+	#for unit: Unit in Globals.units:
+		#if not unit.is_good_order():
+			#continue
+		#var mask: int = 0
+		#var both_teams_present: bool = false
+		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
+		#for _unit in units_in_hex:
+			#if not _unit.is_good_order():
+				#continue
+			#match _unit.team:
+				#Globals.Team.AXIS:
+					#mask |= 1
+				#Globals.Team.ALLIES:
+					#mask |= 2
+			#if mask == 3:
+				#both_teams_present = true
+		#if both_teams_present:
+			#for _unit in units_in_hex:
+				#_unit.in_close_combat = true
+			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
+			#close_combat_locations.add_child(close_combat_sign)
+			#close_combat_sign.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+			#if not Globals.close_combat_locations.has(unit.current_hex):
+				#Globals.close_combat_locations.append(unit.current_hex)
+			#if not Globals.units_in_close_combat.has(unit):
+				#Globals.units_in_close_combat.append(unit)
+		#else:
+			#for _unit in units_in_hex:
+				#_unit.in_close_combat = false
+
+
 func setup_game():
+	for unit in Globals.units:
+		unit.update_terrain_defense_bonus()
 	
 	set_objective_text.emit("")
 	for unit in unit_container.get_children():
@@ -1006,6 +1069,7 @@ func _get_concealment(current_hex: Variant, enemy: Node) -> int:
 
 
 func _on_close_combat_resolve_timer_timeout() -> void:
+	return
 	var units_to_die: Array[Unit]
 	set_close_combat_hexes_and_units()
 	for unit in Globals.units_in_close_combat:

@@ -4,7 +4,6 @@
 
 [node name="GameController" type="Node2D" unique_id=41955973]
 script = ExtResource("1_hj0dx")
-time_left_seconds = null
 metadata/_edit_lock_ = true
 
 [node name="UnitVisiblityCheckerTimer" type="Timer" parent="." unique_id=1713787415]

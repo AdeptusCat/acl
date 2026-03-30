@@ -25,6 +25,7 @@ const GRID_SIZE_Y = 21
 var visible_hexes: Dictionary[int, Array] = {Globals.Team.AXIS: [], Globals.Team.ALLIES: []}
 #var visible_hexes: Array[Vector2i]
 
+var initialized: bool = false
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
@@ -37,6 +38,7 @@ enum BetweenAxis {
 }
 func _ready():
 	z_index = 100  # Higher than other nodes
+	
 
 func load_prebaked_los(_los_resource: String):
 	var los_resource = load(_los_resource) as LosLookupData

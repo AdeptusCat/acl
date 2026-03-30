@@ -50,8 +50,8 @@ var cadence_phase_s: float = 0.0      # fixed per-soldier desync in cadence
 var is_attacker: bool = false
 var is_defender: bool = false
 
-var base_attack: float = 0.0
-var base_defense: float = 0.0
+var base_attack: float = 1.0
+var base_defense: float = 1.0
 
 var weapon_attack: float = 0.0
 var weapon_defense: float = 0.0
