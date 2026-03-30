@@ -216,10 +216,11 @@ func get_soldier_defense_strength(soldier: Soldier) -> float:
 	var morale_mod: float = get_close_morale_defense_mult(soldier.unit.stress_system.state )
 	strength *= morale_mod
 	
-	var terrain_mod: float = get_close_location_mods(terrain_defense_value, false)
+	var terrain_defense_value_prepared: float = terrain_defense_value * soldier.unit.close_combat_defense_preparedness
+	var terrain_mod: float = get_close_location_mods(terrain_defense_value_prepared, false)
 	strength *= terrain_mod
 	
-	var preparedness_mult: float = lerp(0.7, 1.25, soldier.unit.close_combat_defense_preparedness)
+	#var preparedness_mult: float = lerp(0.7, 1.25, soldier.unit.close_combat_defense_preparedness)
 	#strength *= preparedness_mult
 	
 	print("d ", strength)

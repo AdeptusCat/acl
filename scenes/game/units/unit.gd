@@ -1647,12 +1647,13 @@ func _on_state_changed(prev:int, next:int) -> void:
 
 func _on_unit_ui_debug_kill_soldier() -> void:
 	_apply_casualties(1)
-	#stress_system.apply_stress(df, ds)
+	ui.show_casualty()
+	soldiers_changed.emit()
+	stress_system.apply_stress(10.0, 10.0)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()
 	leader_aura._affected.erase(self)
 	leader_aura._apply_to(self)
-
 
 
 # Thin forwarding API for higher-level AI / UI:

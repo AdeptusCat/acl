@@ -11,6 +11,8 @@ extends PanelContainer
 @onready var panel: PanelContainer = self
 @onready var close_combat_defense_preparedness_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/CCDefensePreparedness
 @onready var kill_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Kill
+@onready var kill_soldier_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/KillSoldier
+
 
 
 var opacity_tween: Tween = null
@@ -207,6 +209,7 @@ func show_unit_detail(_unit: Unit, tween_on: bool = true):
 	show()
 	if OS.is_debug_build():
 		kill_button.show()
+		kill_soldier_button.show()
 	#await get_tree().process_frame
 	#reset_size()
 
@@ -297,3 +300,7 @@ func tween_opacity(to: float):
 
 func _on_kill_pressed() -> void:
 	Debug.units_to_kill.append(unit)
+
+
+func _on_kill_soldier_pressed() -> void:
+	Debug.units_soldier_to_kill.append(unit)
