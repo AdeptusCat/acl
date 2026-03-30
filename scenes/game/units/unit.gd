@@ -1323,7 +1323,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 			
 			ui.show_casualty()
 			soldiers_changed.emit()
-			#stress_system.apply_stress(df, ds)
+			stress_system.apply_stress(10.0, 10.0)
 			ui.set_loadout(squad_fire.soldiers)
 			_refresh_leader_aura()
 			leader_aura._affected.erase(self)
