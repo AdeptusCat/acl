@@ -323,4 +323,4 @@ func quit_close_combat():
 			p.unit.in_close_combat = false
 	queue_free()
 
-# FIXME unit not shooting at hex when valid target unit at other hex in LOS
+# FIXME unit not shooting at hex when valid target unit at other hex in LOSs
