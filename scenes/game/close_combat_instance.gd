@@ -319,5 +319,8 @@ func _on_timer_timeout() -> void:
 
 func quit_close_combat():
 	for p in participants:
-		p.unit.in_close_combat = false
+		if is_instance_valid(p):
+			p.unit.in_close_combat = false
 	queue_free()
+
+# FIXME unit not shooting at hex when valid target unit at other hex in LOS
