@@ -312,7 +312,7 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 			unit_entering_hex.surrender()
 	else:
 		if enemy_present:
-			if unit_entering_hex.broken:
+			if unit_entering_hex.broken and not unit_entering_hex.surrendered:
 				unit_entering_hex.action_controller._start_rout()
 			else:
 				for unit: Unit in units_in_hex:

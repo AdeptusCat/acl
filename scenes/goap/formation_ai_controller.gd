@@ -73,8 +73,9 @@ func _refresh_enemy_contacts() -> void:
 	enemy_contacts.clear()
 	for squad in squads:
 		for enemy_contact in squad.enemies_reported:
-			if not enemy_contacts.has(enemy_contact) and enemy_contact.is_good_order():
-				enemy_contacts.append(enemy_contact)
+			if is_instance_valid(enemy_contact):
+				if not enemy_contacts.has(enemy_contact) and enemy_contact.is_good_order():
+					enemy_contacts.append(enemy_contact)
 	for squad in squads:
 		squad.enemies_reported_from_formation = enemy_contacts
 

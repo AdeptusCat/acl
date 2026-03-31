@@ -342,8 +342,9 @@ func on_morale_state_changed(_prev: int, next: int) -> void:
 	
 	if next == MoraleState.PANIC:
 		if action_state != SquadActionState.ROUTING:
-			_start_rout()
-			_set_action_state(SquadActionState.ROUTING)
+			if not unit.surrendered:
+				_start_rout()
+				_set_action_state(SquadActionState.ROUTING)
 		return
 	
 	if next == MoraleState.PINNED:

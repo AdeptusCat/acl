@@ -371,7 +371,7 @@ func handle_auto_fire(
 		var units_in_enemy_hex: Array[Unit] = LOSHelper.find_units_at(enemy.current_hex)
 		var has_friendly_in_target_hex: bool = false
 		for _unit in units_in_enemy_hex:
-			if _unit.team == unit.team:
+			if _unit.team == unit.team and not _unit.surrendered:
 				has_friendly_in_target_hex = true
 				break
 		if has_friendly_in_target_hex:

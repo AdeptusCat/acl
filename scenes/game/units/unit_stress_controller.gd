@@ -60,10 +60,12 @@ extends Node
 # --- TUNABLES: ramps (seconds to go 0 → 100%) ---
 @export var repin_ramp_s: float  = 10.0   # CAUTIOUS→PINNED hazard ramps up after unpin
 @export var unpin_ramp_s: float  = 10.0   # PINNED→CAUTIOUS hazard ramps up while pinned
+@export var rout_ramp_s: float  = 10.0    # ROUT hazard ramps up while pinned
 
 # --- INTERNALS: timers for ramps ---
 var _repin_since_unpin: float = 999.0	    # seconds since PINNED→CAUTIOUS; big at start
 var _since_pinned: float      = 999.0		# seconds since we entered PINNED
+var _since_rout_check: float  = 999.0		# seconds since we checked for rout
 
 # how leaders affect the *rate* the lads get rattled
 @export var leader_gain_reduction_max: float = 0.5      # up to 50% less *incoming* stress
@@ -188,7 +190,32 @@ func _process(delta: float) -> void:
 			_repin_since_unpin += delta
 		STATES.MoraleState.PINNED:
 			_since_pinned += delta
-		#STATES.MoraleState.PANIC:
+			_since_rout_check += delta
+			# HACK checking for route should be more complex than this
+			if not get_parent().surrendered:
+				for _unit in Globals.units:
+					if not _unit.team == get_parent().team:
+						if _unit.is_good_order():
+							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:
+								if _since_rout_check >= 2.0:
+									var roll: float = randf()
+									if roll > 0.5:
+										_set_state(STATES.MoraleState.PANIC)
+									_since_rout_check = 0.0
+		STATES.MoraleState.PANIC:
+			_since_rout_check += delta
+			if not get_parent().surrendered:
+				for _unit in Globals.units:
+					if not _unit.team == get_parent().team:
+						if _unit.is_good_order():
+							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:
+								if _since_rout_check >= 2.0:
+									var roll: float = randf()
+									if roll > 0.5:
+										get_parent().action_controller._start_rout()
+									_since_rout_check = 0.0
+			
+			
 			#if _how_long_under_fire_s > _how_long_under_fire_util_rout_s:
 				#state_changed.emit(state, state)
 				#_how_long_under_fire_s = 0.0

@@ -75,8 +75,8 @@ func setup_close_combat():
 
 
 func add_unit(unit: Unit):
-	if not units_by_team[unit.team].has(unit):
-		units_by_team[unit.team].append(unit)
+	if units_by_team[unit.team].has(unit):
+		return
 	var participant: Participant = Participant.new(unit)
 	participant.team = unit.team
 	if unit.moving: 
@@ -273,6 +273,16 @@ func _on_timer_timeout() -> void:
 		if participant.unit == null:
 			participants.erase(participant)
 			continue
+		if participant.unit.surrendered:
+			units_by_team[participant.team].erase(participant.unit)
+			participants.erase(participant)
+			if units_by_team[Globals.Team.AXIS].is_empty():
+				quit_close_combat()
+				return
+			if units_by_team[Globals.Team.ALLIES].is_empty():
+				quit_close_combat()
+				return
+			continue
 		participant.defense_preparedness = participant.unit.close_combat_defense_preparedness
 		for soldier in participant.unit.squad_fire.soldiers:
 			soldier.cooldown_remaining -= 0.1
@@ -294,9 +304,12 @@ func _on_timer_timeout() -> void:
 					casualty_chance = get_soldier_attack_strength(soldier) / (get_soldier_attack_strength(soldier) + get_soldier_defense_strength(enemy_soldier))
 				if participant.side_role == SideRole.DEFENDER:
 					casualty_chance = get_soldier_defense_strength(soldier) / (get_soldier_defense_strength(soldier) + get_soldier_attack_strength(enemy_soldier))
-				#casualty_chance *= lethality_scale
+				var lethality_scale: float = 0.3
+				casualty_chance *= lethality_scale
 				var min_chance = 0.05
 				var max_chance = 0.80
+				if casualty_chance < min_chance or casualty_chance > max_chance:
+					pass
 				casualty_chance = clamp(casualty_chance, min_chance, max_chance)
 				
 				var roll: float = randf()
@@ -323,4 +336,8 @@ func quit_close_combat():
 			p.unit.in_close_combat = false
 	queue_free()
 
-# FIXME unit not shooting at hex when valid target unit at other hex in LOSs
+# FIXME unit not shooting at hex when valid target unit at other hex in LOS
+# FIXME unit routing because of surrendered adjacent enemy unit, should not make the unit rout
+# FIXME if surrendered unit is in same hex as enemy unit, other enemy units are not attacking the hex
+# FIXME surrendered unit not selectable
+# TODO surrendered unit should be able to return to combat if friendly unit is in same hex and no enemy present
