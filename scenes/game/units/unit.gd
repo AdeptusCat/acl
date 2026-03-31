@@ -1323,6 +1323,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 			
 			ui.show_casualty()
 			soldiers_changed.emit()
+			# FIXME stress through casualty from close combat or other particular event should not be fixed value
 			stress_system.apply_stress(10.0, 10.0)
 			ui.set_loadout(squad_fire.soldiers)
 			_refresh_leader_aura()
@@ -1649,6 +1650,7 @@ func _on_unit_ui_debug_kill_soldier() -> void:
 	_apply_casualties(1)
 	ui.show_casualty()
 	soldiers_changed.emit()
+	# FIXME stress through casualty from debug kill should not be fixed value
 	stress_system.apply_stress(10.0, 10.0)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()

@@ -1685,7 +1685,7 @@ formation_id = 1
 squadType = 1
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" unique_id=1176980552 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(992, 544)
+position = Vector2(1232, 640)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1734,7 +1734,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ghkdt"), SubRes
 squadType = 5
 
 [node name="AlliesRifle1" parent="GameController/UnitContainer" unique_id=122231699 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(944, 512)
+position = Vector2(848, 512)
 squad = 1
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1743,7 +1743,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubRes
 formation_id = 1
 
 [node name="AlliesMg1" parent="GameController/UnitContainer" unique_id=134768984 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(944, 512)
+position = Vector2(800, 544)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1754,7 +1754,7 @@ formation_id = 1
 squadType = 1
 
 [node name="AlliesPlatoonLeader1" parent="GameController/UnitContainer" unique_id=862346137 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(944, 512)
+position = Vector2(800, 480)
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1
@@ -1763,7 +1763,7 @@ formation_id = 1
 squadType = 4
 
 [node name="AlliesRifle2" parent="GameController/UnitContainer" unique_id=1038416695 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(560, 640)
+position = Vector2(656, 704)
 squad = 1
 platoon = 2
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
