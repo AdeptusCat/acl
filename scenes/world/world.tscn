@@ -1685,7 +1685,7 @@ formation_id = 1
 squadType = 1
 
 [node name="AxisRifle1" parent="GameController/UnitContainer" unique_id=1176980552 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(848, 448)
+position = Vector2(992, 544)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")

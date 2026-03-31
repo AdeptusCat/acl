@@ -38,17 +38,20 @@ extends Node
 
 # --- TUNABLES: hazard rates λ (per second) for each leg ---
 # NORMAL →
-@export var L_NORMAL_TO_PANIC: float   = 0.70
+#@export var L_NORMAL_TO_PANIC: float   = 0.70
+@export var L_NORMAL_TO_PANIC: float   = 0.00
 @export var L_NORMAL_TO_PINNED: float  = 0.55
 @export var L_NORMAL_TO_CAUTIOUS: float= 0.40
 
 # CAUTIOUS →
-@export var L_CAUTIOUS_TO_PANIC: float = 0.60
-@export var L_CAUTIOUS_TO_PINNED: float= 0.30   # base; scaled by re-pin ramp
+#@export var L_CAUTIOUS_TO_PANIC: float = 0.60
+@export var L_CAUTIOUS_TO_PANIC: float = 0.00
+@export var L_CAUTIOUS_TO_PINNED: float= 0.90 # 0.30  # base; scaled by re-pin ramp
 @export var L_CAUTIOUS_TO_NORMAL: float= 0.45   # recovery; gets recovery_bias
 
 # PINNED →
-@export var L_PINNED_TO_PANIC: float   = 0.35
+#@export var L_PINNED_TO_PANIC: float   = 0.35
+@export var L_PINNED_TO_PANIC: float   = 0.00
 @export var L_PINNED_TO_CAUTIOUS: float= 0.35   # recovery; ramped, then gets recovery_bias
 
 # PANIC →
@@ -178,11 +181,13 @@ func get_average_stress_rate() -> float:
 
 
 func _process(delta: float) -> void:
-	#match state:
-		#STATES.MoraleState.CAUTIOUS:
-			#_repin_since_unpin += delta
-		#STATES.MoraleState.PINNED:
-			#_since_pinned += delta
+	match state:
+		STATES.MoraleState.CAUTIOUS:
+			_repin_since_unpin += delta
+		STATES.MoraleState.NORMAL:
+			_repin_since_unpin += delta
+		STATES.MoraleState.PINNED:
+			_since_pinned += delta
 		#STATES.MoraleState.PANIC:
 			#if _how_long_under_fire_s > _how_long_under_fire_util_rout_s:
 				#state_changed.emit(state, state)
@@ -455,11 +460,11 @@ func _maybe_transition(delta: float) -> void:
 
 	match state:
 		STATES.MoraleState.NORMAL:
-			if s_eff >= panic_threshold:
-				var p: float = _rate_to_prob(L_NORMAL_TO_PANIC, dt_trial)
-				if roll < p:
-					_set_state(STATES.MoraleState.PANIC)
-			elif s_eff >= pin_threshold:
+			#if s_eff >= panic_threshold:
+				#var p: float = _rate_to_prob(L_NORMAL_TO_PANIC, dt_trial)
+				#if roll < p:
+					#_set_state(STATES.MoraleState.PANIC)
+			if s_eff >= pin_threshold:
 				var p: float = _rate_to_prob(L_NORMAL_TO_PINNED, dt_trial)
 				if roll < p:
 					_set_state(STATES.MoraleState.PINNED)
@@ -469,14 +474,16 @@ func _maybe_transition(delta: float) -> void:
 					_set_state(STATES.MoraleState.CAUTIOUS)
 
 		STATES.MoraleState.CAUTIOUS:
-			if s_eff >= panic_threshold:
-				var p: float = _rate_to_prob(L_CAUTIOUS_TO_PANIC, dt_trial)
-				if roll < p:
-					_set_state(STATES.MoraleState.PANIC)
-			elif s_eff >= pin_threshold:
+			#if s_eff >= panic_threshold:
+				#var p: float = _rate_to_prob(L_CAUTIOUS_TO_PANIC, dt_trial)
+				#if roll < p:
+					#_set_state(STATES.MoraleState.PANIC)
+			if s_eff >= pin_threshold:
 				# base hazard is 0.30; ramp it from 0 → 0.30 after unpin
-				var lambda: float = L_CAUTIOUS_TO_PINNED * _repin_ramp_multiplier()
-				if roll < _rate_to_prob(lambda, dt_trial):
+				var repin_ramp_multiplier: float = _repin_ramp_multiplier()
+				var lambda: float = L_CAUTIOUS_TO_PINNED * repin_ramp_multiplier
+				var rate: float = _rate_to_prob(lambda, dt_trial)
+				if roll < rate:
 					_set_state(STATES.MoraleState.PINNED)
 			elif s_eff < pin_threshold * H_NORMAL_FROM_CAUTION:
 				# recovery leg: CAUTIOUS -> NORMAL (apply bias)

@@ -180,11 +180,11 @@ func get_close_morale_attack_mult(state: UnitStates.MoraleState) -> float:
 	if state == UnitStates.MoraleState.CAUTIOUS:
 		return 0.9
 	if state == UnitStates.MoraleState.PINNED:
-		return 0.65
+		return 0.10
 	if state == UnitStates.MoraleState.PANIC:
-		return 0.35
+		return 0.00
 	if state == UnitStates.MoraleState.COMBAT_INEFFECTIVE:
-		return 0.1
+		return 0.00
 	return 1.0
 
 
@@ -195,11 +195,11 @@ func get_close_morale_defense_mult(state: UnitStates.MoraleState) -> float:
 	if state == UnitStates.MoraleState.CAUTIOUS:
 		return 0.95
 	if state == UnitStates.MoraleState.PINNED:
-		return 0.75
+		return 0.10
 	if state == UnitStates.MoraleState.PANIC:
-		return 0.45
+		return 0.00
 	if state == UnitStates.MoraleState.COMBAT_INEFFECTIVE:
-		return 0.2
+		return 0.00
 	return 1.0
 
 
@@ -304,7 +304,10 @@ func _on_timer_timeout() -> void:
 					#continue
 					soldiers_by_team[enemy_soldier.team].erase(enemy_soldier)
 					if enemy_soldier.unit.apply_specific_casualty(enemy_soldier):
-						participants.erase(participant)
+						for p in participants:
+							if p == enemy_soldier.unit:
+								participants.erase(p)
+						#participants.erase(participant)
 						units_by_team[enemy_soldier.team].erase(enemy_soldier.unit)
 						enemy_soldier.unit._set_combat_ineffective()
 						
