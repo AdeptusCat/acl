@@ -336,7 +336,6 @@ func quit_close_combat():
 			p.unit.in_close_combat = false
 	queue_free()
 
-# FIXME unit not shooting at hex when valid target unit at other hex in LOS, or generally not working very good for that matter
 # FIXME surrendered unit not selectable
 # FIXME unit state change to pinned is too likely, needs fix
 # FIXME if unit enters close combat and receives casualties, the likelyhood that they break is very high and thus will surrender quite quickly. make this more sensible

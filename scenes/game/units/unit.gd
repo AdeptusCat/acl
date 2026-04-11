@@ -230,13 +230,15 @@ func order(cmd: Globals.UnitCmd, parameter):
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
 				var units: Array = Globals.unit_visible_enemies[self]
+				var has_target_unit: bool = false
 				for unit in units:
 					if unit.current_hex == map_hex:
 						if not unit.team == Globals.team_player or Debug.enemy_selectable:
 							var _path: Array[Vector3i] = []
 							setAttackState(AttackState.MANUAL_TRACK)
 							squad_fire.set_target_unit(unit)
-				if units.is_empty():
+							has_target_unit = true
+				if not has_target_unit:
 					setAttackState(AttackState.MANUAL_GROUND)
 					squad_fire.target_hex = map_hex
 					var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
