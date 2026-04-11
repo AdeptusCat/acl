@@ -12,6 +12,7 @@ extends PanelContainer
 @onready var close_combat_defense_preparedness_label: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/CCDefensePreparedness
 @onready var kill_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Kill
 @onready var kill_soldier_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/KillSoldier
+@onready var surrender_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Surrender
 
 
 
@@ -210,6 +211,7 @@ func show_unit_detail(_unit: Unit, tween_on: bool = true):
 	if OS.is_debug_build():
 		kill_button.show()
 		kill_soldier_button.show()
+		surrender_button.show()
 	#await get_tree().process_frame
 	#reset_size()
 
@@ -304,3 +306,7 @@ func _on_kill_pressed() -> void:
 
 func _on_kill_soldier_pressed() -> void:
 	Debug.units_soldier_to_kill.append(unit)
+
+
+func _on_surrender_pressed() -> void:
+	Debug.units_to_surrender.append(unit)

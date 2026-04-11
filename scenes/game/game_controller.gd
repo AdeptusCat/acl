@@ -509,7 +509,7 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 	if not selected_unit:
 		return
 	
-	if selected_unit.broken:
+	if selected_unit.broken or selected_unit.surrendered:
 		selected_unit.ui.show_failure()
 		return
 	
@@ -577,7 +577,7 @@ func _on_mouse_button_left_pressed(event_pos: Vector2):
 	if selected_hex_index >= units.size():
 		selected_hex_index = 0
 	var unit = units[selected_hex_index]
-	if unit and not unit.surrendered: # and not unit.broken 
+	if unit: # and not unit.broken  and not unit.surrendered
 		if not unit.team == Globals.team_player and not Debug.enemy_selectable:
 			return
 		if unit == selected_unit:
@@ -868,6 +868,11 @@ func _process(delta):
 	for unit in units_soldier_to_kill:
 		Debug.units_soldier_to_kill.erase(unit)
 		unit._on_unit_ui_debug_kill_soldier()
+	
+	var units_to_surrender: Array[Unit] = Debug.units_to_surrender.duplicate()
+	for unit in units_to_surrender:
+		Debug.units_to_surrender.erase(unit)
+		unit.surrender()
 	
 	
 func update_los_time(delta: float) -> void:
