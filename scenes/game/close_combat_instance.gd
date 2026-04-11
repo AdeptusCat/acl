@@ -223,7 +223,7 @@ func get_soldier_defense_strength(soldier: Soldier) -> float:
 	#var preparedness_mult: float = lerp(0.7, 1.25, soldier.unit.close_combat_defense_preparedness)
 	#strength *= preparedness_mult
 	
-	print("d ", strength)
+	#print("d ", strength)
 	
 	return strength
 
@@ -244,7 +244,7 @@ func get_soldier_attack_strength(soldier: Soldier) -> float:
 	var terrain_mod: float = get_close_location_mods(terrain_defense_value, true)
 	strength *= terrain_mod
 	
-	print("a ", strength)
+	#print("a ", strength)
 	
 	
 	return strength
@@ -336,6 +336,7 @@ func quit_close_combat():
 			p.unit.in_close_combat = false
 	queue_free()
 
+# FIXME if a unit already shoots at the enemy but only with like an mg that has range. if the enemy comes closer for rifle fire then everybody shoots at once.
 # FIXME units should not be queued free but rather deactivated. should fix nulls in Units Array
 # FIXME unit state change to pinned is too likely, needs fix
 # FIXME if unit enters close combat and receives casualties, the likelyhood that they break is very high and thus will surrender quite quickly. make this more sensible
