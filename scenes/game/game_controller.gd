@@ -519,8 +519,14 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 		WheelOption.Option.MOVE_NORMAL:
 			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
 		WheelOption.Option.FIRE_AT:
-			var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(selected_unit.current_hex, [])
-			if unit_visible_hexes.has(map_hex):
+			var can_shoot: bool = false
+			if not selected_unit.squadType == Unit.SquadType.MORTAR:
+				var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(selected_unit.current_hex, [])
+				if unit_visible_hexes.has(map_hex):
+					can_shoot = true
+			else:
+				can_shoot = true
+			if can_shoot:
 				selected_unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
 				selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
 		WheelOption.Option.ASSAULT:
