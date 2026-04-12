@@ -123,7 +123,7 @@ func compute_connectivity(unit: Unit, command_squad: Unit):
 		command_unit_state = command_squad.stress_system.state
 		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, command_squad.current_cube)
 		
-		var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, [])
+		var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 		if unit_visible_hexes.has(command_squad.current_hex) and distance <= 3:
 			los_to_leader = true
 		else:

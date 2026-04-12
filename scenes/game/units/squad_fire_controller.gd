@@ -683,7 +683,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			s.reload_task.done = false
 			s.reload_task.start_time_s = s.weapon.reload_s / s.rof_mult
 			s.rounds_in_mag = s.weapon.mag_capacity
-		return 0
+		#return 0 # TODO figure out why this was in place? this just prohibits that damage is done
 	
 	var _target_hex = target_hex
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
@@ -852,6 +852,10 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	
 	var cover_mod: float = cover_multiplier_exp(terrain_defense_bonus)
 	
+	# handle air bursts in woods
+	if weapon.family == WeaponSpec.Family.MORTAR and terrain_defense_bonus == 1:
+		cover_mod = 2.0
+	
 	var is_point_blank: bool = target_distance == 1
 	
 	var shooter_stress: float = 0.0
@@ -1009,6 +1013,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	
 	# apply cover damp to stress (not boost!)
 	var stress_cover_mod: float = cover_multiplier_exp(terrain_defense_bonus) # 1 cover = 1.0; 3 cover = 0.63
+	if weapon.family == WeaponSpec.Family.MORTAR:
+		stress_cover_mod = stress_cover_mod * 4.0
 	#var stress_cover_fast_mod: float = _stress_cover_mult(cover_norm, stress_cover_fast_min) # 1 cover = 1.0; 3 cover = 0.63
 	#var stress_cover_slow_mod: float = _stress_cover_mult(cover_norm, stress_cover_slow_min) # 1 cover = 1.0; 3 cover = 0.76
 	s_fast *= stress_cover_mod
