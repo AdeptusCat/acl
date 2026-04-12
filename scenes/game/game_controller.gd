@@ -519,8 +519,10 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 		WheelOption.Option.MOVE_NORMAL:
 			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
 		WheelOption.Option.FIRE_AT:
-			selected_unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
-			selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
+			var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(selected_unit.current_hex, [])
+			if unit_visible_hexes.has(map_hex):
+				selected_unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
+				selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
 		WheelOption.Option.ASSAULT:
 			pass
 		WheelOption.Option.STOP:
