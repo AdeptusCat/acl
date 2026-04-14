@@ -53,6 +53,9 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var reload_riflegrenade_s: float = 3.6
 @export var riflegrenade_range: int = 3
 
+@export var he_casualty_potential: float = 0.45
+@export var he_suppression_power: float = 18
+@export var he_burst_radius: float = 3.5
 
 @export var snd_shot: AudioStream = null        # close one-shot muzzle
 @export var snd_mech: AudioStream = null        # mechanical action (bolt, trigger)

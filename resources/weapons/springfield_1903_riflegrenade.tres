@@ -17,6 +17,7 @@ raise_s = 1.6
 aim_s = 0.6
 can_fire_riflegrenades = true
 riflegrenade_range = 4
+he_burst_radius = 2.0
 riflegrenade_shot = ExtResource("2_t4u0y")
 riflegrenade_hit = ExtResource("1_agyg1")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

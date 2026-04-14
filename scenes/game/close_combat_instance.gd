@@ -336,6 +336,10 @@ func quit_close_combat():
 			p.unit.in_close_combat = false
 	queue_free()
 
+# TODO add rout button so unit can rout if pinned
+# TODO soldiers should get simple system that leads them to use the weapon that is appropriate to the task
+# TODO riflegrenade, HE and mortar are weird exceptions that need to be properly incorporated
+# FIXME a unit that is not seen should be detected at some point when firing. or maybe not certain but the chance to be spotted should increase
 # FIXME if a unit already shoots at the enemy but only with like an mg that has range. if the enemy comes closer for rifle fire then everybody shoots at once.
 # FIXME units should not be queued free but rather deactivated. should fix nulls in Units Array
 # FIXME unit state change to pinned is too likely, needs fix

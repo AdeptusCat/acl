@@ -689,7 +689,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = _mortar_target_hex
 	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
+	
 	var life: float = dist / s.weapon.projectile_speed      # seconds
+	if s.weapon.can_fire_riflegrenades:
+		life = dist / s.weapon.riflegrenade_projectile_speed
 	await get_tree().create_timer(life).timeout
 	
 	# handle result on enemy unit
@@ -808,7 +811,16 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 		fire_recent = 1.0
 
 func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int) -> void:
+	# debug
 	#return
+	#if not riflegrenade:
+		#return
+	#if not weapon.family == WeaponSpec.Family.ROCKET_LAUNCHER:
+		#return
+	#if not weapon.ammo_type == WeaponSpec.AmmoType.HE and not riflegrenade:
+		#return
+	# TODO refactor fire functions
+	# TODO riflegrenate hits instant?
 	add_fire_impulse(total_rounds, 10)
 	var terrain_defense_bonus: float = target_cover
 	if weapon.family == WeaponSpec.Family.MORTAR:
@@ -922,13 +934,25 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		hits_per_target.append(0)
 		i += 1
 	
+	#var enclosure_factor: float = 1.0
 	i = 0
 	if riflegrenade == true or weapon.ammo_type == WeaponSpec.AmmoType.HE:
+		if weapon.type == WeaponSpec.Family.MORTAR:
+			if terrain_defense_bonus == 1: # reflects airbursts in wood # TODO reflect airbursts betterds
+				cover_mod = 1.5
+		#var max_possible_casualties: float = weapon.he_burst_radius # * cover_mod #* burst_quality
+		# TODO HE weapons should hit multiple target but a bit more elaborate
+		var max_possible_casualties: float = weapon.he_burst_radius
+		#if riflegrenade:
+			#max_possible_casualties
 		while i < n_targets:
 			var ii: int = 0
-			while ii < 4:
+			while ii < max_possible_casualties:
 				var p_hit: float = float(chance_to_hit_per_target[i])
-				if randf() < p_hit:
+				p_hit = p_hit - (randf_range(0.01, p_hit * 0.1) * ii)
+				p_hit = clamp(p_hit, 0.00001, 0.95)
+				var roll : float = randf()
+				if roll < p_hit:
 					hits_per_target[i] = int(hits_per_target[i]) + 1
 				ii += 1
 			i += 1
@@ -939,7 +963,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 			var idx: int = randi() % n_targets
 			# roll hit with that squad's p
 			var p_hit: float = float(chance_to_hit_per_target[idx])
-			if randf() < p_hit:
+			var roll : float = randf()
+			if roll < p_hit:
 				hits_per_target[idx] = int(hits_per_target[idx]) + 1
 			i += 1
 	
@@ -1013,12 +1038,20 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	
 	# apply cover damp to stress (not boost!)
 	var stress_cover_mod: float = cover_multiplier_exp(terrain_defense_bonus) # 1 cover = 1.0; 3 cover = 0.63
-	if weapon.family == WeaponSpec.Family.MORTAR:
-		stress_cover_mod = stress_cover_mod * 4.0
+	#if riflegrenade or weapon.family == WeaponSpec.Family.MORTAR:
+		
+	if weapon.ammo_type == WeaponSpec.AmmoType.HE or riflegrenade:
+		s_fast = stress_fast_base + mean_chance_to_hit * weapon.he_suppression_power
+		s_slow = stress_fast_base + mean_chance_to_hit * weapon.he_suppression_power
+		pass
+		#stress_cover_mod = weapon.he_suppression_power
+		#stress_cover_mod = stress_cover_mod * 4.0
+	
 	#var stress_cover_fast_mod: float = _stress_cover_mult(cover_norm, stress_cover_fast_min) # 1 cover = 1.0; 3 cover = 0.63
 	#var stress_cover_slow_mod: float = _stress_cover_mult(cover_norm, stress_cover_slow_min) # 1 cover = 1.0; 3 cover = 0.76
-	s_fast *= stress_cover_mod
-	s_slow *= stress_cover_mod
+	if not weapon.ammo_type == WeaponSpec.AmmoType.HE and not riflegrenade:
+		s_fast *= stress_cover_mod
+		s_slow *= stress_cover_mod
 
 	# point-blank fear spike
 	if int(target_distance) == 1:
@@ -1026,10 +1059,11 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		s_slow *= stress_point_blank_bonus
 	
 	# distance mod
-	var stress_distance_mod: float = float(target_distance) / float(weapon.range_hexes)
-	stress_distance_mod = 1.0 - 0.5 * stress_distance_mod
-	s_fast *= stress_distance_mod
-	s_slow *= stress_distance_mod
+	if not weapon.ammo_type == WeaponSpec.AmmoType.HE and not riflegrenade:
+		var stress_distance_mod: float = float(target_distance) / float(weapon.range_hexes)
+		stress_distance_mod = 1.0 - 0.5 * stress_distance_mod
+		s_fast *= stress_distance_mod
+		s_slow *= stress_distance_mod
 	
 	## crossfire bonus if you track it outside; else leave 0.0
 	#if stress_crossfire_bonus > 0.0:
