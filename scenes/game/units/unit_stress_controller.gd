@@ -197,11 +197,12 @@ func _process(delta: float) -> void:
 					if not _unit.team == get_parent().team:
 						if _unit.is_good_order():
 							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:
-								if _since_rout_check >= 2.0:
-									var roll: float = randf()
-									if roll > 0.5:
-										_set_state(STATES.MoraleState.PANIC)
-									_since_rout_check = 0.0
+								if S_eff >= S_CAP:
+									if _since_rout_check >= 2.0:
+										var roll: float = randf()
+										if roll > 0.5:
+											_set_state(STATES.MoraleState.PANIC)
+										_since_rout_check = 0.0
 		STATES.MoraleState.PANIC:
 			_since_rout_check += delta
 			if not get_parent().surrendered:

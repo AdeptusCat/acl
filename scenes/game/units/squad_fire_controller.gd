@@ -819,6 +819,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		#return
 	#if not weapon.ammo_type == WeaponSpec.AmmoType.HE and not riflegrenade:
 		#return
+	# FIXME units should not break when pinned but stress level not full
 	# TODO refactor fire functions
 	# TODO riflegrenate hits instant?
 	add_fire_impulse(total_rounds, 10)
