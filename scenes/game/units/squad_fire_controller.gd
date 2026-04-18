@@ -1024,7 +1024,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		if "members_alive" in u_chk:
 			if casualties_i > int(u_chk.members_alive):
 				casualties_i = int(u_chk.members_alive)
-
+	
+		casualties_i = u_chk.members_alive
 		casualties_per_target.append(casualties_i)
 		target_i += 1
 

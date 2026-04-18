@@ -23,6 +23,7 @@ func _exit_tree():
 	fully_freed.emit()
 
 func _ready():
+	ui.show()
 	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
 	LOSHelper.building_layer = building_layer  # <-- inject the TileMap
 	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap

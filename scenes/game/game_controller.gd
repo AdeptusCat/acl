@@ -438,10 +438,12 @@ func setup_game():
 		unit.update_terrain_defense_bonus()
 	
 	for unit in unit_container2.get_children():
-		unit_container2.remove_child(unit)
-		unit_container.add_child(unit)
-	
+		unit.reparent(unit_container)
 	remove_child(unit_container3)
+	
+	#for unit in unit_container3.get_children():
+		#unit.reparent(unit_container)
+	#remove_child(unit_container2)
 	
 	set_objective_text.emit("")
 	for unit in unit_container.get_children():
@@ -737,6 +739,8 @@ func _on_unit_died(unit: Unit):
 	for _unit in Globals.unit_enemy_los_time_s:
 		if is_instance_valid(_unit):
 			Globals.unit_enemy_los_time_s[_unit].erase(unit)
+		else:
+			pass
 	
 	Globals.unit_enemy_spot_conf.erase(unit)
 	# not working
@@ -744,6 +748,8 @@ func _on_unit_died(unit: Unit):
 	for _unit in Globals.unit_enemy_spot_conf:
 		if is_instance_valid(_unit):
 			Globals.unit_enemy_spot_conf[_unit].erase(unit)
+		else:
+			pass
 	
 	Globals.unit_enemy_last_seen_unix_s.erase(unit)
 	# not working
@@ -790,7 +796,7 @@ func start_game(team: Globals.Team, time: float):
 	
 	var i_team_0: int = 0
 	var i_team_1: int = 0
-	for unit in unit_container.get_children():
+	for unit in Globals.get_units():
 		if unit.team == Globals.team_player:
 			unit.visible = true
 		if unit.team == Globals.team_player:
@@ -940,7 +946,7 @@ func end_game_check():
 		return
 	end_game_handled = true
 	var occupying_units : Array
-	for unit in unit_container.get_children():
+	for unit in Globals.get_units():
 		if unit.current_hex == Globals.objective_hexes[unit.team][0]:
 			occupying_units.append(unit)
 	for unit in occupying_units:
