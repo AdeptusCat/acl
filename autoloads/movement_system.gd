@@ -51,8 +51,10 @@ func _calculate_threat_weight(hex: Vector2i, _pending_los_lookup: Dictionary, _p
 	var observed_hexes_by_enemy = _pending_visible_hexes.get(enemy_team, [])
 	
 	if observed_hexes_by_enemy.has(hex):
-		for unit in Globals.units:
+		for unit in Globals.get_units():
 			if not is_instance_valid(unit):
+				continue
+			if not unit.alive:
 				continue
 			if not unit.team == enemy_team:
 				continue
@@ -203,7 +205,7 @@ func _on_arrived(hex):
 func _restack_units_in_hex(hex: Vector2i):
 	# collect alive units in this hex
 	var stack := []
-	for u in Globals.units:
+	for u in Globals.get_units():
 		if u.alive and u.current_hex == hex:
 			stack.append(u)
 
@@ -233,7 +235,7 @@ func _restack_units_in_hex(hex: Vector2i):
 func _restack_units():
 	# 1) Group units by their current_hex
 	var groups := {}
-	for u in Globals.units:
+	for u in Globals.get_units():
 		if not u.alive:
 			continue
 		var h = u.current_hex

@@ -41,6 +41,8 @@ var detail_ui = null
 @onready var members_count_label = $MembersCount
 @onready var unit_designation_label = $UnitDesignation
 @onready var rank_texture_rect =$Rank
+@onready var dead: TextureRect = $Dead
+
 
 @onready var soldiers_detail_container = $Soldiers/SoldiersContainer
 @export var soldier_detail_scene: PackedScene
@@ -443,9 +445,18 @@ func surrender():
 
 
 func die():
-	var tween = create_tween()
-	tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
-	await tween.finished
+	dead.show()
+	$StressLevel.hide()
+	$MoraleBar.hide()
+	$MoraleBarDefault.hide()
+	$ColorRect.hide()
+	$LeadershipBonus.hide()
+	$Sprite2D.hide()
+	$UnitSelectedSprite.hide()
+	pass
+	#var tween = create_tween()
+	#tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
+	#await tween.finished
 	#if detail_ui:
 		#detail_ui.queue_free()
 

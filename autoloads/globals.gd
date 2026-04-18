@@ -11,7 +11,6 @@ var unit_enemies_in_los: Dictionary
 var unit_enemy_los_time_s: Dictionary[Unit, Dictionary] = {}
 var unit_enemy_last_seen_unix_s: Dictionary[Unit, Dictionary] = {}
 var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0..1
-var units: Array[Unit]
 var units_in_close_combat: Array[Unit]
 var close_combat_locations: Array[Vector2i]
 var close_combat_instances: Array[CloseCombatInstance]
@@ -70,3 +69,8 @@ func unregister_unit(team: Team, company: Unit.Company, platoon: int, squad: int
 	if unit_hierarchy.has(key) == false:
 		return
 	unit_hierarchy.erase(key)
+
+func get_units() -> Array[Unit]:
+	var _units: Array[Unit] = []
+	_units.assign(get_tree().get_nodes_in_group("units"))
+	return _units

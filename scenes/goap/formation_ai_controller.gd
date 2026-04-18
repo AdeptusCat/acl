@@ -235,15 +235,15 @@ func _build_world_state() -> FormationWorldState:
 	
 	s.objective_held = false
 	var occupying_units : Array
-	for squad in Globals.units:
-		if not is_instance_valid(squad):
+	for unit in Globals.get_units():
+		if not is_instance_valid(unit):
 			continue
-		if not squad.team == team:
+		if not unit.team == team:
 			continue
-		if Globals.objective_hexes.has(squad.team):
-			if not Globals.objective_hexes[squad.team].is_empty():
-				if squad.current_hex == Globals.objective_hexes[squad.team][0]:
-					occupying_units.append(squad)
+		if Globals.objective_hexes.has(unit.team):
+			if not Globals.objective_hexes[unit.team].is_empty():
+				if unit.current_hex == Globals.objective_hexes[unit.team][0]:
+					occupying_units.append(unit)
 	for squad in occupying_units:
 		if squad.is_good_order():
 			s.objective_held = true

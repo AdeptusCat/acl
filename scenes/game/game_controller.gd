@@ -1,6 +1,8 @@
 extends Node2D
 
 @onready var unit_container = $UnitContainer
+@onready var unit_container2 = $UnitContainer2
+@onready var unit_container3 = $UnitContainer3
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
 @onready var axis_formation_ai_controllers := $AxisFormationAIControllers
@@ -82,10 +84,8 @@ func _ready():
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
-	Globals.units.clear()
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is Unit:
-			Globals.units.append(unit)
 			unit.unit_died.connect(_on_unit_died)
 			unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 			unit.unit_entered_hex.connect(_on_unit_entered_hex)
@@ -101,7 +101,7 @@ func _ready():
 			unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
 			Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
 			
-	for unit in Globals.units:
+	for unit in Globals.get_units():
 		if unit is Unit:
 			# assign platoon headquarter to squad 
 			if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
@@ -205,7 +205,6 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	
 	unit.set_team(team)
 	
-	Globals.units.append(unit)
 	unit.unit_died.connect(_on_unit_died)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(_on_unit_entered_hex)
@@ -249,7 +248,7 @@ func show_visible_units():
 			#continue
 		#if not u.team == Globals.team_player:
 			#u.visible = false
-	for u in Globals.units:
+	for u in Globals.get_units():
 		if not is_instance_valid(u):
 			continue
 		if u.surrendered:
@@ -260,7 +259,7 @@ func show_visible_units():
 				if not units_seen.has(unit_in_los):
 					units_seen.append(unit_in_los)
 	
-	for u in Globals.units:
+	for u in Globals.get_units():
 		if not is_instance_valid(u):
 				continue
 		if not u.team == Globals.team_player:
@@ -278,7 +277,7 @@ func show_visible_units():
 func update_visible_hexes():
 	for array in LOSHelper.visible_hexes.values():
 		array.clear()
-	for u in Globals.units:
+	for u in Globals.get_units():
 		if not is_instance_valid(u):
 			continue
 		if u.surrendered:
@@ -348,7 +347,7 @@ func set_close_combat_hexes_and_units():
 	#for child in close_combat_locations.get_children():
 		#child.queue_free()
 	
-	for unit: Unit in Globals.units:
+	for unit in Globals.get_units():
 		if not unit.is_good_order():
 			continue
 		var mask: int = 0
@@ -435,8 +434,14 @@ func set_close_combat_hexes_and_units():
 
 
 func setup_game():
-	for unit in Globals.units:
+	for unit in Globals.get_units():
 		unit.update_terrain_defense_bonus()
+	
+	for unit in unit_container2.get_children():
+		unit_container2.remove_child(unit)
+		unit_container.add_child(unit)
+	
+	remove_child(unit_container3)
 	
 	set_objective_text.emit("")
 	for unit in unit_container.get_children():
@@ -722,8 +727,7 @@ func _on_unit_surrendered(_unit):
 	pass
 
 
-func _on_unit_died(unit):
-	Globals.units.erase(unit)
+func _on_unit_died(unit: Unit):
 	Globals.unit_visible_enemies.erase(unit)
 	Globals.unit_enemies_in_los.erase(unit)
 	
@@ -886,7 +890,7 @@ func _process(delta):
 func update_los_time(delta: float) -> void:
 	var now_unix: float = Time.get_unix_time_from_system()
 
-	for unit in Globals.units:
+	for unit in Globals.get_units():
 		if not is_instance_valid(unit):
 			continue
 
@@ -973,7 +977,7 @@ func _on_spawn_timer_timeout() -> void:
 func _on_unit_visiblity_checker_timer_timeout() -> void:
 	var next_visible: Dictionary = {}
 	
-	for unit in Globals.units:
+	for unit in Globals.get_units():
 		if not is_instance_valid(unit):
 			continue
 		var units_visible: Array = []

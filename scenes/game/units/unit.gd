@@ -1603,9 +1603,13 @@ func surrender():
 
 func die():
 	alive = false
+	remove_from_group("units")
+	add_to_group("dead_units")
 	unit_died.emit(self)
 	await ui.die()
-	queue_free()
+	for node in get_children():
+		if not node == ui:
+			remove_child(node)
 
 
 func _on_retreat_complete(retreat_hex) -> void:

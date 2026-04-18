@@ -193,7 +193,9 @@ func _process(delta: float) -> void:
 			_since_rout_check += delta
 			# HACK checking for route should be more complex than this
 			if not get_parent().surrendered:
-				for _unit in Globals.units:
+				for _unit in Globals.get_units():
+					if not _unit.alive:
+						continue
 					if not _unit.team == get_parent().team:
 						if _unit.is_good_order():
 							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:
@@ -206,7 +208,9 @@ func _process(delta: float) -> void:
 		STATES.MoraleState.PANIC:
 			_since_rout_check += delta
 			if not get_parent().surrendered:
-				for _unit in Globals.units:
+				for _unit in Globals.get_units():
+					if not _unit.alive:
+						continue
 					if not _unit.team == get_parent().team:
 						if _unit.is_good_order():
 							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:

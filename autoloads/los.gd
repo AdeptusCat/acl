@@ -17,7 +17,9 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 	# Clear old visibility info for this unit
 	Globals.unit_enemies_in_los[unit] = []
 
-	for enemy_unit in Globals.units:
+	for enemy_unit in Globals.get_units():
+		if not enemy_unit.alive:
+			return
 		if enemy_unit == unit:
 			continue
 		if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
@@ -53,7 +55,7 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 
 
 func update_all_unit_visibilities():
-	for unit in Globals.units:
+	for unit in Globals.get_units():
 		if not unit.alive:
 			continue
 		var visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
@@ -61,7 +63,7 @@ func update_all_unit_visibilities():
 		visible_hexes[unit.current_hex] = {"shooter_cover" = terrain_defence_bonus, "target_cover" = terrain_defence_bonus}
 		Globals.unit_enemies_in_los[unit] = []
 
-		for enemy_unit in Globals.units:
+		for enemy_unit in Globals.get_units():
 			if enemy_unit == unit or not enemy_unit.alive:
 				continue
 			if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:

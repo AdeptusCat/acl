@@ -24,7 +24,6 @@
 [ext_resource type="Texture2D" uid="uid://822raon63v1l" path="res://assets/status/shooting.png" id="10_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://dprqeinm8tbk2" path="res://assets/status/shooting_us.png" id="11_8rtsn"]
 [ext_resource type="Texture2D" uid="uid://cs61dnhhbquo5" path="res://assets/status/pinned.png" id="11_87qi7"]
-[ext_resource type="Texture2D" uid="uid://cx708ounalns5" path="res://assets/ranks/sergeant.png" id="11_hjrgb"]
 [ext_resource type="Texture2D" uid="uid://cn4m384b387ir" path="res://assets/status/routing_us.png" id="11_kswga"]
 [ext_resource type="Texture2D" uid="uid://cd4qwkl3vrn5p" path="res://assets/ranks/private.png" id="11_pyl2t"]
 [ext_resource type="Texture2D" uid="uid://c3u7esoded7o8" path="res://assets/status/pinned_ger.png" id="12_dlbli"]
@@ -54,6 +53,7 @@
 [ext_resource type="Texture2D" uid="uid://0dw3cwik3cou" path="res://assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png" id="46_k7h5o"]
 [ext_resource type="Texture2D" uid="uid://cw7ie1fi14f0t" path="res://icon.svg" id="46_wb6dq"]
 [ext_resource type="Texture2D" uid="uid://cbvuqskuudt86" path="res://assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png" id="47_awis6"]
+[ext_resource type="Texture2D" uid="uid://cdi4jcejuwcqw" path="res://assets/status/dead.png" id="54_k7h5o"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_eilf2"]
 
@@ -111,7 +111,6 @@ combat_ineffective_texture = ExtResource("10_qfgpo")
 private_texture = ExtResource("11_pyl2t")
 private_first_class_texture = ExtResource("12_pjyrh")
 corporal_texture = ExtResource("13_u05qo")
-seargeant_texture = ExtResource("11_hjrgb")
 second_lieutenant_texture = ExtResource("35_755va")
 captain_texture = ExtResource("13_qfgpo")
 soldier_detail_scene = ExtResource("38_qfgpo")
@@ -457,6 +456,16 @@ offset_right = 56.0
 offset_bottom = 51.0
 label_settings = SubResource("LabelSettings_awis6")
 horizontal_alignment = 2
+
+[node name="Dead" type="TextureRect" parent="." unique_id=1889867209]
+visible = false
+layout_mode = 0
+offset_left = 11.0
+offset_top = 10.0
+offset_right = 51.0
+offset_bottom = 50.0
+texture = ExtResource("54_k7h5o")
+expand_mode = 1
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="KillSoldier" to="." method="_on_kill_soldier_pressed"]

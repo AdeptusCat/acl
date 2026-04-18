@@ -1179,7 +1179,9 @@ func gcd(a: int, b: int) -> int:
 
 func find_units_at(hex: Vector2i) -> Array[Unit]:
 	var units: Array[Unit]
-	for u in Globals.units:
+	for u in Globals.get_units():
+		if not u.alive:
+			continue
 		if u.current_hex == hex:
 			units.append(u)
 	return units
