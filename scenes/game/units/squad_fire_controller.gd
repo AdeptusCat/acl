@@ -874,7 +874,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	var shooter_stress: float = 0.0
 	if unit and "stress_system" in unit:
 		shooter_stress = float(unit.stress_system.S_eff)
-	var shooter_stress_mod: float = lerp(0.6, 1.0, 1.0 - (shooter_stress / 100.0) * 0.7)
+	
+	var shooter_stress_mod: float = lerp(0.4, 1.0, 1.0 - (shooter_stress / 100.0))
 	
 	var chance_to_hit: float = base_accuracy * state_acc_mod
 	chance_to_hit *= to_hit_distance_mod
@@ -1032,7 +1033,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	var mean_chance_to_hit: float = _get_mean_change_to_hit(chance_to_hit_per_target, n_targets)
 
 	# base fast shock + how “accurate” incoming fire looks
-	var s_fast: float = stress_fast_base + mean_chance_to_hit * stress_fast_hit_factor * float(total_rounds)
+	var s_fast: float = mean_chance_to_hit * (stress_fast_hit_factor + stress_fast_base) * float(total_rounds)
+	#var s_fast: float = stress_fast_base + mean_chance_to_hit * stress_fast_hit_factor * float(total_rounds)
 
 	# slow stress grows with sheer volume; cover damps it
 	var s_slow: float = float(total_rounds) #* stress_slow_per_round
