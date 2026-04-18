@@ -1832,10 +1832,11 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubResource("Resource_4gywt"), SubResource("Resource_3un1a")])
 squadType = 3
 
-[node name="UnitContainer3" type="Node2D" parent="GameController" unique_id=1609896956]
+[node name="UnitContainer3" type="Node2D" parent="GameController" unique_id=621238339]
+visible = false
 
-[node name="AxisMg1" parent="GameController/UnitContainer3" unique_id=1651984721 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(560, 896)
+[node name="AxisMg1" parent="GameController/UnitContainer3" unique_id=792412617 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(1040, 640)
 squad = 1
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1844,8 +1845,8 @@ command_squad = NodePath("../AxisPlatoonLeader1")
 formation_id = 1
 squadType = 1
 
-[node name="AxisRifle1" parent="GameController/UnitContainer3" unique_id=410973306 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(416, 928)
+[node name="AxisRifle1" parent="GameController/UnitContainer3" unique_id=1782881041 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(1232, 640)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1853,16 +1854,17 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubRes
 command_squad = NodePath("../AxisPlatoonLeader1")
 formation_id = 1
 
-[node name="AxisPlatoonLeader1" parent="GameController/UnitContainer3" unique_id=2020098668 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(464, 960)
+[node name="AxisPlatoonLeader1" parent="GameController/UnitContainer3" unique_id=962240287 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(1136, 640)
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
+command_squad = NodePath("")
 formation_id = 1
 squadType = 4
 
-[node name="AlliesRifle1" parent="GameController/UnitContainer3" unique_id=58405607 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1040, 896)
+[node name="AlliesRifle1" parent="GameController/UnitContainer3" unique_id=679443044 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(848, 512)
 squad = 1
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1870,8 +1872,8 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
 formation_id = 1
 
-[node name="AlliesMg1" parent="GameController/UnitContainer3" unique_id=992749128 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1088, 992)
+[node name="AlliesMg1" parent="GameController/UnitContainer3" unique_id=258998094 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(800, 544)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
@@ -1881,8 +1883,8 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubRes
 formation_id = 1
 squadType = 1
 
-[node name="AlliesPlatoonLeader1" parent="GameController/UnitContainer3" unique_id=1508738459 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(1136, 1024)
+[node name="AlliesPlatoonLeader1" parent="GameController/UnitContainer3" unique_id=1150342868 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(800, 480)
 platoon = 1
 ground_map = NodePath("../../../TileMapLayers/GroundTileMapLayer")
 team = 1

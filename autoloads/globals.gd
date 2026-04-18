@@ -74,3 +74,13 @@ func get_units() -> Array[Unit]:
 	var _units: Array[Unit] = []
 	_units.assign(get_tree().get_nodes_in_group("units"))
 	return _units
+
+func reset():
+	unit_visible_enemies.clear()
+	unit_enemies_in_los.clear()
+	unit_enemy_los_time_s.clear()
+	unit_enemy_last_seen_unix_s.clear()
+	unit_enemy_spot_conf.clear()
+	units_in_close_combat.clear()
+	close_combat_locations.clear()
+	close_combat_instances.clear()

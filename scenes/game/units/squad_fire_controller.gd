@@ -794,7 +794,8 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_tar
 	var interval: float = 60.0 / rpm
 	for shot in range(shots):
 		fire_shot.emit(s.weapon, _mortar_target_hex)
-		await get_tree().create_timer(interval).timeout
+		if get_tree(): # mighit be already freed or removed as child
+			await get_tree().create_timer(interval).timeout
 	if auto_fire:
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
 

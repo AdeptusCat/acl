@@ -434,12 +434,14 @@ func set_close_combat_hexes_and_units():
 
 
 func setup_game():
+	Globals.reset()
+	
 	for unit in Globals.get_units():
 		unit.update_terrain_defense_bonus()
 	
 	for unit in unit_container2.get_children():
 		unit.reparent(unit_container)
-	remove_child(unit_container3)
+	#remove_child(unit_container3)
 	
 	#for unit in unit_container3.get_children():
 		#unit.reparent(unit_container)
