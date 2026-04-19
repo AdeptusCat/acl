@@ -4,6 +4,8 @@ class_name Map
 @onready var tile_map_layers: Node2D = $TileMapLayers
 @onready var scenarios: Node2D = $Scenarios
 
+@export var map_name: String = "map"
+
 
 func get_tilemap_layers() -> Array[Node]:
 	return tile_map_layers.get_children()
@@ -30,6 +32,12 @@ func get_scenario(nr: int) -> Scenario:
 		return scenarios.get_children()[nr]
 	else:
 		return null
+
+
+func get_scenarios() -> Array[Scenario]:
+	var _scenarios: Array[Scenario] = []
+	_scenarios.assign(scenarios.get_children())
+	return _scenarios
 
 
 func remove_scenarios():

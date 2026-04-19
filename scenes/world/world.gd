@@ -14,8 +14,10 @@ extends Node2D
 @onready var game_controller := $GameController
 @onready var target_area := $TargetArea
 @onready var input_manager := $InputManager
+@onready var maps: Node2D = $Maps
 
-@onready var map_1: Map = $Map1
+@onready var map_1: Map = $Maps/Map1
+
 
 signal try_again
 signal fully_freed
@@ -26,12 +28,19 @@ var wall_layer : HexagonTileMapLayer
 var building_layer : HexagonTileMapLayer
 var mouse_hover_hex: Vector2i
 
+var map: Map
 var scenario: Scenario
+
 
 func _exit_tree():
 	fully_freed.emit()
 
+
 func _ready():
+	var _maps: Array[Map] = []
+	_maps.assign(maps.get_children())
+	start_screen.setup_map_options(_maps)
+	
 	ground_layer = map_1.get_ground_layer()
 	terrain_layer = map_1.get_terrain_layer()
 	wall_layer = map_1.get_wall_layer()

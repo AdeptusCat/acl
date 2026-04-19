@@ -14,6 +14,7 @@ signal time_changed(_time: float)
 @onready var time_spinbox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
 @onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
 @onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
+@onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
 
 
 var time: float
@@ -33,6 +34,18 @@ func _ready():
 	animation_player.play("fade_in")  # Play when screen appears
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
+
+
+func setup_map_options(maps: Array[Map]):
+	for map in maps:
+		var scenarios: Array[Scenario] = map.get_scenarios()
+		var map_button: Button = Button.new()
+		map_button.text = map.map_name
+		maps_v_box_container.add_child(map_button)
+		for scenario in scenarios:
+			var scenario_button: Button = Button.new()
+			scenario_button.text = scenario.scenario_name
+			maps_v_box_container.add_child(scenario_button)
 
 
 func _on_set_objective_text(_hex: String):
