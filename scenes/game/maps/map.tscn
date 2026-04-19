@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c5sw5x8kbsf0b"]
+
+[ext_resource type="Script" uid="uid://cvyaglqgbhyux" path="res://scenes/game/maps/map.gd" id="1_c5lnk"]
+
+[node name="Map" type="Node2D" unique_id=1128763383]
+script = ExtResource("1_c5lnk")
+
+[node name="TileMapLayers" type="Node2D" parent="." unique_id=1478662733]
+
+[node name="Scenarios" type="Node2D" parent="." unique_id=976409343]

@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://fbxdb6wcfift"]
+
+[ext_resource type="Script" uid="uid://dsu0lh8w6wlw7" path="res://scenes/game/maps/scenario.gd" id="1_tdev0"]
+
+[node name="Scenario" type="Node2D" unique_id=43599254]
+script = ExtResource("1_tdev0")
+
+[node name="Units" type="Node2D" parent="." unique_id=1365216721]
+
+[node name="Objectives" type="Node2D" parent="." unique_id=1566573026]
+
+[node name="Axis" type="Node2D" parent="Objectives" unique_id=1152354859]
+
+[node name="Allies" type="Node2D" parent="Objectives" unique_id=51304485]

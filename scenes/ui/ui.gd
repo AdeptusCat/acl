@@ -34,7 +34,7 @@ const HEX_DIRECTIONS = [
 		#var option: WheelOption.Option = selection_wheel.close()
 		#print(option)
 
-func _ready() -> void:
+func setup() -> void:
 	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
 	##var db = -2
 	#var ratio = pow(10.0, db / 20.0)

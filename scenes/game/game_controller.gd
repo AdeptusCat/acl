@@ -1,8 +1,6 @@
 extends Node2D
 
 @onready var unit_container = $UnitContainer
-@onready var unit_container2 = $UnitContainer2
-@onready var unit_container3 = $UnitContainer3
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
 @onready var axis_formation_ai_controllers := $AxisFormationAIControllers
@@ -78,7 +76,7 @@ func _on_draw_threat(_threat_weights: Dictionary[int, Dictionary]):
 		queue_redraw()
 	
 
-func _ready():
+func setup():
 	MovementSystem.draw_threat.connect(_on_draw_threat)
 	#camera.camera_moved.connect(_on_camera_moved)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
@@ -434,13 +432,13 @@ func set_close_combat_hexes_and_units():
 
 
 func setup_game():
-	Globals.reset()
+	
 	
 	for unit in Globals.get_units():
 		unit.update_terrain_defense_bonus()
 	
-	for unit in unit_container2.get_children():
-		unit.reparent(unit_container)
+	#for unit in unit_container2.get_children():
+		#unit.reparent(unit_container)
 	#remove_child(unit_container3)
 	
 	#for unit in unit_container3.get_children():
@@ -450,6 +448,14 @@ func setup_game():
 	set_objective_text.emit("")
 	for unit in unit_container.get_children():
 		unit.visible = false
+
+
+func set_objective_layer(team: Globals.Team, tilemap: TileMapLayer):
+	match team:
+		Globals.Team.AXIS:
+			axis_objective_tilemap = tilemap
+		Globals.Team.ALLIES:
+			allies_objective_tilemap = tilemap
 
 
 func set_objective_cells(player_team: Globals.Team): 
@@ -478,22 +484,22 @@ func set_objective_cells(player_team: Globals.Team):
 			Globals.GameMode.ATTACK:
 				player_objective_tilemap = allies_objective_tilemap
 				ai_objective_tilemap = allies_objective_tilemap
-	if player_team == Globals.Team.AXIS:
-		match Globals.game_mode:
-			Globals.GameMode.DEFEND:
-				axis_objective_tilemap.visible = false
-				allies_objective_tilemap.visible = true
-			Globals.GameMode.ATTACK:
-				axis_objective_tilemap.visible = true
-				allies_objective_tilemap.visible = false
-	elif player_team == Globals.Team.ALLIES:
-		match Globals.game_mode:
-			Globals.GameMode.DEFEND:
-				axis_objective_tilemap.visible = true
-				allies_objective_tilemap.visible = false
-			Globals.GameMode.ATTACK:
-				axis_objective_tilemap.visible = false
-				allies_objective_tilemap.visible = true
+	#if player_team == Globals.Team.AXIS:
+		#match Globals.game_mode:
+			#Globals.GameMode.DEFEND:
+				#axis_objective_tilemap.visible = false
+				#allies_objective_tilemap.visible = true
+			#Globals.GameMode.ATTACK:
+				#axis_objective_tilemap.visible = true
+				#allies_objective_tilemap.visible = false
+	#elif player_team == Globals.Team.ALLIES:
+		#match Globals.game_mode:
+			#Globals.GameMode.DEFEND:
+				#axis_objective_tilemap.visible = true
+				#allies_objective_tilemap.visible = false
+			#Globals.GameMode.ATTACK:
+				#axis_objective_tilemap.visible = false
+				#allies_objective_tilemap.visible = true
 	
 	var cells = player_objective_tilemap.get_used_cells() 
 	if cells.size() > 0:

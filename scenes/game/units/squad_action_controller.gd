@@ -51,6 +51,8 @@ signal rout_failed
 func init(p_unit: Unit, p_movement: UnitMovement, p_squad_fire: SquadFireController, p_stress: StressController, p_ui: UnitUi) -> void:
 	unit = p_unit
 	movement = p_movement
+	if not movement:
+		pass
 	squad_fire = p_squad_fire
 	stress = p_stress
 	ui = p_ui

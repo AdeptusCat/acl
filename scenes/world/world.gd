@@ -1,10 +1,12 @@
 extends Node2D
 
 # --- SETUP ---
-@onready var ground_layer : HexagonTileMapLayer = $TileMapLayers/GroundTileMapLayer
-@onready var building_layer : HexagonTileMapLayer = $TileMapLayers/BuildingTileMapLayer
-@onready var wall_layer : HexagonTileMapLayer = $TileMapLayers/WallTileMapLayer
-@onready var terrain_layer : HexagonTileMapLayer = $TileMapLayers/TerrainTileMapLayer
+@onready var tile_map_layers: Node2D = $TileMapLayers
+
+#@onready var ground_layer : HexagonTileMapLayer = $TileMapLayers/GroundTileMapLayer
+#@onready var building_layer : HexagonTileMapLayer = $TileMapLayers/BuildingTileMapLayer
+#@onready var wall_layer : HexagonTileMapLayer = $TileMapLayers/WallTileMapLayer
+#@onready var terrain_layer : HexagonTileMapLayer = $TileMapLayers/TerrainTileMapLayer
 @onready var selected_hex_layer : HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
@@ -13,23 +15,56 @@ extends Node2D
 @onready var target_area := $TargetArea
 @onready var input_manager := $InputManager
 
+@onready var map_1: Map = $Map1
 
 signal try_again
 signal fully_freed
 
+var ground_layer: HexagonTileMapLayer
+var terrain_layer : HexagonTileMapLayer 
+var wall_layer : HexagonTileMapLayer
+var building_layer : HexagonTileMapLayer
 var mouse_hover_hex: Vector2i
+
+var scenario: Scenario
 
 func _exit_tree():
 	fully_freed.emit()
 
 func _ready():
+	ground_layer = map_1.get_ground_layer()
+	terrain_layer = map_1.get_terrain_layer()
+	wall_layer = map_1.get_wall_layer()
+	building_layer = map_1.get_building_layer()
+	scenario = map_1.get_scenario(0)
+	
+	LOSHelper.ground_layer = map_1.get_ground_layer()
+	LOSHelper.building_layer = map_1.get_building_layer()
+	LOSHelper.wall_layer = map_1.get_wall_layer()
+	LOSHelper.terrain_layer = map_1.get_terrain_layer()
+	game_controller.ground_layer = map_1.get_ground_layer()
+	ui.ground_layer = map_1.get_ground_layer()
+	ui.setup()
 	ui.show()
-	LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
-	LOSHelper.building_layer = building_layer  # <-- inject the TileMap
-	LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
-	LOSHelper.terrain_layer = terrain_layer
-	Globals.astars[Globals.Team.AXIS] = copy_astar(ground_layer.astar)
-	Globals.astars[Globals.Team.ALLIES] = copy_astar(ground_layer.astar)
+	
+	var layers: Array[Node] = map_1.get_tilemap_layers()
+	for layer in layers:
+		layer.reparent(tile_map_layers)
+	
+	var units: Array[Node] = scenario.get_units()
+	for unit in units:
+		unit.setup()
+		unit.add_to_group("units")
+		unit.reparent(game_controller.unit_container)
+	
+	game_controller.setup()
+	
+	#LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
+	#LOSHelper.building_layer = building_layer  # <-- inject the TileMap
+	#LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
+	#LOSHelper.terrain_layer = terrain_layer
+	Globals.astars[Globals.Team.AXIS] = copy_astar(LOSHelper.ground_layer.astar)
+	Globals.astars[Globals.Team.ALLIES] = copy_astar(LOSHelper.ground_layer.astar)
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
 	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
@@ -265,8 +300,18 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 func _on_game_started(team : int, game_mode: Globals.GameMode):
 	Globals.game_mode = game_mode
 	target_area.hide()
+	var objectives: Array[Node] = scenario.get_objectives(team)
+	game_controller.set_objective_layer(team, objectives[0])
+	map_1.remove_scenarios()
+	Globals.reset()
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)
+
+
+func _process(delta: float) -> void:
+	for node in Globals.unit_enemy_los_time_s:
+		if not is_instance_valid(node):
+			pass
 
 
 func _on_ui_try_again() -> void:

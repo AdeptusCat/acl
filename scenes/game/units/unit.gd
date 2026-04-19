@@ -158,7 +158,7 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 
 
 # === Ready ===
-func _ready():
+func setup():
 	if Engine.is_editor_hint():
 		return
 	
@@ -166,7 +166,8 @@ func _ready():
 	retreat_complete.connect(_on_retreat_complete)
 	cover_updated.connect(ui._on_cover_updated)
 	
-	current_cube = ground_map.map_to_cube(current_hex)
+	# FIXME needs to be reimplemented
+	current_cube = LOSHelper.ground_layer.map_to_cube(current_hex)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)
 	unit_arrived_at_hex.connect(squad_fire._on_unit_arrived_at_hex)
@@ -190,6 +191,8 @@ func _ready():
 	
 	#_resize_loadouts(members_count)
 	_setup_runtime_soldiers()
+	if squad_fire.soldiers.size() <= 0:
+		pass
 	
 	squad_fire.fire_shot.connect(_on_fire_shot)
 	squad_fire.fire_riflegrenade.connect(_on_fire_riflegrenade)
