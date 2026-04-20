@@ -177,6 +177,9 @@ func _deferred_copy_dict(source: Dictionary) -> Dictionary:
 	return copy
 
 func _incremental_threat_map_update() -> void:
+	# TODO this is only here because the checks start even if the game hasnt started yet
+	if not Globals.astars.has(0):
+		return
 	var temp_threat_maps: Dictionary[int, Dictionary]
 	temp_threat_maps[Globals.Team.AXIS] = {}
 	temp_threat_maps[Globals.Team.ALLIES] = {}

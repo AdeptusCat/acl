@@ -7,10 +7,13 @@ class_name Scenario
 @export var scenario_name: String = "scenario"
 @export var duration_s: float = 1800.0
 
-@export var attacker_team: Globals.Team = Globals.Team.ALLIES
-@export var defender_team: Globals.Team = Globals.Team.AXIS
+#@export var attacker_team: Globals.Team = Globals.Team.ALLIES
+#@export var defender_team: Globals.Team = Globals.Team.AXIS
+
+@export var player_team: Globals.Team = Globals.Team.AXIS
 
 @export var victory_conditions: Array[VictoryCondition] = []
+
 
 
 #func get_objectives(team: Globals.Team) -> Array[Node]:

@@ -49,8 +49,12 @@ func setup_map_options(maps: Array[Map]):
 			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(scenario))
 
 
-func _on_scenario_button_pressed(scenario):
+func _on_scenario_button_pressed(scenario: Scenario):
 	Globals.scenario_chosen = scenario
+	#animation_player.play("fade_out")
+	#await animation_player.animation_finished
+	#visible = false
+	#game_started.emit(scenario.player_team, Globals.game_mode)
 
 
 func _on_set_objective_text(_hex: String):

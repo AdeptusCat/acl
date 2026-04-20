@@ -635,14 +635,14 @@ sources/5 = SubResource("TileSetAtlasSource_e8dv2")
 script = ExtResource("42_jhdiv")
 metadata/_custom_type_script = "uid://borwbb3e4564s"
 
-[sub_resource type="Resource" id="Resource_ambds"]
-script = ExtResource("42_jhdiv")
-team = 1
-metadata/_custom_type_script = "uid://borwbb3e4564s"
-
 [sub_resource type="Resource" id="Resource_dv005"]
 script = ExtResource("42_jhdiv")
 objective_id = 1
+metadata/_custom_type_script = "uid://borwbb3e4564s"
+
+[sub_resource type="Resource" id="Resource_ambds"]
+script = ExtResource("42_jhdiv")
+team = 1
 metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="Resource" id="Resource_kngxi"]
@@ -1469,10 +1469,12 @@ weapon = ExtResource("55_hpffo")
 
 [sub_resource type="Resource" id="Resource_xroic"]
 script = ExtResource("42_jhdiv")
+test_at_scenario_end = true
 metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="Resource" id="Resource_opb01"]
 script = ExtResource("42_jhdiv")
+test_at_scenario_end = true
 metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wnndm"]
@@ -1567,7 +1569,7 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="Scenario1" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="0" unique_id=43599254 instance=ExtResource("44_jhdiv")]
-victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_pghpc"), SubResource("Resource_ambds"), SubResource("Resource_dv005")])
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_pghpc"), SubResource("Resource_dv005"), SubResource("Resource_ambds")])
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/Scenario1/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 640)

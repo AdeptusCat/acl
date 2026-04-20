@@ -46,7 +46,7 @@ func _ready():
 	terrain_layer = map_1.get_terrain_layer()
 	wall_layer = map_1.get_wall_layer()
 	building_layer = map_1.get_building_layer()
-	scenario = map_1.get_scenario(0)
+	
 	
 	LOSHelper.ground_layer = map_1.get_ground_layer()
 	LOSHelper.building_layer = map_1.get_building_layer()
@@ -56,21 +56,6 @@ func _ready():
 	ui.ground_layer = map_1.get_ground_layer()
 	ui.setup()
 	ui.show()
-	
-	var layers: Array[Node] = map_1.get_tilemap_layers()
-	for layer in layers:
-		layer.reparent(tile_map_layers)
-	
-	var units: Array[Node] = scenario.get_units()
-	for unit in units:
-		unit.setup()
-		unit.add_to_group("units")
-		unit.reparent(game_controller.unit_container)
-	
-	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
-	objectives_layer.reparent(tile_map_layers)
-	
-	Globals.victory_conditions = scenario.get_victory_conditions()
 	
 	game_controller.setup()
 	
@@ -313,6 +298,26 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 
 
 func _on_game_started(team : int, game_mode: Globals.GameMode):
+	scenario = Globals.scenario_chosen
+	
+	var layers: Array[Node] = map_1.get_tilemap_layers()
+	for layer in layers:
+		layer.reparent(tile_map_layers)
+	
+	var units: Array[Node] = scenario.get_units()
+	for unit in units:
+		unit.setup()
+		unit.add_to_group("units")
+		unit.reparent(game_controller.unit_container)
+	
+	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
+	objectives_layer.reparent(tile_map_layers)
+	
+	Globals.victory_conditions = scenario.get_victory_conditions()
+	
+	
+	
+	
 	Globals.game_mode = game_mode
 	target_area.hide()
 	Globals.objectives = scenario.get_objectives()

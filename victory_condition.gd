@@ -26,13 +26,10 @@ enum ObjetiveId {
 @export var outcome_level: OutcomeLevel = OutcomeLevel.MAJOR
 
 @export var objective_id: ObjetiveId = ObjetiveId.A
-@export var required_ratio: float = 1.0
 @export var required_time_s: float = 3.0
-
 @export var required_unit_count: int = 1
-@export var required_effective_ratio: float = 0.0
-@export var required_enemy_effective_ratio_below: float = -1.0
-@export var required_time_reached_s: float = -1.0
+
+@export var test_at_scenario_end: bool = false
 
 var is_met: bool = false
 
