@@ -7,7 +7,9 @@ extends Node2D
 #@onready var building_layer : HexagonTileMapLayer = $TileMapLayers/BuildingTileMapLayer
 #@onready var wall_layer : HexagonTileMapLayer = $TileMapLayers/WallTileMapLayer
 #@onready var terrain_layer : HexagonTileMapLayer = $TileMapLayers/TerrainTileMapLayer
-@onready var selected_hex_layer : HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
+@onready var fog_of_war_tile_map_layer: TileMapLayer = $TileMapLayers/FogOfWarTileMapLayer
+@onready var selected_tile_map_layer: HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
+
 @onready var result_screen := $ResultScreen
 @onready var start_screen := $StartScreen
 @onready var ui := $Ui
@@ -38,6 +40,7 @@ func _exit_tree():
 
 func _ready():
 	Globals.reset()
+	maps.hide()
 	var _maps: Array[Map] = []
 	_maps.assign(maps.get_children())
 	start_screen.setup_map_options(_maps)
@@ -57,7 +60,7 @@ func _ready():
 	ui.setup()
 	ui.show()
 	
-	game_controller.setup()
+	
 	
 	#LOSHelper.ground_layer = ground_layer  # <-- inject the TileMap
 	#LOSHelper.building_layer = building_layer  # <-- inject the TileMap
@@ -80,7 +83,7 @@ func _ready():
 	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
 	game_controller.hex_selected.connect(_on_hex_selected)
 	
-	game_controller.setup_game()
+	
 	
 	#var origin_pos = ground_layer.map_to_local(Vector2i(3, 4))
 	#var target_pos = ground_layer.map_to_local(Vector2i(7, 4))
@@ -114,9 +117,9 @@ var selected_hex: Vector2i
 func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2):
 	if map_hex == selected_hex:
 		return
-	selected_hex_layer.set_cell(selected_hex, -1, Vector2i(0, 0))  # Clear selected cell
+	selected_tile_map_layer.set_cell(selected_hex, -1, Vector2i(0, 0))  # Clear selected cell
 	selected_hex = map_hex
-	selected_hex_layer.set_cell(selected_hex, 0, Vector2i(0, 0))  # Set selected tile with ID 1
+	selected_tile_map_layer.set_cell(selected_hex, 0, Vector2i(0, 0))  # Set selected tile with ID 1
 	calc_unit_data_for_ui(event_pos)
 
 
@@ -313,10 +316,13 @@ func _on_game_started(team : int, game_mode: Globals.GameMode):
 	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
 	objectives_layer.reparent(tile_map_layers)
 	
+	fog_of_war_tile_map_layer.move_to_front()
+	selected_tile_map_layer.move_to_front()
+	
 	Globals.victory_conditions = scenario.get_victory_conditions()
 	
-	
-	
+	game_controller.setup()
+	game_controller.setup_game()
 	
 	Globals.game_mode = game_mode
 	target_area.hide()

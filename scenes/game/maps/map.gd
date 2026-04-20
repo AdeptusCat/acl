@@ -33,12 +33,13 @@ func get_scenario(nr: int) -> Scenario:
 	else:
 		return null
 
+
 func get_objectives_layer_from_scenario(nr: int):
 	if scenarios.get_child_count() > nr:
 		return scenarios.get_children()[nr].get_objectives_layer()
 	else:
 		return null
-	
+
 
 func get_scenarios() -> Array[Scenario]:
 	var _scenarios: Array[Scenario] = []

@@ -182,6 +182,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=964853185]
+visible = false
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
 texture_normal = ExtResource("4_adf7y")
@@ -189,6 +190,7 @@ ignore_texture_size = true
 stretch_mode = 4
 
 [node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=240144611]
+visible = false
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
 texture_normal = ExtResource("5_a1ei0")
