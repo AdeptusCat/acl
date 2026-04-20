@@ -1708,7 +1708,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubRes
 squadType = 3
 
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/Scenario1/Objectives" parent_id_path=PackedInt32Array(43599254, 1566573026) index="0" unique_id=1637617708]
-tile_map_data = PackedByteArray("AAAPAAkABgAAAAAAAAAXAAwAAwAAAAAAAAAYAAwAAwAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAPAAkABgAAAAAAAAAXAAwAAwAAAAAAAAAYAAwAAwAAAAAAAAAVAAoABAAAAAAAAAA=")
 
 [node name="Scenario2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=322232894 instance=ExtResource("44_jhdiv")]
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_xroic"), SubResource("Resource_opb01")])

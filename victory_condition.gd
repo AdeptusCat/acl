@@ -39,6 +39,7 @@ var is_met: bool = false
 var hexes: Array[Vector2i]
 var required_times_reached_s: Dictionary[Vector2i, float]
 var units_in_objectives: Dictionary[Vector2i, UnitsCollection]
+var victory_conditions_met: Dictionary[Vector2i, bool]
 
 var hex: Vector2i
 var cube: Vector3i

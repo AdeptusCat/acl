@@ -16,6 +16,8 @@ var close_combat_locations: Array[Vector2i]
 var close_combat_instances: Array[CloseCombatInstance]
 var objectives: Dictionary[Team, ObjectivesCollection]
 var victory_conditions: Dictionary[Team, VictoryConditionCollection]
+var map_chosen: Map
+var scenario_chosen: Scenario
 
 enum Team {
 	AXIS,
@@ -90,3 +92,5 @@ func reset():
 		victory_conditions[team].victory_conditions.clear()
 	for team in objectives:
 		objectives[team].objectives.clear()
+	map_chosen = null
+	scenario_chosen = null

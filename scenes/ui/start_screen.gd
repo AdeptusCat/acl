@@ -46,6 +46,11 @@ func setup_map_options(maps: Array[Map]):
 			var scenario_button: Button = Button.new()
 			scenario_button.text = scenario.scenario_name
 			maps_v_box_container.add_child(scenario_button)
+			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(scenario))
+
+
+func _on_scenario_button_pressed(scenario):
+	Globals.scenario_chosen = scenario
 
 
 func _on_set_objective_text(_hex: String):

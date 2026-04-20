@@ -1221,6 +1221,9 @@ func set_victory_conditions():
 					for objective in objectives.objectives:
 						if objective.objective_id == victory_condition.objective_id:
 							victory_condition.hexes.append(objective.hex)
+							victory_condition.required_times_reached_s[objective.hex] = 0.0
+							victory_condition.units_in_objectives[objective.hex] = UnitsCollection.new()
+							victory_condition.victory_conditions_met[objective.hex] = false
 							#victory_condition.hex = objective.hex
 
 
@@ -1232,18 +1235,20 @@ func _on_win_condition_timer_timeout() -> void:
 		for victory_condition in Globals.victory_conditions[team].victory_conditions:
 			match victory_condition.condition_type:
 				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-					victory_condition.units_in_objective.units_collection[Globals.Team.AXIS].units.clear()
-					victory_condition.units_in_objective.units_collection[Globals.Team.ALLIES].units.clear()
+					for hex in victory_condition.hexes:
+						victory_condition.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.clear()
+						victory_condition.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.clear()
 		
 		for unit in Globals.get_units():
 			for victory_condition in Globals.victory_conditions[team].victory_conditions:
 				match victory_condition.condition_type:
 					victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-						if victory_condition.hex == unit.current_hex:
-							if unit.team == Globals.Team.AXIS:
-								victory_condition.units_in_objective.units_collection[Globals.Team.AXIS].units.append(unit)
-							elif unit.team == Globals.Team.ALLIES:
-								victory_condition.units_in_objective.units_collection[Globals.Team.ALLIES].units.append(unit)
+						for hex in victory_condition.hexes:
+							if hex == unit.current_hex:
+								if unit.team == Globals.Team.AXIS:
+									victory_condition.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.append(unit)
+								elif unit.team == Globals.Team.ALLIES:
+									victory_condition.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.append(unit)
 		
 		for victory_condition in Globals.victory_conditions[team].victory_conditions:
 			match victory_condition.condition_type:
@@ -1253,24 +1258,26 @@ func _on_win_condition_timer_timeout() -> void:
 						enemy_team = Globals.Team.ALLIES
 					else:
 						enemy_team = Globals.Team.AXIS
+					
+					for hex in victory_condition.hexes:
+						var friendly_units: Array[Unit] = victory_condition.units_in_objectives[hex].units_collection[team].units
+						var enemy_units: Array[Unit] = victory_condition.units_in_objectives[hex].units_collection[enemy_team].units
 
-					var friendly_units: Array[Unit] = victory_condition.units_in_objective.units_collection[team].units
-					var enemy_units: Array[Unit] = victory_condition.units_in_objective.units_collection[enemy_team].units
+						var objective_held: bool = false
+						if not friendly_units.is_empty() and enemy_units.is_empty():
+							if friendly_units.size() >= victory_condition.required_unit_count:
+								objective_held = true
 
-					var objective_held: bool = false
-					if not friendly_units.is_empty() and enemy_units.is_empty():
-						if friendly_units.size() >= victory_condition.required_unit_count:
-							objective_held = true
+						
+						if objective_held:
+							victory_condition.required_times_reached_s[hex] += 1
+						else:
+							victory_condition.required_times_reached_s[hex] = 0
 
-					if objective_held:
-						victory_condition.time_occupied_s += 1
-					else:
-						victory_condition.time_occupied_s = 0
-
-					if victory_condition.time_occupied_s >= victory_condition.required_time_s:
-						victory_condition.is_met = true
-					else:
-						victory_condition.is_met = false
+						if victory_condition.required_times_reached_s[hex] >= victory_condition.required_time_s:
+							victory_condition.victory_conditions_met[hex] = true
+						else:
+							victory_condition.victory_conditions_met[hex] = false
 	
 	var victory_conditions_met: Dictionary[Globals.Team, bool] = {
 		Globals.Team.AXIS: true,
@@ -1278,8 +1285,9 @@ func _on_win_condition_timer_timeout() -> void:
 	}
 	for team in Globals.victory_conditions:
 		for victory_condition in Globals.victory_conditions[team].victory_conditions:
-			if not victory_condition.is_met:
-				victory_conditions_met[team] = false
+			for hex in victory_condition.victory_conditions_met:
+				if not victory_condition.victory_conditions_met[hex]:
+					victory_conditions_met[team] = false
 	
 	if victory_conditions_met[Globals.Team.AXIS] and victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw
@@ -1287,8 +1295,10 @@ func _on_win_condition_timer_timeout() -> void:
 			time_left_seconds = 0
 			timer_running = false
 			show_winner.emit(-1)
+			end_game_handled = true
 	else:
 		for team in victory_conditions_met:
 			if victory_conditions_met[team]:
 				show_winner.emit(team)
+				timer_running = false
 				end_game_handled = true
