@@ -14,6 +14,8 @@ var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0
 var units_in_close_combat: Array[Unit]
 var close_combat_locations: Array[Vector2i]
 var close_combat_instances: Array[CloseCombatInstance]
+var objectives: Dictionary[Team, ObjectivesCollection]
+var victory_conditions: Dictionary[Team, VictoryConditionCollection]
 
 enum Team {
 	AXIS,
@@ -84,3 +86,7 @@ func reset():
 	units_in_close_combat.clear()
 	close_combat_locations.clear()
 	close_combat_instances.clear()
+	for team in victory_conditions:
+		victory_conditions[team].victory_conditions.clear()
+	for team in objectives:
+		objectives[team].objectives.clear()

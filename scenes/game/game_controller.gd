@@ -7,6 +7,7 @@ extends Node2D
 @onready var allies_formation_ai_controllers := $AlliesFormationAIControllers
 @onready var close_combat_locations := $CloseCombatLocations
 @onready var close_combat_instances := $CloseCombatInstances
+@onready var win_condition_timer: Timer = $WinConditionTimer
 
 
 @export var allies_objective_tilemap : TileMapLayer
@@ -796,7 +797,7 @@ func start_game(team: Globals.Team, time: float):
 	else:
 		Globals.team_enemy = Globals.Team.AXIS
 		
-	set_objective_cells(team)
+	#set_objective_cells(team)
 	#set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	
@@ -817,6 +818,8 @@ func start_game(team: Globals.Team, time: float):
 	update_visible_hexes()
 	draw_fog()
 	show_visible_units()
+	win_condition_timer.start()
+	set_victory_conditions()
 	
 	var axis_ai_active: bool = false
 	var allies_ai_active: bool = false
@@ -953,27 +956,27 @@ func end_game_check():
 	if end_game_handled:
 		return
 	end_game_handled = true
-	var occupying_units : Array
-	for unit in Globals.get_units():
-		if unit.current_hex == Globals.objective_hexes[unit.team][0]:
-			occupying_units.append(unit)
-	for unit in occupying_units:
-		if not unit.broken:
-			var winning_team: Globals.Team = Globals.Team.AXIS
-			match Globals.game_mode:
-				Globals.GameMode.DEFEND:
-					if unit.team == Globals.Team.AXIS:
-						winning_team = Globals.Team.AXIS
-					if unit.team == Globals.Team.ALLIES:
-						winning_team = Globals.Team.ALLIES
-				Globals.GameMode.ATTACK:
-					if unit.team == Globals.Team.ALLIES:
-						winning_team = Globals.Team.ALLIES
-					if unit.team == Globals.Team.AXIS:
-						winning_team = Globals.Team.AXIS
-			show_winner.emit(winning_team)
-			return
-	show_winner.emit(-1)
+	#var occupying_units : Array
+	#for unit in Globals.get_units():
+		#if unit.current_hex == Globals.objective_hexes[unit.team][0]:
+			#occupying_units.append(unit)
+	#for unit in occupying_units:
+		#if not unit.broken:
+			#var winning_team: Globals.Team = Globals.Team.AXIS
+			#match Globals.game_mode:
+				#Globals.GameMode.DEFEND:
+					#if unit.team == Globals.Team.AXIS:
+						#winning_team = Globals.Team.AXIS
+					#if unit.team == Globals.Team.ALLIES:
+						#winning_team = Globals.Team.ALLIES
+				#Globals.GameMode.ATTACK:
+					#if unit.team == Globals.Team.ALLIES:
+						#winning_team = Globals.Team.ALLIES
+					#if unit.team == Globals.Team.AXIS:
+						#winning_team = Globals.Team.AXIS
+			#show_winner.emit(winning_team)
+			#return
+	#show_winner.emit(-1)
 
 
 func _on_zoom_in():
@@ -1206,3 +1209,86 @@ func select_target(
 			best_target = target
 
 	return best_target
+
+
+func set_victory_conditions():
+	for team in Globals.victory_conditions:
+		var victory_conditions: VictoryConditionCollection = Globals.victory_conditions[team]
+		for victory_condition in victory_conditions.victory_conditions:
+			match victory_condition.condition_type:
+				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+					var objectives: ObjectivesCollection = Globals.objectives[team]
+					for objective in objectives.objectives:
+						if objective.objective_id == victory_condition.objective_id:
+							victory_condition.hexes.append(objective.hex)
+							#victory_condition.hex = objective.hex
+
+
+func _on_win_condition_timer_timeout() -> void:
+	if end_game_handled:
+		return
+	
+	for team in Globals.victory_conditions:
+		for victory_condition in Globals.victory_conditions[team].victory_conditions:
+			match victory_condition.condition_type:
+				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+					victory_condition.units_in_objective.units_collection[Globals.Team.AXIS].units.clear()
+					victory_condition.units_in_objective.units_collection[Globals.Team.ALLIES].units.clear()
+		
+		for unit in Globals.get_units():
+			for victory_condition in Globals.victory_conditions[team].victory_conditions:
+				match victory_condition.condition_type:
+					victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+						if victory_condition.hex == unit.current_hex:
+							if unit.team == Globals.Team.AXIS:
+								victory_condition.units_in_objective.units_collection[Globals.Team.AXIS].units.append(unit)
+							elif unit.team == Globals.Team.ALLIES:
+								victory_condition.units_in_objective.units_collection[Globals.Team.ALLIES].units.append(unit)
+		
+		for victory_condition in Globals.victory_conditions[team].victory_conditions:
+			match victory_condition.condition_type:
+				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+					var enemy_team: Globals.Team
+					if team == Globals.Team.AXIS:
+						enemy_team = Globals.Team.ALLIES
+					else:
+						enemy_team = Globals.Team.AXIS
+
+					var friendly_units: Array[Unit] = victory_condition.units_in_objective.units_collection[team].units
+					var enemy_units: Array[Unit] = victory_condition.units_in_objective.units_collection[enemy_team].units
+
+					var objective_held: bool = false
+					if not friendly_units.is_empty() and enemy_units.is_empty():
+						if friendly_units.size() >= victory_condition.required_unit_count:
+							objective_held = true
+
+					if objective_held:
+						victory_condition.time_occupied_s += 1
+					else:
+						victory_condition.time_occupied_s = 0
+
+					if victory_condition.time_occupied_s >= victory_condition.required_time_s:
+						victory_condition.is_met = true
+					else:
+						victory_condition.is_met = false
+	
+	var victory_conditions_met: Dictionary[Globals.Team, bool] = {
+		Globals.Team.AXIS: true,
+		Globals.Team.ALLIES: true,
+	}
+	for team in Globals.victory_conditions:
+		for victory_condition in Globals.victory_conditions[team].victory_conditions:
+			if not victory_condition.is_met:
+				victory_conditions_met[team] = false
+	
+	if victory_conditions_met[Globals.Team.AXIS] and victory_conditions_met[Globals.Team.ALLIES]:
+		# Its a Draw
+		if time_left_seconds <= 0:
+			time_left_seconds = 0
+			timer_running = false
+			show_winner.emit(-1)
+	else:
+		for team in victory_conditions_met:
+			if victory_conditions_met[team]:
+				show_winner.emit(team)
+				end_game_handled = true

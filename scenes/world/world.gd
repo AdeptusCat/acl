@@ -37,6 +37,7 @@ func _exit_tree():
 
 
 func _ready():
+	Globals.reset()
 	var _maps: Array[Map] = []
 	_maps.assign(maps.get_children())
 	start_screen.setup_map_options(_maps)
@@ -65,6 +66,11 @@ func _ready():
 		unit.setup()
 		unit.add_to_group("units")
 		unit.reparent(game_controller.unit_container)
+	
+	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
+	objectives_layer.reparent(tile_map_layers)
+	
+	Globals.victory_conditions = scenario.get_victory_conditions()
 	
 	game_controller.setup()
 	
@@ -309,18 +315,18 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 func _on_game_started(team : int, game_mode: Globals.GameMode):
 	Globals.game_mode = game_mode
 	target_area.hide()
-	var objectives: Array[Node] = scenario.get_objectives(team)
-	game_controller.set_objective_layer(team, objectives[0])
+	Globals.objectives = scenario.get_objectives()
+	#game_controller.set_objective_layer(team, objectives[0])
 	map_1.remove_scenarios()
-	Globals.reset()
+	
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)
 
 
-func _process(delta: float) -> void:
-	for node in Globals.unit_enemy_los_time_s:
-		if not is_instance_valid(node):
-			pass
+#func _process(delta: float) -> void:
+	#for node in Globals.unit_enemy_los_time_s:
+		#if not is_instance_valid(node):
+			#pass
 
 
 func _on_ui_try_again() -> void:
