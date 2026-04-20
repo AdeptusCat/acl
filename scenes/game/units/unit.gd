@@ -166,7 +166,6 @@ func setup():
 	retreat_complete.connect(_on_retreat_complete)
 	cover_updated.connect(ui._on_cover_updated)
 	
-	# FIXME needs to be reimplemented
 	current_cube = LOSHelper.ground_layer.map_to_cube(current_hex)
 	
 	unit_arrived_at_hex.connect(ui._on_unit_arrived_at_hex)

@@ -31,7 +31,6 @@
 [ext_resource type="Texture2D" uid="uid://bm6f2meissu07" path="res://assets/tiles/terrain/field_sw_so.png" id="19_7mx70"]
 [ext_resource type="Texture2D" uid="uid://cn8fvetb3cox5" path="res://assets/tiles/terrain/road_nw_n.png" id="19_lbnhc"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_sh7a8"]
-[ext_resource type="Texture2D" uid="uid://dtx0tgn2cjgiu" path="res://assets/ui/objective_tile.png" id="20_7mx70"]
 [ext_resource type="Texture2D" uid="uid://di74wx0c1md23" path="res://assets/tiles/terrain/field_n_s.png" id="20_sh7a8"]
 [ext_resource type="Texture2D" uid="uid://cfqlrjo4x4i2l" path="res://assets/tiles/terrain/road_nw_no.png" id="20_sygq6"]
 [ext_resource type="PackedScene" uid="uid://dry4o5rpga2ec" path="res://scenes/ui/start_screen.tscn" id="21_1cxds"]
@@ -54,6 +53,7 @@
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
 [ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="41_n78lu"]
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
+[ext_resource type="Script" uid="uid://borwbb3e4564s" path="res://victory_condition.gd" id="42_jhdiv"]
 [ext_resource type="PackedScene" uid="uid://fbxdb6wcfift" path="res://scenes/game/maps/scenario.tscn" id="44_jhdiv"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="50_hph6x"]
@@ -630,6 +630,19 @@ sources/2 = SubResource("TileSetAtlasSource_ebxd8")
 sources/3 = SubResource("TileSetAtlasSource_2u7jv")
 sources/4 = SubResource("TileSetAtlasSource_24dk6")
 sources/5 = SubResource("TileSetAtlasSource_e8dv2")
+
+[sub_resource type="Resource" id="Resource_pghpc"]
+script = ExtResource("42_jhdiv")
+outcome_level = 1
+required_unit_count = 1
+metadata/_custom_type_script = "uid://borwbb3e4564s"
+
+[sub_resource type="Resource" id="Resource_ambds"]
+script = ExtResource("42_jhdiv")
+side = 1
+outcome_level = 1
+required_unit_count = 1
+metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
@@ -1453,27 +1466,16 @@ nickname = "Loader"
 role = 2
 weapon = ExtResource("55_hpffo")
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k73cj"]
-texture = ExtResource("20_7mx70")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
+[sub_resource type="Resource" id="Resource_xroic"]
+script = ExtResource("42_jhdiv")
+required_unit_count = 1
+metadata/_custom_type_script = "uid://borwbb3e4564s"
 
-[sub_resource type="TileSet" id="TileSet_rjqkl"]
-tile_shape = 3
-tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
-sources/0 = SubResource("TileSetAtlasSource_k73cj")
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_554ci"]
-texture = ExtResource("20_7mx70")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_hph6x"]
-tile_shape = 3
-tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
-sources/0 = SubResource("TileSetAtlasSource_554ci")
+[sub_resource type="Resource" id="Resource_opb01"]
+script = ExtResource("42_jhdiv")
+side = 1
+required_unit_count = 1
+metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wnndm"]
 texture = ExtResource("18_2x71e")
@@ -1567,6 +1569,7 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="Scenario1" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="0" unique_id=43599254 instance=ExtResource("44_jhdiv")]
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_pghpc"), SubResource("Resource_ambds")])
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/Scenario1/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 640)
@@ -1706,19 +1709,8 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubResource("Resource_4gywt"), SubResource("Resource_3un1a")])
 squadType = 3
 
-[node name="AxisObjectiveTileMapLayer" type="TileMapLayer" parent="Maps/Map1/Scenarios/Scenario1/Objectives/Axis" parent_id_path=PackedInt32Array(43599254, 1152354859) index="0" unique_id=124740164 groups=["tilemaplayers"]]
-visible = false
-top_level = true
-tile_map_data = PackedByteArray("AAAKAAkAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_rjqkl")
-
-[node name="AlliesObjectiveTileMapLayer" type="TileMapLayer" parent="Maps/Map1/Scenarios/Scenario1/Objectives/Allies" parent_id_path=PackedInt32Array(43599254, 51304485) index="0" unique_id=609747767 groups=["tilemaplayers"]]
-visible = false
-top_level = true
-tile_map_data = PackedByteArray("AAAYAA0AAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_hph6x")
-
 [node name="Scenario2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=322232894 instance=ExtResource("44_jhdiv")]
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_xroic"), SubResource("Resource_opb01")])
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/Scenario2/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="0" unique_id=792412617 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 640)
@@ -1769,18 +1761,6 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubResource("Resource_7qc1y"), SubResource("Resource_dobo0"), SubResource("Resource_1ppj3"), SubResource("Resource_tpqd7"), SubResource("Resource_o0evn"), SubResource("Resource_qytxv"), SubResource("Resource_cv01b"), SubResource("Resource_61cyd"), SubResource("Resource_7frv1"), SubResource("Resource_ikqac"), SubResource("Resource_bad7w")])
 formation_id = 1
 squadType = 4
-
-[node name="AxisObjectiveTileMapLayer" type="TileMapLayer" parent="Maps/Map1/Scenarios/Scenario2/Objectives/Axis" parent_id_path=PackedInt32Array(322232894, 1152354859) index="0" unique_id=1171097705 groups=["tilemaplayers"]]
-visible = false
-top_level = true
-tile_map_data = PackedByteArray("AAAKAAkAAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_rjqkl")
-
-[node name="AlliesObjectiveTileMapLayer" type="TileMapLayer" parent="Maps/Map1/Scenarios/Scenario2/Objectives/Allies" parent_id_path=PackedInt32Array(322232894, 51304485) index="0" unique_id=947893496 groups=["tilemaplayers"]]
-visible = false
-top_level = true
-tile_map_data = PackedByteArray("AAAYAA0AAAAAAAAAAAA=")
-tile_set = SubResource("TileSet_hph6x")
 
 [node name="TileMapLayers" type="Node2D" parent="." unique_id=1263725723]
 
