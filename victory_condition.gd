@@ -16,22 +16,20 @@ enum OutcomeLevel {
 	MAJOR
 }
 
-enum ObjetiveId {
-	EXIT,
-	A,
-	B,
-	C
-}
 
 @export var team: Globals.Team = Globals.Team.AXIS
-@export var condition_type: ConditionType = ConditionType.OCCUPY_OBJECTIVE
 @export var outcome_level: OutcomeLevel = OutcomeLevel.MAJOR
-
-@export var objective_id: ObjetiveId = ObjetiveId.A
-@export var required_time_s: float = 3.0
-@export var required_unit_count: int = 1
-
 @export var test_at_scenario_end: bool = false
+
+#@export var objective_id: ObjetiveId = ObjetiveId.A
+#@export var required_time_s: float = 3.0
+#@export var required_unit_count: int = 1
+#@export var condition_type: ConditionType = ConditionType.OCCUPY_OBJECTIVE
+
+
+#func is_condition_met(_scenario_state: ScenarioState) -> bool:
+	#push_error("VictoryCondition.is_condition_met() must be overridden.")
+	#return false
 
 var is_met: bool = false
 var hex: Vector2i

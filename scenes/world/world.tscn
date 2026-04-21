@@ -73,7 +73,10 @@
 [ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
 [ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="57_tj3jo"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
+[ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://exit_units_condition.gd" id="59_jhdiv"]
+[ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
+[ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://occupy_objective_condition.gd" id="61_x77xw"]
 [ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="62_124cm"]
 [ext_resource type="Resource" uid="uid://jga6pmhrhmus" path="res://resources/weapons/granatwerfer_34.tres" id="63_vl1dq"]
 [ext_resource type="Resource" uid="uid://tpc4fivssvv0" path="res://resources/weapons/m2_60mm_mortar.tres" id="64_vl1dq"]
@@ -1466,6 +1469,23 @@ nickname = "Loader"
 role = 2
 weapon = ExtResource("55_hpffo")
 
+[sub_resource type="Resource" id="Resource_js2o5"]
+script = ExtResource("59_jhdiv")
+team = 1
+outcome_level = 0
+metadata/_custom_type_script = "uid://dboih1fudyph4"
+
+[sub_resource type="Resource" id="Resource_pv8d0"]
+script = ExtResource("60_yr5cl")
+team = 1
+outcome_level = 0
+metadata/_custom_type_script = "uid://dwewyipec6v2u"
+
+[sub_resource type="Resource" id="Resource_tul8n"]
+script = ExtResource("61_x77xw")
+team = 1
+metadata/_custom_type_script = "uid://cryk5wbke0nxs"
+
 [sub_resource type="Resource" id="Resource_xroic"]
 script = ExtResource("42_jhdiv")
 test_at_scenario_end = true
@@ -1474,20 +1494,6 @@ metadata/_custom_type_script = "uid://borwbb3e4564s"
 [sub_resource type="Resource" id="Resource_opb01"]
 script = ExtResource("42_jhdiv")
 test_at_scenario_end = true
-metadata/_custom_type_script = "uid://borwbb3e4564s"
-
-[sub_resource type="Resource" id="Resource_pv8d0"]
-script = ExtResource("42_jhdiv")
-team = 1
-condition_type = 2
-outcome_level = 0
-objective_id = 0
-metadata/_custom_type_script = "uid://borwbb3e4564s"
-
-[sub_resource type="Resource" id="Resource_tul8n"]
-script = ExtResource("42_jhdiv")
-condition_type = 3
-outcome_level = 0
 metadata/_custom_type_script = "uid://borwbb3e4564s"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wnndm"]
@@ -1746,7 +1752,7 @@ tile_map_data = PackedByteArray("AAAPAAkABgAAAAAAAAAXAAwAAwAAAAAAAAAYAAwAAwAAAAA
 
 [node name="Scenario2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=322232894 instance=ExtResource("44_jhdiv")]
 player_team = 1
-victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_xroic"), SubResource("Resource_opb01"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/Scenario2/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="0" unique_id=792412617 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(560, 896)
