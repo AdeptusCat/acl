@@ -1279,26 +1279,57 @@ func _on_win_condition_timer_timeout() -> void:
 						else:
 							victory_condition.victory_conditions_met[hex] = false
 	
-	var victory_conditions_met: Dictionary[Globals.Team, bool] = {
+	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
 		Globals.Team.AXIS: true,
 		Globals.Team.ALLIES: true,
 	}
+	
+	var minor_victory_conditions_met: Dictionary[Globals.Team, bool] = {
+		Globals.Team.AXIS: true,
+		Globals.Team.ALLIES: true,
+	}
+	
 	for team in Globals.victory_conditions:
 		for victory_condition in Globals.victory_conditions[team].victory_conditions:
-			for hex in victory_condition.victory_conditions_met:
-				if not victory_condition.victory_conditions_met[hex]:
-					victory_conditions_met[team] = false
+			match victory_condition.condition_type:
+				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+					for hex in victory_condition.victory_conditions_met:
+						if not victory_condition.victory_conditions_met[hex]:
+							match victory_condition.outcome_level:
+								VictoryCondition.OutcomeLevel.MINOR:
+									major_victory_conditions_met[team] = false
+								VictoryCondition.OutcomeLevel.MAJOR:
+									minor_victory_conditions_met[team] = false
+							
 	
-	if victory_conditions_met[Globals.Team.AXIS] and victory_conditions_met[Globals.Team.ALLIES]:
+	if major_victory_conditions_met[Globals.Team.AXIS] and major_victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw
 		if time_left_seconds <= 0:
 			time_left_seconds = 0
 			timer_running = false
 			show_winner.emit(-1)
 			end_game_handled = true
+			return
 	else:
-		for team in victory_conditions_met:
-			if victory_conditions_met[team]:
+		for team in major_victory_conditions_met:
+			if major_victory_conditions_met[team]:
 				show_winner.emit(team)
 				timer_running = false
 				end_game_handled = true
+				return
+	
+	if minor_victory_conditions_met[Globals.Team.AXIS] and minor_victory_conditions_met[Globals.Team.ALLIES]:
+		# Its a Draw
+		if time_left_seconds <= 0:
+			time_left_seconds = 0
+			timer_running = false
+			show_winner.emit(-1)
+			end_game_handled = true
+			return
+	else:
+		for team in minor_victory_conditions_met:
+			if minor_victory_conditions_met[team]:
+				show_winner.emit(team)
+				timer_running = false
+				end_game_handled = true
+				return

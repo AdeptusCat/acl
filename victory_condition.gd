@@ -5,6 +5,7 @@ enum ConditionType {
 	OCCUPY_OBJECTIVE,
 	CLEAR_OBJECTIVE,
 	EXIT_UNITS,
+	DESTROY_UNITS,
 	PRESERVE_FORCE,
 	BREAK_ENEMY,
 	DELAY_UNTIL_TIME
@@ -16,6 +17,7 @@ enum OutcomeLevel {
 }
 
 enum ObjetiveId {
+	EXIT,
 	A,
 	B,
 	C
@@ -32,14 +34,14 @@ enum ObjetiveId {
 @export var test_at_scenario_end: bool = false
 
 var is_met: bool = false
+var hex: Vector2i
+var cube: Vector3i
 
 var hexes: Array[Vector2i]
 var required_times_reached_s: Dictionary[Vector2i, float]
 var units_in_objectives: Dictionary[Vector2i, UnitsCollection]
 var victory_conditions_met: Dictionary[Vector2i, bool]
 
-var hex: Vector2i
-var cube: Vector3i
 var units_in_objective: UnitsCollection = UnitsCollection.new()
 var axis_units_in_objective: Array[Unit]
 var allies_units_in_objective: Array[Unit]

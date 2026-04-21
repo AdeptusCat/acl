@@ -1,7 +1,9 @@
 [gd_scene format=3 uid="uid://fbxdb6wcfift"]
 
 [ext_resource type="Script" uid="uid://dsu0lh8w6wlw7" path="res://scenes/game/maps/scenario.gd" id="1_tdev0"]
+[ext_resource type="Texture2D" uid="uid://b7vh5awnnkpqu" path="res://assets/objectives/allies_exit.png" id="2_84jd5"]
 [ext_resource type="Texture2D" uid="uid://c0rscof5sdasu" path="res://assets/objectives/axis_a.png" id="2_rck5x"]
+[ext_resource type="Texture2D" uid="uid://bbwp1rqkquea5" path="res://assets/objectives/axis_exit.png" id="3_8cmm4"]
 [ext_resource type="Texture2D" uid="uid://blkr8xqn2cell" path="res://assets/objectives/axis_b.png" id="3_xupyy"]
 [ext_resource type="Texture2D" uid="uid://cgjgyxfv63mli" path="res://assets/objectives/axis_c.png" id="4_84jd5"]
 [ext_resource type="Texture2D" uid="uid://ba7swy07te61o" path="res://assets/objectives/allies_a.png" id="5_8cmm4"]
@@ -9,30 +11,45 @@
 [ext_resource type="Texture2D" uid="uid://dvigi28x8fe3i" path="res://assets/objectives/allies_c.png" id="7_06hnl"]
 [ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="8_ofo72"]
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
+texture = ExtResource("2_84jd5")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
+texture = ExtResource("3_8cmm4")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_2 = "Exit"
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
 texture = ExtResource("2_rck5x")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
+0:0/0/custom_data_0 = 1
 0:0/0/custom_data_2 = "Objective A"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
 texture = ExtResource("3_xupyy")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = "Objective B"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
 texture = ExtResource("4_84jd5")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/custom_data_0 = 2
+0:0/0/custom_data_0 = 3
 0:0/0/custom_data_2 = "Objective C"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
 texture = ExtResource("5_8cmm4")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
+0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = 1
 0:0/0/custom_data_2 = "Objective A"
 
@@ -40,7 +57,7 @@ texture_region_size = Vector2i(64, 64)
 texture = ExtResource("6_kp5un")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/custom_data_0 = 1
+0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = 1
 0:0/0/custom_data_2 = "Objective B"
 
@@ -48,7 +65,7 @@ texture_region_size = Vector2i(64, 64)
 texture = ExtResource("7_06hnl")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
-0:0/0/custom_data_0 = 2
+0:0/0/custom_data_0 = 3
 0:0/0/custom_data_1 = 1
 0:0/0/custom_data_2 = "Objective C"
 
@@ -70,6 +87,8 @@ sources/5 = SubResource("TileSetAtlasSource_eq3s3")
 sources/6 = SubResource("TileSetAtlasSource_fcp7w")
 sources/7 = SubResource("TileSetAtlasSource_int16")
 sources/8 = SubResource("TileSetAtlasSource_6ys5q")
+sources/0 = SubResource("TileSetAtlasSource_kp5un")
+sources/1 = SubResource("TileSetAtlasSource_06hnl")
 
 [node name="Scenario" type="Node2D" unique_id=43599254]
 script = ExtResource("1_tdev0")
