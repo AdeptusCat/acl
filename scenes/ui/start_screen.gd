@@ -41,7 +41,7 @@ func _ready():
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
 
-
+# FIXME Units should not be able to move when pinned
 func setup_map_options(maps: Array[Map]):
 	for map in maps:
 		var scenarios: Array[Scenario] = map.get_scenarios()
