@@ -28,10 +28,10 @@ func _ready():
 	if Globals.game_mode == Globals.GameMode.ATTACK:
 		game_mode_attack.text = "ATTACK"
 		game_mode_defend.text = ""
-	visible = true
+	#visible = true
 	start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
 	start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
-	animation_player.play("fade_in")  # Play when screen appears
+	#animation_player.play("fade_in")  # Play when screen appears
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
 

@@ -739,6 +739,12 @@ func _on_unit_surrendered(_unit):
 
 
 func _on_unit_died(unit: Unit):
+	var enemy_team: Globals.Team
+	if unit.team == Globals.Team.AXIS:
+		enemy_team = Globals.Team.ALLIES
+	if unit.team == Globals.Team.ALLIES:
+		enemy_team = Globals.Team.AXIS
+	Globals.units_destroyed.units_collection[enemy_team].units.append(unit)
 	Globals.unit_visible_enemies.erase(unit)
 	Globals.unit_enemies_in_los.erase(unit)
 	
@@ -790,6 +796,7 @@ func erase_freed_objects_key_from_dict(dict: Dictionary):
 
 
 func start_game(team: Globals.Team, time: float):
+	
 	time_left_seconds = time * 60.0
 	Globals.team_player = team
 	if team == Globals.Team.AXIS:
@@ -1215,92 +1222,63 @@ func set_victory_conditions():
 	for team in Globals.victory_conditions:
 		var victory_conditions: VictoryConditionCollection = Globals.victory_conditions[team]
 		for victory_condition in victory_conditions.victory_conditions:
-			match victory_condition.condition_type:
-				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
+			match victory_condition:
+				var condition when condition is OccupyObjectiveCondition:
+					victory_condition = victory_condition as OccupyObjectiveCondition
+					victory_condition.state = OccupyObjectiveState.new()
 					var objectives: ObjectivesCollection = Globals.objectives[team]
 					for objective in objectives.objectives:
 						if objective.objective_id == victory_condition.objective_id:
-							victory_condition.hexes.append(objective.hex)
-							victory_condition.required_times_reached_s[objective.hex] = 0.0
-							victory_condition.units_in_objectives[objective.hex] = UnitsCollection.new()
-							victory_condition.victory_conditions_met[objective.hex] = false
+							victory_condition.state.hexes.append(objective.hex)
+							victory_condition.state.required_times_reached_s[objective.hex] = 0.0
+							victory_condition.state.units_in_objectives[objective.hex] = UnitsCollection.new()
+							victory_condition.state.victory_conditions_met[objective.hex] = false
 							#victory_condition.hex = objective.hex
+				var condition when condition is ExitUnitsCondition:
+					victory_condition = victory_condition as ExitUnitsCondition
+					victory_condition.state = ExitUnitsState.new()
+					var objectives: ObjectivesCollection = Globals.objectives[team]
+					for objective in objectives.objectives:
+						if objective.objective_id == victory_condition.objective_id:
+							victory_condition.state.exit_hexes.append(objective.hex)
+				var condition when condition is DestroyUnitsCondition:
+					victory_condition = victory_condition as DestroyUnitsCondition
+					victory_condition.state = DestroyUnitsState.new()
+					pass
 
 
 func _on_win_condition_timer_timeout() -> void:
 	if end_game_handled:
 		return
 	
-	for team in Globals.victory_conditions:
-		for victory_condition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.condition_type:
-				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-					for hex in victory_condition.hexes:
-						victory_condition.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.clear()
-						victory_condition.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.clear()
-		
-		for unit in Globals.get_units():
-			for victory_condition in Globals.victory_conditions[team].victory_conditions:
-				match victory_condition.condition_type:
-					victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-						for hex in victory_condition.hexes:
-							if hex == unit.current_hex:
-								if unit.team == Globals.Team.AXIS:
-									victory_condition.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.append(unit)
-								elif unit.team == Globals.Team.ALLIES:
-									victory_condition.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.append(unit)
-		
-		for victory_condition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.condition_type:
-				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-					var enemy_team: Globals.Team
-					if team == Globals.Team.AXIS:
-						enemy_team = Globals.Team.ALLIES
-					else:
-						enemy_team = Globals.Team.AXIS
-					
-					for hex in victory_condition.hexes:
-						var friendly_units: Array[Unit] = victory_condition.units_in_objectives[hex].units_collection[team].units
-						var enemy_units: Array[Unit] = victory_condition.units_in_objectives[hex].units_collection[enemy_team].units
-
-						var objective_held: bool = false
-						if not friendly_units.is_empty() and enemy_units.is_empty():
-							if friendly_units.size() >= victory_condition.required_unit_count:
-								objective_held = true
-
-						
-						if objective_held:
-							victory_condition.required_times_reached_s[hex] += 1
-						else:
-							victory_condition.required_times_reached_s[hex] = 0
-
-						if victory_condition.required_times_reached_s[hex] >= victory_condition.required_time_s:
-							victory_condition.victory_conditions_met[hex] = true
-						else:
-							victory_condition.victory_conditions_met[hex] = false
-	
 	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
-		Globals.Team.AXIS: true,
-		Globals.Team.ALLIES: true,
+		Globals.Team.AXIS: false,
+		Globals.Team.ALLIES: false,
 	}
 	
 	var minor_victory_conditions_met: Dictionary[Globals.Team, bool] = {
-		Globals.Team.AXIS: true,
-		Globals.Team.ALLIES: true,
+		Globals.Team.AXIS: false,
+		Globals.Team.ALLIES: false,
 	}
+	
+	var is_met: bool = false
+	for team in Globals.victory_conditions:
+		for victory_condition in Globals.victory_conditions[team].victory_conditions:
+			match victory_condition.outcome_level:
+				VictoryCondition.OutcomeLevel.MAJOR:
+					is_met = victory_condition.is_condition_met()
+					minor_victory_conditions_met[team] = is_met
+					if not is_met:
+						break
 	
 	for team in Globals.victory_conditions:
 		for victory_condition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.condition_type:
-				victory_condition.ConditionType.OCCUPY_OBJECTIVE:
-					for hex in victory_condition.victory_conditions_met:
-						if not victory_condition.victory_conditions_met[hex]:
-							match victory_condition.outcome_level:
-								VictoryCondition.OutcomeLevel.MINOR:
-									major_victory_conditions_met[team] = false
-								VictoryCondition.OutcomeLevel.MAJOR:
-									minor_victory_conditions_met[team] = false
-							
+			match victory_condition.outcome_level:
+				VictoryCondition.OutcomeLevel.MINOR:
+					is_met = victory_condition.is_condition_met()
+					major_victory_conditions_met[team] = is_met
+					if not is_met:
+						break
 	
 	if major_victory_conditions_met[Globals.Team.AXIS] and major_victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw

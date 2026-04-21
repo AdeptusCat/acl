@@ -1477,6 +1477,7 @@ metadata/_custom_type_script = "uid://dboih1fudyph4"
 
 [sub_resource type="Resource" id="Resource_pv8d0"]
 script = ExtResource("60_yr5cl")
+required_unit_count = 0
 team = 1
 outcome_level = 0
 metadata/_custom_type_script = "uid://dwewyipec6v2u"
@@ -1817,6 +1818,9 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubRes
 formation_id = 1
 squadType = 4
 
+[node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/Scenario2/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="0" unique_id=1637617708]
+tile_map_data = PackedByteArray("AAARAAkAAwAAAAAAAAALAA0ABgAAAAAAAAAMAAgAAAAAAAAAAAANAAgAAAAAAAAAAAA=")
+
 [node name="Scenario3" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="2" unique_id=972059538 instance=ExtResource("44_jhdiv")]
 visible = false
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_xroic"), SubResource("Resource_opb01")])
@@ -1884,7 +1888,6 @@ visible = false
 visible = false
 
 [node name="Ui" parent="." unique_id=1104826916 instance=ExtResource("23_ues17")]
-visible = false
 
 [node name="DummyNode2D" type="Node2D" parent="." unique_id=100986594]
 

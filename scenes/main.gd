@@ -3,12 +3,13 @@ extends Node2D
 @export var world_scene: PackedScene
 var world
 
+
 func _ready() -> void:
 	world = world_scene.instantiate()
 	world.try_again.connect(_on_try_again)
 	world.fully_freed.connect(_on_fully_freed)
 	add_child(world)
-
+	world.start_screen.show()
 
 func _on_try_again():
 	Globals.game_started = false
@@ -21,3 +22,4 @@ func _on_fully_freed():
 	world.try_again.connect(_on_try_again)
 	world.fully_freed.connect(_on_fully_freed)
 	add_child(world)
+	world.start_screen.show()

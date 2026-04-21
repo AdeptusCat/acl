@@ -32,6 +32,7 @@ var mouse_hover_hex: Vector2i
 
 var map: Map
 var scenario: Scenario
+var is_setup: bool = false
 
 
 func _exit_tree():
@@ -301,6 +302,10 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 
 
 func _on_game_started(team : int, game_mode: Globals.GameMode):
+	if is_setup:
+		return
+	is_setup = true
+	
 	scenario = Globals.scenario_chosen
 	
 	var layers: Array[Node] = map_1.get_tilemap_layers()

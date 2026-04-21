@@ -8,7 +8,21 @@ enum ObjectiveId {
 	C
 }
 
-@export var exit_zone_id: ObjectiveId = ObjectiveId.EXIT
+@export var objective_id: ObjectiveId = ObjectiveId.EXIT
 @export var required_unit_count: int = 1
 
-var units_exited: int = 0
+var state: ExitUnitsState
+
+func is_condition_met() -> bool:
+	var is_met: bool = false
+	
+	for unit in Globals.get_units():
+		for hex in state.exit_hexes:
+			if hex == unit.current_hex:
+				if unit.team == team:
+					if not state.units_exited.has(unit):
+						state.units_exited.append(unit)
+	
+	if state.units_exited.size() >= required_unit_count:
+		is_met = true
+	return is_met

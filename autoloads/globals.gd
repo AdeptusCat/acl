@@ -18,6 +18,7 @@ var objectives: Dictionary[Team, ObjectivesCollection]
 var victory_conditions: Dictionary[Team, VictoryConditionCollection]
 var map_chosen: Map
 var scenario_chosen: Scenario
+var units_destroyed: UnitsCollection = UnitsCollection.new()
 
 enum Team {
 	AXIS,
@@ -94,3 +95,4 @@ func reset():
 		objectives[team].objectives.clear()
 	map_chosen = null
 	scenario_chosen = null
+	units_destroyed = UnitsCollection.new()
