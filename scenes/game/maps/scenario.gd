@@ -5,7 +5,8 @@ class_name Scenario
 @onready var objectives_tile_map_layer: HexagonTileMapLayer = $Objectives/ObjectivesTileMapLayer
 
 @export var scenario_name: String = "scenario"
-@export var duration_s: float = 1800.0
+@export var scenario_description: String = ""
+@export var duration_s: float = 180.0
 
 #@export var attacker_team: Globals.Team = Globals.Team.ALLIES
 #@export var defender_team: Globals.Team = Globals.Team.AXIS

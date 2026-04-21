@@ -42,9 +42,11 @@ func is_condition_met() -> bool:
 		for hex in state.hexes:
 			if hex == unit.current_hex:
 				if unit.team == Globals.Team.AXIS:
-					state.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.append(unit)
+					if unit.is_good_order():
+						state.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.append(unit)
 				elif unit.team == Globals.Team.ALLIES:
-					state.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.append(unit)
+					if unit.is_good_order():
+						state.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.append(unit)
 	
 	for hex in state.hexes:
 		var friendly_units: Array[Unit] = state.units_in_objectives[hex].units_collection[team].units

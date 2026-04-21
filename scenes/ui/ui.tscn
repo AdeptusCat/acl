@@ -518,6 +518,7 @@ text = "Leadership Bonus"
 script = ExtResource("14_mgwkc")
 
 [node name="CCDefensePreparedness" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=1010918412]
+visible = false
 layout_mode = 2
 text = "CC Readyness"
 

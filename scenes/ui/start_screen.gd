@@ -15,7 +15,13 @@ signal time_changed(_time: float)
 @onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
 @onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
 @onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
+@onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ScenarioDescription
+@onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/Team
 
+var team_texture: Dictionary[Globals.Team, Texture] = {
+	Globals.Team.AXIS: preload("res://assets/ui/axis_flag.png"),
+	Globals.Team.ALLIES: preload("res://assets/ui/us_flag.png")
+}
 
 var time: float
 
@@ -31,7 +37,7 @@ func _ready():
 	#visible = true
 	start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
 	start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
-	#animation_player.play("fade_in")  # Play when screen appears
+	animation_player.play("fade_in")  # Play when screen appears
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
 
@@ -45,9 +51,18 @@ func setup_map_options(maps: Array[Map]):
 		for scenario in scenarios:
 			var scenario_button: Button = Button.new()
 			scenario_button.text = scenario.scenario_name
+			scenario_button.tooltip_text = scenario.scenario_description
 			maps_v_box_container.add_child(scenario_button)
 			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(scenario))
+			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(scenario))
+			scenario_button.mouse_exited.connect(_on_scenario_button_mouse_exited)
 
+func _on_scenario_button_mouse_entered(scenario: Scenario):
+	scenario_description.text = scenario.scenario_description
+	team.texture = team_texture[scenario.player_team]
+
+func _on_scenario_button_mouse_exited():
+	scenario_description.text = ""
 
 func _on_scenario_button_pressed(scenario: Scenario):
 	Globals.scenario_chosen = scenario

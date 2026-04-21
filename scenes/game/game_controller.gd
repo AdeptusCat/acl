@@ -962,7 +962,7 @@ func update_los_time(delta: float) -> void:
 func end_game_check():
 	if end_game_handled:
 		return
-	end_game_handled = true
+	#end_game_handled = true
 	#var occupying_units : Array
 	#for unit in Globals.get_units():
 		#if unit.current_hex == Globals.objective_hexes[unit.team][0]:

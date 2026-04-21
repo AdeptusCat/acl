@@ -318,11 +318,13 @@ func _on_game_started(team : int, game_mode: Globals.GameMode):
 		unit.add_to_group("units")
 		unit.reparent(game_controller.unit_container)
 	
+	fog_of_war_tile_map_layer.move_to_front()
+	selected_tile_map_layer.move_to_front()
+	
 	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
 	objectives_layer.reparent(tile_map_layers)
 	
-	fog_of_war_tile_map_layer.move_to_front()
-	selected_tile_map_layer.move_to_front()
+	
 	
 	Globals.victory_conditions = scenario.get_victory_conditions()
 	
