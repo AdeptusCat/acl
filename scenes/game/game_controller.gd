@@ -98,6 +98,7 @@ func setup():
 			unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
 			unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
 			unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
+			unit.squad_fire.shooting.connect(_on_unit_shooting)
 			Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
 			
 	for unit in Globals.get_units():
@@ -217,6 +218,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
 	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
 	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
+	unit.squad_fire.shooting.connect(_on_unit_shooting)
 	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
 	unit.update_terrain_defense_bonus()
 			
@@ -449,7 +451,9 @@ func setup_game():
 	set_objective_text.emit("")
 	for unit in unit_container.get_children():
 		unit.visible = false
-
+	
+	for unit in Globals.get_units():
+		LOS._on_unit_entered_hex(unit, null)
 
 func set_objective_layer(team: Globals.Team, tilemap: TileMapLayer):
 	match team:
@@ -1008,9 +1012,9 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 		var units_visible: Array = []
 		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
 		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
-		var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
+		#var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
 		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		for enemy_tracked in time_map_keys_filtered:
+		for enemy_tracked in time_map:
 			if not is_instance_valid(enemy_tracked):
 				continue
 			if units_visible_by_this_unit.has(enemy_tracked):
@@ -1312,3 +1316,9 @@ func _on_win_condition_timer_timeout() -> void:
 				timer_running = false
 				end_game_handled = true
 				return
+
+func _on_unit_shooting(unit: Unit):
+	for _unit in Globals.get_units():
+		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(_unit, {} as Dictionary[Unit, float])
+		if conf_map.has(unit):
+			conf_map[unit] += 0.1

@@ -135,7 +135,6 @@ signal new_target_hex(unit: Unit, hex: Vector2i)
 signal draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
 signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
 
-
 # === Nodes ===
 @onready var ui := $UnitUi
 @onready var stress_system: StressController = $UnitStressController

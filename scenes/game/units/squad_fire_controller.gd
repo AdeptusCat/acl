@@ -92,6 +92,7 @@ var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
 signal draw_los_to_target_unit(from_hex, to_hex)
+signal shooting(unit: Unit)
 
 #func _ready() -> void:
 	#var cover: float = 0.0 
@@ -535,12 +536,15 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	var batch_targets: Array[Unit] = []
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
-	for u in visible_enemies:
-		if is_instance_valid(u):
-			if u.alive:
-				if not u.surrendered:
-					#if u.current_hex == target_hex:
-					batch_targets.append(u)
+	
+	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
+	if not unit.attackState == Unit.AttackState.MANUAL_GROUND: 
+		for u in visible_enemies:
+			if is_instance_valid(u):
+				if u.alive:
+					if not u.surrendered:
+						#if u.current_hex == target_hex:
+						batch_targets.append(u)
 	
 	#if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		#set_target_unit(null)
@@ -695,8 +699,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		life = dist / s.weapon.riflegrenade_projectile_speed
 	await get_tree().create_timer(life).timeout
 	
+	shooting.emit(unit)
 	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, unit)
+	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
 	return shots
 
 
@@ -811,7 +816,7 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 	if fire_recent > 1.0:
 		fire_recent = 1.0
 
-func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit], unit: Unit) -> void:
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit]) -> void:
 	# debug
 	#return
 	#if not riflegrenade:
@@ -849,6 +854,9 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 						#if u.current_hex == target_hex:
 							#batch_targets.append(u)
 	
+	# FIXME units that are not seen should not be as easily hit
+	if unit.team == Globals.Team.ALLIES:
+		pass
 	for _unit in Globals.get_units():
 		if _unit.current_hex == _target_hex:
 			if not batch_targets.has(_unit):
