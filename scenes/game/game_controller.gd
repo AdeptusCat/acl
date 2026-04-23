@@ -525,7 +525,8 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 	if not selected_unit:
 		return
 	
-	if selected_unit.broken or selected_unit.surrendered:
+	# FIXME show proper warning to user why order cannot be done
+	if selected_unit.broken or selected_unit.surrendered or selected_unit.stress_system.state == STATES.MoraleState.PINNED:
 		selected_unit.ui.show_failure()
 		return
 	
