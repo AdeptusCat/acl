@@ -1577,6 +1577,7 @@ metadata/_edit_lock_ = true
 visible = false
 scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
+released = true
 player_team = 1
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
 
@@ -1641,6 +1642,7 @@ tile_map_data = PackedByteArray("AAAHABIAAAAAAAAAAAAGABIAAAAAAAAAAAAIABMAAAAAAAA
 visible = false
 scenario_name = "Seize a Village"
 scenario_description = "Lead your Company to take back a village."
+released = true
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_pghpc")])
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
@@ -1803,8 +1805,10 @@ squadType = 3
 tile_map_data = PackedByteArray("AAAJAAkAAwAAAAAAAAAKAAkAAwAAAAAAAAA=")
 
 [node name="PunchThrough" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="2" unique_id=972059538 instance=ExtResource("44_jhdiv")]
+visible = false
 scenario_name = "Punch Through"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
+released = true
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_ambds")])
 
 [node name="AxisRifle1" parent="Maps/Map1/Scenarios/PunchThrough/Units" parent_id_path=PackedInt32Array(972059538, 1365216721) index="0" unique_id=500366871 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
@@ -1923,6 +1927,34 @@ formation_id = 2
 squadType = 1
 
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/PunchThrough/Objectives" parent_id_path=PackedInt32Array(972059538, 1566573026) index="0" unique_id=1637617708]
+tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAAAAAAKAAoAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAA=")
+
+[node name="Debug" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="3" unique_id=1240012679 instance=ExtResource("44_jhdiv")]
+scenario_name = "Debug"
+scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_ambds")])
+
+[node name="AxisRifle1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="0" unique_id=1675212978 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(848, 768)
+squad = 2
+platoon = 1
+ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
+command_squad = NodePath("")
+formation_id = 1
+
+[node name="AlliesMg1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="1" unique_id=199803577 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(656, 704)
+squad = 3
+platoon = 1
+ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubResource("Resource_5vtr0"), SubResource("Resource_xmq5n"), SubResource("Resource_1e8o5"), SubResource("Resource_k0giv")])
+command_squad = NodePath("")
+formation_id = 2
+squadType = 1
+
+[node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/Debug/Objectives" parent_id_path=PackedInt32Array(1240012679, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAAAAAAKAAoAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAA=")
 
 [node name="TileMapLayers" type="Node2D" parent="." unique_id=1263725723]
@@ -2144,4 +2176,5 @@ position = Vector2(626, 904)
 [editable path="Maps/Map1/Scenarios/OutpostProbe"]
 [editable path="Maps/Map1/Scenarios/SeizeVillag"]
 [editable path="Maps/Map1/Scenarios/PunchThrough"]
+[editable path="Maps/Map1/Scenarios/Debug"]
 [editable path="Tracer"]

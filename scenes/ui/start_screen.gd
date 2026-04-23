@@ -17,6 +17,8 @@ signal time_changed(_time: float)
 @onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
 @onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ScenarioDescription
 @onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/Team
+@onready var objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer
+
 
 var team_texture: Dictionary[Globals.Team, Texture] = {
 	Globals.Team.AXIS: preload("res://assets/ui/axis_flag.png"),
@@ -49,20 +51,28 @@ func setup_map_options(maps: Array[Map]):
 		map_button.text = map.map_name
 		maps_v_box_container.add_child(map_button)
 		for scenario in scenarios:
+			if not OS.is_debug_build() and not scenario.released:
+				continue
 			var scenario_button: Button = Button.new()
 			scenario_button.text = scenario.scenario_name
-			scenario_button.tooltip_text = scenario.scenario_description
 			maps_v_box_container.add_child(scenario_button)
 			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(scenario))
 			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(scenario))
 			scenario_button.mouse_exited.connect(_on_scenario_button_mouse_exited)
-
+			
+			
 func _on_scenario_button_mouse_entered(scenario: Scenario):
 	scenario_description.text = scenario.scenario_description
 	team.texture = team_texture[scenario.player_team]
+	for victory_condition in scenario.victory_conditions:
+		var label = Label.new()
+		label.text = victory_condition.get_description()
+		objectives_v_box_container.add_child(label)
 
 func _on_scenario_button_mouse_exited():
 	scenario_description.text = ""
+	for label in objectives_v_box_container.get_children():
+		label.queue_free()
 
 func _on_scenario_button_pressed(scenario: Scenario):
 	Globals.scenario_chosen = scenario

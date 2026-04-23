@@ -26,3 +26,14 @@ func is_condition_met() -> bool:
 	if state.units_exited.size() >= required_unit_count:
 		is_met = true
 	return is_met
+
+func get_description() -> String:
+	var plural_suffix: String = ""
+	if required_unit_count > 1:
+		plural_suffix = "s"
+	
+	var text: String = "Move at least {count} of your unit{plural_suffix} to 'Exit' Markers.".format({
+	"plural_suffix": plural_suffix,
+	"count": required_unit_count
+	})
+	return text

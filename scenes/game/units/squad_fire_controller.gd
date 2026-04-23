@@ -533,7 +533,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	var _mortar_target_hex: Vector2i = mortar_target_hex
 	
-	var batch_targets: Array = []
+	var batch_targets: Array[Unit] = []
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	for u in visible_enemies:
 		if is_instance_valid(u):
@@ -696,7 +696,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	await get_tree().create_timer(life).timeout
 	
 	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover)
+	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
 	return shots
 
 
@@ -811,7 +811,7 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 	if fire_recent > 1.0:
 		fire_recent = 1.0
 
-func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int) -> void:
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit]) -> void:
 	# debug
 	#return
 	#if not riflegrenade:
@@ -829,8 +829,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_target_hex))
 
 	# --- collect all enemy squads in the target hex ---
-	var batch_targets: Array = []
-	batch_targets = LOSHelper.find_units_at(_target_hex)
+	#var batch_targets: Array = []
+	#batch_targets = LOSHelper.find_units_at(_target_hex)
 
 	
 	#var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])

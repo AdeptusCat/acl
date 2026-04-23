@@ -41,3 +41,8 @@ var time_occupied_s: float
 func is_condition_met() -> bool:
 	push_error("VictoryCondition.evaluate() must be overridden.")
 	return false
+
+
+func get_description() -> String:
+	push_error("VictoryCondition.evaluate() must be overridden.")
+	return ""

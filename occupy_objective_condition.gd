@@ -15,6 +15,12 @@ enum ObjectiveId {
 
 var state: OccupyObjectiveState
 
+const OBJECTIVE_NAMES := {
+	ObjectiveId.A: "A",
+	ObjectiveId.B: "B",
+	ObjectiveId.C: "C",
+}
+
 #func is_condition_met(scenario_state: ScenarioState) -> bool:
 	#return scenario_state.is_objective_occupied_for_time(
 		#team,
@@ -24,6 +30,23 @@ var state: OccupyObjectiveState
 		#required_unit_count,
 		#contested_by_enemy_presence
 	#)
+
+
+func get_description() -> String:
+	var text: String = "Occupy the Hex(es) marked '{objective}' with your units.".format({
+	"objective": OBJECTIVE_NAMES[objective_id]
+	})
+	
+	#var plural_suffix: String = ""
+	#if hexes.size() > 1:
+		#plural_suffix = "es"
+	#var text: String = "Occupy the Hex{plural_suffix} marked '{objective}' with your units.".format({
+	#"plural_suffix": plural_suffix,
+	#"objective": OBJECTIVE_NAMES[objective_id]
+	#})
+	
+	return text
+
 
 func is_condition_met() -> bool:
 	var is_met: bool = true
