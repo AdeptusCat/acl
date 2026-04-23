@@ -696,7 +696,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	await get_tree().create_timer(life).timeout
 	
 	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
+	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, unit)
 	return shots
 
 
@@ -811,7 +811,7 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 	if fire_recent > 1.0:
 		fire_recent = 1.0
 
-func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit]) -> void:
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit], unit: Unit) -> void:
 	# debug
 	#return
 	#if not riflegrenade:
@@ -848,10 +848,15 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 					#if not u.surrendered:
 						#if u.current_hex == target_hex:
 							#batch_targets.append(u)
+	
+	for _unit in Globals.get_units():
+		if _unit.current_hex == _target_hex:
+			if not batch_targets.has(_unit):
+				batch_targets.append(_unit)
+	
 	if batch_targets.is_empty():
 		# no enemys to be hit
 		return
-
 	
 	# --- prep per-squad data: cover/exposure & hit prob (same maths as resolve_volley) ---
 	# We keep exposure simple here (1.0). If you’ve got per-squad exposure, plug it in.
@@ -1046,8 +1051,10 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	#if riflegrenade or weapon.family == WeaponSpec.Family.MORTAR:
 		
 	if weapon.ammo_type == WeaponSpec.AmmoType.HE or riflegrenade:
-		s_fast = stress_fast_base + mean_chance_to_hit * weapon.he_suppression_power
-		s_slow = stress_fast_base + mean_chance_to_hit * weapon.he_suppression_power
+		
+		var stress_mod: float = remap(unit.stress_system.S_eff, 0.0, 100.0, 1.0, 0.2)
+		s_fast = stress_fast_base * stress_mod + mean_chance_to_hit * weapon.he_suppression_power
+		s_slow = stress_fast_base * stress_mod + mean_chance_to_hit * weapon.he_suppression_power
 		pass
 		#stress_cover_mod = weapon.he_suppression_power
 		#stress_cover_mod = stress_cover_mod * 4.0
