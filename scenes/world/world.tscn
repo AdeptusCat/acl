@@ -53,7 +53,7 @@
 [ext_resource type="Shader" uid="uid://df38kl3agxbdl" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
 [ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="41_n78lu"]
 [ext_resource type="Shader" uid="uid://cngddq0yavbb6" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
-[ext_resource type="Script" uid="uid://borwbb3e4564s" path="res://victory_condition.gd" id="42_jhdiv"]
+[ext_resource type="Script" uid="uid://borwbb3e4564s" path="res://scenes/scenarios/victory_conditions/victory_condition.gd" id="42_jhdiv"]
 [ext_resource type="PackedScene" uid="uid://fbxdb6wcfift" path="res://scenes/game/maps/scenario.tscn" id="44_jhdiv"]
 [ext_resource type="PackedScene" uid="uid://d2x4o23gxhsrx" path="res://scenes/ui/glow_marker.tscn" id="45_q3hpu"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="50_hph6x"]
@@ -73,10 +73,10 @@
 [ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="57_hnqnj"]
 [ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="57_tj3jo"]
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
-[ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://exit_units_condition.gd" id="59_jhdiv"]
-[ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://destroy_units_condition.gd" id="60_yr5cl"]
+[ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://scenes/scenarios/victory_conditions/exit_units_condition.gd" id="59_jhdiv"]
+[ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
-[ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://occupy_objective_condition.gd" id="61_x77xw"]
+[ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="61_x77xw"]
 [ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="62_124cm"]
 [ext_resource type="Resource" uid="uid://jga6pmhrhmus" path="res://resources/weapons/granatwerfer_34.tres" id="63_vl1dq"]
 [ext_resource type="Resource" uid="uid://tpc4fivssvv0" path="res://resources/weapons/m2_60mm_mortar.tres" id="64_vl1dq"]
@@ -1934,23 +1934,21 @@ scenario_name = "Debug"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_ambds")])
 
-[node name="AxisRifle1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="0" unique_id=1675212978 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+[node name="AxisRifle1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="0" unique_id=1675212978 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(848, 768)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
-command_squad = NodePath("")
 formation_id = 1
 
-[node name="AlliesMg1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="1" unique_id=199803577 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+[node name="AlliesMg1" parent="Maps/Map1/Scenarios/Debug/Units" parent_id_path=PackedInt32Array(1240012679, 1365216721) index="1" unique_id=199803577 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(656, 704)
 squad = 3
 platoon = 1
 ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubResource("Resource_5vtr0"), SubResource("Resource_xmq5n"), SubResource("Resource_1e8o5"), SubResource("Resource_k0giv")])
-command_squad = NodePath("")
 formation_id = 2
 squadType = 1
 
