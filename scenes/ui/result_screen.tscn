@@ -1,13 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://b84f65gu8hp6e"]
+[gd_scene format=3 uid="uid://b84f65gu8hp6e"]
 
 [ext_resource type="Script" uid="uid://bj7ycyqixb6gq" path="res://scenes/ui/result_screen.gd" id="1_e2y21"]
 [ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="2_gm1r0"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2_vmyrh"]
 
-[node name="ResultScreen" type="CanvasLayer"]
+[node name="ResultScreen" type="CanvasLayer" unique_id=1842144900]
 script = ExtResource("1_e2y21")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=705845746]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,7 +17,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2_gm1r0")
 
-[node name="CenterContainer" type="CenterContainer" parent="Control"]
+[node name="CenterContainer" type="CenterContainer" parent="Control" unique_id=1075745463]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -31,43 +31,43 @@ offset_bottom = 54.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=1998718025]
 layout_mode = 2
 theme_override_styles/panel = ExtResource("2_vmyrh")
 
-[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Control/CenterContainer/PanelContainer" unique_id=2042467102]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer" unique_id=372953217]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="ResultLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="ResultLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1010245662]
 layout_mode = 2
 text = "Winner"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=432728371]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="TryAgain" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="TryAgain" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=409671125]
 layout_mode = 2
 text = "Try Again"
 
-[node name="KeepPlaying" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="KeepPlaying" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=972328819]
 layout_mode = 2
 text = "Keep Playing"
 
-[node name="MarginContainer2" type="MarginContainer" parent="Control/CenterContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="Control/CenterContainer" unique_id=1018890048]
 visible = false
 layout_mode = 2
 
-[node name="ColorRect" type="ColorRect" parent="Control/CenterContainer/MarginContainer2"]
+[node name="ColorRect" type="ColorRect" parent="Control/CenterContainer/MarginContainer2" unique_id=1802066636]
 layout_mode = 2
 color = Color(0.65917045, 0.26540613, 0.0678071, 1)
 

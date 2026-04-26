@@ -96,3 +96,4 @@ func reset():
 	map_chosen = null
 	scenario_chosen = null
 	units_destroyed = UnitsCollection.new()
+	unit_hierarchy.clear()
