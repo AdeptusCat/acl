@@ -540,11 +540,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
 	if not unit.attackState == Unit.AttackState.MANUAL_GROUND: 
 		for u in visible_enemies:
-			if is_instance_valid(u):
-				if u.alive:
-					if not u.surrendered:
-						#if u.current_hex == target_hex:
-						batch_targets.append(u)
+			if u.current_hex == target_hex:
+				if is_instance_valid(u):
+					if u.alive:
+						if not u.surrendered:
+							#if u.current_hex == target_hex:
+							batch_targets.append(u)
 	
 	#if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		#set_target_unit(null)
@@ -1061,8 +1062,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	if weapon.ammo_type == WeaponSpec.AmmoType.HE or riflegrenade:
 		
 		var stress_mod: float = remap(unit.stress_system.S_eff, 0.0, 100.0, 1.0, 0.2)
-		s_fast = stress_fast_base * stress_mod + mean_chance_to_hit * weapon.he_suppression_power
-		s_slow = stress_fast_base * stress_mod + mean_chance_to_hit * weapon.he_suppression_power
+		s_fast = stress_fast_base * stress_mod * 0.3 + mean_chance_to_hit * weapon.he_suppression_power
+		s_slow = stress_fast_base * stress_mod * 0.3 + mean_chance_to_hit * weapon.he_suppression_power
 		pass
 		#stress_cover_mod = weapon.he_suppression_power
 		#stress_cover_mod = stress_cover_mod * 4.0
