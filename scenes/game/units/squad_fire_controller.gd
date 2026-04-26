@@ -1097,7 +1097,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	## weapon flavour & global scale
 	#s_fast *= weapon_stress_mult * stress_scale
 	#s_slow *= weapon_stress_mult * stress_scale
-
+	
 	# clamp so one volley can’t nuke morale outright
 	if s_fast > stress_max_per_volley:
 		s_fast = stress_max_per_volley

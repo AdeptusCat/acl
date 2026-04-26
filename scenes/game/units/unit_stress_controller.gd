@@ -319,8 +319,9 @@ func _process(delta: float) -> void:
 	_clamp_bins()
 	
 	# - 1.0 stress per seconds
-	var stress_decay_f_per_second: float = leader_presence_strength * 5.0
-	var stress_decay_s_per_second: float = leader_presence_strength * 5.0
+	# FIXME leader bonus needs adjusting. factor 5 was too much
+	var stress_decay_f_per_second: float = leader_presence_strength# * 5.0
+	var stress_decay_s_per_second: float = leader_presence_strength# * 5.0
 	if leader_presence_strength == 0.0:
 		stress_decay_f_per_second = 0.1
 		stress_decay_s_per_second = 0.1
@@ -390,8 +391,10 @@ func apply_stress(df: float, ds: float) -> void:
 	var eff_scale: float = base_scale * leader_mult
 	var stress_fast_added: float = df_in * eff_scale
 	var stress_slow_added: float = ds_in * eff_scale
-	stress_fast += df_in * eff_scale
-	stress_slow += ds_in * eff_scale
+	var stress_mod: float = remap(S_eff, 0.0, 100.0, 1.0, 0.5)
+	print(stress_mod)
+	stress_fast += df_in * eff_scale * stress_mod
+	stress_slow += ds_in * eff_scale * stress_mod
 	_clamp_bins()
 	
 	stress_buckets.append(stress_fast_added + stress_slow_added)
