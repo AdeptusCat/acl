@@ -1574,7 +1574,6 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="OutpostProbe" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="0" unique_id=322232894 instance=ExtResource("44_jhdiv")]
-visible = false
 scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
@@ -1582,7 +1581,7 @@ player_team = 1
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
 
 [node name="AxisPlatoonLeader1" parent="Maps/Map1/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="0" unique_id=437595144 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(464, 960)
+position = Vector2(512, 928)
 platoon = 1
 ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
@@ -1590,7 +1589,7 @@ formation_id = 1
 squadType = 4
 
 [node name="AxisMg1" parent="Maps/Map1/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="1" unique_id=792412617 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(512, 928)
+position = Vector2(560, 896)
 squad = 1
 platoon = 1
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
@@ -1638,14 +1637,78 @@ squadType = 4
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAHABIAAAAAAAAAAAAGABIAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABIAAAAAAAAAAAALAA0ABgAAAAAAAAAFABIAAAAAAAAAAAAPABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAHABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAAIABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAA=")
 
-[node name="SeizeVillag" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=43599254 instance=ExtResource("44_jhdiv")]
+[node name="OutpostProbe2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=43599254 instance=ExtResource("44_jhdiv")]
+visible = false
+scenario_name = "Probe The Outpost Debug"
+scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
+player_team = 1
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
+
+[node name="AxisPlatoonLeader1" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(272, 1280)
+platoon = 1
+ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
+formation_id = 1
+squadType = 4
+
+[node name="AxisMg1" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="1" unique_id=229747901 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(560, 896)
+squad = 1
+platoon = 1
+ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
+formation_id = 1
+squadType = 1
+
+[node name="AxisRifle1" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="2" unique_id=418559955 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(512, 992)
+squad = 2
+platoon = 1
+ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
+formation_id = 1
+
+[node name="AlliesRifle1" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="3" unique_id=2122064683 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(560, 576)
+squad = 1
+platoon = 1
+ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
+command_squad = NodePath("../AlliesPlatoonLeader1")
+formation_id = 1
+
+[node name="AlliesRifle2" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="4" unique_id=295392931 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(656, 640)
+squad = 2
+platoon = 1
+ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
+command_squad = NodePath("../AlliesPlatoonLeader1")
+formation_id = 2
+
+[node name="AlliesPlatoonLeader1" parent="Maps/Map1/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="5" unique_id=1443147007 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(608, 608)
+platoon = 1
+ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubResource("Resource_7qc1y"), SubResource("Resource_dobo0"), SubResource("Resource_1ppj3"), SubResource("Resource_tpqd7"), SubResource("Resource_o0evn"), SubResource("Resource_qytxv"), SubResource("Resource_cv01b"), SubResource("Resource_61cyd"), SubResource("Resource_7frv1"), SubResource("Resource_ikqac"), SubResource("Resource_bad7w")])
+formation_id = 1
+squadType = 4
+
+[node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/OutpostProbe2/Objectives" parent_id_path=PackedInt32Array(43599254, 1566573026) index="0" unique_id=1637617708]
+tile_map_data = PackedByteArray("AAAHABIAAAAAAAAAAAAGABIAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABIAAAAAAAAAAAALAA0ABgAAAAAAAAAFABIAAAAAAAAAAAAPABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAHABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAAIABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAA=")
+
+[node name="SeizeVillag" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="2" unique_id=1897962322 instance=ExtResource("44_jhdiv")]
 visible = false
 scenario_name = "Seize a Village"
 scenario_description = "Lead your Company to take back a village."
 released = true
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_pghpc")])
 
-[node name="AxisMg1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+[node name="AxisMg1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="0" unique_id=1589381825 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1040, 704)
 squad = 1
 platoon = 1
@@ -1655,7 +1718,7 @@ command_squad = NodePath("../AxisPlatoonLeader1")
 formation_id = 1
 squadType = 1
 
-[node name="AxisRifle1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="1" unique_id=249031480 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+[node name="AxisRifle1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="1" unique_id=249031480 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1232, 640)
 squad = 2
 platoon = 1
@@ -1664,7 +1727,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubRes
 command_squad = NodePath("../AxisPlatoonLeader1")
 formation_id = 1
 
-[node name="AxisPlatoonLeader1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="2" unique_id=48971670 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+[node name="AxisPlatoonLeader1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="2" unique_id=48971670 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(1136, 640)
 platoon = 1
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
@@ -1673,7 +1736,7 @@ command_squad = NodePath("../AxisCompanyLeader")
 formation_id = 1
 squadType = 4
 
-[node name="AxisMg2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="3" unique_id=931119008 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AxisMg2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="3" unique_id=931119008 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(848, 768)
 squad = 1
 platoon = 2
@@ -1682,7 +1745,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_nlt47"), SubRes
 formation_id = 2
 squadType = 1
 
-[node name="AxisRifle2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="4" unique_id=370155055 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AxisRifle2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="4" unique_id=370155055 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(944, 704)
 squad = 2
 platoon = 2
@@ -1690,7 +1753,7 @@ ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2qot8"), SubResource("Resource_sfox1"), SubResource("Resource_nmgud"), SubResource("Resource_le7yh"), SubResource("Resource_wfk0w"), SubResource("Resource_qitea"), SubResource("Resource_6xqbw"), SubResource("Resource_6jobc"), SubResource("Resource_f3kq1"), SubResource("Resource_di5vm")])
 formation_id = 2
 
-[node name="AxisPlatoonLeader2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="5" unique_id=504001136 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AxisPlatoonLeader2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="5" unique_id=504001136 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(944, 768)
 platoon = 2
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
@@ -1698,13 +1761,13 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_mdkuk"), SubRes
 formation_id = 2
 squadType = 4
 
-[node name="AxisCompanyLeader" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="6" unique_id=1663523250 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AxisCompanyLeader" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="6" unique_id=1663523250 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1232, 768)
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ghkdt"), SubResource("Resource_s64j0"), SubResource("Resource_jtcuk"), SubResource("Resource_k6jmd"), SubResource("Resource_pyabd"), SubResource("Resource_qjyj0"), SubResource("Resource_do88p")])
 squadType = 5
 
-[node name="AlliesRifle1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="7" unique_id=1617334762 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesRifle1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="7" unique_id=1617334762 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(848, 512)
 squad = 1
 platoon = 1
@@ -1713,7 +1776,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
 formation_id = 1
 
-[node name="AlliesMg1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="8" unique_id=2089497253 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesMg1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="8" unique_id=2089497253 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(800, 544)
 squad = 2
 platoon = 1
@@ -1724,7 +1787,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_1n8ra"), SubRes
 formation_id = 1
 squadType = 1
 
-[node name="AlliesPlatoonLeader1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="9" unique_id=1549725178 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesPlatoonLeader1" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="9" unique_id=1549725178 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(800, 480)
 platoon = 1
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
@@ -1733,7 +1796,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubRes
 formation_id = 1
 squadType = 4
 
-[node name="AlliesRifle2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="10" unique_id=1166121489 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesRifle2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="10" unique_id=1166121489 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(656, 704)
 squad = 1
 platoon = 2
@@ -1742,7 +1805,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
 formation_id = 2
 
-[node name="AlliesMg2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="11" unique_id=775438136 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesMg2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="11" unique_id=775438136 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(464, 704)
 squad = 2
 platoon = 2
@@ -1752,7 +1815,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_8ckdd"), SubRes
 formation_id = 2
 squadType = 1
 
-[node name="AlliesPlatoonLeader2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="12" unique_id=443784019 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesPlatoonLeader2" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="12" unique_id=443784019 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(512, 672)
 platoon = 2
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
@@ -1761,13 +1824,13 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_64f6w"), SubRes
 formation_id = 2
 squadType = 4
 
-[node name="AlliesCompanyLeader" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="13" unique_id=72053196 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesCompanyLeader" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="13" unique_id=72053196 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(464, 576)
 ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7o8ut"), SubResource("Resource_a5636"), SubResource("Resource_jhdiv"), SubResource("Resource_4ln07"), SubResource("Resource_yr5cl"), SubResource("Resource_x77xw"), SubResource("Resource_pkfnk"), SubResource("Resource_5obl8"), SubResource("Resource_bmoad"), SubResource("Resource_mb8w1"), SubResource("Resource_mmesd"), SubResource("Resource_2t505")])
 
-[node name="BazookaTeam" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="14" unique_id=1623512064 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="BazookaTeam" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="14" unique_id=1623512064 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(704, 544)
 squad = 3
 platoon = 1
@@ -1776,7 +1839,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_4eul6"), SubResource("Resource_h8caq")])
 squadType = 2
 
-[node name="PanzerschreckTeam" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="15" unique_id=1649962066 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="PanzerschreckTeam" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="15" unique_id=1649962066 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(992, 800)
 squad = 3
 platoon = 1
@@ -1784,7 +1847,7 @@ ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_bqfdu"), SubResource("Resource_0cp2s")])
 squadType = 2
 
-[node name="GerMortar81mm" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="16" unique_id=1472131699 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="GerMortar81mm" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="16" unique_id=1472131699 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(1184, 864)
 squad = 3
 platoon = 2
@@ -1792,7 +1855,7 @@ ground_map = NodePath("../../Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_2oqoe"), SubResource("Resource_ua878"), SubResource("Resource_v6xt8"), SubResource("Resource_tb5gq"), SubResource("Resource_qdc15"), SubResource("Resource_k375o"), SubResource("Resource_e58rx"), SubResource("Resource_4nb4u")])
 squadType = 3
 
-[node name="AlliesMortar60mm" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="17" unique_id=1650999931 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+[node name="AlliesMortar60mm" parent="Maps/Map1/Scenarios/SeizeVillag/Units" parent_id_path=PackedInt32Array(1897962322, 1365216721) index="17" unique_id=1650999931 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(416, 608)
 squad = 3
 platoon = 2
@@ -1801,10 +1864,10 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_j6e2y"), SubResource("Resource_4gywt"), SubResource("Resource_3un1a")])
 squadType = 3
 
-[node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/SeizeVillag/Objectives" parent_id_path=PackedInt32Array(43599254, 1566573026) index="0" unique_id=1637617708]
+[node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/SeizeVillag/Objectives" parent_id_path=PackedInt32Array(1897962322, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAJAAkAAwAAAAAAAAAKAAkAAwAAAAAAAAA=")
 
-[node name="PunchThrough" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="2" unique_id=972059538 instance=ExtResource("44_jhdiv")]
+[node name="PunchThrough" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="3" unique_id=972059538 instance=ExtResource("44_jhdiv")]
 visible = false
 scenario_name = "Punch Through"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
@@ -1929,7 +1992,7 @@ squadType = 1
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/PunchThrough/Objectives" parent_id_path=PackedInt32Array(972059538, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAAAAAAKAAoAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAA=")
 
-[node name="Debug" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="3" unique_id=1240012679 instance=ExtResource("44_jhdiv")]
+[node name="Debug" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="4" unique_id=1240012679 instance=ExtResource("44_jhdiv")]
 visible = false
 scenario_name = "Debug"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
@@ -1956,13 +2019,14 @@ squadType = 1
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/Debug/Objectives" parent_id_path=PackedInt32Array(1240012679, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAAAAAAKAAoAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAA=")
 
-[node name="Debug2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="4" unique_id=1551964837 instance=ExtResource("44_jhdiv")]
+[node name="Debug2" parent="Maps/Map1/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="5" unique_id=1551964837 instance=ExtResource("44_jhdiv")]
+visible = false
 scenario_name = "Debug"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
 victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_ambds")])
 
 [node name="AxisPlatoonLeader1" parent="Maps/Map1/Scenarios/Debug2/Units" parent_id_path=PackedInt32Array(1551964837, 1365216721) index="0" unique_id=12860293 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(464, 960)
+position = Vector2(80, 1280)
 platoon = 1
 ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
@@ -1970,13 +2034,22 @@ formation_id = 1
 squadType = 4
 
 [node name="AxisRifle1" parent="Maps/Map1/Scenarios/Debug2/Units" parent_id_path=PackedInt32Array(1551964837, 1365216721) index="1" unique_id=322460770 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(464, 896)
+position = Vector2(464, 960)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 command_squad = NodePath(".")
 formation_id = 1
+
+[node name="AlliesRifle3" parent="Maps/Map1/Scenarios/Debug2/Units" parent_id_path=PackedInt32Array(1551964837, 1365216721) index="2" unique_id=1692673948 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(560, 704)
+squad = 1
+platoon = 2
+ground_map = NodePath("../../../SeizeVillag/Objectives/ObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
+formation_id = 2
 
 [node name="ObjectivesTileMapLayer" parent="Maps/Map1/Scenarios/Debug2/Objectives" parent_id_path=PackedInt32Array(1551964837, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAAAAAAKAAoAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAA=")
@@ -2198,6 +2271,7 @@ position = Vector2(626, 904)
 
 [editable path="Maps/Map1"]
 [editable path="Maps/Map1/Scenarios/OutpostProbe"]
+[editable path="Maps/Map1/Scenarios/OutpostProbe2"]
 [editable path="Maps/Map1/Scenarios/SeizeVillag"]
 [editable path="Maps/Map1/Scenarios/PunchThrough"]
 [editable path="Maps/Map1/Scenarios/Debug"]

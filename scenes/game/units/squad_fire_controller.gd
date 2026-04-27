@@ -460,7 +460,7 @@ func _tick_soldiers(delta: float) -> void:
 			var data = cover_map[target_unit.current_hex]
 			target_cover = data["target_cover"]
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-	
+		
 	
 	var rounds_emitted: int = 0
 
@@ -524,6 +524,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
+	
+	var cover_map = LOSHelper.los_lookup.get(target_hex, null)
+	if cover_map and cover_map.has(target_hex):
+		var data = cover_map[target_hex]
+		target_cover = data["target_cover"]
+	target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(target_hex))
 	
 	if s.weapon.ammunition <= 0:
 		return 0
@@ -1174,7 +1180,8 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 		
 		#s_fast *= total_rounds
 		#s_slow *= total_rounds
-
+	
+		#print(unit, " ", int(s_fast), " ", int(s_slow), " ", cas_i, " ", chance_to_hit_per_target)
 		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast, s_slow, self)
 		i += 1
 
@@ -1210,13 +1217,13 @@ func cover_multiplier_exp(cover_pts: float) -> float:
 		1.0:
 			return 0.5
 		2.0:
-			return 0.3
+			return 0.4
 		3.0:
-			return 0.1
+			return 0.3
 		4.0:
-			return 0.01
+			return 0.1
 		5.0:
-			return 0.001
+			return 0.05
 		_:
 			return 0.001
 	## Multiplier goes 1.0 → MIN_HIT_MULT with diminishing returns as cover_pts rises

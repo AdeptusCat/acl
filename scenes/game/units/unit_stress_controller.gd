@@ -1,6 +1,13 @@
 class_name StressController
 extends Node
 
+var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
+		STATES.MoraleState.NORMAL : 1.0,
+		STATES.MoraleState.CAUTIOUS : 0.8,
+		STATES.MoraleState.PINNED : 0.35,
+		STATES.MoraleState.PANIC : 0.0,
+		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
+	}
 
 # --- TUNABLES ---
 @export var half_life_fast: float = 4.0          
@@ -320,11 +327,17 @@ func _process(delta: float) -> void:
 	
 	# - 1.0 stress per seconds
 	# FIXME leader bonus needs adjusting. factor 5 was too much
-	var stress_decay_f_per_second: float = leader_presence_strength# * 5.0
-	var stress_decay_s_per_second: float = leader_presence_strength# * 5.0
-	if leader_presence_strength == 0.0:
-		stress_decay_f_per_second = 0.1
-		stress_decay_s_per_second = 0.1
+	var _state_mod_squad: float = _state_mod_dict[state]
+	var squad_bonus: float = 1.0 * _state_mod_squad
+	var combined: float = 1.0 - ((1.0 - squad_bonus) * (1.0 - leader_presence_strength))
+	#if leader_presence_strength == 0.0:
+		#pass
+	#print(squad_bonus, " ",leader_presence_strength, " ",combined)
+	var stress_decay_f_per_second: float = combined# * 5.0
+	var stress_decay_s_per_second: float = combined# * 5.0
+	#if leader_presence_strength == 0.0:
+		#stress_decay_f_per_second = 0.1
+		#stress_decay_s_per_second = 0.1
 	var stress_decay_f_with_delta: float = stress_decay_f_per_second * delta
 	var stress_decay_s_with_delta: float = stress_decay_s_per_second * delta
 	stress_fast -= stress_decay_f_with_delta
@@ -392,7 +405,8 @@ func apply_stress(df: float, ds: float) -> void:
 	var stress_fast_added: float = df_in * eff_scale
 	var stress_slow_added: float = ds_in * eff_scale
 	var stress_mod: float = remap(S_eff, 0.0, 100.0, 1.0, 0.5)
-	print(stress_mod)
+	# FIXME cmd stress modifier needs adjustment
+	#print(S_eff, " ", stress_mod)
 	stress_fast += df_in * eff_scale * stress_mod
 	stress_slow += ds_in * eff_scale * stress_mod
 	_clamp_bins()

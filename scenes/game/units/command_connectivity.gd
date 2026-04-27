@@ -8,8 +8,8 @@ var _radio_link_to_leader: bool = false
 
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
-		STATES.MoraleState.CAUTIOUS : 0.9,
-		STATES.MoraleState.PINNED : 0.5,
+		STATES.MoraleState.CAUTIOUS : 0.8,
+		STATES.MoraleState.PINNED : 0.35,
 		STATES.MoraleState.PANIC : 0.0,
 		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
 	}
@@ -114,8 +114,10 @@ func compute_morale_link_strength() -> void:
 					else:
 						best = 0.0
 	
-	var _state_mod: float = _state_mod_dict[_command_unit_state]
-	leader_presence_strength = best * _state_mod
+	var _state_mod_cmd: float = _state_mod_dict[_command_unit_state]
+	var command_strength: float = best * _state_mod_cmd
+	
+	leader_presence_strength = command_strength
 
 
 func compute_connectivity(unit: Unit, command_squad: Unit):
