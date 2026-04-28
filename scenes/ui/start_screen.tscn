@@ -204,7 +204,24 @@ stretch_mode = 4
 [node name="ScenarioDescription" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=928530545]
 layout_mode = 2
 
-[node name="ObjectivesVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1741711926]
+[node name="ObjectivesVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1349602056]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer" unique_id=1308693516]
+layout_mode = 2
+text = "Major Victory objectives:"
+horizontal_alignment = 1
+
+[node name="MajorObjectivesVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer" unique_id=1741711926]
+layout_mode = 2
+
+[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer" unique_id=1691609473]
+visible = false
+layout_mode = 2
+text = "Minor Victory objectives:"
+horizontal_alignment = 1
+
+[node name="MinorObjectivesVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer" unique_id=1000769065]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=68573995]

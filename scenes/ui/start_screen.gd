@@ -17,7 +17,9 @@ signal time_changed(_time: float)
 @onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
 @onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ScenarioDescription
 @onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/Team
-@onready var objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer
+@onready var major_objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MajorObjectivesVBoxContainer
+@onready var minor_objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MinorObjectivesVBoxContainer
+@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MinorObjectivesLabel
 
 
 var team_texture: Dictionary[Globals.Team, Texture] = {
@@ -66,11 +68,19 @@ func _on_scenario_button_mouse_entered(scenario: Scenario):
 	for victory_condition in scenario.victory_conditions:
 		var label = Label.new()
 		label.text = victory_condition.get_description()
-		objectives_v_box_container.add_child(label)
+		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
+			major_objectives_v_box_container.add_child(label)
+		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MINOR:
+			minor_objectives_v_box_container.add_child(label)
+			minor_objectives_label.show()
+			
 
 func _on_scenario_button_mouse_exited():
 	scenario_description.text = ""
-	for label in objectives_v_box_container.get_children():
+	minor_objectives_label.hide()
+	for label in major_objectives_v_box_container.get_children():
+		label.queue_free()
+	for label in minor_objectives_v_box_container.get_children():
 		label.queue_free()
 
 func _on_scenario_button_pressed(scenario: Scenario):
