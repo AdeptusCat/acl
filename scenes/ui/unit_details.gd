@@ -13,6 +13,7 @@ extends PanelContainer
 @onready var kill_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Kill
 @onready var kill_soldier_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/KillSoldier
 @onready var surrender_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Surrender
+@onready var rout_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Rout
 
 
 
@@ -63,7 +64,7 @@ func _ready() -> void:
 		soldiers_entries.append(soldier_entries)
 		
 	soldiers_grid_container.columns = soldiers_entries[0].size()
-
+	
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(unit):
@@ -100,7 +101,13 @@ func _process(_delta: float) -> void:
 		for s in casualty_entries_by_casualty:
 			set_casualty_progress_bar(s, "INCAPACITATED", 0, 0)
 		close_combat_defense_preparedness_label.text = str(unit.close_combat_defense_preparedness)
-		
+		if unit.stress_system.state == STATES.MoraleState.PINNED:
+			if rout_button.disabled:
+				rout_button.set_rout_available(true)
+		else:
+			if not rout_button.disabled:
+				rout_button.set_rout_available(false)
+			
 
 
 func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):
@@ -310,3 +317,7 @@ func _on_kill_soldier_pressed() -> void:
 
 func _on_surrender_pressed() -> void:
 	Debug.units_to_surrender.append(unit)
+
+
+func _on_rout_pressed() -> void:
+	unit.stress_system._set_state(STATES.MoraleState.PANIC)

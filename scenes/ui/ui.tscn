@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="13_swkix"]
 [ext_resource type="Script" uid="uid://btiijdapor3eh" path="res://scenes/ui/leadership_bonus.gd" id="14_mgwkc"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="15_mgwkc"]
+[ext_resource type="Script" uid="uid://c4dsr705wte8a" path="res://scenes/ui/rout_button.gd" id="22_7ygsn"]
 [ext_resource type="Script" uid="uid://ovp1t711br88" path="res://scenes/ui/debug.gd" id="24_fv78h"]
 [ext_resource type="PackedScene" uid="uid://0euyuvdqduxs" path="res://scenes/ui/selection_wheel_alt.tscn" id="25_fqqne"]
 [ext_resource type="PackedScene" uid="uid://c6xxmjtgtwwtj" path="res://scenes/ui/selection_wheel.tscn" id="25_o71gb"]
@@ -537,6 +538,11 @@ visible = false
 layout_mode = 2
 text = "Surrender"
 
+[node name="Rout" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=574178570]
+layout_mode = 2
+text = "Voluntary Rout"
+script = ExtResource("22_7ygsn")
+
 [node name="FoldableContainer" type="FoldableContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer" unique_id=1064376729]
 layout_mode = 2
 mouse_filter = 1
@@ -695,6 +701,7 @@ layout_mode = 1
 [connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Kill" to="Control/UnitDetails" method="_on_kill_pressed"]
 [connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/KillSoldier" to="Control/UnitDetails" method="_on_kill_soldier_pressed"]
 [connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Surrender" to="Control/UnitDetails" method="_on_surrender_pressed"]
+[connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Rout" to="Control/UnitDetails" method="_on_rout_pressed"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/EnemySelectable" to="Control/Debug" method="_on_enemy_selectable_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]

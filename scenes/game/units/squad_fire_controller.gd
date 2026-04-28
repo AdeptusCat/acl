@@ -525,7 +525,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
 	
-	var cover_map = LOSHelper.los_lookup.get(target_hex, null)
+	var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
 	if cover_map and cover_map.has(target_hex):
 		var data = cover_map[target_hex]
 		target_cover = data["target_cover"]
