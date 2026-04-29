@@ -945,21 +945,31 @@ func update_los_time(delta: float) -> void:
 			last_seen_map[enemy] = now_unix
 
 		# cleanup: remove entries for dead refs or enemies not seen for a while
+		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
 		var units_tracked: Array[Unit] = time_map.keys()
 		for unit_tracked in units_tracked:
 			if not is_instance_valid(unit_tracked):
 				continue
 			if not seen_this_tick.has(unit_tracked):
-				var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
-				
-				# E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
-  #<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
-  #<Stack Trace> game_controller.gd:702 @ update_los_time()
-				#game_controller.gd:667 @ _process()
-				
-				#if now_unix - last_seen > 10.0:
-				time_map.erase(unit_tracked)
-				last_seen_map.erase(unit_tracked)
+				#var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
+				#
+				## E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
+  ##<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
+  ##<Stack Trace> game_controller.gd:702 @ update_los_time()
+				##game_controller.gd:667 @ _process()
+				#
+				##if now_unix - last_seen > 10.0:
+				# FIXME thats not working, units will be seen perminately
+				if not conf_map.has(unit_tracked):
+					time_map.erase(unit_tracked)
+					last_seen_map.erase(unit_tracked)
+					continue
+				#conf -= delta
+				conf_map[unit_tracked] -= delta
+				if conf_map[unit_tracked] <= 0.0:
+					conf_map[unit_tracked] = 0.0
+					time_map.erase(unit_tracked)
+					last_seen_map.erase(unit_tracked)
 
 		Globals.unit_enemy_los_time_s[unit] = time_map
 		Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
@@ -1008,7 +1018,7 @@ func _on_spawn_timer_timeout() -> void:
 	spawn_formation()
 
 
-func _on_unit_visiblity_checker_timer_timeout() -> void:
+func _on_unit_visibility_checker_timer_timeout() -> void:
 	var next_visible: Dictionary = {}
 	
 	for unit in Globals.get_units():
@@ -1017,6 +1027,9 @@ func _on_unit_visiblity_checker_timer_timeout() -> void:
 		var units_visible: Array = []
 		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
 		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		
+		var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
+		#print(last_seen_map)
 		#var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
 		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
 		for enemy_tracked in time_map:
@@ -1077,8 +1090,8 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	var is_moving: bool = enemy.moving
 
 	var conceal: int = _get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
-	if conceal > 0:
-		conceal = 1
+	#if conceal > 0:
+		#conceal = 1
 
 	# score components (tune)
 	var score: float = 0.0
@@ -1093,7 +1106,7 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	score -= 0.25 * float(dist)
 
 	# concealment penalty
-	if conceal == 1:
+	if conceal > 0:
 		score -= 0.8 * float(conceal)
 	if conceal == 0:
 		score += 1

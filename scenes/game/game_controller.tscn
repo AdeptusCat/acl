@@ -6,8 +6,8 @@
 script = ExtResource("1_hj0dx")
 metadata/_edit_lock_ = true
 
-[node name="UnitVisiblityCheckerTimer" type="Timer" parent="." unique_id=1713787415]
+[node name="UnitVisibilityCheckerTimer" type="Timer" parent="." unique_id=1713787415]
 wait_time = 0.1
 autostart = true
 
-[connection signal="timeout" from="UnitVisiblityCheckerTimer" to="." method="_on_unit_visiblity_checker_timer_timeout"]
+[connection signal="timeout" from="UnitVisibilityCheckerTimer" to="." method="_on_unit_visibility_checker_timer_timeout"]
