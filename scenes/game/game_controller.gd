@@ -1290,7 +1290,7 @@ func _on_win_condition_timer_timeout() -> void:
 			match victory_condition.outcome_level:
 				VictoryCondition.OutcomeLevel.MAJOR:
 					is_met = victory_condition.is_condition_met()
-					minor_victory_conditions_met[team] = is_met
+					major_victory_conditions_met[team] = is_met
 					if not is_met:
 						break
 	
@@ -1299,7 +1299,7 @@ func _on_win_condition_timer_timeout() -> void:
 			match victory_condition.outcome_level:
 				VictoryCondition.OutcomeLevel.MINOR:
 					is_met = victory_condition.is_condition_met()
-					major_victory_conditions_met[team] = is_met
+					minor_victory_conditions_met[team] = is_met
 					if not is_met:
 						break
 	
@@ -1314,7 +1314,7 @@ func _on_win_condition_timer_timeout() -> void:
 	else:
 		for team in major_victory_conditions_met:
 			if major_victory_conditions_met[team]:
-				show_winner.emit(team)
+				show_winner.emit(team, VictoryCondition.OutcomeLevel.MAJOR)
 				timer_running = false
 				end_game_handled = true
 				return
@@ -1330,7 +1330,7 @@ func _on_win_condition_timer_timeout() -> void:
 	else:
 		for team in minor_victory_conditions_met:
 			if minor_victory_conditions_met[team]:
-				show_winner.emit(team)
+				show_winner.emit(team, VictoryCondition.OutcomeLevel.MINOR)
 				timer_running = false
 				end_game_handled = true
 				return

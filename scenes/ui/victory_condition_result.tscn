@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dpmkqlbwsqj2x"]
+
+[ext_resource type="Script" uid="uid://c1g5usltav88o" path="res://scenes/ui/victory_condition_result.gd" id="1_rqydh"]
+
+[node name="VictoryConditionResult" type="HBoxContainer" unique_id=387285562]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_rqydh")
+
+[node name="CheckBox" type="CheckBox" parent="." unique_id=1125223409]
+layout_mode = 2
+disabled = true
+
+[node name="Label" type="Label" parent="." unique_id=475037982]
+layout_mode = 2

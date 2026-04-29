@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://b84f65gu8hp6e"]
 
 [ext_resource type="Script" uid="uid://bj7ycyqixb6gq" path="res://scenes/ui/result_screen.gd" id="1_e2y21"]
+[ext_resource type="PackedScene" uid="uid://dpmkqlbwsqj2x" path="res://scenes/ui/victory_condition_result.tscn" id="2_8j0an"]
 [ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="2_gm1r0"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2_vmyrh"]
 
 [node name="ResultScreen" type="CanvasLayer" unique_id=1842144900]
 script = ExtResource("1_e2y21")
+victory_condition_result_scene = ExtResource("2_8j0an")
 
 [node name="Control" type="Control" parent="." unique_id=705845746]
 layout_mode = 3
@@ -54,6 +56,7 @@ horizontal_alignment = 1
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=432728371]
 layout_mode = 2
 theme_override_constants/separation = 40
+alignment = 1
 
 [node name="TryAgain" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=409671125]
 layout_mode = 2
@@ -62,6 +65,26 @@ text = "Try Again"
 [node name="KeepPlaying" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=972328819]
 layout_mode = 2
 text = "Keep Playing"
+
+[node name="VictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1696057269]
+layout_mode = 2
+
+[node name="MajorVictoryConditions" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1936004795]
+layout_mode = 2
+text = "Major Victory Conditions:"
+horizontal_alignment = 1
+
+[node name="MajorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1276291256]
+layout_mode = 2
+
+[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=701597352]
+visible = false
+layout_mode = 2
+text = "Minor Victory Conditions:"
+horizontal_alignment = 1
+
+[node name="MinorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1191382577]
+layout_mode = 2
 
 [node name="MarginContainer2" type="MarginContainer" parent="Control/CenterContainer" unique_id=1018890048]
 visible = false

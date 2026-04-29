@@ -318,7 +318,6 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	ui.setup()
 	
-	scenario = Globals.scenario_chosen
 	
 	var layers: Array[Node] = map.get_tilemap_layers()
 	for layer in layers:
@@ -348,7 +347,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	target_area.hide()
 	Globals.objectives = scenario.get_objectives()
 	#game_controller.set_objective_layer(team, objectives[0])
-	map.remove_scenarios()
+	#map.remove_scenarios()
 	
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)

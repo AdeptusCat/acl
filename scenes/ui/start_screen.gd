@@ -17,9 +17,10 @@ signal time_changed(_time: float)
 @onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
 @onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ScenarioDescription
 @onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/Team
-@onready var major_objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MajorObjectivesVBoxContainer
-@onready var minor_objectives_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MinorObjectivesVBoxContainer
-@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectivesVBoxContainer/MinorObjectivesLabel
+
+@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MajorVictoryConditionsVBoxContainer
+@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorVictoryConditionsVBoxContainer
+@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorObjectivesLabel
 
 
 var team_texture: Dictionary[Globals.Team, Texture] = {
@@ -70,18 +71,18 @@ func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 		var label = Label.new()
 		label.text = victory_condition.get_description()
 		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
-			major_objectives_v_box_container.add_child(label)
+			major_victory_conditions_v_box_container.add_child(label)
 		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MINOR:
-			minor_objectives_v_box_container.add_child(label)
+			minor_victory_conditions_v_box_container.add_child(label)
 			minor_objectives_label.show()
 			
 
 func _on_scenario_button_mouse_exited():
 	scenario_description.text = ""
 	minor_objectives_label.hide()
-	for label in major_objectives_v_box_container.get_children():
+	for label in major_victory_conditions_v_box_container.get_children():
 		label.queue_free()
-	for label in minor_objectives_v_box_container.get_children():
+	for label in minor_victory_conditions_v_box_container.get_children():
 		label.queue_free()
 
 func _on_scenario_button_pressed(map: Map, scenario: Scenario):

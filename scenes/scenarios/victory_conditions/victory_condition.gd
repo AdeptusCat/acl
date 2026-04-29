@@ -38,6 +38,7 @@ var allies_units_in_objective: Array[Unit]
 var time_occupied_s: float
 
 
+
 func is_condition_met() -> bool:
 	push_error("VictoryCondition.evaluate() must be overridden.")
 	return false
