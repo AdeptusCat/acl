@@ -194,6 +194,9 @@ func _incremental_threat_map_update() -> void:
 					break
 				var point_id := points[index]
 				var world_pos = Globals.astars[team].get_point_position(point_id)
+				# FIXME this thows error if ground_layer is freed on exit
+				if not is_instance_valid(LOSHelper.ground_layer):
+					break
 				var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
 				var weight := _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
 				temp_threat_maps[team][hex_map] = weight

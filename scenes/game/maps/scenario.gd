@@ -16,6 +16,7 @@ class_name Scenario
 
 @export var victory_conditions: Array[VictoryCondition] = []
 
+var start_hex : Vector2i = Vector2i.ZERO
 
 
 #func get_objectives(team: Globals.Team) -> Array[Node]:
@@ -53,8 +54,12 @@ func get_objectives() -> Dictionary[Globals.Team, ObjectivesCollection]:
 		objective.hex = cell
 		objective.cube = objectives_tile_map_layer.map_to_cube(cell)
 		objective.position = objectives_tile_map_layer.map_to_local(cell)
-			
-		objectives[objective.team].objectives.append(objective)
+		
+		if objective.objective_id == 4:
+			start_hex = cell
+			objectives_tile_map_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear hex
+		else:
+			objectives[objective.team].objectives.append(objective)
 	return objectives
 
 

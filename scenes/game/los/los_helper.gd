@@ -42,7 +42,7 @@ func _ready():
 	
 
 func load_prebaked_los(map: Map):
-	var file_path: String = "res://scenes/game/los/" + map.map_name.replace(" ", "_") + ".tres"
+	var file_path: String = "res://scenes/game/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	var los_resource = load(file_path) as LosLookupData
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
@@ -62,7 +62,7 @@ func bake_and_save_los_data(map: Map):
 
 	var los_resource = LosLookupData.new()
 	los_resource.los_lookup = los_lookup
-	var file_path: String = "res://scenes/game/los/" + map.map_name.replace(" ", "_") + ".tres"
+	var file_path: String = "res://scenes/game/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	
 	ResourceSaver.save(los_resource, file_path)
 	print("LOS data saved to: ", file_path)

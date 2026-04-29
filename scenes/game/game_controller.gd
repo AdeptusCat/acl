@@ -992,6 +992,10 @@ func end_game_check():
 	#show_winner.emit(-1)
 
 
+func move_camera(hex: Vector2i):
+	camera.position	= LOSHelper.ground_layer.map_to_local(hex)
+
+
 func _on_zoom_in():
 	camera.zoom_in()
 

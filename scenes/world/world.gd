@@ -352,6 +352,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)
+	
+	game_controller.move_camera(scenario.start_hex)
 
 
 #func _process(delta: float) -> void:

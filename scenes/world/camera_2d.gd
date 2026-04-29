@@ -1,75 +1,108 @@
 extends Camera2D
 
-# Lower cap for the `_zoom_level`.
-@export var min_zoom := 0.5
-# Upper cap for the `_zoom_level`.
-@export var max_zoom := 2.0
-# Controls how much we increase or decrease the `_zoom_level` on every turn of the scroll wheel.
-@export var zoom_factor := 0.1
-# Duration of the zoom's tween animation.
-@export var zoom_duration := 0.2
-
-# The camera's target zoom level.
-var _zoom_level: float = 1.0 
-
+@export var min_zoom: float = 0.5
+@export var max_zoom: float = 2.0
+@export var zoom_factor: float = 0.1
+@export var zoom_duration: float = 0.2
 
 @export var speed: float = 400.0
+@export var edge_margin: float = 80.0
 
-var map_size : Vector2 
+var _zoom_level: float = 1.0
+var _zoom_tween: Tween
+
+var map_rect: Rect2 = Rect2(Vector2.ZERO, Vector2.ZERO)
+var last_pos: Vector2 = Vector2.INF
 
 signal camera_moved
 
-func set_camera_limit(_map_size : Vector2):
-	map_size = _map_size
-	limit_left =- int(map_size.x / 2.0)
-	limit_top -= int(map_size.y / 4.0)
-	limit_right = int(map_size.x * 4)
-	limit_bottom = int(map_size.y + map_size.y / 2.0)
+
+func set_camera_limit(_map_size: Vector2) -> void:
+	map_rect = Rect2(Vector2.ZERO, _map_size)
+
+	# Optional backup limits for Camera2D itself.
+	#limit_left = int(map_rect.position.x - edge_margin)
+	#limit_top = int(map_rect.position.y - edge_margin)
+	#limit_right = int(map_rect.position.x + map_rect.size.x + edge_margin)
+	#limit_bottom = int(map_rect.position.y + map_rect.size.y + edge_margin)
+
+	position = _clamp_camera_position(position)
+	last_pos = position
 
 
-var last_pos: Vector2
-func _physics_process(delta):
+func _physics_process(delta: float) -> void:
 	var direction: Vector2 = Vector2.ZERO
+
 	if Input.is_action_pressed("up"):
-		direction.y -= 1
+		direction.y -= 1.0
 	if Input.is_action_pressed("down"):
-		direction.y += 1
+		direction.y += 1.0
 	if Input.is_action_pressed("right"):
-		direction.x += 1
+		direction.x += 1.0
 	if Input.is_action_pressed("left"):
-		direction.x -= 1
-	
+		direction.x -= 1.0
+
 	if direction != Vector2.ZERO:
-		direction = direction.normalized() 
-		var pos = position + direction * speed * delta
-		pos = pos.clamp(Vector2(map_size.x/4, 0), Vector2(map_size.x/2, map_size.y))
-		position = pos
-	#print(global_position)
-	camera_moved.emit()
-	#if position.x - get_screen_center_position().x > 1 or position.y - get_screen_center_position().y > 1:
-		#camera_moved.emit()
-	#if global_position.x - last_pos.x > 1 or global_position.y - last_pos.y > 1:
-		#last_pos = global_position
-		#camera_moved.emit()
+		direction = direction.normalized()
 
-func zoom_in():
-	_set_zoom_level(_zoom_level - zoom_factor)
+		var new_position: Vector2 = position + direction * speed * delta
+		#position = new_position
+		position = _clamp_camera_position(new_position)
+
+	if position.distance_to(last_pos) > 0.5:
+		last_pos = position
+		camera_moved.emit()
 
 
-func zoom_out():
+func _clamp_camera_position(target_position: Vector2) -> Vector2:
+	var bounds: Rect2 = map_rect.grow(edge_margin)
+
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var visible_half_size: Vector2 = viewport_size * 0.5 / zoom
+
+	var min_pos: Vector2 = Vector2.ZERO # bounds.position# + visible_half_size
+	var max_pos: Vector2 = bounds.size# bounds.position# + bounds.size - visible_half_size
+
+	var clamped_position: Vector2 = target_position
+
+	if min_pos.x > max_pos.x:
+		clamped_position.x = bounds.get_center().x
+	else:
+		clamped_position.x = clamp(target_position.x, min_pos.x, max_pos.x)
+
+	if min_pos.y > max_pos.y:
+		clamped_position.y = bounds.get_center().y
+	else:
+		clamped_position.y = clamp(target_position.y, min_pos.y, max_pos.y)
+	
+	return clamped_position
+
+
+func zoom_in() -> void:
 	_set_zoom_level(_zoom_level + zoom_factor)
 
 
+func zoom_out() -> void:
+	_set_zoom_level(_zoom_level - zoom_factor)
+
+
 func _set_zoom_level(value: float) -> void:
-	# We limit the value between `min_zoom` and `max_zoom`
 	_zoom_level = clamp(value, min_zoom, max_zoom)
-	# Then, we ask the tween node to animate the camera's `zoom` property from its current value
-	# to the target zoom level.
-	var tween: Tween = create_tween()
-	#en.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
-	tween.tween_property(
+
+	if _zoom_tween != null:
+		if _zoom_tween.is_valid():
+			_zoom_tween.kill()
+
+	_zoom_tween = create_tween()
+	_zoom_tween.tween_property(
 		self,
 		"zoom",
 		Vector2(_zoom_level, _zoom_level),
 		zoom_duration
 	)
+
+	_zoom_tween.tween_callback(_on_zoom_finished)
+
+
+func _on_zoom_finished() -> void:
+	position = _clamp_camera_position(position)
