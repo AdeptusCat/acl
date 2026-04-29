@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 
-signal game_started(team : int)
+signal game_started(map: Map, scenario: Scenario, team : int, game_mode: Globals.GameMode)
 signal hover_start_button(team: int)
 signal time_changed(_time: float)
 
@@ -48,21 +48,22 @@ func _ready():
 func setup_map_options(maps: Array[Map]):
 	for map in maps:
 		var scenarios: Array[Scenario] = map.get_scenarios()
-		var map_button: Button = Button.new()
-		map_button.text = map.map_name
-		maps_v_box_container.add_child(map_button)
+		var map_label: Label = Label.new()
+		map_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		map_label.text = map.map_name
+		maps_v_box_container.add_child(map_label)
 		for scenario in scenarios:
 			if not OS.is_debug_build() and not scenario.released:
 				continue
 			var scenario_button: Button = Button.new()
 			scenario_button.text = scenario.scenario_name
 			maps_v_box_container.add_child(scenario_button)
-			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(scenario))
-			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(scenario))
+			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(map, scenario))
+			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(map, scenario))
 			scenario_button.mouse_exited.connect(_on_scenario_button_mouse_exited)
 			
 			
-func _on_scenario_button_mouse_entered(scenario: Scenario):
+func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 	scenario_description.text = scenario.scenario_description
 	team.texture = team_texture[scenario.player_team]
 	for victory_condition in scenario.victory_conditions:
@@ -83,12 +84,13 @@ func _on_scenario_button_mouse_exited():
 	for label in minor_objectives_v_box_container.get_children():
 		label.queue_free()
 
-func _on_scenario_button_pressed(scenario: Scenario):
+func _on_scenario_button_pressed(map: Map, scenario: Scenario):
+	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
 	animation_player.play("fade_out")
 	await animation_player.animation_finished
 	visible = false
-	game_started.emit(scenario.player_team, Globals.game_mode)
+	game_started.emit(map, scenario, scenario.player_team, Globals.game_mode)
 
 
 func _on_set_objective_text(_hex: String):

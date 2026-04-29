@@ -71,13 +71,11 @@ text = "#"
 [node name="CommandConnectivity" parent="." unique_id=1170922127 instance=ExtResource("11_kkgbq")]
 
 [node name="CommandConnectivityTimer" type="Timer" parent="." unique_id=236328625]
-autostart = true
 
 [node name="EnemyVisibilityChecker" parent="." unique_id=1906807248 instance=ExtResource("12_kkgbq")]
 
 [node name="EnemyVisibilityCheckerTimer" type="Timer" parent="." unique_id=961635982]
 wait_time = 0.1
-autostart = true
 
 [node name="CloseCombatDefensePreparednessTimer" type="Timer" parent="." unique_id=109467033]
 wait_time = 0.1

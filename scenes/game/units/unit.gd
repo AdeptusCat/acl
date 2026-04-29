@@ -145,6 +145,8 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 @onready var action_controller: SquadActionController = $SquadActionController
 @onready var command_connectivity: CommandConnectivity = $CommandConnectivity
 @onready var enemy_visiblity_checker: EnemyVisibilityChecker = $EnemyVisibilityChecker
+@onready var command_connectivity_timer: Timer = $CommandConnectivityTimer
+@onready var enemy_visibility_checker_timer: Timer = $EnemyVisibilityCheckerTimer
 
 
 # === DEBUG ===
@@ -205,6 +207,10 @@ func setup():
 	update_team_sprite(team, squadType)
 	movement.new_target_hex.connect(_on_new_target_hex)
 
+
+func game_start():
+	command_connectivity_timer.start()
+	enemy_visibility_checker_timer.start()
 
 func update_terrain_defense_bonus():
 	terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(current_hex))

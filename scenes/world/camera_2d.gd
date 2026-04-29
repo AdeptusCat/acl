@@ -21,9 +21,9 @@ signal camera_moved
 
 func set_camera_limit(_map_size : Vector2):
 	map_size = _map_size
-	limit_left =- int(map_size.y / 2.0)
+	limit_left =- int(map_size.x / 2.0)
 	limit_top -= int(map_size.y / 4.0)
-	limit_right = int(map_size.x)
+	limit_right = int(map_size.x * 4)
 	limit_bottom = int(map_size.y + map_size.y / 2.0)
 
 

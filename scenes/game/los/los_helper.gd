@@ -7,6 +7,8 @@ extends Node2D
 @export var terrain_layer: HexagonTileMapLayer
 @export var debug_draw_enabled: bool = true
 
+var grid_size: Vector2i
+
 # --- CONSTANTS ---
 const FLOOR_HEIGHT_METERS = 3.0
 const UNIT_HEIGHT_METERS = 1.5
@@ -19,8 +21,7 @@ const BUILDING_COVER = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
-const GRID_SIZE_X = 33 
-const GRID_SIZE_Y = 21
+
 
 var visible_hexes: Dictionary[int, Array] = {Globals.Team.AXIS: [], Globals.Team.ALLIES: []}
 #var visible_hexes: Array[Vector2i]
@@ -40,31 +41,43 @@ func _ready():
 	z_index = 100  # Higher than other nodes
 	
 
-func load_prebaked_los(_los_resource: String):
-	var los_resource = load(_los_resource) as LosLookupData
+func load_prebaked_los(map: Map):
+	var file_path: String = "res://scenes/game/los/" + map.map_name.replace(" ", "_") + ".tres"
+	var los_resource = load(file_path) as LosLookupData
+	ground_layer = map.get_ground_layer()
+	building_layer = map.get_building_layer()
+	wall_layer = map.get_wall_layer()
+	terrain_layer = map.get_terrain_layer()
+	grid_size = map.grid_size
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 
-func bake_and_save_los_data(file_path: String):
+func bake_and_save_los_data(map: Map):
+	ground_layer = map.get_ground_layer()
+	building_layer = map.get_building_layer()
+	wall_layer = map.get_wall_layer()
+	terrain_layer = map.get_terrain_layer()
+	grid_size = map.grid_size
 	prebake_los()
 
 	var los_resource = LosLookupData.new()
 	los_resource.los_lookup = los_lookup
-
+	var file_path: String = "res://scenes/game/los/" + map.map_name.replace(" ", "_") + ".tres"
+	
 	ResourceSaver.save(los_resource, file_path)
 	print("LOS data saved to: ", file_path)
 
 func prebake_los():
-	for ox in range(GRID_SIZE_X):
-		for oy in range(GRID_SIZE_Y):
+	for ox in range(grid_size.x):
+		for oy in range(grid_size.y):
 			var o_hex = Vector2i(ox, oy)
 			var o_pos = ground_layer.map_to_local(o_hex)
 
 			# make this a Dictionary, not an Array
 			los_lookup[o_hex] = {}
 
-			for tx in range(GRID_SIZE_X):
-				for ty in range(GRID_SIZE_Y):
+			for tx in range(grid_size.x):
+				for ty in range(grid_size.y):
 					var t_hex = Vector2i(tx, ty)
 					if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
 						pass
@@ -1051,8 +1064,8 @@ func generate_los_lines_for_debug():
 	los_lines.clear()
 	var origin_pos = ground_layer.map_to_local(origin_hex)
 
-	for tx in range(GRID_SIZE_X):
-		for ty in range(GRID_SIZE_Y):
+	for tx in range(grid_size.x):
+		for ty in range(grid_size.y):
 			var target_hex = Vector2i(tx, ty)
 			if origin_hex == target_hex:
 				continue

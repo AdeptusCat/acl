@@ -1,10 +1,13 @@
 extends Node2D
 class_name Map
 
+@export var grid_size: Vector2i = Vector2i(10, 10)
+
 @onready var tile_map_layers: Node2D = $TileMapLayers
 @onready var scenarios: Node2D = $Scenarios
 
 @export var map_name: String = "map"
+
 
 
 func get_tilemap_layers() -> Array[Node]:

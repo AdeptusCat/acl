@@ -114,11 +114,11 @@ func setup():
 	
 	update_timer_label.emit(time_left_seconds)
 	
-	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.GRID_SIZE_X, LOSHelper.GRID_SIZE_Y)
+	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.grid_size.x, LOSHelper.grid_size.y)
 	camera.set_camera_limit(map_size) 
 	
-	#for x in range(LOSHelper.GRID_SIZE_X):
-		#for y in range(LOSHelper.GRID_SIZE_Y):
+	#for x in range(LOSHelper.grid_size.x):
+		#for y in range(LOSHelper.grid_size.y):
 			#fog_of_war_layer.set_cell(Vector2i(x, y), 0)
 	
 	#fog_of_war_layer.set_cell(Vector2i(1, 1), 0)
@@ -236,8 +236,8 @@ func draw_fog():
 			fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
 		else:
 			fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
-	for x in LOSHelper.GRID_SIZE_X:
-		for y in LOSHelper.GRID_SIZE_Y:
+	for x in LOSHelper.grid_size.x:
+		for y in LOSHelper.grid_size.y:
 			if not LOSHelper.visible_hexes[Globals.team_player].has(Vector2i(x, y)):
 				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
 
@@ -328,12 +328,12 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 			#_units.append(_unit)
 	
 	#get_parent().ui.show_unit_data(map_hex, _units)
-	#for x in range(LOSHelper.GRID_SIZE_X):
-		#for y in range(LOSHelper.GRID_SIZE_Y):
+	#for x in range(LOSHelper.grid_size.x):
+		#for y in range(LOSHelper.grid_size.y):
 			#fog_of_war_layer.set_cell(Vector2(x, y), -1)
 	
 	#
-	#LOSHelper.GRID_SIZE_Y
+	#LOSHelper.grid_size.y
 	#var visible_hexes: Array
 	#for u in units:
 		#if u.team == current_team:

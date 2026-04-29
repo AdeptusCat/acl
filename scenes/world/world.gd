@@ -18,7 +18,6 @@ extends Node2D
 @onready var input_manager := $InputManager
 @onready var maps: Node2D = $Maps
 
-@onready var map_1: Map = $Maps/Map1
 
 
 signal try_again
@@ -30,8 +29,8 @@ var wall_layer : HexagonTileMapLayer
 var building_layer : HexagonTileMapLayer
 var mouse_hover_hex: Vector2i
 
-var map: Map
-var scenario: Scenario
+#var map: Map
+#var scenario: Scenario
 var is_setup: bool = false
 
 
@@ -46,19 +45,7 @@ func _ready():
 	_maps.assign(maps.get_children())
 	start_screen.setup_map_options(_maps)
 	
-	ground_layer = map_1.get_ground_layer()
-	terrain_layer = map_1.get_terrain_layer()
-	wall_layer = map_1.get_wall_layer()
-	building_layer = map_1.get_building_layer()
 	
-	
-	LOSHelper.ground_layer = map_1.get_ground_layer()
-	LOSHelper.building_layer = map_1.get_building_layer()
-	LOSHelper.wall_layer = map_1.get_wall_layer()
-	LOSHelper.terrain_layer = map_1.get_terrain_layer()
-	game_controller.ground_layer = map_1.get_ground_layer()
-	ui.ground_layer = map_1.get_ground_layer()
-	ui.setup()
 	ui.show()
 	
 	
@@ -67,12 +54,15 @@ func _ready():
 	#LOSHelper.building_layer = building_layer  # <-- inject the TileMap
 	#LOSHelper.wall_layer = wall_layer  # <-- inject the TileMap
 	#LOSHelper.terrain_layer = terrain_layer
-	Globals.astars[Globals.Team.AXIS] = copy_astar(LOSHelper.ground_layer.astar)
-	Globals.astars[Globals.Team.ALLIES] = copy_astar(LOSHelper.ground_layer.astar)
-	await get_tree().process_frame
+	#Globals.astars[Globals.Team.AXIS] = copy_astar(LOSHelper.ground_layer.astar)
+	#Globals.astars[Globals.Team.ALLIES] = copy_astar(LOSHelper.ground_layer.astar)
+	#await get_tree().process_frame
 	#LOSHelper.prebake_los()
+	#LOSHelper.bake_and_save_los_data($Maps/Map2)
+	#LOSHelper.load_prebaked_los($Maps/Map2)
+	
 	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
-	LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
+	#LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
 	
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)
@@ -301,14 +291,36 @@ func get_wall_cover(event_pos: Vector2, direction_index: int):
 	return res.wall_cover
 
 
-func _on_game_started(team : int, game_mode: Globals.GameMode):
+func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globals.GameMode):
 	if is_setup:
 		return
 	is_setup = true
 	
+	ground_layer = map.get_ground_layer()
+	terrain_layer = map.get_terrain_layer()
+	wall_layer = map.get_wall_layer()
+	building_layer = map.get_building_layer()
+	
+	
+	LOSHelper.ground_layer = map.get_ground_layer()
+	LOSHelper.building_layer = map.get_building_layer()
+	LOSHelper.wall_layer = map.get_wall_layer()
+	LOSHelper.terrain_layer = map.get_terrain_layer()
+	game_controller.ground_layer = map.get_ground_layer()
+	ui.ground_layer = map.get_ground_layer()
+	
+	Globals.astars[Globals.Team.AXIS] = copy_astar(LOSHelper.ground_layer.astar)
+	Globals.astars[Globals.Team.ALLIES] = copy_astar(LOSHelper.ground_layer.astar)
+	await get_tree().process_frame
+	#LOSHelper.prebake_los()
+	#LOSHelper.bake_and_save_los_data($Maps/Map2)
+	LOSHelper.load_prebaked_los(map)
+	
+	ui.setup()
+	
 	scenario = Globals.scenario_chosen
 	
-	var layers: Array[Node] = map_1.get_tilemap_layers()
+	var layers: Array[Node] = map.get_tilemap_layers()
 	for layer in layers:
 		layer.reparent(tile_map_layers)
 	
@@ -317,6 +329,7 @@ func _on_game_started(team : int, game_mode: Globals.GameMode):
 		unit.setup()
 		unit.add_to_group("units")
 		unit.reparent(game_controller.unit_container)
+		unit.game_start()
 	
 	fog_of_war_tile_map_layer.move_to_front()
 	selected_tile_map_layer.move_to_front()
@@ -335,7 +348,7 @@ func _on_game_started(team : int, game_mode: Globals.GameMode):
 	target_area.hide()
 	Globals.objectives = scenario.get_objectives()
 	#game_controller.set_objective_layer(team, objectives[0])
-	map_1.remove_scenarios()
+	map.remove_scenarios()
 	
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)
