@@ -1991,3 +1991,23 @@ func create_save_data() -> UnitSaveData:
 	#data.state = current_state
 
 	return data
+
+
+func apply_save_data(data: UnitSaveData) -> void:
+	#id = data.unit_id
+	team = data.team
+
+	squad_fire.soldiers.clear()
+
+	for soldier_data: SoldierSaveData in data.soldiers:
+		var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
+
+		if soldier != null:
+			squad_fire.soldiers.append(soldier)
+
+	#stress_controller.stress_fast = data.stress_fast
+	#stress_controller.stress_slow = data.stress_slow
+	#cohesion = data.cohesion
+	#current_state = data.state
+
+	#rebuild_after_load()

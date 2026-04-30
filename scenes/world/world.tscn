@@ -2119,7 +2119,7 @@ tile_map_data = PackedByteArray("AAAMAAoAAQAAAAAAAAALAAoAAQAAAAAAAAALAAkAAQAAAAA
 visible = false
 scenario_name = "Debug"
 scenario_description = "Take your Platoon and reach the other size of the woods and exit the map."
-victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_ambds"), SubResource("Resource_xroic")])
+victory_conditions = Array[ExtResource("42_jhdiv")]([SubResource("Resource_xroic")])
 
 [node name="AxisPlatoonLeader1" parent="Maps/DefaultMap/Scenarios/Debug2/Units" parent_id_path=PackedInt32Array(1551964837, 1365216721) index="0" unique_id=12860293 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(80, 1280)
@@ -2359,6 +2359,8 @@ position = Vector2(626, 904)
 [connection signal="time_changed" from="StartScreen" to="Ui" method="_on_start_screen_time_changed"]
 [connection signal="try_again" from="ResultScreen" to="." method="_on_result_screen_try_again"]
 [connection signal="try_again" from="Ui" to="." method="_on_ui_try_again"]
+[connection signal="show_winner" from="GameController" to="." method="_on_game_controller_show_winner"]
+[connection signal="show_winner" from="GameController" to="GameController" method="_on_show_winner"]
 [connection signal="start_match" from="GameController" to="InputManager" method="_on_game_controller_start_match"]
 [connection signal="timeout" from="GameController/SpawnTimer" to="GameController" method="_on_spawn_timer_timeout"]
 [connection signal="timeout" from="GameController/CloseCombatResolveTimer" to="GameController" method="_on_close_combat_resolve_timer_timeout"]

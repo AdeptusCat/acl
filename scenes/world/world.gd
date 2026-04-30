@@ -102,6 +102,10 @@ func _ready():
 	#print(res)
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
+	
+	var match_data: MatchSaveData = load_match_data("debug")
+	spawn_units_from_match_save(match_data, game_controller.unit_container)
+	
 
 var selected_hex: Vector2i 
 
@@ -387,3 +391,79 @@ func _on_input_manager_right_button_released() -> void:
 	#var option: WheelOption.Option = ui.selection_wheel.close()
 	var option: WheelOption.Option = ui.selection_wheel_alt.close()
 	game_controller.order_via_option_wheel(selected_map_hex, option)
+
+
+func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool) -> void:
+	var match_save: MatchSaveData = MatchSaveData.new()
+	
+	match_save.match_id = Globals.scenario_chosen.scenario_name.to_lower().replace(" ", "_")
+	match_save.scenario_id = Globals.scenario_chosen.scenario_name
+	
+	match_save.winner_team = winner_team
+	match_save.outcome_level = outcome_level
+	match_save.timeout = timeout
+	match_save.player_team = Globals.team_player
+	
+	for unit in Globals.get_units():
+		if unit.team == Globals.team_player:
+			var unit_save_data: UnitSaveData = unit.create_save_data()
+			match_save.player_units.append(unit_save_data)
+	_save_match_data(match_save)
+
+func _save_match_data(match_save: MatchSaveData) -> void:
+	var save_path: String = "user://matches/%s.tres" % match_save.match_id
+	print("Saved match as: " + save_path)
+	var dir_path: String = save_path.get_base_dir()
+
+	if not DirAccess.dir_exists_absolute(dir_path):
+		var dir_error: Error = DirAccess.make_dir_recursive_absolute(dir_path)
+
+		if dir_error != OK:
+			push_error("Could not create save directory: %s Error: %s" % [dir_path, dir_error])
+			return
+
+	var save_error: Error = ResourceSaver.save(match_save, save_path)
+
+	if save_error != OK:
+		push_error("Could not save match data: %s Error: %s" % [save_path, save_error])
+		return
+
+
+func load_match_data(match_id: String) -> MatchSaveData:
+	var save_path: String = "user://matches/%s.tres" % match_id
+
+	if not ResourceLoader.exists(save_path):
+		push_error("Match save does not exist: %s" % save_path)
+		return null
+
+	var loaded_resource: Resource = ResourceLoader.load(save_path)
+
+	if loaded_resource == null:
+		push_error("Could not load match save: %s" % save_path)
+		return null
+
+	var match_save: MatchSaveData = loaded_resource as MatchSaveData
+
+	if match_save == null:
+		push_error("Loaded resource is not MatchSaveData: %s" % save_path)
+		return null
+
+	return match_save
+
+
+func spawn_units_from_match_save(match_save: MatchSaveData, parent: Node) -> void:
+	for unit_save_data: UnitSaveData in match_save.player_units:
+		var packed_scene: PackedScene = ResourceLoader.load(unit_save_data.unit_scene_path) as PackedScene
+
+		if packed_scene == null:
+			push_error("Could not load unit scene: %s" % unit_save_data.unit_scene_path)
+			continue
+
+		var unit: Unit = packed_scene.instantiate() as Unit
+
+		if unit == null:
+			push_error("Instanced scene is not Unit: %s" % unit_save_data.unit_scene_path)
+			continue
+
+		parent.add_child(unit)
+		unit.apply_save_data(unit_save_data)
