@@ -3,12 +3,16 @@ extends Node2D
 
 func setup():
 	for unit in Globals.get_units():
+		
 		var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
 		add_child(aim_line)
 		aim_line.set_unit(unit)
 
 
 func _process(_delta: float) -> void:
+	if not SessionSettings.showCmdConnectivity:
+		for line in get_children():
+			line.hide()
 	for line in get_children():
 		if is_instance_valid(line.unit.command_squad):
 			line.set_line(
@@ -19,6 +23,11 @@ func _process(_delta: float) -> void:
 			line.line_color = strength_to_color_hsv(line.unit.command_connectivity.leader_presence_strength)
 			line._shader_material.set_shader_parameter("line_width_px", clamp(line.unit.command_connectivity.leader_presence_strength * 10, 1.0, 10.0) )
 			line.show()
+			if not line.unit.team == Globals.team_player:
+				if Debug.showEnemyCmdConnectivity:
+					line.show()
+				else:
+					line.hide()
 		else:
 			line.hide()
 
