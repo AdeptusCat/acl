@@ -960,6 +960,9 @@ func update_los_time(delta: float) -> void:
 				##game_controller.gd:667 @ _process()
 				#
 				##if now_unix - last_seen > 10.0:
+				#time_map.erase(unit_tracked)
+				#last_seen_map.erase(unit_tracked)
+				
 				# FIXME thats not working, units will be seen perminately
 				if not conf_map.has(unit_tracked):
 					time_map.erase(unit_tracked)
@@ -1001,7 +1004,7 @@ func _on_unit_visibility_checker_timer_timeout() -> void:
 		var units_visible: Array = []
 		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
 		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
-		
+		var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
 		var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
 		#print(last_seen_map)
 		#var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
@@ -1009,8 +1012,10 @@ func _on_unit_visibility_checker_timer_timeout() -> void:
 		for enemy_tracked in time_map:
 			if not is_instance_valid(enemy_tracked):
 				continue
-			if units_visible_by_this_unit.has(enemy_tracked):
+			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
 				units_visible.append(enemy_tracked)
+				continue
+			if not units_in_los.has(enemy_tracked):
 				continue
 			var time: float = time_map[enemy_tracked]
 			
