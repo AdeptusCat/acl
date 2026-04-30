@@ -497,7 +497,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
-	
+	var _target_hex: Vector2i = target_hex
+	if s.weapon.family == WeaponSpec.Family.MORTAR:
+		_target_hex = mortar_target_hex
 	
 	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
 		pass
@@ -516,20 +518,20 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if Debug.dont_fire_wepaons:
 		return 0
 	
-	if not target_hex == Vector2i.ZERO:
+	if not _target_hex == Vector2i.ZERO:
 		pass
 	
-	if target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
+	if _target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
 	
-	if mortar_target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
+	if _target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
 		return 0
 	
 	var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
-	if cover_map and cover_map.has(target_hex):
-		var data = cover_map[target_hex]
+	if cover_map and cover_map.has(_target_hex):
+		var data = cover_map[_target_hex]
 		target_cover = data["target_cover"]
-	target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(target_hex))
+	target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(_target_hex))
 	
 	if s.weapon.ammunition <= 0:
 		return 0
@@ -538,7 +540,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		#set_target_unit(null) # this should only happen if none have range
 		return 0
 	
-	var _mortar_target_hex: Vector2i = mortar_target_hex
 	
 	var batch_targets: Array[Unit] = []
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
@@ -546,11 +547,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
 	if not unit.attackState == Unit.AttackState.MANUAL_GROUND: 
 		for u in visible_enemies:
-			if u.current_hex == target_hex:
+			if u.current_hex == _target_hex:
 				if is_instance_valid(u):
 					if u.alive:
 						if not u.surrendered:
-							#if u.current_hex == target_hex:
+							#if u.current_hex == _target_hex:
 							batch_targets.append(u)
 	
 	#if batch_targets.is_empty() and not s.weapon.family == WeaponSpec.Family.MORTAR:
@@ -612,7 +613,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	# emit shots immediately into current window
 	# visual
-	_add_rounds_to_hex(target_hex, shots)
+	_add_rounds_to_hex(_target_hex, shots)
 	#fire_shot.emit()
 	
 	# audio
@@ -636,7 +637,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		fire_riflegrenades(s)
 		s.weapon.riflegrenade_loaded = false
 	else:
-		fire_shots(s, shots, s.weapon.rpm, auto_fire, _mortar_target_hex)
+		fire_shots(s, shots, s.weapon.rpm, auto_fire, _target_hex)
 	
 	
 	if shots <= 0:
@@ -696,9 +697,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			s.rounds_in_mag = s.weapon.mag_capacity
 		#return 0 # TODO figure out why this was in place? this just prohibits that damage is done
 	
-	var _target_hex = target_hex
-	if s.weapon.family == WeaponSpec.Family.MORTAR:
-		_target_hex = _mortar_target_hex
 	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
 	
 	var life: float = dist / s.weapon.projectile_speed      # seconds
