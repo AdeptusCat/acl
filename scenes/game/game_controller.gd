@@ -28,7 +28,7 @@ var selected_unit: Unit = null
 
 
 signal update_timer_label(time_left_seconds: float)
-signal show_winner(team: int)
+signal show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos)
 signal show_unit_details_in_ui(unit: Unit)
@@ -112,7 +112,7 @@ func setup():
 	
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	
-	update_timer_label.emit(time_left_seconds)
+	#update_timer_label.emit(time_left_seconds)
 	
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.grid_size.x, LOSHelper.grid_size.y)
 	camera.set_camera_limit(map_size) 
@@ -880,7 +880,7 @@ func _process(delta):
 		if time_left_seconds <= 0:
 			time_left_seconds = 0
 			timer_running = false
-			end_game_check()
+			_on_win_condition_timer_timeout()
 		update_timer_label.emit(time_left_seconds)
 	
 	var mouse_or_unit_position_changed: bool = false
@@ -973,33 +973,6 @@ func update_los_time(delta: float) -> void:
 
 		Globals.unit_enemy_los_time_s[unit] = time_map
 		Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
-
-
-func end_game_check():
-	if end_game_handled:
-		return
-	#end_game_handled = true
-	#var occupying_units : Array
-	#for unit in Globals.get_units():
-		#if unit.current_hex == Globals.objective_hexes[unit.team][0]:
-			#occupying_units.append(unit)
-	#for unit in occupying_units:
-		#if not unit.broken:
-			#var winning_team: Globals.Team = Globals.Team.AXIS
-			#match Globals.game_mode:
-				#Globals.GameMode.DEFEND:
-					#if unit.team == Globals.Team.AXIS:
-						#winning_team = Globals.Team.AXIS
-					#if unit.team == Globals.Team.ALLIES:
-						#winning_team = Globals.Team.ALLIES
-				#Globals.GameMode.ATTACK:
-					#if unit.team == Globals.Team.ALLIES:
-						#winning_team = Globals.Team.ALLIES
-					#if unit.team == Globals.Team.AXIS:
-						#winning_team = Globals.Team.AXIS
-			#show_winner.emit(winning_team)
-			#return
-	#show_winner.emit(-1)
 
 
 func move_camera(hex: Vector2i):
@@ -1308,13 +1281,13 @@ func _on_win_condition_timer_timeout() -> void:
 		if time_left_seconds <= 0:
 			time_left_seconds = 0
 			timer_running = false
-			show_winner.emit(-1)
+			show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, false)
 			end_game_handled = true
 			return
 	else:
 		for team in major_victory_conditions_met:
 			if major_victory_conditions_met[team]:
-				show_winner.emit(team, VictoryCondition.OutcomeLevel.MAJOR)
+				show_winner.emit(team, VictoryCondition.OutcomeLevel.MAJOR, false)
 				timer_running = false
 				end_game_handled = true
 				return
@@ -1324,16 +1297,48 @@ func _on_win_condition_timer_timeout() -> void:
 		if time_left_seconds <= 0:
 			time_left_seconds = 0
 			timer_running = false
-			show_winner.emit(-1)
+			show_winner.emit(-1, VictoryCondition.OutcomeLevel.MINOR, false)
 			end_game_handled = true
 			return
 	else:
 		for team in minor_victory_conditions_met:
 			if minor_victory_conditions_met[team]:
-				show_winner.emit(team, VictoryCondition.OutcomeLevel.MINOR)
+				show_winner.emit(team, VictoryCondition.OutcomeLevel.MINOR, false)
 				timer_running = false
 				end_game_handled = true
 				return
+	
+	if time_left_seconds <= 0:
+		show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, true)
+		timer_running = false
+		end_game_handled = true
+
+
+func end_game_check():
+	if end_game_handled:
+		return
+	#end_game_handled = true
+	#var occupying_units : Array
+	#for unit in Globals.get_units():
+		#if unit.current_hex == Globals.objective_hexes[unit.team][0]:
+			#occupying_units.append(unit)
+	#for unit in occupying_units:
+		#if not unit.broken:
+			#var winning_team: Globals.Team = Globals.Team.AXIS
+			#match Globals.game_mode:
+				#Globals.GameMode.DEFEND:
+					#if unit.team == Globals.Team.AXIS:
+						#winning_team = Globals.Team.AXIS
+					#if unit.team == Globals.Team.ALLIES:
+						#winning_team = Globals.Team.ALLIES
+				#Globals.GameMode.ATTACK:
+					#if unit.team == Globals.Team.ALLIES:
+						#winning_team = Globals.Team.ALLIES
+					#if unit.team == Globals.Team.AXIS:
+						#winning_team = Globals.Team.AXIS
+			#show_winner.emit(winning_team)
+			#return
+	#show_winner.emit(-1)
 
 func _on_unit_shooting(unit: Unit):
 	for _unit in Globals.get_units():

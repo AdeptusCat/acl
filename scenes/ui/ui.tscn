@@ -450,6 +450,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="UnitDetails" type="PanelContainer" parent="Control" unique_id=1487157420]
+visible = false
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0

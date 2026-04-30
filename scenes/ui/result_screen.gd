@@ -3,13 +3,14 @@ extends CanvasLayer
 @export var victory_condition_result_scene: PackedScene
 
 @onready var result_label := $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResultLabel
-@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer/MajorVictoryConditionsVBoxContainer
-@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorVictoryConditionsVBoxContainer
-@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorObjectivesLabel
+@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer2/MajorVictoryConditionsVBoxContainer
+@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer3/MinorObjectivesLabel
+@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer3/MinorVictoryConditionsVBoxContainer
+
 
 signal try_again
 
-func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel):
+func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel = VictoryCondition.OutcomeLevel.MAJOR, timeout: bool = false):
 	var outcome_level_text: String = ""
 	match outcome_level:
 		VictoryCondition.OutcomeLevel.MAJOR:
@@ -22,7 +23,11 @@ func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLe
 		result_label.text = "Team Axis wins a " + outcome_level_text + "!"
 	elif winner_team == 1:
 		result_label.text = "Team Allies wins a " + outcome_level_text + "!"
-	visible = true
+	
+	if timeout and winner_team == -1:
+		result_label.text = "Defeat by Timeout!"
+	
+	show()
 	
 	for victory_condition in Globals.scenario_chosen.victory_conditions:
 		if not victory_condition.team == Globals.team_player:

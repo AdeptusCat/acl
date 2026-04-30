@@ -12,6 +12,9 @@ font_color = Color(0.5721713, 0.2615138, 0.11267393, 1)
 outline_size = 9
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="LabelSettings" id="LabelSettings_a1ei0"]
+font_size = 24
+
 [sub_resource type="Animation" id="Animation_afy8x"]
 length = 0.001
 tracks/0/type = "value"
@@ -94,13 +97,14 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer" unique_id=2011890396]
-custom_minimum_size = Vector2(800, 0)
+custom_minimum_size = Vector2(900, 0)
 layout_mode = 2
 theme_override_styles/panel = ExtResource("2_m7t1o")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer" unique_id=807185288]
 custom_minimum_size = Vector2(0, 600)
 layout_mode = 2
+alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=216841761]
 layout_mode = 2
@@ -120,72 +124,78 @@ value = 3.0
 layout_mode = 2
 text = "Minutes"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=548528218]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer" unique_id=885762485]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=548528218]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="ObjectiveLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=154612638]
+[node name="ObjectiveLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=154612638]
 layout_mode = 2
 
-[node name="MapsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=299734945]
+[node name="MapsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=299734945]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1998921499]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1998921499]
 visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer" unique_id=171937330]
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer" unique_id=171937330]
 layout_mode = 2
 text = "Game Mode: "
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer" unique_id=1798594435]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer" unique_id=1798594435]
 layout_mode = 2
 alignment = 1
 
-[node name="GameModeAttack" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=294620394]
+[node name="GameModeAttack" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=294620394]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Attack"
 label_settings = SubResource("LabelSettings_adf7y")
 horizontal_alignment = 1
 
-[node name="GameModeDefend" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1702806943]
+[node name="GameModeDefend" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1702806943]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Defend"
 label_settings = SubResource("LabelSettings_adf7y")
 horizontal_alignment = 1
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer" unique_id=581317665]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer" unique_id=581317665]
 layout_mode = 2
 alignment = 1
 
-[node name="Attack" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3" unique_id=478144951]
+[node name="Attack" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer3" unique_id=478144951]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Attack"
 
-[node name="Defend" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3" unique_id=1440397826]
+[node name="Defend" type="Button" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer3" unique_id=1440397826]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Defend"
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1198476439]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1198476439]
 visible = false
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2" unique_id=291442773]
+[node name="Label3" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2" unique_id=291442773]
 layout_mode = 2
 text = "Team:"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2" unique_id=950861914]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2" unique_id=950861914]
+visible = false
 layout_mode = 2
 alignment = 1
 
-[node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=964853185]
+[node name="StartAsAxisButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=964853185]
 visible = false
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
@@ -193,7 +203,7 @@ texture_normal = ExtResource("4_adf7y")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=240144611]
+[node name="StartAsAlliesButton" type="TextureButton" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=240144611]
 visible = false
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
@@ -201,35 +211,12 @@ texture_normal = ExtResource("5_a1ei0")
 ignore_texture_size = true
 stretch_mode = 4
 
-[node name="ScenarioDescription" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=928530545]
-layout_mode = 2
-
-[node name="VictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1349602056]
-layout_mode = 2
-
-[node name="MajorVictoryConditions" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1308693516]
-layout_mode = 2
-text = "Major Victory Conditions:"
-horizontal_alignment = 1
-
-[node name="MajorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1741711926]
-layout_mode = 2
-
-[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1691609473]
-visible = false
-layout_mode = 2
-text = "Minor Victory Conditions:"
-horizontal_alignment = 1
-
-[node name="MinorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer" unique_id=1000769065]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=68573995]
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=68573995]
 layout_mode = 2
 text = "Player Team:"
 horizontal_alignment = 1
 
-[node name="Team" type="TextureRect" parent="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer" unique_id=1213480475]
+[node name="Team" type="TextureRect" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1213480475]
 custom_minimum_size = Vector2(150, 100)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -237,14 +224,59 @@ texture = ExtResource("4_adf7y")
 expand_mode = 1
 stretch_mode = 4
 
+[node name="VictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=1349602056]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer" unique_id=968493943]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer" unique_id=190445348]
+layout_mode = 2
+text = "Scenario Description"
+label_settings = SubResource("LabelSettings_a1ei0")
+horizontal_alignment = 1
+
+[node name="ScenarioDescription" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer" unique_id=928530545]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer" unique_id=1849286741]
+layout_mode = 2
+
+[node name="MajorVictoryConditions" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer2" unique_id=1308693516]
+layout_mode = 2
+text = "Major Victory Conditions:"
+label_settings = SubResource("LabelSettings_a1ei0")
+horizontal_alignment = 1
+
+[node name="MajorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer2" unique_id=1741711926]
+layout_mode = 2
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer" unique_id=543708464]
+layout_mode = 2
+
+[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3" unique_id=1691609473]
+visible = false
+layout_mode = 2
+text = "Minor Victory Conditions:"
+label_settings = SubResource("LabelSettings_a1ei0")
+horizontal_alignment = 1
+
+[node name="MinorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3" unique_id=1000769065]
+layout_mode = 2
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=810013410]
 root_node = NodePath("../Control/FadeRect")
 libraries/ = SubResource("AnimationLibrary_afy8x")
 
 [connection signal="value_changed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox" to="." method="_on_spin_box_value_changed"]
-[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Attack" to="." method="_on_attack_pressed"]
-[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer3/Defend" to="." method="_on_defend_pressed"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
-[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
-[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer3/Attack" to="." method="_on_attack_pressed"]
+[connection signal="pressed" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer/HBoxContainer3/Defend" to="." method="_on_defend_pressed"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton" to="." method="_on_start_as_axis_button_mouse_exited"]
+[connection signal="mouse_entered" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_entered"]
+[connection signal="mouse_exited" from="Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton" to="." method="_on_start_as_allies_button_mouse_exited"]

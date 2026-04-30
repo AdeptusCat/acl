@@ -7,20 +7,21 @@ signal time_changed(_time: float)
 
 
 
-@onready var objective_label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ObjectiveLabel
-@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton
-@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton
+#@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton
+#@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton
 @onready var animation_player = $AnimationPlayer
 @onready var time_spinbox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
-@onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
-@onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
-@onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/MapsVBoxContainer
-@onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/ScenarioDescription
-@onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/Team
+#@onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
+#@onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
+@onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/Team
 
-@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MajorVictoryConditionsVBoxContainer
-@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorVictoryConditionsVBoxContainer
-@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VictoryConditionsVBoxContainer/MinorObjectivesLabel
+@onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/MapsVBoxContainer
+@onready var objective_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/ObjectiveLabel
+
+@onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer/ScenarioDescription
+@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer2/MajorVictoryConditionsVBoxContainer
+@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3/MinorObjectivesLabel
+@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3/MinorVictoryConditionsVBoxContainer
 
 
 var team_texture: Dictionary[Globals.Team, Texture] = {
@@ -33,15 +34,15 @@ var time: float
 func _ready():
 	if not SessionSettings.mission_time == 0:
 		time_spinbox.value = SessionSettings.mission_time
-	if Globals.game_mode == Globals.GameMode.DEFEND:
-		game_mode_defend.text = "DEFEND"
-		game_mode_attack.text = ""
-	if Globals.game_mode == Globals.GameMode.ATTACK:
-		game_mode_attack.text = "ATTACK"
-		game_mode_defend.text = ""
+	#if Globals.game_mode == Globals.GameMode.DEFEND:
+		#game_mode_defend.text = "DEFEND"
+		#game_mode_attack.text = ""
+	#if Globals.game_mode == Globals.GameMode.ATTACK:
+		#game_mode_attack.text = "ATTACK"
+		#game_mode_defend.text = ""
 	#visible = true
-	start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
-	start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
+	#start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
+	#start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
 	animation_player.play("fade_in")  # Play when screen appears
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
@@ -69,6 +70,8 @@ func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 	team.texture = team_texture[scenario.player_team]
 	for victory_condition in scenario.victory_conditions:
 		var label = Label.new()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.text = victory_condition.get_description()
 		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
 			major_victory_conditions_v_box_container.add_child(label)
@@ -136,11 +139,11 @@ func _on_start_as_allies_button_mouse_exited() -> void:
 
 func _on_attack_pressed() -> void:
 	Globals.game_mode = Globals.GameMode.ATTACK
-	game_mode_attack.text = "ATTACK"
-	game_mode_defend.text = ""
+	#game_mode_attack.text = "ATTACK"
+	#game_mode_defend.text = ""
 
 
 func _on_defend_pressed() -> void:
 	Globals.game_mode = Globals.GameMode.DEFEND
-	game_mode_defend.text = "DEFEND"
-	game_mode_attack.text = ""
+	#game_mode_defend.text = "DEFEND"
+	#game_mode_attack.text = ""
