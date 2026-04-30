@@ -1971,3 +1971,23 @@ func get_preparedness_terrain_mult(defense_bonus: int) -> float:
 
 func _on_close_combat_defense_preparedness_timer_timeout() -> void:
 	update_close_defense_preparedness(self, 0.1)
+
+
+func create_save_data() -> UnitSaveData:
+	var data: UnitSaveData = UnitSaveData.new()
+
+	data.unit_scene_path = scene_file_path
+	data.team = team
+
+	data.soldiers.clear()
+
+	for soldier: Soldier in squad_fire.soldiers:
+		var soldier_data: SoldierSaveData = soldier.create_save_data()
+		data.soldiers.append(soldier_data)
+
+	#data.stress_fast = stress_controller.stress_fast
+	#data.stress_slow = stress_controller.stress_slow
+	#data.cohesion = cohesion
+	#data.state = current_state
+
+	return data

@@ -111,3 +111,26 @@ func is_acquiring_target_done(delta: float):
 		return true
 	aquire_target_task.remaining_time_s -= delta
 	return false
+
+
+func create_save_data() -> SoldierSaveData:
+	var data: SoldierSaveData = SoldierSaveData.new()
+
+	#data.id = id
+	data.soldier_name = name
+	data.rank_grade = rank_grade
+	data.role = role
+
+	if weapon != null:
+		data.weapon_resource_path = weapon.resource_path
+	else:
+		data.weapon_resource_path = ""
+
+	data.is_alive = is_alive
+	#data.rounds_in_mag = rounds_in_mag
+	#data.jammed = jammed
+
+	#data.base_attack = base_attack
+	#data.base_defense = base_defense
+
+	return data
