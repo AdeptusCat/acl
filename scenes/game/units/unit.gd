@@ -1600,8 +1600,13 @@ func get_squad_type_name(type: SquadType) -> String:
 func surrender():
 	#return
 	#movement.move_to_hex(current_hex)
-	if not team == Globals.team_player:
-		Globals.units_destroyed.units_collection[team].units.append(self)
+	#if not team == Globals.team_player:
+	var enemy_team: Globals.Team
+	if team == Globals.Team.AXIS:
+		enemy_team = Globals.Team.ALLIES
+	if team == Globals.Team.ALLIES:
+		enemy_team = Globals.Team.AXIS
+	Globals.units_destroyed.units_collection[enemy_team].units.append(self)
 	movement.stop()
 	surrendered = true
 	#alive = false
