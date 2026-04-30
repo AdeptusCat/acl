@@ -83,6 +83,7 @@
 [ext_resource type="PackedScene" uid="uid://pt85xx5fagwx" path="res://scenes/game/audio/audio_pool.tscn" id="65_hpffo"]
 [ext_resource type="AudioStream" uid="uid://bp1oqubv3pxu0" path="res://assets/audio/music/litt.mp3" id="66_hnqnj"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="69_j3x8u"]
+[ext_resource type="Script" uid="uid://bbnsjqri366kl" path="res://scenes/world/command_connectivity_renderer.gd" id="79_x77xw"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
 resource_name = "Road"
@@ -2275,6 +2276,9 @@ autostart = true
 [node name="CloseCombatInstances" type="Node2D" parent="GameController" unique_id=1333537019]
 
 [node name="WinConditionTimer" type="Timer" parent="GameController" unique_id=267834995]
+
+[node name="CommandConnectivityRenderer" type="Node2D" parent="GameController" unique_id=1426351301]
+script = ExtResource("79_x77xw")
 
 [node name="TargetArea" type="Node2D" parent="." unique_id=403286200]
 script = ExtResource("55_7rtjl")

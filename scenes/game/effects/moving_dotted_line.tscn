@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cs204t3qwkjph"]
+
+[ext_resource type="Script" uid="uid://c3xx6m2rqj3bs" path="res://scenes/game/effects/moving_dotted_line.gd" id="1_fhw7i"]
+
+[node name="MovingDottedLine" type="Node2D" unique_id=1754617215]
+script = ExtResource("1_fhw7i")

@@ -123,13 +123,30 @@ func _draw():
 			draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
 	for los_data in chain_of_command:
 		draw_line(los_data["from"], los_data["to"], Color(0.0, 0.391, 0.122, 1.0), 2.0)
-	if SessionSettings.showCmdConnectivity:
-		if Debug.showEnemyCmdConnectivity:
-			for connection in leader_presence_strength[Globals.team_enemy]:
-				draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
-		for connection in leader_presence_strength[Globals.team_player]:
-			draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
-
+	#if SessionSettings.showCmdConnectivity:
+		#if Debug.showEnemyCmdConnectivity:
+			#for connection in leader_presence_strength[Globals.team_enemy]:
+				#draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+		#for connection in leader_presence_strength[Globals.team_player]:
+			#draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+	#if SessionSettings.showCmdConnectivity:
+		#if Debug.showEnemyCmdConnectivity:
+			#for connection in leader_presence_strength[Globals.team_enemy]:
+				#var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
+				#add_child(aim_line)
+				#aim_line.set_line(
+					#connection["from"],
+					#connection["to"]
+				#)
+				##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+		#for connection in leader_presence_strength[Globals.team_player]:
+			#var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
+			#add_child(aim_line)
+			#aim_line.set_line(
+				#connection["from"],
+				#connection["to"]
+			#)
+			##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
 
 func strength_to_color_hsv(strength: float) -> Color:
 	var s: float = strength

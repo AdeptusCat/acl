@@ -117,6 +117,7 @@ func setup():
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.grid_size.x, LOSHelper.grid_size.y)
 	camera.set_camera_limit(map_size) 
 	
+	$CommandConnectivityRenderer.setup()
 	#for x in range(LOSHelper.grid_size.x):
 		#for y in range(LOSHelper.grid_size.y):
 			#fog_of_war_layer.set_cell(Vector2i(x, y), 0)
