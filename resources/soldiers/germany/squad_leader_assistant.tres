@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://sglwlumhj57d"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_21gma"]
+[ext_resource type="Resource" uid="uid://btw7qmulsva7g" path="res://resources/weapons/mp40.tres" id="2_v4knh"]
+
+[resource]
+script = ExtResource("1_21gma")
+nickname = "Zugtruppführer"
+rank_grade = 2
+role = 8
+weapon = ExtResource("2_v4knh")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

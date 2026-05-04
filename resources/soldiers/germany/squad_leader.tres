@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_feha4")
-nickname = "Squad Leader"
+nickname = "Truppführer"
 rank_grade = 3
 role = 9
 weapon = ExtResource("2_1xuxs")

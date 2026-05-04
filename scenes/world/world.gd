@@ -336,8 +336,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	fog_of_war_tile_map_layer.move_to_front()
 	selected_tile_map_layer.move_to_front()
 	
-	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
-	objectives_layer.reparent(tile_map_layers)
+	#var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
+	#objectives_layer.reparent(tile_map_layers)
 	
 	
 	

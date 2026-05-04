@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://0yrwtv2ux2fi"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_1d5en"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_gx8aw"]
+[ext_resource type="Resource" uid="uid://bqrrj2rlad38o" path="res://resources/soldiers/germany/company_leader.tres" id="3_b485v"]
+[ext_resource type="Resource" uid="uid://btw7qmulsva7g" path="res://resources/weapons/mp40.tres" id="4_0dfpw"]
+[ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="5_drv06"]
+[ext_resource type="Resource" uid="uid://d861tlfk8agb" path="res://resources/soldiers/germany/rifleman.tres" id="6_0dfpw"]
+
+[sub_resource type="Resource" id="Resource_ugw8x"]
+script = ExtResource("2_gx8aw")
+nickname = "Zugführer"
+rank_grade = 4
+role = 8
+weapon = ExtResource("4_0dfpw")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_opqin"]
+script = ExtResource("2_gx8aw")
+nickname = "Hauptfeldwebel"
+rank_grade = 3
+role = 6
+weapon = ExtResource("4_0dfpw")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_m0wo0"]
+script = ExtResource("2_gx8aw")
+nickname = "Melderführer"
+rank_grade = 3
+role = 6
+weapon = ExtResource("4_0dfpw")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_gfsc7"]
+script = ExtResource("2_gx8aw")
+nickname = "Funker"
+rank_grade = 2
+role = 6
+weapon = ExtResource("5_drv06")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_5hgqf"]
+script = ExtResource("2_gx8aw")
+weapon = ExtResource("5_drv06")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_1d5en")
+squad_type = 5
+soldiers = Array[ExtResource("2_gx8aw")]([ExtResource("3_b485v"), SubResource("Resource_ugw8x"), SubResource("Resource_opqin"), SubResource("Resource_m0wo0"), SubResource("Resource_gfsc7"), SubResource("Resource_5hgqf"), ExtResource("6_0dfpw")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

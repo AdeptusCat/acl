@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://dibkg1uf8xp1l"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_73tgg"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_55agj"]
+[ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="3_bwcva"]
+[ext_resource type="Resource" uid="uid://cmyjkaqf4h1am" path="res://resources/soldiers/germany/loader.tres" id="4_d2to2"]
+
+[sub_resource type="Resource" id="Resource_2e5vn"]
+script = ExtResource("2_55agj")
+nickname = "Gunner"
+rank_grade = 1
+role = 1
+weapon = ExtResource("3_bwcva")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_73tgg")
+squad_type = 2
+soldiers = Array[ExtResource("2_55agj")]([SubResource("Resource_2e5vn"), ExtResource("4_d2to2")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

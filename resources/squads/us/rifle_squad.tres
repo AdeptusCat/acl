@@ -2,8 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_a6j3r"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_3mqbu"]
-[ext_resource type="Resource" uid="uid://c2rwmfwb2346n" path="res://resources/soldiers/us/squad_leader.tres" id="3_y8uvq"]
-[ext_resource type="Resource" uid="uid://hxo4tsta8n0t" path="res://resources/soldiers/us/assistant_squad_leader.tres" id="4_qj24g"]
+[ext_resource type="Resource" uid="uid://c2rwmfwb2346n" path="res://resources/soldiers/us/squad_leader.tres" id="4_qj24g"]
 [ext_resource type="Resource" uid="uid://s5q86tvhibgt" path="res://resources/soldiers/us/mg_gunner.tres" id="5_amjsv"]
 [ext_resource type="Resource" uid="uid://c0y74x6d2lnb6" path="res://resources/soldiers/us/loader.tres" id="6_7douq"]
 [ext_resource type="Resource" uid="uid://cntlstwi5r5pp" path="res://resources/soldiers/us/rifle_grenadier.tres" id="7_8ydg5"]
@@ -12,5 +11,5 @@
 [resource]
 script = ExtResource("1_a6j3r")
 team = 1
-soldiers = Array[ExtResource("2_3mqbu")]([ExtResource("3_y8uvq"), ExtResource("4_qj24g"), ExtResource("5_amjsv"), ExtResource("6_7douq"), ExtResource("7_8ydg5"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv")])
+soldiers = Array[ExtResource("2_3mqbu")]([ExtResource("4_qj24g"), ExtResource("4_qj24g"), ExtResource("5_amjsv"), ExtResource("6_7douq"), ExtResource("7_8ydg5"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv"), ExtResource("8_qm6pv")])
 metadata/_custom_type_script = "uid://dreftkmyohaby"

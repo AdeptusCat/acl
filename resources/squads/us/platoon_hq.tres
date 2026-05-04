@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://cgfs6mgrk10ep"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_fhapq"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_vv6hw"]
+[ext_resource type="Resource" uid="uid://cntsjxepp043a" path="res://resources/soldiers/us/platoon_leader.tres" id="3_pkxtp"]
+[ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="4_4uvll"]
+[ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="5_buqck"]
+
+[sub_resource type="Resource" id="Resource_dlmmx"]
+script = ExtResource("2_vv6hw")
+nickname = "Platoon Seargeant"
+rank_grade = 3
+role = 8
+weapon = ExtResource("4_4uvll")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ahjmf"]
+script = ExtResource("2_vv6hw")
+nickname = "Platoon Guide"
+rank_grade = 3
+role = 6
+weapon = ExtResource("5_buqck")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_asadm"]
+script = ExtResource("2_vv6hw")
+nickname = "Messenger 1"
+weapon = ExtResource("4_4uvll")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ihjum"]
+script = ExtResource("2_vv6hw")
+nickname = "Messenger 2"
+weapon = ExtResource("4_4uvll")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_fhapq")
+squad_type = 4
+team = 1
+soldiers = Array[ExtResource("2_vv6hw")]([ExtResource("3_pkxtp"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://b7lhj4mfei3ky"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_rwbfh"]
+[ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="2_y64t1"]
+
+[resource]
+script = ExtResource("1_rwbfh")
+nickname = "Company Commander"
+rank_grade = 5
+role = 9
+weapon = ExtResource("2_y64t1")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

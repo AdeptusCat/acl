@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://d2fupy0rwq3aw"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_st503"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_nps30"]
+[ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="3_eiorv"]
+[ext_resource type="Resource" uid="uid://cq4b30mgos8ft" path="res://resources/weapons/granatwerfer_36.tres" id="4_h33hc"]
+[ext_resource type="Resource" uid="uid://cmyjkaqf4h1am" path="res://resources/soldiers/germany/loader.tres" id="5_lfohk"]
+[ext_resource type="Resource" uid="uid://bpvmktahaybo6" path="res://resources/soldiers/germany/assistant.tres" id="6_57mok"]
+
+[sub_resource type="Resource" id="Resource_xsi6h"]
+script = ExtResource("2_nps30")
+nickname = "Truppführer"
+rank_grade = 2
+role = 7
+weapon = ExtResource("3_eiorv")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_y8se1"]
+script = ExtResource("2_nps30")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("4_h33hc")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_st503")
+squad_type = 3
+soldiers = Array[ExtResource("2_nps30")]([SubResource("Resource_xsi6h"), SubResource("Resource_y8se1"), ExtResource("5_lfohk"), ExtResource("6_57mok"), ExtResource("6_57mok")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

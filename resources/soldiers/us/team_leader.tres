@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://cdyt4jn0s7bis"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_ahlyj"]
+[ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="2_ahlyj"]
+
+[resource]
+script = ExtResource("1_ahlyj")
+nickname = "Team Leader"
+rank_grade = 2
+role = 7
+weapon = ExtResource("2_ahlyj")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

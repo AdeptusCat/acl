@@ -747,7 +747,7 @@ func _make_company_headquarters_squad(v: bool) -> void:
 			i += 1
 			var platoon_guide2: SoldierLoadout = loadouts[i]
 			platoon_guide2.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
-			platoon_guide2.nickname = "Melderführer"
+			platoon_guide2.nicknam = "Melderführer"
 			platoon_guide2.rank_grade = RankGrades.Grade.SQUAD_LEADER
 			platoon_guide2.weapon = smg
 			i += 1
@@ -793,7 +793,7 @@ func _make_company_headquarters_squad(v: bool) -> void:
 			i += 1
 			var communications_sergeant: SoldierLoadout = loadouts[i]
 			communications_sergeant.role = RankGrades.Role.ASSISTANT_TEAM_LEADER
-			communications_sergeant.nickname = "First Sergeant"
+			communications_sergeant.nickname = "Communications Sergeant"
 			communications_sergeant.rank_grade = RankGrades.Grade.SQUAD_LEADER
 			communications_sergeant.weapon = riflegrenade
 			i += 1
@@ -1094,7 +1094,9 @@ func _on_stopped_moving():
 	moving = false
 	ui.stopped_moving(broken, surrendered)
 	#action_controller.on_stopped_moving()
-	
+
+
+# FIXME stress > 100 is weird since the player doesnt see stress go down and wonders why the unit wont rally
 
 
 func _on_unit_arrived_at_hex(new_hex: Vector2i):

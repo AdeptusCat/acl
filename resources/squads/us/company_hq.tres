@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://bsge266xsare4"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_tytcd"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_2tsjk"]
+[ext_resource type="Resource" uid="uid://b7lhj4mfei3ky" path="res://resources/soldiers/us/company_leader.tres" id="3_25yia"]
+[ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="4_g2e3u"]
+[ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="5_kema7"]
+[ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="6_b28j3"]
+
+[sub_resource type="Resource" id="Resource_ugw8x"]
+script = ExtResource("2_2tsjk")
+nickname = "Executive Officer"
+rank_grade = 4
+role = 8
+weapon = ExtResource("4_g2e3u")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_opqin"]
+script = ExtResource("2_2tsjk")
+nickname = "First Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("4_g2e3u")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_m0wo0"]
+script = ExtResource("2_2tsjk")
+nickname = "Communications Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("5_kema7")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_gfsc7"]
+script = ExtResource("2_2tsjk")
+nickname = "Bugler"
+rank_grade = 1
+role = 6
+weapon = ExtResource("4_g2e3u")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_5hgqf"]
+script = ExtResource("2_2tsjk")
+nickname = "Messenger 1"
+weapon = ExtResource("6_b28j3")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_yyuxn"]
+script = ExtResource("2_2tsjk")
+nickname = "Messenger 2"
+weapon = ExtResource("6_b28j3")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_tytcd")
+squad_type = 5
+team = 1
+soldiers = Array[ExtResource("2_2tsjk")]([ExtResource("3_25yia"), SubResource("Resource_ugw8x"), SubResource("Resource_opqin"), SubResource("Resource_m0wo0"), SubResource("Resource_gfsc7"), SubResource("Resource_5hgqf"), SubResource("Resource_yyuxn")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://b0rfy3y2g3mec"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_8isab"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_fcbla"]
+[ext_resource type="Resource" uid="uid://cdyt4jn0s7bis" path="res://resources/soldiers/us/team_leader.tres" id="3_25kck"]
+[ext_resource type="Resource" uid="uid://cg2ua8j6pxhkn" path="res://resources/weapons/m1_81mm_mortar.tres" id="4_8isab"]
+[ext_resource type="Resource" uid="uid://c0y74x6d2lnb6" path="res://resources/soldiers/us/loader.tres" id="5_fg20y"]
+[ext_resource type="Resource" uid="uid://cj1ie6lthyda0" path="res://resources/soldiers/us/assistant.tres" id="6_3psqu"]
+
+[sub_resource type="Resource" id="Resource_rxxvr"]
+script = ExtResource("2_fcbla")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("4_8isab")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[resource]
+script = ExtResource("1_8isab")
+squad_type = 3
+team = 1
+soldiers = Array[ExtResource("2_fcbla")]([ExtResource("3_25kck"), SubResource("Resource_rxxvr"), ExtResource("5_fg20y"), ExtResource("6_3psqu"), ExtResource("6_3psqu"), ExtResource("6_3psqu"), ExtResource("6_3psqu"), ExtResource("6_3psqu"), ExtResource("6_3psqu")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

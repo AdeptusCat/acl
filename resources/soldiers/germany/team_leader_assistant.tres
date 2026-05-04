@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://bmf6063odlske"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_d1kwf"]
+[ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="2_yfnje"]
+
+[resource]
+script = ExtResource("1_d1kwf")
+nickname = "Schütze"
+rank_grade = 3
+role = 6
+weapon = ExtResource("2_yfnje")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
