@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://s5q86tvhibgt"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_wift7"]
+[ext_resource type="Resource" uid="uid://bvg8b7n4h7vbj" path="res://resources/weapons/m1918a1_bar.tres" id="2_wift7"]
+
+[resource]
+script = ExtResource("1_wift7")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("2_wift7")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

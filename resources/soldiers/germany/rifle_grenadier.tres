@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://cxto06fhfxw1g"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_d3yoj"]
+[ext_resource type="Resource" uid="uid://cbxllfdsgrv68" path="res://resources/weapons/kar98_riflegrenade.tres" id="2_fst3i"]
+
+[resource]
+script = ExtResource("1_d3yoj")
+nickname = "Riflegrenadier"
+weapon = ExtResource("2_fst3i")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

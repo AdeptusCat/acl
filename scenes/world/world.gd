@@ -103,8 +103,7 @@ func _ready():
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 	
-	var match_data: MatchSaveData = load_match_data("debug")
-	spawn_units_from_match_save(match_data, game_controller.unit_container)
+	
 	
 
 var selected_hex: Vector2i 
@@ -357,6 +356,9 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	input_manager.set_process(true)
 	
 	game_controller.move_camera(scenario.start_hex)
+	
+	var match_data: MatchSaveData = load_match_data("debug")
+	game_controller.spawn_units_from_match_save(match_data)
 
 
 #func _process(delta: float) -> void:
@@ -449,21 +451,3 @@ func load_match_data(match_id: String) -> MatchSaveData:
 		return null
 
 	return match_save
-
-
-func spawn_units_from_match_save(match_save: MatchSaveData, parent: Node) -> void:
-	for unit_save_data: UnitSaveData in match_save.player_units:
-		var packed_scene: PackedScene = ResourceLoader.load(unit_save_data.unit_scene_path) as PackedScene
-
-		if packed_scene == null:
-			push_error("Could not load unit scene: %s" % unit_save_data.unit_scene_path)
-			continue
-
-		var unit: Unit = packed_scene.instantiate() as Unit
-
-		if unit == null:
-			push_error("Instanced scene is not Unit: %s" % unit_save_data.unit_scene_path)
-			continue
-
-		parent.add_child(unit)
-		unit.apply_save_data(unit_save_data)

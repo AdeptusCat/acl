@@ -113,11 +113,11 @@ func is_acquiring_target_done(delta: float):
 	return false
 
 
-func create_save_data() -> SoldierSaveData:
-	var data: SoldierSaveData = SoldierSaveData.new()
+func create_save_data() -> SoldierLoadout:
+	var data: SoldierLoadout = SoldierLoadout.new()
 
 	#data.id = id
-	data.soldier_name = name
+	data.nickname = name
 	data.rank_grade = rank_grade
 	data.role = role
 
@@ -126,7 +126,7 @@ func create_save_data() -> SoldierSaveData:
 	else:
 		data.weapon_resource_path = ""
 
-	data.is_alive = is_alive
+	#data.is_alive = is_alive
 	#data.rounds_in_mag = rounds_in_mag
 	#data.jammed = jammed
 
@@ -136,46 +136,46 @@ func create_save_data() -> SoldierSaveData:
 	return data
 
 
-static func create_from_save_data(
-	data: SoldierSaveData,
-	_unit: Unit,
-	_team: Globals.Team
-) -> Soldier:
+#static func create_from_save_data(
+	#data: SoldierSaveData,
+	#_unit: Unit,
+	#_team: Globals.Team
+#) -> Soldier:
 	#var loaded_resource: Resource = load(data.loadout_resource_path)
-
-	if data == null:
-		push_error("Could not load SoldierLoadout: %s" % data.loadout_resource_path)
-		return null
-
-	#var loadout: SoldierLoadout = data as SoldierLoadout
 #
-	#if loadout == null:
-		#push_error("Loaded resource is not SoldierLoadout: %s" % data.loadout_resource_path)
+	#if data == null:
+		#push_error("Could not load SoldierLoadout: %s" % data.loadout_resource_path)
 		#return null
-
-	var soldier: Soldier = Soldier.new(
-		data.soldier_id,
-		data.soldier_name, 
-		data.rank_grade, 
-		data.role, 
-		data.weapon, 
-		data.unit, 
-		data.team
-	)
-
-	soldier.name = data.soldier_name
-
-	soldier.is_alive = data.is_alive
-	soldier.rounds_in_mag = data.rounds_in_mag
-	soldier.jammed = data.jammed
-
-	soldier.experience = data.experience
-	soldier.fatigue = data.fatigue
-	soldier.wounded = data.wounded
-
-	soldier.base_attack = data.base_attack
-	soldier.base_defense = data.base_defense
-
-	soldier.reset_runtime_state()
-
-	return soldier
+#
+	##var loadout: SoldierLoadout = data as SoldierLoadout
+##
+	##if loadout == null:
+		##push_error("Loaded resource is not SoldierLoadout: %s" % data.loadout_resource_path)
+		##return null
+#
+	#var soldier: Soldier = Soldier.new(
+		#data.soldier_id,
+		#data.soldier_name, 
+		#data.rank_grade, 
+		#data.role, 
+		#data.weapon, 
+		#data.unit, 
+		#data.team
+	#)
+#
+	#soldier.name = data.soldier_name
+#
+	#soldier.is_alive = data.is_alive
+	#soldier.rounds_in_mag = data.rounds_in_mag
+	#soldier.jammed = data.jammed
+#
+	#soldier.experience = data.experience
+	#soldier.fatigue = data.fatigue
+	#soldier.wounded = data.wounded
+#
+	#soldier.base_attack = data.base_attack
+	#soldier.base_defense = data.base_defense
+#
+	#soldier.reset_runtime_state()
+#
+	#return soldier

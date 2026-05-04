@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://cntlstwi5r5pp"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_wly1m"]
+[ext_resource type="Resource" uid="uid://btrms0ms8el2w" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="2_wly1m"]
+
+[resource]
+script = ExtResource("1_wly1m")
+nickname = "Riflegrenadier"
+weapon = ExtResource("2_wly1m")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

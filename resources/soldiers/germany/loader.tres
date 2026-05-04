@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://cmyjkaqf4h1am"]
+
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_gi4dr"]
+[ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="2_ebjpp"]
+
+[resource]
+script = ExtResource("1_gi4dr")
+nickname = "Loader"
+role = 2
+weapon = ExtResource("2_ebjpp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"

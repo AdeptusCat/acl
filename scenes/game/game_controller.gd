@@ -804,7 +804,7 @@ func erase_freed_objects_key_from_dict(dict: Dictionary):
 
 func start_game(team: Globals.Team, time: float):
 	
-	time_left_seconds = time * 60.0
+	time_left_seconds = time * 1.0
 	Globals.team_player = team
 	if team == Globals.Team.AXIS:
 		Globals.team_enemy = Globals.Team.ALLIES
@@ -1351,3 +1351,77 @@ func _on_unit_shooting(unit: Unit):
 		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(_unit, {} as Dictionary[Unit, float])
 		if conf_map.has(unit):
 			conf_map[unit] += 0.1
+
+
+func spawn_units_from_match_save(match_save: MatchSaveData) -> void:
+	for data: UnitSaveData in match_save.player_units:
+		var packed_scene: PackedScene = ResourceLoader.load(data.unit_scene_path) as PackedScene
+
+		if packed_scene == null:
+			push_error("Could not load unit scene: %s" % data.unit_scene_path)
+			continue
+		spawn_unit_from_save(data.team, Vector2.ZERO, data.squad_loadout, 0)
+		#var unit: Unit = packed_scene.instantiate() as Unit
+#
+		#if unit == null:
+			#push_error("Instanced scene is not Unit: %s" % unit_save_data.unit_scene_path)
+			#continue
+#
+		#add_child(unit)
+		#unit.apply_save_data(unit_save_data)
+
+
+func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int):
+	var unit: Unit = unit_scene.instantiate()
+	$UnitContainer.add_child(unit)
+	unit.ground_map = ground_layer
+	unit.team = team
+	unit.squad_loadout = squad_loadout
+	unit._setup_runtime_soldiers(squad_loadout)
+	unit.add_to_group("units")
+	#match squad_type:
+		#Unit.SquadType.Rifle:
+			#unit.make_rifle_squad = true
+		#Unit.SquadType.MG:
+			#unit.make_light_mg_team = true
+		#Unit.SquadType.PLATOON_HEADQUARTERS:
+			#unit.make_platoon_headquarters_squad = true
+	
+	unit.formation_id = formation_id 
+	#$UnitContainer.add_child(unit)
+	unit.position = LOSHelper.ground_layer.map_to_local(location)
+	#unit.position = ground_layer.map_to_local(location)
+	
+	var map_coords = LOSHelper.ground_layer.local_to_map(LOSHelper.ground_layer.map_to_local(location))
+	unit.position = LOSHelper.ground_layer.map_to_local(map_coords)
+	unit.current_hex = map_coords
+	unit.current_cube = LOSHelper.ground_layer.map_to_cube(map_coords)
+	
+	#unit.hide()
+	
+	
+	unit.set_team(team)
+	
+	unit.unit_died.connect(_on_unit_died)
+	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
+	unit.unit_entered_hex.connect(_on_unit_entered_hex)
+	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
+	unit.current_hex = ground_layer.local_to_map(unit.global_position)
+	unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
+	unit.deselect_unit.connect(_deselect_unit)
+	unit.started_moving.connect(_on_started_moving)
+	unit.unit_surrendered.connect(_on_unit_surrendered)
+	unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
+	unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
+	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
+	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
+	unit.squad_fire.shooting.connect(_on_unit_shooting)
+	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
+	unit.update_terrain_defense_bonus()
+			
+	# assign platoon headquarter to squad 
+	if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
+	# assign company headquarter to platoon headquarter 
+	if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)

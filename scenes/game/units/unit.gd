@@ -62,6 +62,7 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var machine_guns: int = 0
 @export var members_alive := 10
 @export var loadouts: Array[SoldierLoadout] = []
+@export var squad_loadout: SquadLoadoutSpec
 @export var command_squad: Unit = null
 
 # optional defaults to speed setup (assign in the inspector)
@@ -190,7 +191,9 @@ func setup():
 	squad_fire.set_mg(machine_guns)
 	
 	#_resize_loadouts(members_count)
-	_setup_runtime_soldiers()
+	#_setup_runtime_soldiers()
+	_setup_runtime_soldiers(squad_loadout)
+	
 	if squad_fire.soldiers.size() <= 0:
 		pass
 	
@@ -395,6 +398,8 @@ func _highest_grade_from_runtime() -> int:
 	var best: int = -1
 	var i: int = 0
 	while i < loadouts.size():
+		if not squad_fire.soldiers.size() > i:
+			break
 		var s: Soldier = squad_fire.soldiers[i]
 		if s.is_alive:
 			var g: int = _runtime_soldier_grade(s)
@@ -423,15 +428,18 @@ func _highest_grade_from_loadouts() -> int:
 			best = g
 		i += 1
 	return best
-	
-func _setup_runtime_soldiers() -> void:
+
+
+func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 	effective_range = 0
 	if squad_fire == null:
 		return
+	if _squad_loadout == null:
+		return
 	var list: Array[Soldier] = []
 	var i: int = 0
-	while i < loadouts.size():
-		var L: SoldierLoadout = loadouts[i]
+	for soldier in _squad_loadout.soldiers:
+		var L: SoldierLoadout = soldier
 		var spec: WeaponSpec = L.weapon
 		if spec == null:
 			spec = default_rifle
@@ -439,7 +447,7 @@ func _setup_runtime_soldiers() -> void:
 			i,
 			L.nickname,
 			L.rank_grade,
-			_map_role(L.role),   # if your Soldier.Role differs
+			L.role,   # if your Soldier.Role differs
 			spec,
 			self,
 			team
@@ -456,9 +464,40 @@ func _setup_runtime_soldiers() -> void:
 		i += 1
 	squad_fire.set_soldiers(list)
 
-# map editor roles to runtime Soldier.Role if they differ
-func _map_role(r: int) -> int:
-	return r  # replace if your enums aren’t identical
+
+#func _setup_runtime_soldiers() -> void:
+	#effective_range = 0
+	#if squad_fire == null:
+		#return
+	#var list: Array[Soldier] = []
+	#var i: int = 0
+	#while i < loadouts.size():
+		#var L: SoldierLoadout = loadouts[i]
+		#var spec: WeaponSpec = L.weapon
+		#if spec == null:
+			#spec = default_rifle
+		#var s: Soldier = Soldier.new(
+			#i,
+			#L.nickname,
+			#L.rank_grade,
+			#_map_role(L.role),   # if your Soldier.Role differs
+			#spec,
+			#self,
+			#team
+		#)
+		#if s.role == RankGrades.Role.GUNNER:
+			#machine_guns += 1
+		#spec.ammunition = spec.ammunition_start
+		#if spec.family == WeaponSpec.Family.MORTAR:
+			#ui.set_ammunition_left(spec.ammunition)
+		#s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
+		#list.append(s)
+		#if spec.range_hexes > effective_range:
+			#effective_range = spec.range_hexes
+		#i += 1
+	#squad_fire.set_soldiers(list)
+
+
 
 
 func _resize_loadouts(n: int) -> void:
@@ -1980,11 +2019,16 @@ func create_save_data() -> UnitSaveData:
 	data.team = team
 
 	data.soldiers.clear()
-
+	
+	var squad_loadout: SquadLoadoutSpec = SquadLoadoutSpec.new()
 	for soldier: Soldier in squad_fire.soldiers:
-		var soldier_data: SoldierSaveData = soldier.create_save_data()
-		data.soldiers.append(soldier_data)
-
+		var soldier_data: SoldierLoadout = soldier.create_save_data()
+		squad_loadout.soldiers.append(soldier_data)
+	squad_loadout.squad_type = squadType
+	squad_loadout.team = team
+	
+	data.squad_loadout = squad_loadout
+	
 	#data.stress_fast = stress_controller.stress_fast
 	#data.stress_slow = stress_controller.stress_slow
 	#data.cohesion = cohesion
@@ -1999,11 +2043,13 @@ func apply_save_data(data: UnitSaveData) -> void:
 
 	squad_fire.soldiers.clear()
 
-	for soldier_data: SoldierSaveData in data.soldiers:
-		var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
-
-		if soldier != null:
-			squad_fire.soldiers.append(soldier)
+	#for soldier_data: SoldierSaveData in data.soldiers:
+		#var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
+	
+	_setup_runtime_soldiers(data.squad_loadout)
+	
+		#if soldier != null:
+			#squad_fire.soldiers.append(soldier)
 
 	#stress_controller.stress_fast = data.stress_fast
 	#stress_controller.stress_slow = data.stress_slow

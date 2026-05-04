@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://bwfw35mmy64ro"]
+
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_6xvru"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_q1uog"]
+[ext_resource type="Resource" uid="uid://dghlcxe7d1oeg" path="res://resources/soldiers/germany/squad_leader.tres" id="3_yjgi0"]
+[ext_resource type="Resource" uid="uid://sglwlumhj57d" path="res://resources/soldiers/germany/assistant_squad_leader.tres" id="4_3hbdk"]
+[ext_resource type="Resource" uid="uid://c58b0dx1dc5lv" path="res://resources/soldiers/germany/mg_gunner.tres" id="5_1l8j2"]
+[ext_resource type="Resource" uid="uid://cmyjkaqf4h1am" path="res://resources/soldiers/germany/loader.tres" id="6_nw77j"]
+[ext_resource type="Resource" uid="uid://cxto06fhfxw1g" path="res://resources/soldiers/germany/rifle_grenadier.tres" id="7_5xhqo"]
+[ext_resource type="Resource" uid="uid://d861tlfk8agb" path="res://resources/soldiers/germany/rifleman.tres" id="8_s85xv"]
+
+[resource]
+script = ExtResource("1_6xvru")
+soldiers = Array[ExtResource("2_q1uog")]([ExtResource("3_yjgi0"), ExtResource("4_3hbdk"), ExtResource("5_1l8j2"), ExtResource("6_nw77j"), ExtResource("7_5xhqo"), ExtResource("8_s85xv"), ExtResource("8_s85xv"), ExtResource("8_s85xv"), ExtResource("8_s85xv"), ExtResource("8_s85xv")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"

@@ -6,7 +6,8 @@ class_name UnitSaveData
 @export var unit_scene_path: String = ""
 @export var team: Globals.Team
 
-@export var soldiers: Array[SoldierSaveData] = []
+@export var soldiers: Array[SoldierLoadout] = []
+@export var squad_loadout: SquadLoadoutSpec
 
 @export var stress_fast: float = 0.0
 @export var stress_slow: float = 0.0
