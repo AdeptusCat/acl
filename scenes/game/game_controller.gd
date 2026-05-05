@@ -318,7 +318,8 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 			else:
 				for unit: Unit in units_in_hex:
 					if not unit.team == unit_entering_hex.team:
-						unit.surrender()
+						if unit.is_good_order():
+							unit.surrender()
 	
 	set_close_combat_hexes_and_units()
 	

@@ -161,6 +161,9 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 @onready var tactical_state: SquadTacticalState = SquadTacticalState.new()
 
 
+func _ready() -> void:
+	_make_squad()
+
 
 # === Ready ===
 func setup():
