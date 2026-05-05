@@ -1384,6 +1384,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 
 			# book-keeping and UI
 			members_alive = squad_fire.soldiers.size()
+			
 			stress_system.on_casualty_event(1, leader_down)
 			ui.set_members_alive(members_alive)
 
@@ -1467,9 +1468,13 @@ func _apply_casualties(n: int) -> void:
 	
 	for soldier in casualties:
 		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
+		# FIXME this should fix the out of bounds
+		squad_fire.casualties.append(soldier)
 	
-	for index in casualty_indexes:
-		squad_fire.casualties.append(squad_fire.soldiers[index])
+	#for index in casualty_indexes:
+		# FIXME this tends to be out of bounds
+		#if squad_fire.soldiers.size() > index:
+			#squad_fire.casualties.append(squad_fire.soldiers[index])
 	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
@@ -1486,6 +1491,7 @@ func _apply_casualties(n: int) -> void:
 
 	# book-keeping and UI
 	members_alive = squad_fire.soldiers.size()
+	
 	stress_system.on_casualty_event(n, leader_down)
 	ui.set_members_alive(members_alive)
 

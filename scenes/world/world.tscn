@@ -1575,6 +1575,7 @@ script = ExtResource("1_6hctx")
 [node name="Maps" type="Node2D" parent="." unique_id=2101382623]
 
 [node name="OrchardRoad" parent="Maps" unique_id=1528497757 instance=ExtResource("3_a5636")]
+visible = false
 grid_size = Vector2i(14, 12)
 map_name = "Orchard Road"
 
@@ -1645,7 +1646,7 @@ team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
 squad_loadout = ExtResource("65_oo0aq")
 command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
-formation_id = 2
+formation_id = 1
 
 [node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="4" unique_id=2026778924 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
 position = Vector2(32, 160)
@@ -1664,7 +1665,6 @@ tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")
 tile_map_data = PackedByteArray("AAAIAAQABgAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAAAAAAAAANAAsAAAAAAAAAAAANAAoAAAAAAAAAAAANAAkAAAAAAAAAAAA=")
 
 [node name="DefaultMap" parent="Maps" unique_id=1128763383 instance=ExtResource("3_a5636")]
-visible = false
 grid_size = Vector2i(33, 21)
 map_name = "Default Map"
 
@@ -1690,7 +1690,6 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="OutpostProbe" parent="Maps/DefaultMap/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="0" unique_id=322232894 instance=ExtResource("44_jhdiv")]
-visible = false
 scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
@@ -1752,7 +1751,10 @@ command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
 formation_id = 2
 
 [node name="AxisObjectivesTileMapLayer" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="0" unique_id=1637617708]
-tile_map_data = PackedByteArray("AAAHABIAAAAAAAAAAAAGABIAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABIAAAAAAAAAAAALAA0ABgAAAAAAAAAFABIAAAAAAAAAAAAPABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAHABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAAIABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAMAAkAAgAAAAAAAAA=")
+tile_map_data = PackedByteArray()
+
+[node name="AlliedObjectivesTileMapLayer" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="1" unique_id=952938266]
+tile_map_data = PackedByteArray("AAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAHABQAAAAAAAAAAAAMAAkAAgAAAAAAAAALAA0ABgAAAAAAAAA=")
 
 [node name="OutpostProbe2" parent="Maps/DefaultMap/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=43599254 instance=ExtResource("44_jhdiv")]
 visible = false
@@ -2276,30 +2278,24 @@ close_combat_sign_scene = ExtResource("54_n78lu")
 time_left_seconds = 180.0
 
 [node name="AlliesFormationAIControllers" parent="GameController" unique_id=538941142 instance=ExtResource("51_1o6i5")]
-active = true
 
 [node name="FormationAIController5" parent="GameController/AlliesFormationAIControllers" unique_id=1439673722 instance=ExtResource("51_n78lu")]
-active = true
 mission_mode = 1
 team = 1
 formation_id = 1
 
 [node name="FormationAIController6" parent="GameController/AlliesFormationAIControllers" unique_id=789987374 instance=ExtResource("51_n78lu")]
-active = true
 mission_mode = 1
 team = 1
 formation_id = 2
 
 [node name="AxisFormationAIControllers" parent="GameController" unique_id=670899911 instance=ExtResource("51_1o6i5")]
-active = true
 
 [node name="FormationAIController" parent="GameController/AxisFormationAIControllers" unique_id=1491700994 instance=ExtResource("51_n78lu")]
-active = true
 mission_mode = 1
 formation_id = 1
 
 [node name="FormationAIController2" parent="GameController/AxisFormationAIControllers" unique_id=722100038 instance=ExtResource("51_n78lu")]
-active = true
 mission_mode = 1
 formation_id = 2
 

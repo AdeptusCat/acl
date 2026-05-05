@@ -522,8 +522,8 @@ func set_objective_cells(player_team: Globals.Team):
 			if not Globals.objective_hexes.has(player_team):
 				Globals.objective_hexes[player_team] = []
 			Globals.objective_hexes[player_team].append(cell)
-	else:
-		push_error("ObjectiveTileMapLayer has no tiles placed!")
+	#else:
+		#push_error("ObjectiveTileMapLayer has no tiles placed!")
 	
 	cells = ai_objective_tilemap.get_used_cells() 
 	if cells.size() > 0:
@@ -531,8 +531,8 @@ func set_objective_cells(player_team: Globals.Team):
 			if not Globals.objective_hexes.has(ai_team):
 				Globals.objective_hexes[ai_team] = []
 			Globals.objective_hexes[ai_team].append(cell)
-	else:
-		push_error("ObjectiveTileMapLayer has no tiles placed!")
+	#else:
+		#push_error("ObjectiveTileMapLayer has no tiles placed!")
 
 
 func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
