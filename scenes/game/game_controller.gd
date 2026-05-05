@@ -230,6 +230,7 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Globals.Squa
 	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 
+
 func draw_fog():
 	var used_cells := fog_of_war_layer.get_used_cells()
 	for cell in used_cells:
@@ -269,7 +270,10 @@ func show_visible_units():
 				u.visible = true
 			else:
 				u.visible = false
-			
+	
+	if Debug.show_enemies:
+		for u in Globals.get_units():
+			u.visible = true
 			#if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
 				#u.visible = true
 			#else:
@@ -472,25 +476,29 @@ func set_objective_cells(player_team: Globals.Team):
 	var ai_team: Globals.Team
 	if player_team == Globals.Team.AXIS:
 		ai_team = Globals.Team.ALLIES
+		ai_objective_tilemap = allies_objective_tilemap
+		player_objective_tilemap = axis_objective_tilemap
 	else:
 		ai_team = Globals.Team.AXIS
-		
-	if player_team == Globals.Team.AXIS:
-		match Globals.game_mode:
-			Globals.GameMode.DEFEND:
-				player_objective_tilemap = allies_objective_tilemap
-				ai_objective_tilemap = allies_objective_tilemap
-			Globals.GameMode.ATTACK:
-				player_objective_tilemap = axis_objective_tilemap
-				ai_objective_tilemap = axis_objective_tilemap
-	if player_team == Globals.Team.ALLIES:
-		match Globals.game_mode:
-			Globals.GameMode.DEFEND:
-				player_objective_tilemap = axis_objective_tilemap
-				ai_objective_tilemap = axis_objective_tilemap
-			Globals.GameMode.ATTACK:
-				player_objective_tilemap = allies_objective_tilemap
-				ai_objective_tilemap = allies_objective_tilemap
+		ai_objective_tilemap = axis_objective_tilemap
+		player_objective_tilemap = allies_objective_tilemap
+	ai_objective_tilemap.hide()
+	#if player_team == Globals.Team.AXIS:
+		#match Globals.game_mode:
+			#Globals.GameMode.DEFEND:
+				#player_objective_tilemap = allies_objective_tilemap
+				#ai_objective_tilemap = allies_objective_tilemap
+			#Globals.GameMode.ATTACK:
+				#player_objective_tilemap = axis_objective_tilemap
+				#ai_objective_tilemap = axis_objective_tilemap
+	#if player_team == Globals.Team.ALLIES:
+		#match Globals.game_mode:
+			#Globals.GameMode.DEFEND:
+				#player_objective_tilemap = axis_objective_tilemap
+				#ai_objective_tilemap = axis_objective_tilemap
+			#Globals.GameMode.ATTACK:
+				#player_objective_tilemap = allies_objective_tilemap
+				#ai_objective_tilemap = allies_objective_tilemap
 	#if player_team == Globals.Team.AXIS:
 		#match Globals.game_mode:
 			#Globals.GameMode.DEFEND:
@@ -811,7 +819,9 @@ func start_game(team: Globals.Team, time: float):
 		Globals.team_enemy = Globals.Team.ALLIES
 	else:
 		Globals.team_enemy = Globals.Team.AXIS
-		
+	
+	
+	
 	set_objective_cells(team)
 	set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true

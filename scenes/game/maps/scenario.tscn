@@ -13,25 +13,12 @@
 [ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="8_ofo72"]
 [ext_resource type="Texture2D" uid="uid://bkh0fot722b0y" path="res://assets/objectives/axis_start.png" id="11_06hnl"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
-texture = ExtResource("2_84jd5")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_1 = 1
-0:0/0/custom_data_2 = "Exit"
-
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
 texture = ExtResource("3_8cmm4")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_2 = "Exit"
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
-texture = ExtResource("4_kp5un")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_0 = 4
-0:0/0/custom_data_1 = 1
+0:0/0/custom_data_3 = "Exit"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
 texture = ExtResource("2_rck5x")
@@ -39,6 +26,7 @@ texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
 texture = ExtResource("3_xupyy")
@@ -46,6 +34,7 @@ texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
 texture = ExtResource("4_84jd5")
@@ -53,36 +42,14 @@ texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_2 = "Objective C"
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
-texture = ExtResource("5_8cmm4")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_0 = 1
-0:0/0/custom_data_1 = 1
-0:0/0/custom_data_2 = "Objective A"
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
-texture = ExtResource("6_kp5un")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_0 = 2
-0:0/0/custom_data_1 = 1
-0:0/0/custom_data_2 = "Objective B"
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
-texture = ExtResource("7_06hnl")
-texture_region_size = Vector2i(64, 64)
-0:0/0 = 0
-0:0/0/custom_data_0 = 3
-0:0/0/custom_data_1 = 1
-0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0jm0n"]
 texture = ExtResource("11_06hnl")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/custom_data_0 = 4
+0:0/0/custom_data_3 = "Start"
 
 [sub_resource type="TileSet" id="TileSet_0jm0n"]
 tile_shape = 3
@@ -99,13 +66,69 @@ custom_data_layer_3/type = 4
 sources/3 = SubResource("TileSetAtlasSource_28uas")
 sources/4 = SubResource("TileSetAtlasSource_4cu88")
 sources/5 = SubResource("TileSetAtlasSource_eq3s3")
+sources/1 = SubResource("TileSetAtlasSource_06hnl")
+sources/9 = SubResource("TileSetAtlasSource_0jm0n")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
+texture = ExtResource("2_84jd5")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Exit"
+0:0/0/custom_data_3 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
+texture = ExtResource("4_kp5un")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 4
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_3 = "Start"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
+texture = ExtResource("5_8cmm4")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
+texture = ExtResource("6_kp5un")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
+texture = ExtResource("7_06hnl")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
+
+[sub_resource type="TileSet" id="TileSet_cwow2"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+custom_data_layer_0/name = "objective_id"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "display_name"
+custom_data_layer_2/type = 4
+custom_data_layer_3/name = "zone_type"
+custom_data_layer_3/type = 4
 sources/6 = SubResource("TileSetAtlasSource_fcp7w")
 sources/7 = SubResource("TileSetAtlasSource_int16")
 sources/8 = SubResource("TileSetAtlasSource_6ys5q")
-sources/0 = SubResource("TileSetAtlasSource_kp5un")
-sources/1 = SubResource("TileSetAtlasSource_06hnl")
 sources/2 = SubResource("TileSetAtlasSource_ofo72")
-sources/9 = SubResource("TileSetAtlasSource_0jm0n")
+sources/0 = SubResource("TileSetAtlasSource_kp5un")
 
 [node name="Scenario" type="Node2D" unique_id=43599254]
 script = ExtResource("1_tdev0")
@@ -114,8 +137,14 @@ script = ExtResource("1_tdev0")
 
 [node name="Objectives" type="Node2D" parent="." unique_id=1566573026]
 
-[node name="ObjectivesTileMapLayer" type="TileMapLayer" parent="Objectives" unique_id=1637617708]
+[node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Objectives" unique_id=1637617708]
 tile_map_data = PackedByteArray(0, 0, 17, 0, 9, 0, 3, 0, 0, 0, 0, 0, 0, 0, 15, 0, 9, 0, 6, 0, 0, 0, 0, 0, 0, 0)
 tile_set = SubResource("TileSet_0jm0n")
+script = ExtResource("8_ofo72")
+metadata/_custom_type_script = "uid://buj6ft1vvdf2f"
+
+[node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Objectives" unique_id=952938266]
+tile_map_data = PackedByteArray(0, 0, 17, 0, 9, 0, 3, 0, 0, 0, 0, 0, 0, 0, 15, 0, 9, 0, 6, 0, 0, 0, 0, 0, 0, 0)
+tile_set = SubResource("TileSet_cwow2")
 script = ExtResource("8_ofo72")
 metadata/_custom_type_script = "uid://buj6ft1vvdf2f"

@@ -37,9 +37,9 @@ func get_scenario(nr: int) -> Scenario:
 		return null
 
 
-func get_objectives_layer_from_scenario(nr: int):
+func get_objectives_layer_from_scenario(nr: int, team: Globals.Team) -> HexagonTileMapLayer:
 	if scenarios.get_child_count() > nr:
-		return scenarios.get_children()[nr].get_objectives_layer()
+		return scenarios.get_children()[nr].get_objectives_layer(team)
 	else:
 		return null
 

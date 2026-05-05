@@ -677,6 +677,14 @@ text = "Show LOS Lines"
 layout_mode = 2
 text = "Show Movement Lines"
 
+[node name="HideFogOfWar" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=409354570]
+layout_mode = 2
+text = "Hide Fog Of War"
+
+[node name="ShowEnemies" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=106533866]
+layout_mode = 2
+text = "Show Enemies"
+
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1
@@ -711,3 +719,5 @@ layout_mode = 1
 [connection signal="toggled" from="Control/Debug/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/ShowLosLines" to="Control/Debug" method="_on_show_los_lines_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/ShowMovementLines" to="Control/Debug" method="_on_show_movement_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/HideFogOfWar" to="Control/Debug" method="_on_hide_fog_of_war_toggled"]
+[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemies" to="Control/Debug" method="_on_show_enemies_toggled"]

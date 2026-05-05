@@ -36,5 +36,11 @@ func _on_show_los_lines_toggled(toggled_on: bool) -> void:
 
 func _on_show_movement_lines_toggled(toggled_on: bool) -> void:
 	Debug.show_movement_lines = toggled_on
-	
-	
+
+
+func _on_hide_fog_of_war_toggled(toggled_on: bool) -> void:
+	Debug.hide_fog_of_war = toggled_on
+
+
+func _on_show_enemies_toggled(toggled_on: bool) -> void:
+	Debug.show_enemies = toggled_on

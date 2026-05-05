@@ -337,10 +337,11 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	fog_of_war_tile_map_layer.move_to_front()
 	selected_tile_map_layer.move_to_front()
 	
-	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
-	objectives_layer.reparent(tile_map_layers)
+	var axis_objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer(Globals.Team.AXIS)
+	axis_objectives_layer.reparent(tile_map_layers)
 	
-	
+	var allied_objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer(Globals.Team.ALLIES)
+	allied_objectives_layer.reparent(tile_map_layers)
 	
 	Globals.victory_conditions = scenario.get_victory_conditions()
 	
@@ -353,6 +354,9 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	#game_controller.set_objective_layer(team, objectives[0])
 	#map.remove_scenarios()
 	
+	game_controller.axis_objective_tilemap = scenario.get_objectives_layer(Globals.Team.AXIS)
+	game_controller.allies_objective_tilemap = scenario.get_objectives_layer(Globals.Team.ALLIES)
+	
 	game_controller.start_game(team, start_screen.time)
 	input_manager.set_process(true)
 	
@@ -362,7 +366,11 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	#game_controller.spawn_units_from_match_save(match_data)
 
 
-#func _process(delta: float) -> void:
+func _process(delta: float) -> void:
+	if Debug.hide_fog_of_war:
+		fog_of_war_tile_map_layer.hide()
+	else:
+		fog_of_war_tile_map_layer.show()
 	#for node in Globals.unit_enemy_los_time_s:
 		#if not is_instance_valid(node):
 			#pass
