@@ -47,5 +47,6 @@ metadata/_custom_type_script = "uid://doub5i2qbimo0"
 [resource]
 script = ExtResource("1_1d5en")
 squad_type = 5
+team = null
 soldiers = Array[ExtResource("2_gx8aw")]([ExtResource("3_b485v"), SubResource("Resource_ugw8x"), SubResource("Resource_opqin"), SubResource("Resource_m0wo0"), SubResource("Resource_gfsc7"), SubResource("Resource_5hgqf"), ExtResource("6_0dfpw")])
 metadata/_custom_type_script = "uid://dreftkmyohaby"

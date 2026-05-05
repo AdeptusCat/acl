@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SquadsCollection" format=3 uid="uid://u8chl6873sdy"]
+
+[ext_resource type="Script" uid="uid://dqc5gsc8nyh6r" path="res://squads_collection.gd" id="1_8jmih"]
+[ext_resource type="Script" uid="uid://bhetl3cslc2tj" path="res://squads.gd" id="2_lp85b"]
+[ext_resource type="Resource" uid="uid://lp0f0dhp86jk" path="res://squads_german.tres" id="3_ps3yt"]
+[ext_resource type="Resource" uid="uid://c3126its6x8x4" path="res://squads_us.tres" id="4_d36al"]
+
+[resource]
+script = ExtResource("1_8jmih")
+squads_collection = Dictionary[int, ExtResource("2_lp85b")]({
+0: ExtResource("3_ps3yt"),
+1: ExtResource("4_d36al")
+})
+metadata/_custom_type_script = "uid://dqc5gsc8nyh6r"

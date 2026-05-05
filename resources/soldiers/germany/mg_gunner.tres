@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_qdowk")
-nickname = "Gunner"
+nickname = "Schütze"
 role = 1
 weapon = ExtResource("2_hui12")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"

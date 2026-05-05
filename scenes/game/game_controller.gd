@@ -104,10 +104,10 @@ func setup():
 	for unit in Globals.get_units():
 		if unit is Unit:
 			# assign platoon headquarter to squad 
-			if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+			if not unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 				unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
 			# assign company headquarter to platoon headquarter 
-			if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+			if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 				unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 	
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
@@ -173,23 +173,23 @@ func spawn_formation():
 			formation_ai_controller.formation_id = formation_id
 			$AxisFormationAIControllers.add_child(formation_ai_controller)
 	
-	spawn_unit(team, location, Unit.SquadType.Rifle, formation_id)
-	spawn_unit(team, location, Unit.SquadType.MG, formation_id)
-	spawn_unit(team, location, Unit.SquadType.PLATOON_HEADQUARTERS, formation_id)
+	spawn_unit(team, location, Globals.SquadType.Rifle, formation_id)
+	spawn_unit(team, location, Globals.SquadType.MG, formation_id)
+	spawn_unit(team, location, Globals.SquadType.PLATOON_HEADQUARTERS, formation_id)
 	
 	
 
 
-func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadType, formation_id: int):
+func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Globals.SquadType, formation_id: int):
 	var unit: Unit = unit_scene.instantiate()
 	unit.ground_map = ground_layer
 	unit.team = team
 	match squad_type:
-		Unit.SquadType.Rifle:
+		Globals.SquadType.Rifle:
 			unit.make_rifle_squad = true
-		Unit.SquadType.MG:
+		Globals.SquadType.MG:
 			unit.make_light_mg_team = true
-		Unit.SquadType.PLATOON_HEADQUARTERS:
+		Globals.SquadType.PLATOON_HEADQUARTERS:
 			unit.make_platoon_headquarters_squad = true
 	
 	unit.formation_id = formation_id 
@@ -224,10 +224,10 @@ func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Unit.SquadTy
 	unit.update_terrain_defense_bonus()
 			
 	# assign platoon headquarter to squad 
-	if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+	if not unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
 	# assign company headquarter to platoon headquarter 
-	if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 
 func draw_fog():
@@ -543,7 +543,7 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
 		WheelOption.Option.FIRE_AT:
 			var can_shoot: bool = false
-			if not selected_unit.squadType == Unit.SquadType.MORTAR:
+			if not selected_unit.squad_type == Globals.SquadType.MORTAR:
 				var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(selected_unit.current_hex, [])
 				if unit_visible_hexes.has(map_hex):
 					can_shoot = true
@@ -569,7 +569,7 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 			#selected_unit.ui.show_failure()
 			#return
 		#var local_pos: Vector2
-		#if selected_unit.squadType == Unit.SquadType.MORTAR:
+		#if selected_unit.squad_type == Globals.SquadType.MORTAR:
 			#selected_unit.order(Globals.UnitCmd.ATTACK_GROUND, map_hex)
 		#else:
 			#var units: Array[Node2D] = _find_units_at(map_hex)
@@ -1380,11 +1380,11 @@ func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout:
 	unit._setup_runtime_soldiers(squad_loadout)
 	unit.add_to_group("units")
 	#match squad_type:
-		#Unit.SquadType.Rifle:
+		#Globals.SquadType.Rifle:
 			#unit.make_rifle_squad = true
-		#Unit.SquadType.MG:
+		#Globals.SquadType.MG:
 			#unit.make_light_mg_team = true
-		#Unit.SquadType.PLATOON_HEADQUARTERS:
+		#Globals.SquadType.PLATOON_HEADQUARTERS:
 			#unit.make_platoon_headquarters_squad = true
 	
 	unit.formation_id = formation_id 
@@ -1420,8 +1420,8 @@ func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout:
 	unit.update_terrain_defense_bonus()
 			
 	# assign platoon headquarter to squad 
-	if not unit.squadType == Unit.SquadType.COMPANY_HEADQUARTERS and not unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+	if not unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
 	# assign company headquarter to platoon headquarter 
-	if unit.squadType == Unit.SquadType.PLATOON_HEADQUARTERS:
+	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)

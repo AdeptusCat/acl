@@ -4,15 +4,6 @@ extends Node2D
 class_name Unit
 
 
-enum SquadType {
-	Rifle,
-	MG,
-	ANTITANK,
-	MORTAR,
-	PLATOON_HEADQUARTERS,
-	COMPANY_HEADQUARTERS,
-}
-
 enum Company {
 	A,
 	B,
@@ -22,6 +13,16 @@ enum Company {
 	F,
 }
 
+
+const COMPANY_NAMES: Dictionary[Company, String] = {
+	Company.A: "A",
+	Company.B: "B",
+	Company.C: "C",
+	Company.D: "D",
+	Company.E: "E",
+	Company.F: "F",
+}
+
 enum AttackState { AUTO, MANUAL_GROUND, MANUAL_TRACK }
 var attackState: AttackState = AttackState.AUTO
 var attack_ground_rounds_budget: int = 0
@@ -29,9 +30,9 @@ var terrain_defense_bonus: int = 0
 
 var close_combat_defense_preparedness: float = 0.0
 
-@export var squad: int = 0
-@export var platoon: int = 0
-@export var company: Company = Company.A
+@export var squad: int = 0 : set = set_squad_nr
+@export var platoon: int = 0 : set = set_platoon_nr
+@export var company: Company = Company.A : set = set_company_nr
 
 enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
 
@@ -115,7 +116,10 @@ var original_size := 10
 var leader_alive := true
 
 
-@export var squadType: SquadType = SquadType.Rifle
+@export var squads_collection: SquadsCollection
+@export var squad_type: Globals.SquadType = Globals.SquadType.Rifle : set = set_squad_type
+
+#@export var make_rifle_squad: bool = false : set = _make_rifle_squad
 
 # === Signals ===
 signal unit_entered_hex(new_hex: Vector2i)
@@ -155,7 +159,6 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 
 # === Classes ===
 @onready var tactical_state: SquadTacticalState = SquadTacticalState.new()
-
 
 
 
@@ -207,7 +210,7 @@ func setup():
 	
 	ui.set_loadout(squad_fire.soldiers)
 	
-	update_team_sprite(team, squadType)
+	update_team_sprite(team, squad_type)
 	movement.new_target_hex.connect(_on_new_target_hex)
 
 
@@ -230,7 +233,7 @@ func order(cmd: Globals.UnitCmd, parameter):
 		#return
 	match cmd:
 		Globals.UnitCmd.FIRE_AT_HEX:
-			if squadType == Unit.SquadType.MORTAR:
+			if squad_type == Globals.SquadType.MORTAR:
 				if parameter is Unit:
 					var enemy_unit: Unit = parameter as Unit
 					squad_fire.set_target_unit(enemy_unit)
@@ -260,7 +263,7 @@ func order(cmd: Globals.UnitCmd, parameter):
 		
 		
 		#Globals.UnitCmd.ATTACK_UNIT:
-			#if squadType == Unit.SquadType.MORTAR:
+			#if squad_type == Globals.SquadType.MORTAR:
 				#if parameter is Unit:
 					#var enemy_unit: Unit = parameter as Unit
 					#squad_fire.set_target_unit(enemy_unit)
@@ -272,7 +275,7 @@ func order(cmd: Globals.UnitCmd, parameter):
 				#squad_fire.set_target_unit(enemy_unit)
 #
 		#Globals.UnitCmd.ATTACK_GROUND:
-			#if squadType == Unit.SquadType.MORTAR:
+			#if squad_type == Globals.SquadType.MORTAR:
 				#if parameter is Unit:
 					#var enemy_unit: Unit = parameter as Unit
 					#squad_fire.set_target_unit(enemy_unit)
@@ -525,10 +528,47 @@ func _resize_loadouts(n: int) -> void:
 	while loadouts.size() > n:
 		loadouts.pop_back()
 
+
+func set_squad_type(_squad_type: Globals.SquadType):
+	squad_type = _squad_type
+	_make_squad()
+
+
+func set_squad_nr(_value: int):
+	squad = _value
+	_make_squad()
+
+
+func set_platoon_nr(_value: int):
+	platoon = _value
+	_make_squad()
+
+
+func set_company_nr(_value: Company):
+	company = _value
+	_make_squad()
+
+
+func _make_squad():
+	match squad_type:
+		Globals.SquadType.PLATOON_HEADQUARTERS:
+			if not squad == 0:
+				squad = 0
+		Globals.SquadType.COMPANY_HEADQUARTERS:
+			if not squad == 0:
+				squad = 0
+			if not platoon == 0:
+				platoon = 0
+	var _squads: Squads = squads_collection.get_squad(team)
+	var _squad: SquadLoadoutSpec = _squads.get_squad(squad_type)
+	squad_loadout = _squad
+	name =   "C" + str(COMPANY_NAMES[company]) + "_P" + str(platoon) + "_S" + str(squad) + "_" + Globals.TEAM_NAMES[team] + "_" + Globals.SQUAD_TYPE_NAMES[squad_type]
+
+
 # template builders (run in editor by ticking the bool, it resets to false)
 func _make_rifle_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.Rifle
+		squad_type = Globals.SquadType.Rifle
 		make_rifle_squad = false
 		if team == 0:
 			var group_size: int = 10
@@ -631,7 +671,7 @@ func _make_rifle_squad(v: bool) -> void:
 
 func _make_platoon_headquarters_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.PLATOON_HEADQUARTERS
+		squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
 		make_rifle_squad = false
 		if team == 0:
 			var group_size: int = 7
@@ -717,7 +757,7 @@ func _make_platoon_headquarters_squad(v: bool) -> void:
 
 func _make_company_headquarters_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.COMPANY_HEADQUARTERS
+		squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
 		make_rifle_squad = false
 		if team == 0:
 			var group_size: int = 7
@@ -815,7 +855,7 @@ func _make_company_headquarters_squad(v: bool) -> void:
 
 func _make_light_mg_team(v: bool) -> void:
 	if v:
-		squadType = SquadType.MG
+		squad_type = Globals.SquadType.MG
 		make_light_mg_team = false
 		if team == 0:
 			var group_size: int = 7
@@ -896,7 +936,7 @@ func _make_light_mg_team(v: bool) -> void:
 
 func _make_anti_tank_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.ANTITANK
+		squad_type = Globals.SquadType.ANTITANK
 		make_anti_tank_squad = false
 		if team == 0:
 			var group_size: int = 2
@@ -941,7 +981,7 @@ func _make_anti_tank_squad(v: bool) -> void:
 
 func _make_light_mortar_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.MORTAR
+		squad_type = Globals.SquadType.MORTAR
 		make_light_mortar_squad = false
 		if team == 0:
 			var group_size: int = 5
@@ -1012,7 +1052,7 @@ func _make_light_mortar_squad(v: bool) -> void:
 
 func _make_medium_mortar_squad(v: bool) -> void:
 	if v:
-		squadType = SquadType.MORTAR
+		squad_type = Globals.SquadType.MORTAR
 		make_anti_tank_squad = false
 		if team == 0:
 			var group_size: int = 8
@@ -1245,11 +1285,11 @@ func get_visible_enemies() -> Array:
 
 func set_team(new_team: Globals.Team):
 	team = new_team
-	update_team_sprite(team, squadType)
+	update_team_sprite(team, squad_type)
 
 
-func update_team_sprite(_team: Globals.Team, _squadType: SquadType):
-	ui.update_team_sprite(_team, _squadType)
+func update_team_sprite(_team: Globals.Team, _squad_type: Globals.SquadType):
+	ui.update_team_sprite(_team, _squad_type)
 
 
 
@@ -1627,14 +1667,14 @@ func get_state_name(state: MoraleState) -> String:
 		
 
 
-func get_squad_type_name(type: SquadType) -> String:
+func get_squad_type_name(type: Globals.SquadType) -> String:
 	match type:
-		SquadType.Rifle: return "Rifle Squad"
-		SquadType.MG: return "Machine Gun Squad"
-		SquadType.ANTITANK: return "Antitank Team"
-		SquadType.MORTAR: return "Mortar Squad"
-		SquadType.PLATOON_HEADQUARTERS: return "Platoon Headquarters"
-		SquadType.COMPANY_HEADQUARTERS: return "Company Headquarters"
+		Globals.SquadType.Rifle: return "Rifle Squad"
+		Globals.SquadType.MG: return "Machine Gun Squad"
+		Globals.SquadType.ANTITANK: return "Antitank Team"
+		Globals.SquadType.MORTAR: return "Mortar Squad"
+		Globals.SquadType.PLATOON_HEADQUARTERS: return "Platoon Headquarters"
+		Globals.SquadType.COMPANY_HEADQUARTERS: return "Company Headquarters"
 		_: return "Unknown"
 		
 
@@ -1957,7 +1997,7 @@ func is_probe_candidate() -> bool:
 	return is_alive() and not is_mg_team()
 
 func is_mg_team() -> bool:
-	return squadType == Unit.SquadType.MG
+	return squad_type == Globals.SquadType.MG
 
 
 func _on_command_connectivity_timeout() -> void:
@@ -2026,7 +2066,7 @@ func create_save_data() -> UnitSaveData:
 	for soldier: Soldier in squad_fire.soldiers:
 		var soldier_data: SoldierLoadout = soldier.create_save_data()
 		squad_loadout.soldiers.append(soldier_data)
-	squad_loadout.squad_type = squadType
+	squad_loadout.squad_type = squad_type
 	squad_loadout.team = team
 	
 	data.squad_loadout = squad_loadout

@@ -212,7 +212,7 @@ func show_unit_detail(_unit: Unit, tween_on: bool = true):
 	
 	_on_leadership_changed(unit.stress_system.leadership_bonus)
 	_on_state_changed(unit.stress_system.state)
-	unit_type_label.text = unit.get_squad_type_name(unit.squadType)
+	unit_type_label.text = unit.get_squad_type_name(unit.squad_type)
 	
 	show()
 	if OS.is_debug_build():

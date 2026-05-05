@@ -57,13 +57,17 @@ func setup_map_options(maps: Array[Map]):
 		for scenario in scenarios:
 			if not OS.is_debug_build() and not scenario.released:
 				continue
+			
 			var scenario_button: Button = Button.new()
 			scenario_button.text = scenario.scenario_name
 			maps_v_box_container.add_child(scenario_button)
 			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(map, scenario))
 			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(map, scenario))
 			scenario_button.mouse_exited.connect(_on_scenario_button_mouse_exited)
-			
+			if scenario.previous_scenario:
+				var match_data: MatchSaveData = Globals.load_match_data(scenario.previous_scenario.scenario_name.to_lower().replace(" ", "_"))
+				if not match_data:
+					scenario_button.disabled = true
 			
 func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 	scenario_description.text = scenario.scenario_description

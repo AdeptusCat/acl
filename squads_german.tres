@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="Squads" format=3 uid="uid://lp0f0dhp86jk"]
+
+[ext_resource type="Script" uid="uid://bhetl3cslc2tj" path="res://squads.gd" id="1_50hsf"]
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="2_54gaq"]
+[ext_resource type="Resource" uid="uid://bwfw35mmy64ro" path="res://resources/squads/german/rifle_squad.tres" id="3_h57nn"]
+[ext_resource type="Resource" uid="uid://1vun3vkkv6cn" path="res://resources/squads/german/lmg_squad.tres" id="4_8kew4"]
+[ext_resource type="Resource" uid="uid://dibkg1uf8xp1l" path="res://resources/squads/german/anti_tank_team.tres" id="5_0m0ui"]
+[ext_resource type="Resource" uid="uid://bgercl11nyflu" path="res://resources/squads/german/medium_mortar_squad.tres" id="6_cbmfo"]
+[ext_resource type="Resource" uid="uid://boephgpg2cfao" path="res://resources/squads/german/platoon_hq.tres" id="7_8aqkk"]
+[ext_resource type="Resource" uid="uid://0yrwtv2ux2fi" path="res://resources/squads/german/company_hq.tres" id="8_17714"]
+
+[resource]
+script = ExtResource("1_50hsf")
+squads = Dictionary[int, ExtResource("2_54gaq")]({
+0: ExtResource("3_h57nn"),
+1: ExtResource("4_8kew4"),
+2: ExtResource("5_0m0ui"),
+3: ExtResource("6_cbmfo"),
+4: ExtResource("7_8aqkk"),
+5: ExtResource("8_17714")
+})
+metadata/_custom_type_script = "uid://bhetl3cslc2tj"

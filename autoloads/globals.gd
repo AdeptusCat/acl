@@ -39,6 +39,28 @@ enum UnitCmd {
 }
 
 
+enum SquadType {
+	Rifle,
+	MG,
+	ANTITANK,
+	MORTAR,
+	PLATOON_HEADQUARTERS,
+	COMPANY_HEADQUARTERS,
+}
+
+const SQUAD_TYPE_NAMES: Dictionary[SquadType, String] = {
+	SquadType.Rifle: "Rifle",
+	SquadType.MG: "MG",
+	SquadType.ANTITANK: "Antitank",
+	SquadType.MORTAR: "Mortar",
+	SquadType.PLATOON_HEADQUARTERS: "PlatoonHQ",
+	SquadType.COMPANY_HEADQUARTERS: "CompanyHQ",
+}
+
+const TEAM_NAMES: Dictionary[Team, String] = {
+	Team.AXIS: "Axis",
+	Team.ALLIES: "Allies",
+}
 
 const SQUAD_SHIFT: int = 0
 const PLATOON_SHIFT: int = 8
@@ -97,3 +119,44 @@ func reset():
 	scenario_chosen = null
 	units_destroyed = UnitsCollection.new()
 	unit_hierarchy.clear()
+
+
+func save_match_data(match_save: MatchSaveData) -> void:
+	var save_path: String = "user://matches/%s.tres" % match_save.match_id
+	print("Saved match as: " + save_path)
+	var dir_path: String = save_path.get_base_dir()
+
+	if not DirAccess.dir_exists_absolute(dir_path):
+		var dir_error: Error = DirAccess.make_dir_recursive_absolute(dir_path)
+
+		if dir_error != OK:
+			push_error("Could not create save directory: %s Error: %s" % [dir_path, dir_error])
+			return
+
+	var save_error: Error = ResourceSaver.save(match_save, save_path)
+
+	if save_error != OK:
+		push_error("Could not save match data: %s Error: %s" % [save_path, save_error])
+		return
+
+
+func load_match_data(match_id: String) -> MatchSaveData:
+	var save_path: String = "user://matches/%s.tres" % match_id
+
+	if not ResourceLoader.exists(save_path):
+		push_error("Match save does not exist: %s" % save_path)
+		return null
+
+	var loaded_resource: Resource = ResourceLoader.load(save_path)
+
+	if loaded_resource == null:
+		push_error("Could not load match save: %s" % save_path)
+		return null
+
+	var match_save: MatchSaveData = loaded_resource as MatchSaveData
+
+	if match_save == null:
+		push_error("Loaded resource is not MatchSaveData: %s" % save_path)
+		return null
+
+	return match_save

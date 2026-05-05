@@ -8,6 +8,7 @@ class_name Scenario
 @export var scenario_description: String = ""
 @export var duration_s: float = 180.0
 @export var released: bool = false
+@export var previous_scenario: Scenario
 
 #@export var attacker_team: Globals.Team = Globals.Team.ALLIES
 #@export var defender_team: Globals.Team = Globals.Team.AXIS

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="2_h0ojj"]
+[ext_resource type="Resource" uid="uid://u8chl6873sdy" path="res://squads_collection.tres" id="3_8iqcm"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
 [ext_resource type="PackedScene" uid="uid://i3ic130sb2st" path="res://scenes/game/units/leader_aura.tscn" id="8_b5oeb"]
@@ -32,6 +33,7 @@ fire_rate = 1.5
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("3_8iqcm")
 metadata/_edit_lock_ = true
 
 [node name="UnitUi" parent="." unique_id=1803731449 instance=ExtResource("10_ga1pk")]
@@ -81,7 +83,6 @@ wait_time = 0.1
 wait_time = 0.1
 autostart = true
 
-[connection signal="debug_kill_soldier" from="UnitUi" to="." method="_on_unit_ui_debug_kill_soldier"]
 [connection signal="timeout" from="CommandConnectivityTimer" to="." method="_on_command_connectivity_timeout"]
 [connection signal="timeout" from="EnemyVisibilityCheckerTimer" to="." method="_on_enemy_visibility_checker_timer_timeout"]
 [connection signal="timeout" from="CloseCombatDefensePreparednessTimer" to="." method="_on_close_combat_defense_preparedness_timer_timeout"]

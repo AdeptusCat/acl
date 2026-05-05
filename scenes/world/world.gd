@@ -103,7 +103,8 @@ func _ready():
 	#var pos_a : Vector2 = ground_layer.map_to_local(Vector2i(0,1))
 	#LOSHelper.get_tile_local_pixel_coords(pos_a, building_layer)
 	
-	
+	#var match_data: MatchSaveData = load_match_data("debug1")
+	#game_controller.spawn_units_from_match_save(match_data)
 	
 
 var selected_hex: Vector2i 
@@ -336,8 +337,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	fog_of_war_tile_map_layer.move_to_front()
 	selected_tile_map_layer.move_to_front()
 	
-	#var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
-	#objectives_layer.reparent(tile_map_layers)
+	var objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer()
+	objectives_layer.reparent(tile_map_layers)
 	
 	
 	
@@ -357,8 +358,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	game_controller.move_camera(scenario.start_hex)
 	
-	var match_data: MatchSaveData = load_match_data("debug")
-	game_controller.spawn_units_from_match_save(match_data)
+	#var match_data: MatchSaveData = load_match_data("debug")
+	#game_controller.spawn_units_from_match_save(match_data)
 
 
 #func _process(delta: float) -> void:
@@ -410,44 +411,4 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 		if unit.team == Globals.team_player:
 			var unit_save_data: UnitSaveData = unit.create_save_data()
 			match_save.player_units.append(unit_save_data)
-	_save_match_data(match_save)
-
-func _save_match_data(match_save: MatchSaveData) -> void:
-	var save_path: String = "user://matches/%s.tres" % match_save.match_id
-	print("Saved match as: " + save_path)
-	var dir_path: String = save_path.get_base_dir()
-
-	if not DirAccess.dir_exists_absolute(dir_path):
-		var dir_error: Error = DirAccess.make_dir_recursive_absolute(dir_path)
-
-		if dir_error != OK:
-			push_error("Could not create save directory: %s Error: %s" % [dir_path, dir_error])
-			return
-
-	var save_error: Error = ResourceSaver.save(match_save, save_path)
-
-	if save_error != OK:
-		push_error("Could not save match data: %s Error: %s" % [save_path, save_error])
-		return
-
-
-func load_match_data(match_id: String) -> MatchSaveData:
-	var save_path: String = "user://matches/%s.tres" % match_id
-
-	if not ResourceLoader.exists(save_path):
-		push_error("Match save does not exist: %s" % save_path)
-		return null
-
-	var loaded_resource: Resource = ResourceLoader.load(save_path)
-
-	if loaded_resource == null:
-		push_error("Could not load match save: %s" % save_path)
-		return null
-
-	var match_save: MatchSaveData = loaded_resource as MatchSaveData
-
-	if match_save == null:
-		push_error("Loaded resource is not MatchSaveData: %s" % save_path)
-		return null
-
-	return match_save
+	Globals.save_match_data(match_save)
