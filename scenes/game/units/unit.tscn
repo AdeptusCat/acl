@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://df21y1pynx2e8" path="res://scenes/game/units/unit.gd" id="1_btf8p"]
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="2_h0ojj"]
+[ext_resource type="Resource" uid="uid://bwfw35mmy64ro" path="res://resources/squads/german/rifle_squad.tres" id="2_hv2oo"]
 [ext_resource type="Resource" uid="uid://u8chl6873sdy" path="res://squads_collection.tres" id="3_8iqcm"]
 [ext_resource type="PackedScene" uid="uid://dadnwuy2v5xk4" path="res://scenes/game/effects/morale_popup.tscn" id="5_djab4"]
 [ext_resource type="PackedScene" uid="uid://c8oapr6lv0pny" path="res://scenes/game/units/unit_stress_controller.tscn" id="7_v8x2n"]
@@ -26,10 +27,11 @@ metadata/_custom_type_script = "uid://bikdnoi2rxdle"
 script = ExtResource("2_h0ojj")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"
 
-[node name="Unit" type="Node2D" unique_id=437630089]
+[node name="CA_P0_S0_Axis_Rifle" type="Node2D" unique_id=437630089]
 script = ExtResource("1_btf8p")
 retreat_speed = 100.0
 fire_rate = 1.5
+squad_loadout = ExtResource("2_hv2oo")
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")

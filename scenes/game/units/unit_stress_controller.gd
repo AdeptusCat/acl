@@ -5,7 +5,7 @@ var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
 		STATES.MoraleState.CAUTIOUS : 0.8,
 		STATES.MoraleState.PINNED : 0.35,
-		STATES.MoraleState.PANIC : 0.0,
+		STATES.MoraleState.PANIC : 0.1,
 		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
 	}
 
@@ -364,7 +364,9 @@ func _process(delta: float) -> void:
 		S_eff = S_CAP
 	else:
 		S_eff = raw_effective_stress
-	
+	#if S_eff > 0.0:
+		#print(S_eff, " ", stress_fast, " ", stress_slow)
+		
 	if S_eff < 0.0:
 		S_eff = 0.0
 	if S_eff > S_CAP:
