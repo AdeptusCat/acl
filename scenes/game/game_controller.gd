@@ -387,6 +387,7 @@ func set_close_combat_hexes_and_units():
 			
 			for _unit in units_in_hex:
 				_unit.in_close_combat = true
+				_unit.movement.stop()
 			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
 			#close_combat_locations.add_child(close_combat_sign)
 			#if not Globals.close_combat_locations.has(unit.current_hex):
@@ -539,7 +540,8 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 	if not selected_unit:
 		return
 	
-	
+	if selected_unit.in_close_combat:
+		return
 	
 	match option:
 		WheelOption.Option.NONE:
