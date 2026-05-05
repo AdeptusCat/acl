@@ -812,8 +812,8 @@ func start_game(team: Globals.Team, time: float):
 	else:
 		Globals.team_enemy = Globals.Team.AXIS
 		
-	#set_objective_cells(team)
-	#set_objective_cells(Globals.Team.ALLIES)
+	set_objective_cells(team)
+	set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	
 	start_match.emit()
@@ -844,18 +844,21 @@ func start_game(team: Globals.Team, time: float):
 		allies_ai_active = true
 	
 	var ai_mission_mode: GoapTypes.FormationMissionMode
-	match Globals.game_mode:
-		Globals.GameMode.DEFEND:
-			ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
-		Globals.GameMode.ATTACK:
-			ai_mission_mode = GoapTypes.FormationMissionMode.DEFEND
+	ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
+	#match Globals.game_mode:
+		#Globals.GameMode.DEFEND:
+			#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
+		#Globals.GameMode.ATTACK:
+			#ai_mission_mode = GoapTypes.FormationMissionMode.DEFEND
 		
 	for formation_ai_controller in axis_formation_ai_controllers.get_children():
+		formation_ai_controller._refresh_squad_list()
 		var controller: FormationAIController = formation_ai_controller
 		if controller.active:
 			controller.active = axis_ai_active
 			controller.mission_mode = ai_mission_mode
 	for formation_ai_controller in allies_formation_ai_controllers.get_children():
+		formation_ai_controller._refresh_squad_list()
 		var controller: FormationAIController = formation_ai_controller
 		if controller.active:
 			controller.active = allies_ai_active

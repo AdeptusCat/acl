@@ -25,7 +25,7 @@ var enemy_contacts: Array[Unit]
 
 
 func _ready() -> void:
-	_refresh_squad_list()
+	#_refresh_squad_list()
 	_select_goal(null)
 
 func _process(delta: float) -> void:
@@ -42,17 +42,15 @@ func _process(delta: float) -> void:
 
 func _refresh_squad_list() -> void:
 	squads.clear()
-	var units: Array[Node] = get_tree().get_nodes_in_group("units")
+	var units: Array[Unit] = Globals.get_units()
 	var has_unit_in_formation: bool = false
-	for n in units:
-		var squad: Node = n
-		if squad.has_method("get_formation_id"):
-			var f_id: int = squad.get_formation_id()
-			var s_team: Globals.Team = squad.team
-			if f_id == formation_id and s_team == team:
-				has_unit_in_formation = true
-				if squad.is_good_order():
-					squads.append(squad)
+	for unit in units:
+		var f_id: int = unit.get_formation_id()
+		var s_team: Globals.Team = unit.team
+		if f_id == formation_id and s_team == team:
+			has_unit_in_formation = true
+			if unit.is_good_order():
+				squads.append(unit)
 	if not has_unit_in_formation:
 		queue_free()
 	for squad in squads:
