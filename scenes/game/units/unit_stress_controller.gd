@@ -114,6 +114,7 @@ var _how_long_under_fire_s: float = 0.0
 var _how_long_under_fire_util_rout_s: float = 4.0
 var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
+var under_fire: bool = false
 
 var stress_window_duration: float = 10.0
 var stress_time_accumulator: float = 0.0
@@ -190,6 +191,14 @@ func get_average_stress_rate() -> float:
 
 
 func _process(delta: float) -> void:
+	_under_fire_t -= delta
+	if _under_fire_t < 0.0:
+		_under_fire_t = 0.0
+	if _under_fire_t > 0.0:
+		under_fire = true
+	else:
+		under_fire = false
+	
 	match state:
 		STATES.MoraleState.CAUTIOUS:
 			_repin_since_unpin += delta
@@ -206,7 +215,7 @@ func _process(delta: float) -> void:
 					if not _unit.team == get_parent().team:
 						if _unit.is_good_order():
 							if LOSHelper.ground_layer.cube_distance(get_parent().current_cube, _unit.current_cube) <= 1:
-								if S_eff >= S_CAP:
+								if S_eff >= 90.0:
 									if _since_rout_check >= 2.0:
 										var roll: float = randf()
 										if roll > 0.5:
@@ -342,7 +351,19 @@ func _process(delta: float) -> void:
 	var stress_decay_s_with_delta: float = stress_decay_s_per_second * delta
 	stress_fast -= stress_decay_f_with_delta
 	stress_slow -= stress_decay_s_with_delta
-	S_eff = stress_fast + stress_slow
+	#S_eff = stress_fast + stress_slow
+	
+	var raw_effective_stress: float = 0.0
+
+	raw_effective_stress += stress_fast * 0.5
+	raw_effective_stress += stress_slow * 0.5
+
+	if raw_effective_stress < 0.0:
+		S_eff = 0.0
+	elif raw_effective_stress > S_CAP:
+		S_eff = S_CAP
+	else:
+		S_eff = raw_effective_stress
 	
 	if S_eff < 0.0:
 		S_eff = 0.0
@@ -514,13 +535,15 @@ func _maybe_transition(delta: float) -> void:
 				#if roll < p:
 					#_set_state(STATES.MoraleState.PANIC)
 			if s_eff >= pin_threshold:
-				var p: float = _rate_to_prob(L_NORMAL_TO_PINNED, dt_trial)
-				if roll < p:
-					_set_state(STATES.MoraleState.PINNED)
+				if under_fire:
+					var p: float = _rate_to_prob(L_NORMAL_TO_PINNED, dt_trial)
+					if roll < p:
+						_set_state(STATES.MoraleState.PINNED)
 			elif s_eff >= pin_threshold * H_CAUTION_FROM_NORMAL:
-				var p: float = _rate_to_prob(L_NORMAL_TO_CAUTIOUS, dt_trial)
-				if roll < p:
-					_set_state(STATES.MoraleState.CAUTIOUS)
+				if under_fire:
+					var p: float = _rate_to_prob(L_NORMAL_TO_CAUTIOUS, dt_trial)
+					if roll < p:
+						_set_state(STATES.MoraleState.CAUTIOUS)
 
 		STATES.MoraleState.CAUTIOUS:
 			#if s_eff >= panic_threshold:
@@ -528,12 +551,13 @@ func _maybe_transition(delta: float) -> void:
 				#if roll < p:
 					#_set_state(STATES.MoraleState.PANIC)
 			if s_eff >= pin_threshold:
-				# base hazard is 0.30; ramp it from 0 → 0.30 after unpin
-				var repin_ramp_multiplier: float = _repin_ramp_multiplier()
-				var lambda: float = L_CAUTIOUS_TO_PINNED * repin_ramp_multiplier
-				var rate: float = _rate_to_prob(lambda, dt_trial)
-				if roll < rate:
-					_set_state(STATES.MoraleState.PINNED)
+				if under_fire:
+					# base hazard is 0.30; ramp it from 0 → 0.30 after unpin
+					var repin_ramp_multiplier: float = _repin_ramp_multiplier()
+					var lambda: float = L_CAUTIOUS_TO_PINNED * repin_ramp_multiplier
+					var rate: float = _rate_to_prob(lambda, dt_trial)
+					if roll < rate:
+						_set_state(STATES.MoraleState.PINNED)
 			elif s_eff < pin_threshold * H_NORMAL_FROM_CAUTION:
 				# recovery leg: CAUTIOUS -> NORMAL (apply bias)
 				var p: float = _rate_to_prob(_apply_recovery_bias(L_CAUTIOUS_TO_NORMAL), dt_trial)
@@ -541,6 +565,7 @@ func _maybe_transition(delta: float) -> void:
 					_set_state(STATES.MoraleState.NORMAL)
 
 		STATES.MoraleState.PINNED:
+			# disabled by setting L_PINNED_TO_PANIC = 0.0
 			if s_eff >= panic_threshold:
 				var p: float = _rate_to_prob(L_PINNED_TO_PANIC, dt_trial)
 				if roll < p:
