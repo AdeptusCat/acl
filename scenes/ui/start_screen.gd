@@ -68,6 +68,9 @@ func setup_map_options(maps: Array[Map]):
 				var match_data: MatchSaveData = Globals.load_match_data(scenario.previous_scenario.scenario_name.to_lower().replace(" ", "_"))
 				if not match_data:
 					scenario_button.disabled = true
+				else:
+					if not match_data.winner_team == match_data.player_team:
+						scenario_button.disabled = true
 			
 func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 	scenario_description.text = scenario.scenario_description

@@ -817,7 +817,7 @@ func erase_freed_objects_key_from_dict(dict: Dictionary):
 
 func start_game(team: Globals.Team, time: float):
 	
-	time_left_seconds = time * 60.0
+	time_left_seconds = time * 60.0 # * 60.0
 	Globals.team_player = team
 	if team == Globals.Team.AXIS:
 		Globals.team_enemy = Globals.Team.ALLIES

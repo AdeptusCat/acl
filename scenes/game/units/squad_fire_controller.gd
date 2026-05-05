@@ -497,6 +497,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
+	if target_unit and (Unit.AttackState.MANUAL_TRACK or Unit.AttackState.AUTO):
+		if not target_unit.current_hex == target_hex:
+			target_hex = target_unit.current_hex
 	var _target_hex: Vector2i = target_hex
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = mortar_target_hex

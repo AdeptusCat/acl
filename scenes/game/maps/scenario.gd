@@ -18,7 +18,10 @@ class_name Scenario
 
 @export var victory_conditions: Array[VictoryCondition] = []
 
-var start_hex : Vector2i = Vector2i.ZERO
+var start_hex: Dictionary[Globals.Team, Vector2i] = {
+	Globals.Team.AXIS: Vector2i.ZERO,
+	Globals.Team.ALLIES: Vector2i.ZERO
+	}
 
 
 #func get_objectives(team: Globals.Team) -> Array[Node]:
@@ -66,7 +69,7 @@ func get_objectives() -> Dictionary[Globals.Team, ObjectivesCollection]:
 		objective.position = axis_objectives_tile_map_layer.map_to_local(cell)
 		
 		if objective.objective_id == 4:
-			start_hex = cell
+			start_hex[Globals.Team.AXIS] = cell
 			axis_objectives_tile_map_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear hex
 		else:
 			objectives[objective.team].objectives.append(objective)
@@ -89,7 +92,7 @@ func get_objectives() -> Dictionary[Globals.Team, ObjectivesCollection]:
 		objective.position = allied_objectives_tile_map_layer.map_to_local(cell)
 		
 		if objective.objective_id == 4:
-			start_hex = cell
+			start_hex[Globals.Team.ALLIES] = cell
 			allied_objectives_tile_map_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear hex
 		else:
 			objectives[objective.team].objectives.append(objective)
