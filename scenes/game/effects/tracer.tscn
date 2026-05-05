@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://f0alj1u01yb5"]
+[gd_scene format=3 uid="uid://f0alj1u01yb5"]
 
 [ext_resource type="Script" uid="uid://dhgn3ugjdh5p1" path="res://scenes/game/effects/tracer.gd" id="1_yt2qg"]
 [ext_resource type="Texture2D" uid="uid://gn37ek8rfqmy" path="res://assets/effects/tracer - Kopie.png" id="2_oxgep"]
@@ -20,11 +20,11 @@ colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
 _data = [Vector2(0.015432097, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 2
 
-[node name="Tracer" type="Node2D"]
+[node name="Tracer" type="Node2D" unique_id=172848691]
 script = ExtResource("1_yt2qg")
 tracer_texture = ExtResource("2_oxgep")
 
-[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
+[node name="CPUParticles2D" type="CPUParticles2D" parent="." unique_id=430471733]
 modulate = Color(18.031, 11.303, 6.597, 1)
 amount = 1
 texture = ExtResource("2_oxgep")
@@ -34,7 +34,7 @@ emission_shape = 1
 emission_sphere_radius = 128.0
 gravity = Vector2(0, 0)
 
-[node name="CPUParticles2D2" type="CPUParticles2D" parent="."]
+[node name="CPUParticles2D2" type="CPUParticles2D" parent="." unique_id=554603097]
 modulate = Color(5.854, 1.659, 0, 1)
 emitting = false
 amount = 50
@@ -52,7 +52,7 @@ scale_amount_max = 3.0
 scale_amount_curve = SubResource("Curve_oxgep")
 color_ramp = SubResource("Gradient_njtwl")
 
-[node name="RocketExhaust" type="CPUParticles2D" parent="."]
+[node name="RocketExhaust" type="CPUParticles2D" parent="." unique_id=1675854690]
 emitting = false
 amount = 32
 lifetime = 0.5

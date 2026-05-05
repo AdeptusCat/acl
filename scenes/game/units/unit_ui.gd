@@ -248,7 +248,7 @@ func stopped_moving(broken: bool, surrendered: bool):
 func _on_morale_breaks():
 	$Timer.stop()
 	#broken_label.visible = true
-	show_failure()
+	show_broken()
 	for child in unit_status_control.get_children():
 		child.visible = false
 	broken_texture_rect.visible = true
@@ -277,7 +277,7 @@ func _on_morale_updated(current, _max):
 
 
 func _on_morale_failure():
-	show_failure()
+	show_broken()
 	if detail_ui:
 		detail_ui._on_morale_failure()
 
@@ -319,8 +319,12 @@ func show_casualty():
 	_spawn_popup("casualty")
 
 
-func show_failure():
-	_spawn_popup("failure")
+func show_broken():
+	_spawn_popup("broken")
+
+
+func show_pinned():
+	_spawn_popup("pinned")
 	#_spawn_flash("failure")
 	#if detail_ui:
 		#detail_ui.show_failure()
@@ -339,8 +343,10 @@ func _spawn_popup(type: String):
 	add_child(popup)
 	#popup.position = position + Vector2(0, -20)
 	match type:
-		"failure":
-			popup.start_failure()
+		"broken":
+			popup.start_broken()
+		"pinned":
+			popup.start_pinned()
 		"casualty":
 			popup.start_casualty()
 		_:

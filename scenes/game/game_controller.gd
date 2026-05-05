@@ -545,9 +545,11 @@ func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option):
 		WheelOption.Option.NONE:
 			pass
 		WheelOption.Option.MOVE_NORMAL:
-			# FIXME show proper warning to user why order cannot be done
-			if selected_unit.broken or selected_unit.surrendered or selected_unit.stress_system.state == STATES.MoraleState.PINNED:
-				selected_unit.ui.show_failure()
+			if selected_unit.broken or selected_unit.surrendered:
+				selected_unit.ui.show_broken()
+				return
+			if selected_unit.stress_system.state == STATES.MoraleState.PINNED:
+				selected_unit.ui.show_pinned()
 				return
 			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
 		WheelOption.Option.FIRE_AT:

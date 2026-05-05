@@ -11,10 +11,18 @@ func start_success():
 	await anim.animation_finished
 	queue_free()
 
-func start_failure():
+func start_broken():
 	$PopupLabel.show()
 	$TextureRect.hide()
 	label.text = "BROKEN"
+	anim.play("popup")
+	await anim.animation_finished
+	queue_free()
+
+func start_pinned():
+	$PopupLabel.show()
+	$TextureRect.hide()
+	label.text = "PINNED"
 	anim.play("popup")
 	await anim.animation_finished
 	queue_free()
