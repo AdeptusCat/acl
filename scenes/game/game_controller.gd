@@ -1084,7 +1084,7 @@ func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) ->
 	if dist < 1:
 		dist = 1
 
-	var is_moving: bool = enemy.moving
+	var is_moving: bool = enemy.is_moving
 
 	var conceal: int = _get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
 	#if conceal > 0:

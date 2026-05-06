@@ -67,7 +67,7 @@ func initialize_project_settings() -> void:
 		OpenWebUIAPI.DEPRECATED_API_KEY_SETTING)
 	
 	if ProjectSettings.get_setting(CONFIG_LLM_API, "").is_empty():
-		# In the future we can consider moving this back to simply:
+		# In the future we can consider is_moving this back to simply:
 		# ProjectSettings.set_setting(CONFIG_LLM_API, "ollama_api")
 		# the code below handles migrating the config from 1.2.0 to 1.3.0
 		var old_path:= "ai_assistant_hub/llm_api"

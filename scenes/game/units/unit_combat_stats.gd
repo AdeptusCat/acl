@@ -211,8 +211,8 @@ func _get_movement_under_fire_penalty() -> float:
 
 	var penalty: float = 0.10
 
-	if unit.is_in_open_ground():
-		penalty = 0.20
+	#if unit.is_in_open_ground():
+		#penalty = 0.20
 
 	return penalty
 

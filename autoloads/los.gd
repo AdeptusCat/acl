@@ -29,7 +29,7 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 			Globals.unit_enemies_in_los[unit].append(enemy_unit)
 
 			## Fire immediately if stationary (optional fast reaction shot)
-			#if enemy_unit.moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
+			#if enemy_unit.is_moving or not enemy_unit.alive or enemy_unit.broken or enemy_unit.surrendered:
 				#if enemy_unit.broken:
 					#var distance: int = LOSHelper.ground_layer.cube_distance(enemy_unit.current_cube, unit.current_cube)
 					#if distance <= 1:

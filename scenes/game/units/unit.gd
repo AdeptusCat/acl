@@ -111,7 +111,7 @@ var goal_hex: Vector2i
 var target_hex: Vector2i # where the movement will end e.g. end of path
 var formation_squads: Array[Unit]
 var selected: bool = false
-var moving: bool = false
+var is_moving: bool = false
 var target_position: Vector2
 var retreat_target_hex: Vector2i = Vector2i()
 var effective_range: int = 0
@@ -1140,7 +1140,7 @@ func _make_medium_mortar_squad(v: bool) -> void:
 
 func _on_started_moving():
 	setAttackState(Unit.AttackState.AUTO)
-	moving = true
+	is_moving = true
 	ui.started_moving(broken, surrendered)
 	started_moving.emit()
 	squad_fire.set_target_unit(null)
@@ -1148,7 +1148,7 @@ func _on_started_moving():
 
 
 func _on_stopped_moving():
-	moving = false
+	is_moving = false
 	ui.stopped_moving(broken, surrendered)
 	#action_controller.on_stopped_moving()
 
@@ -1313,7 +1313,7 @@ func update_team_sprite(_team: Globals.Team, _squad_type: Globals.SquadType):
 #func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 func receive_fire(terrain_defense_bonus: float):
 	cover_updated.emit(int(terrain_defense_bonus))
-	#if moving and not broken and not surrendered:
+	#if is_moving and not broken and not surrendered:
 		#movement.recalc_path()
 
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) -> void:
@@ -1735,7 +1735,7 @@ func die():
 
 
 func _on_retreat_complete(retreat_hex) -> void:
-	movement.moving = false
+	movement.is_moving = false
 	current_hex = retreat_hex
 	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
 	unit_entered_hex.emit(self, current_hex)
@@ -1874,7 +1874,7 @@ func _start_move_to() -> void:
 		#movement.set_route(fallback_route)
 		
 		current_order.target_hexes.append(Globals.objective_hexes[team][0])
-	if moving == false and current_order.target_hexes[0] == current_hex:
+	if is_moving == false and current_order.target_hexes[0] == current_hex:
 		return
 	if not movement.path_hexes.is_empty():
 		if not movement.path_hexes[-1] == current_order.target_hexes[0]:
@@ -1951,7 +1951,7 @@ func _start_base_of_fire() -> void:
 	
 	
 	
-	if not moving and current_hex == closest_hex:
+	if not is_moving and current_hex == closest_hex:
 		return
 	if not movement.path_hexes.is_empty():
 		if not movement.path_hexes[-1] == closest_hex:
@@ -2047,7 +2047,7 @@ func update_close_defense_preparedness(unit: Unit, dt: float) -> void:
 
 	if unit.broken:
 		delta = -1.8 * dt
-	elif unit.moving:
+	elif unit.is_moving:
 		delta = -0.9 * dt
 	else:
 		delta = 0.25 * dt

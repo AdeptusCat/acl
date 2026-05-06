@@ -239,7 +239,7 @@ func _process(delta: float) -> void:
 	
 	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 	if not visible_enemies1.is_empty(): # and target_hex == Vector2i.ZERO
-		if unit.moving or not unit.alive or unit.broken or unit.surrendered:
+		if unit.is_moving or not unit.alive or unit.broken or unit.surrendered:
 			return
 		else:
 			#if unit.team == Globals.team_player:
@@ -431,7 +431,7 @@ func _score_enemy_for_target(shooter_unit: Unit, enemy: Unit, current_hex: Vecto
 	var cover_penalty: float = float(cover_val) # tune weights below to match your cover scale
 
 	var move_bonus: float = 0.0
-	if enemy.moving:
+	if enemy.is_moving:
 		move_bonus = 1.0
 
 	# weights (tune)
@@ -513,7 +513,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	if unit.in_close_combat:
 		return 0
-	if unit.moving:
+	if unit.is_moving:
 		return 0
 	if not s.is_weapon_setup_done(delta_mod):
 		return 0

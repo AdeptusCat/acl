@@ -79,7 +79,7 @@ func add_unit(unit: Unit):
 		return
 	var participant: Participant = Participant.new(unit)
 	participant.team = unit.team
-	if unit.moving: 
+	if unit.is_moving: 
 		participant.side_role = SideRole.ATTACKER
 		if elapsed == 0.0:
 			participant.entry_role = EntryRole.INITIAL_ASSAULTER

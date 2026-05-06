@@ -7,7 +7,7 @@ var unit: Unit
 var path_hexes: Array[Vector2i] = []
 var path_index: int = 0
 var target_position: Vector2
-var moving: bool = false
+var is_moving: bool = false
 var move_speed: float = 30.0
 var target_hex: Vector2i
 @export var base_speed: float = 30.0
@@ -54,7 +54,7 @@ enum TerrainType { OPEN, ROAD, ORCHARD, GRAIN, BRUSH, WOODS, BUILDING }
 var terrain_mult: float = 1.0
 
 func _process(delta: float) -> void:
-	if moving:
+	if is_moving:
 		_process_movement(delta)
 
 
@@ -63,7 +63,7 @@ func _process(delta: float) -> void:
 # ----------------------------------------------------------------------
 
 func stop():
-	if moving:
+	if is_moving:
 		_get_terrain_multiplier()
 		path_index = 0
 		path_hexes.clear()
@@ -76,7 +76,7 @@ func move_to_hex(new_hex: Vector2i) -> void:
 	_get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
-	moving = true
+	is_moving = true
 	started_moving.emit()
 	draw_movement_path.emit(unit.current_hex, path_hexes)
 
@@ -191,7 +191,7 @@ func _process_movement(delta: float) -> void:
 	if dist <= step:
 		# arrive at hex
 		unit.position = target_position
-		moving = false
+		is_moving = false
 		stopped_moving.emit()
 		
 		# here somethings off, the target target_position is where the unit is but the path is another 
@@ -218,7 +218,7 @@ func _process_movement(delta: float) -> void:
 			path_index = 0
 			unit.unit_arrived_at_hex.emit(unit.current_hex)
 	else:
-		# keep moving
+		# keep is_moving
 		unit.position += dir * step
 		# debug
 		if unit.stress_system.state != STATES.MoraleState.NORMAL:

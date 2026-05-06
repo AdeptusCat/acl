@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://b3mkn0m2t3v1t" path="res://scenes/game/units/command_connectivity.tscn" id="11_kkgbq"]
 [ext_resource type="PackedScene" uid="uid://b7txttbtaphxv" path="res://scenes/game/units/enemy_visibility_checker.tscn" id="12_kkgbq"]
 [ext_resource type="Script" uid="uid://cplrik5jrng8v" path="res://scenes/game/units/unit_combat_stats.gd" id="15_hcf0e"]
+[ext_resource type="Script" uid="uid://ba8gxee32uvwd" path="res://scenes/game/units/squad_ai_controller.gd" id="16_8wa5q"]
 
 [sub_resource type="Resource" id="Resource_v8x2n"]
 script = ExtResource("2_h0ojj")
@@ -92,6 +93,9 @@ script = ExtResource("15_hcf0e")
 [node name="CombatStatsTimer" type="Timer" parent="." unique_id=916708244]
 wait_time = 0.25
 autostart = true
+
+[node name="SquadAiController" type="Node" parent="." unique_id=1855446396]
+script = ExtResource("16_8wa5q")
 
 [connection signal="timeout" from="CommandConnectivityTimer" to="." method="_on_command_connectivity_timeout"]
 [connection signal="timeout" from="EnemyVisibilityCheckerTimer" to="." method="_on_enemy_visibility_checker_timer_timeout"]

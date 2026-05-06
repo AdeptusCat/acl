@@ -82,7 +82,7 @@ func _process(_delta: float) -> void:
 				if not unit.is_good_order():
 					set_progress_bar(s, "Panicking", 0, 0)
 					continue
-				if unit.moving:
+				if unit.is_moving:
 					set_progress_bar(s, "Moving", 0, 0)
 					continue
 				if unit.in_close_combat:

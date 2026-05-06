@@ -97,7 +97,7 @@ func _enter_action_state(_prev: int, state: int) -> void:
 	match state:
 		SquadActionState.NO_ORDER:
 			_clear_order_context()
-			movement.moving = false
+			movement.is_moving = false
 			squad_fire.set_target_unit(null)
 			squad_fire.set_target_hex(Vector2i.ZERO)
 		
@@ -129,7 +129,7 @@ func _enter_action_state(_prev: int, state: int) -> void:
 			squad_fire.set_target_hex(Vector2i.ZERO)
 		
 		SquadActionState.REGROUPING:
-			movement.moving = false
+			movement.is_moving = false
 			_start_regroup_timer()
 		
 		_:
@@ -210,7 +210,7 @@ func give_hold_order() -> void:
 	has_attack_flag = false
 	has_withdraw_flag = false
 	
-	movement.moving = false
+	movement.is_moving = false
 	_set_action_state(SquadActionState.HOLDING_POSITION)
 
 
