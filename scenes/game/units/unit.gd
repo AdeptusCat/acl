@@ -61,7 +61,14 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var retreat_speed := 70.0
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
-@export var members_alive := 10
+
+
+@export var members_alive: int = 10
+var original_size: int = 10
+var casualties_taken: int = 0
+var embedded_leader_alive: bool = true
+
+
 @export var loadouts: Array[SoldierLoadout] = []
 @export var squad_loadout: SquadLoadoutSpec
 @export var command_squad: Unit = null
@@ -112,8 +119,6 @@ var in_close_combat: bool = false
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
-var original_size := 10
-var leader_alive := true
 
 
 @export var squads_collection: SquadsCollection
@@ -152,6 +157,8 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 @onready var enemy_visiblity_checker: EnemyVisibilityChecker = $EnemyVisibilityChecker
 @onready var command_connectivity_timer: Timer = $CommandConnectivityTimer
 @onready var enemy_visibility_checker_timer: Timer = $EnemyVisibilityCheckerTimer
+@onready var combat_stats: UnitCombatStats = $CombatStats
+@onready var combat_stats_timer: Timer = $CombatStatsTimer
 
 
 # === DEBUG ===
@@ -208,6 +215,7 @@ func setup():
 	
 	members_alive = loadouts.size()
 	ui.set_members_alive(loadouts.size())
+	original_size = loadouts.size()
 	
 	_refresh_leader_aura()
 	
@@ -215,11 +223,17 @@ func setup():
 	
 	update_team_sprite(team, squad_type)
 	movement.new_target_hex.connect(_on_new_target_hex)
-
+	
+	command_connectivity_timer.start()
+	enemy_visibility_checker_timer.start()
+	combat_stats.unit = self
+	combat_stats_timer.start()
 
 func game_start():
 	command_connectivity_timer.start()
 	enemy_visibility_checker_timer.start()
+	combat_stats_timer.start()
+
 
 func update_terrain_defense_bonus():
 	terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(current_hex))
@@ -414,7 +428,7 @@ func _highest_grade_from_runtime() -> int:
 		i += 1
 	return best
 
-# Adjust this if your Soldier stores the grade under a different field.
+# Adjust this if your Soldier stores the grade underunder a different field.
 # Assumes Soldier.rank (or .rank_grade) is aligned to RankGrades.Grade ordering.
 func _runtime_soldier_grade(s: Soldier) -> int:
 	var g: int = -1
@@ -1427,6 +1441,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 
 # --- casualties, role replacement, and support-weapon re-crewing ---
 func _apply_casualties(n: int) -> void:
+	combat_stats.notify_casualty_taken(n)
 	var casualty_indexes: Array[int] = get_unique_random_ints(n, members_alive)
 	var members_alive_before: int = members_alive
 	if n == 0:
@@ -1471,6 +1486,7 @@ func _apply_casualties(n: int) -> void:
 		# FIXME this should fix the out of bounds
 		squad_fire.casualties.append(soldier)
 	
+	casualties_taken = squad_fire.casualties.size()
 	#for index in casualty_indexes:
 		# FIXME this tends to be out of bounds
 		#if squad_fire.soldiers.size() > index:
@@ -1494,7 +1510,7 @@ func _apply_casualties(n: int) -> void:
 	
 	stress_system.on_casualty_event(n, leader_down)
 	ui.set_members_alive(members_alive)
-
+	
 	if members_alive_before == members_alive:
 		pass
 	# if the whole lot’s gone, we’re done
@@ -1504,6 +1520,8 @@ func _apply_casualties(n: int) -> void:
 
 	# 1) replace leader if needed: ASL first, else any SOLDIER
 	if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
+		embedded_leader_alive = false
+		combat_stats.notify_leader_killed()
 		_promote_new_leader()
 	
 	# 2) re-crew any dropped guns (e.g., MG) — loader preferred as new gunner
@@ -1516,7 +1534,7 @@ func _apply_casualties(n: int) -> void:
 	# 3) if we lost a loader but the gun’s still in the squad, top up loaders
 	if roles_lost.has(RankGrades.Role.LOADER):
 		_fill_missing_loaders_for_existing_guns()
-
+	
 	# optional: if you maintain any cached fire stats, rebuild them now
 	# squad_fire.rebuild_cached_stats()
 	# emit signals as needed
@@ -1534,7 +1552,7 @@ func _promote_new_leader() -> void:
 	if new_leader_idx != -1:
 		var s: Soldier = squad_fire.soldiers[new_leader_idx]
 		s.role = RankGrades.Role.SQUAD_LEADER
-		leader_alive = true
+		#leader_alive = true
 		
 		# if you track graded leadership, update bonus here instead of this placeholder:
 		# stress_system.leadership_bonus = _compute_leadership_bonus_for(s)
@@ -2108,3 +2126,7 @@ func apply_save_data(data: UnitSaveData) -> void:
 	#current_state = data.state
 
 	#rebuild_after_load()
+
+
+func _on_unit_combat_stats_timer_timeout() -> void:
+	combat_stats.update_stats(combat_stats_timer.wait_time)

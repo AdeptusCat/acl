@@ -2,6 +2,10 @@
 extends Node
 class_name SquadFireController
 
+
+
+
+
 # Wiring
 @export var unit: Unit
 @export var stress_controller: StressController

@@ -15,6 +15,9 @@ extends PanelContainer
 @onready var surrender_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Surrender
 @onready var rout_button: Button = $MarginContainer/SoldiersContainer/UnitGridContainer/Rout
 
+@onready var cohesion: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer/Cohesion
+@onready var effectiveness: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer/Effectiveness
+@onready var casualty_shock: Label = $MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer/CasualtyShock
 
 
 var opacity_tween: Tween = null
@@ -107,7 +110,10 @@ func _process(_delta: float) -> void:
 		else:
 			if not rout_button.disabled:
 				rout_button.set_rout_available(false)
-			
+		
+		cohesion.text = "%.0f%%" % (unit.combat_stats.cohesion_current * 100.0)
+		effectiveness.text = "%.0f%%" % (unit.combat_stats.combat_effectiveness * 100.0)
+		casualty_shock.text = "%.0f%%" % (unit.combat_stats.recent_casualty_shock * 100.0)
 
 
 func set_progress_bar(s:Soldier, task_name: String, start_time_s: float, remaining_time_s: float):

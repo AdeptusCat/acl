@@ -524,6 +524,34 @@ visible = false
 layout_mode = 2
 text = "CC Readyness"
 
+[node name="GridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=60816207]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=141615363]
+layout_mode = 2
+text = "Cohesion:"
+horizontal_alignment = 2
+
+[node name="Cohesion" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=555005812]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=751922686]
+layout_mode = 2
+text = "Effectiveness:"
+horizontal_alignment = 2
+
+[node name="Effectiveness" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=1342035796]
+layout_mode = 2
+
+[node name="Label5" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=952243017]
+layout_mode = 2
+text = "Casualty Shock:"
+horizontal_alignment = 2
+
+[node name="CasualtyShock" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=237694910]
+layout_mode = 2
+
 [node name="Kill" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=306415407]
 visible = false
 layout_mode = 2
