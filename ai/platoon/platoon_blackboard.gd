@@ -204,13 +204,17 @@ func register_incoming_fire_estimate(
 		-1
 	)
 
+
+
 func mark_objective_observed_clear(p_confidence_gain: float) -> void:
 	objective_observed_this_tick = true
 	objective_clear_confidence += p_confidence_gain
 	objective_clear_confidence = clampf(objective_clear_confidence, 0.0, 1.0)
 
+
 func clear_phase_tasks() -> void:
 	phase_tasks.clear()
+
 
 func create_task(
 	p_task_type: int,
@@ -320,13 +324,13 @@ func recalculate_objective_beliefs(delta: float) -> void:
 
 	for track: EnemyTrack in enemy_tracks:
 		var distance: int = get_hex_distance(track.last_known_hex, objective_hex)
-
+		
 		if distance > OBJECTIVE_NEAR_RADIUS:
 			continue
-
+		
 		if track.confidence > strongest_enemy_confidence:
 			strongest_enemy_confidence = track.confidence
-
+	
 	objective_enemy_confidence = strongest_enemy_confidence
 
 	if objective_enemy_confidence >= 0.30:

@@ -1105,14 +1105,15 @@ func _on_unit_visibility_checker_timer_timeout() -> void:
 			var r: float = randf()
 
 			if r < p_tick:
-				track.spot_confidence += 0.35
+				track.confidence += 0.35
 			else:
-				track.spot_confidence -= 0.10
+				track.confidence -= 0.10
 
-			track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+			track.confidence = clamp(track.confidence, 0.0, 1.0)
 
-			if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+			if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
 				track.is_visible = true
+				
 				units_visible.append(enemy_tracked)
 			else:
 				track.is_visible = false
@@ -1135,7 +1136,7 @@ func _on_unit_visibility_checker_timer_timeout() -> void:
 				same_hex_track = EnemyTrack.new(unit, unit_in_current_hex)
 				track_map[unit_in_current_hex] = same_hex_track
 
-			same_hex_track.spot_confidence = 1.0
+			same_hex_track.confidence = 1.0
 			same_hex_track.is_visible = true
 			same_hex_track.has_confirmed_lock = true
 			same_hex_track.currently_in_los = true
@@ -1507,10 +1508,10 @@ func _on_unit_shooting(shooter: Unit) -> void:
 		if track == null:
 			continue
 
-		track.spot_confidence += 0.1
-		track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+		track.confidence += 0.1
+		track.confidence = clamp(track.confidence, 0.0, 1.0)
 
-		if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+		if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
 			track.is_visible = true
 
 		Globals.unit_enemy_tracks[observer] = track_map
@@ -1537,10 +1538,10 @@ func _on_unit_shooting(shooter: Unit) -> void:
 		#if track == null:
 			#continue
 #
-		#track.spot_confidence += 0.1
-		#track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+		#track.confidence += 0.1
+		#track.confidence = clamp(track.confidence, 0.0, 1.0)
 #
-		#if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+		#if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
 			#track.is_visible = true
 #
 		#Globals.unit_enemy_tracks[observer] = track_map

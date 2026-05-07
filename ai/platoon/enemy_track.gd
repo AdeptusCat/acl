@@ -124,7 +124,6 @@ const VISIBLE_CONF_THRESHOLD: float = 0.55
 
 var los_time_s: float = 0.0
 var last_seen_unix_s: float = 0.0
-var spot_confidence: float = 0.0
 
 var currently_in_los: bool = false
 var is_visible: bool = false
@@ -151,11 +150,11 @@ func update_not_seen(delta: float) -> void:
 	los_time_s = 0.0
 	has_confirmed_lock = false
 
-	spot_confidence -= 0.10 * delta
-	if spot_confidence < 0.0:
-		spot_confidence = 0.0
+	confidence -= 0.10 * delta
+	if confidence < 0.0:
+		confidence = 0.0
 
-	if spot_confidence < VISIBLE_CONF_THRESHOLD:
+	if confidence < VISIBLE_CONF_THRESHOLD:
 		is_visible = false
 
 
@@ -163,7 +162,7 @@ func should_delete() -> bool:
 	if currently_in_los:
 		return false
 
-	if spot_confidence > 0.0:
+	if confidence > 0.0:
 		return false
 
 	return true

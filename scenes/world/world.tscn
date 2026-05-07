@@ -95,6 +95,186 @@
 [ext_resource type="Resource" uid="uid://b47gq5wbijpgy" path="res://resources/squads/us/light_mortar_squad.tres" id="73_jtcuk"]
 [ext_resource type="Script" uid="uid://bbnsjqri366kl" path="res://scenes/world/command_connectivity_renderer.gd" id="79_x77xw"]
 
+[sub_resource type="Resource" id="Resource_kngxi"]
+script = ExtResource("50_hph6x")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("53_dhssw")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_dhssw"]
+script = ExtResource("50_hph6x")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("52_7lp0r")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_cf0uk"]
+script = ExtResource("50_hph6x")
+nickname = "Loader"
+role = 2
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_j2kh8"]
+script = ExtResource("50_hph6x")
+nickname = "Ass. 4"
+role = 3
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_hpffo"]
+script = ExtResource("50_hph6x")
+nickname = "Ass. 5"
+role = 3
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_ckeh6"]
+script = ExtResource("50_hph6x")
+nickname = "Ass. 6"
+role = 3
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_pww7v"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 7"
+weapon = ExtResource("52_dhssw")
+
+[sub_resource type="Resource" id="Resource_7tufn"]
+script = ExtResource("50_hph6x")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("58_7lp0r")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_hee0g"]
+script = ExtResource("50_hph6x")
+nickname = "Ass. Squad Leader"
+rank_grade = 2
+role = 8
+weapon = ExtResource("58_7lp0r")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_1xiqq"]
+script = ExtResource("50_hph6x")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("57_hnqnj")
+
+[sub_resource type="Resource" id="Resource_n3r5j"]
+script = ExtResource("50_hph6x")
+nickname = "Loader"
+role = 2
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_icsua"]
+script = ExtResource("50_hph6x")
+nickname = "Riflegrenadier"
+weapon = ExtResource("57_tj3jo")
+
+[sub_resource type="Resource" id="Resource_bj2ac"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 6"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_axy21"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 7"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_42xbh"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 8"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_n0grg"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 9"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_hg63j"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 10"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_d51ap"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 11"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_mdwnc"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 12"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_cnv4p"]
+script = ExtResource("50_hph6x")
+nickname = "Squad Leader"
+rank_grade = 3
+role = 9
+weapon = ExtResource("58_7lp0r")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_l6p3e"]
+script = ExtResource("50_hph6x")
+nickname = "Ass. Squad Leader"
+rank_grade = 2
+role = 8
+weapon = ExtResource("58_7lp0r")
+is_key_role = true
+
+[sub_resource type="Resource" id="Resource_y0kmp"]
+script = ExtResource("50_hph6x")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("57_hnqnj")
+
+[sub_resource type="Resource" id="Resource_vn2as"]
+script = ExtResource("50_hph6x")
+nickname = "Loader"
+role = 2
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_umxri"]
+script = ExtResource("50_hph6x")
+nickname = "Riflegrenadier"
+weapon = ExtResource("57_tj3jo")
+
+[sub_resource type="Resource" id="Resource_03pw5"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 6"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_xox43"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 7"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_y8aho"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 8"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_bise0"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 9"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_jo2eh"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 10"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_h7bpp"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 11"
+weapon = ExtResource("58_7lp0r")
+
+[sub_resource type="Resource" id="Resource_gbjsl"]
+script = ExtResource("50_hph6x")
+nickname = "Rifle 12"
+weapon = ExtResource("58_7lp0r")
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0wrxw"]
 resource_name = "Road"
 texture = ExtResource("16_d0ajt")
@@ -668,50 +848,6 @@ required_unit_count = 2
 team = 1
 metadata/_custom_type_script = "uid://dwewyipec6v2u"
 
-[sub_resource type="Resource" id="Resource_kngxi"]
-script = ExtResource("50_hph6x")
-nickname = "Squad Leader"
-rank_grade = 3
-role = 9
-weapon = ExtResource("53_dhssw")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_dhssw"]
-script = ExtResource("50_hph6x")
-nickname = "Gunner"
-role = 1
-weapon = ExtResource("52_7lp0r")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_cf0uk"]
-script = ExtResource("50_hph6x")
-nickname = "Loader"
-role = 2
-weapon = ExtResource("52_dhssw")
-
-[sub_resource type="Resource" id="Resource_j2kh8"]
-script = ExtResource("50_hph6x")
-nickname = "Ass. 4"
-role = 3
-weapon = ExtResource("52_dhssw")
-
-[sub_resource type="Resource" id="Resource_hpffo"]
-script = ExtResource("50_hph6x")
-nickname = "Ass. 5"
-role = 3
-weapon = ExtResource("52_dhssw")
-
-[sub_resource type="Resource" id="Resource_ckeh6"]
-script = ExtResource("50_hph6x")
-nickname = "Ass. 6"
-role = 3
-weapon = ExtResource("52_dhssw")
-
-[sub_resource type="Resource" id="Resource_pww7v"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 7"
-weapon = ExtResource("52_dhssw")
-
 [sub_resource type="Resource" id="Resource_hph6x"]
 script = ExtResource("50_hph6x")
 nickname = "Squad Leader"
@@ -769,142 +905,6 @@ weapon = ExtResource("52_dhssw")
 script = ExtResource("50_hph6x")
 nickname = "Rifle 10"
 weapon = ExtResource("52_dhssw")
-
-[sub_resource type="Resource" id="Resource_7tufn"]
-script = ExtResource("50_hph6x")
-nickname = "Squad Leader"
-rank_grade = 3
-role = 9
-weapon = ExtResource("58_7lp0r")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_hee0g"]
-script = ExtResource("50_hph6x")
-nickname = "Ass. Squad Leader"
-rank_grade = 2
-role = 8
-weapon = ExtResource("58_7lp0r")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_1xiqq"]
-script = ExtResource("50_hph6x")
-nickname = "Gunner"
-role = 1
-weapon = ExtResource("57_hnqnj")
-
-[sub_resource type="Resource" id="Resource_n3r5j"]
-script = ExtResource("50_hph6x")
-nickname = "Loader"
-role = 2
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_icsua"]
-script = ExtResource("50_hph6x")
-nickname = "Riflegrenadier"
-weapon = ExtResource("57_tj3jo")
-
-[sub_resource type="Resource" id="Resource_bj2ac"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 6"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_axy21"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 7"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_42xbh"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 8"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_n0grg"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 9"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_hg63j"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 10"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_d51ap"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 11"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_mdwnc"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 12"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_cnv4p"]
-script = ExtResource("50_hph6x")
-nickname = "Squad Leader"
-rank_grade = 3
-role = 9
-weapon = ExtResource("58_7lp0r")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_l6p3e"]
-script = ExtResource("50_hph6x")
-nickname = "Ass. Squad Leader"
-rank_grade = 2
-role = 8
-weapon = ExtResource("58_7lp0r")
-is_key_role = true
-
-[sub_resource type="Resource" id="Resource_y0kmp"]
-script = ExtResource("50_hph6x")
-nickname = "Gunner"
-role = 1
-weapon = ExtResource("57_hnqnj")
-
-[sub_resource type="Resource" id="Resource_vn2as"]
-script = ExtResource("50_hph6x")
-nickname = "Loader"
-role = 2
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_umxri"]
-script = ExtResource("50_hph6x")
-nickname = "Riflegrenadier"
-weapon = ExtResource("57_tj3jo")
-
-[sub_resource type="Resource" id="Resource_03pw5"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 6"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_xox43"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 7"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_y8aho"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 8"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_bise0"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 9"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_jo2eh"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 10"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_h7bpp"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 11"
-weapon = ExtResource("58_7lp0r")
-
-[sub_resource type="Resource" id="Resource_gbjsl"]
-script = ExtResource("50_hph6x")
-nickname = "Rifle 12"
-weapon = ExtResource("58_7lp0r")
 
 [sub_resource type="Resource" id="Resource_ladsi"]
 script = ExtResource("50_hph6x")
@@ -1591,6 +1591,38 @@ script = ExtResource("1_6hctx")
 
 [node name="InputManager" parent="." unique_id=2029001427 instance=ExtResource("24_x0nq1")]
 
+[node name="CA_P1_S1_Axis_MG" parent="." unique_id=2093352708 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(656, 192)
+squad = 1
+platoon = 1
+ground_map = NodePath("../Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives/AxisObjectivesTileMapLayer")
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
+squad_loadout = ExtResource("63_mb8w1")
+formation_id = 1
+squad_type = 1
+
+[node name="CA_P1_S1_Allies_Rifle" parent="." unique_id=1739247476 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(224, 224)
+squad = 1
+platoon = 1
+ground_map = NodePath("../Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives/AxisObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
+squad_loadout = ExtResource("65_oo0aq")
+command_squad = NodePath("../Maps/OrchardRoad/Scenarios/OutpostProbe/Units/CA_P1_S0_Allies_PlatoonHQ")
+formation_id = 1
+
+[node name="CA_P1_S2_Allies_Rifle" parent="." unique_id=1386046873 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(32, 96)
+squad = 2
+platoon = 1
+ground_map = NodePath("../Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives/AxisObjectivesTileMapLayer")
+team = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
+squad_loadout = ExtResource("65_oo0aq")
+command_squad = NodePath("../Maps/OrchardRoad/Scenarios/OutpostProbe/Units/CA_P1_S0_Allies_PlatoonHQ")
+formation_id = 1
+
 [node name="Maps" type="Node2D" parent="." unique_id=2101382623]
 
 [node name="OrchardRoad" parent="Maps" unique_id=1528497757 instance=ExtResource("3_a5636")]
@@ -1625,48 +1657,16 @@ released = true
 player_team = 1
 victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n"), SubResource("Resource_opb01")])
 
-[node name="CA_P1_S1_Axis_MG" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="0" unique_id=2093352708 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(560, 256)
-squad = 1
-platoon = 1
-ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
-squad_loadout = ExtResource("63_mb8w1")
-formation_id = 1
-squad_type = 1
-
-[node name="CA_P1_S2_Axis_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="1" unique_id=602531029 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(368, 320)
+[node name="CA_P1_S2_Axis_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="0" unique_id=602531029 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(656, 192)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 formation_id = 1
 
-[node name="CA_P1_S1_Allies_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="2" unique_id=1739247476 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(80, 128)
-squad = 1
-platoon = 1
-ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
-team = 1
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_7tufn"), SubResource("Resource_hee0g"), SubResource("Resource_1xiqq"), SubResource("Resource_n3r5j"), SubResource("Resource_icsua"), SubResource("Resource_bj2ac"), SubResource("Resource_axy21"), SubResource("Resource_42xbh"), SubResource("Resource_n0grg"), SubResource("Resource_hg63j"), SubResource("Resource_d51ap"), SubResource("Resource_mdwnc")])
-squad_loadout = ExtResource("65_oo0aq")
-command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
-formation_id = 1
-
-[node name="CA_P1_S2_Allies_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="3" unique_id=1386046873 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(32, 96)
-squad = 2
-platoon = 1
-ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
-team = 1
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_cnv4p"), SubResource("Resource_l6p3e"), SubResource("Resource_y0kmp"), SubResource("Resource_vn2as"), SubResource("Resource_umxri"), SubResource("Resource_03pw5"), SubResource("Resource_xox43"), SubResource("Resource_y8aho"), SubResource("Resource_bise0"), SubResource("Resource_jo2eh"), SubResource("Resource_h7bpp"), SubResource("Resource_gbjsl")])
-squad_loadout = ExtResource("65_oo0aq")
-command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
-formation_id = 1
-
-[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="4" unique_id=2026778924 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(32, 160)
+[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="1" unique_id=2026778924 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
+position = Vector2(224, 224)
 platoon = 1
 ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
 team = 1
@@ -1676,7 +1676,7 @@ formation_id = 1
 squad_type = 4
 
 [node name="PlatoonAiController" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units/CA_P1_S0_Allies_PlatoonHQ" unique_id=585976234 node_paths=PackedStringArray("squads") instance=ExtResource("59_mrxq0")]
-squads = [NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../../CA_P1_S2_Allies_Rifle"), NodePath("..")]
+squads = [NodePath("..")]
 
 [node name="AxisObjectivesTileMapLayer" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(148229250, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")

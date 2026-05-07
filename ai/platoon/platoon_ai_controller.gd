@@ -132,6 +132,7 @@ func _print_suspected_zones() -> void:
 func _tactical_tick(delta: float) -> void:
 	_update_squad_snapshots()
 	blackboard.ingest_unit_enemy_tracks(squads)
+	_update_objective_observation()
 	blackboard.tactical_update(delta)
 
 	# Next systems later:
@@ -180,3 +181,26 @@ func _build_state_from_squad(squad: Unit) -> SquadTacticalState:
 	)
 	
 	return state
+
+
+func _update_objective_observation() -> void:
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		if squad.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+			continue
+
+		if _squad_can_observe_objective(squad):
+			blackboard.mark_objective_observed_clear(0.06)
+			return
+
+func _squad_can_observe_objective(squad: Unit) -> bool:
+	if squad.current_hex == blackboard.objective_hex:
+		return true
+
+	var visible_hexes = LOSHelper.los_lookup.get(squad.current_hex, [])
+	if visible_hexes.has(blackboard.objective_hex):
+		return true
+
+	return false
