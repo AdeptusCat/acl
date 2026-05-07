@@ -263,7 +263,7 @@ func _get_state_mod() -> float:
 		value = 0.40
 	elif unit.stress_system.state == STATES.MoraleState.PANIC:
 		value = 0.15
-	elif unit.stress_system.state == STATES.MoraleStateCOMBAT_INEFFECTIVE:
+	elif unit.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		value = 0.0
 
 	return value

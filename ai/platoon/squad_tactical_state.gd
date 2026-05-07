@@ -11,16 +11,15 @@ var combat_effectiveness: float = 1.0
 var stress_effective: float = 0.0
 var cohesion: float = 1.0
 
-var is_pinned: bool = false
-var is_panicking: bool = false
-var is_combat_ineffective: bool = false
+var morale_state: STATES.MoraleState = STATES.MoraleState.NORMAL
 
-var has_mg: bool = false
-var has_leader: bool = false
-var has_radio: bool = false
+#var has_mg: bool = false
+#var has_leader: bool = false
+#var has_radio: bool = false
 
 var current_role: int = PlatoonTypes.Role.NONE
 var assigned_task_id: int = -1
+
 
 func configure(
 	p_squad: Node,
@@ -30,12 +29,10 @@ func configure(
 	p_combat_effectiveness: float,
 	p_stress_effective: float,
 	p_cohesion: float,
-	p_is_pinned: bool,
-	p_is_panicking: bool,
-	p_is_combat_ineffective: bool,
-	p_has_mg: bool,
-	p_has_leader: bool,
-	p_has_radio: bool
+	p_morale_state: STATES.MoraleState,
+	#p_has_mg: bool,
+	#p_has_leader: bool,
+	#p_has_radio: bool
 ) -> void:
 	squad = p_squad
 	hex = p_hex
@@ -45,10 +42,43 @@ func configure(
 	stress_effective = clampf(p_stress_effective, 0.0, 100.0)
 	cohesion = clampf(p_cohesion, 0.0, 1.0)
 
-	is_pinned = p_is_pinned
-	is_panicking = p_is_panicking
-	is_combat_ineffective = p_is_combat_ineffective
+	morale_state = p_morale_state
 
-	has_mg = p_has_mg
-	has_leader = p_has_leader
-	has_radio = p_has_radio
+	#has_mg = p_has_mg
+	#has_leader = p_has_leader
+	#has_radio = p_has_radio
+
+
+func is_pinned() -> bool:
+	return morale_state == STATES.MoraleState.PINNED
+
+
+func is_panicking() -> bool:
+	return morale_state == STATES.MoraleState.PANIC
+
+
+func is_combat_ineffective() -> bool:
+	return morale_state == STATES.MoraleState.COMBAT_INEFFECTIVE
+
+
+func can_fire() -> bool:
+	if morale_state == STATES.MoraleState.PANIC:
+		return false
+
+	if morale_state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		return false
+
+	return true
+
+
+func can_move_normally() -> bool:
+	if morale_state == STATES.MoraleState.PINNED:
+		return false
+
+	if morale_state == STATES.MoraleState.PANIC:
+		return false
+
+	if morale_state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		return false
+
+	return true

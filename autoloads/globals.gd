@@ -7,10 +7,11 @@ var game_started: bool = false
 var objective_hexes: Dictionary[Team, Array]
 var game_mode: GameMode
 var unit_visible_enemies: Dictionary
+var unit_enemy_tracks: Dictionary[Unit, Dictionary] = {}
 var unit_enemies_in_los: Dictionary
-var unit_enemy_los_time_s: Dictionary[Unit, Dictionary] = {}
-var unit_enemy_last_seen_unix_s: Dictionary[Unit, Dictionary] = {}
-var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0..1
+#var unit_enemy_los_time_s: Dictionary[Unit, Dictionary] = {}
+#var unit_enemy_last_seen_unix_s: Dictionary[Unit, Dictionary] = {}
+#var unit_enemy_spot_conf: Dictionary[Unit, Dictionary] = {} # unit -> enemy -> 0..1
 var units_in_close_combat: Array[Unit]
 var close_combat_locations: Array[Vector2i]
 var close_combat_instances: Array[CloseCombatInstance]
@@ -105,9 +106,10 @@ func get_units() -> Array[Unit]:
 func reset():
 	unit_visible_enemies.clear()
 	unit_enemies_in_los.clear()
-	unit_enemy_los_time_s.clear()
-	unit_enemy_last_seen_unix_s.clear()
-	unit_enemy_spot_conf.clear()
+	unit_enemy_tracks.clear()
+	#unit_enemy_los_time_s.clear()
+	#unit_enemy_last_seen_unix_s.clear()
+	#unit_enemy_spot_conf.clear()
 	units_in_close_combat.clear()
 	close_combat_locations.clear()
 	close_combat_instances.clear()

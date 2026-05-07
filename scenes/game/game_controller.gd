@@ -3,8 +3,6 @@ extends Node2D
 @onready var unit_container = $UnitContainer
 @onready var los_renderer   = $LOSRenderer
 @onready var camera 		= $Camera2D
-@onready var axis_formation_ai_controllers := $AxisFormationAIControllers
-@onready var allies_formation_ai_controllers := $AlliesFormationAIControllers
 @onready var close_combat_locations := $CloseCombatLocations
 @onready var close_combat_instances := $CloseCombatInstances
 @onready var win_condition_timer: Timer = $WinConditionTimer
@@ -128,54 +126,54 @@ func setup():
 func spawn_formation():
 	if Globals.game_mode == Globals.GameMode.ATTACK:
 		return
-	var team: Globals.Team
-	var location: Vector2i
-	var roll: int = randi_range(0, 4)
-	
-	match Globals.team_player:
-		Globals.Team.AXIS:
-			team = Globals.Team.ALLIES
-			if roll == 0:
-				location = Vector2i(21, 20)
-			elif roll == 1:
-				location = Vector2i(6, 16)
-			elif roll == 2:
-				location = Vector2i(12, 10)
-			elif roll == 3:
-				location = Vector2i(31, 1)
-			else:
-				location = Vector2i(16, 7)
-		Globals.Team.ALLIES:
-			team = Globals.Team.AXIS
-			if roll == 0:
-				location = Vector2i(27,7)
-			elif roll == 1:
-				location = Vector2i(22,12)
-			elif roll == 2:
-				location = Vector2i(9,17)
-			elif roll == 3:
-				location = Vector2i(11,0)
-			else:
-				location = Vector2i(19,12)
-
-	var formation_ai_controller: FormationAIController = formation_ai_controller_scene.instantiate()
-	formation_ai_controller.active = true
-	formation_ai_controller.mission_mode = GoapTypes.FormationMissionMode.ATTACK
-	formation_ai_controller.team = team
-	var formation_id: int
-	match Globals.team_player:
-		Globals.Team.AXIS:
-			formation_id = $AlliesFormationAIControllers.get_child_count() + 1
-			formation_ai_controller.formation_id = formation_id
-			$AlliesFormationAIControllers.add_child(formation_ai_controller)
-		Globals.Team.ALLIES:
-			formation_id = $AxisFormationAIControllers.get_child_count() + 1
-			formation_ai_controller.formation_id = formation_id
-			$AxisFormationAIControllers.add_child(formation_ai_controller)
-	
-	spawn_unit(team, location, Globals.SquadType.Rifle, formation_id)
-	spawn_unit(team, location, Globals.SquadType.MG, formation_id)
-	spawn_unit(team, location, Globals.SquadType.PLATOON_HEADQUARTERS, formation_id)
+	#var team: Globals.Team
+	#var location: Vector2i
+	#var roll: int = randi_range(0, 4)
+	#
+	#match Globals.team_player:
+		#Globals.Team.AXIS:
+			#team = Globals.Team.ALLIES
+			#if roll == 0:
+				#location = Vector2i(21, 20)
+			#elif roll == 1:
+				#location = Vector2i(6, 16)
+			#elif roll == 2:
+				#location = Vector2i(12, 10)
+			#elif roll == 3:
+				#location = Vector2i(31, 1)
+			#else:
+				#location = Vector2i(16, 7)
+		#Globals.Team.ALLIES:
+			#team = Globals.Team.AXIS
+			#if roll == 0:
+				#location = Vector2i(27,7)
+			#elif roll == 1:
+				#location = Vector2i(22,12)
+			#elif roll == 2:
+				#location = Vector2i(9,17)
+			#elif roll == 3:
+				#location = Vector2i(11,0)
+			#else:
+				#location = Vector2i(19,12)
+#
+	#var formation_ai_controller: FormationAIController = formation_ai_controller_scene.instantiate()
+	#formation_ai_controller.active = true
+	#formation_ai_controller.mission_mode = GoapTypes.FormationMissionMode.ATTACK
+	#formation_ai_controller.team = team
+	#var formation_id: int
+	#match Globals.team_player:
+		#Globals.Team.AXIS:
+			#formation_id = $AlliesFormationAIControllers.get_child_count() + 1
+			#formation_ai_controller.formation_id = formation_id
+			#$AlliesFormationAIControllers.add_child(formation_ai_controller)
+		#Globals.Team.ALLIES:
+			#formation_id = $AxisFormationAIControllers.get_child_count() + 1
+			#formation_ai_controller.formation_id = formation_id
+			#$AxisFormationAIControllers.add_child(formation_ai_controller)
+	#
+	#spawn_unit(team, location, Globals.SquadType.Rifle, formation_id)
+	#spawn_unit(team, location, Globals.SquadType.MG, formation_id)
+	#spawn_unit(team, location, Globals.SquadType.PLATOON_HEADQUARTERS, formation_id)
 	
 	
 
@@ -857,26 +855,26 @@ func start_game(team: Globals.Team, time: float):
 	else:
 		allies_ai_active = true
 	
-	var ai_mission_mode: GoapTypes.FormationMissionMode
-	ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
+	#var ai_mission_mode: GoapTypes.FormationMissionMode
+	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 	#match Globals.game_mode:
 		#Globals.GameMode.DEFEND:
 			#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 		#Globals.GameMode.ATTACK:
 			#ai_mission_mode = GoapTypes.FormationMissionMode.DEFEND
 		
-	for formation_ai_controller in axis_formation_ai_controllers.get_children():
-		formation_ai_controller._refresh_squad_list()
-		var controller: FormationAIController = formation_ai_controller
-		if controller.active:
-			controller.active = axis_ai_active
-			controller.mission_mode = ai_mission_mode
-	for formation_ai_controller in allies_formation_ai_controllers.get_children():
-		formation_ai_controller._refresh_squad_list()
-		var controller: FormationAIController = formation_ai_controller
-		if controller.active:
-			controller.active = allies_ai_active
-			controller.mission_mode = ai_mission_mode
+	#for formation_ai_controller in axis_formation_ai_controllers.get_children():
+		#formation_ai_controller._refresh_squad_list()
+		#var controller: FormationAIController = formation_ai_controller
+		#if controller.active:
+			#controller.active = axis_ai_active
+			#controller.mission_mode = ai_mission_mode
+	#for formation_ai_controller in allies_formation_ai_controllers.get_children():
+		#formation_ai_controller._refresh_squad_list()
+		#var controller: FormationAIController = formation_ai_controller
+		#if controller.active:
+			#controller.active = allies_ai_active
+			#controller.mission_mode = ai_mission_mode
 
 
 func index_to_char(i: int) -> String:
@@ -936,65 +934,114 @@ func _process(delta):
 		unit.surrender()
 	
 	
+#func update_los_time(delta: float) -> void:
+	#var now_unix: float = Time.get_unix_time_from_system()
+#
+	#for unit in Globals.get_units():
+		#if not is_instance_valid(unit):
+			#continue
+#
+#
+		#var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		#var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
+#
+		#var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+#
+		#var seen_this_tick: Dictionary[Unit, bool] = {}
+#
+		#for enemy in enemies_in_los:
+			#if not is_instance_valid(enemy):
+				#continue
+#
+			#seen_this_tick[enemy] = true
+#
+			#var t: float = time_map.get(enemy, 0.0)
+			#t += delta
+			#time_map[enemy] = t
+#
+			#last_seen_map[enemy] = now_unix
+#
+		## cleanup: remove entries for dead refs or enemies not seen for a while
+		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
+		#var units_tracked: Array[Unit] = time_map.keys()
+		#for unit_tracked in units_tracked:
+			#if not is_instance_valid(unit_tracked):
+				#continue
+			#if not seen_this_tick.has(unit_tracked):
+				##var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
+				##
+				### E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
+  ###<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
+  ###<Stack Trace> game_controller.gd:702 @ update_los_time()
+				###game_controller.gd:667 @ _process()
+				##
+				###if now_unix - last_seen > 10.0:
+				##time_map.erase(unit_tracked)
+				##last_seen_map.erase(unit_tracked)
+				#
+				## FIXME thats not working, units will be seen perminately
+				#if not conf_map.has(unit_tracked):
+					#time_map.erase(unit_tracked)
+					#last_seen_map.erase(unit_tracked)
+					#continue
+				##conf -= delta
+				#conf_map[unit_tracked] -= delta
+				#if conf_map[unit_tracked] <= 0.0:
+					#conf_map[unit_tracked] = 0.0
+					#time_map.erase(unit_tracked)
+					#last_seen_map.erase(unit_tracked)
+#
+		#Globals.unit_enemy_los_time_s[unit] = time_map
+		#Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
+
+
 func update_los_time(delta: float) -> void:
 	var now_unix: float = Time.get_unix_time_from_system()
 
-	for unit in Globals.get_units():
-		if not is_instance_valid(unit):
+	for unit_variant in Globals.get_units():
+		var unit: Unit = unit_variant as Unit
+		if unit == null:
 			continue
 
-
-		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
-		var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
+		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
+			unit,
+			{} as Dictionary[Unit, EnemyTrack]
+		)
 
 		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-
 		var seen_this_tick: Dictionary[Unit, bool] = {}
 
-		for enemy in enemies_in_los:
-			if not is_instance_valid(enemy):
+		for enemy_variant in enemies_in_los:
+			var enemy: Unit = enemy_variant as Unit
+			if enemy == null:
 				continue
 
 			seen_this_tick[enemy] = true
 
-			var t: float = time_map.get(enemy, 0.0)
-			t += delta
-			time_map[enemy] = t
+			var track: EnemyTrack = track_map.get(enemy, null)
+			if track == null:
+				track = EnemyTrack.new(unit, enemy)
+				track_map[enemy] = track
 
-			last_seen_map[enemy] = now_unix
+			track.update_seen(delta, now_unix)
 
-		# cleanup: remove entries for dead refs or enemies not seen for a while
-		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		var units_tracked: Array[Unit] = time_map.keys()
-		for unit_tracked in units_tracked:
-			if not is_instance_valid(unit_tracked):
+		var tracked_enemies: Array[Unit] = track_map.keys()
+
+		for tracked_enemy in tracked_enemies:
+			if seen_this_tick.has(tracked_enemy):
 				continue
-			if not seen_this_tick.has(unit_tracked):
-				#var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
-				#
-				## E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
-  ##<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
-  ##<Stack Trace> game_controller.gd:702 @ update_los_time()
-				##game_controller.gd:667 @ _process()
-				#
-				##if now_unix - last_seen > 10.0:
-				#time_map.erase(unit_tracked)
-				#last_seen_map.erase(unit_tracked)
-				
-				# FIXME thats not working, units will be seen perminately
-				if not conf_map.has(unit_tracked):
-					time_map.erase(unit_tracked)
-					last_seen_map.erase(unit_tracked)
-					continue
-				#conf -= delta
-				conf_map[unit_tracked] -= delta
-				if conf_map[unit_tracked] <= 0.0:
-					conf_map[unit_tracked] = 0.0
-					time_map.erase(unit_tracked)
-					last_seen_map.erase(unit_tracked)
 
-		Globals.unit_enemy_los_time_s[unit] = time_map
-		Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
+			var existing_track: EnemyTrack = track_map.get(tracked_enemy, null)
+			if existing_track == null:
+				track_map.erase(tracked_enemy)
+				continue
+
+			existing_track.update_not_seen(delta)
+
+			if existing_track.should_delete():
+				track_map.erase(tracked_enemy)
+
+		Globals.unit_enemy_tracks[unit] = track_map
 
 
 func move_camera(hex: Vector2i):
@@ -1015,69 +1062,137 @@ func _on_spawn_timer_timeout() -> void:
 
 func _on_unit_visibility_checker_timer_timeout() -> void:
 	var next_visible: Dictionary = {}
-	
-	for unit in Globals.get_units():
+
+	for unit_variant in Globals.get_units():
+		var unit: Unit = unit_variant as Unit
+		if unit == null:
+			continue
+
 		if not is_instance_valid(unit):
 			continue
-		var units_visible: Array = []
+
+		var units_visible: Array[Unit] = []
 		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
-		var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
 		var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
-		#print(last_seen_map)
-		#var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
-		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		for enemy_tracked in time_map:
+
+		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
+			unit,
+			{} as Dictionary[Unit, EnemyTrack]
+		)
+
+		for enemy_variant in track_map.keys():
+			var enemy_tracked: Unit = enemy_variant as Unit
+			if enemy_tracked == null:
+				continue
+
 			if not is_instance_valid(enemy_tracked):
 				continue
+
+			var track: EnemyTrack = track_map.get(enemy_tracked, null)
+			if track == null:
+				continue
+
 			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
+				track.is_visible = true
 				units_visible.append(enemy_tracked)
 				continue
+
 			if not units_in_los.has(enemy_tracked):
+				track.is_visible = false
 				continue
-			var time: float = time_map[enemy_tracked]
-			
-			var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0) # 1.0 is delta of one second
-			var conf: float = conf_map.get(enemy_tracked, 0.0)
+
+			var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0)
 			var r: float = randf()
+
 			if r < p_tick:
-				conf += 0.35
+				track.spot_confidence += 0.35
 			else:
-				conf -= 0.10 * 1.0 # 1.0 is delta of one second
-			conf = clamp(conf, 0.0, 1.0)
-			conf_map[enemy_tracked] = conf
-			
-			if conf >= 0.55:
+				track.spot_confidence -= 0.10
+
+			track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+
+			if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+				track.is_visible = true
 				units_visible.append(enemy_tracked)
+			else:
+				track.is_visible = false
+
 		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
-		for unit_in_current_hex in units_at_current_hex:
-			if not unit_in_current_hex.team == unit.team:
-				if not units_visible.has(unit_in_current_hex):
-					units_visible.append(unit_in_current_hex)
-		
-		Globals.unit_enemy_spot_conf[unit] = conf_map
+
+		for unit_in_current_hex_variant in units_at_current_hex:
+			var unit_in_current_hex: Unit = unit_in_current_hex_variant as Unit
+			if unit_in_current_hex == null:
+				continue
+
+			if unit_in_current_hex.team == unit.team:
+				continue
+
+			if not units_visible.has(unit_in_current_hex):
+				units_visible.append(unit_in_current_hex)
+
+			var same_hex_track: EnemyTrack = track_map.get(unit_in_current_hex, null)
+			if same_hex_track == null:
+				same_hex_track = EnemyTrack.new(unit, unit_in_current_hex)
+				track_map[unit_in_current_hex] = same_hex_track
+
+			same_hex_track.spot_confidence = 1.0
+			same_hex_track.is_visible = true
+			same_hex_track.has_confirmed_lock = true
+			same_hex_track.currently_in_los = true
+			same_hex_track.last_known_global_position = unit_in_current_hex.global_position
+
+		Globals.unit_enemy_tracks[unit] = track_map
 		next_visible[unit] = units_visible
+
 	Globals.unit_visible_enemies = next_visible
 	show_visible_units()
 	
 	#var next_visible: Dictionary = {}
-#
-	#for unit in Globals.units:
+	#
+	#for unit in Globals.get_units():
 		#if not is_instance_valid(unit):
 			#continue
-#
-		#var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		#var filtered: Array = []
-#
-		#for enemy in enemies_in_los:
-			#if not is_instance_valid(enemy):
+		#var units_visible: Array = []
+		#var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
+		#var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
+		#var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+		#var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
+		##print(last_seen_map)
+		##var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
+		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
+		#for enemy_tracked in time_map:
+			#if not is_instance_valid(enemy_tracked):
 				#continue
-			#filtered.append(enemy)
-#
-		#next_visible[unit] = filtered
-#
+			#if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
+				#units_visible.append(enemy_tracked)
+				#continue
+			#if not units_in_los.has(enemy_tracked):
+				#continue
+			#var time: float = time_map[enemy_tracked]
+			#
+			#var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0) # 1.0 is delta of one second
+			#var conf: float = conf_map.get(enemy_tracked, 0.0)
+			#var r: float = randf()
+			#if r < p_tick:
+				#conf += 0.35
+			#else:
+				#conf -= 0.10 * 1.0 # 1.0 is delta of one second
+			#conf = clamp(conf, 0.0, 1.0)
+			#conf_map[enemy_tracked] = conf
+			#
+			#if conf >= 0.55:
+				#units_visible.append(enemy_tracked)
+		#var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
+		#for unit_in_current_hex in units_at_current_hex:
+			#if not unit_in_current_hex.team == unit.team:
+				#if not units_visible.has(unit_in_current_hex):
+					#units_visible.append(unit_in_current_hex)
+		#
+		#Globals.unit_enemy_spot_conf[unit] = conf_map
+		#next_visible[unit] = units_visible
 	#Globals.unit_visible_enemies = next_visible
 	#show_visible_units()
+
 
 func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) -> float:
 	var dist: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
@@ -1364,11 +1479,71 @@ func end_game_check():
 			#return
 	#show_winner.emit(-1)
 
-func _on_unit_shooting(unit: Unit):
-	for _unit in Globals.get_units():
-		var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(_unit, {} as Dictionary[Unit, float])
-		if conf_map.has(unit):
-			conf_map[unit] += 0.1
+#func _on_unit_shooting(unit: Unit):
+	#for _unit in Globals.get_units():
+		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(_unit, {} as Dictionary[Unit, float])
+		#if conf_map.has(unit):
+			#conf_map[unit] += 0.1
+
+
+func _on_unit_shooting(shooter: Unit) -> void:
+	for observer_variant in Globals.get_units():
+		var observer: Unit = observer_variant as Unit
+		if observer == null:
+			continue
+
+		if not is_instance_valid(observer):
+			continue
+
+		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
+			observer,
+			{} as Dictionary[Unit, EnemyTrack]
+		)
+
+		if not track_map.has(shooter):
+			continue
+
+		var track: EnemyTrack = track_map.get(shooter, null)
+		if track == null:
+			continue
+
+		track.spot_confidence += 0.1
+		track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+
+		if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+			track.is_visible = true
+
+		Globals.unit_enemy_tracks[observer] = track_map
+
+
+#func _on_unit_shooting(unit: Unit) -> void:
+	#for observer_variant in Globals.get_units():
+		#var observer: Unit = observer_variant as Unit
+		#if observer == null:
+			#continue
+#
+		#if not is_instance_valid(observer):
+			#continue
+#
+		#var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
+			#observer,
+			#{} as Dictionary[Unit, EnemyTrack]
+		#)
+#
+		#if not track_map.has(unit):
+			#continue
+#
+		#var track: EnemyTrack = track_map.get(unit, null)
+		#if track == null:
+			#continue
+#
+		#track.spot_confidence += 0.1
+		#track.spot_confidence = clamp(track.spot_confidence, 0.0, 1.0)
+#
+		#if track.spot_confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+			#track.is_visible = true
+#
+		#Globals.unit_enemy_tracks[observer] = track_map
 
 
 func spawn_units_from_match_save(match_save: MatchSaveData) -> void:

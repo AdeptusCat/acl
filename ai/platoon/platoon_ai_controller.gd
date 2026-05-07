@@ -1,157 +1,182 @@
 class_name PlatoonAiController
 extends Node
 
-#Platoon Layer
-#System: FSM + HTN-style phase planner + Utility AI
-#Purpose: run attack/defense phases and assign squad roles
+var blackboard: PlatoonBlackboard = PlatoonBlackboard.new()
 
-enum PlatoonMission {
-	NONE,
-	ATTACK_OBJECTIVE,
-	DEFEND_OBJECTIVE,
-	WITHDRAW,
-	RALLY
-}
-
-@export var decision_interval: float = 1.0
-
+@export var tactical_tick_interval: float = 0.5
 @export var squads: Array[Unit] = []
-@export var mission: PlatoonMission = PlatoonMission.NONE
-@export var objective_hex: Vector2i = Vector2i.ZERO
-@export var fallback_hex: Vector2i = Vector2i.ZERO
-var decision_timer: float = 0.0
+
+@export var objective_hex: Vector2i = Vector2i(8, 4)
+
+var tactical_tick_timer: float = 0.0
+
+
+func _ready() -> void:
+	for squad: Unit in squads:
+		blackboard.register_friendly_squad(squad)
+	
+	set_attack_objective(objective_hex)
+	print("--- Platoon blackboard test started ---")
+	print("Objective hex: ", objective_hex)
 
 
 func setup(p_units: Array[Unit]) -> void:
 	squads = p_units
+	blackboard.clear_friendly_squads()
+
+	for squad: Unit in squads:
+		blackboard.register_friendly_squad(squad)
+
+
+func set_attack_objective(p_objective_hex: Vector2i) -> void:
+	blackboard.reset_for_mission(
+		PlatoonTypes.MissionType.ATTACK_OBJECTIVE,
+		p_objective_hex
+	)
 
 
 func _physics_process(delta: float) -> void:
-	decision_timer += delta
+	tactical_tick_timer += delta
 
-	if decision_timer >= decision_interval:
-		decision_timer = 0.0
-		_decision_tick()
-
-
-func _decision_tick() -> void:
-	var average_e: float = _get_average_combat_effectiveness()
-
-	if average_e < 0.30:
-		_assign_withdraw_orders()
+	if tactical_tick_timer < tactical_tick_interval:
 		return
 
-	if average_e < 0.45:
-		_assign_rally_or_defend_orders()
-		return
+	var tick_delta: float = tactical_tick_timer
+	tactical_tick_timer = 0.0
 
-	if mission == PlatoonMission.ATTACK_OBJECTIVE:
-		_assign_attack_orders()
-	elif mission == PlatoonMission.DEFEND_OBJECTIVE:
-		_assign_defend_orders()
-	elif mission == PlatoonMission.WITHDRAW:
-		_assign_withdraw_orders()
-	elif mission == PlatoonMission.RALLY:
-		_assign_rally_or_defend_orders()
+	_tactical_tick(tick_delta)
+	
+	_print_blackboard_state()
+	
+	
+	
+	#if Globals.get_units().size() > 0:
+		##for unit in Globals.get_units():
+			##print(unit.current_hex)
+		#
+		#blackboard.register_enemy_observation(
+			#squads[0],
+			#Globals.get_units()[1],
+			#0.8,
+			#0.7,
+			#PlatoonTypes.TrackSource.LOS
+		#)
+
+func _print_blackboard_state() -> void:
+
+	print("--- Blackboard State ----------------------------------------------------------------")
+	print("Mission type: ", blackboard.mission_type)
+	print("Current phase: ", blackboard.current_phase)
+	print("Has objective: ", blackboard.has_objective)
+	print("Objective hex: ", blackboard.objective_hex)
+
+	print("Friendly squads: ", blackboard.friendly_squads.size())
+	print("Squad states: ", blackboard.squad_states.size())
+
+	print("Enemy tracks: ", blackboard.enemy_tracks.size())
+	print("Suspected enemy zones: ", blackboard.suspected_enemy_zones.size())
+
+	print("Objective enemy confidence: ", blackboard.objective_enemy_confidence)
+	print("Objective clear confidence: ", blackboard.objective_clear_confidence)
+
+	var should_recon: bool = blackboard.should_recon_objective()
+	print("Should recon objective: ", should_recon)
+
+	var probably_clear: bool = blackboard.is_objective_probably_clear()
+	print("Objective probably clear: ", probably_clear)
+
+	var can_assault: bool = blackboard.can_assault_objective()
+	print("Can assault objective: ", can_assault)
+
+	_print_squad_states()
+	_print_suspected_zones()
 
 
-func _get_average_combat_effectiveness() -> float:
-	var weighted_sum: float = 0.0
-	var total_weight: float = 0.0
 
+func _print_squad_states() -> void:
+	print("--- Squad States ---")
+
+	for squad: Node in blackboard.friendly_squads:
+		var state: SquadTacticalState = blackboard.get_squad_state(squad)
+
+		if state == null:
+			print("Missing state for squad: ", squad.name)
+			continue
+
+		print(
+			state.squad.name,
+			" hex=", state.hex,
+			" E=", state.combat_effectiveness,
+			" stress=", state.stress_effective,
+			" cohesion=", state.cohesion,
+			" morale=", state.morale_state,
+			#" MG=", state.has_mg,
+			#" leader=", state.has_leader,
+			#" radio=", state.has_radio
+		)
+
+
+func _print_suspected_zones() -> void:
+	print("--- Suspected Zones ---")
+
+	for zone: SuspectedEnemyZone in blackboard.suspected_enemy_zones:
+		print(
+			"zone_id=", zone.zone_id,
+			" hex=", zone.hex,
+			" suspicion=", zone.suspicion,
+			" danger=", zone.danger,
+			" reason=", zone.reason
+		)
+
+
+func _tactical_tick(delta: float) -> void:
+	_update_squad_snapshots()
+	blackboard.ingest_unit_enemy_tracks(squads)
+	blackboard.tactical_update(delta)
+
+	# Next systems later:
+	# PlatoonPhaseFsm.evaluate(blackboard)
+	# PlatoonPhasePlanner.build_tasks(blackboard)
+	# PlatoonUtilityAssigner.assign_roles(blackboard)
+	# PlatoonOrderWriter.issue_orders(blackboard)
+
+
+func _update_squad_snapshots() -> void:
 	for squad: Unit in squads:
-		var weight: float = float(squad.original_size)
+		if squad == null:
+			continue
 
-		#if squad.split_size > 0:
-			#weight = float(squad.split_size)
-
-		if weight < 1.0:
-			weight = 1.0
-
-		weighted_sum += squad.combat_stats.combat_effectiveness * weight
-		total_weight += weight
-
-	if total_weight <= 0.0:
-		return 0.0
-
-	var value: float = weighted_sum / total_weight
-	return clampf(value, 0.0, 1.0)
+		var state: SquadTacticalState = _build_state_from_squad(squad)
+		blackboard.update_squad_state(state)
 
 
-func _assign_attack_orders() -> void:
-	var sorted_squads: Array[Unit] = squads.duplicate()
-	sorted_squads.sort_custom(_sort_by_e_descending)
+func _build_state_from_squad(squad: Unit) -> SquadTacticalState:
+	var state: SquadTacticalState = SquadTacticalState.new()
 
-	var index: int = 0
+	var squad_hex: Vector2i = squad.current_hex
+	var members_alive: int = squad.members_alive
+	var original_size: int = squad.original_size
+	var combat_effectiveness: float = squad.combat_stats.combat_effectiveness
+	var stress_effective: float = squad.stress_system.S_eff
+	var cohesion: float = squad.combat_stats.cohesion_current
+	var morale_state: STATES.MoraleState = squad.stress_system.state
 
-	for squad: Unit in sorted_squads:
-		var order: AiOrder = AiOrder.new()
+	#var has_mg: bool = squad.has_mg()
+	#var has_leader: bool = squad.has_embedded_leader()
+	#var has_radio: bool = squad.has_radio()
 
-		if index == 0:
-			order.order_type = AiOrder.OrderType.ASSAULT
-			order.target_hex = objective_hex
-			order.allow_assault = true
-		elif index == 1:
-			order.order_type = AiOrder.OrderType.SUPPRESS
-			order.target_hex = objective_hex
-			order.allow_movement = false
-		else:
-			order.order_type = AiOrder.OrderType.HOLD
-			order.target_hex = squad.hex
-
-		_set_squad_order(squad, order)
-		index += 1
-
-
-func _sort_by_e_descending(a: Unit, b: Unit) -> bool:
-	var a_e: float = a.combat_stats.combat_effectiveness
-	var b_e: float = b.combat_stats.combat_effectiveness
-
-	return a_e > b_e
-
-
-func _assign_defend_orders() -> void:
-	for squad: Unit in squads:
-		var order: AiOrder = AiOrder.new()
-		order.order_type = AiOrder.OrderType.HOLD
-		order.target_hex = squad.hex
-		order.allow_fire = true
-		order.allow_movement = false
-
-		_set_squad_order(squad, order)
-
-
-func _assign_rally_or_defend_orders() -> void:
-	for squad: Unit in squads:
-		var order: AiOrder = AiOrder.new()
-
-		if squad.combat_stats.combat_effectiveness < 0.35:
-			order.order_type = AiOrder.OrderType.RALLY
-			order.target_hex = fallback_hex
-			order.allow_fire = true
-			order.allow_movement = true
-		else:
-			order.order_type = AiOrder.OrderType.HOLD
-			order.target_hex = squad.current_hex
-			order.allow_fire = true
-			order.allow_movement = false
-
-		_set_squad_order(squad, order)
-
-
-func _assign_withdraw_orders() -> void:
-	for squad: Unit in squads:
-		var order: AiOrder = AiOrder.new()
-		order.order_type = AiOrder.OrderType.WITHDRAW
-		order.target_hex = fallback_hex
-		order.allow_fire = false
-		order.allow_movement = true
-
-		_set_squad_order(squad, order)
-
-
-func _set_squad_order(squad: Unit, order: AiOrder) -> void:
-	if squad.squad_ai_controller == null:
-		return
-
-	squad.squad_ai_controller.set_order(order)
+	state.configure(
+		squad,
+		squad_hex,
+		members_alive,
+		original_size,
+		combat_effectiveness,
+		stress_effective,
+		cohesion,
+		morale_state,
+		#has_mg,
+		#has_leader,
+		#has_radio
+	)
+	
+	return state

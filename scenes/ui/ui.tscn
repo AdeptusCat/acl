@@ -513,6 +513,7 @@ mouse_filter = 1
 text = "Leadership Bonus:"
 
 [node name="LeadershipBonus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=323951193]
+visible = false
 layout_mode = 2
 mouse_filter = 1
 theme_override_colors/font_color = Color(1, 1, 1, 1)

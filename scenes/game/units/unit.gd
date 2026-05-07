@@ -93,8 +93,6 @@ var enemies_reported: Array[Unit]
 var enemies_reported_from_formation: Array[Unit]
 var has_reported_contact: bool = false
 @export var formation_id: int = 0
-var current_order: SquadOrder = SquadOrder.new()
-var current_order_status: int = GoapTypes.SquadOrderStatus.IDLE
 
 # === Runtime State ===
 var morale_meter_current: int = 0
@@ -1178,7 +1176,6 @@ func _on_morale_breaks():
 
 func _on_morale_recovered():
 	broken = false
-	_on_new_order_received()
 
 
 # === Process Loop ===
@@ -1820,191 +1817,6 @@ func clear_orders() -> void:
 	action_controller.clear_orders()
 	#action_label.text = "clear order"
 
-
-# === GOAP ===
-
-
-func set_order_resource(_order: SquadOrder) -> void:
-	current_order = _order
-	current_order_status = GoapTypes.SquadOrderStatus.IN_PROGRESS
-	_on_new_order_received()
-
-func _on_new_order_received() -> void:
-	match current_order.order_type:
-		GoapTypes.SquadOrderType.DEFEND_POSITION:
-			_start_defend_position()
-		GoapTypes.SquadOrderType.DEFEND_OBJECTIVE:
-			_start_defend_objective()
-		GoapTypes.SquadOrderType.MOVE_TO:
-			_start_move_to()
-		GoapTypes.SquadOrderType.BASE_OF_FIRE:
-			_start_base_of_fire()
-		GoapTypes.SquadOrderType.ASSAULT_ROUTE:
-			_start_assault_route()
-		GoapTypes.SquadOrderType.SCREEN_AXIS:
-			pass
-			#_start_screen_axis()
-		GoapTypes.SquadOrderType.REST:
-			#_start_rest()
-			pass
-		GoapTypes.SquadOrderType.REORGANIZE_MERGE:
-			#_start_reorganize()
-			pass
-		_:
-			current_order_status = GoapTypes.SquadOrderStatus.IDLE
-			action_controller.action_state = SquadActionController.SquadActionState.NO_ORDER
-
-
-func _start_defend_line() -> void:
-	# Use current_order.target_hexes or line/sector mapping to hexes
-	var defend_hex: Vector2i = Vector2i.ZERO#_pick_defend_hex_for_this_squad()
-	movement.set_path_to_hex(defend_hex)
-	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-	
-func _start_defend_position():
-	pass
-
-
-func  _start_defend_objective():
-	pass
-
-
-func _start_move_to() -> void:
-	# current_order.target_hexes should hold route
-	if current_order.target_hexes.is_empty():
-		# optional: derive a simple fallback from current position if formation gave no path
-		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
-		#movement.set_route(fallback_route)
-		
-		current_order.target_hexes.append(Globals.objective_hexes[team][0])
-	if is_moving == false and current_order.target_hexes[0] == current_hex:
-		return
-	if not movement.path_hexes.is_empty():
-		if not movement.path_hexes[-1] == current_order.target_hexes[0]:
-			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
-			give_move_to_hex_order(current_order.target_hexes[0], path, false)
-			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-	else:
-		if not current_hex == current_order.target_hexes[0]:
-			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
-			give_move_to_hex_order(current_order.target_hexes[0], path, false)
-			action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-	action_label.text = "move to" + str(current_order.target_hexes[0])
-
-func _start_base_of_fire() -> void:
-	#var visible_hexes_by_enemy: Array[Vector2i] = LOSHelper.los_lookup.get(enemies_reported[0].current_hex, [])
-	var enemies: Array[Unit] = []
-	
-	if not enemy_memory.is_empty():
-		enemies = enemy_memory.keys()
-	
-	if not enemies_reported.is_empty():
-		for enemy in enemies_reported:
-			if is_instance_valid(enemy):
-				if not enemies.has(enemy):
-					enemies.append(enemy)
-	else:
-		for enemy in enemies_reported_from_formation:
-			if is_instance_valid(enemy):
-				if not enemies.has(enemy):
-						enemies.append(enemy)
-	
-	if enemies.is_empty():
-		return
-	
-	var closest_distance_to_cover: int = 1000
-	var closest_hex: Vector2i
-	
-	var closest_enemy: Unit
-	var closest_distance_to_enemy: int = 1000
-	for enemy in enemies:
-		if is_instance_valid(enemy):
-			var distance_to_enemy: int = LOSHelper.ground_layer.cube_distance(current_cube, enemy.current_cube)
-			if distance_to_enemy <= closest_distance_to_enemy:
-			
-				closest_distance_to_enemy = distance_to_enemy
-				
-				var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemy.current_hex, [])
-	
-				for hex in visible_hexes_by_enemy.keys():
-					var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-					var distance_to_cover: int = LOSHelper.ground_layer.cube_distance(current_cube, cube)
-					if visible_hexes_by_enemy[hex]["target_cover"] > 0: # visible_hexes_by_enemy[hex]["shooter_cover"]
-						var hex_already_taken_by_squad_mate: bool = false
-						for squad in formation_squads:
-							if is_instance_valid(squad):
-								if not squad == self:
-									if squad.target_hex == hex:
-										hex_already_taken_by_squad_mate = true
-						if distance_to_cover < closest_distance_to_cover and distance_to_enemy <= effective_range and not hex_already_taken_by_squad_mate:
-							closest_distance_to_cover = distance_to_cover
-							closest_hex = LOSHelper.ground_layer.cube_to_map(cube)
-							closest_enemy = enemy
-	
-	if not closest_enemy:
-		return
-	
-	if not LOSHelper.los_lookup.has(closest_enemy.current_hex):
-		return
-	
-	#var enemy_hex: Vector2i = _get_enemy_hex_for_cover(enemies[0])
-	#if enemy_hex.x == -9999:
-		#return
-	#var visible_hexes_by_enemy: Dictionary = LOSHelper.los_lookup.get(enemy_hex, {})
-	
-	
-	
-	if not is_moving and current_hex == closest_hex:
-		return
-	if not movement.path_hexes.is_empty():
-		if not movement.path_hexes[-1] == closest_hex:
-			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, closest_hex, team)
-			give_move_to_hex_order(closest_hex, path, false)
-	else:
-		if not current_hex == closest_hex:
-			var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, closest_hex, team)
-			give_move_to_hex_order(closest_hex, path, false)
-	action_label.text = "base of fire" + str(closest_hex)
-	#return
-	#if current_order.target_hexes.is_empty():
-		#return
-	#var firebase_hex: Vector2i
-	#var visible_hexes_to_target = LOSHelper.los_lookup.get(current_order.target_hexes[0], [])
-	#var closest_distance: int = 1000
-	#for hex in visible_hexes_to_target:
-		#var target_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-		#var distance: int = LOSHelper.ground_layer.cube_distance(current_cube, target_cube)
-		#if distance < closest_distance:
-			#closest_distance = distance
-			#firebase_hex = hex
-	#current_order.target_hexes.append(firebase_hex)
-	#var path: Array[Vector3i] = Globals.movement_system._compute_path(current_hex, firebase_hex, team)
-	#give_move_to_hex_order(firebase_hex, path, false)
-	#action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-
-
-func _start_assault_route() -> void:
-	# current_order.target_hexes should hold route
-	if current_order.target_hexes.is_empty():
-		# optional: derive a simple fallback from current position if formation gave no path
-		#var fallback_route: Array[Vector2i] = _compute_simple_fallback_route()
-		#movement.set_route(fallback_route)
-		current_order.target_hexes.append(Globals.objective_hexes[team][0])
-	var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, current_order.target_hexes[0], team)
-	give_move_to_hex_order(current_order.target_hexes[0], path, false)
-	
-	action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
-
-
-func _complete_order_success() -> void:
-	current_order_status = GoapTypes.SquadOrderStatus.ACHIEVED
-	action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
-
-func _fail_order() -> void:
-	current_order_status = GoapTypes.SquadOrderStatus.FAILED
-
-func _break_order() -> void:
-	current_order_status = GoapTypes.SquadOrderStatus.BROKEN
 
 func get_formation_id() -> int:
 	return formation_id
