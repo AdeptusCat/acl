@@ -362,6 +362,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	game_controller.move_camera(scenario.start_hex[scenario.player_team])
 	
+	
+	
 	#var match_data: MatchSaveData = load_match_data("debug")
 	#game_controller.spawn_units_from_match_save(match_data)
 

@@ -7,6 +7,7 @@ var unit: Unit = null
 var current_order: AiOrder = null
 var decision_timer: float = 0.0
 
+var withdraw_active: bool = false
 
 func setup(p_unit: Unit) -> void:
 	unit = p_unit
@@ -28,30 +29,31 @@ func _physics_process(delta: float) -> void:
 
 
 func _decision_tick() -> void:
-	if current_order == null:
-		#_hold_position()
-		return
-
-	if unit.state == STATES.MoraleState.PANIC:
+	if unit.stress_system.state == STATES.MoraleState.PANIC:
 		#_retreat_to_cover()
 		return
-
-	if unit.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+	
+	if unit.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		#_withdraw_or_merge()
 		return
-
-	if unit.state == STATES.MoraleState.PINNED:
+	
+	if unit.stress_system.state == STATES.MoraleState.PINNED:
 		#_handle_pinned()
 		return
-
+	
 	if unit.combat_stats.combat_effectiveness < 0.20:
 		_withdraw_or_merge()
 		return
-
+	withdraw_active = false
+	
 	if unit.combat_stats.combat_effectiveness < 0.35:
 		_rally_or_hold()
 		return
-
+	
+	if current_order == null:
+		#_hold_position()
+		return
+	
 	_execute_order()
 
 
@@ -70,6 +72,9 @@ func _execute_order() -> void:
 		_rally_or_hold()
 	else:
 		_hold_position()
+	
+	if not current_order.order_type == AiOrder.OrderType.WITHDRAW:
+		withdraw_active = false
 
 
 func _hold_position() -> void:
@@ -100,8 +105,12 @@ func _assault_order_target() -> void:
 	if unit.combat_stats.combat_effectiveness < 0.60:
 		_suppress_order_target()
 		return
-
-	if unit.state != STATES.MoraleState.NORMAL or unit.state != STATES.MoraleState.CAUTIOUS:
+	
+	#print(unit.stress_system.state)
+	#print(STATES.MoraleState.NORMAL)
+	#print(STATES.MoraleState.CAUTIOUS)
+	#print(" #")
+	if unit.stress_system.state != STATES.MoraleState.NORMAL and unit.stress_system.state != STATES.MoraleState.CAUTIOUS:
 		_suppress_order_target()
 		return
 
@@ -109,8 +118,13 @@ func _assault_order_target() -> void:
 
 
 func _withdraw_to_order_target() -> void:
-	unit.squad_fire.clear_target()
-	unit.movement.move_to_hex(current_order.target_hex)
+	#unit.squad_fire.set_target(null)
+	if withdraw_active:
+		return
+	withdraw_active = true
+	var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, current_order.target_hex, unit.team)
+	unit.give_move_to_hex_order(current_order.target_hex, path, false)
+	#unit.movement.move_to_hex(current_order.target_hex)
 
 
 func _rally_or_hold() -> void:
@@ -127,6 +141,9 @@ func _rally_or_hold() -> void:
 
 
 func _withdraw_or_merge() -> void:
+	if withdraw_active:
+		return
+	withdraw_active = true
 	var known_enemies: Array[Unit] = []
 	#var i: int = 0
 	#while i < unit.units.size():
@@ -143,7 +160,9 @@ func _withdraw_or_merge() -> void:
 	var retreat_hex: Vector2i = unit.action_controller.compute_retreat_hex(unit.current_hex, known_enemies, retreat_distance)
 	
 	if retreat_hex != Vector2i.ZERO:
-		unit.movement.move_to_hex(retreat_hex)
+		#unit.movement.move_to_hex(retreat_hex)
+		var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, retreat_hex, unit.team)
+		unit.give_move_to_hex_order(retreat_hex, path, false)
 
 	#var fallback_hex: Vector2i = _find_fallback_hex()
 #

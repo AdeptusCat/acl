@@ -75,6 +75,7 @@
 [ext_resource type="Resource" uid="uid://dmn373dp04x33" path="res://resources/weapons/m1_garand.tres" id="58_7lp0r"]
 [ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://scenes/scenarios/victory_conditions/exit_units_condition.gd" id="59_jhdiv"]
 [ext_resource type="Resource" uid="uid://0yrwtv2ux2fi" path="res://resources/squads/german/company_hq.tres" id="59_mdkuk"]
+[ext_resource type="PackedScene" uid="uid://chkbs6ulxllvt" path="res://platoon_ai_controller.tscn" id="59_mrxq0"]
 [ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
 [ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="61_x77xw"]
@@ -1574,7 +1575,6 @@ script = ExtResource("1_6hctx")
 [node name="Maps" type="Node2D" parent="." unique_id=2101382623]
 
 [node name="OrchardRoad" parent="Maps" unique_id=1528497757 instance=ExtResource("3_a5636")]
-visible = false
 grid_size = Vector2i(14, 12)
 map_name = "Orchard Road"
 
@@ -1656,6 +1656,11 @@ squad_loadout = ExtResource("66_olhon")
 formation_id = 1
 squad_type = 4
 
+[node name="PlatoonAiController" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units/CA_P1_S0_Allies_PlatoonHQ" unique_id=585976234 node_paths=PackedStringArray("squads") instance=ExtResource("59_mrxq0")]
+squads = [NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../../CA_P1_S2_Allies_Rifle"), NodePath("..")]
+objective_hex = Vector2i(8, 4)
+fallback_hex = Vector2i(1, 1)
+
 [node name="AxisObjectivesTileMapLayer" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(148229250, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")
 
@@ -1663,6 +1668,7 @@ tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")
 tile_map_data = PackedByteArray("AAAIAAQABgAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAAAAAAAAANAAsAAAAAAAAAAAANAAoAAAAAAAAAAAANAAkAAAAAAAAAAAA=")
 
 [node name="DefaultMap" parent="Maps" unique_id=1128763383 instance=ExtResource("3_a5636")]
+visible = false
 grid_size = Vector2i(33, 21)
 map_name = "Default Map"
 

@@ -159,6 +159,7 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 @onready var enemy_visibility_checker_timer: Timer = $EnemyVisibilityCheckerTimer
 @onready var combat_stats: UnitCombatStats = $CombatStats
 @onready var combat_stats_timer: Timer = $CombatStatsTimer
+@onready var squad_ai_controller: SquadAiController = $SquadAiController
 
 
 # === DEBUG ===
@@ -228,6 +229,8 @@ func setup():
 	enemy_visibility_checker_timer.start()
 	combat_stats.unit = self
 	combat_stats_timer.start()
+	squad_ai_controller.unit = self
+
 
 func game_start():
 	command_connectivity_timer.start()

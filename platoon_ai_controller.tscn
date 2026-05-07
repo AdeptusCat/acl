@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://chkbs6ulxllvt"]
+
+[ext_resource type="Script" uid="uid://bjayt7gpxucst" path="res://platoon_ai_controller.gd" id="1_n0ghb"]
+
+[node name="PlatoonAiController" type="Node" unique_id=585976234]
+script = ExtResource("1_n0ghb")
