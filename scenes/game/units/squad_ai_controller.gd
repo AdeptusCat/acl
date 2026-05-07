@@ -1,6 +1,10 @@
 class_name SquadAiController
 extends Node
 
+#Squad Layer
+#System: Behavior Tree + Utility AI
+#Purpose: execute orders while reacting to danger
+
 @export var decision_interval: float = 0.50
 
 var unit: Unit = null

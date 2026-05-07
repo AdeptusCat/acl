@@ -1,6 +1,10 @@
 class_name PlatoonAiController
 extends Node
 
+#Platoon Layer
+#System: FSM + HTN-style phase planner + Utility AI
+#Purpose: run attack/defense phases and assign squad roles
+
 enum PlatoonMission {
 	NONE,
 	ATTACK_OBJECTIVE,
