@@ -1658,7 +1658,7 @@ player_team = 1
 victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n"), SubResource("Resource_opb01")])
 
 [node name="CA_P1_S2_Axis_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="0" unique_id=602531029 node_paths=PackedStringArray("ground_map") instance=ExtResource("19_sh7a8")]
-position = Vector2(656, 192)
+position = Vector2(416, 288)
 squad = 2
 platoon = 1
 ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")

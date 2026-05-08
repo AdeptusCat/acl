@@ -373,9 +373,6 @@ func _process(delta: float) -> void:
 		fog_of_war_tile_map_layer.hide()
 	else:
 		fog_of_war_tile_map_layer.show()
-	#for node in Globals.unit_enemy_los_time_s:
-		#if not is_instance_valid(node):
-			#pass
 
 
 func _on_ui_try_again() -> void:

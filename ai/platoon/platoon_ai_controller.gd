@@ -192,7 +192,8 @@ func _update_objective_observation() -> void:
 			continue
 
 		if _squad_can_observe_objective(squad):
-			blackboard.mark_objective_observed_clear(0.06)
+			
+			blackboard.mark_objective_observed_clear(0.06) # TODO magic number need to reflect, that unit has hinderence so spotting is more difficult
 			return
 
 func _squad_can_observe_objective(squad: Unit) -> bool:

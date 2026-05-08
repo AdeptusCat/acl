@@ -766,31 +766,6 @@ func _on_unit_died(unit: Unit):
 	Globals.unit_visible_enemies.erase(unit)
 	Globals.unit_enemies_in_los.erase(unit)
 	
-	Globals.unit_enemy_los_time_s.erase(unit)
-	# not working
-	#erase_freed_objects_key_from_dict(Globals.unit_enemy_los_time_s)
-	for _unit in Globals.unit_enemy_los_time_s:
-		if is_instance_valid(_unit):
-			Globals.unit_enemy_los_time_s[_unit].erase(unit)
-		else:
-			pass
-	
-	Globals.unit_enemy_spot_conf.erase(unit)
-	# not working
-	#erase_freed_objects_key_from_dict(Globals.unit_enemy_spot_conf)
-	for _unit in Globals.unit_enemy_spot_conf:
-		if is_instance_valid(_unit):
-			Globals.unit_enemy_spot_conf[_unit].erase(unit)
-		else:
-			pass
-	
-	Globals.unit_enemy_last_seen_unix_s.erase(unit)
-	# not working
-	#erase_freed_objects_key_from_dict(Globals.unit_enemy_last_seen_unix_s)
-	for _unit in Globals.unit_enemy_last_seen_unix_s:
-		if is_instance_valid(_unit):
-			Globals.unit_enemy_last_seen_unix_s[_unit].erase(unit)
-	
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
@@ -932,67 +907,6 @@ func _process(delta):
 	for unit in units_to_surrender:
 		Debug.units_to_surrender.erase(unit)
 		unit.surrender()
-	
-	
-#func update_los_time(delta: float) -> void:
-	#var now_unix: float = Time.get_unix_time_from_system()
-#
-	#for unit in Globals.get_units():
-		#if not is_instance_valid(unit):
-			#continue
-#
-#
-		#var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
-		#var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
-#
-		#var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-#
-		#var seen_this_tick: Dictionary[Unit, bool] = {}
-#
-		#for enemy in enemies_in_los:
-			#if not is_instance_valid(enemy):
-				#continue
-#
-			#seen_this_tick[enemy] = true
-#
-			#var t: float = time_map.get(enemy, 0.0)
-			#t += delta
-			#time_map[enemy] = t
-#
-			#last_seen_map[enemy] = now_unix
-#
-		## cleanup: remove entries for dead refs or enemies not seen for a while
-		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		#var units_tracked: Array[Unit] = time_map.keys()
-		#for unit_tracked in units_tracked:
-			#if not is_instance_valid(unit_tracked):
-				#continue
-			#if not seen_this_tick.has(unit_tracked):
-				##var last_seen: float = last_seen_map.get(unit_tracked, 0.0)
-				##
-				### E 0:02:39:581   game_controller.gd:702 @ update_los_time(): Condition "!_p->typed_key.validate(key, "erase")" is true. Returning: false
-  ###<C++ Source>  core/variant/dictionary.cpp:254 @ erase()
-  ###<Stack Trace> game_controller.gd:702 @ update_los_time()
-				###game_controller.gd:667 @ _process()
-				##
-				###if now_unix - last_seen > 10.0:
-				##time_map.erase(unit_tracked)
-				##last_seen_map.erase(unit_tracked)
-				#
-				## FIXME thats not working, units will be seen perminately
-				#if not conf_map.has(unit_tracked):
-					#time_map.erase(unit_tracked)
-					#last_seen_map.erase(unit_tracked)
-					#continue
-				##conf -= delta
-				#conf_map[unit_tracked] -= delta
-				#if conf_map[unit_tracked] <= 0.0:
-					#conf_map[unit_tracked] = 0.0
-					#time_map.erase(unit_tracked)
-					#last_seen_map.erase(unit_tracked)
-#
-		#Globals.unit_enemy_los_time_s[unit] = time_map
-		#Globals.unit_enemy_last_seen_unix_s[unit] = last_seen_map
 
 
 func update_los_time(delta: float) -> void:
@@ -1147,52 +1061,6 @@ func _on_unit_visibility_checker_timer_timeout() -> void:
 
 	Globals.unit_visible_enemies = next_visible
 	show_visible_units()
-	
-	#var next_visible: Dictionary = {}
-	#
-	#for unit in Globals.get_units():
-		#if not is_instance_valid(unit):
-			#continue
-		#var units_visible: Array = []
-		#var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
-		#var time_map: Dictionary[Unit, float] = Globals.unit_enemy_los_time_s.get(unit, {} as Dictionary[Unit, float])
-		#var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		#var last_seen_map: Dictionary[Unit, float] = Globals.unit_enemy_last_seen_unix_s.get(unit, {} as Dictionary[Unit, float])
-		##print(last_seen_map)
-		##var time_map_keys_filtered: Array[Unit] = time_map.keys().filter(func(v): return v != null)
-		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(unit, {} as Dictionary[Unit, float])
-		#for enemy_tracked in time_map:
-			#if not is_instance_valid(enemy_tracked):
-				#continue
-			#if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
-				#units_visible.append(enemy_tracked)
-				#continue
-			#if not units_in_los.has(enemy_tracked):
-				#continue
-			#var time: float = time_map[enemy_tracked]
-			#
-			#var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0) # 1.0 is delta of one second
-			#var conf: float = conf_map.get(enemy_tracked, 0.0)
-			#var r: float = randf()
-			#if r < p_tick:
-				#conf += 0.35
-			#else:
-				#conf -= 0.10 * 1.0 # 1.0 is delta of one second
-			#conf = clamp(conf, 0.0, 1.0)
-			#conf_map[enemy_tracked] = conf
-			#
-			#if conf >= 0.55:
-				#units_visible.append(enemy_tracked)
-		#var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
-		#for unit_in_current_hex in units_at_current_hex:
-			#if not unit_in_current_hex.team == unit.team:
-				#if not units_visible.has(unit_in_current_hex):
-					#units_visible.append(unit_in_current_hex)
-		#
-		#Globals.unit_enemy_spot_conf[unit] = conf_map
-		#next_visible[unit] = units_visible
-	#Globals.unit_visible_enemies = next_visible
-	#show_visible_units()
 
 
 func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) -> float:
@@ -1457,34 +1325,6 @@ func _on_win_condition_timer_timeout() -> void:
 func end_game_check():
 	if end_game_handled:
 		return
-	#end_game_handled = true
-	#var occupying_units : Array
-	#for unit in Globals.get_units():
-		#if unit.current_hex == Globals.objective_hexes[unit.team][0]:
-			#occupying_units.append(unit)
-	#for unit in occupying_units:
-		#if not unit.broken:
-			#var winning_team: Globals.Team = Globals.Team.AXIS
-			#match Globals.game_mode:
-				#Globals.GameMode.DEFEND:
-					#if unit.team == Globals.Team.AXIS:
-						#winning_team = Globals.Team.AXIS
-					#if unit.team == Globals.Team.ALLIES:
-						#winning_team = Globals.Team.ALLIES
-				#Globals.GameMode.ATTACK:
-					#if unit.team == Globals.Team.ALLIES:
-						#winning_team = Globals.Team.ALLIES
-					#if unit.team == Globals.Team.AXIS:
-						#winning_team = Globals.Team.AXIS
-			#show_winner.emit(winning_team)
-			#return
-	#show_winner.emit(-1)
-
-#func _on_unit_shooting(unit: Unit):
-	#for _unit in Globals.get_units():
-		#var conf_map: Dictionary[Unit, float] = Globals.unit_enemy_spot_conf.get(_unit, {} as Dictionary[Unit, float])
-		#if conf_map.has(unit):
-			#conf_map[unit] += 0.1
 
 
 func _on_unit_shooting(shooter: Unit) -> void:
