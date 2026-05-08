@@ -4,7 +4,7 @@ extends RefCounted
 const ACTIONABLE_ENEMY_CONFIDENCE: float = 0.60
 const ASSAULT_REQUIRED_ENEMY_CONFIDENCE: float = 0.70
 const OBJECTIVE_NEAR_RADIUS: int = 2
-const CLEAR_CONFIDENCE_GAIN_PER_SECOND: float = 0.06
+const CLEAR_CONFIDENCE_GAIN_PER_SECOND: float = 0.01
 const CLEAR_CONFIDENCE_LOSS_PER_SECOND: float = 0.12
 
 var mission_type: int = PlatoonTypes.MissionType.NONE

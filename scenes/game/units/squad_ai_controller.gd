@@ -126,9 +126,10 @@ func _withdraw_to_order_target() -> void:
 	if withdraw_active:
 		return
 	withdraw_active = true
-	var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, current_order.target_hex, unit.team)
-	unit.give_move_to_hex_order(current_order.target_hex, path, false)
+	#var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, current_order.target_hex, unit.team)
+	#unit.give_move_to_hex_order(current_order.target_hex, path, false)
 	#unit.movement.move_to_hex(current_order.target_hex)
+	unit.order(Globals.UnitCmd.MOVE, current_order.target_hex)
 
 
 func _rally_or_hold() -> void:
@@ -165,8 +166,9 @@ func _withdraw_or_merge() -> void:
 	
 	if retreat_hex != Vector2i.ZERO:
 		#unit.movement.move_to_hex(retreat_hex)
-		var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, retreat_hex, unit.team)
-		unit.give_move_to_hex_order(retreat_hex, path, false)
+		unit.order(Globals.UnitCmd.MOVE, retreat_hex)
+		#var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, retreat_hex, unit.team)
+		#unit.give_move_to_hex_order(retreat_hex, path, false)
 
 	#var fallback_hex: Vector2i = _find_fallback_hex()
 #

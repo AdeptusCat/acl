@@ -117,8 +117,6 @@ var in_close_combat: bool = false
 
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
-
-
 @export var squads_collection: SquadsCollection
 @export var squad_type: Globals.SquadType = Globals.SquadType.Rifle : set = set_squad_type
 
