@@ -117,3 +117,44 @@ static func task_type_to_string(task_type: int) -> String:
 			return "WITHDRAW_TO_HEX"
 		_:
 			return "UNKNOWN_TASK_TYPE"
+
+static func mission_type_to_string(mission_type: int) -> String:
+	match mission_type:
+		MissionType.NONE:
+			return "NONE"
+		MissionType.ATTACK_OBJECTIVE:
+			return "ATTACK_OBJECTIVE"
+		MissionType.DEFEND_AREA:
+			return "DEFEND_AREA"
+		MissionType.WITHDRAW:
+			return "WITHDRAW"
+		_:
+			return "UNKNOWN_MISSION_TYPE"
+
+
+static func phase_to_string(phase: int) -> String:
+	match phase:
+		Phase.IDLE:
+			return "IDLE"
+		Phase.PLANNING_ATTACK:
+			return "PLANNING_ATTACK"
+		Phase.APPROACH_TO_OBJECTIVE:
+			return "APPROACH_TO_OBJECTIVE"
+		Phase.RECON_OBJECTIVE:
+			return "RECON_OBJECTIVE"
+		Phase.DEVELOP_CONTACT:
+			return "DEVELOP_CONTACT"
+		Phase.SUPPRESS_OBJECTIVE:
+			return "SUPPRESS_OBJECTIVE"
+		Phase.MANEUVER_TO_ASSAULT_POSITION:
+			return "MANEUVER_TO_ASSAULT_POSITION"
+		Phase.ASSAULT_OBJECTIVE:
+			return "ASSAULT_OBJECTIVE"
+		Phase.CONSOLIDATE_OBJECTIVE:
+			return "CONSOLIDATE_OBJECTIVE"
+		Phase.REORGANIZE:
+			return "REORGANIZE"
+		Phase.WITHDRAW:
+			return "WITHDRAW"
+		_:
+			return "UNKNOWN_PHASE"

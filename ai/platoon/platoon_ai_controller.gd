@@ -158,7 +158,7 @@ func _tactical_tick(delta: float) -> void:
 	_issue_squad_level_orders()
 
 	# 10. Monitor triggers for phase transition.
-	_monitor_triggers_for_phase_transition()
+	#_monitor_triggers_for_phase_transition()
 
 
 func _read_squad_states() -> void:
@@ -333,7 +333,7 @@ func _select_attack_phase() -> int:
 		return PlatoonTypes.Phase.PLANNING_ATTACK
 
 	if blackboard.current_phase == PlatoonTypes.Phase.PLANNING_ATTACK:
-		if phase_elapsed_seconds >= tactical_tick_interval:
+		if phase_elapsed_seconds >= tactical_tick_interval * 10:
 			return PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE
 		return blackboard.current_phase
 
@@ -463,19 +463,19 @@ func _build_idle_plan() -> void:
 
 
 func _build_planning_attack_plan() -> void:
-	blackboard.create_task(
-		PlatoonTypes.TaskType.OBSERVE_HEX,
-		blackboard.objective_hex,
-		PlatoonTypes.Role.LEAD_PROBE,
-		0.70
-	)
+	var rally_hex: Vector2i = _get_platoon_center_hex()
 
-	blackboard.create_task(
-		PlatoonTypes.TaskType.RALLY_AT_HEX,
-		_get_platoon_center_hex(),
-		PlatoonTypes.Role.RESERVE,
-		0.45
-	)
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		blackboard.create_task(
+			PlatoonTypes.TaskType.RALLY_AT_HEX,
+			rally_hex,
+			PlatoonTypes.Role.RESERVE,
+			0.45
+		)
+
 
 
 func _build_approach_plan() -> void:
@@ -1048,9 +1048,9 @@ func _issue_overwatch_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
 			##_issue_stop_order(squad)
 
 func _get_movement_destination_for_task(squad: Unit, task: PlatoonTask) -> Vector2i:
-	if task.task_type == PlatoonTypes.TaskType.ASSAULT_HEX:
-		if _should_assault_break_formation(squad, task):
-			return task.target_hex
+	#if task.task_type == PlatoonTypes.TaskType.ASSAULT_HEX:
+		#if _should_assault_break_formation(squad, task):
+			#return task.target_hex
 
 	return _get_formation_destination_for_squad(squad, task)
 
@@ -1468,19 +1468,23 @@ func _get_withdraw_hex() -> Vector2i:
 
 
 func _print_blackboard_state() -> void:
+	
+	var mission_type_name: String = PlatoonTypes.mission_type_to_string(blackboard.mission_type)
+	var phase_type_name: String = PlatoonTypes.phase_to_string(blackboard.current_phase)
+	
 	print("--- Blackboard State ----------------------------------------------------------------")
-	print("Mission type: ", blackboard.mission_type)
-	print("Current phase: ", blackboard.current_phase)
-	print("Phase elapsed: ", phase_elapsed_seconds)
+	print("Mission type: ", mission_type_name)
+	print("Current phase: ", phase_type_name)
+	#print("Phase elapsed: ", phase_elapsed_seconds)
 	print("Plan tasks: ", blackboard.phase_tasks.size())
-	print("Has objective: ", blackboard.has_objective)
+	#print("Has objective: ", blackboard.has_objective)
 	print("Objective hex: ", blackboard.objective_hex)
 
 	print("Friendly squads: ", blackboard.friendly_squads.size())
-	print("Squad states: ", blackboard.squad_states.size())
+	#print("Squad states: ", blackboard.squad_states.size())
 
 	print("Enemy tracks: ", blackboard.enemy_tracks.size())
-	print("Suspected enemy zones: ", blackboard.suspected_enemy_zones.size())
+	#print("Suspected enemy zones: ", blackboard.suspected_enemy_zones.size())
 
 	print("Objective enemy confidence: ", blackboard.objective_enemy_confidence)
 	print("Objective clear confidence: ", blackboard.objective_clear_confidence)
@@ -1561,24 +1565,28 @@ func _print_phase_tasks() -> void:
 
 func _assign_formation_slots() -> void:
 	formation_slot_by_squad.clear()
-
-	var ordered_squads: Array[Unit] = []
-
-	for task: PlatoonTask in blackboard.phase_tasks:
-		if task.assigned_squad == null:
-			continue
-
-		if ordered_squads.has(task.assigned_squad):
-			continue
-
-		ordered_squads.append(task.assigned_squad)
-
-	ordered_squads.sort_custom(_sort_squads_for_formation)
-
 	var slot_index: int = 0
-	for squad: Unit in ordered_squads:
+	for squad: Unit in squads:
 		formation_slot_by_squad[squad] = slot_index
 		slot_index += 1
+	
+	#var ordered_squads: Array[Unit] = []
+#
+	#for task: PlatoonTask in blackboard.phase_tasks:
+		#if task.assigned_squad == null:
+			#continue
+#
+		#if ordered_squads.has(task.assigned_squad):
+			#continue
+#
+		#ordered_squads.append(task.assigned_squad)
+#
+	##ordered_squads.sort_custom(_sort_squads_for_formation)
+#
+	#var slot_index: int = 0
+	#for squad: Unit in ordered_squads:
+		#formation_slot_by_squad[squad] = slot_index
+		#slot_index += 1
 
 
 func _sort_squads_for_formation(a: Unit, b: Unit) -> bool:
@@ -1926,13 +1934,13 @@ func _normalize_hex_direction(delta: Vector2i) -> Vector2i:
 func _get_slot_offset(slot_index: int, heading: Vector2i, role: int) -> Vector2i:
 	var left: Vector2i = _rotate_hex_direction_left(heading)
 	var right: Vector2i = _rotate_hex_direction_right(heading)
-	var rear: Vector2i = -heading
+	var center: Vector2i = Vector2i.ZERO
 
 	if formation_shape == FormationShape.COLUMN:
-		return _get_column_slot_offset(slot_index, heading, rear)
+		return _get_column_slot_offset(slot_index, heading, center)
 
 	if formation_shape == FormationShape.WEDGE:
-		return _get_wedge_slot_offset(slot_index, heading, left, right, rear, role)
+		return _get_wedge_slot_offset(slot_index, heading, left, right, center, role)
 
 	return Vector2i.ZERO
 
@@ -1952,18 +1960,18 @@ func _get_wedge_slot_offset(
 	rear: Vector2i,
 	role: int
 ) -> Vector2i:
-	if role == PlatoonTypes.Role.SUPPORT_BY_FIRE:
-		if slot_index % 2 == 0:
-			return rear + left
-		return rear + right
-
-	if role == PlatoonTypes.Role.OVERWATCH:
-		if slot_index % 2 == 0:
-			return rear * 2 + left
-		return rear * 2 + right
-
-	if role == PlatoonTypes.Role.RESERVE:
-		return rear * 2
+	#if role == PlatoonTypes.Role.SUPPORT_BY_FIRE:
+		#if slot_index % 2 == 0:
+			#return rear + left
+		#return rear + right
+#
+	#if role == PlatoonTypes.Role.OVERWATCH:
+		#if slot_index % 2 == 0:
+			#return rear + left
+		#return rear + right
+#
+	#if role == PlatoonTypes.Role.RESERVE:
+		#return rear
 
 	if slot_index == 0:
 		return Vector2i.ZERO
@@ -1975,12 +1983,12 @@ func _get_wedge_slot_offset(
 		return rear + right
 
 	if slot_index == 3:
-		return rear * 2 + left
+		return rear + left
 
 	if slot_index == 4:
-		return rear * 2 + right
+		return rear + right
 
-	return rear * 2
+	return rear
 
 
 func _rotate_hex_direction_left(direction: Vector2i) -> Vector2i:
@@ -2012,18 +2020,18 @@ func _rotate_hex_direction_right(direction: Vector2i) -> Vector2i:
 func _find_nearest_free_formation_hex(preferred_hex: Vector2i, requesting_squad: Unit) -> Vector2i:
 	if _is_free_formation_hex(preferred_hex, requesting_squad):
 		return preferred_hex
-
-	var radius: int = 1
-	while radius <= 2:
-		var ring: Array[Vector2i] = _get_hex_ring(preferred_hex, radius)
-
-		for candidate_hex: Vector2i in ring:
-			if _is_free_formation_hex(candidate_hex, requesting_squad):
-				return candidate_hex
-
-		radius += 1
-
 	return preferred_hex
+	#var radius: int = 1
+	#while radius <= 2:
+		#var ring: Array[Vector2i] = _get_hex_ring(preferred_hex, radius)
+#
+		#for candidate_hex: Vector2i in ring:
+			#if _is_free_formation_hex(candidate_hex, requesting_squad):
+				#return candidate_hex
+#
+		#radius += 1
+#
+	#return preferred_hex
 
 
 func _is_free_formation_hex(candidate_hex: Vector2i, requesting_squad: Unit) -> bool:
@@ -2069,7 +2077,7 @@ func _get_hex_ring(center_hex: Vector2i, radius: int) -> Array[Vector2i]:
 		result.append(center_hex)
 		return result
 
-	var hex: Vector2i = center_hex + HEX_DIRECTIONS[4] * radius
+	var hex: Vector2i = center_hex + HEX_DIRECTIONS[2] * radius
 
 	var side_index: int = 0
 	while side_index < HEX_DIRECTIONS.size():
