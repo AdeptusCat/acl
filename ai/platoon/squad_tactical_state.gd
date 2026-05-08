@@ -1,7 +1,7 @@
 class_name SquadTacticalState
 extends RefCounted
 
-var squad: Node = null
+var squad: Unit = null
 var hex: Vector2i = Vector2i.ZERO
 
 var members_alive: int = 0
@@ -22,7 +22,7 @@ var assigned_task_id: int = -1
 
 
 func configure(
-	p_squad: Node,
+	p_squad: Unit,
 	p_hex: Vector2i,
 	p_members_alive: int,
 	p_original_size: int,

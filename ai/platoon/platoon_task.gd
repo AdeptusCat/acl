@@ -2,13 +2,13 @@ class_name PlatoonTask
 extends RefCounted
 
 var task_id: int = -1
-var task_type: int = PlatoonTypes.TaskType.NONE
+var task_type: PlatoonTypes.TaskType = PlatoonTypes.TaskType.NONE
 
 var target_hex: Vector2i = Vector2i.ZERO
 var target_track_id: int = -1
 var target_zone_id: int = -1
 
-var required_role: int = PlatoonTypes.Role.NONE
+var required_role: PlatoonTypes.Role = PlatoonTypes.Role.NONE
 var assigned_squad: Node = null
 
 var priority: float = 0.0
@@ -17,9 +17,9 @@ var is_locked: bool = false
 
 func configure(
 	p_task_id: int,
-	p_task_type: int,
+	p_task_type: PlatoonTypes.TaskType,
 	p_target_hex: Vector2i,
-	p_required_role: int,
+	p_required_role: PlatoonTypes.Role,
 	p_priority: float
 ) -> void:
 	task_id = p_task_id

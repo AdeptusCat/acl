@@ -15,6 +15,8 @@ const ROLE_UNASSIGNED: int = -1
 
 var blackboard: PlatoonBlackboard = PlatoonBlackboard.new()
 
+@export var is_active: bool = false
+
 @export var tactical_tick_interval: float = 0.5
 @export var plan_refresh_interval: float = 1.0
 @export var phase_transition_cooldown_seconds: float = 1.5
@@ -56,6 +58,10 @@ var last_move_order_hex_by_squad: Dictionary = {}
 
 @export var formation_settle_seconds: float = 1.25
 @export var formation_center_tolerance_px: float = 6.0
+@export var assault_break_in_distance: int = 2
+@export var objective_verification_radius: int = 1
+@export var unresolved_objective_suspicion_threshold: float = 0.30
+@export var unverified_clear_confidence_cap: float = 0.65
 
 func _ready() -> void:
 	for squad: Unit in squads:
@@ -89,6 +95,9 @@ func set_attack_objective(p_objective_hex: Vector2i) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not is_active:
+		return
+	
 	if not Globals.game_started:
 		return
 	
@@ -134,6 +143,7 @@ func _tactical_tick(delta: float) -> void:
 	# Beliefs depend on post-decay tracks and zones.
 	blackboard.recalculate_platoon_values()
 	blackboard.recalculate_objective_beliefs(0.0)
+	_enforce_objective_clear_verification()
 
 	# 6. Evaluate current phase.
 	_evaluate_current_phase()
@@ -271,6 +281,11 @@ func _find_suspected_zone_at_hex(p_hex: Vector2i) -> SuspectedEnemyZone:
 
 
 func _evaluate_current_phase() -> void:
+	if blackboard.current_phase == PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE:
+		if not _is_objective_verified_clear():
+			_change_phase(PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE)
+			return
+
 	var next_phase: int = _select_phase_from_blackboard()
 
 	if next_phase == blackboard.current_phase:
@@ -308,6 +323,12 @@ func _select_attack_phase() -> int:
 	if not blackboard.has_objective:
 		return PlatoonTypes.Phase.IDLE
 
+	if _is_objective_verified_clear():
+		return PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE
+
+	if blackboard.current_phase == PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE:
+		return PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE
+
 	if blackboard.current_phase == PlatoonTypes.Phase.IDLE:
 		return PlatoonTypes.Phase.PLANNING_ATTACK
 
@@ -315,9 +336,6 @@ func _select_attack_phase() -> int:
 		if phase_elapsed_seconds >= tactical_tick_interval:
 			return PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE
 		return blackboard.current_phase
-
-	if blackboard.is_objective_probably_clear():
-		return PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE
 
 	if blackboard.objective_enemy_confidence >= PlatoonBlackboard.ACTIONABLE_ENEMY_CONFIDENCE:
 		if blackboard.current_phase == PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE:
@@ -327,14 +345,14 @@ func _select_attack_phase() -> int:
 			return PlatoonTypes.Phase.DEVELOP_CONTACT
 
 	if blackboard.current_phase == PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE:
-		if blackboard.should_recon_objective():
-			return PlatoonTypes.Phase.RECON_OBJECTIVE
+		if _is_any_assault_capable_squad_in_break_in_distance(blackboard.objective_hex):
+			return PlatoonTypes.Phase.ASSAULT_OBJECTIVE
 		return blackboard.current_phase
 
 	if blackboard.current_phase == PlatoonTypes.Phase.RECON_OBJECTIVE:
-		if blackboard.objective_clear_confidence >= 0.75:
-			return PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE
-		return blackboard.current_phase
+		if _is_any_assault_capable_squad_in_break_in_distance(blackboard.objective_hex):
+			return PlatoonTypes.Phase.ASSAULT_OBJECTIVE
+		return PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE
 
 	if blackboard.current_phase == PlatoonTypes.Phase.DEVELOP_CONTACT:
 		if blackboard.can_assault_objective():
@@ -347,19 +365,16 @@ func _select_attack_phase() -> int:
 		return blackboard.current_phase
 
 	if blackboard.current_phase == PlatoonTypes.Phase.MANEUVER_TO_ASSAULT_POSITION:
-		if phase_elapsed_seconds >= min_maneuver_seconds:
+		if _is_any_assault_capable_squad_in_break_in_distance(blackboard.objective_hex):
 			return PlatoonTypes.Phase.ASSAULT_OBJECTIVE
 		return blackboard.current_phase
 
 	if blackboard.current_phase == PlatoonTypes.Phase.ASSAULT_OBJECTIVE:
-		if blackboard.is_objective_probably_clear():
+		if _is_objective_verified_clear():
 			return PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE
 		return blackboard.current_phase
 
-	if blackboard.current_phase == PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE:
-		return blackboard.current_phase
-
-	return PlatoonTypes.Phase.PLANNING_ATTACK
+	return PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE
 
 
 func _select_defense_phase() -> int:
@@ -398,6 +413,12 @@ func _change_phase(p_next_phase: int) -> void:
 	phase_transition_cooldown_timer = phase_transition_cooldown_seconds
 	planned_phase = ROLE_UNASSIGNED
 	plan_refresh_timer = 0.0
+	formation_path.clear()
+	formation_path_index = 0
+	formation_slot_by_squad.clear()
+	reserved_formation_hexes.clear()
+	formation_settle_started_msec_by_squad.clear()
+	last_move_order_hex_by_squad.clear()
 	blackboard.clear_phase_tasks()
 	blackboard.clear_role_assignments()
 
@@ -458,28 +479,25 @@ func _build_planning_attack_plan() -> void:
 
 
 func _build_approach_plan() -> void:
-	var staging_hex: Vector2i = _get_assault_staging_hex()
-	var support_hex: Vector2i = _get_support_by_fire_hex()
-
 	blackboard.create_task(
-		PlatoonTypes.TaskType.MOVE_TO_HEX,
-		staging_hex,
-		PlatoonTypes.Role.LEAD_PROBE,
-		0.85
+		PlatoonTypes.TaskType.MANEUVER_TO_HEX,
+		blackboard.objective_hex,
+		PlatoonTypes.Role.ASSAULT,
+		0.95
 	)
 
 	blackboard.create_task(
-		PlatoonTypes.TaskType.MOVE_TO_HEX,
-		support_hex,
+		PlatoonTypes.TaskType.OVERWATCH_ZONE,
+		blackboard.objective_hex,
 		PlatoonTypes.Role.OVERWATCH,
-		0.70
+		0.75
 	)
 
 	blackboard.create_task(
-		PlatoonTypes.TaskType.RALLY_AT_HEX,
-		_get_platoon_center_hex(),
-		PlatoonTypes.Role.RESERVE,
-		0.40
+		PlatoonTypes.TaskType.MOVE_TO_HEX,
+		_get_support_by_fire_hex(),
+		PlatoonTypes.Role.SECURITY,
+		0.55
 	)
 
 
@@ -582,25 +600,30 @@ func _build_maneuver_plan() -> void:
 
 
 func _build_assault_plan() -> void:
+	var assault_task_type: int = PlatoonTypes.TaskType.MANEUVER_TO_HEX
+
+	if _is_any_assault_capable_squad_in_break_in_distance(blackboard.objective_hex):
+		assault_task_type = PlatoonTypes.TaskType.ASSAULT_HEX
+
 	blackboard.create_task(
-		PlatoonTypes.TaskType.ASSAULT_HEX,
+		assault_task_type,
 		blackboard.objective_hex,
 		PlatoonTypes.Role.ASSAULT,
 		1.00
 	)
 
 	blackboard.create_task(
-		PlatoonTypes.TaskType.SUPPORT_BY_FIRE,
-		_get_best_contact_hex(),
-		PlatoonTypes.Role.SUPPORT_BY_FIRE,
-		0.80
+		PlatoonTypes.TaskType.OVERWATCH_ZONE,
+		blackboard.objective_hex,
+		PlatoonTypes.Role.OVERWATCH,
+		0.85
 	)
 
 	blackboard.create_task(
 		PlatoonTypes.TaskType.SECURE_HEX,
 		blackboard.objective_hex,
 		PlatoonTypes.Role.SECURITY,
-		0.65
+		0.55
 	)
 
 
@@ -750,6 +773,19 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 	var score: float = 0.0
 
 	if task.required_role == PlatoonTypes.Role.LEAD_PROBE:
+		match state.squad.squad_type:
+			Globals.SquadType.Rifle:
+				score += 20
+			Globals.SquadType.MG:
+				score += 0
+			Globals.SquadType.ANTITANK:
+				score += 10
+			Globals.SquadType.MORTAR:
+				score -= 20
+			Globals.SquadType.PLATOON_HEADQUARTERS:
+				score -= 20
+			Globals.SquadType.COMPANY_HEADQUARTERS:
+				score -= 40
 		if state.can_move_normally():
 			score += 20.0
 		else:
@@ -759,6 +795,19 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 			score += 10.0
 
 	elif task.required_role == PlatoonTypes.Role.OVERWATCH:
+		match state.squad.squad_type:
+			Globals.SquadType.Rifle:
+				score += 10
+			Globals.SquadType.MG:
+				score += 20
+			Globals.SquadType.ANTITANK:
+				score += 10
+			Globals.SquadType.MORTAR:
+				score += 20
+			Globals.SquadType.PLATOON_HEADQUARTERS:
+				score -= 0
+			Globals.SquadType.COMPANY_HEADQUARTERS:
+				score -= 0
 		if state.can_fire():
 			score += 18.0
 		else:
@@ -768,6 +817,19 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 			score += 8.0
 
 	elif task.required_role == PlatoonTypes.Role.SUPPORT_BY_FIRE:
+		match state.squad.squad_type:
+			Globals.SquadType.Rifle:
+				score += 10
+			Globals.SquadType.MG:
+				score += 20
+			Globals.SquadType.ANTITANK:
+				score += 10
+			Globals.SquadType.MORTAR:
+				score += 20
+			Globals.SquadType.PLATOON_HEADQUARTERS:
+				score -= 0
+			Globals.SquadType.COMPANY_HEADQUARTERS:
+				score -= 0
 		if state.can_fire():
 			score += 30.0
 		else:
@@ -777,6 +839,19 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 			score += 15.0
 
 	elif task.required_role == PlatoonTypes.Role.ASSAULT:
+		match state.squad.squad_type:
+			Globals.SquadType.Rifle:
+				score += 20
+			Globals.SquadType.MG:
+				score += 0
+			Globals.SquadType.ANTITANK:
+				score += 10
+			Globals.SquadType.MORTAR:
+				score -= 20
+			Globals.SquadType.PLATOON_HEADQUARTERS:
+				score -= 20
+			Globals.SquadType.COMPANY_HEADQUARTERS:
+				score -= 40
 		if state.can_move_normally():
 			score += 25.0
 		else:
@@ -799,6 +874,19 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 			score += 25.0
 
 	elif task.required_role == PlatoonTypes.Role.SECURITY:
+		match state.squad.squad_type:
+			Globals.SquadType.Rifle:
+				score += 20
+			Globals.SquadType.MG:
+				score += 10
+			Globals.SquadType.ANTITANK:
+				score += 10
+			Globals.SquadType.MORTAR:
+				score -= 20
+			Globals.SquadType.PLATOON_HEADQUARTERS:
+				score -= 0
+			Globals.SquadType.COMPANY_HEADQUARTERS:
+				score -= 10
 		if state.can_fire():
 			score += 12.0
 
@@ -818,6 +906,7 @@ func _issue_squad_level_orders() -> void:
 	_update_formation_path(anchor_target_hex)
 	_assign_formation_slots()
 	_update_formation_anchor_progress()
+	reserved_formation_hexes.clear()
 
 	for task: PlatoonTask in blackboard.phase_tasks:
 		if task.assigned_squad == null:
@@ -839,7 +928,7 @@ func _issue_squad_level_orders() -> void:
 			_issue_role_to_squad(squad, role)
 
 
-func _issue_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
+func _issue_task_to_squad(squad: Node, task: PlatoonTask) -> void:
 	if squad == null:
 		return
 
@@ -852,8 +941,18 @@ func _issue_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
 	squad.set_meta("platoon_target_hex", task.target_hex)
 	squad.set_meta("platoon_target_track_id", task.target_track_id)
 
+	if _task_requires_support_before_moving(task):
+		if not _has_active_support_for_movement():
+			_issue_hold_order(squad)
+			return
+
+	#if _task_is_movement_task(task):
+		#var destination_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+		#_issue_move_order(squad, destination_hex)
+		#return
+	
 	if _task_is_movement_task(task):
-		var destination_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+		var destination_hex: Vector2i = _get_movement_destination_for_task(squad, task)
 		_issue_move_order(squad, destination_hex)
 		return
 
@@ -862,43 +961,142 @@ func _issue_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
 		return
 
 	if task.task_type == PlatoonTypes.TaskType.OBSERVE_HEX:
-		_issue_observe_order(squad, task.target_hex)
+		_issue_overwatch_task_to_squad(squad, task)
 		return
-	
-	pass
-	#match task.task_type:
-		#PlatoonTypes.TaskType.MOVE_TO_HEX:
-			#_issue_move_order(squad, task.target_hex)
+
+	if task.task_type == PlatoonTypes.TaskType.OVERWATCH_ZONE:
+		_issue_overwatch_task_to_squad(squad, task)
+		return
+
+
+func _issue_overwatch_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
+	if squad == null:
+		return
+
+	if task == null:
+		return
+
+	var slot_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+	squad.set_meta("platoon_overwatch_hex", task.target_hex)
+	squad.set_meta("platoon_overwatch_slot_hex", slot_hex)
+
+	if not _is_squad_settled_at_hex(squad, slot_hex):
+		_issue_move_order(squad, slot_hex)
+		return
+
+	_issue_observe_order(squad, task.target_hex)
+
+#func _issue_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
+	#if squad == null:
+		#return
 #
-		#PlatoonTypes.TaskType.MANEUVER_TO_HEX:
-			#_issue_move_order(squad, task.target_hex)
+	#if task == null:
+		#return
 #
-		#PlatoonTypes.TaskType.ASSAULT_HEX:
-			#_issue_assault_order(squad, task.target_hex)
+	#squad.set_meta("platoon_task_id", task.task_id)
+	#squad.set_meta("platoon_task_type", task.task_type)
+	#squad.set_meta("platoon_role", task.required_role)
+	#squad.set_meta("platoon_target_hex", task.target_hex)
+	#squad.set_meta("platoon_target_track_id", task.target_track_id)
 #
-		#PlatoonTypes.TaskType.WITHDRAW_TO_HEX:
-			#_issue_withdraw_order(squad, task.target_hex)
+	#if _task_is_movement_task(task):
+		#var destination_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+		#_issue_move_order(squad, destination_hex)
+		#return
 #
-		#PlatoonTypes.TaskType.RALLY_AT_HEX:
-			#_issue_rally_order(squad, task.target_hex)
+	#if _task_is_fire_task(task):
+		#_issue_fire_order(squad, task.target_hex, task.target_track_id)
+		#return
 #
-		#PlatoonTypes.TaskType.OBSERVE_HEX:
-			#_issue_observe_order(squad, task.target_hex)
-#
-		#PlatoonTypes.TaskType.OVERWATCH_ZONE:
-			#_issue_overwatch_order(squad, task.target_hex)
-#
-		#PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
-			#_issue_fire_order(squad, task.target_hex, task.target_track_id)
-#
-		#PlatoonTypes.TaskType.SUPPRESS_TRACK:
-			#_issue_fire_order(squad, task.target_hex, task.target_track_id)
-#
-		#PlatoonTypes.TaskType.SECURE_HEX:
-			#_issue_secure_order(squad, task.target_hex)
-#
-		#_:
-			#_issue_stop_order(squad)
+	#if task.task_type == PlatoonTypes.TaskType.OBSERVE_HEX:
+		#_issue_observe_order(squad, task.target_hex)
+		#return
+	#
+	#pass
+	##match task.task_type:
+		##PlatoonTypes.TaskType.MOVE_TO_HEX:
+			##_issue_move_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.MANEUVER_TO_HEX:
+			##_issue_move_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.ASSAULT_HEX:
+			##_issue_assault_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.WITHDRAW_TO_HEX:
+			##_issue_withdraw_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.RALLY_AT_HEX:
+			##_issue_rally_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.OBSERVE_HEX:
+			##_issue_observe_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.OVERWATCH_ZONE:
+			##_issue_overwatch_order(squad, task.target_hex)
+##
+		##PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
+			##_issue_fire_order(squad, task.target_hex, task.target_track_id)
+##
+		##PlatoonTypes.TaskType.SUPPRESS_TRACK:
+			##_issue_fire_order(squad, task.target_hex, task.target_track_id)
+##
+		##PlatoonTypes.TaskType.SECURE_HEX:
+			##_issue_secure_order(squad, task.target_hex)
+##
+		##_:
+			##_issue_stop_order(squad)
+
+func _get_movement_destination_for_task(squad: Unit, task: PlatoonTask) -> Vector2i:
+	if task.task_type == PlatoonTypes.TaskType.ASSAULT_HEX:
+		if _should_assault_break_formation(squad, task):
+			return task.target_hex
+
+	return _get_formation_destination_for_squad(squad, task)
+
+
+func _should_assault_break_formation(squad: Unit, task: PlatoonTask) -> bool:
+	if squad == null:
+		return false
+
+	if task == null:
+		return false
+
+	if not _has_active_support_for_movement():
+		return false
+
+	var state: SquadTacticalState = blackboard.get_squad_state(squad)
+	if state == null:
+		return false
+
+	var distance_to_assault_hex: int = blackboard.get_hex_distance(state.hex, task.target_hex)
+
+	if distance_to_assault_hex <= assault_break_in_distance:
+		return true
+
+	return false
+
+
+func _task_requires_support_before_moving(task: PlatoonTask) -> bool:
+	match task.task_type:
+		PlatoonTypes.TaskType.ASSAULT_HEX:
+			return true
+		_:
+			return false
+
+
+func _issue_hold_order(squad: Node) -> void:
+	squad.set_meta("wants_movement", false)
+	squad.set_meta("wants_hold", true)
+
+	if squad.has_method("stop_movement"):
+		squad.call("stop_movement")
+		return
+
+	if squad.has_method("hold_position"):
+		squad.call("hold_position")
+		return
+
 
 func _issue_role_to_squad(squad: Unit, role: int) -> void:
 	if squad == null:
@@ -933,9 +1131,6 @@ func _task_is_movement_task(task: PlatoonTask) -> bool:
 
 
 func _task_is_fire_task(task: PlatoonTask) -> bool:
-	if task.task_type == PlatoonTypes.TaskType.OVERWATCH_ZONE:
-		return true
-
 	if task.task_type == PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
 		return true
 
@@ -989,8 +1184,13 @@ func _monitor_triggers_for_phase_transition() -> void:
 		return
 
 	if blackboard.current_phase == PlatoonTypes.Phase.ASSAULT_OBJECTIVE:
-		if blackboard.is_objective_probably_clear():
+		if _is_objective_verified_clear():
 			_change_phase(PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE)
+			return
+
+	if blackboard.current_phase == PlatoonTypes.Phase.CONSOLIDATE_OBJECTIVE:
+		if not _is_objective_verified_clear():
+			_change_phase(PlatoonTypes.Phase.APPROACH_TO_OBJECTIVE)
 			return
 
 
@@ -1024,10 +1224,7 @@ func _update_objective_observation() -> void:
 		if squad == null:
 			continue
 
-		if squad.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
-			continue
-
-		if _has_los_to_hex(squad, blackboard.objective_hex):
+		if _can_squad_physically_verify_objective(squad):
 			blackboard.mark_objective_observed_clear(0.00)
 			return
 
@@ -1039,6 +1236,96 @@ func _has_los_to_hex(squad: Unit, hex: Vector2i) -> bool:
 	var visible_hexes: Variant = LOSHelper.los_lookup.get(squad.current_hex, [])
 	if visible_hexes.has(hex):
 		return true
+
+	return false
+
+
+func _enforce_objective_clear_verification() -> void:
+	if _is_objective_verified_clear():
+		if blackboard.objective_clear_confidence < 0.85:
+			blackboard.objective_clear_confidence = 0.85
+		return
+
+	if blackboard.objective_clear_confidence > unverified_clear_confidence_cap:
+		blackboard.objective_clear_confidence = unverified_clear_confidence_cap
+
+
+func _is_objective_verified_clear() -> bool:
+	if not blackboard.has_objective:
+		return false
+
+	if blackboard.objective_enemy_confidence >= 0.30:
+		return false
+
+	if _has_unresolved_objective_suspicion():
+		return false
+
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		if _can_squad_physically_verify_objective(squad):
+			return true
+
+	return false
+
+
+func _has_unresolved_objective_suspicion() -> bool:
+	for zone: SuspectedEnemyZone in blackboard.suspected_enemy_zones:
+		if zone == null:
+			continue
+
+		var distance: int = blackboard.get_hex_distance(zone.hex, blackboard.objective_hex)
+		if distance > objective_verification_radius:
+			continue
+
+		if zone.suspicion >= unresolved_objective_suspicion_threshold:
+			return true
+
+	return false
+
+
+func _can_squad_physically_verify_objective(squad: Unit) -> bool:
+	if squad == null:
+		return false
+
+	if squad.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		return false
+
+	if squad.stress_system.state == STATES.MoraleState.PANIC:
+		return false
+
+	var distance: int = blackboard.get_hex_distance(squad.current_hex, blackboard.objective_hex)
+	if distance > objective_verification_radius:
+		return false
+
+	if squad.movement.is_moving:
+		return false
+
+	if not squad.is_centered_on_hex(squad.current_hex):
+		return false
+
+	if not _has_los_to_hex(squad, blackboard.objective_hex):
+		return false
+
+	return true
+
+
+func _is_any_assault_capable_squad_in_break_in_distance(target_hex: Vector2i) -> bool:
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		var state: SquadTacticalState = blackboard.get_squad_state(squad)
+		if state == null:
+			continue
+
+		if not state.can_move_normally():
+			continue
+
+		var distance: int = blackboard.get_hex_distance(state.hex, target_hex)
+		if distance <= assault_break_in_distance:
+			return true
 
 	return false
 
@@ -1207,6 +1494,9 @@ func _print_blackboard_state() -> void:
 	var can_assault: bool = blackboard.can_assault_objective()
 	print("Can assault objective: ", can_assault)
 
+	var controller_verified_clear: bool = _is_objective_verified_clear()
+	print("Controller verified clear: ", controller_verified_clear)
+
 	_print_squad_states()
 	_print_suspected_zones()
 	_print_phase_tasks()
@@ -1335,6 +1625,8 @@ func _update_formation_path(anchor_target_hex: Vector2i) -> void:
 	if formation_path.is_empty():
 		formation_path = _find_platoon_anchor_path(current_anchor_hex, anchor_target_hex)
 		formation_path_index = 0
+		if formation_path.size() >= 2:
+			formation_path_index = 1
 		return
 
 	var current_goal_hex: Vector2i = formation_path[formation_path.size() - 1]
@@ -1343,18 +1635,11 @@ func _update_formation_path(anchor_target_hex: Vector2i) -> void:
 	if distance_to_goal >= formation_repath_distance:
 		formation_path = _find_platoon_anchor_path(current_anchor_hex, anchor_target_hex)
 		formation_path_index = 0
+		if formation_path.size() >= 2:
+			formation_path_index = 1
 
 
 func _find_platoon_anchor_path(from_hex: Vector2i, to_hex: Vector2i) -> Array[Vector2i]:
-	if has_method("find_path_hexes"):
-		var result: Variant = call("find_path_hexes", from_hex, to_hex)
-		if result is Array:
-			var typed_result: Array[Vector2i] = []
-			for value: Variant in result:
-				if value is Vector2i:
-					typed_result.append(value)
-			return typed_result
-	
 	var cube_path: Array[Vector3i] = MovementSystem._compute_path(from_hex, to_hex, squads[0].team) # FIXME dangerous squads[0].team
 	var hex_path: Array[Vector2i]
 	for cube in cube_path:
@@ -1430,14 +1715,36 @@ func _task_blocks_formation_advance(task: PlatoonTask) -> bool:
 			return true
 		PlatoonTypes.TaskType.MANEUVER_TO_HEX:
 			return true
-		PlatoonTypes.TaskType.ASSAULT_HEX:
-			return true
 		PlatoonTypes.TaskType.SECURE_HEX:
 			return true
 		PlatoonTypes.TaskType.RALLY_AT_HEX:
 			return true
 		PlatoonTypes.TaskType.WITHDRAW_TO_HEX:
 			return true
+		_:
+			return false
+
+
+#func _task_blocks_formation_advance(task: PlatoonTask) -> bool:
+	#match task.task_type:
+		#PlatoonTypes.TaskType.MOVE_TO_HEX:
+			#return true
+		#PlatoonTypes.TaskType.MANEUVER_TO_HEX:
+			#return true
+		#PlatoonTypes.TaskType.ASSAULT_HEX:
+			#return true
+		#PlatoonTypes.TaskType.SECURE_HEX:
+			#return true
+		#PlatoonTypes.TaskType.RALLY_AT_HEX:
+			#return true
+		#PlatoonTypes.TaskType.WITHDRAW_TO_HEX:
+			#return true
+		#_:
+			#return false
+
+
+func _is_support_task_active(task: PlatoonTask) -> bool:
+	match task.task_type:
 		PlatoonTypes.TaskType.OVERWATCH_ZONE:
 			return true
 		PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
@@ -1446,6 +1753,31 @@ func _task_blocks_formation_advance(task: PlatoonTask) -> bool:
 			return true
 		_:
 			return false
+
+
+func _has_active_support_for_movement() -> bool:
+	var support_count: int = 0
+	var ready_support_count: int = 0
+
+	for task: PlatoonTask in blackboard.phase_tasks:
+		if task.assigned_squad == null:
+			continue
+
+		if not _is_support_task_active(task):
+			continue
+
+		support_count += 1
+
+		if _is_squad_ready_to_support(task.assigned_squad, task):
+			ready_support_count += 1
+
+	if support_count <= 0:
+		return true
+
+	if ready_support_count >= 1:
+		return true
+
+	return false
 
 
 func _is_task_ready_for_formation_advance(squad: Unit, task: PlatoonTask) -> bool:
@@ -1479,7 +1811,7 @@ func _is_squad_settled_at_hex(squad: Unit, target_hex: Vector2i) -> bool:
 		_reset_squad_formation_settle(squad)
 		return false
 
-	if squad.move:
+	if squad.movement.is_moving:
 		_reset_squad_formation_settle(squad)
 		return false
 
