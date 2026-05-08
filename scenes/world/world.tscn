@@ -1676,7 +1676,22 @@ formation_id = 1
 squad_type = 4
 
 [node name="PlatoonAiController" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units/CA_P1_S0_Allies_PlatoonHQ" unique_id=585976234 node_paths=PackedStringArray("squads") instance=ExtResource("59_mrxq0")]
+tactical_tick_interval = null
+plan_refresh_interval = null
+phase_transition_cooldown_seconds = null
+min_suppress_seconds = null
+min_maneuver_seconds = null
+withdraw_strength_threshold = null
+reorganize_strength_threshold = null
+high_stress_threshold = null
+emergency_stress_threshold = null
 squads = [NodePath(".."), NodePath("../../CA_P1_S2_Allies_Rifle"), NodePath("../../CA_P1_S1_Allies_Rifle")]
+objective_hex = null
+formation_repath_distance = null
+formation_advance_required_fraction = null
+formation_slot_accept_distance = null
+formation_settle_seconds = null
+formation_center_tolerance_px = null
 
 [node name="AxisObjectivesTileMapLayer" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(148229250, 1566573026) index="0" unique_id=1637617708]
 tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")

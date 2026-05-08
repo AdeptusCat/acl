@@ -36,6 +36,27 @@ var phase_elapsed_seconds: float = 0.0
 var phase_transition_cooldown_timer: float = 0.0
 
 
+enum FormationShape {
+	COLUMN,
+	WEDGE
+}
+
+var formation_shape: int = FormationShape.WEDGE
+var formation_path: Array[Vector2i] = []
+var formation_path_index: int = 0
+var formation_slot_by_squad: Dictionary = {}
+var reserved_formation_hexes: Dictionary = {}
+
+@export var formation_repath_distance: int = 3
+@export var formation_advance_required_fraction: float = 0.66
+@export var formation_slot_accept_distance: int = 0
+
+var formation_settle_started_msec_by_squad: Dictionary = {}
+var last_move_order_hex_by_squad: Dictionary = {}
+
+@export var formation_settle_seconds: float = 1.25
+@export var formation_center_tolerance_px: float = 6.0
+
 func _ready() -> void:
 	for squad: Unit in squads:
 		blackboard.register_friendly_squad(squad)
@@ -645,17 +666,17 @@ func _build_withdraw_plan() -> void:
 func _score_squad_role_assignments() -> void:
 	blackboard.clear_role_assignments()
 
-	var unassigned_squads: Array[Node] = []
+	var unassigned_squads: Array[Unit] = []
 	for squad: Unit in squads:
 		if squad == null:
 			continue
 		unassigned_squads.append(squad)
 
 	for task: PlatoonTask in blackboard.phase_tasks:
-		var best_squad: Node = null
+		var best_squad: Unit = null
 		var best_score: float = INVALID_SCORE
 
-		for squad: Node in unassigned_squads:
+		for squad: Unit in unassigned_squads:
 			var state: SquadTacticalState = blackboard.get_squad_state(squad)
 			if state == null:
 				continue
@@ -678,8 +699,8 @@ func _score_squad_role_assignments() -> void:
 	_assign_remaining_squads_to_reserve(unassigned_squads)
 
 
-func _assign_remaining_squads_to_reserve(p_unassigned_squads: Array[Node]) -> void:
-	for squad: Node in p_unassigned_squads:
+func _assign_remaining_squads_to_reserve(p_unassigned_squads: Array[Unit]) -> void:
+	for squad: Unit in p_unassigned_squads:
 		var state: SquadTacticalState = blackboard.get_squad_state(squad)
 		if state == null:
 			continue
@@ -791,6 +812,13 @@ func _role_specific_score(state: SquadTacticalState, task: PlatoonTask, distance
 
 
 func _issue_squad_level_orders() -> void:
+	reserved_formation_hexes.clear()
+
+	var anchor_target_hex: Vector2i = _get_current_phase_anchor_target_hex()
+	_update_formation_path(anchor_target_hex)
+	_assign_formation_slots()
+	_update_formation_anchor_progress()
+
 	for task: PlatoonTask in blackboard.phase_tasks:
 		if task.assigned_squad == null:
 			continue
@@ -811,7 +839,7 @@ func _issue_squad_level_orders() -> void:
 			_issue_role_to_squad(squad, role)
 
 
-func _issue_task_to_squad(squad: Node, task: PlatoonTask) -> void:
+func _issue_task_to_squad(squad: Unit, task: PlatoonTask) -> void:
 	if squad == null:
 		return
 
@@ -825,7 +853,8 @@ func _issue_task_to_squad(squad: Node, task: PlatoonTask) -> void:
 	squad.set_meta("platoon_target_track_id", task.target_track_id)
 
 	if _task_is_movement_task(task):
-		_issue_move_order(squad, task.target_hex)
+		var destination_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+		_issue_move_order(squad, destination_hex)
 		return
 
 	if _task_is_fire_task(task):
@@ -871,7 +900,7 @@ func _issue_task_to_squad(squad: Node, task: PlatoonTask) -> void:
 		#_:
 			#_issue_stop_order(squad)
 
-func _issue_role_to_squad(squad: Node, role: int) -> void:
+func _issue_role_to_squad(squad: Unit, role: int) -> void:
 	if squad == null:
 		return
 
@@ -917,10 +946,24 @@ func _task_is_fire_task(task: PlatoonTask) -> bool:
 
 
 func _issue_move_order(squad: Unit, target_hex: Vector2i) -> void:
+	if squad == null:
+		return
+
+	if last_move_order_hex_by_squad.has(squad):
+		var previous_hex: Vector2i = last_move_order_hex_by_squad[squad]
+		if previous_hex == target_hex:
+			return
+
+	last_move_order_hex_by_squad[squad] = target_hex
+	_reset_squad_formation_settle(squad)
+
+	squad.set_meta("move_target_hex", target_hex)
+	squad.set_meta("wants_movement", true)
+	
 	squad.order(Globals.UnitCmd.MOVE, target_hex)
 
 
-func _issue_fire_order(squad: Node, target_hex: Vector2i, target_track_id: int) -> void:
+func _issue_fire_order(squad: Unit, target_hex: Vector2i, target_track_id: int) -> void:
 	squad.set_meta("platoon_fire_target_hex", target_hex)
 	squad.set_meta("platoon_fire_target_track_id", target_track_id)
 	squad.order(Globals.UnitCmd.FIRE_AT_HEX, target_hex)
@@ -984,17 +1027,17 @@ func _update_objective_observation() -> void:
 		if squad.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 			continue
 
-		if _squad_can_observe_objective(squad):
+		if _has_los_to_hex(squad, blackboard.objective_hex):
 			blackboard.mark_objective_observed_clear(0.00)
 			return
 
 
-func _squad_can_observe_objective(squad: Unit) -> bool:
-	if squad.current_hex == blackboard.objective_hex:
+func _has_los_to_hex(squad: Unit, hex: Vector2i) -> bool:
+	if squad.current_hex == hex:
 		return true
 
 	var visible_hexes: Variant = LOSHelper.los_lookup.get(squad.current_hex, [])
-	if visible_hexes.has(blackboard.objective_hex):
+	if visible_hexes.has(hex):
 		return true
 
 	return false
@@ -1172,7 +1215,7 @@ func _print_blackboard_state() -> void:
 func _print_squad_states() -> void:
 	print("--- Squad States ---")
 
-	for squad: Node in blackboard.friendly_squads:
+	for squad: Unit in blackboard.friendly_squads:
 		var state: SquadTacticalState = blackboard.get_squad_state(squad)
 
 		if state == null:
@@ -1224,3 +1267,499 @@ func _print_phase_tasks() -> void:
 			" priority=", task.priority,
 			" assigned=", assigned_name
 		)
+
+
+func _assign_formation_slots() -> void:
+	formation_slot_by_squad.clear()
+
+	var ordered_squads: Array[Unit] = []
+
+	for task: PlatoonTask in blackboard.phase_tasks:
+		if task.assigned_squad == null:
+			continue
+
+		if ordered_squads.has(task.assigned_squad):
+			continue
+
+		ordered_squads.append(task.assigned_squad)
+
+	ordered_squads.sort_custom(_sort_squads_for_formation)
+
+	var slot_index: int = 0
+	for squad: Unit in ordered_squads:
+		formation_slot_by_squad[squad] = slot_index
+		slot_index += 1
+
+
+func _sort_squads_for_formation(a: Unit, b: Unit) -> bool:
+	var role_a: int = PlatoonTypes.Role.NONE
+	var role_b: int = PlatoonTypes.Role.NONE
+
+	if blackboard.assigned_roles.has(a):
+		role_a = int(blackboard.assigned_roles[a])
+
+	if blackboard.assigned_roles.has(b):
+		role_b = int(blackboard.assigned_roles[b])
+
+	var priority_a: int = _get_formation_role_priority(role_a)
+	var priority_b: int = _get_formation_role_priority(role_b)
+
+	return priority_a < priority_b
+
+
+func _get_formation_role_priority(role: int) -> int:
+	match role:
+		PlatoonTypes.Role.LEAD_PROBE:
+			return 0
+		PlatoonTypes.Role.ASSAULT:
+			return 1
+		PlatoonTypes.Role.SUPPORT_BY_FIRE:
+			return 2
+		PlatoonTypes.Role.OVERWATCH:
+			return 3
+		PlatoonTypes.Role.SECURITY:
+			return 4
+		PlatoonTypes.Role.RESERVE:
+			return 5
+		PlatoonTypes.Role.RALLY:
+			return 6
+		PlatoonTypes.Role.WITHDRAWING:
+			return 7
+		_:
+			return 99
+
+
+func _update_formation_path(anchor_target_hex: Vector2i) -> void:
+	var current_anchor_hex: Vector2i = _get_current_platoon_center_hex()
+
+	if formation_path.is_empty():
+		formation_path = _find_platoon_anchor_path(current_anchor_hex, anchor_target_hex)
+		formation_path_index = 0
+		return
+
+	var current_goal_hex: Vector2i = formation_path[formation_path.size() - 1]
+	var distance_to_goal: int = blackboard.get_hex_distance(current_goal_hex, anchor_target_hex)
+
+	if distance_to_goal >= formation_repath_distance:
+		formation_path = _find_platoon_anchor_path(current_anchor_hex, anchor_target_hex)
+		formation_path_index = 0
+
+
+func _find_platoon_anchor_path(from_hex: Vector2i, to_hex: Vector2i) -> Array[Vector2i]:
+	if has_method("find_path_hexes"):
+		var result: Variant = call("find_path_hexes", from_hex, to_hex)
+		if result is Array:
+			var typed_result: Array[Vector2i] = []
+			for value: Variant in result:
+				if value is Vector2i:
+					typed_result.append(value)
+			return typed_result
+	
+	var cube_path: Array[Vector3i] = MovementSystem._compute_path(from_hex, to_hex, squads[0].team) # FIXME dangerous squads[0].team
+	var hex_path: Array[Vector2i]
+	for cube in cube_path:
+		hex_path.append(LOSHelper.ground_layer.cube_to_map(cube))
+	#give_move_to_hex_order(to_hex, path, false)
+	#var fallback: Array[Vector2i] = []
+	#fallback.append(to_hex)
+	return hex_path
+
+
+func _get_current_platoon_center_hex() -> Vector2i:
+	var sum_q: int = 0
+	var sum_r: int = 0
+	var count: int = 0
+
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		var state: SquadTacticalState = blackboard.get_squad_state(squad)
+		if state == null:
+			continue
+
+		sum_q += state.hex.x
+		sum_r += state.hex.y
+		count += 1
+
+	if count <= 0:
+		return Vector2i.ZERO
+
+	var center_hex: Vector2i = Vector2i(
+		int(round(float(sum_q) / float(count))),
+		int(round(float(sum_r) / float(count)))
+	)
+
+	return center_hex
+
+
+func _update_formation_anchor_progress() -> void:
+	if formation_path.is_empty():
+		return
+
+	if formation_path_index >= formation_path.size() - 1:
+		return
+
+	var ready_count: int = 0
+	var blocking_count: int = 0
+
+	for task: PlatoonTask in blackboard.phase_tasks:
+		if task.assigned_squad == null:
+			continue
+
+		if not _task_blocks_formation_advance(task):
+			continue
+
+		blocking_count += 1
+
+		if _is_task_ready_for_formation_advance(task.assigned_squad, task):
+			ready_count += 1
+
+	if blocking_count <= 0:
+		return
+
+	var ready_fraction: float = float(ready_count) / float(blocking_count)
+
+	if ready_fraction >= formation_advance_required_fraction:
+		formation_path_index += 1
+
+
+func _task_blocks_formation_advance(task: PlatoonTask) -> bool:
+	match task.task_type:
+		PlatoonTypes.TaskType.MOVE_TO_HEX:
+			return true
+		PlatoonTypes.TaskType.MANEUVER_TO_HEX:
+			return true
+		PlatoonTypes.TaskType.ASSAULT_HEX:
+			return true
+		PlatoonTypes.TaskType.SECURE_HEX:
+			return true
+		PlatoonTypes.TaskType.RALLY_AT_HEX:
+			return true
+		PlatoonTypes.TaskType.WITHDRAW_TO_HEX:
+			return true
+		PlatoonTypes.TaskType.OVERWATCH_ZONE:
+			return true
+		PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
+			return true
+		PlatoonTypes.TaskType.SUPPRESS_TRACK:
+			return true
+		_:
+			return false
+
+
+func _is_task_ready_for_formation_advance(squad: Unit, task: PlatoonTask) -> bool:
+	if squad == null:
+		return false
+
+	if _task_is_movement_task(task):
+		var desired_hex: Vector2i = _get_formation_destination_for_squad(squad, task)
+		return _is_squad_settled_at_hex(squad, desired_hex)
+
+	if _task_is_fire_task(task):
+		return _is_squad_ready_to_support(squad, task)
+
+	if task.task_type == PlatoonTypes.TaskType.OVERWATCH_ZONE:
+		return _is_squad_ready_to_support(squad, task)
+
+	return true
+
+
+func _is_squad_settled_at_hex(squad: Unit, target_hex: Vector2i) -> bool:
+	var state: SquadTacticalState = blackboard.get_squad_state(squad)
+	if state == null:
+		_reset_squad_formation_settle(squad)
+		return false
+
+	if state.hex != target_hex:
+		_reset_squad_formation_settle(squad)
+		return false
+
+	if not _is_squad_centered_on_hex(squad, target_hex):
+		_reset_squad_formation_settle(squad)
+		return false
+
+	if squad.move:
+		_reset_squad_formation_settle(squad)
+		return false
+
+	return _has_squad_settled_long_enough(squad)
+
+
+func _is_squad_centered_on_hex(squad: Unit, target_hex: Vector2i) -> bool:
+	return squad.is_centered_on_hex(target_hex)
+
+
+func _is_squad_ready_to_support(squad: Unit, task: PlatoonTask) -> bool:
+	if squad.movement.is_moving:
+		_reset_squad_formation_settle(squad)
+		return false
+
+	if task.task_type == PlatoonTypes.TaskType.SUPPORT_BY_FIRE:
+		if not _has_los_to_hex_from_squad(squad, task.target_hex):
+			return false
+
+	if task.task_type == PlatoonTypes.TaskType.SUPPRESS_TRACK:
+		if not _has_los_to_hex_from_squad(squad, task.target_hex):
+			return false
+
+	if task.task_type == PlatoonTypes.TaskType.OVERWATCH_ZONE:
+		if not _has_los_to_hex_from_squad(squad, task.target_hex):
+			return false
+
+	return _has_squad_settled_long_enough(squad)
+
+
+func _has_squad_settled_long_enough(squad: Unit) -> bool:
+	var now_msec: int = Time.get_ticks_msec()
+
+	if not formation_settle_started_msec_by_squad.has(squad):
+		formation_settle_started_msec_by_squad[squad] = now_msec
+		return false
+
+	var started_msec: int = int(formation_settle_started_msec_by_squad[squad])
+	var elapsed_seconds: float = float(now_msec - started_msec) / 1000.0
+
+	if elapsed_seconds >= formation_settle_seconds:
+		return true
+
+	return false
+
+
+func _get_current_formation_anchor_hex() -> Vector2i:
+	if formation_path.is_empty():
+		return _get_current_platoon_center_hex()
+
+	if formation_path_index < 0:
+		formation_path_index = 0
+
+	if formation_path_index >= formation_path.size():
+		formation_path_index = formation_path.size() - 1
+
+	return formation_path[formation_path_index]
+
+
+func _get_formation_destination_for_squad(squad: Unit, task: PlatoonTask) -> Vector2i:
+	var anchor_hex: Vector2i = _get_current_formation_anchor_hex()
+	var heading: Vector2i = _get_formation_heading()
+	var slot_index: int = 0
+
+	if formation_slot_by_squad.has(squad):
+		slot_index = int(formation_slot_by_squad[squad])
+
+	var preferred_offset: Vector2i = _get_slot_offset(slot_index, heading, task.required_role)
+	var preferred_hex: Vector2i = anchor_hex + preferred_offset
+
+	var final_hex: Vector2i = _find_nearest_free_formation_hex(preferred_hex, squad)
+	reserved_formation_hexes[final_hex] = squad
+
+	return final_hex
+
+
+func _get_formation_heading() -> Vector2i:
+	if formation_path.is_empty():
+		return Vector2i(1, 0)
+
+	var current_index: int = formation_path_index
+	if current_index < 0:
+		current_index = 0
+
+	if current_index >= formation_path.size() - 1:
+		if formation_path.size() >= 2:
+			var previous_hex: Vector2i = formation_path[formation_path.size() - 2]
+			var current_hex: Vector2i = formation_path[formation_path.size() - 1]
+			return _normalize_hex_direction(current_hex - previous_hex)
+
+		return Vector2i(1, 0)
+
+	var from_hex: Vector2i = formation_path[current_index]
+	var to_hex: Vector2i = formation_path[current_index + 1]
+
+	return _normalize_hex_direction(to_hex - from_hex)
+
+
+func _normalize_hex_direction(delta: Vector2i) -> Vector2i:
+	var best_direction: Vector2i = HEX_DIRECTIONS[0]
+	var best_distance: int = 999999
+
+	for direction: Vector2i in HEX_DIRECTIONS:
+		var distance: int = abs(delta.x - direction.x) + abs(delta.y - direction.y)
+		if distance < best_distance:
+			best_distance = distance
+			best_direction = direction
+
+	return best_direction
+
+
+func _get_slot_offset(slot_index: int, heading: Vector2i, role: int) -> Vector2i:
+	var left: Vector2i = _rotate_hex_direction_left(heading)
+	var right: Vector2i = _rotate_hex_direction_right(heading)
+	var rear: Vector2i = -heading
+
+	if formation_shape == FormationShape.COLUMN:
+		return _get_column_slot_offset(slot_index, heading, rear)
+
+	if formation_shape == FormationShape.WEDGE:
+		return _get_wedge_slot_offset(slot_index, heading, left, right, rear, role)
+
+	return Vector2i.ZERO
+
+
+func _get_column_slot_offset(slot_index: int, heading: Vector2i, rear: Vector2i) -> Vector2i:
+	if slot_index == 0:
+		return Vector2i.ZERO
+
+	return rear * slot_index
+
+
+func _get_wedge_slot_offset(
+	slot_index: int,
+	heading: Vector2i,
+	left: Vector2i,
+	right: Vector2i,
+	rear: Vector2i,
+	role: int
+) -> Vector2i:
+	if role == PlatoonTypes.Role.SUPPORT_BY_FIRE:
+		if slot_index % 2 == 0:
+			return rear + left
+		return rear + right
+
+	if role == PlatoonTypes.Role.OVERWATCH:
+		if slot_index % 2 == 0:
+			return rear * 2 + left
+		return rear * 2 + right
+
+	if role == PlatoonTypes.Role.RESERVE:
+		return rear * 2
+
+	if slot_index == 0:
+		return Vector2i.ZERO
+
+	if slot_index == 1:
+		return rear + left
+
+	if slot_index == 2:
+		return rear + right
+
+	if slot_index == 3:
+		return rear * 2 + left
+
+	if slot_index == 4:
+		return rear * 2 + right
+
+	return rear * 2
+
+
+func _rotate_hex_direction_left(direction: Vector2i) -> Vector2i:
+	var index: int = HEX_DIRECTIONS.find(direction)
+
+	if index < 0:
+		return HEX_DIRECTIONS[1]
+
+	var new_index: int = index - 1
+	if new_index < 0:
+		new_index = HEX_DIRECTIONS.size() - 1
+
+	return HEX_DIRECTIONS[new_index]
+
+
+func _rotate_hex_direction_right(direction: Vector2i) -> Vector2i:
+	var index: int = HEX_DIRECTIONS.find(direction)
+
+	if index < 0:
+		return HEX_DIRECTIONS[5]
+
+	var new_index: int = index + 1
+	if new_index >= HEX_DIRECTIONS.size():
+		new_index = 0
+
+	return HEX_DIRECTIONS[new_index]
+
+
+func _find_nearest_free_formation_hex(preferred_hex: Vector2i, requesting_squad: Unit) -> Vector2i:
+	if _is_free_formation_hex(preferred_hex, requesting_squad):
+		return preferred_hex
+
+	var radius: int = 1
+	while radius <= 2:
+		var ring: Array[Vector2i] = _get_hex_ring(preferred_hex, radius)
+
+		for candidate_hex: Vector2i in ring:
+			if _is_free_formation_hex(candidate_hex, requesting_squad):
+				return candidate_hex
+
+		radius += 1
+
+	return preferred_hex
+
+
+func _is_free_formation_hex(candidate_hex: Vector2i, requesting_squad: Unit) -> bool:
+	if reserved_formation_hexes.has(candidate_hex):
+		return false
+
+	for squad: Unit in squads:
+		if squad == null:
+			continue
+
+		if squad == requesting_squad:
+			continue
+
+		var state: SquadTacticalState = blackboard.get_squad_state(squad)
+		if state == null:
+			continue
+
+		if state.hex == candidate_hex:
+			return false
+
+	return true
+
+
+func _get_current_phase_anchor_target_hex() -> Vector2i:
+	var best_hex: Vector2i = _get_current_platoon_center_hex()
+	var best_priority: float = -999999.0
+
+	for task: PlatoonTask in blackboard.phase_tasks:
+		if not _task_is_movement_task(task):
+			continue
+
+		if task.priority > best_priority:
+			best_priority = task.priority
+			best_hex = task.target_hex
+
+	return best_hex
+
+
+func _get_hex_ring(center_hex: Vector2i, radius: int) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+
+	if radius <= 0:
+		result.append(center_hex)
+		return result
+
+	var hex: Vector2i = center_hex + HEX_DIRECTIONS[4] * radius
+
+	var side_index: int = 0
+	while side_index < HEX_DIRECTIONS.size():
+		var step_index: int = 0
+		while step_index < radius:
+			result.append(hex)
+			hex += HEX_DIRECTIONS[side_index]
+			step_index += 1
+
+		side_index += 1
+
+	return result
+
+
+func _reset_squad_formation_settle(squad: Unit) -> void:
+	if formation_settle_started_msec_by_squad.has(squad):
+		formation_settle_started_msec_by_squad.erase(squad)
+
+
+func _has_los_to_hex_from_squad(squad: Unit, target_hex: Vector2i) -> bool:
+	var state: SquadTacticalState = blackboard.get_squad_state(squad)
+	if state == null:
+		return false
+
+	return _has_los_to_hex(squad, target_hex)

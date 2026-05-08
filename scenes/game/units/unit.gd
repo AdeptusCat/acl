@@ -268,6 +268,8 @@ func order(cmd: Globals.UnitCmd, parameter):
 							squad_fire.set_target_unit(unit)
 							has_target_unit = true
 				if not has_target_unit:
+					if squad_fire.target_hex == map_hex:
+						return
 					setAttackState(AttackState.MANUAL_GROUND)
 					squad_fire.target_hex = map_hex
 					var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
@@ -1943,3 +1945,9 @@ func apply_save_data(data: UnitSaveData) -> void:
 
 func _on_unit_combat_stats_timer_timeout() -> void:
 	combat_stats.update_stats(combat_stats_timer.wait_time)
+
+
+func is_centered_on_hex(hex: Vector2i) -> bool:
+	if LOSHelper.ground_layer.map_to_local(hex) == position:
+		return true
+	return false
