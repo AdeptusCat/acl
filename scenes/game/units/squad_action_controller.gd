@@ -411,7 +411,7 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], _step
 	var _ring: int = 0
 	
 	while queue.size() > 0 and retreat_hex == Vector2i.ZERO:
-		var level_size: int = queue.size()
+		var level_size: int = min(queue.size(), 30)
 		var added_any: bool = false
 		
 		var li: int = 0
@@ -469,7 +469,12 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], _step
 		
 		if added_any == false:
 			break
+		if _ring > 10:
+			break
 		_ring += 1
+	
+	if retreat_hex == Vector2i.ZERO:
+		retreat_hex = origin_hex
 	
 	return retreat_hex
 
