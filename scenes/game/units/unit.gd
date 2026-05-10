@@ -1383,9 +1383,10 @@ func _apply_casualties(n: int) -> void:
 	
 	for soldier in casualties:
 		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
+		squad_fire.casualties.append(soldier)
 	
-	for index in casualty_indexes:
-		squad_fire.casualties.append(squad_fire.soldiers[index])
+	#for index in casualty_indexes:
+		#squad_fire.casualties.append(squad_fire.soldiers[index])
 	
 	# physically remove the fallen from our parallel arrays
 	remove_indices(loadouts, casualty_indexes)
