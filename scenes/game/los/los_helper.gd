@@ -930,6 +930,17 @@ func calculate_absolute_height(hex_elevation: int, story_level: int) -> float:
 		#result["block_point"]  = sample_pt
 	#return false
 
+
+func is_hex_hindrance(hex_map: Vector2i):
+	if terrain_layer.get_cell_source_id(hex_map) == -1:
+		return false
+	else:
+		var tile_data: TileData = terrain_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("hindrance"):
+			return tile_data.get_custom_data("hindrance")
+		return false
+
+
 func is_sample_point_in_building(sample_point: Vector2) -> int:
 	var hex_map = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) == -1:
