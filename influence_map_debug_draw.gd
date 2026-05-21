@@ -283,14 +283,18 @@ func _make_hex_polygon(center: Vector2, radius_x: float, radius_y: float) -> Pac
 func _value_to_color(value: float, min_value: float, max_value: float) -> Color:
 	var t: float = 0.0
 	var value_range: float = max_value - min_value
-
+	
+	#if value > 0.0 and value < 0.5:
+		#pass
+	
 	if abs(value_range) > 0.0001:
 		t = (value - min_value) / value_range
 
 	t = clamp(t, 0.0, 1.0)
 
 	var color: Color = Color.WHITE
-
+	
+	
 	if t < 0.5:
 		var local_t: float = t / 0.5
 		color = low_color.lerp(mid_color, local_t)

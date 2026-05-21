@@ -12,12 +12,18 @@ var axis_weights: PackedFloat32Array = PackedFloat32Array()
 
 var rebuild_pending: bool = false
 
-
 #func _ready() -> void:
 	#create_maps()
 
+var update_counter: float = 0
+var update_threshold: float = 1.0
 
 func _process(_delta: float) -> void:
+	update_counter += _delta
+	if update_counter > update_threshold:
+		update_counter = 0.0
+		rebuild_dynamic_tactical_layers()
+	
 	if not rebuild_pending:
 		return
 
@@ -57,6 +63,10 @@ func create_maps() -> void:
 	maps_by_team[Globals.Team.AXIS] = axis_map
 
 	rebuild_pending = true
+	
+	rebuild_static_terrain_layers()
+	rebuild_dynamic_tactical_layers()
+
 
 
 func _create_default_weights() -> PackedFloat32Array:
@@ -116,9 +126,9 @@ func rebuild_dynamic_tactical_layers() -> void:
 		influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
 
 		_write_visibility_for_team(influence_map, team)
-		_write_fire_threat_for_team(influence_map, team)
-		_write_friendly_support_for_team(influence_map, team)
-		_write_known_enemy_positions_for_team(influence_map, team)
+		#_write_fire_threat_for_team(influence_map, team)
+		#_write_friendly_support_for_team(influence_map, team)
+		#_write_known_enemy_positions_for_team(influence_map, team)
 
 	rebuild_pending = true
 
@@ -232,12 +242,17 @@ func _get_cover_value_for_cell(_cell: Vector2i) -> float:
 	# Normalize to 0.0 .. 1.0.
 	# 0.0 = no cover
 	# 1.0 = excellent cover
-	return 0.0
+	var terrain_defence_bonus: int = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_cell))
+	if terrain_defence_bonus > 0:
+		pass
+	var terrain_defence_bonus_normalized: float = remap(terrain_defence_bonus, 0.0, 3.0, 0.0, 1.0)
+	return terrain_defence_bonus_normalized
 
 
 func _get_move_cost_for_cell(_cell: Vector2i) -> float:
-	# 0.0 = normal movement
-	# higher = worse movement
+	var terrain_defence_bonus: int = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_cell))
+	if terrain_defence_bonus > 0:
+		return 1.0
 	return 0.0
 
 

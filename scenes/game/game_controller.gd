@@ -130,6 +130,7 @@ func setup():
 	influence_map_debug_draw.influence_controller = influence_map_controller
 	influence_map_debug_draw.set_team(Globals.Team.ALLIES)
 	influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.ENEMY_FIRE_THREAT)
+	
 	influence_map_debug_draw.setup()
 
 func spawn_formation():
