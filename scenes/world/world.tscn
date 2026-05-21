@@ -94,6 +94,8 @@
 [ext_resource type="Resource" uid="uid://bgercl11nyflu" path="res://resources/squads/german/medium_mortar_squad.tres" id="71_s64j0"]
 [ext_resource type="Resource" uid="uid://b47gq5wbijpgy" path="res://resources/squads/us/light_mortar_squad.tres" id="73_jtcuk"]
 [ext_resource type="Script" uid="uid://bbnsjqri366kl" path="res://scenes/world/command_connectivity_renderer.gd" id="79_x77xw"]
+[ext_resource type="PackedScene" uid="uid://d1onivapwnk0s" path="res://influence_map_debug_draw.tscn" id="90_n0in2"]
+[ext_resource type="PackedScene" uid="uid://b2l16lejahl5o" path="res://influence_map_controller.tscn" id="91_mdkuk"]
 
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
@@ -2341,7 +2343,13 @@ autostart = true
 [node name="WinConditionTimer" type="Timer" parent="GameController" unique_id=267834995]
 
 [node name="CommandConnectivityRenderer" type="Node2D" parent="GameController" unique_id=1426351301]
+visible = false
 script = ExtResource("79_x77xw")
+
+[node name="InfluenceMapDebugDraw" parent="GameController" unique_id=1463029207 instance=ExtResource("90_n0in2")]
+top_level = true
+
+[node name="InfluenceMapController" parent="GameController" unique_id=1942260574 instance=ExtResource("91_mdkuk")]
 
 [node name="TargetArea" type="Node2D" parent="." unique_id=403286200]
 script = ExtResource("55_7rtjl")

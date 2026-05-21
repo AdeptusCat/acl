@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://d1onivapwnk0s"]
+
+[ext_resource type="Script" uid="uid://dkxy3avq40twc" path="res://influence_map_debug_draw.gd" id="1_y4035"]
+
+[node name="InfluenceMapDebugDraw" type="Node2D" unique_id=1463029207]
+script = ExtResource("1_y4035")

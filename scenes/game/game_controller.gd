@@ -6,6 +6,8 @@ extends Node2D
 @onready var close_combat_locations := $CloseCombatLocations
 @onready var close_combat_instances := $CloseCombatInstances
 @onready var win_condition_timer: Timer = $WinConditionTimer
+@onready var influence_map_debug_draw: InfluenceMapDebugDraw = $InfluenceMapDebugDraw
+@onready var influence_map_controller: InfluenceMapController = $InfluenceMapController
 
 
 @export var allies_objective_tilemap : TileMapLayer
@@ -76,7 +78,7 @@ func _on_draw_threat(_threat_weights: Dictionary[int, Dictionary]):
 	
 
 func setup():
-	MovementSystem.draw_threat.connect(_on_draw_threat)
+	#MovementSystem.draw_threat.connect(_on_draw_threat)
 	#camera.camera_moved.connect(_on_camera_moved)
 	#combat_sys.visibility_changed.connect(los_renderer._on_visibility_changed)
 	#for child in $"../UnitManager".get_children():
@@ -122,6 +124,13 @@ func setup():
 	
 	#fog_of_war_layer.set_cell(Vector2i(1, 1), 0)
 	#fog_of_war_layer.set_cell(tile_map_layer, new_tile_map_cell_position, tile_map_cell_source_id, tile_map_cell_atlas_coords, tile_map_cell_alternative)
+	
+	influence_map_controller.create_maps()
+	influence_map_debug_draw.tile_map_layer = LOSHelper.ground_layer
+	influence_map_debug_draw.influence_controller = influence_map_controller
+	influence_map_debug_draw.set_team(Globals.Team.ALLIES)
+	influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.ENEMY_FIRE_THREAT)
+	influence_map_debug_draw.setup()
 
 func spawn_formation():
 	if Globals.game_mode == Globals.GameMode.ATTACK:

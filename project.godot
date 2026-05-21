@@ -32,6 +32,7 @@ SessionSettings="*res://autoloads/session_settings.gd"
 Debug="*res://autoloads/debug.gd"
 MovementSystem="*uid://dla50r83yg10r"
 LOS="*uid://bkkx84cy8adyu"
+ThreatMap="*uid://smksvypix41r"
 
 [display]
 

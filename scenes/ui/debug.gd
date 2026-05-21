@@ -12,6 +12,18 @@ extends PanelContainer
 @onready var hide_fog_of_war: CheckBox = $VBoxContainer/HideFogOfWar
 @onready var show_enemies: CheckBox = $VBoxContainer/ShowEnemies
 
+enum DebugInfluenceView {
+	NONE,
+	COMPOSITE,
+	TERRAIN_COVER,
+	TERRAIN_MOVE_COST,
+	ENEMY_VISIBILITY,
+	ENEMY_FIRE_THREAT,
+	FRIENDLY_SUPPORT,
+	OBJECTIVE_PRESSURE,
+	KNOWN_ENEMY_POSITION,
+	NO_GO
+}
 
 func _ready() -> void:
 	if not OS.is_debug_build():
