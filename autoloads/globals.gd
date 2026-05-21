@@ -96,10 +96,30 @@ func unregister_unit(team: Team, company: Unit.Company, platoon: int, squad: int
 		return
 	unit_hierarchy.erase(key)
 
+
 func get_units() -> Array[Unit]:
 	var _units: Array[Unit] = []
 	_units.assign(get_tree().get_nodes_in_group("units"))
 	return _units
+
+
+func get_units_for_team(team: Team) -> Array[Unit]:
+	var result: Array[Unit] = []
+	
+	for unit: Unit in Globals.get_units():
+		if not is_instance_valid(unit):
+			continue
+
+		if not unit.alive:
+			continue
+
+		if unit.team != team:
+			continue
+
+		result.append(unit)
+
+	return result
+
 
 func reset():
 	unit_visible_enemies.clear()

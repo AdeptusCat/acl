@@ -4,15 +4,34 @@ extends Node2D
 enum DebugView {
 	NONE,
 	COMPOSITE,
+	
 	TERRAIN_COVER,
 	TERRAIN_MOVE_COST,
+	
 	ENEMY_VISIBILITY,
 	ENEMY_FIRE_THREAT,
-	FRIENDLY_SUPPORT,
-	OBJECTIVE_PRESSURE,
-	KNOWN_ENEMY_POSITION,
-	NO_GO
+	
+	COVER_VS_ENEMY_FIRE,
+	ENEMY_VISIBILITY_HINDRANCE,
+	#RETURN_FIRE_PENALTY,
+	
+	#FRIENDLY_SUPPORT,
+	#OBJECTIVE_PRESSURE,
+	#KNOWN_ENEMY_POSITION,
+	#NO_GO
 }
+
+const DebugViewNames: Dictionary[DebugView, String] = {
+	DebugView.COMPOSITE: "Composite",
+	DebugView.TERRAIN_COVER: "TERRAIN_COVER",
+	DebugView.TERRAIN_MOVE_COST: "TERRAIN_MOVE_COST",
+	DebugView.ENEMY_VISIBILITY: "ENEMY_VISIBILITY",
+	DebugView.ENEMY_FIRE_THREAT: "ENEMY_FIRE_THREAT",
+	DebugView.COVER_VS_ENEMY_FIRE: "COVER_VS_ENEMY_FIRE",
+	DebugView.ENEMY_VISIBILITY_HINDRANCE: "ENEMY_VISIBILITY_HINDRANCE",
+}
+
+
 
 @export var tile_map_layer: TileMapLayer = null
 @export var influence_controller: Node = null
@@ -21,7 +40,7 @@ enum DebugView {
 @export var debug_view: DebugView = DebugView.NONE
 
 @export var draw_alpha: float = 0.55
-@export var hex_draw_scale: float = 0.92
+@export var hex_draw_scale: float = 0.5
 @export var flat_top_hexes: bool = false
 
 @export var auto_scale_values: bool = true
@@ -34,9 +53,19 @@ enum DebugView {
 @export var draw_cell_values: bool = false
 @export var value_text_min_zoom: float = 0.75
 
-var low_color: Color = Color(0.1, 0.25, 1.0, 1.0)
-var mid_color: Color = Color(0.1, 1.0, 0.1, 1.0)
-var high_color: Color = Color(1.0, 0.1, 0.1, 1.0)
+#var low_color: Color = Color(0.1, 0.25, 1.0, 1.0)
+#var mid_color: Color = Color(0.1, 1.0, 0.1, 1.0)
+#var high_color: Color = Color(1.0, 0.1, 0.1, 1.0)
+
+var low_color: Color = Color(0.65, 0.85, 1.0, 1.0)
+var mid_color: Color = Color(0.1, 0.35, 0.85, 1.0)
+var high_color: Color = Color(0.05, 0.12, 0.35, 1.0)
+
+#var low_color: Color = Color(0.05, 0.12, 0.35, 1.0)
+#var mid_color: Color = Color(0.1, 0.35, 0.85, 1.0)
+#var high_color: Color = Color(0.65, 0.85, 1.0, 1.0)
+
+#var influence_color: Color = Color(0.1, 0.35, 1.0, 1.0)
 
 var _cached_cells: Array[Vector2i] = []
 var _cached_min_value: float = 0.0
@@ -76,6 +105,7 @@ func _process(_delta: float) -> void:
 func set_debug_view(p_debug_view: int) -> void:
 	debug_view = p_debug_view as DebugView
 	_cache_valid = false
+	Debug.influence_map_name = DebugViewNames[p_debug_view]
 	queue_redraw()
 
 
@@ -232,18 +262,24 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 
 	if p_debug_view == DebugView.ENEMY_FIRE_THREAT:
 		return InfluenceMap.Layer.ENEMY_FIRE_THREAT
+	
+	if p_debug_view == DebugView.COVER_VS_ENEMY_FIRE:
+		return InfluenceMap.Layer.COVER_VS_ENEMY_FIRE
+	
+	if p_debug_view == DebugView.ENEMY_VISIBILITY_HINDRANCE:
+		return InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE
 
-	if p_debug_view == DebugView.FRIENDLY_SUPPORT:
-		return InfluenceMap.Layer.FRIENDLY_SUPPORT
+	#if p_debug_view == DebugView.FRIENDLY_SUPPORT:
+		#return InfluenceMap.Layer.FRIENDLY_SUPPORT
 
-	if p_debug_view == DebugView.OBJECTIVE_PRESSURE:
-		return InfluenceMap.Layer.OBJECTIVE_PRESSURE
+	#if p_debug_view == DebugView.OBJECTIVE_PRESSURE:
+		#return InfluenceMap.Layer.OBJECTIVE_PRESSURE
 
-	if p_debug_view == DebugView.KNOWN_ENEMY_POSITION:
-		return InfluenceMap.Layer.KNOWN_ENEMY_POSITION
+	#if p_debug_view == DebugView.KNOWN_ENEMY_POSITION:
+		#return InfluenceMap.Layer.KNOWN_ENEMY_POSITION
 
-	if p_debug_view == DebugView.NO_GO:
-		return InfluenceMap.Layer.NO_GO
+	#if p_debug_view == DebugView.NO_GO:
+		#return InfluenceMap.Layer.NO_GO
 
 	return -1
 
@@ -259,7 +295,7 @@ func _cell_to_local_position(cell: Vector2i) -> Vector2:
 func _make_hex_polygon(center: Vector2, radius_x: float, radius_y: float) -> PackedVector2Array:
 	var points: PackedVector2Array = PackedVector2Array()
 
-	var start_degrees: float = -90.0
+	var start_degrees: float = 0.0 #-90.0
 
 	if flat_top_hexes:
 		start_degrees = 0.0
@@ -278,6 +314,26 @@ func _make_hex_polygon(center: Vector2, radius_x: float, radius_y: float) -> Pac
 		index += 1
 
 	return points
+
+
+#func _value_to_color(value: float, min_value: float, max_value: float) -> Color:
+	#var t: float = 0.0
+	#var value_range: float = max_value - min_value
+#
+	#if abs(value_range) > 0.0001:
+		#t = (value - min_value) / value_range
+#
+	#t = clamp(t, 0.1, 1.0)
+#
+	#var alpha: float = draw_alpha * t
+#
+	#if alpha < 0.05:
+		#alpha = 0.05
+#
+	#var color: Color = influence_color
+	#color.a = alpha
+#
+	#return color
 
 
 func _value_to_color(value: float, min_value: float, max_value: float) -> Color:
@@ -357,22 +413,30 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key_event.keycode == KEY_5:
 		set_debug_view(DebugView.ENEMY_FIRE_THREAT)
 		return
-
+	
 	if key_event.keycode == KEY_6:
-		set_debug_view(DebugView.FRIENDLY_SUPPORT)
+		set_debug_view(DebugView.COVER_VS_ENEMY_FIRE)
 		return
 
 	if key_event.keycode == KEY_7:
-		set_debug_view(DebugView.OBJECTIVE_PRESSURE)
+		set_debug_view(DebugView.ENEMY_VISIBILITY_HINDRANCE)
 		return
+	
+	#if key_event.keycode == KEY_6:
+		#set_debug_view(DebugView.FRIENDLY_SUPPORT)
+		#return
 
-	if key_event.keycode == KEY_8:
-		set_debug_view(DebugView.KNOWN_ENEMY_POSITION)
-		return
+	#if key_event.keycode == KEY_7:
+		#set_debug_view(DebugView.OBJECTIVE_PRESSURE)
+		#return
 
-	if key_event.keycode == KEY_9:
-		set_debug_view(DebugView.NO_GO)
-		return
+	#if key_event.keycode == KEY_8:
+		#set_debug_view(DebugView.KNOWN_ENEMY_POSITION)
+		#return
+
+	#if key_event.keycode == KEY_9:
+		#set_debug_view(DebugView.NO_GO)
+		#return
 
 	if key_event.keycode == KEY_TAB:
 		_cycle_team()

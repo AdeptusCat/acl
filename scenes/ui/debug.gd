@@ -11,19 +11,8 @@ extends PanelContainer
 @onready var show_movement_lines: CheckBox = $VBoxContainer/ShowMovementLines
 @onready var hide_fog_of_war: CheckBox = $VBoxContainer/HideFogOfWar
 @onready var show_enemies: CheckBox = $VBoxContainer/ShowEnemies
+@onready var influence_map_name: Label = $VBoxContainer/InfluenceMapName
 
-enum DebugInfluenceView {
-	NONE,
-	COMPOSITE,
-	TERRAIN_COVER,
-	TERRAIN_MOVE_COST,
-	ENEMY_VISIBILITY,
-	ENEMY_FIRE_THREAT,
-	FRIENDLY_SUPPORT,
-	OBJECTIVE_PRESSURE,
-	KNOWN_ENEMY_POSITION,
-	NO_GO
-}
 
 func _ready() -> void:
 	if not OS.is_debug_build():
@@ -41,7 +30,10 @@ func _ready() -> void:
 	
 
 
-
+func _process(delta: float) -> void:
+	if not OS.is_debug_build():
+		return
+	influence_map_name.text = Debug.influence_map_name
 
 
 

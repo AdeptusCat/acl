@@ -126,7 +126,7 @@ func rebuild_dynamic_tactical_layers() -> void:
 		influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
 
 		_write_visibility_for_team(influence_map, team)
-		#_write_fire_threat_for_team(influence_map, team)
+		rebuild_los_influence_for_team(influence_map, team)
 		#_write_friendly_support_for_team(influence_map, team)
 		#_write_known_enemy_positions_for_team(influence_map, team)
 
@@ -155,30 +155,215 @@ func _write_visibility_for_team(influence_map: InfluenceMap, team: int) -> void:
 		influence_map.max_layer_value(InfluenceMap.Layer.ENEMY_VISIBILITY, cell, 1.0)
 
 
-func _write_fire_threat_for_team(influence_map: InfluenceMap, team: int) -> void:
+#func _write_fire_threat_for_team(influence_map: InfluenceMap, team: int) -> void:
+	#var enemy_team: int = _get_enemy_team(team)
+#
+	#for unit: Unit in Globals.get_units():
+		#if not is_instance_valid(unit):
+			#continue
+#
+		#if not unit.alive:
+			#continue
+#
+		#if unit.team != enemy_team:
+			#continue
+#
+		#var threat_radius: int = 8
+		#var threat_value: float = _get_unit_threat_value(unit)
+#
+		#influence_map.stamp_radius(
+			#InfluenceMap.Layer.ENEMY_FIRE_THREAT,
+			#unit.current_hex,
+			#threat_radius,
+			#threat_value,
+			#InfluenceMap.WriteMode.ADD,
+			#true
+		#)
+
+
+func rebuild_los_influence_for_team(
+	influence_map: InfluenceMap,
+	team: int
+) -> void:
+	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_FIRE_THREAT, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.COVER_VS_ENEMY_FIRE, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.RETURN_FIRE_PENALTY, 0.0)
+
 	var enemy_team: int = _get_enemy_team(team)
-
-	for unit: Unit in Globals.get_units():
-		if not is_instance_valid(unit):
+	var enemy_units: Array[Unit] = Globals.get_units_for_team(enemy_team)
+	
+	var los_lookup: Dictionary = LOSHelper.los_lookup
+	
+	for enemy_unit: Unit in enemy_units:
+		if not is_instance_valid(enemy_unit):
 			continue
 
-		if not unit.alive:
+		var observer_hex: Vector2i = enemy_unit.current_hex
+
+		if not los_lookup.has(observer_hex):
 			continue
+		
+		var visible_targets: Dictionary = los_lookup[observer_hex]
+		var enemy_firepower: float = _get_unit_firepower(enemy_unit)
+		var enemy_effectiveness: float = _get_unit_effectiveness(enemy_unit)
 
-		if unit.team != enemy_team:
-			continue
+		for target_hex: Vector2i in visible_targets.keys():
+			if not influence_map.is_valid_cell(target_hex):
+				continue
 
-		var threat_radius: int = 8
-		var threat_value: float = _get_unit_threat_value(unit)
+			var los_data: Dictionary = visible_targets[target_hex]
 
-		influence_map.stamp_radius(
-			InfluenceMap.Layer.ENEMY_FIRE_THREAT,
-			unit.current_hex,
-			threat_radius,
-			threat_value,
-			InfluenceMap.WriteMode.ADD,
-			true
-		)
+			_project_single_enemy_los_record(
+				influence_map,
+				observer_hex,
+				target_hex,
+				los_data,
+				enemy_firepower,
+				enemy_effectiveness
+			)
+
+
+func _project_single_enemy_los_record(
+	influence_map: InfluenceMap,
+	observer_hex: Vector2i,
+	target_hex: Vector2i,
+	los_data: Dictionary,
+	enemy_firepower: float,
+	enemy_effectiveness: float
+) -> void:
+	var target_cover: float = _read_los_float(los_data, "target_cover", 0.0)
+	var shooter_cover: float = _read_los_float(los_data, "shooter_cover", 0.0)
+	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
+	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
+	
+	var distance: int = _hex_distance(observer_hex, target_hex)
+
+	var threat: float = _calculate_los_fire_threat(
+		enemy_firepower,
+		enemy_effectiveness,
+		target_cover,
+		hindrance,
+		distance
+	)
+
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.ENEMY_VISIBILITY,
+		target_hex,
+		1.0
+	)
+
+	influence_map.add_layer_value(
+		InfluenceMap.Layer.ENEMY_FIRE_THREAT,
+		target_hex,
+		threat
+	)
+
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
+		target_hex,
+		target_cover
+	)
+
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE,
+		target_hex,
+		hindrance
+	)
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE,
+		target_hex,
+		target_concealment
+	)
+
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.RETURN_FIRE_PENALTY,
+		target_hex,
+		shooter_cover
+	)
+
+
+func _read_los_float(data: Dictionary, key: String, fallback: float) -> float:
+	if not data.has(key):
+		return fallback
+
+	var value: Variant = data[key]
+
+	if typeof(value) == TYPE_INT:
+		return float(value)
+
+	if typeof(value) == TYPE_FLOAT:
+		return value
+
+	return fallback
+
+
+func _get_unit_firepower(unit: Unit) -> float:
+	var firepower: float = 1.0
+
+	#if unit.combat_stats != null:
+		#firepower = unit.combat_stats.firepower
+
+	return firepower
+
+
+func _get_unit_effectiveness(unit: Unit) -> float:
+	var effectiveness: float = 1.0
+
+	#if unit.combat_stats != null:
+		#effectiveness = unit.combat_stats.combat_effectiveness
+
+	return effectiveness
+
+
+func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var dq: int = a.x - b.x
+	var dr: int = a.y - b.y
+	var ds: int = -a.x - a.y - (-b.x - b.y)
+
+	var distance: int = (abs(dq) + abs(dr) + abs(ds)) / 2
+	return distance
+
+
+func _calculate_los_fire_threat(
+	enemy_firepower: float,
+	enemy_effectiveness: float,
+	target_cover: float,
+	hindrance: float,
+	distance: int
+) -> float:
+	var threat: float = enemy_firepower * enemy_effectiveness
+
+	var cover_multiplier: float = 1.0 / (1.0 + target_cover * 0.35)
+	var hindrance_multiplier: float = 1.0 / (1.0 + hindrance * 0.25)
+	var range_multiplier: float = _get_range_threat_multiplier(distance)
+	#var range_multiplier: float = 1.0
+
+	threat *= cover_multiplier
+	threat *= hindrance_multiplier
+	threat *= range_multiplier
+
+	if threat < 0.0:
+		threat = 0.0
+
+	return threat
+
+
+func _get_range_threat_multiplier(distance: int) -> float:
+	if distance <= 1:
+		return 2.0
+
+	if distance <= 3:
+		return 1.3
+
+	if distance <= 6:
+		return 1.0
+
+	if distance <= 10:
+		return 0.65
+
+	return 0.35
 
 
 func _write_friendly_support_for_team(influence_map: InfluenceMap, team: int) -> void:

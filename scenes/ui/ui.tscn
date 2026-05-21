@@ -714,6 +714,9 @@ text = "Hide Fog Of War"
 layout_mode = 2
 text = "Show Enemies"
 
+[node name="InfluenceMapName" type="Label" parent="Control/Debug/VBoxContainer" unique_id=692635582]
+layout_mode = 2
+
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1

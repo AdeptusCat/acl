@@ -104,7 +104,9 @@ func prebake_los():
 						# store both cover values under t_hex
 						los_lookup[o_hex][t_hex] = {
 							"shooter_cover": los["shooter_cover"],
-							"target_cover":  los["target_cover"]
+							"target_cover":  los["target_cover"],
+							"hindrance": los["hindrance"],
+							"target_concealment": los["target_concealment"]
 						}
 				# end tx,ty
 			# end ox,oy
@@ -233,6 +235,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		"target_cover": 0,
 		"hexes": [],
 		"hindrance": 0,
+		"target_concealment": 0,
 	}
 	
 
@@ -242,6 +245,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		#result.shooter_cover = BUILDING_COVER
 	# 2) target building cover
 	result.target_cover = is_sample_point_in_building(target_pos)
+	result.target_concealment = get_target_concealment(target_pos)
 	#if is_sample_point_in_building(target_pos):
 		#result.target_cover = BUILDING_COVER
 	
@@ -680,8 +684,6 @@ func cube_line(origin_hex_cube: Vector3i, target_hex_cube: Vector3i, n: int) -> 
 	return hexes
 
 
-
-
 func _check_hindrance(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
 	var tile_data: TileData = terrain_layer.get_cell_tile_data(sample_hex_map)
 	if tile_data and tile_data.has_custom_data("hindrance") \
@@ -691,6 +693,7 @@ func _check_hindrance(sample_hex_map: Vector2i, result: Dictionary) -> Dictionar
 			result.shooter_cover += 1
 			result.target_cover += 1
 	return result
+
 
 func _check_blocking_terrain(sample_hex_map: Vector2i, result: Dictionary) -> Dictionary:
 	var tile_data: TileData = terrain_layer.get_cell_tile_data(sample_hex_map)
@@ -939,6 +942,20 @@ func is_hex_hindrance(hex_map: Vector2i):
 		if tile_data and tile_data.has_custom_data("hindrance"):
 			return tile_data.get_custom_data("hindrance")
 		return false
+
+
+func get_target_concealment(sample_point: Vector2) -> int:
+	var hex_map = building_layer.local_to_map(sample_point)
+	if building_layer.get_cell_source_id(hex_map) != -1:
+		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("cover"):
+			return 2
+	if terrain_layer.get_cell_source_id(hex_map) != -1:
+		var tile_data: TileData = terrain_layer.get_cell_tile_data(hex_map)
+		if tile_data and tile_data.has_custom_data("hindrance"):
+			return 1
+	return 0
+	
 
 
 func is_sample_point_in_building(sample_point: Vector2) -> int:

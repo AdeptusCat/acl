@@ -14,3 +14,5 @@ var show_enemies: bool = false
 var units_to_kill: Array[Unit] = []
 var units_soldier_to_kill: Array[Unit] = []
 var units_to_surrender: Array[Unit] = []
+
+var influence_map_name: String = ""

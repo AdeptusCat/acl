@@ -317,7 +317,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	Globals.astars[Globals.Team.ALLIES] = copy_astar(LOSHelper.ground_layer.astar)
 	await get_tree().process_frame
 	#LOSHelper.prebake_los()
-	#LOSHelper.bake_and_save_los_data($Maps/Map2)
+	#LOSHelper.bake_and_save_los_data(map)
 	LOSHelper.load_prebaked_los(map)
 	
 	ui.setup()
