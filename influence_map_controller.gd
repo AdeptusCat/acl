@@ -12,6 +12,22 @@ var axis_weights: PackedFloat32Array = PackedFloat32Array()
 
 var rebuild_pending: bool = false
 
+enum CompositeSource {
+	SELF,
+	ENEMY
+}
+
+
+class CompositeTerm:
+	var source: int = CompositeSource.SELF
+	var layer: int = InfluenceMap.Layer.TERRAIN_COVER
+	var weight: float = 0.0
+
+	func _init(p_source: int, p_layer: int, p_weight: float) -> void:
+		source = p_source
+		layer = p_layer
+		weight = p_weight
+
 #func _ready() -> void:
 	#create_maps()
 
@@ -68,6 +84,109 @@ func create_maps() -> void:
 	rebuild_dynamic_tactical_layers()
 
 
+func rebuild_composite_for_team(team: int, terms: Array[CompositeTerm]) -> void:
+	var self_map: InfluenceMap = maps_by_team[team]
+	var enemy_team: int = _get_enemy_team(team)
+	var enemy_map: InfluenceMap = maps_by_team[enemy_team]
+
+	if self_map == null:
+		return
+
+	if enemy_map == null:
+		return
+
+	self_map.clear_composite()
+
+	var bounds: Rect2i = self_map.bounds
+	
+	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
+		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
+			var hex: Vector2i = Vector2i(x, y)
+			var score: float = 0.0
+
+			for term in terms:
+				var source_map: InfluenceMap = self_map
+
+				if term.source == CompositeSource.ENEMY:
+					source_map = enemy_map
+				else:
+					source_map = self_map
+
+				var value: float = source_map.get_layer_value(term.layer, hex)
+				score += value * term.weight
+
+			self_map.set_composite_value(hex, score)
+
+
+func _create_default_movement_composition() -> Array[CompositeTerm]:
+	var terms: Array[CompositeTerm] = []
+
+	# Static / self-perspective layers.
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.TERRAIN_MOVE_COST,
+		1.00
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
+		-0.50
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.VISIBILITY_HINDRANCE,
+		-0.20
+	))
+
+	# Enemy-owned layers used as threat.
+	terms.append(CompositeTerm.new(
+		CompositeSource.ENEMY,
+		InfluenceMap.Layer.FIRE_POWER,
+		0.50
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.ENEMY,
+		InfluenceMap.Layer.VISIBILITY,
+		0.35
+	))
+
+	# Friendly-owned layers used as attraction/support.
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.FIRE_POWER,
+		-0.20
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.FRIENDLY_SUPPORT,
+		-0.50
+	))
+
+	# Team-local tactical layers.
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.OBJECTIVE_PRESSURE,
+		-0.75
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.KNOWN_ENEMY_POSITION,
+		1.50
+	))
+
+	terms.append(CompositeTerm.new(
+		CompositeSource.SELF,
+		InfluenceMap.Layer.NO_GO,
+		20.00
+	))
+
+	return terms
+
 
 func _create_default_weights() -> PackedFloat32Array:
 	var weights: PackedFloat32Array = PackedFloat32Array()
@@ -77,15 +196,36 @@ func _create_default_weights() -> PackedFloat32Array:
 	# Positive values increase movement cost / danger.
 	# Negative values reduce movement cost / attract movement.
 
-	weights[InfluenceMap.Layer.TERRAIN_COVER] = -0.40
-	weights[InfluenceMap.Layer.TERRAIN_MOVE_COST] = 1.00
-	weights[InfluenceMap.Layer.VISIBILITY] = 2.00
-	weights[InfluenceMap.Layer.FIRE_POWER] = 3.00
-	weights[InfluenceMap.Layer.FRIENDLY_SUPPORT] = -0.50
-	weights[InfluenceMap.Layer.OBJECTIVE_PRESSURE] = -0.75
-	weights[InfluenceMap.Layer.KNOWN_ENEMY_POSITION] = 1.50
-	weights[InfluenceMap.Layer.NO_GO] = 20.00
-
+	#weights[InfluenceMap.Layer.TERRAIN_COVER] = -0.40
+	#weights[InfluenceMap.Layer.TERRAIN_MOVE_COST] = 1.00
+	#weights[InfluenceMap.Layer.VISIBILITY] = 2.00
+	#weights[InfluenceMap.Layer.FIRE_POWER] = 3.00
+	#weights[InfluenceMap.Layer.FRIENDLY_SUPPORT] = -0.50
+	#weights[InfluenceMap.Layer.OBJECTIVE_PRESSURE] = -0.75
+	#weights[InfluenceMap.Layer.KNOWN_ENEMY_POSITION] = 1.50
+	#weights[InfluenceMap.Layer.NO_GO] = 20.00
+	
+	
+	weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
+	weights[InfluenceMap.Layer.FIRE_POWER] = 0.50 # this is supposed to be enemy FP
+	
+	#TERRAIN_COVER,
+	#TERRAIN_MOVE_COST,
+	#
+	#VISIBILITY,
+	#FIRE_POWER,
+	#
+	#COVER_VS_ENEMY_FIRE,
+	#VISIBILITY_HINDRANCE,
+	#RETURN_FIRE_PENALTY,
+	#
+	#FRIENDLY_SUPPORT,
+	#OBJECTIVE_PRESSURE,
+	#KNOWN_ENEMY_POSITION,
+	#NO_GO,
+	
+	#COUNT
+	
 	return weights
 
 
