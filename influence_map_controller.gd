@@ -79,8 +79,8 @@ func _create_default_weights() -> PackedFloat32Array:
 
 	weights[InfluenceMap.Layer.TERRAIN_COVER] = -0.40
 	weights[InfluenceMap.Layer.TERRAIN_MOVE_COST] = 1.00
-	weights[InfluenceMap.Layer.ENEMY_VISIBILITY] = 2.00
-	weights[InfluenceMap.Layer.ENEMY_FIRE_THREAT] = 3.00
+	weights[InfluenceMap.Layer.VISIBILITY] = 2.00
+	weights[InfluenceMap.Layer.FIRE_POWER] = 3.00
 	weights[InfluenceMap.Layer.FRIENDLY_SUPPORT] = -0.50
 	weights[InfluenceMap.Layer.OBJECTIVE_PRESSURE] = -0.75
 	weights[InfluenceMap.Layer.KNOWN_ENEMY_POSITION] = 1.50
@@ -120,8 +120,8 @@ func rebuild_dynamic_tactical_layers() -> void:
 	for team: int in maps_by_team.keys():
 		var influence_map: InfluenceMap = maps_by_team[team]
 
-		influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
-		influence_map.clear_layer(InfluenceMap.Layer.ENEMY_FIRE_THREAT, 0.0)
+		influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY, 0.0)
+		influence_map.clear_layer(InfluenceMap.Layer.FIRE_POWER, 0.0)
 		influence_map.clear_layer(InfluenceMap.Layer.FRIENDLY_SUPPORT, 0.0)
 		influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
 
@@ -152,7 +152,7 @@ func _write_visibility_for_team(influence_map: InfluenceMap, team: int) -> void:
 	var visible_hexes: Array = LOSHelper.visible_hexes.get(enemy_team, [])
 
 	for cell: Vector2i in visible_hexes:
-		influence_map.max_layer_value(InfluenceMap.Layer.ENEMY_VISIBILITY, cell, 1.0)
+		influence_map.max_layer_value(InfluenceMap.Layer.VISIBILITY, cell, 1.0)
 
 
 #func _write_fire_threat_for_team(influence_map: InfluenceMap, team: int) -> void:
@@ -172,7 +172,7 @@ func _write_visibility_for_team(influence_map: InfluenceMap, team: int) -> void:
 		#var threat_value: float = _get_unit_threat_value(unit)
 #
 		#influence_map.stamp_radius(
-			#InfluenceMap.Layer.ENEMY_FIRE_THREAT,
+			#InfluenceMap.Layer.FIRE_POWER,
 			#unit.current_hex,
 			#threat_radius,
 			#threat_value,
@@ -185,29 +185,29 @@ func rebuild_los_influence_for_team(
 	influence_map: InfluenceMap,
 	team: int
 ) -> void:
-	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
-	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_FIRE_THREAT, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.FIRE_POWER, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.COVER_VS_ENEMY_FIRE, 0.0)
-	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY_HINDRANCE, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.RETURN_FIRE_PENALTY, 0.0)
 
 	var enemy_team: int = _get_enemy_team(team)
+	var units: Array[Unit] = Globals.get_units_for_team(team)
 	var enemy_units: Array[Unit] = Globals.get_units_for_team(enemy_team)
 	
 	var los_lookup: Dictionary = LOSHelper.los_lookup
-	
-	for enemy_unit: Unit in enemy_units:
-		if not is_instance_valid(enemy_unit):
+	for unit: Unit in units:
+		if not is_instance_valid(unit):
 			continue
 
-		var observer_hex: Vector2i = enemy_unit.current_hex
+		var observer_hex: Vector2i = unit.current_hex
 
 		if not los_lookup.has(observer_hex):
 			continue
 		
 		var visible_targets: Dictionary = los_lookup[observer_hex]
-		var enemy_firepower: float = _get_unit_firepower(enemy_unit)
-		var enemy_effectiveness: float = _get_unit_effectiveness(enemy_unit)
+		var unit_firepower: float = _get_unit_firepower(unit)
+		var unit_effectiveness: float = _get_unit_effectiveness(unit)
 
 		for target_hex: Vector2i in visible_targets.keys():
 			if not influence_map.is_valid_cell(target_hex):
@@ -215,23 +215,51 @@ func rebuild_los_influence_for_team(
 
 			var los_data: Dictionary = visible_targets[target_hex]
 
-			_project_single_enemy_los_record(
+			_project_friendly_los_record(
 				influence_map,
 				observer_hex,
 				target_hex,
 				los_data,
-				enemy_firepower,
-				enemy_effectiveness
+				unit_firepower,
+				unit_effectiveness
+			)
+	
+	for unit: Unit in enemy_units:
+		if not is_instance_valid(unit):
+			continue
+
+		var observer_hex: Vector2i = unit.current_hex
+
+		if not los_lookup.has(observer_hex):
+			continue
+		
+		var visible_targets: Dictionary = los_lookup[observer_hex]
+		var unit_firepower: float = _get_unit_firepower(unit)
+		var unit_effectiveness: float = _get_unit_effectiveness(unit)
+
+		for target_hex: Vector2i in visible_targets.keys():
+			if not influence_map.is_valid_cell(target_hex):
+				continue
+
+			var los_data: Dictionary = visible_targets[target_hex]
+
+			_project_enemy_los_record(
+				influence_map,
+				observer_hex,
+				target_hex,
+				los_data,
+				unit_firepower,
+				unit_effectiveness
 			)
 
 
-func _project_single_enemy_los_record(
+func _project_friendly_los_record(
 	influence_map: InfluenceMap,
 	observer_hex: Vector2i,
 	target_hex: Vector2i,
 	los_data: Dictionary,
-	enemy_firepower: float,
-	enemy_effectiveness: float
+	unit_firepower: float,
+	unit_effectiveness: float
 ) -> void:
 	var target_cover: float = _read_los_float(los_data, "target_cover", 0.0)
 	var shooter_cover: float = _read_los_float(los_data, "shooter_cover", 0.0)
@@ -239,40 +267,39 @@ func _project_single_enemy_los_record(
 	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
 	
 	var distance: int = _hex_distance(observer_hex, target_hex)
-
+	
+	if shooter_cover > 4:
+		observer_hex
+		pass
+	
 	var threat: float = _calculate_los_fire_threat(
-		enemy_firepower,
-		enemy_effectiveness,
+		unit_firepower,
+		unit_effectiveness,
 		target_cover,
 		hindrance,
 		distance
 	)
 
 	influence_map.max_layer_value(
-		InfluenceMap.Layer.ENEMY_VISIBILITY,
+		InfluenceMap.Layer.VISIBILITY,
 		target_hex,
 		1.0
 	)
 
 	influence_map.add_layer_value(
-		InfluenceMap.Layer.ENEMY_FIRE_THREAT,
+		InfluenceMap.Layer.FIRE_POWER,
 		target_hex,
 		threat
 	)
-
+	
+	
 	influence_map.max_layer_value(
-		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
-		target_hex,
-		target_cover
-	)
-
-	influence_map.max_layer_value(
-		InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE,
+		InfluenceMap.Layer.VISIBILITY_HINDRANCE,
 		target_hex,
 		hindrance
 	)
 	influence_map.max_layer_value(
-		InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE,
+		InfluenceMap.Layer.VISIBILITY_HINDRANCE,
 		target_hex,
 		target_concealment
 	)
@@ -282,6 +309,31 @@ func _project_single_enemy_los_record(
 		target_hex,
 		shooter_cover
 	)
+
+
+func _project_enemy_los_record(
+	influence_map: InfluenceMap,
+	observer_hex: Vector2i,
+	target_hex: Vector2i,
+	los_data: Dictionary,
+	unit_firepower: float,
+	unit_effectiveness: float
+) -> void:
+	var target_cover: float = _read_los_float(los_data, "target_cover", 0.0)
+	var shooter_cover: float = _read_los_float(los_data, "shooter_cover", 0.0)
+	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
+	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
+	
+	var distance: int = _hex_distance(observer_hex, target_hex)
+	
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
+		target_hex,
+		target_cover
+	)
+
+
+
 
 
 func _read_los_float(data: Dictionary, key: String, fallback: float) -> float:

@@ -5,11 +5,11 @@ enum Layer {
 	TERRAIN_COVER,
 	TERRAIN_MOVE_COST,
 	
-	ENEMY_VISIBILITY,
-	ENEMY_FIRE_THREAT,
+	VISIBILITY,
+	FIRE_POWER,
 	
 	COVER_VS_ENEMY_FIRE,
-	ENEMY_VISIBILITY_HINDRANCE,
+	VISIBILITY_HINDRANCE,
 	RETURN_FIRE_PENALTY,
 	
 	FRIENDLY_SUPPORT,
@@ -200,10 +200,6 @@ func add_layer_value(layer_id: int, cell: Vector2i, value: float) -> void:
 
 	if not is_valid_cell(cell):
 		return
-	
-	if layer_id == InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE:
-		if value > 0.0:
-			pass
 	
 	var index: int = cell_to_index(cell)
 	var data: PackedFloat32Array = _layers[layer_id]

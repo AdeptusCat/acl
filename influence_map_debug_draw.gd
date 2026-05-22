@@ -8,11 +8,11 @@ enum DebugView {
 	TERRAIN_COVER,
 	TERRAIN_MOVE_COST,
 	
-	ENEMY_VISIBILITY,
-	ENEMY_FIRE_THREAT,
+	VISIBILITY,
+	FIRE_POWER,
 	
 	COVER_VS_ENEMY_FIRE,
-	ENEMY_VISIBILITY_HINDRANCE,
+	VISIBILITY_HINDRANCE,
 	#RETURN_FIRE_PENALTY,
 	
 	#FRIENDLY_SUPPORT,
@@ -25,10 +25,10 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 	DebugView.COMPOSITE: "Composite",
 	DebugView.TERRAIN_COVER: "TERRAIN_COVER",
 	DebugView.TERRAIN_MOVE_COST: "TERRAIN_MOVE_COST",
-	DebugView.ENEMY_VISIBILITY: "ENEMY_VISIBILITY",
-	DebugView.ENEMY_FIRE_THREAT: "ENEMY_FIRE_THREAT",
+	DebugView.VISIBILITY: "VISIBILITY",
+	DebugView.FIRE_POWER: "FIRE_POWER",
 	DebugView.COVER_VS_ENEMY_FIRE: "COVER_VS_ENEMY_FIRE",
-	DebugView.ENEMY_VISIBILITY_HINDRANCE: "ENEMY_VISIBILITY_HINDRANCE",
+	DebugView.VISIBILITY_HINDRANCE: "VISIBILITY_HINDRANCE",
 }
 
 
@@ -111,6 +111,7 @@ func set_debug_view(p_debug_view: int) -> void:
 
 func set_team(p_team: int) -> void:
 	team = p_team
+	Debug.influence_map_team_name = Globals.TEAM_NAMES[team]
 	_cache_valid = false
 	queue_redraw()
 
@@ -257,17 +258,17 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 	if p_debug_view == DebugView.TERRAIN_MOVE_COST:
 		return InfluenceMap.Layer.TERRAIN_MOVE_COST
 
-	if p_debug_view == DebugView.ENEMY_VISIBILITY:
-		return InfluenceMap.Layer.ENEMY_VISIBILITY
+	if p_debug_view == DebugView.VISIBILITY:
+		return InfluenceMap.Layer.VISIBILITY
 
-	if p_debug_view == DebugView.ENEMY_FIRE_THREAT:
-		return InfluenceMap.Layer.ENEMY_FIRE_THREAT
+	if p_debug_view == DebugView.FIRE_POWER:
+		return InfluenceMap.Layer.FIRE_POWER
 	
 	if p_debug_view == DebugView.COVER_VS_ENEMY_FIRE:
 		return InfluenceMap.Layer.COVER_VS_ENEMY_FIRE
 	
-	if p_debug_view == DebugView.ENEMY_VISIBILITY_HINDRANCE:
-		return InfluenceMap.Layer.ENEMY_VISIBILITY_HINDRANCE
+	if p_debug_view == DebugView.VISIBILITY_HINDRANCE:
+		return InfluenceMap.Layer.VISIBILITY_HINDRANCE
 
 	#if p_debug_view == DebugView.FRIENDLY_SUPPORT:
 		#return InfluenceMap.Layer.FRIENDLY_SUPPORT
@@ -378,7 +379,7 @@ func _draw_value_text(center: Vector2, value: float) -> void:
 	draw_string(font, draw_position, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not event is InputEventKey:
 		return
 
@@ -407,11 +408,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_4:
-		set_debug_view(DebugView.ENEMY_VISIBILITY)
+		set_debug_view(DebugView.VISIBILITY)
 		return
 
 	if key_event.keycode == KEY_5:
-		set_debug_view(DebugView.ENEMY_FIRE_THREAT)
+		set_debug_view(DebugView.FIRE_POWER)
 		return
 	
 	if key_event.keycode == KEY_6:
@@ -419,7 +420,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_7:
-		set_debug_view(DebugView.ENEMY_VISIBILITY_HINDRANCE)
+		set_debug_view(DebugView.VISIBILITY_HINDRANCE)
 		return
 	
 	#if key_event.keycode == KEY_6:

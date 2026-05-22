@@ -714,7 +714,17 @@ text = "Hide Fog Of War"
 layout_mode = 2
 text = "Show Enemies"
 
-[node name="InfluenceMapName" type="Label" parent="Control/Debug/VBoxContainer" unique_id=692635582]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=905440762]
+layout_mode = 2
+
+[node name="InfluenceMapTeamName" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=1159297784]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=1605024239]
+layout_mode = 2
+text = ":"
+
+[node name="InfluenceMapName" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=692635582]
 layout_mode = 2
 
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]

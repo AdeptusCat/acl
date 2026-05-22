@@ -11,7 +11,8 @@ extends PanelContainer
 @onready var show_movement_lines: CheckBox = $VBoxContainer/ShowMovementLines
 @onready var hide_fog_of_war: CheckBox = $VBoxContainer/HideFogOfWar
 @onready var show_enemies: CheckBox = $VBoxContainer/ShowEnemies
-@onready var influence_map_name: Label = $VBoxContainer/InfluenceMapName
+@onready var influence_map_name: Label = $VBoxContainer/HBoxContainer2/InfluenceMapName
+@onready var influence_map_team_name: Label = $VBoxContainer/HBoxContainer2/InfluenceMapTeamName
 
 
 func _ready() -> void:
@@ -34,6 +35,7 @@ func _process(delta: float) -> void:
 	if not OS.is_debug_build():
 		return
 	influence_map_name.text = Debug.influence_map_name
+	influence_map_team_name.text = Debug.influence_map_team_name
 
 
 
