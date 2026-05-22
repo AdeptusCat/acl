@@ -8,11 +8,15 @@ enum DebugView {
 	TERRAIN_COVER,
 	TERRAIN_MOVE_COST,
 	
+	ENEMY_VISIBILITY,
 	VISIBILITY,
 	FIRE_POWER,
+	THREAT,
+	ENEMY_VULNERABILITY,
 	
 	COVER_VS_ENEMY_FIRE,
 	VISIBILITY_HINDRANCE,
+	ORIGIN_INFLUENCE,
 	#RETURN_FIRE_PENALTY,
 	
 	#FRIENDLY_SUPPORT,
@@ -29,6 +33,9 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 	DebugView.FIRE_POWER: "FIRE_POWER",
 	DebugView.COVER_VS_ENEMY_FIRE: "COVER_VS_ENEMY_FIRE",
 	DebugView.VISIBILITY_HINDRANCE: "VISIBILITY_HINDRANCE",
+	DebugView.THREAT: "THREAT",
+	DebugView.ENEMY_VULNERABILITY: "ENEMY_VULNERABILITY",
+	DebugView.ORIGIN_INFLUENCE: "ORIGIN_INFLUENCE",
 }
 
 
@@ -269,6 +276,15 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 	
 	if p_debug_view == DebugView.VISIBILITY_HINDRANCE:
 		return InfluenceMap.Layer.VISIBILITY_HINDRANCE
+	
+	if p_debug_view == DebugView.THREAT:
+		return InfluenceMap.Layer.THREAT
+	
+	if p_debug_view == DebugView.ENEMY_VULNERABILITY:
+		return InfluenceMap.Layer.ENEMY_VULNERABILITY
+	
+	if p_debug_view == DebugView.ORIGIN_INFLUENCE:
+		return InfluenceMap.Layer.ORIGIN_INFLUENCE
 
 	#if p_debug_view == DebugView.FRIENDLY_SUPPORT:
 		#return InfluenceMap.Layer.FRIENDLY_SUPPORT
@@ -400,7 +416,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_2:
-		set_debug_view(DebugView.TERRAIN_COVER)
+		set_debug_view(DebugView.ORIGIN_INFLUENCE)
 		return
 
 	if key_event.keycode == KEY_3:
@@ -431,13 +447,13 @@ func _input(event: InputEvent) -> void:
 		#set_debug_view(DebugView.OBJECTIVE_PRESSURE)
 		#return
 
-	#if key_event.keycode == KEY_8:
-		#set_debug_view(DebugView.KNOWN_ENEMY_POSITION)
-		#return
+	if key_event.keycode == KEY_8:
+		set_debug_view(DebugView.THREAT)
+		return
 
-	#if key_event.keycode == KEY_9:
-		#set_debug_view(DebugView.NO_GO)
-		#return
+	if key_event.keycode == KEY_9:
+		set_debug_view(DebugView.ENEMY_VULNERABILITY)
+		return
 
 	if key_event.keycode == KEY_TAB:
 		_cycle_team()

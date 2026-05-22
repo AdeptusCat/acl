@@ -5,11 +5,17 @@ enum Layer {
 	TERRAIN_COVER,
 	TERRAIN_MOVE_COST,
 	
+	ENEMY_VISIBILITY,
 	VISIBILITY,
 	FIRE_POWER,
+	THREAT,
+	ENEMY_VULNERABILITY,
 	
 	COVER_VS_ENEMY_FIRE,
 	VISIBILITY_HINDRANCE,
+	
+	ORIGIN_INFLUENCE,
+	
 	RETURN_FIRE_PENALTY,
 	
 	FRIENDLY_SUPPORT,
@@ -26,6 +32,13 @@ enum WriteMode {
 	MAX,
 	MIN
 }
+
+const ORIGIN_INFLUENCE_START_VALUE: float = 1.0
+const ORIGIN_INFLUENCE_DISTANCE_LOSS: float = 0.1
+const ORIGIN_INFLUENCE_MAX_DISTANCE: int = 10
+const ORIGIN_INFLUENCE_TIME_LOSS: float = 0.1
+const ORIGIN_INFLUENCE_DECAY_INTERVAL_S: float = 5.0
+var origin_influence_decay_timer_s: float = 0.0
 
 const DEFAULT_COMPOSITE_MIN: float = 0.05
 const DEFAULT_COMPOSITE_MAX: float = 20.0
@@ -420,3 +433,84 @@ func _hex_distance(a: Vector2i, b: Vector2i) -> int:
 
 	var distance: int = (abs(dq) + abs(dr) + abs(ds)) / 2
 	return distance
+
+
+func multiply_layers(layer_a: int, layer_b: int, target_layer: int) -> void:
+	if layer_a < 0:
+		return
+	if layer_a >= Layer.COUNT:
+		return
+
+	if layer_b < 0:
+		return
+	if layer_b >= Layer.COUNT:
+		return
+
+	if target_layer < 0:
+		return
+	if target_layer >= Layer.COUNT:
+		return
+
+	var values_a: PackedFloat32Array = _layers[layer_a]
+	var values_b: PackedFloat32Array = _layers[layer_b]
+	var target_values: PackedFloat32Array = _layers[target_layer]
+
+	for i in range(target_values.size()):
+		target_values[i] = values_a[i] * values_b[i]
+
+	_layers[target_layer] = target_values
+
+
+func stamp_origin_influence(origin_hex: Vector2i) -> void:
+	if not is_valid_layer(Layer.ORIGIN_INFLUENCE):
+		return
+
+	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+
+	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
+		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
+			var hex: Vector2i = Vector2i(x, y)
+			var distance: int = _hex_distance(origin_hex, hex)
+
+			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
+				continue
+
+			var value: float = ORIGIN_INFLUENCE_START_VALUE
+			value -= float(distance) * ORIGIN_INFLUENCE_DISTANCE_LOSS
+
+			if value < 0.0:
+				value = 0.0
+
+			var index: int = cell_to_index(hex)
+			if index < 0:
+				continue
+
+			values[index] = value
+
+	_layers[Layer.ORIGIN_INFLUENCE] = values
+
+
+func update_origin_influence_decay(delta: float) -> void:
+	origin_influence_decay_timer_s += delta
+
+	if origin_influence_decay_timer_s < ORIGIN_INFLUENCE_DECAY_INTERVAL_S:
+		return
+
+	origin_influence_decay_timer_s -= ORIGIN_INFLUENCE_DECAY_INTERVAL_S
+
+	_decay_origin_influence_values()
+
+
+func _decay_origin_influence_values() -> void:
+	if not is_valid_layer(Layer.ORIGIN_INFLUENCE):
+		return
+
+	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+
+	for i in range(values.size()):
+		values[i] -= ORIGIN_INFLUENCE_TIME_LOSS
+
+		if values[i] < 0.0:
+			values[i] = 0.0
+
+	_layers[Layer.ORIGIN_INFLUENCE] = values

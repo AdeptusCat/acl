@@ -38,7 +38,8 @@ func _process(_delta: float) -> void:
 	update_counter += _delta
 	if update_counter > update_threshold:
 		update_counter = 0.0
-		rebuild_dynamic_tactical_layers()
+		#rebuild_dynamic_tactical_layers()
+		create_maps(update_threshold)
 	
 	if not rebuild_pending:
 		return
@@ -57,7 +58,7 @@ func _process(_delta: float) -> void:
 		influence_maps_updated.emit()
 
 
-func create_maps() -> void:
+func create_maps(delta) -> void:
 	if not is_instance_valid(LOSHelper.ground_layer):
 		return
 
@@ -72,120 +73,34 @@ func create_maps() -> void:
 	allied_weights = _create_default_weights()
 	axis_weights = _create_default_weights()
 
-	allied_map.configure_composite_weights(allied_weights, 1.0, 0.05, 20.0)
-	axis_map.configure_composite_weights(axis_weights, 1.0, 0.05, 20.0)
+	allied_map.configure_composite_weights(allied_weights, 10.0, 0.00, 20.0)
+	axis_map.configure_composite_weights(axis_weights, 10.0, 0.00, 20.0)
 
 	maps_by_team[Globals.Team.ALLIES] = allied_map
 	maps_by_team[Globals.Team.AXIS] = axis_map
-
+	
+	var origin_hex: Vector2i = Vector2i(11, 3)
+	#var allied_map: InfluenceMap = maps_by_team[Globals.Team.ALLIES]
+	if allied_map != null:
+		allied_map.stamp_origin_influence(origin_hex)
+	if allied_map != null:
+		allied_map.update_origin_influence_decay(delta)
+	if axis_map != null:
+		axis_map.stamp_origin_influence(origin_hex)
+	if axis_map != null:
+		axis_map.update_origin_influence_decay(delta)
+	
 	rebuild_pending = true
 	
 	rebuild_static_terrain_layers()
 	rebuild_dynamic_tactical_layers()
-
-
-func rebuild_composite_for_team(team: int, terms: Array[CompositeTerm]) -> void:
-	var self_map: InfluenceMap = maps_by_team[team]
-	var enemy_team: int = _get_enemy_team(team)
-	var enemy_map: InfluenceMap = maps_by_team[enemy_team]
-
-	if self_map == null:
-		return
-
-	if enemy_map == null:
-		return
-
-	self_map.clear_composite()
-
-	var bounds: Rect2i = self_map.bounds
 	
-	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
-		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
-			var hex: Vector2i = Vector2i(x, y)
-			var score: float = 0.0
-
-			for term in terms:
-				var source_map: InfluenceMap = self_map
-
-				if term.source == CompositeSource.ENEMY:
-					source_map = enemy_map
-				else:
-					source_map = self_map
-
-				var value: float = source_map.get_layer_value(term.layer, hex)
-				score += value * term.weight
-
-			self_map.set_composite_value(hex, score)
-
-
-func _create_default_movement_composition() -> Array[CompositeTerm]:
-	var terms: Array[CompositeTerm] = []
-
-	# Static / self-perspective layers.
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.TERRAIN_MOVE_COST,
-		1.00
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
-		-0.50
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.VISIBILITY_HINDRANCE,
-		-0.20
-	))
-
-	# Enemy-owned layers used as threat.
-	terms.append(CompositeTerm.new(
-		CompositeSource.ENEMY,
-		InfluenceMap.Layer.FIRE_POWER,
-		0.50
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.ENEMY,
-		InfluenceMap.Layer.VISIBILITY,
-		0.35
-	))
-
-	# Friendly-owned layers used as attraction/support.
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.FIRE_POWER,
-		-0.20
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.FRIENDLY_SUPPORT,
-		-0.50
-	))
-
-	# Team-local tactical layers.
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.OBJECTIVE_PRESSURE,
-		-0.75
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.KNOWN_ENEMY_POSITION,
-		1.50
-	))
-
-	terms.append(CompositeTerm.new(
-		CompositeSource.SELF,
-		InfluenceMap.Layer.NO_GO,
-		20.00
-	))
-
-	return terms
+	# multiplying leads to interesting results
+	#maps_by_team[Globals.Team.AXIS].multiply_layers(
+	#InfluenceMap.Layer.THREAT,
+	#InfluenceMap.Layer.FIRE_POWER,
+	#InfluenceMap.Layer.TERRAIN_COVER
+	#)
 
 
 func _create_default_weights() -> PackedFloat32Array:
@@ -195,6 +110,16 @@ func _create_default_weights() -> PackedFloat32Array:
 
 	# Positive values increase movement cost / danger.
 	# Negative values reduce movement cost / attract movement.
+	
+	#TERRAIN_COVER,
+	#TERRAIN_MOVE_COST,
+	#ENEMY_VISIBILITY,
+	#VISIBILITY,
+	#FIRE_POWER,
+	#THREAT,
+	#ENEMY_VULNERABILITY,
+	#COVER_VS_ENEMY_FIRE,
+	#VISIBILITY_HINDRANCE,
 
 	#weights[InfluenceMap.Layer.TERRAIN_COVER] = -0.40
 	#weights[InfluenceMap.Layer.TERRAIN_MOVE_COST] = 1.00
@@ -205,9 +130,26 @@ func _create_default_weights() -> PackedFloat32Array:
 	#weights[InfluenceMap.Layer.KNOWN_ENEMY_POSITION] = 1.50
 	#weights[InfluenceMap.Layer.NO_GO] = 20.00
 	
-	
 	weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
-	weights[InfluenceMap.Layer.FIRE_POWER] = 0.50 # this is supposed to be enemy FP
+	#weights[InfluenceMap.Layer.THREAT] = 0.9 # this only makes good close hexes undesirable
+	#weights[InfluenceMap.Layer.ENEMY_VISIBILITY] = -1.0
+	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
+	weights[InfluenceMap.Layer.ORIGIN_INFLUENCE] = -2.00
+	
+	# this works good for the attacker
+	# might also work for defender
+	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
+	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
+	
+	# this works for defender quite well since it look for strong points to defend
+	# attacker is attracted to move back because its safer
+	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.90
+	#weights[InfluenceMap.Layer.THREAT] = 1.5
+	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
+	
+	
+	#weights[InfluenceMap.Layer.THREAT] = 1.5
+	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
 	
 	#TERRAIN_COVER,
 	#TERRAIN_MOVE_COST,
@@ -330,7 +272,10 @@ func rebuild_los_influence_for_team(
 	influence_map.clear_layer(InfluenceMap.Layer.COVER_VS_ENEMY_FIRE, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY_HINDRANCE, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.RETURN_FIRE_PENALTY, 0.0)
-
+	influence_map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VULNERABILITY, 0.0)
+	
 	var enemy_team: int = _get_enemy_team(team)
 	var units: Array[Unit] = Globals.get_units_for_team(team)
 	var enemy_units: Array[Unit] = Globals.get_units_for_team(enemy_team)
@@ -432,7 +377,6 @@ func _project_friendly_los_record(
 		threat
 	)
 	
-	
 	influence_map.max_layer_value(
 		InfluenceMap.Layer.VISIBILITY_HINDRANCE,
 		target_hex,
@@ -466,11 +410,39 @@ func _project_enemy_los_record(
 	
 	var distance: int = _hex_distance(observer_hex, target_hex)
 	
+	var threat: float = _calculate_los_fire_threat(
+		unit_firepower,
+		unit_effectiveness,
+		target_cover,
+		hindrance,
+		distance
+	)
+	
 	influence_map.max_layer_value(
 		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE,
 		target_hex,
 		target_cover
 	)
+	
+	influence_map.add_layer_value(
+		InfluenceMap.Layer.THREAT,
+		target_hex,
+		threat
+	)
+	
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.ENEMY_VISIBILITY,
+		target_hex,
+		1.0
+	)
+	
+	influence_map.max_layer_value(
+		InfluenceMap.Layer.ENEMY_VULNERABILITY,
+		target_hex,
+		#shooter_cover
+		remap(shooter_cover, 0.0, 5.0, 5.0, 0.0)
+	)
+	
 
 
 

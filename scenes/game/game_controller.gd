@@ -125,7 +125,7 @@ func setup():
 	#fog_of_war_layer.set_cell(Vector2i(1, 1), 0)
 	#fog_of_war_layer.set_cell(tile_map_layer, new_tile_map_cell_position, tile_map_cell_source_id, tile_map_cell_atlas_coords, tile_map_cell_alternative)
 	
-	influence_map_controller.create_maps()
+	influence_map_controller.create_maps(1.0)
 	influence_map_debug_draw.tile_map_layer = LOSHelper.ground_layer
 	influence_map_debug_draw.influence_controller = influence_map_controller
 	influence_map_debug_draw.set_team(Globals.Team.ALLIES)

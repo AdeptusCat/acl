@@ -1646,7 +1646,7 @@ loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubRes
 formation_id = 1
 
 [node name="CA_P1_S1_Allies_Rifle" parent="Maps/OrchardRoad/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(148229250, 1365216721) index="1" unique_id=1739247476 node_paths=PackedStringArray("ground_map", "command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(128, 224)
+position = Vector2(272, 384)
 squad = 1
 platoon = 1
 ground_map = NodePath("../../Objectives/AxisObjectivesTileMapLayer")
