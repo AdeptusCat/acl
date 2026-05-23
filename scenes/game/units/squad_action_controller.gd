@@ -384,99 +384,134 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 
 var allowed_hexes: Array[Vector2i] = []
 
-func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], _steps: int) -> Vector2i:
-	var retreat_hex: Vector2i = Vector2i.ZERO
+func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], max_steps: int) -> Vector2i:
 	allowed_hexes.clear()
 	allowed_hexes.append(origin_hex)
-	var ground_layer = LOSHelper.ground_layer
-	var building_layer = LOSHelper.building_layer
+
+	var ground_layer: TileMapLayer = LOSHelper.ground_layer
+	var building_layer: TileMapLayer = LOSHelper.building_layer
 	var origin_cube: Vector3i = ground_layer.map_to_cube(origin_hex)
-	
-	var immediate_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, origin_cube, known_enemies)
-	for neighbor_hex in immediate_neighbors:
-		if building_layer.get_cell_source_id(neighbor_hex) != -1:
-			var visible_by_enemy: bool = false
-			for enemy in known_enemies:
-				var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
-				if visible_hexes.has(neighbor_hex):
-					visible_by_enemy = true
-					break
-			if visible_by_enemy == false:
-				allowed_hexes.append(neighbor_hex)
-				return neighbor_hex
-	
-	var visited := {}
-	var queue: Array[Vector2i] = [origin_hex]
+
+	var found_retreat_hex: bool = false
+	var retreat_hex: Vector2i = origin_hex
+
+	var immediate_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(
+		origin_cube,
+		origin_cube,
+		known_enemies
+	)
+
+	for neighbor_hex: Vector2i in immediate_neighbors:
+		if not _is_valid_retreat_candidate(neighbor_hex):
+			continue
+
+		if building_layer.get_cell_source_id(neighbor_hex) == -1:
+			continue
+
+		if _is_hex_visible_by_any_enemy(neighbor_hex, known_enemies):
+			continue
+
+		allowed_hexes.append(neighbor_hex)
+		return neighbor_hex
+
+	var visited: Dictionary = {}
+	var queue: Array[Vector2i] = []
+	var depth_queue: Array[int] = []
+
+	queue.append(origin_hex)
+	depth_queue.append(0)
 	visited[origin_hex] = true
-	var _ring: int = 0
-	
-	while queue.size() > 0 and retreat_hex == Vector2i.ZERO:
-		var level_size: int = min(queue.size(), 30)
-		var added_any: bool = false
-		
-		var li: int = 0
-		while li < level_size:
-			var current: Vector2i = queue.pop_front()
-			var current_cube: Vector3i = ground_layer.map_to_cube(current)
-			
-			var next_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(origin_cube, current_cube, known_enemies)
-			for neighbor in next_neighbors:
-				if visited.has(neighbor):
-					continue
-				visited[neighbor] = true
-				added_any = true
-				
-				var neighbor_cube: Vector3i = ground_layer.map_to_cube(neighbor)
-				var adjacent_hexes: Array[Vector2i] = []
-				for direction_index in [
-					TileSet.CELL_NEIGHBOR_TOP_SIDE,
-					TileSet.CELL_NEIGHBOR_TOP_RIGHT_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_SIDE,
-					TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE,
-					TileSet.CELL_NEIGHBOR_TOP_LEFT_SIDE,
-				]:
-					var offset: Vector3i = ground_layer.cube_direction(direction_index)
-					var adjacent_cube: Vector3i = neighbor_cube + offset
-					adjacent_hexes.append(ground_layer.cube_to_map(adjacent_cube))
-				
-				var is_adjacent_to_enemy: bool = false
-				for enemy in known_enemies:
-					if adjacent_hexes.has(enemy.current_hex):
-						is_adjacent_to_enemy = true
-						break
-				if is_adjacent_to_enemy:
-					continue
-				
-				allowed_hexes.append(neighbor)
-				
-				if building_layer.get_cell_source_id(neighbor) != -1:
-					var visible_by_enemy: bool = false
-					for enemy in known_enemies:
-						var visible_hexes = LOSHelper.los_lookup.get(enemy.current_hex, [])
-						if visible_hexes.has(neighbor):
-							visible_by_enemy = true
-							break
-					if visible_by_enemy == false:
-						retreat_hex = neighbor
-						break
-				queue.append(neighbor)
-			
-			if retreat_hex != Vector2i.ZERO:
-				break
-			
-			li += 1
-		
-		if added_any == false:
+
+	var queue_index: int = 0
+
+	while queue_index < queue.size():
+		var current: Vector2i = queue[queue_index]
+		var current_depth: int = depth_queue[queue_index]
+		queue_index += 1
+
+		if current_depth >= max_steps:
+			continue
+
+		var current_cube: Vector3i = ground_layer.map_to_cube(current)
+
+		var next_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(
+			origin_cube,
+			current_cube,
+			known_enemies
+		)
+
+		for neighbor: Vector2i in next_neighbors:
+			if visited.has(neighbor):
+				continue
+
+			visited[neighbor] = true
+
+			if not _is_valid_retreat_candidate(neighbor):
+				continue
+
+			if _is_adjacent_to_any_enemy(neighbor, known_enemies):
+				continue
+
+			allowed_hexes.append(neighbor)
+
+			if building_layer.get_cell_source_id(neighbor) != -1:
+				if not _is_hex_visible_by_any_enemy(neighbor, known_enemies):
+					retreat_hex = neighbor
+					found_retreat_hex = true
+					break
+
+			queue.append(neighbor)
+			depth_queue.append(current_depth + 1)
+
+		if found_retreat_hex:
 			break
-		if _ring > 10:
-			break
-		_ring += 1
-	
-	if retreat_hex == Vector2i.ZERO:
-		retreat_hex = origin_hex
-	
+
 	return retreat_hex
+
+
+func _is_valid_retreat_candidate(hex: Vector2i) -> bool:
+	var ground_layer: HexagonTileMapLayer = LOSHelper.ground_layer
+
+	if ground_layer.get_cell_source_id(hex) == -1:
+		return false
+
+	#if not ground_layer.has_point(hex):
+		#return false
+#
+	#if ground_layer.is_point_solid(hex):
+		#return false
+
+	return true
+
+
+func _is_hex_visible_by_any_enemy(hex: Vector2i, known_enemies: Array[Unit]) -> bool:
+	for enemy: Unit in known_enemies:
+		if not is_instance_valid(enemy):
+			continue
+
+		var visible_hexes: Array = LOSHelper.los_lookup.get(enemy.current_hex, [])
+		if visible_hexes.has(hex):
+			return true
+
+	return false
+
+
+func _is_adjacent_to_any_enemy(hex: Vector2i, known_enemies: Array[Unit]) -> bool:
+	var ground_layer: TileMapLayer = LOSHelper.ground_layer
+	var hex_cube: Vector3i = ground_layer.map_to_cube(hex)
+
+	for enemy: Unit in known_enemies:
+		if not is_instance_valid(enemy):
+			continue
+
+		var enemy_cube: Vector3i = ground_layer.map_to_cube(enemy.current_hex)
+		var distance: int = ground_layer.cube_distance(hex_cube, enemy_cube)
+
+		if distance <= 1:
+			return true
+
+	return false
+
 
 func _start_rout() -> void:
 	var known_enemies: Array[Unit] = []
