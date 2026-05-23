@@ -130,11 +130,13 @@ func _create_default_weights() -> PackedFloat32Array:
 	#weights[InfluenceMap.Layer.KNOWN_ENEMY_POSITION] = 1.50
 	#weights[InfluenceMap.Layer.NO_GO] = 20.00
 	
+	# this works quite well for attacker
+	weights[InfluenceMap.Layer.TERRAIN_COVER] = -1.00
 	weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
-	#weights[InfluenceMap.Layer.THREAT] = 0.9 # this only makes good close hexes undesirable
-	#weights[InfluenceMap.Layer.ENEMY_VISIBILITY] = -1.0
-	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
-	weights[InfluenceMap.Layer.ORIGIN_INFLUENCE] = -2.00
+	weights[InfluenceMap.Layer.THREAT] = 1.0 # this only makes good close hexes undesirable
+	##weights[InfluenceMap.Layer.ENEMY_VISIBILITY] = -1.0
+	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -1.00
+	#weights[InfluenceMap.Layer.ORIGIN_INFLUENCE] = -2.00
 	
 	# this works good for the attacker
 	# might also work for defender

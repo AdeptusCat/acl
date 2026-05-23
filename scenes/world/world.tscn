@@ -2348,6 +2348,7 @@ script = ExtResource("79_x77xw")
 
 [node name="InfluenceMapDebugDraw" parent="GameController" unique_id=1463029207 instance=ExtResource("90_n0in2")]
 top_level = true
+draw_cell_values = true
 
 [node name="InfluenceMapController" parent="GameController" unique_id=1942260574 instance=ExtResource("91_mdkuk")]
 
