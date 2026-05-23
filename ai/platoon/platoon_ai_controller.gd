@@ -95,6 +95,7 @@ func set_attack_objective(p_objective_hex: Vector2i) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	return
 	if not is_active:
 		return
 	
