@@ -30,6 +30,9 @@ var terrain_defense_bonus: int = 0
 
 var close_combat_defense_preparedness: float = 0.0
 
+var influence_map: PackedFloat32Array
+var best_index: int = 0
+
 @export var squad: int = 0 : set = set_squad_nr
 @export var platoon: int = 0 : set = set_platoon_nr
 @export var company: Company = Company.A : set = set_company_nr

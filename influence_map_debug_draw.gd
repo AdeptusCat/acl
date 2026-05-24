@@ -60,6 +60,8 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 @export var draw_cell_values: bool = false
 @export var value_text_min_zoom: float = 0.75
 
+var selected_unit: Unit
+
 #var low_color: Color = Color(0.1, 0.25, 1.0, 1.0)
 #var mid_color: Color = Color(0.1, 1.0, 0.1, 1.0)
 #var high_color: Color = Color(1.0, 0.1, 0.1, 1.0)
@@ -161,6 +163,7 @@ func _draw() -> void:
 	if influence_map_variant == null:
 		return
 
+
 	var influence_map: InfluenceMap = influence_map_variant as InfluenceMap
 
 	if influence_map == null:
@@ -193,6 +196,11 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 			continue
 
 		var value: float = _get_debug_value(influence_map, cell)
+		
+		if selected_unit:
+			var index: int = influence_map.cell_to_index(cell)
+			if selected_unit.influence_map.size() > index:
+				value = selected_unit.influence_map[index]
 
 		if hide_zero_values:
 			if abs(value) <= zero_epsilon:

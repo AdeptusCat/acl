@@ -753,6 +753,7 @@ func _select_unit(unit):
 		selected_unit.deselect()
 	selected_unit = unit
 	unit.select()
+	influence_map_debug_draw.selected_unit = unit
 
 
 func _deselect_unit(unit):
@@ -760,7 +761,8 @@ func _deselect_unit(unit):
 		selected_unit.deselect()
 		selected_unit = null
 		LOSHelper.clear_los()
-
+		influence_map_debug_draw.selected_unit = null
+		
 
 func _on_unit_surrendered(_unit):
 	pass

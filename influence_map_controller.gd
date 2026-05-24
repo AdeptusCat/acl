@@ -59,25 +59,32 @@ func _process(_delta: float) -> void:
 	
 	#var unit: Unit = Globals.get_units()[0]
 	
+		for unit in Globals.get_units_for_team(Globals.Team.AXIS):
+			var influence_map: InfluenceMap = maps_by_team[unit.team]
+			
+			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+			var composite: PackedFloat32Array = influence_map._composite
+			var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
+			
+			var best_index: int = influence_map.get_max_value_index(result)
+			if best_index == -1:
+				continue
+			
+			var best_value: float = result[best_index]
+			var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+			
+			var prev_best_value: float = result[unit.best_index]
+			if best_value * 0.8 > prev_best_value:
+				unit.order(Globals.UnitCmd.MOVE, best_hex)
+				unit.best_index = best_index
+			unit.influence_map = result
+			
+			#print(unit.name, " best hex: ", best_hex, " value: ", best_value)
+			pass
+			#maps_by_team[unit.team]._composite = result
+		pass
+		#maps_by_team[unit.team]._composite = stamp
 	
-	for unit in Globals.get_units_for_team(Globals.Team.AXIS):
-		var influence_map: InfluenceMap = maps_by_team[unit.team]
-		
-		var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
-		var composite: PackedFloat32Array = influence_map._composite
-		var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
-		
-		var best_index: int = influence_map.get_max_value_index(result)
-		if best_index == -1:
-			continue
-		
-		var best_value: float = result[best_index]
-		var best_hex: Vector2i = influence_map.index_to_cell(best_index)
-		
-		unit.order(Globals.UnitCmd.MOVE, best_hex)
-		print(unit.name, " best hex: ", best_hex, " value: ", best_value)
-	#maps_by_team[unit.team]._composite = stamp
-		maps_by_team[unit.team]._composite = result
 
 
 func create_maps(delta) -> void:
