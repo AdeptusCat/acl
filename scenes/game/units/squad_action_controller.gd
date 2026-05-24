@@ -489,7 +489,7 @@ func _is_hex_visible_by_any_enemy(hex: Vector2i, known_enemies: Array[Unit]) -> 
 		if not is_instance_valid(enemy):
 			continue
 
-		var visible_hexes: Array = LOSHelper.los_lookup.get(enemy.current_hex, [])
+		var visible_hexes: Dictionary = LOSHelper.los_lookup.get(enemy.current_hex, {})
 		if visible_hexes.has(hex):
 			return true
 

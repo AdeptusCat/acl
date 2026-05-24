@@ -56,6 +56,28 @@ func _process(_delta: float) -> void:
 	if all_done:
 		rebuild_pending = false
 		influence_maps_updated.emit()
+	
+	#var unit: Unit = Globals.get_units()[0]
+	
+	
+	for unit in Globals.get_units_for_team(Globals.Team.AXIS):
+		var influence_map: InfluenceMap = maps_by_team[unit.team]
+		
+		var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+		var composite: PackedFloat32Array = influence_map._composite
+		var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
+		
+		var best_index: int = influence_map.get_max_value_index(result)
+		if best_index == -1:
+			continue
+		
+		var best_value: float = result[best_index]
+		var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+		
+		unit.order(Globals.UnitCmd.MOVE, best_hex)
+		print(unit.name, " best hex: ", best_hex, " value: ", best_value)
+	#maps_by_team[unit.team]._composite = stamp
+		maps_by_team[unit.team]._composite = result
 
 
 func create_maps(delta) -> void:
@@ -73,8 +95,8 @@ func create_maps(delta) -> void:
 	allied_weights = _create_default_weights()
 	axis_weights = _create_default_weights()
 
-	allied_map.configure_composite_weights(allied_weights, 10.0, 0.00, 20.0)
-	axis_map.configure_composite_weights(axis_weights, 10.0, 0.00, 20.0)
+	allied_map.configure_composite_weights(allied_weights, 0.0, 0.00, 20.0)
+	axis_map.configure_composite_weights(axis_weights, 0.0, 0.00, 20.0)
 
 	maps_by_team[Globals.Team.ALLIES] = allied_map
 	maps_by_team[Globals.Team.AXIS] = axis_map
@@ -131,23 +153,23 @@ func _create_default_weights() -> PackedFloat32Array:
 	#weights[InfluenceMap.Layer.NO_GO] = 20.00
 	
 	# this works quite well for attacker
-	weights[InfluenceMap.Layer.TERRAIN_COVER] = -1.00
-	weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
-	weights[InfluenceMap.Layer.THREAT] = 1.0 # this only makes good close hexes undesirable
+	weights[InfluenceMap.Layer.TERRAIN_COVER] = 0.10
+	weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = 0.10
+	weights[InfluenceMap.Layer.THREAT] = -0.1 # this only makes good close hexes undesirable
 	##weights[InfluenceMap.Layer.ENEMY_VISIBILITY] = -1.0
-	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -1.00
+	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = 0.10
 	#weights[InfluenceMap.Layer.ORIGIN_INFLUENCE] = -2.00
 	
 	# this works good for the attacker
 	# might also work for defender
-	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.50
-	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
+	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = 0.50
+	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = 0.50
 	
 	# this works for defender quite well since it look for strong points to defend
 	# attacker is attracted to move back because its safer
-	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = -0.90
-	#weights[InfluenceMap.Layer.THREAT] = 1.5
-	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = -0.50
+	#weights[InfluenceMap.Layer.COVER_VS_ENEMY_FIRE] = 0.90
+	#weights[InfluenceMap.Layer.THREAT] = -1.5
+	#weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = 0.50
 	
 	
 	#weights[InfluenceMap.Layer.THREAT] = 1.5

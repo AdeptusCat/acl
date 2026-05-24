@@ -435,6 +435,16 @@ func _hex_distance(a: Vector2i, b: Vector2i) -> int:
 	return distance
 
 
+func multiply_layers_with_return(values_a: PackedFloat32Array, values_b: PackedFloat32Array) -> PackedFloat32Array:
+	var target_values: PackedFloat32Array = PackedFloat32Array()
+	target_values.resize(cell_count)
+
+	for i in range(target_values.size()):
+		target_values[i] = values_a[i] * values_b[i]
+
+	return target_values
+
+
 func multiply_layers(layer_a: int, layer_b: int, target_layer: int) -> void:
 	if layer_a < 0:
 		return
@@ -459,6 +469,32 @@ func multiply_layers(layer_a: int, layer_b: int, target_layer: int) -> void:
 		target_values[i] = values_a[i] * values_b[i]
 
 	_layers[target_layer] = target_values
+
+
+func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
+	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+
+	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
+		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
+			var hex: Vector2i = Vector2i(x, y)
+			var distance: int = _hex_distance(origin_hex, hex)
+
+			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
+				continue
+
+			var value: float = ORIGIN_INFLUENCE_START_VALUE
+			value -= float(distance) * ORIGIN_INFLUENCE_DISTANCE_LOSS
+
+			if value < 0.0:
+				value = 0.0
+
+			var index: int = cell_to_index(hex)
+			if index < 0:
+				continue
+
+			values[index] = value
+
+	return values
 
 
 func stamp_origin_influence(origin_hex: Vector2i) -> void:
@@ -514,3 +550,39 @@ func _decay_origin_influence_values() -> void:
 			values[i] = 0.0
 
 	_layers[Layer.ORIGIN_INFLUENCE] = values
+
+
+func get_max_value(values: PackedFloat32Array) -> float:
+	if values.is_empty():
+		return 0.0
+
+	var max_value: float = values[0]
+
+	var i: int = 1
+	while i < values.size():
+		var value: float = values[i]
+		if value > max_value:
+			max_value = value
+
+		i += 1
+
+	return max_value
+
+
+func get_max_value_index(values: PackedFloat32Array) -> int:
+	if values.is_empty():
+		return -1
+
+	var best_index: int = 0
+	var best_value: float = values[0]
+
+	var i: int = 1
+	while i < values.size():
+		var value: float = values[i]
+		if value > best_value:
+			best_value = value
+			best_index = i
+
+		i += 1
+
+	return best_index
