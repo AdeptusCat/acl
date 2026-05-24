@@ -1606,6 +1606,7 @@ squad_type = 1
 [node name="Maps" type="Node2D" parent="." unique_id=2101382623]
 
 [node name="OrchardRoad" parent="Maps" unique_id=1528497757 instance=ExtResource("3_a5636")]
+visible = false
 grid_size = Vector2i(14, 12)
 map_name = "Orchard Road"
 
@@ -1688,7 +1689,6 @@ tile_map_data = PackedByteArray("AAANAAIAAQAAAAAAAAA=")
 tile_map_data = PackedByteArray("AAAIAAQABgAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAAAAAAAAANAAsAAAAAAAAAAAANAAoAAAAAAAAAAAANAAkAAAAAAAAAAAA=")
 
 [node name="DefaultMap" parent="Maps" unique_id=1128763383 instance=ExtResource("3_a5636")]
-visible = false
 grid_size = Vector2i(33, 21)
 map_name = "Default Map"
 

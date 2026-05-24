@@ -1057,19 +1057,19 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 func _draw():
 	if not debug_draw_enabled:
 		return
-
+	
 	if origin_hex == Vector2i(-1, -1):
 		return
-
+	
 	var origin_pos = ground_layer.map_to_local(origin_hex)
-
+	
 	for line_data in los_lines:
 		if line_data["blocked"]:
 			var block_point = line_data["block_point"]
 			if block_point == null:
 				block_point = origin_pos  # Failsafe
 			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
-
+	
 	for line_data in los_lines:
 		var block_point = line_data["block_point"]
 		if block_point == null:

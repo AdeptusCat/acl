@@ -35,7 +35,7 @@ enum WriteMode {
 
 const ORIGIN_INFLUENCE_START_VALUE: float = 1.0
 const ORIGIN_INFLUENCE_DISTANCE_LOSS: float = 0.1
-const ORIGIN_INFLUENCE_MAX_DISTANCE: int = 10
+const ORIGIN_INFLUENCE_MAX_DISTANCE: int = 3
 const ORIGIN_INFLUENCE_TIME_LOSS: float = 0.1
 const ORIGIN_INFLUENCE_DECAY_INTERVAL_S: float = 5.0
 var origin_influence_decay_timer_s: float = 0.0
@@ -435,6 +435,16 @@ func _hex_distance(a: Vector2i, b: Vector2i) -> int:
 	return distance
 
 
+func add_layers_with_return(values_a: PackedFloat32Array, values_b: PackedFloat32Array) -> PackedFloat32Array:
+	var target_values: PackedFloat32Array = PackedFloat32Array()
+	target_values.resize(cell_count)
+
+	for i in range(target_values.size()):
+		target_values[i] = values_a[i] + values_b[i]
+
+	return target_values
+
+
 func multiply_layers_with_return(values_a: PackedFloat32Array, values_b: PackedFloat32Array) -> PackedFloat32Array:
 	var target_values: PackedFloat32Array = PackedFloat32Array()
 	target_values.resize(cell_count)
@@ -477,7 +487,11 @@ func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var distance: int = _hex_distance(origin_hex, hex)
+			var origin_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(origin_hex)
+			var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
+			
+			var distance: int = LOSHelper.ground_layer.cube_distance(origin_cube, cube)
+			#var distance: int = _hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue
@@ -494,6 +508,28 @@ func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 
 			values[index] = value
 
+	return values
+
+
+func create_unit_stamp(unit: Unit) -> PackedFloat32Array:
+	var values: PackedFloat32Array = PackedFloat32Array()
+	values.resize(cell_count)
+	values.fill(1.0)
+	for _unit in Globals.get_units_for_team(unit.team):
+		if _unit == unit:
+			continue
+		var index: int = cell_to_index(_unit.current_hex)
+		values[index] = 0.5
+	return values
+
+
+func create_reserved_stamp(reserved_hexes: Array[Vector2i]) -> PackedFloat32Array:
+	var values: PackedFloat32Array = PackedFloat32Array()
+	values.resize(cell_count)
+	values.fill(1.0)
+	for hex in reserved_hexes:
+		var index: int = cell_to_index(hex)
+		values[index] = 0.6
 	return values
 
 

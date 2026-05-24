@@ -58,13 +58,28 @@ func _process(_delta: float) -> void:
 		influence_maps_updated.emit()
 	
 	#var unit: Unit = Globals.get_units()[0]
-	
+		
+		var reserved_hexes: Array[Vector2i]
 		for unit in Globals.get_units_for_team(Globals.Team.AXIS):
 			var influence_map: InfluenceMap = maps_by_team[unit.team]
 			
-			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+			var unit_stamp: PackedFloat32Array = influence_map.create_unit_stamp(unit)
+			var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(Vector2i(11, 13))
+			#var stamp: PackedFloat32Array = influence_map.create_origin_stasmp(Vector2i(11, 10))
+			
 			var composite: PackedFloat32Array = influence_map._composite
-			var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
+			#var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
+			var result: PackedFloat32Array = composite
+			result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+			#result = influence_map.multiply_layers_with_return(result, unit_stamp)
+			
+			#var result: PackedFloat32Array = influence_map.add_layers_with_return(stamp, composite)
+			#result = influence_map.multiply_layers_with_return(stamp, result)
+			#result = influence_map.multiply_layers_with_return(result, unit_stamp)
+			
+			#var result: PackedFloat32Array = stamp
 			
 			var best_index: int = influence_map.get_max_value_index(result)
 			if best_index == -1:
@@ -72,6 +87,7 @@ func _process(_delta: float) -> void:
 			
 			var best_value: float = result[best_index]
 			var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+			reserved_hexes.append(best_hex)
 			
 			var prev_best_value: float = result[unit.best_index]
 			if best_value * 0.8 > prev_best_value:
@@ -81,9 +97,11 @@ func _process(_delta: float) -> void:
 			
 			#print(unit.name, " best hex: ", best_hex, " value: ", best_value)
 			pass
-			#maps_by_team[unit.team]._composite = result
+			## CAREFUL ##
+			#maps_by_team[unit.team]._composite = stamp
+			#maps_by_team[unit.team]._composite = unit_stamp
 		pass
-		#maps_by_team[unit.team]._composite = stamp
+		
 	
 
 
@@ -110,14 +128,14 @@ func create_maps(delta) -> void:
 	
 	var origin_hex: Vector2i = Vector2i(11, 3)
 	#var allied_map: InfluenceMap = maps_by_team[Globals.Team.ALLIES]
-	if allied_map != null:
-		allied_map.stamp_origin_influence(origin_hex)
-	if allied_map != null:
-		allied_map.update_origin_influence_decay(delta)
-	if axis_map != null:
-		axis_map.stamp_origin_influence(origin_hex)
-	if axis_map != null:
-		axis_map.update_origin_influence_decay(delta)
+	#if allied_map != null:
+		#allied_map.stamp_origin_influence(origin_hex)
+	#if allied_map != null:
+		#allied_map.update_origin_influence_decay(delta)
+	#if axis_map != null:
+		#axis_map.stamp_origin_influence(origin_hex)
+	#if axis_map != null:
+		#axis_map.update_origin_influence_decay(delta)
 	
 	rebuild_pending = true
 	
@@ -504,8 +522,7 @@ func _get_unit_firepower(unit: Unit) -> float:
 
 
 func _get_unit_effectiveness(unit: Unit) -> float:
-	var effectiveness: float = 1.0
-
+	var effectiveness: float = remap(unit.stress_system.S_eff, 0.0, 100.0, 1.0, 0.0) 
 	#if unit.combat_stats != null:
 		#effectiveness = unit.combat_stats.combat_effectiveness
 
