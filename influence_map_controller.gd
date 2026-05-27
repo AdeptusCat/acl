@@ -57,7 +57,8 @@ func _process(_delta: float) -> void:
 		rebuild_pending = false
 		influence_maps_updated.emit()
 		
-		var objective_hex: Vector2i = Vector2i(11, 13)
+		#var objective_hex: Vector2i = Vector2i(11, 13)
+		var objective_hex: Vector2i = Vector2i(11, 3)
 		#var objective_hex: Vector2i = Vector2i(11, 10)
 		
 		var objective_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(objective_hex)
@@ -67,19 +68,49 @@ func _process(_delta: float) -> void:
 			#line.resize(4)
 		
 		var reserved_hexes: Array[Vector2i]
-		for unit in Globals.get_units_for_team(Globals.Team.AXIS):
+		for unit in Globals.get_units_for_team(Globals.Team.ALLIES):
 			var influence_map: InfluenceMap = maps_by_team[unit.team]
+			
+			# offense
+			var propable_enemy_stamp: PackedFloat32Array = PackedFloat32Array()# = influence_map.create_origin_stamp(hex)
+			propable_enemy_stamp.resize(influence_map.cell_count)
+			propable_enemy_stamp.fill(0.0)
+			for enemy_unit in Globals.get_units_for_team(Globals.Team.AXIS):
+				var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+				if enemies_in_los.has(enemy_unit):
+					var enemy_stamp: PackedFloat32Array = influence_map.create_origin_stamp(enemy_unit.current_hex)
+					propable_enemy_stamp = influence_map.add_layers_with_return(enemy_stamp, propable_enemy_stamp)
+				else:
+					var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(enemy_unit.current_cube, unit.current_cube)
+					line.resize(4)
+					var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(line.pop_back())
+					var enemy_stamp: PackedFloat32Array = influence_map.create_origin_stamp(hex)
+					propable_enemy_stamp = influence_map.add_layers_with_return(enemy_stamp, propable_enemy_stamp)
+			
+			
+			#var propable_enemy_stamp: PackedFloat32Array = influence_map.create_origin_stamp(hex)
 			
 			var unit_stamp: PackedFloat32Array = influence_map.create_unit_stamp(unit)
 			var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
-			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
-			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
+			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
 			#var stamp: PackedFloat32Array = influence_map.create_origin_stasmp(objective_hex)
-			
 			#var stamp_alt: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
 			var composite: PackedFloat32Array = influence_map._composite
-			var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
-			result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+			var result: PackedFloat32Array = influence_map.multiply_layers_with_return(propable_enemy_stamp, composite)
+			#result = influence_map.multiply_layers_with_return(composite, reserved_stamp)
+			#result = stamp
+			
+			## defense
+			#var unit_stamp: PackedFloat32Array = influence_map.create_unit_stamp(unit)
+			#var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+			##var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
+			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
+			##var stamp: PackedFloat32Array = influence_map.create_origin_stasmp(objective_hex)
+			##var stamp_alt: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
+			#var composite: PackedFloat32Array = influence_map._composite
+			#var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
+			#result = influence_map.multiply_layers_with_return(result, reserved_stamp)
 			
 			#var composite: PackedFloat32Array = influence_map._composite
 			##var result: PackedFloat32Array = influence_map.multiply_layers_with_return(stamp, composite)
@@ -415,26 +446,42 @@ func rebuild_los_influence_for_team(
 
 		var observer_hex: Vector2i = unit.current_hex
 		
-		var objective_hex: Vector2i = Vector2i(11, 13)
+		#var objective_hex: Vector2i = Vector2i(11, 13)
+		var objective_hex: Vector2i = Vector2i(11, 3)
 		#var objective_hex: Vector2i = Vector2i(11, 10)
 		var objective_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(objective_hex)
 		#for unit in Globals.get_units_for_team(Globals.Team.ALLIES):
-		var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(objective_cube, unit.current_cube)
-		line.resize(4)
-		print("###")
-		for cube in line:
-			var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(cube)
-			if hex == objective_hex:
-				continue
-				
-			if not los_lookup.has(hex):
+		
+		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
+		if not enemies_in_los.is_empty():
+			if not los_lookup.has(observer_hex):
 				continue
 			
-			if hex == Vector2i.ZERO:
-				continue
-			
-			print(hex)
-			
+			var visible_targets: Dictionary = los_lookup[observer_hex]
+			var unit_firepower: float = _get_unit_firepower(unit)
+			var unit_effectiveness: float = _get_unit_effectiveness(unit)
+
+			for target_hex: Vector2i in visible_targets.keys():
+				if not influence_map.is_valid_cell(target_hex):
+					continue
+
+				var los_data: Dictionary = visible_targets[target_hex]
+
+				_project_enemy_los_record(
+					influence_map,
+					observer_hex,
+					target_hex,
+					los_data,
+					unit_firepower,
+					unit_effectiveness
+				)
+		else:
+			# for offense
+			var friendly_unit: Unit = Globals.get_units_for_team(Globals.Team.ALLIES)[0]
+			var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(unit.current_cube, friendly_unit.current_cube)
+			if line.size() > 4:
+				line.resize(4)
+			var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(line.pop_back())
 			var visible_targets: Dictionary = los_lookup[hex]
 			var unit_firepower: float = _get_unit_firepower(unit)
 			var unit_effectiveness: float = _get_unit_effectiveness(unit)
@@ -453,28 +500,41 @@ func rebuild_los_influence_for_team(
 					unit_firepower,
 					unit_effectiveness
 				)
+			
+			## for defense
+			##var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(objective_cube, unit.current_cube)
+			#line.resize(4)
+			#for cube in line:
+				#var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(cube)
+				#if hex == objective_hex:
+					#continue
+					#
+				#if not los_lookup.has(hex):
+					#continue
+				#
+				#if hex == Vector2i.ZERO:
+					#continue
+				#
+				#var visible_targets: Dictionary = los_lookup[hex]
+				#var unit_firepower: float = _get_unit_firepower(unit)
+				#var unit_effectiveness: float = _get_unit_effectiveness(unit)
+				#
+				#for target_hex: Vector2i in visible_targets.keys():
+					#if not influence_map.is_valid_cell(target_hex):
+						#continue
+#
+					#var los_data: Dictionary = visible_targets[target_hex]
+#
+					#_project_enemy_los_record(
+						#influence_map,
+						#hex,
+						#target_hex,
+						#los_data,
+						#unit_firepower,
+						#unit_effectiveness
+					#)
 		
-		#if not los_lookup.has(observer_hex):
-			#continue
-		#
-		#var visible_targets: Dictionary = los_lookup[observer_hex]
-		#var unit_firepower: float = _get_unit_firepower(unit)
-		#var unit_effectiveness: float = _get_unit_effectiveness(unit)
-#
-		#for target_hex: Vector2i in visible_targets.keys():
-			#if not influence_map.is_valid_cell(target_hex):
-				#continue
-#
-			#var los_data: Dictionary = visible_targets[target_hex]
-#
-			#_project_enemy_los_record(
-				#influence_map,
-				#observer_hex,
-				#target_hex,
-				#los_data,
-				#unit_firepower,
-				#unit_effectiveness
-			#)
+		
 
 
 func _project_friendly_los_record(
