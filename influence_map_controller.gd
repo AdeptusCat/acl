@@ -1,5 +1,5 @@
 class_name InfluenceMapController
-extends Node
+extends Node2D
 
 signal influence_maps_updated()
 
@@ -11,6 +11,9 @@ var allied_weights: PackedFloat32Array = PackedFloat32Array()
 var axis_weights: PackedFloat32Array = PackedFloat32Array()
 
 var rebuild_pending: bool = false
+
+var objective_hex: Vector2i = Vector2i(11, 13)
+#var objective_hex: Vector2i = Vector2i(11, 10)
 
 enum CompositeSource {
 	SELF,
@@ -57,8 +60,7 @@ func _process(_delta: float) -> void:
 		rebuild_pending = false
 		influence_maps_updated.emit()
 		
-		var objective_hex: Vector2i = Vector2i(11, 13)
-		#var objective_hex: Vector2i = Vector2i(11, 10)
+		
 		
 		var objective_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(objective_hex)
 	#var unit: Unit = Globals.get_units()[0]
@@ -415,13 +417,13 @@ func rebuild_los_influence_for_team(
 
 		var observer_hex: Vector2i = unit.current_hex
 		
-		var objective_hex: Vector2i = Vector2i(11, 13)
+		#var objective_hex: Vector2i = Vector2i(11, 13)
 		#var objective_hex: Vector2i = Vector2i(11, 10)
 		var objective_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(objective_hex)
 		#for unit in Globals.get_units_for_team(Globals.Team.ALLIES):
 		var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(objective_cube, unit.current_cube)
 		line.resize(4)
-		print("###")
+		#print("###")
 		for cube in line:
 			var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(cube)
 			if hex == objective_hex:
@@ -433,7 +435,7 @@ func rebuild_los_influence_for_team(
 			if hex == Vector2i.ZERO:
 				continue
 			
-			print(hex)
+			#print(hex)
 			
 			var visible_targets: Dictionary = los_lookup[hex]
 			var unit_firepower: float = _get_unit_firepower(unit)
@@ -768,3 +770,21 @@ func _team_has_contact_on_unit(team: int, enemy_unit: Unit) -> bool:
 		return true
 
 	return false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var mouse_button_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_button_event == null:
+		return
+	
+	if mouse_button_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	
+	if mouse_button_event.pressed == false:
+		return
+	
+	if mouse_button_event.ctrl_pressed == false:
+		return
+	
+	objective_hex = LOSHelper.ground_layer.local_to_map(get_global_mouse_position()) 
+	print("objective hex: ", objective_hex)
