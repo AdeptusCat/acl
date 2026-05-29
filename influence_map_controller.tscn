@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" uid="uid://bemixmw3agmlv" path="res://influence_map_controller.gd" id="1_nfvag"]
 
-[node name="InfluenceMapController" type="Node" unique_id=1942260574]
+[node name="InfluenceMapController" type="Node2D" unique_id=1463066945]
 script = ExtResource("1_nfvag")

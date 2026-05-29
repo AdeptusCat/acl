@@ -408,7 +408,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	var key_event: InputEventKey = event as InputEventKey
-
+	
 	if not key_event.pressed:
 		return
 
