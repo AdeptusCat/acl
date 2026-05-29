@@ -75,8 +75,17 @@ func _process(_delta: float) -> void:
 			var unit_stamp: PackedFloat32Array = influence_map.create_unit_stamp(unit)
 			var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
 			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(unit.current_hex)
-			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
+			#var stamp: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
 			#var stamp: PackedFloat32Array = influence_map.create_origin_stasmp(objective_hex)
+			
+			var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(objective_cube, Globals.get_units_for_team(Globals.Team.ALLIES)[0].current_cube)
+			#line.resize(4)
+			line.resize(8)
+			for i in range(3):
+				line.pop_front()
+			var defense_cube: Vector3i = line.pop_front()
+			var defense_hex: Vector2i = LOSHelper.ground_layer.cube_to_map(defense_cube)
+			var stamp: PackedFloat32Array = influence_map.create_origin_stamp(defense_hex)
 			
 			#var stamp_alt: PackedFloat32Array = influence_map.create_origin_stamp(objective_hex)
 			var composite: PackedFloat32Array = influence_map._composite
@@ -422,7 +431,11 @@ func rebuild_los_influence_for_team(
 		var objective_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(objective_hex)
 		#for unit in Globals.get_units_for_team(Globals.Team.ALLIES):
 		var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(objective_cube, unit.current_cube)
-		line.resize(4)
+		#line.resize(4)
+		line.resize(8)
+		for i in range(4):
+			line.pop_front()
+		#line.pop_front()
 		#print("###")
 		for cube in line:
 			var hex: Vector2i = LOSHelper.ground_layer.cube_to_map(cube)
