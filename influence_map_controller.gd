@@ -211,7 +211,8 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
 			composite,
 			approach_stamp,
-			InfluenceMap.WriteMode.MULTIPLY
+			InfluenceMap.WriteMode.MULTIPLY,
+			true
 		)
 
 		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
@@ -333,7 +334,7 @@ func _create_projected_approach_stamp(
 	for source: ProjectionSource in sources:
 		var stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
 			source.observer_hex,
-			3,
+			2,
 			1.0,
 			InfluenceMap.FalloffMode.SQUARE_ROOT
 		)

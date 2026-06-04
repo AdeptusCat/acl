@@ -389,15 +389,17 @@ func mark_all_dirty() -> void:
 func write_stamp_to_layer_with_return(
 	layer: PackedFloat32Array,
 	stamp: InfluenceStamp,
-	mode: int
+	mode: int,
+	zero_outside_stamp: bool = false
 ) -> PackedFloat32Array:
 	var result: PackedFloat32Array = PackedFloat32Array()
 	result.resize(layer.size())
 
-	var i: int = 0
-	while i < layer.size():
-		result[i] = layer[i]
-		i += 1
+	if not zero_outside_stamp:
+		var i: int = 0
+		while i < layer.size():
+			result[i] = layer[i]
+			i += 1
 
 	var y: int = 0
 	while y < stamp.size.y:
@@ -415,7 +417,12 @@ func write_stamp_to_layer_with_return(
 
 				if is_valid_cell(cell):
 					var layer_index: int = get_cell_index(cell)
-					var current_value: float = result[layer_index]
+					var current_value: float = 0.0
+
+					if zero_outside_stamp:
+						current_value = layer[layer_index]
+					else:
+						current_value = result[layer_index]
 
 					result[layer_index] = _get_write_mode_result_value(
 						current_value,
