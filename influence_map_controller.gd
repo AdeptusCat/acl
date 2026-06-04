@@ -130,12 +130,25 @@ func _create_axis_defense_config() -> InfluenceProjectionConfig:
 	config.enemy_group = ""
 	config.task = TacticalTask.DEFEND_OBJECTIVE
 	config.objective_hex = objective_hex
-
-	config.projected_line_max_cells = 8
-	config.anchor_skip_front = 3
+	
+	# we draw a line from objective_hex to an enemy unit
+	# the line is at most projected_line_max_cells long or shorter if enemy closer
+	# the first los_skip_front/anchor_skip_front hexes are skipped
+	# the amount of hexes considered are los_count/anchor_count
+	
+	# Simulated enemy LOS
+	# enemy -> [skip skip skip skip] [LOS LOS LOS LOS] -> objective
+	# los_skip_front / los_count is for estimating where enemies can see or project threat from.
+	
+	# anchor_skip_front / anchor_count is for choosing the projected 
+	# enemy -> [skip skip skip] [ANCHOR] -> objective
+	# destination/pressure point used to pull movement toward a tactical position.
+	
+	config.projected_line_max_cells = 16
+	config.anchor_skip_front = 4 # simulate enemies at this distance from objective
 	config.anchor_count = 1
 	config.los_skip_front = 4
-	config.los_count = 4
+	config.los_count = 1
 	config.move_improvement_ratio = 0.8
 
 	return config
@@ -662,7 +675,7 @@ func rebuild_los_influence_for_team(
 
 func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
 	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
-
+	
 	config.unit_team = team
 	config.enemy_team = _get_enemy_team(team)
 	config.unit_group = ""
@@ -671,7 +684,7 @@ func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
 	config.objective_hex = objective_hex
 
 	config.projected_line_max_cells = 8
-	config.anchor_skip_front = 3
+	config.anchor_skip_front = 1
 	config.anchor_count = 1
 	config.los_skip_front = 4
 	config.los_count = 4
