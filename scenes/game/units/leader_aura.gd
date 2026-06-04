@@ -90,11 +90,3 @@ func _same_team(a: Node2D, b: Node2D) -> bool:
 	if ta == tb:
 		return true
 	return false
-
-#func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	## Axial conversion if your map is axial; adjust if you’re using offset coords.
-	#var dx: int = a.x - b.x
-	#var dy: int = a.y - b.y
-	#var dz: int = -dx - dy
-	#var dist: int = int((abs(dx) + abs(dy) + abs(dz)) / 2)
-	#return dist

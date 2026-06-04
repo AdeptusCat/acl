@@ -1039,7 +1039,7 @@ func _project_friendly_los_record(
 	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
 	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
 	
-	var distance: int = _hex_distance(observer_hex, target_hex)
+	var distance: int = LOSHelper.hex_distance(observer_hex, target_hex)
 	
 	if shooter_cover > 4:
 		observer_hex
@@ -1096,7 +1096,7 @@ func _project_enemy_los_record(
 	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
 	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
 	
-	var distance: int = _hex_distance(observer_hex, target_hex)
+	var distance: int = LOSHelper.hex_distance(observer_hex, target_hex)
 	
 	var threat: float = _calculate_los_fire_threat(
 		unit_firepower,
@@ -1166,15 +1166,6 @@ func _get_unit_effectiveness(unit: Unit) -> float:
 		#effectiveness = unit.combat_stats.combat_effectiveness
 
 	return effectiveness
-
-
-func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	var dq: int = a.x - b.x
-	var dr: int = a.y - b.y
-	var ds: int = -a.x - a.y - (-b.x - b.y)
-
-	var distance: int = (abs(dq) + abs(dr) + abs(ds)) / 2
-	return distance
 
 
 func _calculate_los_fire_threat(

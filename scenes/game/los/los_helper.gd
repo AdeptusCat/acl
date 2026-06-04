@@ -1226,3 +1226,11 @@ func find_units_at(hex: Vector2i) -> Array[Unit]:
 		if u.current_hex == hex:
 			units.append(u)
 	return units
+
+
+func hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var a_cube: Vector3i = ground_layer.map_to_cube(a)
+	var b_cube: Vector3i = ground_layer.map_to_cube(b)
+
+	var distance: int = ground_layer.cube_distance(a_cube, b_cube)
+	return distance

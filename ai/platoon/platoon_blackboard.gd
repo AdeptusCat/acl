@@ -250,7 +250,7 @@ func has_actionable_enemy_near_objective() -> bool:
 		if not track.is_actionable(ACTIONABLE_ENEMY_CONFIDENCE):
 			continue
 
-		var distance: int = get_hex_distance(track.hex, objective_hex)
+		var distance: int = LOSHelper.hex_distance(track.hex, objective_hex)
 		if distance <= OBJECTIVE_NEAR_RADIUS:
 			return true
 
@@ -323,7 +323,7 @@ func recalculate_objective_beliefs(delta: float) -> void:
 	var strongest_enemy_confidence: float = 0.0
 
 	for track: EnemyTrack in enemy_tracks:
-		var distance: int = get_hex_distance(track.last_known_hex, objective_hex)
+		var distance: int = LOSHelper.hex_distance(track.last_known_hex, objective_hex)
 		
 		if distance > OBJECTIVE_NEAR_RADIUS:
 			continue
@@ -341,18 +341,10 @@ func recalculate_objective_beliefs(delta: float) -> void:
 
 	objective_clear_confidence = clampf(objective_clear_confidence, 0.0, 1.0)
 
-func get_hex_distance(a: Vector2i, b: Vector2i) -> int:
-	var dq: int = a.x - b.x
-	var dr: int = a.y - b.y
-	var ds: int = -dq - dr
-
-	var distance: int = int((abs(dq) + abs(dr) + abs(ds)) / 2)
-
-	return distance
 
 func _find_enemy_track_near_hex(p_hex: Vector2i, p_radius: int) -> EnemyTrack:
 	for track: EnemyTrack in enemy_tracks:
-		var distance: int = get_hex_distance(track.hex, p_hex)
+		var distance: int = LOSHelper.hex_distance(track.hex, p_hex)
 
 		if distance <= p_radius:
 			return track

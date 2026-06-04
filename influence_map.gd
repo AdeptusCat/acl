@@ -549,7 +549,7 @@ func create_radius_stamp(
 				pass
 			if cell == Vector2i(7,8):
 				pass
-			var distance: int = _hex_distance(center, cell)
+			var distance: int = LOSHelper.hex_distance(center, cell)
 			
 			if distance <= radius:
 				var index: int = stamp.get_index(x, y)
@@ -804,14 +804,6 @@ func _mark_dirty_index(index: int) -> void:
 	_dirty_indices.append(index)
 
 
-func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	var a_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(a)
-	var b_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(b)
-
-	var distance: int = LOSHelper.ground_layer.cube_distance(a_cube, b_cube)
-	return distance
-
-
 func add_stamps_with_return(stamp_a: InfluenceStamp, stamp_b: InfluenceStamp) -> InfluenceStamp:
 	var min_x: int = min(stamp_a.min_cell.x, stamp_b.min_cell.x)
 	var min_y: int = min(stamp_a.min_cell.y, stamp_b.min_cell.y)
@@ -916,7 +908,7 @@ func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var distance: int = _hex_distance(origin_hex, hex)
+			var distance: int = LOSHelper.hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue
@@ -967,7 +959,7 @@ func stamp_origin_influence(origin_hex: Vector2i) -> void:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var distance: int = _hex_distance(origin_hex, hex)
+			var distance: int = LOSHelper.hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue
