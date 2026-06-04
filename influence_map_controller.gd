@@ -181,6 +181,8 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 		return
 
 	var reserved_hexes: Array[Vector2i] = []
+	
+	var ordered_units: Array[Unit] = []
 
 	for unit: Unit in units:
 		if not _is_valid_living_unit(unit):
@@ -189,40 +191,28 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 		if not maps_by_team.has(unit.team):
 			continue
 
+		ordered_units.append(unit)
+
+	ordered_units.sort_custom(_compare_units_by_squad_type_priority)
+
+	for unit: Unit in ordered_units:
 		var influence_map: InfluenceMap = maps_by_team[unit.team]
+
 		var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
 			influence_map,
 			config,
 			enemy_units
 		)
-		
-		#if approach_stamp.is_empty():
-			#continue
 
 		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
-		#var reserved_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
-			#influence_map,
-			#config,
-			#enemy_units
-		#)
-		
+
 		var composite: PackedFloat32Array = influence_map._composite
-		#var result: PackedFloat32Array = influence_map.multiply_layers_with_return(
-			#approach_stamp,
-			#composite
-		#)
-		
+
 		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
 			composite,
 			approach_stamp,
 			InfluenceMap.WriteMode.MULTIPLY
 		)
-		
-		#influence_map.write_stamp_to_layer_with_return(
-			#result,
-			#reserved_stamp,
-			#InfluenceMap.WriteMode.MULTIPLY
-		#)
 
 		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
 
@@ -244,6 +234,84 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 			unit.best_index = best_index
 
 		unit.influence_map = result
+	
+	#for unit: Unit in units:
+		#if not _is_valid_living_unit(unit):
+			#continue
+#
+		#if not maps_by_team.has(unit.team):
+			#continue
+#
+		#var influence_map: InfluenceMap = maps_by_team[unit.team]
+		#var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
+			#influence_map,
+			#config,
+			#enemy_units
+		#)
+#
+		#var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+		#
+		#var composite: PackedFloat32Array = influence_map._composite
+		#
+		#var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+			#composite,
+			#approach_stamp,
+			#InfluenceMap.WriteMode.MULTIPLY
+		#)
+#
+		#result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+#
+		#var best_index: int = influence_map.get_max_value_index(result)
+		#if best_index == -1:
+			#continue
+#
+		#var best_value: float = result[best_index]
+		#var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+#
+		#reserved_hexes.append(best_hex)
+#
+		#var previous_best_value: float = -INF
+		#if unit.best_index >= 0 and unit.best_index < result.size():
+			#previous_best_value = result[unit.best_index]
+#
+		#if best_value * config.move_improvement_ratio > previous_best_value:
+			#unit.order(Globals.UnitCmd.MOVE, best_hex)
+			#unit.best_index = best_index
+#
+		#unit.influence_map = result
+
+
+
+func _get_squad_type_priority(squad_type: Globals.SquadType) -> int:
+	if squad_type == Globals.SquadType.MG:
+		return 0
+
+	if squad_type == Globals.SquadType.Rifle:
+		return 1
+
+	if squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
+		return 2
+
+	if squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+		return 3
+
+	if squad_type == Globals.SquadType.ANTITANK:
+		return 4
+
+	if squad_type == Globals.SquadType.MORTAR:
+		return 5
+
+	return 999
+
+
+func _compare_units_by_squad_type_priority(unit_a: Unit, unit_b: Unit) -> bool:
+	var priority_a: int = _get_squad_type_priority(unit_a.squad_type)
+	var priority_b: int = _get_squad_type_priority(unit_b.squad_type)
+
+	if priority_a == priority_b:
+		return unit_a.get_instance_id() < unit_b.get_instance_id()
+
+	return priority_a < priority_b
 
 
 func _create_projected_approach_stamp(
