@@ -30,7 +30,15 @@ enum WriteMode {
 	SET,
 	ADD,
 	MAX,
-	MIN
+	MIN,
+	MULTIPLY
+}
+
+enum FalloffMode {
+	NONE,
+	LINEAR,
+	SQUARE_ROOT,
+	EXPONENTIAL
 }
 
 const ORIGIN_INFLUENCE_START_VALUE: float = 1.0
@@ -59,6 +67,55 @@ var _dirty_cursor: int = 0
 var composite_min: float = DEFAULT_COMPOSITE_MIN
 var composite_max: float = DEFAULT_COMPOSITE_MAX
 var composite_base: float = 1.0
+
+
+class InfluenceStamp extends RefCounted:
+	var values: PackedFloat32Array = PackedFloat32Array()
+	var min_cell: Vector2i = Vector2i.ZERO
+	var size: Vector2i = Vector2i.ZERO
+
+	func _init(p_min_cell: Vector2i, p_size: Vector2i) -> void:
+		min_cell = p_min_cell
+		size = p_size
+		values.resize(size.x * size.y)
+
+	func get_index(local_x: int, local_y: int) -> int:
+		return local_y * size.x + local_x
+
+	func contains_cell(cell: Vector2i) -> bool:
+		if cell.x < min_cell.x:
+			return false
+
+		if cell.y < min_cell.y:
+			return false
+
+		if cell.x >= min_cell.x + size.x:
+			return false
+
+		if cell.y >= min_cell.y + size.y:
+			return false
+
+		return true
+
+	func get_value_at_cell(cell: Vector2i) -> float:
+		if not contains_cell(cell):
+			return 0.0
+
+		var local_x: int = cell.x - min_cell.x
+		var local_y: int = cell.y - min_cell.y
+		var index: int = get_index(local_x, local_y)
+
+		return values[index]
+
+	func add_value_at_cell(cell: Vector2i, value: float) -> void:
+		if not contains_cell(cell):
+			return
+
+		var local_x: int = cell.x - min_cell.x
+		var local_y: int = cell.y - min_cell.y
+		var index: int = get_index(local_x, local_y)
+
+		values[index] += value
 
 
 func get_layer_value_by_cell(layer_id: int, cell: Vector2i, fallback: float = 0.0) -> float:
@@ -329,44 +386,342 @@ func mark_all_dirty() -> void:
 		index += 1
 
 
+func write_stamp_to_layer_with_return(
+	layer: PackedFloat32Array,
+	stamp: InfluenceStamp,
+	mode: int
+) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+	result.resize(layer.size())
+
+	var i: int = 0
+	while i < layer.size():
+		result[i] = layer[i]
+		i += 1
+
+	var y: int = 0
+	while y < stamp.size.y:
+		var x: int = 0
+
+		while x < stamp.size.x:
+			var stamp_index: int = stamp.get_index(x, y)
+			var write_value: float = stamp.values[stamp_index]
+
+			if _should_write_stamp_value(write_value, mode):
+				var cell: Vector2i = Vector2i(
+					stamp.min_cell.x + x,
+					stamp.min_cell.y + y
+				)
+
+				if is_valid_cell(cell):
+					var layer_index: int = get_cell_index(cell)
+					var current_value: float = result[layer_index]
+
+					result[layer_index] = _get_write_mode_result_value(
+						current_value,
+						write_value,
+						mode
+					)
+
+			x += 1
+
+		y += 1
+
+	return result
+
+
+func get_cell_index(cell: Vector2i) -> int:
+	return cell_to_index(cell)
+
+
+func write_stamp_to_layer(
+	layer_id: int,
+	stamp: InfluenceStamp,
+	mode: int
+) -> void:
+	if not is_valid_layer(layer_id):
+		return
+
+	var y: int = 0
+	while y < stamp.size.y:
+		var x: int = 0
+
+		while x < stamp.size.x:
+			var index: int = stamp.get_index(x, y)
+			var write_value: float = stamp.values[index]
+
+			if _should_write_stamp_value(write_value, mode):
+				var cell: Vector2i = Vector2i(
+					stamp.min_cell.x + x,
+					stamp.min_cell.y + y
+				)
+
+				if is_valid_cell(cell):
+					_write_layer_value(layer_id, cell, write_value, mode)
+
+			x += 1
+
+		y += 1
+
+
+func _should_write_stamp_value(write_value: float, mode: int) -> bool:
+	if write_value != 0.0:
+		return true
+
+	if mode == InfluenceMap.WriteMode.ADD:
+		return false
+
+	return true
+
+
 func stamp_radius(
 	layer_id: int,
 	center: Vector2i,
 	radius: int,
 	value: float,
 	mode: int,
-	falloff: bool
+	falloff_mode: int
 ) -> void:
 	if not is_valid_layer(layer_id):
 		return
+	
+	var stamp: InfluenceStamp = create_radius_stamp(
+		center,
+		radius,
+		value,
+		falloff_mode
+	)
+	
+	write_stamp_to_layer(layer_id, stamp, mode)
+	
+	#var stamp_size: int = radius * 2 + 1
+#
+	#var min_x: int = center.x - radius
+	#var max_x: int = center.x + radius
+	#var min_y: int = center.y - radius
+	#var max_y: int = center.y + radius
+#
+	#var y: int = min_y
+	#while y <= max_y:
+		#var x: int = min_x
+#
+		#while x <= max_x:
+			#var cell: Vector2i = Vector2i(x, y)
+#
+			#if is_valid_cell(cell):
+				#var local_x: int = x - min_x
+				#var local_y: int = y - min_y
+				#var stamp_index: int = local_y * stamp_size + local_x
+				#var write_value: float = stamp[stamp_index]
+#
+				#if _should_write_stamp_value(write_value, mode):
+					#_write_layer_value(layer_id, cell, write_value, mode)
+#
+			#x += 1
+#
+		#y += 1
 
-	var min_x: int = center.x - radius
-	var max_x: int = center.x + radius
-	var min_y: int = center.y - radius
-	var max_y: int = center.y + radius
 
-	var y: int = min_y
-	while y <= max_y:
-		var x: int = min_x
+func create_radius_stamp(
+	center: Vector2i,
+	radius: int,
+	value: float,
+	falloff_mode: int
+) -> InfluenceStamp:
+	var stamp_size: int = radius * 2 + 1
+	var min_cell: Vector2i = Vector2i(center.x - radius, center.y - radius)
+	var stamp: InfluenceStamp = InfluenceStamp.new(
+		min_cell,
+		Vector2i(stamp_size, stamp_size)
+	)
 
-		while x <= max_x:
-			var cell: Vector2i = Vector2i(x, y)
+	var y: int = 0
+	while y < stamp.size.y:
+		var x: int = 0
 
-			if is_valid_cell(cell):
-				var distance: int = _hex_distance(center, cell)
+		while x < stamp.size.x:
+			var cell: Vector2i = Vector2i(
+				stamp.min_cell.x + x,
+				stamp.min_cell.y + y
+			)
+			
+			if x == 7 and y == 8:
+				pass
+			if cell == Vector2i(7,8):
+				pass
+			var distance: int = _hex_distance(center, cell)
+			
+			if distance <= radius:
+				var index: int = stamp.get_index(x, y)
 
-				if distance <= radius:
-					var write_value: float = value
-
-					if falloff:
-						var falloff_factor: float = 1.0 - float(distance) / float(radius + 1)
-						write_value = value * falloff_factor
-
-					_write_layer_value(layer_id, cell, write_value, mode)
+				stamp.values[index] = _get_radius_falloff_value(
+					value,
+					distance,
+					radius,
+					falloff_mode
+				)
 
 			x += 1
 
 		y += 1
+
+	return stamp
+
+
+#func create_radius_stamp(
+	#center: Vector2i,
+	#radius: int,
+	#value: float,
+	#falloff_mode: int
+#) -> PackedFloat32Array:
+	#var stamp_size: int = radius * 2 + 1
+	#var stamp: PackedFloat32Array = PackedFloat32Array()
+	#stamp.resize(stamp_size * stamp_size)
+#
+	#var min_x: int = center.x - radius
+	#var max_x: int = center.x + radius
+	#var min_y: int = center.y - radius
+	#var max_y: int = center.y + radius
+#
+	#var y: int = min_y
+	#while y <= max_y:
+		#var x: int = min_x
+#
+		#while x <= max_x:
+			#var cell: Vector2i = Vector2i(x, y)
+			#var distance: int = _hex_distance(center, cell)
+#
+			#if distance <= radius:
+				#var local_x: int = x - min_x
+				#var local_y: int = y - min_y
+				#var stamp_index: int = local_y * stamp_size + local_x
+#
+				#stamp[stamp_index] = _get_radius_falloff_value(
+					#value,
+					#distance,
+					#radius,
+					#falloff_mode
+				#)
+#
+			#x += 1
+#
+		#y += 1
+#
+	#return stamp
+
+
+
+#func stamp_radius(
+	#layer_id: int,
+	#center: Vector2i,
+	#radius: int,
+	#value: float,
+	#mode: int,
+	#falloff_mode: int
+#) -> void:
+	#if not is_valid_layer(layer_id):
+		#return
+#
+	#var min_x: int = center.x - radius
+	#var max_x: int = center.x + radius
+	#var min_y: int = center.y - radius
+	#var max_y: int = center.y + radius
+#
+	#var y: int = min_y
+	#while y <= max_y:
+		#var x: int = min_x
+#
+		#while x <= max_x:
+			#var cell: Vector2i = Vector2i(x, y)
+#
+			#if is_valid_cell(cell):
+				#var distance: int = _hex_distance(center, cell)
+#
+				#if distance <= radius:
+					#var write_value: float = _get_radius_falloff_value(
+						#value,
+						#distance,
+						#radius,
+						#falloff_mode
+					#)
+#
+					#_write_layer_value(layer_id, cell, write_value, mode)
+#
+			#x += 1
+#
+		#y += 1
+
+
+func _get_radius_falloff_value(
+	value: float,
+	distance: int,
+	radius: int,
+	falloff_mode: int
+) -> float:
+	if radius <= 0:
+		return value
+
+	if falloff_mode == FalloffMode.NONE:
+		return value
+
+	var distance_ratio: float = float(distance) / float(radius + 1)
+	var falloff_factor: float = 1.0
+
+	if falloff_mode == FalloffMode.LINEAR:
+		falloff_factor = 1.0 - distance_ratio
+
+	elif falloff_mode == FalloffMode.SQUARE_ROOT:
+		falloff_factor = sqrt(1.0 - distance_ratio)
+
+	elif falloff_mode == FalloffMode.EXPONENTIAL:
+		falloff_factor = exp(-4.0 * distance_ratio)
+
+	else:
+		falloff_factor = 1.0
+
+	falloff_factor = clampf(falloff_factor, 0.0, 1.0)
+
+	return value * falloff_factor
+
+
+#func stamp_radius(
+	#layer_id: int,
+	#center: Vector2i,
+	#radius: int,
+	#value: float,
+	#mode: int,
+	#falloff: bool
+#) -> void:
+	#if not is_valid_layer(layer_id):
+		#return
+#
+	#var min_x: int = center.x - radius
+	#var max_x: int = center.x + radius
+	#var min_y: int = center.y - radius
+	#var max_y: int = center.y + radius
+#
+	#var y: int = min_y
+	#while y <= max_y:
+		#var x: int = min_x
+#
+		#while x <= max_x:
+			#var cell: Vector2i = Vector2i(x, y)
+#
+			#if is_valid_cell(cell):
+				#var distance: int = _hex_distance(center, cell)
+#
+				#if distance <= radius:
+					#var write_value: float = value
+#
+					#if falloff:
+						#var falloff_factor: float = 1.0 - float(distance) / float(radius + 1)
+						#write_value = value * falloff_factor
+#
+					#_write_layer_value(layer_id, cell, write_value, mode)
+#
+			#x += 1
+#
+		#y += 1
 
 
 func copy_layer_to(layer_id: int, target: PackedFloat32Array) -> PackedFloat32Array:
@@ -393,6 +748,29 @@ func _write_layer_value(layer_id: int, cell: Vector2i, value: float, mode: int) 
 	if mode == WriteMode.MIN:
 		min_layer_value(layer_id, cell, value)
 		return
+
+
+func _get_write_mode_result_value(
+	current_value: float,
+	write_value: float,
+	mode: int
+) -> float:
+	if mode == WriteMode.SET:
+		return write_value
+
+	if mode == WriteMode.ADD:
+		return current_value + write_value
+
+	if mode == WriteMode.MULTIPLY:
+		return current_value * write_value
+
+	if mode == WriteMode.MAX:
+		return maxf(current_value, write_value)
+
+	if mode == WriteMode.MIN:
+		return minf(current_value, write_value)
+
+	return current_value
 
 
 func _calculate_composite_at_index(index: int) -> float:
@@ -427,12 +805,63 @@ func _mark_dirty_index(index: int) -> void:
 
 
 func _hex_distance(a: Vector2i, b: Vector2i) -> int:
-	var dq: int = a.x - b.x
-	var dr: int = a.y - b.y
-	var ds: int = -a.x - a.y - (-b.x - b.y)
+	var a_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(a)
+	var b_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(b)
 
-	var distance: int = (abs(dq) + abs(dr) + abs(ds)) / 2
+	var distance: int = LOSHelper.ground_layer.cube_distance(a_cube, b_cube)
 	return distance
+
+
+func add_stamps_with_return(stamp_a: InfluenceStamp, stamp_b: InfluenceStamp) -> InfluenceStamp:
+	var min_x: int = min(stamp_a.min_cell.x, stamp_b.min_cell.x)
+	var min_y: int = min(stamp_a.min_cell.y, stamp_b.min_cell.y)
+
+	var max_x: int = max(
+		stamp_a.min_cell.x + stamp_a.size.x - 1,
+		stamp_b.min_cell.x + stamp_b.size.x - 1
+	)
+
+	var max_y: int = max(
+		stamp_a.min_cell.y + stamp_a.size.y - 1,
+		stamp_b.min_cell.y + stamp_b.size.y - 1
+	)
+
+	var combined_size: Vector2i = Vector2i(
+		max_x - min_x + 1,
+		max_y - min_y + 1
+	)
+
+	var combined_stamp: InfluenceStamp = InfluenceStamp.new(
+		Vector2i(min_x, min_y),
+		combined_size
+	)
+
+	_add_stamp_into_stamp(combined_stamp, stamp_a)
+	_add_stamp_into_stamp(combined_stamp, stamp_b)
+
+	return combined_stamp
+
+
+func _add_stamp_into_stamp(target_stamp: InfluenceStamp, source_stamp: InfluenceStamp) -> void:
+	var y: int = 0
+	while y < source_stamp.size.y:
+		var x: int = 0
+
+		while x < source_stamp.size.x:
+			var source_index: int = source_stamp.get_index(x, y)
+			var source_value: float = source_stamp.values[source_index]
+
+			if source_value != 0.0:
+				var cell: Vector2i = Vector2i(
+					source_stamp.min_cell.x + x,
+					source_stamp.min_cell.y + y
+				)
+
+				target_stamp.add_value_at_cell(cell, source_value)
+
+			x += 1
+
+		y += 1
 
 
 func add_layers_with_return(values_a: PackedFloat32Array, values_b: PackedFloat32Array) -> PackedFloat32Array:
@@ -487,11 +916,7 @@ func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var origin_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(origin_hex)
-			var cube: Vector3i = LOSHelper.ground_layer.map_to_cube(hex)
-			
-			var distance: int = LOSHelper.ground_layer.cube_distance(origin_cube, cube)
-			#var distance: int = _hex_distance(origin_hex, hex)
+			var distance: int = _hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue

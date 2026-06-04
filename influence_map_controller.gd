@@ -113,6 +113,22 @@ func _process_budgeted_rebuild() -> void:
 	rebuild_pending = false
 	influence_maps_updated.emit()
 	_run_post_rebuild_tactical_tasks()
+	
+	## test ###
+	#var influence_map1: InfluenceMap = maps_by_team[Globals.Team.AXIS]
+	#influence_map1._layers[InfluenceMap.Layer.ORIGIN_INFLUENCE]
+	#var stamp: InfluenceMap.InfluenceStamp = influence_map1.create_radius_stamp(
+			#Vector2i(5,5),
+			#5,
+			#1.0,
+			#InfluenceMap.FalloffMode.EXPONENTIAL
+		#)
+	#var result: PackedFloat32Array = influence_map1.write_stamp_to_layer_with_return(
+			#influence_map1._layers[InfluenceMap.Layer.ORIGIN_INFLUENCE],
+			#stamp,
+			#InfluenceMap.WriteMode.ADD
+		#)
+	#influence_map1._layers[InfluenceMap.Layer.ORIGIN_INFLUENCE] = result
 
 
 func _run_post_rebuild_tactical_tasks() -> void:
@@ -144,7 +160,7 @@ func _create_axis_defense_config() -> InfluenceProjectionConfig:
 	# enemy -> [skip skip skip] [ANCHOR] -> objective
 	# destination/pressure point used to pull movement toward a tactical position.
 	
-	config.projected_line_max_cells = 16
+	config.projected_line_max_cells = 8
 	config.anchor_skip_front = 4 # simulate enemies at this distance from objective
 	config.anchor_count = 1
 	config.los_skip_front = 4
@@ -174,21 +190,39 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 			continue
 
 		var influence_map: InfluenceMap = maps_by_team[unit.team]
-		var approach_stamp: PackedFloat32Array = _create_projected_approach_stamp(
+		var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
 			influence_map,
 			config,
 			enemy_units
 		)
-
-		if approach_stamp.is_empty():
-			continue
+		
+		#if approach_stamp.is_empty():
+			#continue
 
 		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+		#var reserved_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
+			#influence_map,
+			#config,
+			#enemy_units
+		#)
+		
 		var composite: PackedFloat32Array = influence_map._composite
-		var result: PackedFloat32Array = influence_map.multiply_layers_with_return(
+		#var result: PackedFloat32Array = influence_map.multiply_layers_with_return(
+			#approach_stamp,
+			#composite
+		#)
+		
+		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+			composite,
 			approach_stamp,
-			composite
+			InfluenceMap.WriteMode.MULTIPLY
 		)
+		
+		#influence_map.write_stamp_to_layer_with_return(
+			#result,
+			#reserved_stamp,
+			#InfluenceMap.WriteMode.MULTIPLY
+		#)
 
 		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
 
@@ -216,7 +250,7 @@ func _create_projected_approach_stamp(
 	influence_map: InfluenceMap,
 	config: InfluenceProjectionConfig,
 	enemy_units: Array[Unit]
-) -> PackedFloat32Array:
+) -> InfluenceMap.InfluenceStamp:
 	var sources: Array[ProjectionSource] = _build_projected_line_sources(
 		enemy_units,
 		config.objective_hex,
@@ -225,19 +259,65 @@ func _create_projected_approach_stamp(
 		config.anchor_count
 	)
 
-	var combined_stamp: PackedFloat32Array = PackedFloat32Array()
+	var combined_stamp: InfluenceMap.InfluenceStamp = null
 	var has_stamp: bool = false
 
 	for source: ProjectionSource in sources:
-		var stamp: PackedFloat32Array = influence_map.create_origin_stamp(source.observer_hex)
+		var stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
+			source.observer_hex,
+			3,
+			1.0,
+			InfluenceMap.FalloffMode.SQUARE_ROOT
+		)
 
 		if not has_stamp:
 			combined_stamp = stamp
 			has_stamp = true
 		else:
-			combined_stamp = influence_map.add_layers_with_return(combined_stamp, stamp)
+			combined_stamp = influence_map.add_stamps_with_return(
+				combined_stamp,
+				stamp
+			)
+
+	if not has_stamp:
+		combined_stamp = InfluenceMap.InfluenceStamp.new(Vector2i.ZERO, Vector2i.ZERO)
 
 	return combined_stamp
+
+
+#func _create_projected_approach_stamp(
+	#influence_map: InfluenceMap,
+	#config: InfluenceProjectionConfig,
+	#enemy_units: Array[Unit]
+#) -> PackedFloat32Array:
+	#var sources: Array[ProjectionSource] = _build_projected_line_sources(
+		#enemy_units,
+		#config.objective_hex,
+		#config.projected_line_max_cells,
+		#config.anchor_skip_front,
+		#config.anchor_count
+	#)
+#
+	#var combined_stamp: PackedFloat32Array = PackedFloat32Array()
+	#var has_stamp: bool = false
+#
+	#for source: ProjectionSource in sources:
+		##var stamp: PackedFloat32Array = influence_map.create_origin_stamp(source.observer_hex)
+		#var stamp: PackedFloat32Array = influence_map.create_radius_stamp(
+			#source.observer_hex,
+			#3,
+			#1.0,
+			#InfluenceMap.FalloffMode.SQUARE_ROOT
+		#)
+		#
+#
+		#if not has_stamp:
+			#combined_stamp = stamp
+			#has_stamp = true
+		#else:
+			#combined_stamp = influence_map.add_layers_with_return(combined_stamp, stamp)
+#
+	#return combined_stamp
 
 
 func _build_projected_line_sources(
@@ -1150,15 +1230,24 @@ func _write_friendly_support_for_team(influence_map: InfluenceMap, team: int) ->
 
 		var support_radius: int = 5
 		var support_value: float = _get_unit_support_value(unit)
-
+		
 		influence_map.stamp_radius(
 			InfluenceMap.Layer.FRIENDLY_SUPPORT,
 			unit.current_hex,
 			support_radius,
 			support_value,
 			InfluenceMap.WriteMode.ADD,
-			true
+			InfluenceMap.FalloffMode.LINEAR
 		)
+		
+		#influence_map.stamp_radius(
+			#InfluenceMap.Layer.FRIENDLY_SUPPORT,
+			#unit.current_hex,
+			#support_radius,
+			#support_value,
+			#InfluenceMap.WriteMode.ADD,
+			#true
+		#)
 
 
 func _write_known_enemy_positions_for_team(influence_map: InfluenceMap, team: int) -> void:
@@ -1176,15 +1265,24 @@ func _write_known_enemy_positions_for_team(influence_map: InfluenceMap, team: in
 
 		if not _team_has_contact_on_unit(team, unit):
 			continue
-
+		
 		influence_map.stamp_radius(
 			InfluenceMap.Layer.KNOWN_ENEMY_POSITION,
 			unit.current_hex,
 			2,
 			1.0,
 			InfluenceMap.WriteMode.MAX,
-			true
+			InfluenceMap.FalloffMode.LINEAR
 		)
+		
+		#influence_map.stamp_radius(
+			#InfluenceMap.Layer.KNOWN_ENEMY_POSITION,
+			#unit.current_hex,
+			#2,
+			#1.0,
+			#InfluenceMap.WriteMode.MAX,
+			#true
+		#)
 
 
 func _get_enemy_team(team: int) -> int:
