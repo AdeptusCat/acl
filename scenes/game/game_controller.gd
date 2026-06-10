@@ -8,6 +8,8 @@ extends Node2D
 @onready var win_condition_timer: Timer = $WinConditionTimer
 @onready var influence_map_debug_draw: InfluenceMapDebugDraw = $InfluenceMapDebugDraw
 @onready var influence_map_controller: InfluenceMapController = $InfluenceMapController
+@onready var defense_director: DefenseDirector = $DefenseDirector
+@onready var platoon_ai: PlatoonAI = $PlatoonAi
 
 
 @export var allies_objective_tilemap : TileMapLayer
@@ -842,6 +844,10 @@ func start_game(team: Globals.Team, time: float):
 	else:
 		allies_ai_active = true
 	
+	
+	defense_director.manual_threat_axes = create_test_axes()
+	defense_director.assign_order_to_platoon()
+	$PlatoonAi
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 	#match Globals.game_mode:
@@ -862,6 +868,42 @@ func start_game(team: Globals.Team, time: float):
 		#if controller.active:
 			#controller.active = allies_ai_active
 			#controller.mission_mode = ai_mission_mode
+
+
+func create_test_axes() -> Array[ThreatAxis]:
+	var axes: Array[ThreatAxis] = []
+
+	var north_axis: ThreatAxis = ThreatAxis.new()
+	north_axis.axis_name = "North Road"
+	north_axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+	north_axis.source_hex = Vector2i(10, 2)
+	north_axis.target_hex = influence_map_controller.objective_hex
+	north_axis.estimated_enemy_count = 8
+	north_axis.estimated_firepower = 3.0
+	north_axis.confidence = 1.0
+	north_axis.proximity_to_objective = 0.7
+	north_axis.attack_lane_quality = 0.8
+	north_axis.flank_danger = 0.2
+	north_axis.time_pressure = 0.6
+	north_axis.recompute_score()
+	axes.append(north_axis)
+
+	var east_axis: ThreatAxis = ThreatAxis.new()
+	east_axis.axis_name = "East Woods"
+	east_axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+	east_axis.source_hex = Vector2i(18, 8)
+	north_axis.target_hex = influence_map_controller.objective_hex
+	east_axis.estimated_enemy_count = 5
+	east_axis.estimated_firepower = 2.0
+	east_axis.confidence = 0.8
+	east_axis.proximity_to_objective = 0.5
+	east_axis.attack_lane_quality = 0.6
+	east_axis.flank_danger = 0.9
+	east_axis.time_pressure = 0.4
+	east_axis.recompute_score()
+	axes.append(east_axis)
+
+	return axes
 
 
 func index_to_char(i: int) -> String:

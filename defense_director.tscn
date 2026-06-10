@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bded2il2i85hf"]
+
+[ext_resource type="Script" uid="uid://pnfl68ete2qo" path="res://defense_director.gd" id="1_trvih"]
+
+[node name="DefenseDirector" type="Node" unique_id=837909797]
+script = ExtResource("1_trvih")

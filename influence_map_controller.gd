@@ -230,9 +230,10 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 		if unit.best_index >= 0 and unit.best_index < result.size():
 			previous_best_value = result[unit.best_index]
 
-		if best_value * config.move_improvement_ratio > previous_best_value:
-			unit.order(Globals.UnitCmd.MOVE, best_hex)
-			unit.best_index = best_index
+		# TODO convert this to platoon ai
+		#if best_value * config.move_improvement_ratio > previous_best_value:
+			#unit.order(Globals.UnitCmd.MOVE, best_hex)
+			#unit.best_index = best_index
 
 		unit.influence_map = result
 	
