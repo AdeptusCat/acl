@@ -46,6 +46,7 @@ class InfluenceProjectionConfig:
 	var los_count: int = 4
 
 	var move_improvement_ratio: float = 0.8
+	var threat_axis: ThreatAxis = null
 
 
 class ProjectionSource:
@@ -112,7 +113,7 @@ func _process_budgeted_rebuild() -> void:
 
 	rebuild_pending = false
 	influence_maps_updated.emit()
-	_run_post_rebuild_tactical_tasks()
+	#_run_post_rebuild_tactical_tasks()
 	
 	## test ###
 	#var influence_map1: InfluenceMap = maps_by_team[Globals.Team.AXIS]
@@ -135,6 +136,13 @@ func _run_post_rebuild_tactical_tasks() -> void:
 	var config: InfluenceProjectionConfig = _create_axis_defense_config()
 	config.objective_hex = objective_hex
 	_assign_best_positions_for_config(config)
+
+
+func run_post_rebuild_tactical_tasks_with_threataxis(axis: ThreatAxis, units: Array[Unit]) -> void:
+	var config: InfluenceProjectionConfig = _create_axis_defense_config()
+	config.objective_hex = objective_hex
+	config.threat_axis = axis
+	_assign_best_positions_for_config_and_threataxis(config, units)
 
 
 func _create_axis_defense_config() -> InfluenceProjectionConfig:
@@ -231,57 +239,85 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 			previous_best_value = result[unit.best_index]
 
 		# TODO convert this to platoon ai
-		#if best_value * config.move_improvement_ratio > previous_best_value:
-			#unit.order(Globals.UnitCmd.MOVE, best_hex)
-			#unit.best_index = best_index
+		if best_value * config.move_improvement_ratio > previous_best_value:
+			unit.order(Globals.UnitCmd.MOVE, best_hex)
+			unit.best_index = best_index
 
 		unit.influence_map = result
-	
-	#for unit: Unit in units:
-		#if not _is_valid_living_unit(unit):
-			#continue
-#
-		#if not maps_by_team.has(unit.team):
-			#continue
-#
-		#var influence_map: InfluenceMap = maps_by_team[unit.team]
-		#var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp(
-			#influence_map,
-			#config,
-			#enemy_units
-		#)
-#
-		#var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
-		#
-		#var composite: PackedFloat32Array = influence_map._composite
-		#
-		#var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
-			#composite,
-			#approach_stamp,
-			#InfluenceMap.WriteMode.MULTIPLY
-		#)
-#
-		#result = influence_map.multiply_layers_with_return(result, reserved_stamp)
-#
-		#var best_index: int = influence_map.get_max_value_index(result)
-		#if best_index == -1:
-			#continue
-#
-		#var best_value: float = result[best_index]
-		#var best_hex: Vector2i = influence_map.index_to_cell(best_index)
-#
-		#reserved_hexes.append(best_hex)
-#
-		#var previous_best_value: float = -INF
-		#if unit.best_index >= 0 and unit.best_index < result.size():
-			#previous_best_value = result[unit.best_index]
-#
-		#if best_value * config.move_improvement_ratio > previous_best_value:
-			#unit.order(Globals.UnitCmd.MOVE, best_hex)
-			#unit.best_index = best_index
-#
-		#unit.influence_map = result
 
+
+
+
+func _assign_best_positions_for_config_and_threataxis(
+	config: InfluenceProjectionConfig,
+	axis_units: Array[Unit] = []
+) -> void:
+	var units: Array[Unit] = axis_units
+
+	if units.is_empty():
+		units = _get_config_units(config.unit_team, config.unit_group)
+
+	if units.is_empty():
+		return
+
+	if config.threat_axis == null:
+		var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
+		if enemy_units.is_empty():
+			return
+
+	var reserved_hexes: Array[Vector2i] = []
+	var ordered_units: Array[Unit] = []
+
+	for unit: Unit in units:
+		if not _is_valid_living_unit(unit):
+			continue
+
+		if not maps_by_team.has(unit.team):
+			continue
+
+		ordered_units.append(unit)
+
+	ordered_units.sort_custom(_compare_units_by_squad_type_priority)
+
+	for unit: Unit in ordered_units:
+		var influence_map: InfluenceMap = maps_by_team[unit.team]
+
+		var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp_with_threataxis(
+			influence_map,
+			config
+		)
+
+		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+		var composite: PackedFloat32Array = influence_map._composite
+
+		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+			composite,
+			approach_stamp,
+			InfluenceMap.WriteMode.MULTIPLY,
+			true
+		)
+
+		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+
+		var best_index: int = influence_map.get_max_value_index(result)
+		if best_index == -1:
+			continue
+
+		var best_value: float = result[best_index]
+		var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+
+		reserved_hexes.append(best_hex)
+
+		var previous_best_value: float = -INF
+		if unit.best_index >= 0 and unit.best_index < result.size():
+			previous_best_value = result[unit.best_index]
+
+		# TODO convert this to platoon ai
+		if best_value * config.move_improvement_ratio > previous_best_value:
+			unit.order(Globals.UnitCmd.MOVE, best_hex)
+			unit.best_index = best_index
+
+		unit.influence_map = result
 
 
 func _get_squad_type_priority(squad_type: Globals.SquadType) -> int:
@@ -353,6 +389,91 @@ func _create_projected_approach_stamp(
 		combined_stamp = InfluenceMap.InfluenceStamp.new(Vector2i.ZERO, Vector2i.ZERO)
 
 	return combined_stamp
+
+
+
+func _create_projected_approach_stamp_with_threataxis(
+	influence_map: InfluenceMap,
+	config: InfluenceProjectionConfig
+) -> InfluenceMap.InfluenceStamp:
+	var sources: Array[ProjectionSource] = []
+
+	if config.threat_axis != null:
+		sources = _build_projected_line_sources_from_axis_alt(
+			config.threat_axis,
+			config.objective_hex,
+			config.projected_line_max_cells,
+			config.anchor_skip_front,
+			config.anchor_count
+		)
+	else:
+		var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
+		sources = _build_projected_line_sources(
+			enemy_units,
+			config.objective_hex,
+			config.projected_line_max_cells,
+			config.anchor_skip_front,
+			config.anchor_count
+		)
+
+	var combined_stamp: InfluenceMap.InfluenceStamp = null
+	var has_stamp: bool = false
+
+	for source: ProjectionSource in sources:
+		var stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
+			source.observer_hex,
+			2,
+			1.0,
+			InfluenceMap.FalloffMode.SQUARE_ROOT
+		)
+
+		if not has_stamp:
+			combined_stamp = stamp
+			has_stamp = true
+		else:
+			combined_stamp = influence_map.add_stamps_with_return(
+				combined_stamp,
+				stamp
+			)
+
+	if not has_stamp:
+		combined_stamp = InfluenceMap.InfluenceStamp.new(Vector2i.ZERO, Vector2i.ZERO)
+
+	return combined_stamp
+
+
+func _build_projected_line_sources_from_axis_alt(
+	axis: ThreatAxis,
+	objective: Vector2i,
+	max_cells: int,
+	skip_front: int,
+	count: int
+) -> Array[ProjectionSource]:
+	var sources: Array[ProjectionSource] = []
+
+	if axis == null:
+		return sources
+
+	var projected_hexes: Array[Vector2i] = _get_projected_line_hexes(
+		objective,
+		axis.source_hex,
+		max_cells,
+		skip_front,
+		count
+	)
+
+	for observer_hex: Vector2i in projected_hexes:
+		var source: ProjectionSource = ProjectionSource.new(
+			null,
+			observer_hex,
+			1.0,
+			1.0
+		)
+
+		sources.append(source)
+
+	return sources
+
 
 
 #func _create_projected_approach_stamp(

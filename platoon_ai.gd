@@ -1,15 +1,16 @@
 class_name PlatoonAI
 extends Node
 
-@export var reconsider_interval: float = 5.0
+@export var reconsider_interval: float = 1.0
 
 var current_order: MissionOrder = null
 @export var squads: Array[Unit] = []
 var squad_assignments: Dictionary = {}
 var time_until_reconsider: float = 0.0
-
+@export var influence_map_controller: InfluenceMapController
 
 func _process(delta: float) -> void:
+	#return
 	if current_order == null:
 		return
 
@@ -128,7 +129,37 @@ func _assign_reserve_squad(squad: Unit) -> void:
 	}
 
 
-func _assign_squads_to_axes(available_squads: Array[Unit], sorted_axes: Array[ThreatAxis]) -> void:
+#func _assign_squads_to_axes(available_squads: Array[Unit], sorted_axes: Array[ThreatAxis]) -> void:
+	#if available_squads.is_empty():
+		#return
+#
+	#if sorted_axes.is_empty():
+		#_assign_squads_to_objective_defense(available_squads)
+		#return
+#
+	#var squad_index: int = 0
+#
+	#for squad: Unit in available_squads:
+		#var axis: ThreatAxis = sorted_axes[squad_index]
+		#
+		#var target_hex: Vector2i = _find_best_defense_hex_for_axis(squad, axis)
+#
+		#squad_assignments[squad] = {
+			#"role": "defend_axis",
+			#"axis": axis,
+			#"target_hex": target_hex,
+		#}
+#
+		#squad_index += 1
+#
+		#if squad_index >= sorted_axes.size():
+			#squad_index = 0
+
+
+func _assign_squads_to_axes(
+	available_squads: Array[Unit],
+	sorted_axes: Array[ThreatAxis]
+) -> void:
 	if available_squads.is_empty():
 		return
 
@@ -136,23 +167,46 @@ func _assign_squads_to_axes(available_squads: Array[Unit], sorted_axes: Array[Th
 		_assign_squads_to_objective_defense(available_squads)
 		return
 
-	var squad_index: int = 0
+	var axis_units_by_axis: Dictionary = _distribute_squads_over_axes(
+		available_squads,
+		sorted_axes
+	)
+
+	for axis: ThreatAxis in sorted_axes:
+		var assigned_units: Array[Unit] = axis_units_by_axis[axis]
+
+		influence_map_controller.run_post_rebuild_tactical_tasks_with_threataxis(
+			axis,
+			assigned_units
+		)
+
+
+func _distribute_squads_over_axes(
+	available_squads: Array[Unit],
+	sorted_axes: Array[ThreatAxis]
+) -> Dictionary:
+	var axis_units_by_axis: Dictionary = {}
+
+	for axis: ThreatAxis in sorted_axes:
+		var axis_units: Array[Unit] = []
+		axis_units_by_axis[axis] = axis_units
+
+	var axis_index: int = 0
 
 	for squad: Unit in available_squads:
-		var axis: ThreatAxis = sorted_axes[squad_index]
+		var axis: ThreatAxis = sorted_axes[axis_index]
+		var axis_units: Array[Unit] = axis_units_by_axis[axis]
 
-		var target_hex: Vector2i = _find_best_defense_hex_for_axis(squad, axis)
+		axis_units.append(squad)
+		axis_units_by_axis[axis] = axis_units
 
-		squad_assignments[squad] = {
-			"role": "defend_axis",
-			"axis": axis,
-			"target_hex": target_hex,
-		}
+		axis_index += 1
 
-		squad_index += 1
+		if axis_index >= sorted_axes.size():
+			axis_index = 0
 
-		if squad_index >= sorted_axes.size():
-			squad_index = 0
+	return axis_units_by_axis
+
 
 
 func _find_best_defense_hex_for_axis(squad: Unit, axis: ThreatAxis) -> Vector2i:

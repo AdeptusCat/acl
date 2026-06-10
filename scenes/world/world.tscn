@@ -2357,8 +2357,9 @@ draw_cell_values = true
 [node name="DefenseDirector" parent="GameController" unique_id=837909797 node_paths=PackedStringArray("platoon_ai") instance=ExtResource("92_i1y2t")]
 platoon_ai = NodePath("../PlatoonAi")
 
-[node name="PlatoonAi" parent="GameController" unique_id=1445759041 node_paths=PackedStringArray("squads") instance=ExtResource("60_mrxq0")]
+[node name="PlatoonAi" parent="GameController" unique_id=1445759041 node_paths=PackedStringArray("squads", "influence_map_controller") instance=ExtResource("60_mrxq0")]
 squads = [NodePath("../../Maps/DefaultMap/Scenarios/OutpostProbe/Units/CA_P1_S1_Axis_MG"), NodePath("../../Maps/DefaultMap/Scenarios/OutpostProbe/Units/CA_P1_S2_Axis_Rifle")]
+influence_map_controller = NodePath("../InfluenceMapController")
 
 [node name="TargetArea" type="Node2D" parent="." unique_id=403286200]
 script = ExtResource("55_7rtjl")
