@@ -1854,11 +1854,11 @@ func calculate_enemy_gradients_to_team_center(
 ) -> Array[InfluenceMap.UnitInfluenceGradient]:
 	var result: Array[InfluenceMap.UnitInfluenceGradient] = []
 
-	if not maps_by_team.has(target_team):
+	if not maps_by_team.has(enemy_team):
 		return result
 
-	var target_map: InfluenceMap = maps_by_team[target_team]
-	var enemies: Array[Unit] = Globals.get_units_for_team(enemy_team)
+	var target_map: InfluenceMap = maps_by_team[enemy_team]
+	var enemies: Array[Unit] = Globals.get_units_for_team(target_team)
 
 	for enemy: Unit in enemies:
 		if not _is_valid_living_unit(enemy):
