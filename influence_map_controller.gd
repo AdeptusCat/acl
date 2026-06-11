@@ -10,6 +10,11 @@ var maps_by_team: Dictionary[int, InfluenceMap] = {}
 var allied_weights: PackedFloat32Array = PackedFloat32Array()
 var axis_weights: PackedFloat32Array = PackedFloat32Array()
 
+var center_of_mass: Dictionary[Globals.Team, Vector2i] = {
+	Globals.Team.AXIS: Vector2i.ZERO,
+	Globals.Team.ALLIES: Vector2i.ZERO,
+}
+
 var rebuild_pending: bool = false
 
 var objective_hex: Vector2i = Vector2i(11, 13)
@@ -875,13 +880,41 @@ func rebuild_dynamic_tactical_layers() -> void:
 		influence_map.clear_layer(InfluenceMap.Layer.FIRE_POWER, 0.0)
 		influence_map.clear_layer(InfluenceMap.Layer.FRIENDLY_SUPPORT, 0.0)
 		influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
+		influence_map.clear_layer(InfluenceMap.Layer.UNIT_INFLUENCE, 0.0)
 
 		_write_visibility_for_team(influence_map, team)
 		rebuild_los_influence_for_team(influence_map, team)
+		_write_unit_influence_for_team(influence_map, team)
 		#_write_friendly_support_for_team(influence_map, team)
 		#_write_known_enemy_positions_for_team(influence_map, team)
 
 	rebuild_pending = true
+
+
+func _write_unit_influence_for_team(influence_map: InfluenceMap, team: int) -> void:
+	#var units: Array[Unit] = Globals.get_units_for_team(team)
+	var units: Array[Unit] = Globals.get_units()
+
+	for unit: Unit in units:
+		if not _is_valid_living_unit(unit):
+			continue
+		
+		var write_mode: InfluenceMap.WriteMode = InfluenceMap.WriteMode.ADD
+		if not team == unit.team:
+			write_mode = InfluenceMap.WriteMode.SUBSTRACT
+		
+		influence_map.stamp_radius(
+			InfluenceMap.Layer.UNIT_INFLUENCE,
+			unit.current_hex,
+			InfluenceMap.UNIT_INFLUENCE_RADIUS,
+			InfluenceMap.UNIT_INFLUENCE_VALUE,
+			write_mode,
+			InfluenceMap.FalloffMode.LINEAR
+		)
+	
+	var max_value_index: int = influence_map.get_max_value_index(influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE])
+	center_of_mass[team] = influence_map.index_to_cell(max_value_index)
+	pass
 
 
 func _write_static_terrain_for_map(influence_map: InfluenceMap) -> void:

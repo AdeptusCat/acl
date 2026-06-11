@@ -16,7 +16,7 @@ enum DebugView {
 	
 	COVER_VS_ENEMY_FIRE,
 	VISIBILITY_HINDRANCE,
-	ORIGIN_INFLUENCE,
+	UNIT_INFLUENCE,
 	#RETURN_FIRE_PENALTY,
 	
 	#FRIENDLY_SUPPORT,
@@ -35,7 +35,7 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 	DebugView.VISIBILITY_HINDRANCE: "VISIBILITY_HINDRANCE",
 	DebugView.THREAT: "THREAT",
 	DebugView.ENEMY_VULNERABILITY: "ENEMY_VULNERABILITY",
-	DebugView.ORIGIN_INFLUENCE: "ORIGIN_INFLUENCE",
+	DebugView.UNIT_INFLUENCE: "UNIT_INFLUENCE",
 }
 
 
@@ -291,8 +291,8 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 	if p_debug_view == DebugView.ENEMY_VULNERABILITY:
 		return InfluenceMap.Layer.ENEMY_VULNERABILITY
 	
-	if p_debug_view == DebugView.ORIGIN_INFLUENCE:
-		return InfluenceMap.Layer.ORIGIN_INFLUENCE
+	if p_debug_view == DebugView.UNIT_INFLUENCE:
+		return InfluenceMap.Layer.UNIT_INFLUENCE
 
 	#if p_debug_view == DebugView.FRIENDLY_SUPPORT:
 		#return InfluenceMap.Layer.FRIENDLY_SUPPORT
@@ -424,7 +424,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_2:
-		set_debug_view(DebugView.ORIGIN_INFLUENCE)
+		set_debug_view(DebugView.UNIT_INFLUENCE)
 		return
 
 	if key_event.keycode == KEY_3:

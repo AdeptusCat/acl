@@ -1228,9 +1228,19 @@ func find_units_at(hex: Vector2i) -> Array[Unit]:
 	return units
 
 
-func hex_distance(a: Vector2i, b: Vector2i) -> int:
+func get_hex_distance(a: Vector2i, b: Vector2i) -> int:
 	var a_cube: Vector3i = ground_layer.map_to_cube(a)
 	var b_cube: Vector3i = ground_layer.map_to_cube(b)
 
 	var distance: int = ground_layer.cube_distance(a_cube, b_cube)
 	return distance
+
+
+func get_hex_neighbors(a: Vector2i) -> Array[Vector2i]:
+	var cube: Vector3i = ground_layer.map_to_cube(a)
+	var cube_neighbors: Array[Vector3i] = ground_layer.cube_neighbors(cube)
+	var hex_neighbors: Array[Vector2i]
+	for cube_neighbor in cube_neighbors:
+		var hex: Vector2i = ground_layer.cube_to_map(cube_neighbor)
+		hex_neighbors.append(hex)
+	return hex_neighbors

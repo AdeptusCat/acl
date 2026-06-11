@@ -14,7 +14,7 @@ enum Layer {
 	COVER_VS_ENEMY_FIRE,
 	VISIBILITY_HINDRANCE,
 	
-	ORIGIN_INFLUENCE,
+	UNIT_INFLUENCE,
 	
 	RETURN_FIRE_PENALTY,
 	
@@ -29,6 +29,7 @@ enum Layer {
 enum WriteMode {
 	SET,
 	ADD,
+	SUBSTRACT,
 	MAX,
 	MIN,
 	MULTIPLY
@@ -50,6 +51,9 @@ var origin_influence_decay_timer_s: float = 0.0
 
 const DEFAULT_COMPOSITE_MIN: float = 0.05
 const DEFAULT_COMPOSITE_MAX: float = 20.0
+
+const UNIT_INFLUENCE_RADIUS: int = 5
+const UNIT_INFLUENCE_VALUE: float = 5.0
 
 var bounds: Rect2i = Rect2i()
 var width: int = 0
@@ -277,6 +281,22 @@ func add_layer_value(layer_id: int, cell: Vector2i, value: float) -> void:
 	_layers[layer_id] = data
 
 	_mark_dirty_index(index)
+
+
+func substract_layer_value(layer_id: int, cell: Vector2i, value: float) -> void:
+	if not is_valid_layer(layer_id):
+		return
+
+	if not is_valid_cell(cell):
+		return
+	
+	var index: int = cell_to_index(cell)
+	var data: PackedFloat32Array = _layers[layer_id]
+	data[index] -= value
+	_layers[layer_id] = data
+
+	_mark_dirty_index(index)
+
 
 
 func max_layer_value(layer_id: int, cell: Vector2i, value: float) -> void:
@@ -743,7 +763,11 @@ func _write_layer_value(layer_id: int, cell: Vector2i, value: float, mode: int) 
 	if mode == WriteMode.SET:
 		set_layer_value(layer_id, cell, value)
 		return
-
+	
+	if mode == WriteMode.SUBSTRACT:
+		substract_layer_value(layer_id, cell, value)
+		return
+	
 	if mode == WriteMode.ADD:
 		add_layer_value(layer_id, cell, value)
 		return
@@ -910,7 +934,7 @@ func multiply_layers(layer_a: int, layer_b: int, target_layer: int) -> void:
 
 
 func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
-	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+	var values: PackedFloat32Array = _layers[Layer.UNIT_INFLUENCE]
 
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
@@ -957,11 +981,11 @@ func create_reserved_stamp(reserved_hexes: Array[Vector2i]) -> PackedFloat32Arra
 	return values
 
 
-func stamp_origin_influence(origin_hex: Vector2i) -> void:
-	if not is_valid_layer(Layer.ORIGIN_INFLUENCE):
+func stamp_unit_influence(origin_hex: Vector2i) -> void:
+	if not is_valid_layer(Layer.UNIT_INFLUENCE):
 		return
 
-	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+	var values: PackedFloat32Array = _layers[Layer.UNIT_INFLUENCE]
 
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
@@ -983,10 +1007,10 @@ func stamp_origin_influence(origin_hex: Vector2i) -> void:
 
 			values[index] = value
 
-	_layers[Layer.ORIGIN_INFLUENCE] = values
+	_layers[Layer.UNIT_INFLUENCE] = values
 
 
-func update_origin_influence_decay(delta: float) -> void:
+func update_unit_influence_decay(delta: float) -> void:
 	origin_influence_decay_timer_s += delta
 
 	if origin_influence_decay_timer_s < ORIGIN_INFLUENCE_DECAY_INTERVAL_S:
@@ -994,14 +1018,14 @@ func update_origin_influence_decay(delta: float) -> void:
 
 	origin_influence_decay_timer_s -= ORIGIN_INFLUENCE_DECAY_INTERVAL_S
 
-	_decay_origin_influence_values()
+	_decay_unit_influence_values()
 
 
-func _decay_origin_influence_values() -> void:
-	if not is_valid_layer(Layer.ORIGIN_INFLUENCE):
+func _decay_unit_influence_values() -> void:
+	if not is_valid_layer(Layer.UNIT_INFLUENCE):
 		return
 
-	var values: PackedFloat32Array = _layers[Layer.ORIGIN_INFLUENCE]
+	var values: PackedFloat32Array = _layers[Layer.UNIT_INFLUENCE]
 
 	for i in range(values.size()):
 		values[i] -= ORIGIN_INFLUENCE_TIME_LOSS
@@ -1009,7 +1033,7 @@ func _decay_origin_influence_values() -> void:
 		if values[i] < 0.0:
 			values[i] = 0.0
 
-	_layers[Layer.ORIGIN_INFLUENCE] = values
+	_layers[Layer.UNIT_INFLUENCE] = values
 
 
 func get_max_value(values: PackedFloat32Array) -> float:
@@ -1046,3 +1070,36 @@ func get_max_value_index(values: PackedFloat32Array) -> int:
 		i += 1
 
 	return best_index
+
+
+func get_best_gradient_neighbor(
+	layer_id: int,
+	from_cell: Vector2i,
+	bias_cell: Vector2i,
+	bias_weight: float
+) -> Vector2i:
+	var value_here: float = get_layer_value(layer_id, from_cell)
+	var best_cell: Vector2i = from_cell
+	var best_score: float = -INF
+
+	var current_bias_distance: int = LOSHelper.hex_distance(from_cell, bias_cell)
+	var neighbors: Array[Vector2i] = LOSHelper.get_hex_neighbors(from_cell)
+
+	for neighbor_cell: Vector2i in neighbors:
+		if not is_valid_cell(neighbor_cell):
+			continue
+
+		var neighbor_value: float = get_layer_value(layer_id, neighbor_cell)
+		var influence_gain: float = neighbor_value - value_here
+
+		var neighbor_bias_distance: int = LOSHelper.hex_distance(neighbor_cell, bias_cell)
+		var bias_gain: float = float(current_bias_distance - neighbor_bias_distance)
+
+		var score: float = influence_gain
+		score += bias_gain * bias_weight
+
+		if score > best_score:
+			best_score = score
+			best_cell = neighbor_cell
+
+	return best_cell
