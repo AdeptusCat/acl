@@ -177,3 +177,10 @@ func load_match_data(match_id: String) -> MatchSaveData:
 		return null
 
 	return match_save
+
+
+func get_enemy_team(team: int) -> int:
+	if team == Globals.Team.ALLIES:
+		return Globals.Team.AXIS
+
+	return Globals.Team.ALLIES

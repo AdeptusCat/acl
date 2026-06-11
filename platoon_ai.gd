@@ -256,7 +256,7 @@ func _get_objective_anchor_score(hex: Vector2i) -> float:
 	if current_order == null:
 		return 0.0
 
-	var distance: int = LOSHelper.hex_distance(hex, current_order.objective_hex)
+	var distance: int = LOSHelper.get_hex_distance(hex, current_order.objective_hex)
 	var score: float = 1.0 - float(distance) * 0.1
 
 	if score < 0.0:
@@ -281,7 +281,7 @@ func _get_distance_from_squad_penalty(squad: Unit, hex: Vector2i) -> float:
 	if squad == null:
 		return 0.0
 
-	var distance: int = LOSHelper.hex_distance(squad.current_hex, hex)
+	var distance: int = LOSHelper.get_hex_distance(squad.current_hex, hex)
 	return float(distance) * 0.1
 
 

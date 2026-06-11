@@ -73,6 +73,32 @@ var composite_max: float = DEFAULT_COMPOSITE_MAX
 var composite_base: float = 1.0
 
 
+const UNIT_INFLUENCE_CENTER_PULL_WEIGHT: float = 0.25
+
+
+class UnitInfluenceGradient:
+	var unit: Unit = null
+	var from_hex: Vector2i = Vector2i.ZERO
+	var next_hex: Vector2i = Vector2i.ZERO
+	var value_here: float = 0.0
+	var value_next: float = 0.0
+	var influence_gain: float = 0.0
+
+	func _init(
+		p_unit: Unit,
+		p_from_hex: Vector2i,
+		p_next_hex: Vector2i,
+		p_value_here: float,
+		p_value_next: float
+	) -> void:
+		unit = p_unit
+		from_hex = p_from_hex
+		next_hex = p_next_hex
+		value_here = p_value_here
+		value_next = p_value_next
+		influence_gain = value_next - value_here
+
+
 class InfluenceStamp extends RefCounted:
 	var values: PackedFloat32Array = PackedFloat32Array()
 	var min_cell: Vector2i = Vector2i.ZERO
@@ -120,6 +146,24 @@ class InfluenceStamp extends RefCounted:
 		var index: int = get_index(local_x, local_y)
 
 		values[index] += value
+
+
+
+
+
+func get_unit_influence_value(influence_map: InfluenceMap, cell: Vector2i) -> float:
+	if not influence_map.is_valid_cell(cell):
+		return 0.0
+
+	var index: int = influence_map.get_cell_index(cell)
+	if index < 0:
+		return 0.0
+
+	var layer: PackedFloat32Array = influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+	if index >= layer.size():
+		return 0.0
+
+	return layer[index]
 
 
 func get_layer_value_by_cell(layer_id: int, cell: Vector2i, fallback: float = 0.0) -> float:
@@ -576,7 +620,7 @@ func create_radius_stamp(
 				pass
 			if cell == Vector2i(7,8):
 				pass
-			var distance: int = LOSHelper.hex_distance(center, cell)
+			var distance: int = LOSHelper.get_hex_distance(center, cell)
 			
 			if distance <= radius:
 				var index: int = stamp.get_index(x, y)
@@ -939,7 +983,7 @@ func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var distance: int = LOSHelper.hex_distance(origin_hex, hex)
+			var distance: int = LOSHelper.get_hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue
@@ -990,7 +1034,7 @@ func stamp_unit_influence(origin_hex: Vector2i) -> void:
 	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
 		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
-			var distance: int = LOSHelper.hex_distance(origin_hex, hex)
+			var distance: int = LOSHelper.get_hex_distance(origin_hex, hex)
 
 			if distance > ORIGIN_INFLUENCE_MAX_DISTANCE:
 				continue
@@ -1082,7 +1126,7 @@ func get_best_gradient_neighbor(
 	var best_cell: Vector2i = from_cell
 	var best_score: float = -INF
 
-	var current_bias_distance: int = LOSHelper.hex_distance(from_cell, bias_cell)
+	var current_bias_distance: int = LOSHelper.get_hex_distance(from_cell, bias_cell)
 	var neighbors: Array[Vector2i] = LOSHelper.get_hex_neighbors(from_cell)
 
 	for neighbor_cell: Vector2i in neighbors:
@@ -1092,7 +1136,7 @@ func get_best_gradient_neighbor(
 		var neighbor_value: float = get_layer_value(layer_id, neighbor_cell)
 		var influence_gain: float = neighbor_value - value_here
 
-		var neighbor_bias_distance: int = LOSHelper.hex_distance(neighbor_cell, bias_cell)
+		var neighbor_bias_distance: int = LOSHelper.get_hex_distance(neighbor_cell, bias_cell)
 		var bias_gain: float = float(current_bias_distance - neighbor_bias_distance)
 
 		var score: float = influence_gain
@@ -1103,3 +1147,38 @@ func get_best_gradient_neighbor(
 			best_cell = neighbor_cell
 
 	return best_cell
+
+
+func get_largest_gradient_value(
+	gradients: Array[UnitInfluenceGradient]
+) -> float:
+	if gradients.is_empty():
+		return 0.0
+
+	var largest_value: float = -INF
+
+	for gradient: UnitInfluenceGradient in gradients:
+		if gradient.influence_gain > largest_value:
+			largest_value = gradient.influence_gain
+
+	if largest_value == -INF:
+		return 0.0
+
+	return largest_value
+
+
+func get_largest_gradient(
+	gradients: Array[UnitInfluenceGradient]
+) -> UnitInfluenceGradient:
+	var best_gradient: UnitInfluenceGradient = null
+	var best_value: float = -INF
+
+	for gradient: UnitInfluenceGradient in gradients:
+		if gradient == null:
+			continue
+
+		if gradient.influence_gain > best_value:
+			best_value = gradient.influence_gain
+			best_gradient = gradient
+
+	return best_gradient

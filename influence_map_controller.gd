@@ -15,6 +15,12 @@ var center_of_mass: Dictionary[Globals.Team, Vector2i] = {
 	Globals.Team.ALLIES: Vector2i.ZERO,
 }
 
+var formations: Dictionary[Globals.Team, FormationIdentification] = {
+	Globals.Team.AXIS: null,
+	Globals.Team.ALLIES: null,
+}
+
+
 var rebuild_pending: bool = false
 
 var objective_hex: Vector2i = Vector2i(11, 13)
@@ -31,6 +37,36 @@ enum TacticalTask {
 	ATTACK_OBJECTIVE
 }
 
+const FORMATION_GROUP_RADIUS: int = 3
+
+enum FormationRole {
+	FRONT,
+	FLANK
+}
+
+class FormationGroup:
+	var role: FormationRole = FormationRole.FRONT
+	var seed_gradient: InfluenceMap.UnitInfluenceGradient = null
+	var seed_unit: Unit = null
+	var seed_hex: Vector2i = Vector2i.ZERO
+	var gradients: Array[InfluenceMap.UnitInfluenceGradient] = []
+	var units: Array[Unit] = []
+
+	func _init(
+		p_role: FormationRole,
+		p_seed_gradient: InfluenceMap.UnitInfluenceGradient
+	) -> void:
+		role = p_role
+		seed_gradient = p_seed_gradient
+
+		if seed_gradient != null:
+			seed_unit = seed_gradient.unit
+			seed_hex = seed_gradient.from_hex
+
+
+class FormationIdentification:
+	var front: FormationGroup = null
+	var flanks: Array[FormationGroup] = []
 
 class InfluenceProjectionConfig:
 	var unit_team: int = Globals.Team.AXIS
@@ -914,7 +950,183 @@ func _write_unit_influence_for_team(influence_map: InfluenceMap, team: int) -> v
 	
 	var max_value_index: int = influence_map.get_max_value_index(influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE])
 	center_of_mass[team] = influence_map.index_to_cell(max_value_index)
+	
+	var gradients: Array[InfluenceMap.UnitInfluenceGradient] = calculate_enemy_gradients_to_team_center(
+		Globals.get_enemy_team(team),
+		team,
+		center_of_mass[team]
+	)
+	
+	#for gradient: InfluenceMap.UnitInfluenceGradient in gradients:
+		#print(
+			#gradient.unit.name,
+			#" from ",
+			#gradient.from_hex,
+			#" next ",
+			#gradient.next_hex,
+			#" gain ",
+			#gradient.influence_gain
+		#)
+	
+	var best_gradient: InfluenceMap.UnitInfluenceGradient = influence_map.get_largest_gradient(gradients)
+	#if best_gradient != null:
+		#var best_unit: Unit = best_gradient.unit
+		#var from_hex: Vector2i = best_gradient.from_hex
+		#var next_hex: Vector2i = best_gradient.next_hex
+		#var gradient_value: float = best_gradient.influence_gain
+#
+		#print(best_unit.name)
+		#print(from_hex)
+		#print(next_hex)
+		#print(gradient_value)
+	
+	var formation: FormationIdentification = identify_formations_from_gradients(
+		influence_map,
+		gradients,
+		best_gradient
+	)
+	
+	formations[team] = formation
+	
+	print(Globals.TEAM_NAMES[team])
+	if formation.front != null:
+		print("FRONT seed unit: ", formation.front.seed_unit.name)
+		print("FRONT seed hex: ", formation.front.seed_hex)
+		print("FRONT unit count: ", formation.front.units.size())
+
+	for flank: FormationGroup in formation.flanks:
+		print("FLANK seed unit: ", flank.seed_unit.name)
+		print("FLANK seed hex: ", flank.seed_hex)
+		print("FLANK unit count: ", flank.units.size())
+	
 	pass
+
+
+func identify_formations_from_gradients(
+	influence_map: InfluenceMap,
+	gradients: Array[InfluenceMap.UnitInfluenceGradient],
+	best_gradient: InfluenceMap.UnitInfluenceGradient
+) -> FormationIdentification:
+	var result: FormationIdentification = FormationIdentification.new()
+
+	if best_gradient == null:
+		return result
+
+	var assigned_units: Dictionary = {}
+
+	var front_group: FormationGroup = FormationGroup.new(
+		FormationRole.FRONT,
+		best_gradient
+	)
+
+	result.front = front_group
+
+	for gradient: InfluenceMap.UnitInfluenceGradient in gradients:
+		if not _is_valid_gradient(gradient):
+			continue
+
+		var distance_to_front: int = LOSHelper.get_hex_distance(
+			gradient.from_hex,
+			best_gradient.from_hex
+		)
+
+		if distance_to_front <= FORMATION_GROUP_RADIUS:
+			_add_gradient_to_formation_group(front_group, gradient, assigned_units)
+
+	var remaining_gradients: Array[InfluenceMap.UnitInfluenceGradient] = _get_unassigned_gradients(
+		gradients,
+		assigned_units
+	)
+
+	while not remaining_gradients.is_empty():
+		var flank_seed: InfluenceMap.UnitInfluenceGradient = influence_map.get_largest_gradient(
+			remaining_gradients
+		)
+
+		if flank_seed == null:
+			break
+
+		var flank_group: FormationGroup = FormationGroup.new(
+			FormationRole.FLANK,
+			flank_seed
+		)
+
+		_add_gradient_to_formation_group(flank_group, flank_seed, assigned_units)
+
+		for gradient: InfluenceMap.UnitInfluenceGradient in remaining_gradients:
+			if not _is_valid_gradient(gradient):
+				continue
+
+			if _is_unit_assigned(gradient.unit, assigned_units):
+				continue
+
+			var distance_to_flank: int = LOSHelper.get_hex_distance(
+				gradient.from_hex,
+				flank_seed.from_hex
+			)
+
+			if distance_to_flank <= FORMATION_GROUP_RADIUS:
+				_add_gradient_to_formation_group(flank_group, gradient, assigned_units)
+
+		result.flanks.append(flank_group)
+
+		remaining_gradients = _get_unassigned_gradients(
+			gradients,
+			assigned_units
+		)
+
+	return result
+
+
+func _add_gradient_to_formation_group(
+	group: FormationGroup,
+	gradient: InfluenceMap.UnitInfluenceGradient,
+	assigned_units: Dictionary
+) -> void:
+	if not _is_valid_gradient(gradient):
+		return
+
+	if _is_unit_assigned(gradient.unit, assigned_units):
+		return
+
+	group.gradients.append(gradient)
+	group.units.append(gradient.unit)
+	assigned_units[gradient.unit.get_instance_id()] = true
+
+
+func _get_unassigned_gradients(
+	gradients: Array[InfluenceMap.UnitInfluenceGradient],
+	assigned_units: Dictionary
+) -> Array[InfluenceMap.UnitInfluenceGradient]:
+	var result: Array[InfluenceMap.UnitInfluenceGradient] = []
+
+	for gradient: InfluenceMap.UnitInfluenceGradient in gradients:
+		if not _is_valid_gradient(gradient):
+			continue
+
+		if _is_unit_assigned(gradient.unit, assigned_units):
+			continue
+
+		result.append(gradient)
+
+	return result
+
+
+func _is_valid_gradient(gradient: InfluenceMap.UnitInfluenceGradient) -> bool:
+	if gradient == null:
+		return false
+
+	if gradient.unit == null:
+		return false
+
+	return true
+
+
+func _is_unit_assigned(unit: Unit, assigned_units: Dictionary) -> bool:
+	if unit == null:
+		return false
+
+	return assigned_units.has(unit.get_instance_id())
 
 
 func _write_static_terrain_for_map(influence_map: InfluenceMap) -> void:
@@ -932,7 +1144,7 @@ func _write_static_terrain_for_map(influence_map: InfluenceMap) -> void:
 
 
 func _write_visibility_for_team(influence_map: InfluenceMap, team: int) -> void:
-	var enemy_team: int = _get_enemy_team(team)
+	var enemy_team: int = Globals.get_enemy_team(team)
 	var visible_hexes: Array = LOSHelper.visible_hexes.get(enemy_team, [])
 
 	for cell: Vector2i in visible_hexes:
@@ -981,7 +1193,7 @@ func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
 	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
 	
 	config.unit_team = team
-	config.enemy_team = _get_enemy_team(team)
+	config.enemy_team = Globals.get_enemy_team(team)
 	config.unit_group = ""
 	config.enemy_group = ""
 	config.task = TacticalTask.DEFEND_OBJECTIVE
@@ -1263,7 +1475,7 @@ func _project_friendly_los_record(
 	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
 	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
 	
-	var distance: int = LOSHelper.hex_distance(observer_hex, target_hex)
+	var distance: int = LOSHelper.get_hex_distance(observer_hex, target_hex)
 	
 	if shooter_cover > 4:
 		observer_hex
@@ -1320,7 +1532,7 @@ func _project_enemy_los_record(
 	var hindrance: float = _read_los_float(los_data, "hindrance", 0.0)
 	var target_concealment: float = _read_los_float(los_data, "target_concealment", 0.0)
 	
-	var distance: int = LOSHelper.hex_distance(observer_hex, target_hex)
+	var distance: int = LOSHelper.get_hex_distance(observer_hex, target_hex)
 	
 	var threat: float = _calculate_los_fire_threat(
 		unit_firepower,
@@ -1466,7 +1678,7 @@ func _write_friendly_support_for_team(influence_map: InfluenceMap, team: int) ->
 
 
 func _write_known_enemy_positions_for_team(influence_map: InfluenceMap, team: int) -> void:
-	var enemy_team: int = _get_enemy_team(team)
+	var enemy_team: int = Globals.get_enemy_team(team)
 
 	for unit: Unit in Globals.get_units():
 		if not is_instance_valid(unit):
@@ -1499,12 +1711,6 @@ func _write_known_enemy_positions_for_team(influence_map: InfluenceMap, team: in
 			#true
 		#)
 
-
-func _get_enemy_team(team: int) -> int:
-	if team == Globals.Team.ALLIES:
-		return Globals.Team.AXIS
-
-	return Globals.Team.ALLIES
 
 
 func _get_cover_value_for_cell(_cell: Vector2i) -> float:
@@ -1568,3 +1774,102 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	objective_hex = LOSHelper.ground_layer.local_to_map(get_global_mouse_position()) 
 	print("objective hex: ", objective_hex)
+
+
+func _calculate_unit_gradient_to_influence_center(
+	unit: Unit,
+	target_map: InfluenceMap,
+	target_center_hex: Vector2i
+) -> InfluenceMap.UnitInfluenceGradient:
+	var from_hex: Vector2i = unit.current_hex
+	var value_here: float = target_map.get_unit_influence_value(target_map, from_hex)
+
+	var best_hex: Vector2i = from_hex
+	var best_value: float = value_here
+	var best_score: float = -INF
+
+	var current_center_distance: int = LOSHelper.get_hex_distance(from_hex, target_center_hex)
+	var neighbors: Array[Vector2i] = LOSHelper.get_hex_neighbors(from_hex)
+
+	for neighbor_hex: Vector2i in neighbors:
+		if not target_map.is_valid_cell(neighbor_hex):
+			continue
+
+		var neighbor_value: float = target_map.get_unit_influence_value(target_map, neighbor_hex)
+		var influence_gain: float = neighbor_value - value_here
+
+		var neighbor_center_distance: int = LOSHelper.get_hex_distance(neighbor_hex, target_center_hex)
+		var center_gain: float = float(current_center_distance - neighbor_center_distance)
+
+		var score: float = influence_gain
+		score += center_gain * target_map.UNIT_INFLUENCE_CENTER_PULL_WEIGHT
+
+		if score > best_score:
+			best_score = score
+			best_hex = neighbor_hex
+			best_value = neighbor_value
+
+	return InfluenceMap.UnitInfluenceGradient.new(
+		unit,
+		from_hex,
+		best_hex,
+		value_here,
+		best_value
+	)
+
+
+func calculate_enemy_gradient_steps_to_team_center(
+	enemy_team: int,
+	target_team: int,
+	target_center_hex: Vector2i
+) -> Dictionary:
+	var result: Dictionary = {}
+
+	if not maps_by_team.has(target_team):
+		return result
+
+	var target_map: InfluenceMap = maps_by_team[target_team]
+	var enemies: Array[Unit] = Globals.get_units_for_team(enemy_team)
+
+	for enemy: Unit in enemies:
+		if not _is_valid_living_unit(enemy):
+			continue
+
+		var next_hex: Vector2i = target_map.get_best_gradient_neighbor(
+			InfluenceMap.Layer.UNIT_INFLUENCE,
+			enemy.current_hex,
+			target_center_hex,
+			InfluenceMap.UNIT_INFLUENCE_CENTER_PULL_WEIGHT
+		)
+
+		result[enemy] = next_hex
+
+	return result
+
+
+func calculate_enemy_gradients_to_team_center(
+	enemy_team: int,
+	target_team: int,
+	target_center_hex: Vector2i
+) -> Array[InfluenceMap.UnitInfluenceGradient]:
+	var result: Array[InfluenceMap.UnitInfluenceGradient] = []
+
+	if not maps_by_team.has(target_team):
+		return result
+
+	var target_map: InfluenceMap = maps_by_team[target_team]
+	var enemies: Array[Unit] = Globals.get_units_for_team(enemy_team)
+
+	for enemy: Unit in enemies:
+		if not _is_valid_living_unit(enemy):
+			continue
+
+		var gradient: InfluenceMap.UnitInfluenceGradient = _calculate_unit_gradient_to_influence_center(
+			enemy,
+			target_map,
+			target_center_hex
+		)
+
+		result.append(gradient)
+
+	return result
