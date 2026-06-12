@@ -879,7 +879,7 @@ func _mark_dirty_index(index: int) -> void:
 	_dirty_indices.append(index)
 
 
-func add_stamps_with_return(stamp_a: InfluenceStamp, stamp_b: InfluenceStamp) -> InfluenceStamp:
+func add_stamps_with_return(stamp_a: InfluenceStamp, stamp_b: InfluenceStamp, max_value: float = INF) -> InfluenceStamp:
 	var min_x: int = min(stamp_a.min_cell.x, stamp_b.min_cell.x)
 	var min_y: int = min(stamp_a.min_cell.y, stamp_b.min_cell.y)
 
@@ -905,7 +905,26 @@ func add_stamps_with_return(stamp_a: InfluenceStamp, stamp_b: InfluenceStamp) ->
 
 	_add_stamp_into_stamp(combined_stamp, stamp_a)
 	_add_stamp_into_stamp(combined_stamp, stamp_b)
+	
+	var y: int = 0
+	while y < combined_stamp.size.y:
+		var x: int = 0
 
+		while x < combined_stamp.size.x:
+			var source_index: int = combined_stamp.get_index(x, y)
+			var source_value: float = combined_stamp.values[source_index]
+
+			if source_value != 0.0:
+				var cell: Vector2i = Vector2i(
+					combined_stamp.min_cell.x + x,
+					combined_stamp.min_cell.y + y
+				)
+				
+				var min_value: float = min(source_value, max_value)
+				combined_stamp.values[source_index] = min_value
+			x += 1
+
+		y += 1
 	return combined_stamp
 
 
@@ -923,7 +942,7 @@ func _add_stamp_into_stamp(target_stamp: InfluenceStamp, source_stamp: Influence
 					source_stamp.min_cell.x + x,
 					source_stamp.min_cell.y + y
 				)
-
+				
 				target_stamp.add_value_at_cell(cell, source_value)
 
 			x += 1
@@ -1182,3 +1201,33 @@ func get_largest_gradient(
 			best_gradient = gradient
 
 	return best_gradient
+
+
+func stamp_to_full_map_array(
+	stamp: InfluenceStamp,
+	outside_value: float = 0.0
+) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+	result.resize(cell_count)
+	result.fill(outside_value)
+
+	var y: int = 0
+	while y < stamp.size.y:
+		var x: int = 0
+
+		while x < stamp.size.x:
+			var stamp_index: int = stamp.get_index(x, y)
+			var cell: Vector2i = Vector2i(
+				stamp.min_cell.x + x,
+				stamp.min_cell.y + y
+			)
+
+			if is_valid_cell(cell):
+				var map_index: int = get_cell_index(cell)
+				result[map_index] = stamp.values[stamp_index]
+
+			x += 1
+
+		y += 1
+
+	return result

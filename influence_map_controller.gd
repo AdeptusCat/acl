@@ -19,7 +19,8 @@ var formations: Dictionary[Globals.Team, FormationIdentification] = {
 	Globals.Team.AXIS: null,
 	Globals.Team.ALLIES: null,
 }
-
+#var reserved_hexes: Array[Vector2i] = []
+var reserved_hexes: Dictionary[Unit, Vector2i] = {}
 
 var rebuild_pending: bool = false
 
@@ -209,10 +210,19 @@ func _create_axis_defense_config() -> InfluenceProjectionConfig:
 	# enemy -> [skip skip skip] [ANCHOR] -> objective
 	# destination/pressure point used to pull movement toward a tactical position.
 	
+	# forward defense
+	#config.projected_line_max_cells = 8
+	#config.anchor_skip_front = 4 # simulate enemies at this distance from objective
+	#config.anchor_count = 1
+	#config.los_skip_front = 4
+	#config.los_count = 1
+	#config.move_improvement_ratio = 0.8
+	
+	# home defense
 	config.projected_line_max_cells = 8
-	config.anchor_skip_front = 4 # simulate enemies at this distance from objective
-	config.anchor_count = 1
-	config.los_skip_front = 4
+	config.anchor_skip_front = 1 # simulate enemies at this distance from objective
+	config.anchor_count = 5
+	config.los_skip_front = 1
 	config.los_count = 1
 	config.move_improvement_ratio = 0.8
 
@@ -306,7 +316,7 @@ func _assign_best_positions_for_config_and_threataxis(
 		if enemy_units.is_empty():
 			return
 
-	var reserved_hexes: Array[Vector2i] = []
+	
 	var ordered_units: Array[Unit] = []
 
 	for unit: Unit in units:
@@ -327,8 +337,24 @@ func _assign_best_positions_for_config_and_threataxis(
 			influence_map,
 			config
 		)
-
-		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes)
+		var approach_stamp_full: PackedFloat32Array = influence_map.stamp_to_full_map_array(
+			approach_stamp,
+			0.0
+		)
+		
+		# FIXME this is only needed if create_reserved_stamp() takes multiple units into account
+		var reserved_hexes_duplicate: Dictionary[Unit, Vector2i] = reserved_hexes.duplicate()
+		reserved_hexes_duplicate.erase(unit)
+		var reserved_hexes_array: Array[Vector2i]
+		for hex in reserved_hexes_duplicate.values():
+			reserved_hexes_array.append(hex)
+		
+		#var reserved_hexes_array: Array[Vector2i]
+		#for hex in reserved_hexes.values():
+			#reserved_hexes_array.append(hex)
+			
+		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes_array)
+		var reserved_stamp_full: PackedFloat32Array = reserved_stamp.duplicate()
 		var composite: PackedFloat32Array = influence_map._composite
 
 		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
@@ -346,19 +372,29 @@ func _assign_best_positions_for_config_and_threataxis(
 
 		var best_value: float = result[best_index]
 		var best_hex: Vector2i = influence_map.index_to_cell(best_index)
-
-		reserved_hexes.append(best_hex)
+		
+		reserved_hexes[unit] = best_hex
 
 		var previous_best_value: float = -INF
 		if unit.best_index >= 0 and unit.best_index < result.size():
 			previous_best_value = result[unit.best_index]
-
+		
+		# TODO use unit influence layer to mask the approach stamp, positive unit influence allows defense to grow there
+		# TODO use global reserved hexes layer otherwise different defense axis cannot see whos reserving hexes
+		
 		# TODO convert this to platoon ai
 		if best_value * config.move_improvement_ratio > previous_best_value:
+			prints(unit, best_value,previous_best_value,best_hex)
 			unit.order(Globals.UnitCmd.MOVE, best_hex)
 			unit.best_index = best_index
+			
 
-		unit.influence_map = result
+		#unit.influence_map = result
+		unit.influence_map = reserved_stamp_full
+		#unit.influence_map = approach_stamp_full
+		#unit.influence_map = composite
+		pass
+
 
 
 func _get_squad_type_priority(squad_type: Globals.SquadType) -> int:
@@ -474,7 +510,8 @@ func _create_projected_approach_stamp_with_threataxis(
 		else:
 			combined_stamp = influence_map.add_stamps_with_return(
 				combined_stamp,
-				stamp
+				stamp,
+				1.0
 			)
 
 	if not has_stamp:

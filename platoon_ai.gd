@@ -3,6 +3,7 @@ extends Node
 
 @export var reconsider_interval: float = 1.0
 
+@export var team: Globals.Team = Globals.Team.AXIS
 var current_order: MissionOrder = null
 @export var squads: Array[Unit] = []
 var squad_assignments: Dictionary = {}
@@ -67,15 +68,59 @@ func _get_sorted_threat_axes() -> Array[ThreatAxis]:
 
 	if current_order == null:
 		return axes
-
-	for axis: ThreatAxis in current_order.threat_axes:
-		if axis == null:
-			continue
-
-		axis.recompute_score()
-
-		if axis.is_valid_axis():
-			axes.append(axis)
+	
+	var formation: InfluenceMapController.FormationIdentification = influence_map_controller.formations[Globals.get_enemy_team(team)]
+	
+	#for axis: ThreatAxis in current_order.threat_axes:
+		#if axis == null:
+			#continue
+#
+		#axis.recompute_score()
+#
+		#if axis.is_valid_axis():
+			#axes.append(axis)
+	
+	var front_axis: ThreatAxis = ThreatAxis.new()
+	front_axis.axis_name = "X"
+	front_axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+	front_axis.source_hex = formation.front.seed_hex
+	front_axis.target_hex = influence_map_controller.objective_hex
+	front_axis.estimated_enemy_count = formation.front.units.size()
+	front_axis.estimated_firepower = formation.front.units.size()
+	front_axis.confidence = 1.0
+	front_axis.proximity_to_objective = 0.7
+	front_axis.attack_lane_quality = 0.8
+	front_axis.flank_danger = 0.2
+	front_axis.time_pressure = 0.6
+	front_axis.recompute_score()
+	axes.append(front_axis)
+	
+	for flank in formation.flanks:
+		var flank_axis: ThreatAxis = ThreatAxis.new()
+		flank_axis.axis_name = "X"
+		flank_axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+		flank_axis.source_hex = flank.seed_hex
+		flank_axis.target_hex = influence_map_controller.objective_hex
+		flank_axis.estimated_enemy_count = flank.units.size()
+		flank_axis.estimated_firepower = flank.units.size()
+		flank_axis.confidence = 1.0
+		flank_axis.proximity_to_objective = 0.7
+		flank_axis.attack_lane_quality = 0.8
+		flank_axis.flank_danger = 0.2
+		flank_axis.time_pressure = 0.6
+		flank_axis.recompute_score()
+		axes.append(flank_axis)
+	
+	
+	#for axis: ThreatAxis in current_order.threat_axes:
+	#for axis: ThreatAxis in axes:
+		#if axis == null:
+			#continue
+#
+		#axis.recompute_score()
+#
+		#if axis.is_valid_axis():
+			#axes.append(axis)
 
 	axes.sort_custom(_sort_axis_by_score_descending)
 
@@ -172,6 +217,13 @@ func _assign_squads_to_axes(
 		sorted_axes
 	)
 
+	influence_map_controller.reserved_hexes.clear()
+	
+	for unit in available_squads:
+		influence_map_controller.reserved_hexes[unit] = unit.movement.target_hex
+		#influence_map_controller.reserved_hexes.append(unit.movement.target_hex)
+		#print(unit.movement.target_hex)
+	
 	for axis: ThreatAxis in sorted_axes:
 		var assigned_units: Array[Unit] = axis_units_by_axis[axis]
 
