@@ -219,13 +219,22 @@ func _create_axis_defense_config() -> InfluenceProjectionConfig:
 	#config.move_improvement_ratio = 0.8
 	
 	# home defense
-	config.projected_line_max_cells = 8
+	config.projected_line_max_cells = 6 # how many hexes from objective to the actual enemy are used to create fake LOS
 	config.anchor_skip_front = 1 # simulate enemies at this distance from objective
-	config.anchor_count = 5
+	config.anchor_count = 4 # the amount of simulated LOS positions actually considered
 	config.los_skip_front = 1
-	config.los_count = 1
+	config.los_count = 4
 	config.move_improvement_ratio = 0.8
-
+	
+	# EXAMPLE
+	#config.projected_line_max_cells = 8
+	#config.anchor_skip_front = 1
+	#config.anchor_count = 3
+	#objective
+	#0 1 2 3 4 5 6 7 enemy direction
+	#Selected anchors:
+	#[1 2 3]
+	
 	return config
 
 
@@ -342,16 +351,11 @@ func _assign_best_positions_for_config_and_threataxis(
 			0.0
 		)
 		
-		# FIXME this is only needed if create_reserved_stamp() takes multiple units into account
 		var reserved_hexes_duplicate: Dictionary[Unit, Vector2i] = reserved_hexes.duplicate()
 		reserved_hexes_duplicate.erase(unit)
 		var reserved_hexes_array: Array[Vector2i]
 		for hex in reserved_hexes_duplicate.values():
 			reserved_hexes_array.append(hex)
-		
-		#var reserved_hexes_array: Array[Vector2i]
-		#for hex in reserved_hexes.values():
-			#reserved_hexes_array.append(hex)
 			
 		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes_array)
 		var reserved_stamp_full: PackedFloat32Array = reserved_stamp.duplicate()
@@ -388,13 +392,16 @@ func _assign_best_positions_for_config_and_threataxis(
 		# TODO use unit influence layer to mask the approach stamp, positive unit influence allows defense to grow there
 		# TODO use global reserved hexes layer otherwise different defense axis cannot see whos reserving hexes
 		
+		# TODO calculate COMPOSITE and its enemy LOS simulation for that particular axis to defend and not all enemy LOS 
+		# otherwise the unit cannot concentrate on defending its axis 
+		
 		# TODO convert this to platoon ai
 		if best_value * config.move_improvement_ratio > previous_best_value:
 			prints(unit, best_value,previous_best_value,best_hex)
 			unit.order(Globals.UnitCmd.MOVE, best_hex)
 			unit.best_index = best_index
 			
-
+		# FIXME it seems like the composite enemy LOS calculation if wrong? its not projecting towards the enemies?
 		unit.influence_map = result
 		#unit.influence_map = reserved_stamp_full
 		#unit.influence_map = approach_stamp_full
@@ -505,7 +512,7 @@ func _create_projected_approach_stamp_with_threataxis(
 	for source: ProjectionSource in sources:
 		var stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
 			source.observer_hex,
-			2,
+			3,
 			1.0,
 			InfluenceMap.FalloffMode.SQUARE_ROOT
 		)
@@ -851,8 +858,8 @@ func _create_default_weights() -> PackedFloat32Array:
 	weights.resize(InfluenceMap.Layer.COUNT)
 	weights.fill(0.0)
 
-	# Positive values increase movement cost / danger.
-	# Negative values reduce movement cost / attract movement.
+	# Negative values increase movement cost / danger.
+	# Positive values reduce movement cost / attract movement.
 	
 	#TERRAIN_COVER,
 	#TERRAIN_MOVE_COST,
@@ -1226,9 +1233,11 @@ func rebuild_los_influence_for_team(
 ) -> void:
 	_clear_los_influence_layers(influence_map)
 
-	var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
-
+	#var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
+	# TODO build one for allies as wel
+	var config: InfluenceProjectionConfig = _create_axis_defense_config()
 	_project_actual_friendly_los(influence_map, config)
+	#_project_actual_enemy_los(influence_map, config)
 	_project_simulated_enemy_los(influence_map, config)
 
 
@@ -1308,6 +1317,36 @@ func _project_simulated_enemy_los(
 	)
 
 	for source: ProjectionSource in sources:
+		_project_los_from_source(
+			influence_map,
+			source,
+			false
+		)
+
+
+func _project_actual_enemy_los(
+	influence_map: InfluenceMap,
+	config: InfluenceProjectionConfig
+) -> void:
+	var units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
+	var los_lookup: Dictionary = LOSHelper.los_lookup
+
+	for unit: Unit in units:
+		if not _is_valid_living_unit(unit):
+			continue
+
+		var observer_hex: Vector2i = unit.current_hex
+
+		if not los_lookup.has(observer_hex):
+			continue
+
+		var source: ProjectionSource = ProjectionSource.new(
+			unit,
+			observer_hex,
+			_get_unit_firepower(unit),
+			_get_unit_effectiveness(unit)
+		)
+
 		_project_los_from_source(
 			influence_map,
 			source,
