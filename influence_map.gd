@@ -32,7 +32,8 @@ enum WriteMode {
 	SUBSTRACT,
 	MAX,
 	MIN,
-	MULTIPLY
+	MULTIPLY,
+	POSITIVE_MASK
 }
 
 enum FalloffMode {
@@ -823,6 +824,31 @@ func _write_layer_value(layer_id: int, cell: Vector2i, value: float, mode: int) 
 	if mode == WriteMode.MIN:
 		min_layer_value(layer_id, cell, value)
 		return
+
+
+func apply_positive_mask_layer_with_return(
+		layer: PackedFloat32Array,
+		mask_layer: PackedFloat32Array
+) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+
+	if layer.size() != mask_layer.size():
+		return result
+
+	result.resize(layer.size())
+
+	var i: int = 0
+	while i < layer.size():
+		var mask_value: float = mask_layer[i]
+
+		if mask_value > 0.0:
+			result[i] = layer[i]
+		else:
+			result[i] = 0.0
+
+		i += 1
+
+	return result
 
 
 func _get_write_mode_result_value(

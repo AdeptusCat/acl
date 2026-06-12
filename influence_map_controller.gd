@@ -365,6 +365,12 @@ func _assign_best_positions_for_config_and_threataxis(
 		)
 
 		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+		
+		
+		result = influence_map.apply_positive_mask_layer_with_return(
+			result,
+			influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+		)
 
 		var best_index: int = influence_map.get_max_value_index(result)
 		if best_index == -1:
@@ -389,8 +395,8 @@ func _assign_best_positions_for_config_and_threataxis(
 			unit.best_index = best_index
 			
 
-		#unit.influence_map = result
-		unit.influence_map = reserved_stamp_full
+		unit.influence_map = result
+		#unit.influence_map = reserved_stamp_full
 		#unit.influence_map = approach_stamp_full
 		#unit.influence_map = composite
 		pass
