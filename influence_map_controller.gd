@@ -3,6 +3,9 @@ extends Node2D
 
 signal influence_maps_updated()
 
+const RESERVED_HEX_MULTIPLIER: float = 0.6
+const DEBUG_AXIS_ASSIGNMENT_MAPS: bool = false
+
 const REBUILD_CELLS_PER_FRAME: int = 400
 
 var maps_by_team: Dictionary[int, InfluenceMap] = {}
@@ -195,7 +198,7 @@ func run_post_rebuild_tactical_tasks_with_threataxis(axis: ThreatAxis, units: Ar
 	var config: InfluenceProjectionConfig = _create_axis_defense_config()
 	config.objective_hex = objective_hex
 	config.threat_axis = axis
-	_assign_best_positions_for_config_and_threataxis(config, units, axis.enemy_units)
+	_assign_best_positions_for_config_and_threataxis(config, units)
 
 
 func _create_axis_defense_config() -> InfluenceProjectionConfig:
@@ -317,12 +320,9 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 		unit.influence_map = result
 
 
-
-
 func _assign_best_positions_for_config_and_threataxis(
 	config: InfluenceProjectionConfig,
-	axis_units: Array[Unit],
-	axis_enemy_units: Array[Unit]
+	axis_units: Array[Unit] = []
 ) -> void:
 	var units: Array[Unit] = axis_units
 
@@ -336,15 +336,7 @@ func _assign_best_positions_for_config_and_threataxis(
 		var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
 		if enemy_units.is_empty():
 			return
-	
-	var influence_map: InfluenceMap = maps_by_team[units[0].team]
 
-	var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
-		influence_map,
-		config,
-		axis_enemy_units
-	)
-	
 	var ordered_units: Array[Unit] = []
 
 	for unit: Unit in units:
@@ -358,79 +350,235 @@ func _assign_best_positions_for_config_and_threataxis(
 
 	ordered_units.sort_custom(_compare_units_by_squad_type_priority)
 
+	if ordered_units.is_empty():
+		return
+
+	var influence_map: InfluenceMap = maps_by_team[ordered_units[0].team]
+
+	var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp_with_threataxis(
+		influence_map,
+		config
+	)
+
+	var composite: PackedFloat32Array = influence_map._composite
+	var positive_mask_layer: PackedFloat32Array = influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+
 	for unit: Unit in ordered_units:
-		#var influence_map: InfluenceMap = maps_by_team[unit.team]
-
-		var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp_with_threataxis(
+		var reserved_indices: Dictionary[int, bool] = _get_reserved_indices_except_unit(
 			influence_map,
-			config
+			unit
 		)
-		var approach_stamp_full: PackedFloat32Array = influence_map.stamp_to_full_map_array(
-			approach_stamp,
-			0.0
-		)
-		
-		var reserved_hexes_duplicate: Dictionary[Unit, Vector2i] = reserved_hexes.duplicate()
-		reserved_hexes_duplicate.erase(unit)
-		var reserved_hexes_array: Array[Vector2i]
-		for hex in reserved_hexes_duplicate.values():
-			reserved_hexes_array.append(hex)
-			
-		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes_array)
-		var reserved_stamp_full: PackedFloat32Array = reserved_stamp.duplicate()
-		#var composite: PackedFloat32Array = influence_map._composite
-		#var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
-			#influence_map,
-			#config,
-			#axis_enemy_units
-		#)
 
-		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+		var best_index: int = _find_best_axis_position_index(
+			influence_map,
 			composite,
 			approach_stamp,
-			InfluenceMap.WriteMode.MULTIPLY,
-			true
+			reserved_indices,
+			positive_mask_layer
 		)
 
-		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
-		
-		
-		result = influence_map.apply_positive_mask_layer_with_return(
-			result,
-			influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
-		)
-
-		var best_index: int = influence_map.get_max_value_index(result)
 		if best_index == -1:
 			continue
 
-		var best_value: float = result[best_index]
+		var best_value: float = _get_axis_position_score_at_index(
+			influence_map,
+			composite,
+			approach_stamp,
+			reserved_indices,
+			positive_mask_layer,
+			best_index
+		)
+
 		var best_hex: Vector2i = influence_map.index_to_cell(best_index)
-		
+
+		var previous_best_value: float = _get_axis_position_score_at_index(
+			influence_map,
+			composite,
+			approach_stamp,
+			reserved_indices,
+			positive_mask_layer,
+			unit.best_index
+		)
+
 		reserved_hexes[unit] = best_hex
 
-		var previous_best_value: float = -INF
-		if unit.best_index >= 0 and unit.best_index < result.size():
-			previous_best_value = result[unit.best_index]
-		
-		# TODO use unit influence layer to mask the approach stamp, positive unit influence allows defense to grow there
-		# TODO use global reserved hexes layer otherwise different defense axis cannot see whos reserving hexes
-		
-		# TODO calculate COMPOSITE and its enemy LOS simulation for that particular axis to defend and not all enemy LOS 
-		# otherwise the unit cannot concentrate on defending its axis 
-		
-		# TODO convert this to platoon ai
-		if best_value * config.move_improvement_ratio > previous_best_value:
-			prints(unit, best_value,previous_best_value,best_hex)
-			unit.order(Globals.UnitCmd.MOVE, best_hex)
-			unit.best_index = best_index
-			
-		# FIXME it seems like the composite enemy LOS calculation if wrong? its not projecting towards the enemies?
-		#unit.influence_map = reserved_stamp_full
-		#unit.influence_map = aapproach_stamp_full
-		#unit.influence_map = compossite
-		unit.influence_map = result
-		pass
+		if unit.best_index == best_index:
+			continue
+
+		if best_value * config.move_improvement_ratio <= previous_best_value:
+			continue
+
+		unit.order(Globals.UnitCmd.MOVE, best_hex)
+		unit.best_index = best_index
+
+		#if DEBUG_AXIS_ASSIGNMENT_MAPS:
+		unit.influence_map = _create_debug_axis_assignment_map(
+			influence_map,
+			composite,
+			approach_stamp,
+			reserved_indices,
+			positive_mask_layer
+		)
+
+
+func _create_debug_axis_assignment_map(
+	influence_map: InfluenceMap,
+	composite: PackedFloat32Array,
+	approach_stamp: InfluenceMap.InfluenceStamp,
+	reserved_indices: Dictionary[int, bool],
+	positive_mask_layer: PackedFloat32Array
+) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+	result.resize(influence_map.cell_count)
+	result.fill(0.0)
+
+	var y: int = 0
+	while y < approach_stamp.size.y:
+		var x: int = 0
+
+		while x < approach_stamp.size.x:
+			var stamp_index: int = approach_stamp.get_index(x, y)
+			var stamp_value: float = approach_stamp.values[stamp_index]
+
+			if stamp_value > 0.0:
+				var cell: Vector2i = Vector2i(
+					approach_stamp.min_cell.x + x,
+					approach_stamp.min_cell.y + y
+				)
+
+				if influence_map.is_valid_cell(cell):
+					var map_index: int = influence_map.cell_to_index(cell)
+
+					if positive_mask_layer[map_index] > 0.0:
+						var reserved_multiplier: float = 1.0
+
+						if reserved_indices.has(map_index):
+							reserved_multiplier = RESERVED_HEX_MULTIPLIER
+
+						var value: float = composite[map_index]
+						value *= stamp_value
+						value *= reserved_multiplier
+						result[map_index] = value
+
+			x += 1
+
+		y += 1
+
+	return result
+
+
+#func _assign_best_positions_for_config_and_threataxis(
+	#config: InfluenceProjectionConfig,
+	#axis_units: Array[Unit],
+	#axis_enemy_units: Array[Unit]
+#) -> void:
+	#var units: Array[Unit] = axis_units
+#
+	#if units.is_empty():
+		#units = _get_config_units(config.unit_team, config.unit_group)
+#
+	#if units.is_empty():
+		#return
+#
+	#if config.threat_axis == null:
+		#var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
+		#if enemy_units.is_empty():
+			#return
+	#
+	#var influence_map: InfluenceMap = maps_by_team[units[0].team]
+#
+	#var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
+		#influence_map,
+		#config,
+		#axis_enemy_units
+	#)
+	#
+	#var ordered_units: Array[Unit] = []
+#
+	#for unit: Unit in units:
+		#if not _is_valid_living_unit(unit):
+			#continue
+#
+		#if not maps_by_team.has(unit.team):
+			#continue
+#
+		#ordered_units.append(unit)
+#
+	#ordered_units.sort_custom(_compare_units_by_squad_type_priority)
+#
+	#for unit: Unit in ordered_units:
+		##var influence_map: InfluenceMap = maps_by_team[unit.team]
+#
+		#var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp_with_threataxis(
+			#influence_map,
+			#config
+		#)
+		#var approach_stamp_full: PackedFloat32Array = influence_map.stamp_to_full_map_array(
+			#approach_stamp,
+			#0.0
+		#)
+		#
+		#var reserved_hexes_duplicate: Dictionary[Unit, Vector2i] = reserved_hexes.duplicate()
+		#reserved_hexes_duplicate.erase(unit)
+		#var reserved_hexes_array: Array[Vector2i]
+		#for hex in reserved_hexes_duplicate.values():
+			#reserved_hexes_array.append(hex)
+			#
+		#var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes_array)
+		#var reserved_stamp_full: PackedFloat32Array = reserved_stamp.duplicate()
+		##var composite: PackedFloat32Array = influence_map._composite
+		##var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
+			##influence_map,
+			##config,
+			##axis_enemy_units
+		##)
+#
+		#var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+			#composite,
+			#approach_stamp,
+			#InfluenceMap.WriteMode.MULTIPLY,
+			#true
+		#)
+#
+		#result = influence_map.multiply_layers_with_return(result, reserved_stamp)
+		#
+		#
+		#result = influence_map.apply_positive_mask_layer_with_return(
+			#result,
+			#influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+		#)
+#
+		#var best_index: int = influence_map.get_max_value_index(result)
+		#if best_index == -1:
+			#continue
+#
+		#var best_value: float = result[best_index]
+		#var best_hex: Vector2i = influence_map.index_to_cell(best_index)
+		#
+		#reserved_hexes[unit] = best_hex
+#
+		#var previous_best_value: float = -INF
+		#if unit.best_index >= 0 and unit.best_index < result.size():
+			#previous_best_value = result[unit.best_index]
+		#
+		## TODO use unit influence layer to mask the approach stamp, positive unit influence allows defense to grow there
+		## TODO use global reserved hexes layer otherwise different defense axis cannot see whos reserving hexes
+		#
+		## TODO calculate COMPOSITE and its enemy LOS simulation for that particular axis to defend and not all enemy LOS 
+		## otherwise the unit cannot concentrate on defending its axis 
+		#
+		## TODO convert this to platoon ai
+		#if best_value * config.move_improvement_ratio > previous_best_value:
+			#prints(unit, best_value,previous_best_value,best_hex)
+			#unit.order(Globals.UnitCmd.MOVE, best_hex)
+			#unit.best_index = best_index
+			#
+		## FIXME it seems like the composite enemy LOS calculation if wrong? its not projecting towards the enemies?
+		##unit.influence_map = reserved_stamp_full
+		##unit.influence_map = aapproach_stamp_full
+		##unit.influence_map = compossite
+		#unit.influence_map = result
+		#pass
 
 
 
@@ -2190,3 +2338,116 @@ func _clear_dynamic_layers_for_team(influence_map: InfluenceMap) -> void:
 	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.ENEMY_VULNERABILITY, 0.0)
 
 	influence_map.mark_all_dirty()
+
+
+func _find_best_axis_position_index(
+	influence_map: InfluenceMap,
+	composite: PackedFloat32Array,
+	approach_stamp: InfluenceMap.InfluenceStamp,
+	reserved_indices: Dictionary[int, bool],
+	positive_mask_layer: PackedFloat32Array
+) -> int:
+	if composite.size() != influence_map.cell_count:
+		return -1
+
+	if positive_mask_layer.size() != influence_map.cell_count:
+		return -1
+
+	var best_index: int = -1
+	var best_value: float = -INF
+
+	var y: int = 0
+	while y < approach_stamp.size.y:
+		var x: int = 0
+
+		while x < approach_stamp.size.x:
+			var stamp_index: int = approach_stamp.get_index(x, y)
+			var stamp_value: float = approach_stamp.values[stamp_index]
+
+			if stamp_value > 0.0:
+				var cell: Vector2i = Vector2i(
+					approach_stamp.min_cell.x + x,
+					approach_stamp.min_cell.y + y
+				)
+
+				if influence_map.is_valid_cell(cell):
+					var map_index: int = influence_map.cell_to_index(cell)
+
+					if positive_mask_layer[map_index] > 0.0:
+						var reserved_multiplier: float = 1.0
+
+						if reserved_indices.has(map_index):
+							reserved_multiplier = RESERVED_HEX_MULTIPLIER
+
+						var value: float = composite[map_index]
+						value *= stamp_value
+						value *= reserved_multiplier
+
+						if value > best_value:
+							best_value = value
+							best_index = map_index
+
+			x += 1
+
+		y += 1
+
+	return best_index
+
+
+func _get_axis_position_score_at_index(
+	influence_map: InfluenceMap,
+	composite: PackedFloat32Array,
+	approach_stamp: InfluenceMap.InfluenceStamp,
+	reserved_indices: Dictionary[int, bool],
+	positive_mask_layer: PackedFloat32Array,
+	index: int
+) -> float:
+	if index < 0:
+		return -INF
+
+	if index >= influence_map.cell_count:
+		return -INF
+
+	if positive_mask_layer.size() != influence_map.cell_count:
+		return -INF
+
+	if positive_mask_layer[index] <= 0.0:
+		return -INF
+
+	var cell: Vector2i = influence_map.index_to_cell(index)
+	var stamp_value: float = approach_stamp.get_value_at_cell(cell)
+
+	if stamp_value <= 0.0:
+		return -INF
+
+	var reserved_multiplier: float = 1.0
+
+	if reserved_indices.has(index):
+		reserved_multiplier = RESERVED_HEX_MULTIPLIER
+
+	var value: float = composite[index]
+	value *= stamp_value
+	value *= reserved_multiplier
+
+	return value
+
+
+func _get_reserved_indices_except_unit(
+	influence_map: InfluenceMap,
+	ignored_unit: Unit
+) -> Dictionary[int, bool]:
+	var result: Dictionary[int, bool] = {}
+
+	for reserved_unit: Unit in reserved_hexes.keys():
+		if reserved_unit == ignored_unit:
+			continue
+
+		var hex: Vector2i = reserved_hexes[reserved_unit]
+
+		if not influence_map.is_valid_cell(hex):
+			continue
+
+		var index: int = influence_map.cell_to_index(hex)
+		result[index] = true
+
+	return result

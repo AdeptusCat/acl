@@ -26,8 +26,8 @@ func _process(delta: float) -> void:
 
 func receive_mission_order(order: MissionOrder) -> void:
 	current_order = order
-	time_until_reconsider = 0.0
 	reconsider_assignments()
+	time_until_reconsider = reconsider_interval
 
 
 func set_squads(new_squads: Array[Unit]) -> void:
@@ -228,7 +228,10 @@ func _assign_squads_to_axes(
 	
 	for axis: ThreatAxis in sorted_axes:
 		var assigned_units: Array[Unit] = axis_units_by_axis[axis]
-
+		
+		if assigned_units.is_empty():
+			continue
+		
 		influence_map_controller.run_post_rebuild_tactical_tasks_with_threataxis(
 			axis,
 			assigned_units
@@ -250,9 +253,7 @@ func _distribute_squads_over_axes(
 	for squad: Unit in available_squads:
 		var axis: ThreatAxis = sorted_axes[axis_index]
 		var axis_units: Array[Unit] = axis_units_by_axis[axis]
-
 		axis_units.append(squad)
-		axis_units_by_axis[axis] = axis_units
 
 		axis_index += 1
 
@@ -353,7 +354,10 @@ func _issue_orders() -> void:
 func _issue_move_order_to_squad(squad: Unit, target_hex: Vector2i) -> void:
 	if squad == null:
 		return
-
+	
+	if squad.movement.target_hex == target_hex:
+		return
+	
 	# Replace with your existing movement/order function.
 	#squad.set_ai_move_target(target_hex)
 	squad.order(Globals.UnitCmd.MOVE, target_hex)
