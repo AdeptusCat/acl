@@ -87,6 +87,7 @@ func _get_sorted_threat_axes() -> Array[ThreatAxis]:
 	front_axis.target_hex = influence_map_controller.objective_hex
 	front_axis.estimated_enemy_count = formation.front.units.size()
 	front_axis.estimated_firepower = formation.front.units.size()
+	front_axis.enemy_units = formation.front.units
 	front_axis.confidence = 1.0
 	front_axis.proximity_to_objective = 0.7
 	front_axis.attack_lane_quality = 0.8
@@ -103,6 +104,7 @@ func _get_sorted_threat_axes() -> Array[ThreatAxis]:
 		flank_axis.target_hex = influence_map_controller.objective_hex
 		flank_axis.estimated_enemy_count = flank.units.size()
 		flank_axis.estimated_firepower = flank.units.size()
+		flank_axis.enemy_units = flank.units
 		flank_axis.confidence = 1.0
 		flank_axis.proximity_to_objective = 0.7
 		flank_axis.attack_lane_quality = 0.8

@@ -36,7 +36,7 @@ enum AxisType {
 @export var time_pressure: float = 0.0
 
 var score: float = 0.0
-
+var enemy_units: Array[Unit]
 
 func recompute_score() -> void:
 	var strength_score: float = float(estimated_enemy_count) + estimated_firepower

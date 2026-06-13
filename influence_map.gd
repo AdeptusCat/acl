@@ -1257,3 +1257,18 @@ func stamp_to_full_map_array(
 		y += 1
 
 	return result
+
+
+func set_layer_data_copy(layer_id: int, values: PackedFloat32Array) -> void:
+	if not is_valid_layer(layer_id):
+		return
+
+	if values.size() != cell_count:
+		return
+
+	_layers[layer_id] = values.duplicate()
+	mark_all_dirty()
+
+
+func get_composite_data_copy() -> PackedFloat32Array:
+	return _composite.duplicate()

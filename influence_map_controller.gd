@@ -76,6 +76,7 @@ class InfluenceProjectionConfig:
 	var enemy_group: String = ""
 	var task: int = TacticalTask.DEFEND_OBJECTIVE
 	var objective_hex: Vector2i = Vector2i.ZERO
+	var enemy_units: Array[Unit]
 
 	var projected_line_max_cells: int = 8
 
@@ -184,7 +185,7 @@ func run_post_rebuild_tactical_tasks_with_threataxis(axis: ThreatAxis, units: Ar
 	var config: InfluenceProjectionConfig = _create_axis_defense_config()
 	config.objective_hex = objective_hex
 	config.threat_axis = axis
-	_assign_best_positions_for_config_and_threataxis(config, units)
+	_assign_best_positions_for_config_and_threataxis(config, units, axis.enemy_units)
 
 
 func _create_axis_defense_config() -> InfluenceProjectionConfig:
@@ -310,7 +311,8 @@ func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> voi
 
 func _assign_best_positions_for_config_and_threataxis(
 	config: InfluenceProjectionConfig,
-	axis_units: Array[Unit] = []
+	axis_units: Array[Unit],
+	axis_enemy_units: Array[Unit]
 ) -> void:
 	var units: Array[Unit] = axis_units
 
@@ -324,7 +326,14 @@ func _assign_best_positions_for_config_and_threataxis(
 		var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
 		if enemy_units.is_empty():
 			return
+	
+	var influence_map: InfluenceMap = maps_by_team[units[0].team]
 
+	var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
+		influence_map,
+		config,
+		axis_enemy_units
+	)
 	
 	var ordered_units: Array[Unit] = []
 
@@ -340,7 +349,7 @@ func _assign_best_positions_for_config_and_threataxis(
 	ordered_units.sort_custom(_compare_units_by_squad_type_priority)
 
 	for unit: Unit in ordered_units:
-		var influence_map: InfluenceMap = maps_by_team[unit.team]
+		#var influence_map: InfluenceMap = maps_by_team[unit.team]
 
 		var approach_stamp: InfluenceMap.InfluenceStamp = _create_projected_approach_stamp_with_threataxis(
 			influence_map,
@@ -359,7 +368,12 @@ func _assign_best_positions_for_config_and_threataxis(
 			
 		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(reserved_hexes_array)
 		var reserved_stamp_full: PackedFloat32Array = reserved_stamp.duplicate()
-		var composite: PackedFloat32Array = influence_map._composite
+		#var composite: PackedFloat32Array = influence_map._composite
+		#var composite: PackedFloat32Array = _create_axis_composite_from_enemy_units(
+			#influence_map,
+			#config,
+			#axis_enemy_units
+		#)
 
 		var result: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
 			composite,
@@ -402,10 +416,10 @@ func _assign_best_positions_for_config_and_threataxis(
 			unit.best_index = best_index
 			
 		# FIXME it seems like the composite enemy LOS calculation if wrong? its not projecting towards the enemies?
-		unit.influence_map = result
 		#unit.influence_map = reserved_stamp_full
-		#unit.influence_map = approach_stamp_full
-		#unit.influence_map = composite
+		#unit.influence_map = aapproach_stamp_full
+		#unit.influence_map = compossite
+		unit.influence_map = result
 		pass
 
 
@@ -1955,3 +1969,67 @@ func calculate_enemy_gradients_to_team_center(
 		result.append(gradient)
 
 	return result
+
+
+func _project_simulated_enemy_los_from_units(
+	influence_map: InfluenceMap,
+	config: InfluenceProjectionConfig,
+	enemy_units: Array[Unit]
+) -> void:
+	var sources: Array[ProjectionSource] = _build_projected_line_sources(
+		enemy_units,
+		config.objective_hex,
+		config.projected_line_max_cells,
+		config.los_skip_front,
+		config.los_count
+	)
+
+	for source: ProjectionSource in sources:
+		_project_los_from_source(
+			influence_map,
+			source,
+			false
+		)
+
+
+func _create_axis_composite_from_enemy_units(
+	source_map: InfluenceMap,
+	config: InfluenceProjectionConfig,
+	axis_enemy_units: Array[Unit]
+) -> PackedFloat32Array:
+	var axis_map: InfluenceMap = InfluenceMap.new()
+	axis_map.configure(source_map.bounds)
+
+	var weights: PackedFloat32Array = _create_default_weights()
+
+	axis_map.configure_composite_weights(
+		weights,
+		0.0,
+		0.0,
+		20.0
+	)
+
+	axis_map.set_layer_data_copy(
+		InfluenceMap.Layer.TERRAIN_COVER,
+		source_map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_COVER)
+	)
+
+	axis_map.set_layer_data_copy(
+		InfluenceMap.Layer.TERRAIN_MOVE_COST,
+		source_map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_MOVE_COST)
+	)
+
+	_project_actual_friendly_los(
+		axis_map,
+		config
+	)
+
+	_project_simulated_enemy_los_from_units(
+		axis_map,
+		config,
+		axis_enemy_units
+	)
+
+	axis_map.rebuild_all_composite()
+
+	return axis_map.get_composite_data_copy()
