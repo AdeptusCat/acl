@@ -391,14 +391,31 @@ func _assign_best_positions_for_config_and_threataxis(
 			InfluenceMap.WriteMode.MULTIPLY,
 			true
 		)
-
+		
 		result = influence_map.multiply_layers_with_return(result, reserved_stamp)
 		
+		var objective_stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
+				config.objective_hex,
+				2,
+				1.0,
+				InfluenceMap.FalloffMode.NONE
+			)
+		var unit_influence_with_objective: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
+			influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE],
+			objective_stamp,
+			InfluenceMap.WriteMode.MAX,
+			true
+		)
 		
 		result = influence_map.apply_positive_mask_layer_with_return(
 			result,
-			influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+			unit_influence_with_objective
 		)
+		
+		#result = influence_map.apply_positive_mask_layer_with_return(
+			#result,
+			#influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE]
+		#)
 
 		var best_index: int = influence_map.get_max_value_index(result)
 		if best_index == -1:
@@ -413,12 +430,6 @@ func _assign_best_positions_for_config_and_threataxis(
 		if unit.best_index >= 0 and unit.best_index < result.size():
 			previous_best_value = result[unit.best_index]
 		
-		# TODO use unit influence layer to mask the approach stamp, positive unit influence allows defense to grow there
-		# TODO use global reserved hexes layer otherwise different defense axis cannot see whos reserving hexes
-		
-		# TODO calculate COMPOSITE and its enemy LOS simulation for that particular axis to defend and not all enemy LOS 
-		# otherwise the unit cannot concentrate on defending its axis 
-		
 		# TODO convert this to platoon ai
 		if best_value * config.move_improvement_ratio > previous_best_value:
 			prints(unit, best_value,previous_best_value,best_hex)
@@ -427,8 +438,8 @@ func _assign_best_positions_for_config_and_threataxis(
 			
 		# FIXME it seems like the composite enemy LOS calculation if wrong? its not projecting towards the enemies?
 		#unit.influence_map = reserved_stamp_full
-		#unit.influence_map = aapproach_stamp_full
-		#unit.influence_map = compossite
+		#unit.influence_map = approach_stamp_full
+		#unit.influence_map = composite
 		unit.influence_map = result
 		pass
 
@@ -531,12 +542,19 @@ func _create_projected_approach_stamp_with_threataxis(
 		)
 
 	var combined_stamp: InfluenceMap.InfluenceStamp = null
-	var has_stamp: bool = false
-
+	var has_stamp: bool = true
+	
+	combined_stamp = influence_map.create_radius_stamp(
+			config.objective_hex,
+			2,
+			1.0,
+			InfluenceMap.FalloffMode.SQUARE_ROOT
+		)
+	
 	for source: ProjectionSource in sources:
 		var stamp: InfluenceMap.InfluenceStamp = influence_map.create_radius_stamp(
 			source.observer_hex,
-			3,
+			2,
 			1.0,
 			InfluenceMap.FalloffMode.SQUARE_ROOT
 		)
