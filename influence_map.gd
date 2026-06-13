@@ -1272,3 +1272,12 @@ func set_layer_data_copy(layer_id: int, values: PackedFloat32Array) -> void:
 
 func get_composite_data_copy() -> PackedFloat32Array:
 	return _composite.duplicate()
+
+
+func clear_layer_without_dirty(layer_id: int, value: float = 0.0) -> void:
+	if not is_valid_layer(layer_id):
+		return
+
+	var data: PackedFloat32Array = _layers[layer_id]
+	data.fill(value)
+	_layers[layer_id] = data

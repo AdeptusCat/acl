@@ -27,6 +27,15 @@ var rebuild_pending: bool = false
 var objective_hex: Vector2i = Vector2i(11, 13)
 #var objective_hex: Vector2i = Vector2i(11, 10)
 
+var los_rebuild_active: bool = false
+var los_rebuild_map: InfluenceMap = null
+var los_rebuild_sources: Array[ProjectionSource] = []
+var los_rebuild_modes: Array[bool] = []
+var los_rebuild_cursor: int = 0
+
+const LOS_SOURCES_PER_FRAME: int = 1
+
+
 enum CompositeSource {
 	SELF,
 	ENEMY
@@ -127,6 +136,7 @@ var update_threshold: float = 1.0
 
 func _process(_delta: float) -> void:
 	_update_rebuild_timer(_delta)
+	_process_los_rebuild()
 	_process_budgeted_rebuild()
 
 
@@ -821,11 +831,21 @@ func _is_valid_living_unit(unit: Unit) -> bool:
 		#
 	#
 
+var maps_initialized: bool = false
 
-func create_maps(delta) -> void:
+func create_maps(delta: float) -> void:
 	if not is_instance_valid(LOSHelper.ground_layer):
 		return
 
+	if not maps_initialized:
+		_initialize_maps()
+		rebuild_static_terrain_layers()
+		maps_initialized = true
+
+	rebuild_dynamic_tactical_layers()
+
+
+func _initialize_maps() -> void:
 	var bounds: Rect2i = LOSHelper.ground_layer.get_used_rect()
 
 	var allied_map: InfluenceMap = InfluenceMap.new()
@@ -837,34 +857,67 @@ func create_maps(delta) -> void:
 	allied_weights = _create_default_weights()
 	axis_weights = _create_default_weights()
 
-	allied_map.configure_composite_weights(allied_weights, 0.0, 0.00, 20.0)
-	axis_map.configure_composite_weights(axis_weights, 0.0, 0.00, 20.0)
+	allied_map.configure_composite_weights(
+		allied_weights,
+		0.0,
+		0.0,
+		20.0
+	)
+
+	axis_map.configure_composite_weights(
+		axis_weights,
+		0.0,
+		0.0,
+		20.0
+	)
 
 	maps_by_team[Globals.Team.ALLIES] = allied_map
 	maps_by_team[Globals.Team.AXIS] = axis_map
-	
-	var origin_hex: Vector2i = Vector2i(11, 3)
-	#var allied_map: InfluenceMap = maps_by_team[Globals.Team.ALLIES]
-	#if allied_map != null:
-		#allied_map.stamp_origin_influence(origin_hex)
-	#if allied_map != null:
-		#allied_map.update_origin_influence_decay(delta)
-	#if axis_map != null:
-		#axis_map.stamp_origin_influence(origin_hex)
-	#if axis_map != null:
-		#axis_map.update_origin_influence_decay(delta)
-	
-	rebuild_pending = true
-	
-	rebuild_static_terrain_layers()
-	rebuild_dynamic_tactical_layers()
-	
-	# multiplying leads to interesting results
-	#maps_by_team[Globals.Team.AXIS].multiply_layers(
-	#InfluenceMap.Layer.THREAT,
-	#InfluenceMap.Layer.FIRE_POWER,
-	#InfluenceMap.Layer.TERRAIN_COVER
-	#)
+
+
+#func create_maps(delta) -> void:
+	#if not is_instance_valid(LOSHelper.ground_layer):
+		#return
+#
+	#var bounds: Rect2i = LOSHelper.ground_layer.get_used_rect()
+#
+	#var allied_map: InfluenceMap = InfluenceMap.new()
+	#var axis_map: InfluenceMap = InfluenceMap.new()
+#
+	#allied_map.configure(bounds)
+	#axis_map.configure(bounds)
+#
+	#allied_weights = _create_default_weights()
+	#axis_weights = _create_default_weights()
+#
+	#allied_map.configure_composite_weights(allied_weights, 0.0, 0.00, 20.0)
+	#axis_map.configure_composite_weights(axis_weights, 0.0, 0.00, 20.0)
+#
+	#maps_by_team[Globals.Team.ALLIES] = allied_map
+	#maps_by_team[Globals.Team.AXIS] = axis_map
+	#
+	#var origin_hex: Vector2i = Vector2i(11, 3)
+	##var allied_map: InfluenceMap = maps_by_team[Globals.Team.ALLIES]
+	##if allied_map != null:
+		##allied_map.stamp_origin_influence(origin_hex)
+	##if allied_map != null:
+		##allied_map.update_origin_influence_decay(delta)
+	##if axis_map != null:
+		##axis_map.stamp_origin_influence(origin_hex)
+	##if axis_map != null:
+		##axis_map.update_origin_influence_decay(delta)
+	#
+	#rebuild_pending = true
+	#
+	#rebuild_static_terrain_layers()
+	#rebuild_dynamic_tactical_layers()
+	#
+	## multiplying leads to interesting results
+	##maps_by_team[Globals.Team.AXIS].multiply_layers(
+	##InfluenceMap.Layer.THREAT,
+	##InfluenceMap.Layer.FIRE_POWER,
+	##InfluenceMap.Layer.TERRAIN_COVER
+	##)
 
 
 func _create_default_weights() -> PackedFloat32Array:
@@ -976,19 +1029,34 @@ func rebuild_dynamic_tactical_layers() -> void:
 	for team: int in maps_by_team.keys():
 		var influence_map: InfluenceMap = maps_by_team[team]
 
-		influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY, 0.0)
-		influence_map.clear_layer(InfluenceMap.Layer.FIRE_POWER, 0.0)
-		influence_map.clear_layer(InfluenceMap.Layer.FRIENDLY_SUPPORT, 0.0)
-		influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
-		influence_map.clear_layer(InfluenceMap.Layer.UNIT_INFLUENCE, 0.0)
+		_clear_dynamic_layers_for_team(influence_map)
 
 		_write_visibility_for_team(influence_map, team)
-		rebuild_los_influence_for_team(influence_map, team)
 		_write_unit_influence_for_team(influence_map, team)
-		#_write_friendly_support_for_team(influence_map, team)
-		#_write_known_enemy_positions_for_team(influence_map, team)
+
+		var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
+		_begin_los_rebuild_for_team(influence_map, config)
 
 	rebuild_pending = true
+
+
+#func rebuild_dynamic_tactical_layers() -> void:
+	#for team: int in maps_by_team.keys():
+		#var influence_map: InfluenceMap = maps_by_team[team]
+#
+		#influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY, 0.0)
+		#influence_map.clear_layer(InfluenceMap.Layer.FIRE_POWER, 0.0)
+		#influence_map.clear_layer(InfluenceMap.Layer.FRIENDLY_SUPPORT, 0.0)
+		#influence_map.clear_layer(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
+		#influence_map.clear_layer(InfluenceMap.Layer.UNIT_INFLUENCE, 0.0)
+#
+		#_write_visibility_for_team(influence_map, team)
+		#rebuild_los_influence_for_team(influence_map, team)
+		#_write_unit_influence_for_team(influence_map, team)
+		##_write_friendly_support_for_team(influence_map, team)
+		##_write_known_enemy_positions_for_team(influence_map, team)
+#
+	#rebuild_pending = true
 
 
 func _write_unit_influence_for_team(influence_map: InfluenceMap, team: int) -> void:
@@ -1052,16 +1120,16 @@ func _write_unit_influence_for_team(influence_map: InfluenceMap, team: int) -> v
 	
 	formations[team] = formation
 	
-	print(Globals.TEAM_NAMES[team])
-	if formation.front != null:
-		print("FRONT seed unit: ", formation.front.seed_unit.name)
-		print("FRONT seed hex: ", formation.front.seed_hex)
-		print("FRONT unit count: ", formation.front.units.size())
-
-	for flank: FormationGroup in formation.flanks:
-		print("FLANK seed unit: ", flank.seed_unit.name)
-		print("FLANK seed hex: ", flank.seed_hex)
-		print("FLANK unit count: ", flank.units.size())
+	#print(Globals.TEAM_NAMES[team])
+	#if formation.front != null:
+		#print("FRONT seed unit: ", formation.front.seed_unit.name)
+		#print("FRONT seed hex: ", formation.front.seed_hex)
+		#print("FRONT unit count: ", formation.front.units.size())
+#
+	#for flank: FormationGroup in formation.flanks:
+		#print("FLANK seed unit: ", flank.seed_unit.name)
+		#print("FLANK seed hex: ", flank.seed_hex)
+		#print("FLANK unit count: ", flank.units.size())
 	
 	pass
 
@@ -1245,7 +1313,7 @@ func rebuild_los_influence_for_team(
 	influence_map: InfluenceMap,
 	team: int
 ) -> void:
-	_clear_los_influence_layers(influence_map)
+	#_clear_los_influence_layers(influence_map)
 
 	#var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
 	# TODO build one for allies as wel
@@ -2033,3 +2101,92 @@ func _create_axis_composite_from_enemy_units(
 	axis_map.rebuild_all_composite()
 
 	return axis_map.get_composite_data_copy()
+
+
+func _begin_los_rebuild_for_team(
+	influence_map: InfluenceMap,
+	config: InfluenceProjectionConfig
+) -> void:
+	los_rebuild_active = true
+	los_rebuild_map = influence_map
+	los_rebuild_sources.clear()
+	los_rebuild_modes.clear()
+	los_rebuild_cursor = 0
+
+	var friendly_units: Array[Unit] = _get_config_units(config.unit_team, config.unit_group)
+	var los_lookup: Dictionary = LOSHelper.los_lookup
+
+	for unit: Unit in friendly_units:
+		if not _is_valid_living_unit(unit):
+			continue
+
+		if not los_lookup.has(unit.current_hex):
+			continue
+
+		var friendly_source: ProjectionSource = ProjectionSource.new(
+			unit,
+			unit.current_hex,
+			_get_unit_firepower(unit),
+			_get_unit_effectiveness(unit)
+		)
+
+		los_rebuild_sources.append(friendly_source)
+		los_rebuild_modes.append(true)
+
+	var enemy_units: Array[Unit] = _get_config_units(config.enemy_team, config.enemy_group)
+
+	var enemy_sources: Array[ProjectionSource] = _build_projected_line_sources(
+		enemy_units,
+		config.objective_hex,
+		config.projected_line_max_cells,
+		config.los_skip_front,
+		config.los_count
+	)
+
+	for enemy_source: ProjectionSource in enemy_sources:
+		los_rebuild_sources.append(enemy_source)
+		los_rebuild_modes.append(false)
+
+
+func _process_los_rebuild() -> void:
+	if not los_rebuild_active:
+		return
+
+	var processed: int = 0
+
+	while los_rebuild_cursor < los_rebuild_sources.size() and processed < LOS_SOURCES_PER_FRAME:
+		var source: ProjectionSource = los_rebuild_sources[los_rebuild_cursor]
+		var project_as_friendly: bool = los_rebuild_modes[los_rebuild_cursor]
+
+		_project_los_from_source(
+			los_rebuild_map,
+			source,
+			project_as_friendly
+		)
+
+		los_rebuild_cursor += 1
+		processed += 1
+
+	if los_rebuild_cursor >= los_rebuild_sources.size():
+		los_rebuild_active = false
+		los_rebuild_map = null
+		los_rebuild_sources.clear()
+		los_rebuild_modes.clear()
+		los_rebuild_cursor = 0
+		rebuild_pending = true
+
+
+func _clear_dynamic_layers_for_team(influence_map: InfluenceMap) -> void:
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.VISIBILITY, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.FIRE_POWER, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.FRIENDLY_SUPPORT, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.KNOWN_ENEMY_POSITION, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.UNIT_INFLUENCE, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.COVER_VS_ENEMY_FIRE, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.VISIBILITY_HINDRANCE, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.RETURN_FIRE_PENALTY, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.THREAT, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
+	influence_map.clear_layer_without_dirty(InfluenceMap.Layer.ENEMY_VULNERABILITY, 0.0)
+
+	influence_map.mark_all_dirty()
