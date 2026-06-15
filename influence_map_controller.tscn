@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b2l16lejahl5o"]
 
-[ext_resource type="Script" uid="uid://bemixmw3agmlv" path="res://influence_map_controller.gd" id="1_nfvag"]
+[ext_resource type="Script" uid="uid://dwf6kplytfcfj" path="res://scenes/world/influence_map/controller_subsystems/influence_map_controller.gd" id="1_nfvag"]
 
 [node name="InfluenceMapController" type="Node2D" unique_id=1463066945]
 script = ExtResource("1_nfvag")

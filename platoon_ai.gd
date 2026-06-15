@@ -69,7 +69,7 @@ func _get_sorted_threat_axes() -> Array[ThreatAxis]:
 	if current_order == null:
 		return axes
 	
-	var formation: InfluenceMapController.FormationIdentification = influence_map_controller.formations[Globals.get_enemy_team(team)]
+	var formation: FormationIdentification = influence_map_controller.formations[Globals.get_enemy_team(team)]
 	
 	#for axis: ThreatAxis in current_order.threat_axes:
 		#if axis == null:
