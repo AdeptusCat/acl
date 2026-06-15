@@ -32,7 +32,6 @@ var formations: Dictionary[Globals.Team, FormationIdentification] = {
 	Globals.Team.ALLIES: null,
 }
 
-var reserved_hexes: Dictionary[Unit, Vector2i] = {}
 var rebuild_pending: bool = false
 var objective_hex: Vector2i = Vector2i(11, 13)
 
@@ -82,27 +81,21 @@ func _process_budgeted_rebuild() -> void:
 
 
 func _run_post_rebuild_tactical_tasks() -> void:
-	var config: InfluenceProjectionConfig = _create_axis_defense_config()
-	config.objective_hex = objective_hex
-	_assign_best_positions_for_config(config)
+	return
 
 
-func run_post_rebuild_tactical_tasks_with_threataxis(axis: ThreatAxis, units: Array[Unit]) -> void:
-	var config: InfluenceProjectionConfig = _create_axis_defense_config()
-	config.objective_hex = objective_hex
-	config.threat_axis = axis
-	_assign_best_positions_for_config_and_threataxis(config, units, axis.enemy_units)
-
-
-func _create_axis_defense_config() -> InfluenceProjectionConfig:
+func create_axis_defense_config(
+	defending_team: int,
+	p_objective_hex: Vector2i
+) -> InfluenceProjectionConfig:
 	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
 
-	config.unit_team = Globals.Team.AXIS
-	config.enemy_team = Globals.Team.ALLIES
+	config.unit_team = defending_team
+	config.enemy_team = Globals.get_enemy_team(defending_team)
 	config.unit_group = ""
 	config.enemy_group = ""
 	config.task = TacticalTask.DEFEND_OBJECTIVE
-	config.objective_hex = objective_hex
+	config.objective_hex = p_objective_hex
 
 	config.projected_line_max_cells = 6
 	config.anchor_skip_front = 1
@@ -112,6 +105,10 @@ func _create_axis_defense_config() -> InfluenceProjectionConfig:
 	config.move_improvement_ratio = 0.8
 
 	return config
+
+
+func _create_axis_defense_config() -> InfluenceProjectionConfig:
+	return create_axis_defense_config(Globals.Team.AXIS, objective_hex)
 
 
 func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
@@ -134,24 +131,121 @@ func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
 	return config
 
 
-func _assign_best_positions_for_config(config: InfluenceProjectionConfig) -> void:
-	DefensePositionPlanner.assign_best_positions_for_config(self, config)
+func get_sorted_threat_axes_for_team(
+	defending_team: int,
+	p_objective_hex: Vector2i
+) -> Array[ThreatAxis]:
+	var result: Array[ThreatAxis] = []
+	var enemy_team: int = Globals.get_enemy_team(defending_team)
+
+	if not formations.has(enemy_team):
+		return result
+
+	var formation: FormationIdentification = formations[enemy_team]
+	if formation == null:
+		return result
+
+	if formation.front != null:
+		var front_axis: ThreatAxis = _create_threat_axis_from_formation_group(
+			formation.front,
+			p_objective_hex,
+			"front"
+		)
+		result.append(front_axis)
+
+	var flank_index: int = 0
+	for flank: FormationGroup in formation.flanks:
+		if flank == null:
+			continue
+
+		var flank_axis: ThreatAxis = _create_threat_axis_from_formation_group(
+			flank,
+			p_objective_hex,
+			"flank_%d" % flank_index
+		)
+		result.append(flank_axis)
+		flank_index += 1
+
+	result.sort_custom(_sort_threat_axis_by_score_descending)
+	return result
 
 
-func _assign_best_positions_for_config_and_threataxis(
-	config: InfluenceProjectionConfig,
-	axis_units: Array[Unit],
-	axis_enemy_units: Array[Unit]
-) -> void:
-	DefensePositionPlanner.assign_best_positions_for_threat_axis(
+func _create_threat_axis_from_formation_group(
+	group: FormationGroup,
+	p_objective_hex: Vector2i,
+	axis_name: String
+) -> ThreatAxis:
+	var axis: ThreatAxis = ThreatAxis.new()
+
+	axis.axis_name = axis_name
+	axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+	axis.source_hex = group.seed_hex
+	axis.target_hex = p_objective_hex
+	axis.estimated_enemy_count = group.units.size()
+	axis.estimated_firepower = group.units.size()
+	axis.enemy_units = group.units
+	axis.confidence = 1.0
+	axis.proximity_to_objective = 0.7
+	axis.attack_lane_quality = 0.8
+	axis.flank_danger = 0.2
+	axis.time_pressure = 0.6
+	axis.recompute_score()
+
+	return axis
+
+
+func _sort_threat_axis_by_score_descending(axis_a: ThreatAxis, axis_b: ThreatAxis) -> bool:
+	return axis_a.score > axis_b.score
+
+
+func analyze_defense_positions_for_threat_axis(
+	defending_team: int,
+	p_objective_hex: Vector2i,
+	axis: ThreatAxis,
+	assigned_units: Array[Unit],
+	reserved_hexes_by_unit: Dictionary
+) -> Array[DefensePositionResult]:
+	var empty_result: Array[DefensePositionResult] = []
+
+	if axis == null:
+		return empty_result
+
+	var config: InfluenceProjectionConfig = create_axis_defense_config(
+		defending_team,
+		p_objective_hex
+	)
+	config.threat_axis = axis
+
+	return DefensePositionAnalyzer.analyze_best_positions_for_threat_axis(
 		self,
 		config,
-		axis_units,
-		axis_enemy_units
+		assigned_units,
+		axis.enemy_units,
+		reserved_hexes_by_unit
+	)
+
+
+func analyze_objective_defense_positions(
+	defending_team: int,
+	p_objective_hex: Vector2i,
+	assigned_units: Array[Unit],
+	reserved_hexes_by_unit: Dictionary
+) -> Array[DefensePositionResult]:
+	var config: InfluenceProjectionConfig = create_axis_defense_config(
+		defending_team,
+		p_objective_hex
+	)
+
+	return DefensePositionAnalyzer.analyze_objective_defense_positions(
+		self,
+		config,
+		assigned_units,
+		reserved_hexes_by_unit
 	)
 
 
 func create_maps(_delta: float) -> void:
+
 	if not is_instance_valid(LOSHelper.ground_layer):
 		return
 
@@ -710,7 +804,7 @@ func _create_projected_approach_stamp(
 	config: InfluenceProjectionConfig,
 	enemy_units: Array[Unit]
 ) -> InfluenceStamp:
-	return DefensePositionPlanner.create_projected_approach_stamp(
+	return DefensePositionAnalyzer.create_projected_approach_stamp(
 		influence_map,
 		config,
 		enemy_units
@@ -721,7 +815,7 @@ func _create_projected_approach_stamp_with_threataxis(
 	influence_map: InfluenceMap,
 	config: InfluenceProjectionConfig
 ) -> InfluenceStamp:
-	return DefensePositionPlanner.create_projected_approach_stamp_for_threat_axis(
+	return DefensePositionAnalyzer.create_projected_approach_stamp_for_threat_axis(
 		influence_map,
 		config
 	)

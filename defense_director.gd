@@ -1,7 +1,7 @@
 class_name DefenseDirector
 extends Node
 
-@export var objective_hex: Vector2i = Vector2i(9,17)# Vector2i.ZERO
+@export var objective_hex: Vector2i = Vector2i(11,13)# Vector2i.ZERO
 @export var sector_cells: Array[Vector2i] = [Vector2i(9,17), Vector2i(10,17), Vector2i(11,17), Vector2i(8,17)]
 @export var fallback_hexes: Array[Vector2i] = [Vector2i(9,15)]
 

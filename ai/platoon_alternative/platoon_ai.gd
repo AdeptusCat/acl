@@ -78,7 +78,7 @@ func _get_sorted_threat_axes() -> Array[ThreatAxis]:
 			team,
 			current_order.objective_hex
 		)
-
+	
 	if axes.is_empty():
 		axes = _get_order_threat_axes()
 
