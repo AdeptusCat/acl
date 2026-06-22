@@ -28,6 +28,7 @@ enum DebugView {
 }
 
 const DebugViewNames: Dictionary[DebugView, String] = {
+	DebugView.NONE: "NONE",
 	DebugView.COMPOSITE: "Composite",
 	DebugView.TERRAIN_COVER: "TERRAIN_COVER",
 	DebugView.TERRAIN_MOVE_COST: "TERRAIN_MOVE_COST",

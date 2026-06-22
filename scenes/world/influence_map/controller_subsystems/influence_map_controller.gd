@@ -4,7 +4,7 @@ extends Node2D
 signal influence_maps_updated()
 
 const REBUILD_CELLS_PER_FRAME: int = 400
-const LOS_SOURCES_PER_FRAME: int = 1
+const LOS_SOURCES_PER_FRAME: int = 2
 
 
 enum CompositeSource {
@@ -41,6 +41,7 @@ var los_rebuild_map: InfluenceMap = null
 var los_rebuild_sources: Array[ProjectionSource] = []
 var los_rebuild_modes: Array[bool] = []
 var los_rebuild_cursor: int = 0
+var los_rebuild_jobs: Array[LosRebuildJob] = []
 
 var update_counter: float = 0.0
 var update_threshold: float = 1.0
@@ -246,10 +247,12 @@ func analyze_objective_defense_positions(
 
 
 func create_maps(_delta: float) -> void:
-
 	if not is_instance_valid(LOSHelper.ground_layer):
 		return
-
+	
+	if not los_rebuild_jobs.is_empty():
+		return
+	
 	if not maps_initialized:
 		_initialize_maps()
 		rebuild_static_terrain_layers()
@@ -301,10 +304,6 @@ func create_default_weights() -> PackedFloat32Array:
 	return weights
 
 
-func _create_default_weights() -> PackedFloat32Array:
-	return create_default_weights()
-
-
 func get_map_for_team(team: int) -> InfluenceMap:
 	if maps_by_team.has(team):
 		return maps_by_team[team]
@@ -333,6 +332,8 @@ func rebuild_static_terrain_layers() -> void:
 
 
 func rebuild_dynamic_tactical_layers() -> void:
+	los_rebuild_jobs.clear()
+	
 	for team: int in maps_by_team.keys():
 		var influence_map: InfluenceMap = maps_by_team[team]
 
@@ -436,6 +437,8 @@ func _write_hq_support_need_for_team(influence_map: InfluenceMap, team: int) -> 
 		influence_map,
 		squads_without_platoon_leader
 	)
+	
+	
 
 	influence_map._layers[InfluenceMap.Layer.HQ_SUPPORT_NEED] = support_need_layer
 
@@ -739,19 +742,6 @@ func _project_simulated_enemy_los_from_units(
 		influence_map,
 		config,
 		enemy_units
-	)
-
-
-func _create_axis_composite_from_enemy_units(
-	source_map: InfluenceMap,
-	config: InfluenceProjectionConfig,
-	axis_enemy_units: Array[Unit]
-) -> PackedFloat32Array:
-	return LosInfluenceProjector.create_axis_composite_from_enemy_units(
-		source_map,
-		config,
-		axis_enemy_units,
-		create_default_weights()
 	)
 
 

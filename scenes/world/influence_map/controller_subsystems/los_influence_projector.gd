@@ -338,12 +338,15 @@ static func begin_budgeted_rebuild_for_team(
 	influence_map: InfluenceMap,
 	config: InfluenceProjectionConfig
 ) -> void:
-	controller.los_rebuild_active = true
-	controller.los_rebuild_map = influence_map
-	controller.los_rebuild_sources.clear()
-	controller.los_rebuild_modes.clear()
-	controller.los_rebuild_cursor = 0
-
+	#controller.los_rebuild_active = true
+	#controller.los_rebuild_map = influence_map
+	#controller.los_rebuild_sources.clear()
+	#controller.los_rebuild_modes.clear()
+	#controller.los_rebuild_cursor = 0
+	var job: LosRebuildJob = LosRebuildJob.new()
+	job.influence_map = influence_map
+ 
+	
 	var friendly_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group)
 	var los_lookup: Dictionary = LOSHelper.los_lookup
 
@@ -361,8 +364,10 @@ static func begin_budgeted_rebuild_for_team(
 			InfluenceUnitQuery.get_unit_effectiveness(unit)
 		)
 
-		controller.los_rebuild_sources.append(friendly_source)
-		controller.los_rebuild_modes.append(true)
+		#controller.los_rebuild_sources.append(friendly_source)
+		#controller.los_rebuild_modes.append(true)
+		job.sources.append(friendly_source)
+		job.projection_modes.append(true)
 
 	var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
 	var enemy_sources: Array[ProjectionSource] = ProjectionSourceBuilder.build_from_units(
@@ -374,33 +379,96 @@ static func begin_budgeted_rebuild_for_team(
 	)
 
 	for enemy_source: ProjectionSource in enemy_sources:
-		controller.los_rebuild_sources.append(enemy_source)
-		controller.los_rebuild_modes.append(false)
+		#controller.los_rebuild_sources.append(enemy_source)
+		#controller.los_rebuild_modes.append(false)
+		job.sources.append(enemy_source)
+		job.projection_modes.append(false)
+	
+	controller.los_rebuild_jobs.append(job)
 
+static func process_budgeted_rebuild(
+	controller: InfluenceMapController,
+	sources_per_frame: int
+) -> void:
+	var had_jobs: bool = not controller.los_rebuild_jobs.is_empty()
 
-static func process_budgeted_rebuild(controller: InfluenceMapController, sources_per_frame: int) -> void:
-	if not controller.los_rebuild_active:
+	if not had_jobs:
 		return
 
 	var processed: int = 0
 
-	while controller.los_rebuild_cursor < controller.los_rebuild_sources.size() and processed < sources_per_frame:
-		var source: ProjectionSource = controller.los_rebuild_sources[controller.los_rebuild_cursor]
-		var project_as_friendly: bool = controller.los_rebuild_modes[controller.los_rebuild_cursor]
+	while processed < sources_per_frame and not controller.los_rebuild_jobs.is_empty():
+		var current_job: LosRebuildJob = controller.los_rebuild_jobs[0]
+
+		if current_job.cursor >= current_job.sources.size():
+			controller.los_rebuild_jobs.remove_at(0)
+			continue
+
+		var source: ProjectionSource = current_job.sources[current_job.cursor]
+		var project_as_friendly: bool = current_job.projection_modes[current_job.cursor]
 
 		project_los_from_source(
-			controller.los_rebuild_map,
+			current_job.influence_map,
 			source,
 			project_as_friendly
 		)
 
-		controller.los_rebuild_cursor += 1
+		current_job.cursor += 1
 		processed += 1
 
-	if controller.los_rebuild_cursor >= controller.los_rebuild_sources.size():
-		controller.los_rebuild_active = false
-		controller.los_rebuild_map = null
-		controller.los_rebuild_sources.clear()
-		controller.los_rebuild_modes.clear()
-		controller.los_rebuild_cursor = 0
+		var job_is_complete: bool = current_job.cursor >= current_job.sources.size()
+
+		controller.los_rebuild_jobs.remove_at(0)
+
+		if not job_is_complete:
+			controller.los_rebuild_jobs.append(current_job)
+
+	if controller.los_rebuild_jobs.is_empty():
 		controller.rebuild_pending = true
+
+
+
+#static func process_budgeted_rebuild(controller: InfluenceMapController, sources_per_frame: int) -> void:
+	##if not controller.los_rebuild_active:
+		##return
+	#var processed: int = 0
+#
+	##while controller.los_rebuild_cursor < controller.los_rebuild_sources.size() and processed < sources_per_frame:
+		##var source: ProjectionSource = controller.los_rebuild_sources[controller.los_rebuild_cursor]
+		##var project_as_friendly: bool = controller.los_rebuild_modes[controller.los_rebuild_cursor]
+#
+	#while processed < sources_per_frame and not controller.los_rebuild_jobs.is_empty():
+		#var job: LosRebuildJob = controller.los_rebuild_jobs[0]
+#
+		#if job.cursor >= job.sources.size():
+			#controller.los_rebuild_jobs.remove_at(0)
+			#controller.rebuild_pending = true
+			#continue
+#
+		#var source: ProjectionSource = job.sources[job.cursor]
+		#var project_as_friendly: bool = job.projection_modes[job.cursor]
+#
+		#project_los_from_source(
+			##controller.los_rebuild_map,
+			#job.influence_map,
+			#source,
+			#project_as_friendly
+		#)
+#
+		##controller.los_rebuild_cursor += 1
+		#job.cursor += 1
+		#processed += 1
+#
+	#if controller.los_rebuild_cursor >= controller.los_rebuild_sources.size():
+		##controller.los_rebuild_active = false
+		##controller.los_rebuild_map = null
+		##controller.los_rebuild_sources.clear()
+		##controller.los_rebuild_modes.clear()
+		##controller.los_rebuild_cursor = 0
+		##controller.rebuild_pending = true
+		#controller.los_rebuild_jobs.remove_at(0)
+#
+		#if job.cursor >= job.sources.size():
+			#controller.rebuild_pending = true
+		#else:
+			#controller.los_rebuild_jobs.append(job)
