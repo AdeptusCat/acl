@@ -159,10 +159,7 @@ func _draw() -> void:
 	if influence_controller == null:
 		return
 
-	if not influence_controller.has_method("get_map_for_team"):
-		return
-
-	var influence_map_variant: Variant = influence_controller.call("get_map_for_team", team)
+	var influence_map_variant: Variant = influence_controller.get_map_for_team(team)
 
 	if influence_map_variant == null:
 		return

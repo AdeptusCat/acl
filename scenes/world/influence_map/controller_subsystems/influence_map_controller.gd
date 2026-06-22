@@ -36,12 +36,14 @@ var formations: Dictionary[Globals.Team, FormationIdentification] = {
 var rebuild_pending: bool = false
 var objective_hex: Vector2i = Vector2i(11, 13)
 
-var los_rebuild_active: bool = false
-var los_rebuild_map: InfluenceMap = null
-var los_rebuild_sources: Array[ProjectionSource] = []
-var los_rebuild_modes: Array[bool] = []
-var los_rebuild_cursor: int = 0
 var los_rebuild_jobs: Array[LosRebuildJob] = []
+
+# One persistent tactical result set for each defending team.
+# Each entry contains one enemy threat-axis composite.
+var threat_axis_composites_by_team: Dictionary[int, Array] = {
+	Globals.Team.ALLIES: [],
+	Globals.Team.AXIS: [],
+}
 
 var update_counter: float = 0.0
 var update_threshold: float = 1.0
@@ -66,9 +68,17 @@ func _process_budgeted_rebuild() -> void:
 	if not rebuild_pending:
 		return
 
+	# Do not publish a completed tactical result while either team's LOS
+	# projections are still being written.
+	if not los_rebuild_jobs.is_empty():
+		return
+
 	var all_done: bool = true
 
-	for team: int in maps_by_team.keys():
+	for team: int in _get_processed_teams():
+		if not maps_by_team.has(team):
+			continue
+
 		var influence_map: InfluenceMap = maps_by_team[team]
 		var done: bool = influence_map.rebuild_dirty_composite_budgeted(REBUILD_CELLS_PER_FRAME)
 
@@ -77,6 +87,8 @@ func _process_budgeted_rebuild() -> void:
 
 	if not all_done:
 		return
+
+	_rebuild_threat_axis_composites_for_all_teams()
 
 	rebuild_pending = false
 	influence_maps_updated.emit()
@@ -290,6 +302,16 @@ func _initialize_maps() -> void:
 	maps_by_team[Globals.Team.ALLIES] = allied_map
 	maps_by_team[Globals.Team.AXIS] = axis_map
 
+	threat_axis_composites_by_team[Globals.Team.ALLIES] = []
+	threat_axis_composites_by_team[Globals.Team.AXIS] = []
+
+
+func _get_processed_teams() -> Array[int]:
+	var teams: Array[int] = []
+	teams.append(Globals.Team.ALLIES)
+	teams.append(Globals.Team.AXIS)
+	return teams
+
 
 func create_default_weights() -> PackedFloat32Array:
 	var weights: PackedFloat32Array = PackedFloat32Array()
@@ -302,6 +324,71 @@ func create_default_weights() -> PackedFloat32Array:
 	weights[InfluenceMap.Layer.ENEMY_VULNERABILITY] = 0.10
 
 	return weights
+
+
+func _rebuild_threat_axis_composites_for_all_teams() -> void:
+	for defending_team: int in _get_processed_teams():
+		_rebuild_threat_axis_composites_for_team(defending_team)
+
+
+func _rebuild_threat_axis_composites_for_team(defending_team: int) -> void:
+	var results: Array[ThreatAxisComposite] = []
+
+	if not maps_by_team.has(defending_team):
+		threat_axis_composites_by_team[defending_team] = results
+		return
+
+	var influence_map: InfluenceMap = maps_by_team[defending_team]
+	var axes: Array[ThreatAxis] = get_sorted_threat_axes_for_team(
+		defending_team,
+		objective_hex
+	)
+
+	for threat_axis: ThreatAxis in axes:
+		if threat_axis == null:
+			continue
+
+		var config: InfluenceProjectionConfig = create_axis_defense_config(
+			defending_team,
+			objective_hex
+		)
+		config.threat_axis = threat_axis
+
+		var axis_composite: PackedFloat32Array = LosInfluenceProjector.create_axis_composite_from_enemy_units(
+			influence_map,
+			config,
+			threat_axis.enemy_units,
+			create_default_weights()
+		)
+
+		var result: ThreatAxisComposite = ThreatAxisComposite.new()
+		result.configure(threat_axis, axis_composite)
+		results.append(result)
+
+	threat_axis_composites_by_team[defending_team] = results
+
+
+func get_threat_axis_composites_for_team(team: int) -> Array[ThreatAxisComposite]:
+	if not threat_axis_composites_by_team.has(team):
+		return []
+
+	return threat_axis_composites_by_team[team]
+
+
+func get_threat_axis_composite_for_team(
+	team: int,
+	axis_index: int
+) -> PackedFloat32Array:
+	var empty_composite: PackedFloat32Array = PackedFloat32Array()
+	var composites: Array[ThreatAxisComposite] = get_threat_axis_composites_for_team(team)
+
+	if axis_index < 0:
+		return empty_composite
+
+	if axis_index >= composites.size():
+		return empty_composite
+
+	return composites[axis_index].composite
 
 
 func get_map_for_team(team: int) -> InfluenceMap:
@@ -320,7 +407,10 @@ func get_movement_weight(team: int, cell: Vector2i) -> float:
 
 
 func rebuild_static_terrain_layers() -> void:
-	for team: int in maps_by_team.keys():
+	for team: int in _get_processed_teams():
+		if not maps_by_team.has(team):
+			continue
+
 		var influence_map: InfluenceMap = maps_by_team[team]
 
 		influence_map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER, 0.0)
@@ -333,8 +423,11 @@ func rebuild_static_terrain_layers() -> void:
 
 func rebuild_dynamic_tactical_layers() -> void:
 	los_rebuild_jobs.clear()
-	
-	for team: int in maps_by_team.keys():
+
+	for team: int in _get_processed_teams():
+		if not maps_by_team.has(team):
+			continue
+
 		var influence_map: InfluenceMap = maps_by_team[team]
 
 		_clear_dynamic_layers_for_team(influence_map)
@@ -838,3 +931,142 @@ func _get_projected_line_hexes(
 	count: int
 ) -> Array[Vector2i]:
 	return ProjectionSourceBuilder.get_projected_line_hexes(from_hex, to_hex, max_cells, skip_front, count)
+
+
+
+
+
+
+
+
+
+
+###### DEBUG
+
+func debug_print_layer_state(team: int, layer_id: int) -> void:
+	var influence_map: InfluenceMap = get_map_for_team(team)
+
+	if influence_map == null:
+		print("[InfluenceMap] Missing map for team: ", team)
+		return
+
+	if not influence_map.is_valid_layer(layer_id):
+		print("[InfluenceMap] Invalid layer: ", layer_id)
+		return
+
+	var values: PackedFloat32Array = influence_map.get_layer_data_copy(layer_id)
+
+	print(
+		"[InfluenceMap] team=",
+		_debug_get_team_name(team),
+		" map_id=",
+		influence_map.get_instance_id(),
+		" layer=",
+		_debug_get_layer_name(layer_id)
+	)
+
+	_debug_print_value_stats(values)
+
+	var axis_composites: Array[ThreatAxisComposite] = get_threat_axis_composites_for_team(team)
+
+	print(
+		"[InfluenceMap] threat_axis_composites=",
+		axis_composites.size()
+	)
+
+
+func _debug_print_value_stats(values: PackedFloat32Array) -> void:
+	if values.is_empty():
+		print("[InfluenceMap] values are empty")
+		return
+
+	var min_value: float = values[0]
+	var max_value: float = values[0]
+	var positive_count: int = 0
+	var negative_count: int = 0
+	var non_zero_count: int = 0
+
+	var index: int = 0
+
+	while index < values.size():
+		var value: float = values[index]
+
+		if value < min_value:
+			min_value = value
+
+		if value > max_value:
+			max_value = value
+
+		if value > 0.0:
+			positive_count += 1
+
+		if value < 0.0:
+			negative_count += 1
+
+		if value != 0.0:
+			non_zero_count += 1
+
+		index += 1
+
+	print(
+		"[InfluenceMap] cells=",
+		values.size(),
+		" non_zero=",
+		non_zero_count,
+		" positive=",
+		positive_count,
+		" negative=",
+		negative_count,
+		" min=",
+		min_value,
+		" max=",
+		max_value
+	)
+
+
+func _debug_get_team_name(team: int) -> String:
+	if team == Globals.Team.ALLIES:
+		return "ALLIES"
+
+	if team == Globals.Team.AXIS:
+		return "AXIS"
+
+	return "UNKNOWN_%d" % team
+
+
+func _debug_get_layer_name(layer_id: int) -> String:
+	match layer_id:
+		InfluenceMap.Layer.TERRAIN_COVER:
+			return "TERRAIN_COVER"
+		InfluenceMap.Layer.TERRAIN_MOVE_COST:
+			return "TERRAIN_MOVE_COST"
+		InfluenceMap.Layer.ENEMY_VISIBILITY:
+			return "ENEMY_VISIBILITY"
+		InfluenceMap.Layer.VISIBILITY:
+			return "VISIBILITY"
+		InfluenceMap.Layer.FIRE_POWER:
+			return "FIRE_POWER"
+		InfluenceMap.Layer.THREAT:
+			return "THREAT"
+		InfluenceMap.Layer.ENEMY_VULNERABILITY:
+			return "ENEMY_VULNERABILITY"
+		InfluenceMap.Layer.COVER_VS_ENEMY_FIRE:
+			return "COVER_VS_ENEMY_FIRE"
+		InfluenceMap.Layer.VISIBILITY_HINDRANCE:
+			return "VISIBILITY_HINDRANCE"
+		InfluenceMap.Layer.UNIT_INFLUENCE:
+			return "UNIT_INFLUENCE"
+		InfluenceMap.Layer.RETURN_FIRE_PENALTY:
+			return "RETURN_FIRE_PENALTY"
+		InfluenceMap.Layer.FRIENDLY_SUPPORT:
+			return "FRIENDLY_SUPPORT"
+		InfluenceMap.Layer.OBJECTIVE_PRESSURE:
+			return "OBJECTIVE_PRESSURE"
+		InfluenceMap.Layer.KNOWN_ENEMY_POSITION:
+			return "KNOWN_ENEMY_POSITION"
+		InfluenceMap.Layer.NO_GO:
+			return "NO_GO"
+		InfluenceMap.Layer.HQ_SUPPORT_NEED:
+			return "HQ_SUPPORT_NEED"
+
+	return "UNKNOWN_%d" % layer_id
