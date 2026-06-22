@@ -19,6 +19,7 @@ static func clear_los_layers(influence_map: InfluenceMap) -> void:
 	influence_map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VULNERABILITY, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.HQ_SUPPORT_NEED, 0.0)
 
 
 static func project_actual_friendly_los(

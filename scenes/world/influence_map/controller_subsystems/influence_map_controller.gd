@@ -6,6 +6,7 @@ signal influence_maps_updated()
 const REBUILD_CELLS_PER_FRAME: int = 400
 const LOS_SOURCES_PER_FRAME: int = 1
 
+
 enum CompositeSource {
 	SELF,
 	ENEMY
@@ -338,6 +339,7 @@ func rebuild_dynamic_tactical_layers() -> void:
 		_clear_dynamic_layers_for_team(influence_map)
 		_write_visibility_for_team(influence_map, team)
 		_write_unit_influence_for_team(influence_map, team)
+		_write_hq_support_need_for_team(influence_map, team)
 
 		var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
 		_begin_los_rebuild_for_team(influence_map, config)
@@ -421,6 +423,21 @@ func _write_visibility_for_team(influence_map: InfluenceMap, team: int) -> void:
 func rebuild_los_influence_for_team(influence_map: InfluenceMap, team: int) -> void:
 	var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
 	LosInfluenceProjector.rebuild_los_influence_for_team(influence_map, config)
+
+
+func _write_hq_support_need_for_team(influence_map: InfluenceMap, team: int) -> void:
+	var squads: Array[Unit] = Globals.get_units_for_team(team)
+	var squads_without_platoon_leader: Array[Unit]
+	for squad in squads:
+		if not squad.squad == 0:
+			squads_without_platoon_leader.append(squad)
+
+	var support_need_layer: PackedFloat32Array = HqSupportNeedLayer.build_squad_support_need_layer(
+		influence_map,
+		squads_without_platoon_leader
+	)
+
+	influence_map._layers[InfluenceMap.Layer.HQ_SUPPORT_NEED] = support_need_layer
 
 
 func _clear_los_influence_layers(influence_map: InfluenceMap) -> void:
@@ -612,24 +629,6 @@ func _team_has_contact_on_unit(team: int, enemy_unit: Unit) -> bool:
 		return true
 
 	return false
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	var mouse_button_event: InputEventMouseButton = event as InputEventMouseButton
-	if mouse_button_event == null:
-		return
-
-	if mouse_button_event.button_index != MOUSE_BUTTON_LEFT:
-		return
-
-	if mouse_button_event.pressed == false:
-		return
-
-	if mouse_button_event.ctrl_pressed == false:
-		return
-
-	objective_hex = LOSHelper.ground_layer.local_to_map(get_global_mouse_position())
-	print("objective hex: ", objective_hex)
 
 
 func _calculate_unit_gradient_to_influence_center(

@@ -416,7 +416,7 @@ static func apply_unit_influence_and_objective_mask(
 ) -> PackedFloat32Array:
 	var objective_stamp: InfluenceStamp = influence_map.create_radius_stamp(
 		objective_hex,
-		2,
+		3,
 		1.0,
 		InfluenceMap.FalloffMode.NONE
 	)

@@ -360,3 +360,21 @@ func _create_current_reserved_hexes(units: Array[Unit]) -> Dictionary:
 		result[unit] = reserved_hex
 
 	return result
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var mouse_button_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_button_event == null:
+		return
+
+	if mouse_button_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+
+	if mouse_button_event.pressed == false:
+		return
+
+	if mouse_button_event.ctrl_pressed == false:
+		return
+
+	current_order.objective_hex = LOSHelper.ground_layer.local_to_map(get_parent().get_global_mouse_position())
+	print("objective hex: ", current_order.objective_hex)

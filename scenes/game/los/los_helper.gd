@@ -1244,3 +1244,12 @@ func get_hex_neighbors(a: Vector2i) -> Array[Vector2i]:
 		var hex: Vector2i = ground_layer.cube_to_map(cube_neighbor)
 		hex_neighbors.append(hex)
 	return hex_neighbors
+
+
+func get_hex_ring(hex_center: Vector2i, radius: int, first_side: TileSet.CellNeighbor = -1) -> Array[Vector2i]:
+	var cube_center: Vector3i = ground_layer.map_to_cube(hex_center)
+	var cube_ring: Array[Vector3i] = ground_layer.cube_ring(cube_center, radius, first_side)
+	var hex_ring: Array[Vector2i]
+	for cube in cube_ring:
+		hex_ring.append(LOSHelper.ground_layer.cube_to_map(cube))
+	return hex_ring

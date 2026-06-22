@@ -22,8 +22,10 @@ enum Layer {
 	OBJECTIVE_PRESSURE,
 	KNOWN_ENEMY_POSITION,
 	NO_GO,
-
-	COUNT
+	
+	HQ_SUPPORT_NEED,
+	
+	COUNT,
 }
 
 enum WriteMode {
@@ -91,7 +93,7 @@ func configure(p_bounds: Rect2i) -> void:
 		layer_data.fill(0.0)
 		_layers.append(layer_data)
 		layer_id += 1
-
+		
 	_composite.resize(cell_count)
 	_composite.fill(composite_base)
 
@@ -667,3 +669,27 @@ func _decay_unit_influence_values() -> void:
 
 	_layers[Layer.UNIT_INFLUENCE] = values
 	mark_all_dirty()
+
+
+func normalize_layer(layer: PackedFloat32Array) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+	result.resize(layer.size())
+
+	var max_value: float = 0.0
+
+	var i: int = 0
+	while i < layer.size():
+		if layer[i] > max_value:
+			max_value = layer[i]
+		i += 1
+
+	i = 0
+	while i < layer.size():
+		if max_value > 0.0:
+			result[i] = layer[i] / max_value
+		else:
+			result[i] = 0.0
+
+		i += 1
+
+	return result
