@@ -115,14 +115,15 @@ static func project_los_from_source(
 	influence_map: InfluenceMap,
 	source: ProjectionSource,
 	project_as_friendly: bool
-) -> void:
+) -> int:
 	var los_lookup: Dictionary = LOSHelper.los_lookup
 	var observer_hex: Vector2i = source.observer_hex
 
 	if not los_lookup.has(observer_hex):
-		return
+		return 0
 
 	var visible_targets: Dictionary = los_lookup[observer_hex]
+	var written_target_count: int = 0
 
 	for target_hex: Vector2i in visible_targets.keys():
 		if not influence_map.is_valid_cell(target_hex):
@@ -149,6 +150,9 @@ static func project_los_from_source(
 				source.effectiveness
 			)
 
+		written_target_count += 1
+
+	return written_target_count
 
 static func project_friendly_los_record(
 	influence_map: InfluenceMap,
@@ -345,7 +349,7 @@ static func begin_budgeted_rebuild_for_team(
 	#controller.los_rebuild_cursor = 0
 	var job: LosRebuildJob = LosRebuildJob.new()
 	job.influence_map = influence_map
- 
+	job.defending_team = config.unit_team
 	
 	var friendly_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group)
 	var los_lookup: Dictionary = LOSHelper.los_lookup
@@ -368,7 +372,7 @@ static func begin_budgeted_rebuild_for_team(
 		#controller.los_rebuild_modes.append(true)
 		job.sources.append(friendly_source)
 		job.projection_modes.append(true)
-
+	
 	var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
 	var enemy_sources: Array[ProjectionSource] = ProjectionSourceBuilder.build_from_units(
 		enemy_units,
@@ -385,6 +389,21 @@ static func begin_budgeted_rebuild_for_team(
 		job.projection_modes.append(false)
 	
 	controller.los_rebuild_jobs.append(job)
+	
+	print(
+		"[LOS JOB] defending_team=",
+		Globals.TEAM_NAMES[config.unit_team],
+		" enemy_team=",
+		Globals.TEAM_NAMES[config.enemy_team],
+		" friendly_units=",
+		friendly_units.size(),
+		" friendly_sources=",
+		job.sources.size(),
+		" enemy_units=",
+		enemy_units.size(),
+		" projected_enemy_sources=",
+		enemy_sources.size()
+	)
 
 static func process_budgeted_rebuild(
 	controller: InfluenceMapController,
@@ -407,10 +426,32 @@ static func process_budgeted_rebuild(
 		var source: ProjectionSource = current_job.sources[current_job.cursor]
 		var project_as_friendly: bool = current_job.projection_modes[current_job.cursor]
 
-		project_los_from_source(
+		var target_record_count: int = project_los_from_source(
 			current_job.influence_map,
 			source,
 			project_as_friendly
+		)
+
+		var write_mode_name: String = "ENEMY"
+
+		if project_as_friendly:
+			write_mode_name = "FRIENDLY"
+
+		print(
+			"[LOS SOURCE] defending_team=",
+			Globals.TEAM_NAMES[current_job.defending_team],
+			" mode=",
+			write_mode_name,
+			" observer=",
+			source.observer_hex,
+			" firepower=",
+			source.firepower,
+			" effectiveness=",
+			source.effectiveness,
+			" targets=",
+			target_record_count,
+			" los_exists=",
+			LOSHelper.los_lookup.has(source.observer_hex)
 		)
 
 		current_job.cursor += 1

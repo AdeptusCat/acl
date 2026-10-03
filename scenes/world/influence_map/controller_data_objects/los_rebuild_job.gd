@@ -6,3 +6,4 @@ var influence_map: InfluenceMap = null
 var sources: Array[ProjectionSource] = []
 var projection_modes: Array[bool] = []
 var cursor: int = 0
+var defending_team: int = -1

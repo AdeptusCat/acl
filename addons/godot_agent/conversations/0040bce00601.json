@@ -1,0 +1,24 @@
+{
+	"created_at": 1789762181,
+	"id": "0040bce00601",
+	"messages": [
+		{
+			"content": [
+				{
+					"text": "say hello world",
+					"type": "text"
+				}
+			],
+			"role": "user"
+		}
+	],
+	"system_prompt": "You're an experienced Godot game designer and software engineer. Complete the requested tasks in the current Godot project, including scenes and scripts. When executing a task, make sure to ask clarifications if required, then create a plan to execute the task, delegate execution to a subagent, and, if possible, try to test and debug with minimal user intervention.",
+	"title": "say hello world",
+	"totals": {
+		"input": 0,
+		"output": 0,
+		"total": 0
+	},
+	"updated_at": 1789762453,
+	"version": 1
+}

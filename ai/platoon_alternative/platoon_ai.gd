@@ -373,8 +373,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if mouse_button_event.pressed == false:
 		return
 
-	if mouse_button_event.ctrl_pressed == false:
-		return
-
-	current_order.objective_hex = LOSHelper.ground_layer.local_to_map(get_parent().get_global_mouse_position())
-	print("objective hex: ", current_order.objective_hex)
+	if mouse_button_event.ctrl_pressed == true:
+		if team == Globals.Team.AXIS:
+			current_order.objective_hex = LOSHelper.ground_layer.local_to_map(get_parent().get_global_mouse_position())
+			print("objective hex: ", current_order.objective_hex)
+	
+	if mouse_button_event.shift_pressed == true:
+		if team == Globals.Team.ALLIES:
+			current_order.objective_hex = LOSHelper.ground_layer.local_to_map(get_parent().get_global_mouse_position())
+			print("objective hex: ", current_order.objective_hex)

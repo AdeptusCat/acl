@@ -2355,6 +2355,7 @@ draw_cell_values = true
 [node name="InfluenceMapController" parent="GameController" unique_id=1942260574 instance=ExtResource("91_mdkuk")]
 
 [node name="DefenseDirector" parent="GameController" unique_id=837909797 node_paths=PackedStringArray("platoon_ai") instance=ExtResource("92_i1y2t")]
+objective_hex = Vector2i(11, 13)
 platoon_ai = NodePath("../PlatoonAi")
 
 [node name="DefenseDirector2" parent="GameController" unique_id=1039800395 node_paths=PackedStringArray("platoon_ai") instance=ExtResource("92_i1y2t")]

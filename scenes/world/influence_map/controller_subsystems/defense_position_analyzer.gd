@@ -325,15 +325,16 @@ static func create_projected_approach_stamp_for_threat_axis(
 			config.anchor_count
 		)
 	else:
-		var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-		sources = ProjectionSourceBuilder.build_from_units(
-			enemy_units,
-			config.objective_hex,
-			config.projected_line_max_cells,
-			config.anchor_skip_front,
-			config.anchor_count
-		)
-
+		push_error("no threat axis")
+		#var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
+		#sources = ProjectionSourceBuilder.build_from_units(
+			#enemy_units,
+			#config.objective_hex,
+			#config.projected_line_max_cells,
+			#config.anchor_skip_front,
+			#config.anchor_count
+		#)
+	
 	return create_combined_source_stamp(influence_map, sources, true, config.objective_hex)
 
 

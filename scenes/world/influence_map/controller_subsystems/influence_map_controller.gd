@@ -34,7 +34,7 @@ var formations: Dictionary[Globals.Team, FormationIdentification] = {
 }
 
 var rebuild_pending: bool = false
-var objective_hex: Vector2i = Vector2i(11, 13)
+var objective_hex: Vector2i #= Vector2i(11, 13)
 
 var los_rebuild_jobs: Array[LosRebuildJob] = []
 
@@ -119,10 +119,6 @@ func create_axis_defense_config(
 	config.move_improvement_ratio = 0.8
 
 	return config
-
-
-func _create_axis_defense_config() -> InfluenceProjectionConfig:
-	return create_axis_defense_config(Globals.Team.AXIS, objective_hex)
 
 
 func _create_los_config_for_team(team: int) -> InfluenceProjectionConfig:
@@ -879,60 +875,6 @@ func _get_squad_type_priority(squad_type: Globals.SquadType) -> int:
 
 func _compare_units_by_squad_type_priority(unit_a: Unit, unit_b: Unit) -> bool:
 	return InfluenceUnitQuery.compare_units_by_squad_type_priority(unit_a, unit_b)
-
-
-func _create_projected_approach_stamp(
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig,
-	enemy_units: Array[Unit]
-) -> InfluenceStamp:
-	return DefensePositionAnalyzer.create_projected_approach_stamp(
-		influence_map,
-		config,
-		enemy_units
-	)
-
-
-func _create_projected_approach_stamp_with_threataxis(
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig
-) -> InfluenceStamp:
-	return DefensePositionAnalyzer.create_projected_approach_stamp_for_threat_axis(
-		influence_map,
-		config
-	)
-
-
-func _build_projected_line_sources_from_axis_alt(
-	axis: ThreatAxis,
-	objective: Vector2i,
-	max_cells: int,
-	skip_front: int,
-	count: int
-) -> Array[ProjectionSource]:
-	return ProjectionSourceBuilder.build_from_threat_axis(axis, objective, max_cells, skip_front, count)
-
-
-func _build_projected_line_sources(
-	units: Array[Unit],
-	objective: Vector2i,
-	max_cells: int,
-	skip_front: int,
-	count: int
-) -> Array[ProjectionSource]:
-	return ProjectionSourceBuilder.build_from_units(units, objective, max_cells, skip_front, count)
-
-
-func _get_projected_line_hexes(
-	from_hex: Vector2i,
-	to_hex: Vector2i,
-	max_cells: int,
-	skip_front: int,
-	count: int
-) -> Array[Vector2i]:
-	return ProjectionSourceBuilder.get_projected_line_hexes(from_hex, to_hex, max_cells, skip_front, count)
-
-
 
 
 

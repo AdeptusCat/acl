@@ -47,7 +47,34 @@ static func build_from_units(
 	for unit: Unit in units:
 		if not InfluenceUnitQuery.is_valid_living_unit(unit):
 			continue
+		
+		var from_hex: Vector2i = objective
+		var to_hex: Vector2i = unit.current_hex
 
+		var from_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(from_hex)
+		var to_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(to_hex)
+		var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(
+			from_cube,
+			to_cube
+		)
+
+		print(
+			"[ProjectionSourceBuilder] unit_team=",
+			unit.team,
+			" unit_hex=",
+			unit.current_hex,
+			" objective=",
+			objective,
+			" line_cells=",
+			line.size(),
+			" skip_front=",
+			skip_front,
+			" max_cells=",
+			max_cells,
+			" count=",
+			count
+		)
+		
 		var projected_hexes: Array[Vector2i] = get_projected_line_hexes(
 			objective,
 			unit.current_hex,

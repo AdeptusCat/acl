@@ -40,6 +40,7 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 	DebugView.ENEMY_VULNERABILITY: "ENEMY_VULNERABILITY",
 	DebugView.UNIT_INFLUENCE: "UNIT_INFLUENCE",
 	DebugView.HQ_SUPPORT_NEED: "HQ_SUPPORT_NEED",
+	DebugView.ENEMY_VISIBILITY: "ENEMY_VISIBILITY",
 }
 
 
@@ -119,6 +120,7 @@ func set_debug_view(p_debug_view: int) -> void:
 	debug_view = p_debug_view as DebugView
 	_cache_valid = false
 	Debug.influence_map_name = DebugViewNames[p_debug_view]
+	_debug_report_layer_access("View changed")
 	queue_redraw()
 
 
@@ -126,6 +128,7 @@ func set_team(p_team: int) -> void:
 	team = p_team
 	Debug.influence_map_team_name = Globals.TEAM_NAMES[team]
 	_cache_valid = false
+	_debug_report_layer_access("View changed")
 	queue_redraw()
 
 
@@ -185,6 +188,17 @@ func _draw() -> void:
 		max_value = _cached_max_value
 
 	_draw_cells(influence_map, min_value, max_value)
+	
+	if draw_layer_access_text:
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(20.0, 30.0),
+			_layer_access_text,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			14,
+			Color.WHITE
+		)
 
 
 func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float) -> void:
@@ -297,7 +311,10 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 	
 	if p_debug_view == DebugView.UNIT_INFLUENCE:
 		return InfluenceMap.Layer.UNIT_INFLUENCE
-
+	
+	if p_debug_view == DebugView.ENEMY_VISIBILITY:
+		return InfluenceMap.Layer.ENEMY_VISIBILITY
+	
 	#if p_debug_view == DebugView.FRIENDLY_SUPPORT:
 		#return InfluenceMap.Layer.FRIENDLY_SUPPORT
 
@@ -482,3 +499,126 @@ func _cycle_team() -> void:
 		return
 
 	set_team(Globals.Team.ALLIES)
+
+
+
+
+
+
+
+
+
+# DEBUG ###############
+
+@export var debug_probe_cell: Vector2i
+@export var draw_layer_access_text: bool = true
+
+var _layer_access_text: String = ""
+
+func _debug_report_layer_access(reason: String) -> void:
+	if influence_controller == null:
+		_layer_access_text = "Influence controller missing"
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	var influence_map_variant: Variant = influence_controller.get_map_for_team(team)
+
+	if influence_map_variant == null:
+		_layer_access_text = "Map missing for team %d" % team
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	var influence_map: InfluenceMap = influence_map_variant as InfluenceMap
+
+	if influence_map == null:
+		_layer_access_text = "Selected map is not an InfluenceMap"
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	var probe_cell: Vector2i = debug_probe_cell
+
+	if not influence_map.is_valid_cell(probe_cell):
+		probe_cell = influence_map.bounds.position
+
+	if debug_view == DebugView.COMPOSITE:
+		var composite_index: int = influence_map.cell_to_index(probe_cell)
+		var composite_getter_value: float = influence_map.get_composite_value(probe_cell, -999.0)
+		var composite_direct_value: float = influence_map._composite[composite_index]
+
+		_layer_access_text = (
+			"%s | team=%s | map=%d | COMPOSITE | cell=%s | index=%d | getter=%.3f | direct=%.3f"
+			% [
+				reason,
+				Globals.TEAM_NAMES[team],
+				influence_map.get_instance_id(),
+				probe_cell,
+				composite_index,
+				composite_getter_value,
+				composite_direct_value
+			]
+		)
+
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	var layer_id: int = _debug_view_to_layer_id(debug_view)
+
+	if layer_id < 0:
+		_layer_access_text = "Debug view has no layer mapping"
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	if layer_id >= influence_map._layers.size():
+		_layer_access_text = "Layer ID outside _layers array: %d" % layer_id
+		print("[InfluenceMapDebug] ", _layer_access_text)
+		return
+
+	var index: int = influence_map.cell_to_index(probe_cell)
+	var direct_layer: PackedFloat32Array = influence_map._layers[layer_id]
+	var copied_layer: PackedFloat32Array = influence_map.get_layer_data_copy(layer_id)
+
+	var getter_value: float = influence_map.get_layer_value_by_cell(
+		layer_id,
+		probe_cell,
+		-999.0
+	)
+
+	var direct_value: float = direct_layer[index]
+	var copied_value: float = copied_layer[index]
+
+	var non_zero_count: int = 0
+	var layer_index: int = 0
+
+	while layer_index < direct_layer.size():
+		if direct_layer[layer_index] != 0.0:
+			non_zero_count += 1
+
+		layer_index += 1
+
+	var values_match: bool = is_equal_approx(getter_value, direct_value)
+	values_match = values_match and is_equal_approx(direct_value, copied_value)
+
+	var match_text: String = "NO"
+
+	if values_match:
+		match_text = "YES"
+
+	_layer_access_text = (
+		"%s | team=%s | map=%d | view=%d | layer=%d | cell=%s | index=%d | getter=%.3f | direct=%.3f | copy=%.3f | match=%s | non_zero=%d"
+		% [
+			reason,
+			Globals.TEAM_NAMES[team],
+			influence_map.get_instance_id(),
+			debug_view,
+			layer_id,
+			probe_cell,
+			index,
+			getter_value,
+			direct_value,
+			copied_value,
+			match_text,
+			non_zero_count
+		]
+	)
+
+	print("[InfluenceMapDebug] ", _layer_access_text)

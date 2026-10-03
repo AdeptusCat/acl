@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="AdvancedCompanyLeader"
 run/main_scene="uid://dbbh255dq65on"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/image="uid://dxadjck0dj44"
 config/icon="res://icon.svg"
 
@@ -41,7 +41,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
 
 [input]
 

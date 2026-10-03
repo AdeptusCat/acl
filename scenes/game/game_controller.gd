@@ -847,6 +847,7 @@ func start_game(team: Globals.Team, time: float):
 	
 	#defense_director.manual_threat_axes = create_test_axes()
 	defense_director.assign_order_to_platoon()
+	$DefenseDirector2.assign_order_to_platoon()
 	$PlatoonAi
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
