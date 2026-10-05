@@ -63,16 +63,19 @@ func _process(delta: float) -> void:
 # ----------------------------------------------------------------------
 
 func stop() -> void:
+	_clear_path_state()
 	if is_moving:
-		_get_terrain_multiplier()
-		path_index = 0
-		path_hexes.clear()
-		move_to_hex(unit.current_hex)
+		_start_move_to_hex(unit.current_hex)
 		target_hex = unit.current_hex
 		new_target_hex.emit(target_hex)
 
 
 func move_to_hex(new_hex: Vector2i) -> void:
+	_clear_path_state()
+	_start_move_to_hex(new_hex)
+
+
+func _start_move_to_hex(new_hex: Vector2i) -> void:
 	_get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
@@ -82,7 +85,7 @@ func move_to_hex(new_hex: Vector2i) -> void:
 
 
 func follow_cube_path(cube_path: Array[Vector3i]) -> void:
-	path_hexes.clear()
+	_clear_path_state()
 	var i: int = 0
 	while i < cube_path.size():
 		var cube: Vector3i = cube_path[i]
@@ -91,13 +94,26 @@ func follow_cube_path(cube_path: Array[Vector3i]) -> void:
 	
 	if path_hexes.size() > 1:
 		path_index = 1
-		move_to_hex(path_hexes[path_index])
+		_start_move_to_hex(path_hexes[path_index])
 	elif path_hexes.size() == 1:
 		path_index = 0
-		move_to_hex(path_hexes[0])
+		_start_move_to_hex(path_hexes[0])
+	else:
+		stop()
 	if not path_hexes.is_empty():
 		target_hex = path_hexes[-1]
 		new_target_hex.emit(target_hex)
+
+
+func _clear_path_state() -> void:
+	path_hexes.clear()
+	path_index = 0
+	attack_in_progress = false
+	in_exposed_phase = false
+	covered_path_cubes.clear()
+	exposed_path_hexes.clear()
+	retreating = false
+
 
 # ----------------------------------------------------------------------
 # ATTACK-MOVE PATH SUPPORT
@@ -106,11 +122,9 @@ func follow_cube_path(cube_path: Array[Vector3i]) -> void:
 # covered_path: cubes from A* (safe route)
 # exposed_segment: cubes for the final open-ground leg
 func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
+	_clear_path_state()
+	is_moving = false
 	attack_in_progress = true
-	in_exposed_phase = false
-	
-	covered_path_cubes.clear()
-	exposed_path_hexes.clear()
 	
 	var i: int = 0
 	while i < covered_path.size():
@@ -132,19 +146,22 @@ func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vect
 
 # Called by the action FSM
 func start_covered_phase() -> void:
+	if not attack_in_progress:
+		return
 	if path_hexes.size() <= 1:
 		_start_exposed_phase()
 		return
 	
 	path_index = 1
-	move_to_hex(path_hexes[path_index])
+	_start_move_to_hex(path_hexes[path_index])
 
 
 # Internal: once covered path finished, switch into exposed segment
 func _start_exposed_phase() -> void:
+	if not attack_in_progress:
+		return
 	if exposed_path_hexes.is_empty():
-		attack_in_progress = false
-		in_exposed_phase = false
+		_clear_path_state()
 		return
 	
 	in_exposed_phase = true
@@ -160,7 +177,7 @@ func _start_exposed_phase() -> void:
 		return
 	
 	path_index = 0
-	move_to_hex(path_hexes[path_index])
+	_start_move_to_hex(path_hexes[path_index])
 	crossing_exposed_started.emit()
 
 
@@ -189,7 +206,7 @@ func _process_movement(delta: float) -> void:
 		if path_index < path_hexes.size() - 1:
 			# move to next hex
 			path_index += 1
-			move_to_hex(path_hexes[path_index])
+			_start_move_to_hex(path_hexes[path_index])
 		else:
 			# end movement here
 			if retreating:
@@ -202,10 +219,7 @@ func _process_movement(delta: float) -> void:
 				return
 			
 			# Otherwise, end of whole path
-			attack_in_progress = false
-			in_exposed_phase = false
-			path_hexes.clear()
-			path_index = 0
+			_clear_path_state()
 			unit.unit_arrived_at_hex.emit(unit.current_hex)
 	else:
 		# keep is_moving

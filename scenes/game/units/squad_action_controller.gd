@@ -210,12 +210,13 @@ func give_hold_order() -> void:
 	has_attack_flag = false
 	has_withdraw_flag = false
 	
-	movement.is_moving = false
+	movement.stop()
 	_set_action_state(SquadActionState.HOLDING_POSITION)
 
 
 func clear_orders() -> void:
 	action_order_id += 1
+	movement.stop()
 	_set_action_state(SquadActionState.NO_ORDER)
 
 # ----------------------------------------------------------------------
@@ -224,6 +225,7 @@ func clear_orders() -> void:
 
 func _start_move_on_path(path: Array[Vector3i]) -> void:
 	if path.is_empty():
+		movement.stop()
 		_set_action_state(SquadActionState.NO_ORDER)
 		return
 	
@@ -532,8 +534,6 @@ func _start_rout() -> void:
 		rout_failed.emit()
 		return
 	
-	unit.movement.retreating = true
-	
 	var restricted_astar: AStar2D = create_restricted_astar(allowed_hexes)
 	var from_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(unit.current_hex))
 	var to_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(retreat_hex))
@@ -548,6 +548,8 @@ func _start_rout() -> void:
 		i += 1
 	
 	unit.movement.follow_cube_path(cube_path)
+	if not cube_path.is_empty():
+		unit.movement.retreating = true
 
 
 
