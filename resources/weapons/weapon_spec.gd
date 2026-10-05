@@ -14,6 +14,7 @@ enum WeaponType {
 }
 
 var is_setup: bool = false
+var source_resource_path: String = ""
 
 enum AmmoType {BULLET, HE, AP}
 enum Family { SMALL_ARM, SPIGOT_LAUNCHER, ROCKET_LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
@@ -69,3 +70,14 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var riflegrenade_shot: AudioStream = null
 @export var riflegrenade_hit: AudioStream = null     
 @export var riflegrenade_projectile_speed: int = 200
+
+
+func create_runtime() -> WeaponSpec:
+	# Keep audio assets shared, but give each physical weapon its own mutable state.
+	var runtime: WeaponSpec = duplicate() as WeaponSpec
+	runtime.source_resource_path = source_resource_path
+	if runtime.source_resource_path.is_empty():
+		runtime.source_resource_path = resource_path
+	runtime.ammunition = ammunition_start
+	runtime.riflegrenade_loaded = false
+	return runtime

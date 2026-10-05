@@ -122,7 +122,9 @@ func create_save_data() -> SoldierLoadout:
 	data.role = role
 
 	if weapon != null:
-		data.weapon_resource_path = weapon.resource_path
+		data.weapon_resource_path = weapon.source_resource_path
+		if data.weapon_resource_path.is_empty():
+			data.weapon_resource_path = weapon.resource_path
 	else:
 		data.weapon_resource_path = ""
 

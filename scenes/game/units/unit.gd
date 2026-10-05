@@ -467,6 +467,7 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 		var spec: WeaponSpec = L.weapon
 		if spec == null:
 			spec = default_rifle
+		spec = spec.create_runtime()
 		var s: Soldier = Soldier.new(
 			i,
 			L.nickname,
@@ -478,7 +479,6 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 		)
 		if s.role == RankGrades.Role.GUNNER:
 			machine_guns += 1
-		spec.ammunition = spec.ammunition_start
 		if spec.family == WeaponSpec.Family.MORTAR:
 			ui.set_ammunition_left(spec.ammunition)
 		s.cadence_phase_s = randf_range(0.0, 3) # up to 0.2 s desync
