@@ -7,6 +7,9 @@ class AmmoUiUnderTest extends UnitUi:
 	func set_ammunition_left(ammo: int) -> void:
 		ammunition_left = ammo
 
+	func set_members_alive(_members_alive: int) -> void:
+		pass
+
 
 var failures: int = 0
 var units: Array[Unit] = []

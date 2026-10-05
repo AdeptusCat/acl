@@ -213,10 +213,6 @@ func setup():
 	squad_fire.fire_shot.connect(_on_fire_shot)
 	squad_fire.fire_riflegrenade.connect(_on_fire_riflegrenade)
 	
-	members_alive = loadouts.size()
-	ui.set_members_alive(loadouts.size())
-	original_size = loadouts.size()
-	
 	_refresh_leader_aura()
 	
 	ui.set_loadout(squad_fire.soldiers)
@@ -421,9 +417,7 @@ func _refresh_leader_aura() -> void:
 func _highest_grade_from_runtime() -> int:
 	var best: int = -1
 	var i: int = 0
-	while i < loadouts.size():
-		if not squad_fire.soldiers.size() > i:
-			break
+	while i < squad_fire.soldiers.size():
 		var s: Soldier = squad_fire.soldiers[i]
 		if s.is_alive:
 			var g: int = _runtime_soldier_grade(s)
@@ -487,6 +481,11 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 			effective_range = spec.range_hexes
 		i += 1
 	squad_fire.set_soldiers(list)
+	squad_fire.casualties.clear()
+	members_alive = list.size()
+	original_size = members_alive
+	casualties_taken = 0
+	ui.set_members_alive(members_alive)
 
 
 #func _setup_runtime_soldiers() -> void:
@@ -1364,7 +1363,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 func apply_specific_casualty(casualty: Soldier) -> bool:
 	for soldier in squad_fire.soldiers:
 		if soldier == casualty:
-			var members_alive_before: int = members_alive
+			var members_alive_before: int = squad_fire.soldiers.size()
 			
 			var leader_down: bool = false
 			
@@ -1380,14 +1379,10 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 			
 			weapon_audio.stop_mg_loop(casualty.weapon, position, soldier.id, self)
 			squad_fire.casualties.append(casualty)
+			casualties_taken = squad_fire.casualties.size()
+			combat_stats.notify_casualty_taken(1)
 			
-			# physically remove the fallen from our parallel arrays
-			var loadout_to_remove: SoldierLoadout
-			for loadout in loadouts:
-				if loadout.nickname == casualty.name:
-					loadout_to_remove = loadout
-					break
-			loadouts.erase(loadout_to_remove)
+			# Editor loadouts are definitions; only the runtime roster loses soldiers.
 			squad_fire.soldiers.erase(casualty)
 			
 			effective_range = 0
@@ -1444,11 +1439,12 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 
 # --- casualties, role replacement, and support-weapon re-crewing ---
 func _apply_casualties(n: int) -> void:
-	combat_stats.notify_casualty_taken(n)
-	var casualty_indexes: Array[int] = get_unique_random_ints(n, members_alive)
-	var members_alive_before: int = members_alive
-	if n == 0:
-		pass
+	var members_alive_before: int = squad_fire.soldiers.size()
+	var casualty_count: int = clampi(n, 0, members_alive_before)
+	if casualty_count == 0:
+		return
+	combat_stats.notify_casualty_taken(casualty_count)
+	var casualty_indexes: Array[int] = get_unique_random_ints(casualty_count, members_alive_before)
 
 	var leader_down: bool = false
 	#if leader_alive:
@@ -1495,8 +1491,7 @@ func _apply_casualties(n: int) -> void:
 		#if squad_fire.soldiers.size() > index:
 			#squad_fire.casualties.append(squad_fire.soldiers[index])
 	
-	# physically remove the fallen from our parallel arrays
-	remove_indices(loadouts, casualty_indexes)
+	# Editor loadouts are definitions; only the runtime roster loses soldiers.
 	remove_indices(squad_fire.soldiers, casualty_indexes)
 	
 	effective_range = 0
@@ -1505,13 +1500,13 @@ func _apply_casualties(n: int) -> void:
 			effective_range = soldier.weapon.range_hexes
 
 	# debug
-	if n != casualty_indexes.size():
+	if casualty_count != casualty_indexes.size():
 		pass
 
 	# book-keeping and UI
 	members_alive = squad_fire.soldiers.size()
 	
-	stress_system.on_casualty_event(n, leader_down)
+	stress_system.on_casualty_event(casualty_count, leader_down)
 	ui.set_members_alive(members_alive)
 	
 	if members_alive_before == members_alive:
