@@ -1558,7 +1558,6 @@ shader_parameter/grain_strength = 0.35
 
 [sub_resource type="GDScript" id="GDScript_nyio1"]
 script/source = "# formation_ai_controller.gd
-class_name FormationAIController
 extends Node
 "
 
