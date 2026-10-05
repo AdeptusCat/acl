@@ -62,7 +62,7 @@ func _process(delta: float) -> void:
 # BASIC MOVE / PATH
 # ----------------------------------------------------------------------
 
-func stop():
+func stop() -> void:
 	if is_moving:
 		_get_terrain_multiplier()
 		path_index = 0
@@ -104,7 +104,7 @@ func follow_cube_path(cube_path: Array[Vector3i]) -> void:
 # ----------------------------------------------------------------------
 
 # covered_path: cubes from A* (safe route)
-# exposed_segment: hexes for the final open-ground leg
+# exposed_segment: cubes for the final open-ground leg
 func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
 	attack_in_progress = true
 	in_exposed_phase = false
@@ -119,7 +119,7 @@ func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vect
 	
 	i = 0
 	while i < exposed_segment.size():
-		exposed_path_hexes.append(exposed_segment[i])
+		exposed_path_hexes.append(LOSHelper.ground_layer.cube_to_map(exposed_segment[i]))
 		i += 1
 	
 	# Seed path_hexes with covered part; movement starts with start_covered_phase()
@@ -133,8 +133,7 @@ func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vect
 # Called by the action FSM
 func start_covered_phase() -> void:
 	if path_hexes.size() <= 1:
-		attack_in_progress = false
-		in_exposed_phase = false
+		_start_exposed_phase()
 		return
 	
 	path_index = 1
@@ -177,20 +176,11 @@ func _process_movement(delta: float) -> void:
 	var dist: float = unit.position.distance_to(target_position)
 	var step: float = move_speed * terrain_mult * delta
 	
-	# check if unit entered hex
-	if path_index < path_hexes.size():
-		var closest_cube: Vector3i = LOSHelper.ground_layer.get_closest_cell_from_local(unit.position)
-		var next_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
-		if closest_cube == next_cube:
-			if unit.current_hex != path_hexes[path_index]:
-				unit.current_hex = path_hexes[path_index]
-				unit.current_cube = LOSHelper.ground_layer.map_to_cube(path_hexes[path_index])
-				unit.unit_entered_hex.emit(unit, path_hexes[path_index])
-	
 	# check if arrived at hex
 	if dist <= step:
 		# arrive at hex
 		unit.position = target_position
+		_update_current_hex(unit.goal_hex)
 		is_moving = false
 		stopped_moving.emit()
 		
@@ -220,9 +210,18 @@ func _process_movement(delta: float) -> void:
 	else:
 		# keep is_moving
 		unit.position += dir * step
+		_update_current_hex(LOSHelper.ground_layer.local_to_map(unit.position))
 		# debug
 		if unit.stress_system.state != STATES.MoraleState.NORMAL:
 			var _state: int = unit.stress_system.state
+
+
+func _update_current_hex(hex: Vector2i) -> void:
+	if unit.current_hex == hex:
+		return
+	unit.current_hex = hex
+	unit.current_cube = LOSHelper.ground_layer.map_to_cube(hex)
+	unit.unit_entered_hex.emit(unit, hex)
 
 
 # ----------------------------------------------------------------------
@@ -233,7 +232,7 @@ func _get_terrain_multiplier() -> void:
 	if path_hexes.is_empty():
 		var hex_to_move_to: Vector2i = unit.current_hex
 		var next_terr: int = _get_terrain_type(hex_to_move_to)
-		var mf_base = _terrain_mf(next_terr)
+		var mf_base: float = _terrain_mf(next_terr)
 		terrain_mult = _mf_to_speed_mult(mf_base)
 		#terrain_mult = 1.0
 		return
