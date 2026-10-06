@@ -82,6 +82,8 @@ func _run() -> void:
 
 func _test_sight_loss(attack_state: Unit.AttackState) -> void:
 	var burst_hex: Vector2i = Vector2i(6, 5)
+	var original_los: Dictionary = LOSHelper.los_lookup
+	LOSHelper.los_lookup = {shooter.current_hex: {burst_hex: {"target_cover": 0}}}
 	_prepare_target(burst_hex, attack_state)
 	_fire_burst(burst_hex)
 	_check(visual.destinations.size() == 1, "Burst starts before the target leaves sight")
@@ -97,11 +99,14 @@ func _test_sight_loss(attack_state: Unit.AttackState) -> void:
 	_check(shooter.squad_fire.target_hex == Vector2i.ZERO, "Cleared target reproduces the reported origin fallback")
 	await burst_finished
 	_check_destinations([burst_hex, burst_hex, burst_hex], "Sight loss during attack state %d retains the burst destination" % attack_state)
+	LOSHelper.los_lookup = original_los
 
 
 func _test_visible_movement() -> void:
 	var old_hex: Vector2i = Vector2i(6, 5)
 	var new_hex: Vector2i = Vector2i(7, 5)
+	var original_los: Dictionary = LOSHelper.los_lookup
+	LOSHelper.los_lookup = {shooter.current_hex: {old_hex: {"target_cover": 0}, new_hex: {"target_cover": 0}}}
 	_prepare_target(old_hex, Unit.AttackState.MANUAL_TRACK)
 	_fire_burst(old_hex)
 	_set_hex(enemy, new_hex)
@@ -110,6 +115,7 @@ func _test_visible_movement() -> void:
 	_check_destinations([old_hex, old_hex, old_hex], "Movement during a burst retains its captured destination")
 	await shooter.squad_fire.fire_shots(gunner, 3, 1200.0, false, shooter.squad_fire.target_hex)
 	_check_destinations([old_hex, old_hex, old_hex, new_hex, new_hex, new_hex], "The next burst uses the moved target's new hex")
+	LOSHelper.los_lookup = original_los
 
 
 func _test_retarget() -> void:

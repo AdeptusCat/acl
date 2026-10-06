@@ -161,6 +161,10 @@ func set_soldiers(list: Array[Soldier]) -> void:
 					#targetCover = data["target_cover"]
 					
 func set_target_unit(targetUnit: Unit) -> void:
+	if targetUnit != null and unit.attackState != Unit.AttackState.MANUAL_GROUND and not _can_track_target(targetUnit):
+		targetUnit = null
+		if unit.attackState == Unit.AttackState.MANUAL_TRACK:
+			unit.setAttackState(Unit.AttackState.AUTO)
 	var hex: Vector2i = Vector2i.ZERO
 	var distance: int
 	var had_target_before: bool = false
@@ -246,6 +250,32 @@ func clear_target() -> void:
 	has_mortar_target_hex = false
 
 
+func _can_track_target(enemy: Unit) -> bool:
+	if not is_instance_valid(enemy) or not enemy.alive or enemy.surrendered:
+		return false
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
+	if not visible_enemies.has(enemy):
+		return false
+	if enemy.current_hex == unit.current_hex:
+		return true
+	# Detection is published on a timer; check geometry at the current hex too.
+	var current_los: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
+	return current_los.has(enemy.current_hex)
+
+
+func _refresh_tracked_target() -> bool:
+	if not _can_track_target(target_unit):
+		if unit.attackState == Unit.AttackState.MANUAL_TRACK:
+			unit.setAttackState(Unit.AttackState.AUTO)
+		if target_unit != null or has_target_hex or has_mortar_target_hex:
+			clear_target()
+		return false
+	if not has_target_hex or target_hex != target_unit.current_hex:
+		target_hex = target_unit.current_hex
+	mortar_target_hex = target_hex
+	return true
+
+
 
 
 func _process(delta: float) -> void:
@@ -264,23 +294,12 @@ func _process(delta: float) -> void:
 			if unit.attackState == Unit.AttackState.AUTO:
 				handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
 	
+	if unit.attackState != Unit.AttackState.MANUAL_GROUND:
+		_refresh_tracked_target()
 	update_fire_recent(delta)
 	_update_state_multipliers()
 	_tick_soldiers(delta)
 	
-	if unit.attackState == Unit.AttackState.MANUAL_TRACK:
-		if target_unit:
-			var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
-			if visible_enemies.has(target_unit):
-				if not target_unit.current_hex == target_hex:
-					target_hex = target_unit.current_hex
-			else:
-				unit.setAttackState(Unit.AttackState.AUTO)
-		else:
-			unit.setAttackState(Unit.AttackState.AUTO)
-		#if target_unit:
-			#target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-			#target_hex = target_unit.current_hex
 
 
 func update_fire_recent(delta: float) -> void:
@@ -436,10 +455,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
-	if is_instance_valid(target_unit) and (unit.attackState == Unit.AttackState.MANUAL_TRACK or unit.attackState == Unit.AttackState.AUTO):
-		if not target_unit.current_hex == target_hex:
-			target_hex = target_unit.current_hex
-		mortar_target_hex = target_hex
+	if unit.attackState != Unit.AttackState.MANUAL_GROUND and not _refresh_tracked_target():
+		return 0
 	var _target_hex: Vector2i = target_hex
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = mortar_target_hex

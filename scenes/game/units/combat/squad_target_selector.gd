@@ -25,11 +25,7 @@ static func handle_auto_fire(controller: SquadFireController,
 	var best_cover: int = 0
 
 	for enemy: Unit in visible_enemies:
-		if not is_instance_valid(enemy):
-			continue
-		if not enemy.alive:
-			continue
-		if enemy.surrendered:
+		if not controller._can_track_target(enemy):
 			continue
 		
 		var units_in_enemy_hex: Array[Unit] = LOSHelper.find_units_at(enemy.current_hex)
