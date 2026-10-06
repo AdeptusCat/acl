@@ -191,120 +191,19 @@ func spawn_formation() -> void:
 
 
 func spawn_unit(team: Globals.Team, location: Vector2i, squad_type: Globals.SquadType, formation_id: int) -> void:
-	var unit: Unit = unit_scene.instantiate()
-	unit.ground_map = ground_layer
-	unit.team = team
-	match squad_type:
-		Globals.SquadType.Rifle:
-			unit.make_rifle_squad = true
-		Globals.SquadType.MG:
-			unit.make_light_mg_team = true
-		Globals.SquadType.PLATOON_HEADQUARTERS:
-			unit.make_platoon_headquarters_squad = true
-	
-	unit.formation_id = formation_id 
-	#$UnitContainer.add_child(unit)
-	unit.position = ground_layer.map_to_local(location)
-	
-	var map_coords: Vector2i = ground_layer.local_to_map(ground_layer.map_to_local(location))
-	unit.position = ground_layer.map_to_local(map_coords)
-	unit.current_hex = map_coords
-	unit.current_cube = ground_layer.map_to_cube(map_coords)
-	
-	unit.hide()
-	$UnitContainer.add_child(unit)
-	
-	unit.set_team(team)
-	
-	unit.unit_died.connect(_on_unit_died)
-	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
-	unit.unit_entered_hex.connect(_on_unit_entered_hex)
-	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
-	unit.current_hex = ground_layer.local_to_map(unit.global_position)
-	unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
-	unit.deselect_unit.connect(_deselect_unit)
-	unit.started_moving.connect(_on_started_moving)
-	unit.unit_surrendered.connect(_on_unit_surrendered)
-	unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
-	unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
-	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
-	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
-	unit.squad_fire.shooting.connect(_on_unit_shooting)
-	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
-	unit.update_terrain_defense_bonus()
-			
-	# assign platoon headquarter to squad 
-	if not unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
-		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
-	# assign company headquarter to platoon headquarter 
-	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
-		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
+	MatchUnitSpawner.spawn_unit(self, team, location, squad_type, formation_id)
 
 
 func draw_fog() -> void:
-	var used_cells: Array[Vector2i] = fog_of_war_layer.get_used_cells()
-	for cell: Vector2i in used_cells:
-		if LOSHelper.visible_hexes[Globals.team_player].has(cell):
-			fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
-		else:
-			fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
-	for x: int in LOSHelper.grid_size.x:
-		for y: int in LOSHelper.grid_size.y:
-			if not LOSHelper.visible_hexes[Globals.team_player].has(Vector2i(x, y)):
-				fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0)) 
+	MatchVisibilityCoordinator.draw_fog(self)
 
 
 func show_visible_units() -> void:
-	var units_seen: Array = []
-	#for u in Globals.units:
-		#if not is_instance_valid(u):
-			#continue
-		#if not u.team == Globals.team_player:
-			#u.visible = false
-	for u: Unit in Globals.get_units():
-		if not is_instance_valid(u):
-			continue
-		if u.surrendered:
-			continue
-		if u.team == Globals.team_player:
-			var units_in_los: Array = Globals.unit_visible_enemies.get(u, [])
-			for unit_in_los: Unit in units_in_los:
-				if not units_seen.has(unit_in_los):
-					units_seen.append(unit_in_los)
-	
-	for u: Unit in Globals.get_units():
-		if not is_instance_valid(u):
-				continue
-		if not u.team == Globals.team_player:
-			if units_seen.has(u):
-				u.visible = true
-			else:
-				u.visible = false
-	
-	if Debug.show_enemies:
-		for u: Unit in Globals.get_units():
-			u.visible = true
-			#if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
-				#u.visible = true
-			#else:
-				#u.visible = false 
+	MatchVisibilityCoordinator.show_visible_units(self)
 
 
 func update_visible_hexes() -> void:
-	for array: Array in LOSHelper.visible_hexes.values():
-		array.clear()
-	for u: Unit in Globals.get_units():
-		if not is_instance_valid(u):
-			continue
-		if u.surrendered:
-			continue
-		var unit_visible: Dictionary = LOSHelper.los_lookup.get(u.current_hex, {})
-		for hex: Vector2i in unit_visible:
-			if not LOSHelper.visible_hexes[u.team].has(hex):
-				LOSHelper.visible_hexes[u.team].append(hex)
-		if not LOSHelper.visible_hexes[u.team].has(u.current_hex):
-			LOSHelper.visible_hexes[u.team].append(u.current_hex)
-
+	MatchVisibilityCoordinator.update_visible_hexes(self)
 
 
 func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i) -> void:
@@ -358,97 +257,7 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i) -> voi
 
 
 func set_close_combat_hexes_and_units() -> void:
-	#Globals.units_in_close_combat.clear()
-	#Globals.close_combat_locations.clear()
-	
-	#for child in close_combat_locations.get_children():
-		#child.queue_free()
-	
-	for combat: CloseCombatInstance in close_combat_instances.get_children():
-		combat.refresh_participants()
-
-	for unit: Unit in Globals.get_units():
-		if not unit.is_good_order() or unit.squad_fire.soldiers.is_empty():
-			continue
-		var mask: int = 0
-		var both_teams_present: bool = false
-		var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
-		for _unit: Unit in units_in_hex:
-			if not _unit.is_good_order() or _unit.squad_fire.soldiers.is_empty():
-				continue
-			match _unit.team:
-				Globals.Team.AXIS:
-					mask |= 1
-				Globals.Team.ALLIES:
-					mask |= 2
-			if mask == 3:
-				both_teams_present = true
-		if both_teams_present:
-			var close_combat_instance: CloseCombatInstance
-			for close_combat_instance_present: CloseCombatInstance in close_combat_instances.get_children():
-				if not close_combat_instance_present.ongoing or close_combat_instance_present.is_queued_for_deletion():
-					continue
-				if close_combat_instance_present.hex == unit.current_hex:
-					close_combat_instance = close_combat_instance_present
-					break
-			if not close_combat_instance:
-				close_combat_instance = close_combat_instance_scene.instantiate()
-				close_combat_instance.hex = unit.current_hex
-				close_combat_instance.terrain_defense_value = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
-				
-			for _unit: Unit in units_in_hex:
-				if not close_combat_instance.can_unit_participate(_unit):
-					continue
-				close_combat_instance.add_unit(_unit)
-				_unit.movement.stop()
-			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
-			#close_combat_locations.add_child(close_combat_sign)
-			#if not Globals.close_combat_locations.has(unit.current_hex):
-				#Globals.close_combat_locations.append(unit.current_hex)
-			#if not Globals.units_in_close_combat.has(unit):
-				#Globals.units_in_close_combat.append(unit)
-			
-			if close_combat_instance.get_parent() == null:
-				close_combat_instance.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
-				close_combat_instances.add_child(close_combat_instance)
-
-
-#func set_close_combat_hexes_and_units():
-	#Globals.units_in_close_combat.clear()
-	#Globals.close_combat_locations.clear()
-	#
-	#for child in close_combat_locations.get_children():
-		#child.queue_free()
-	#
-	#for unit: Unit in Globals.units:
-		#if not unit.is_good_order():
-			#continue
-		#var mask: int = 0
-		#var both_teams_present: bool = false
-		#var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
-		#for _unit in units_in_hex:
-			#if not _unit.is_good_order():
-				#continue
-			#match _unit.team:
-				#Globals.Team.AXIS:
-					#mask |= 1
-				#Globals.Team.ALLIES:
-					#mask |= 2
-			#if mask == 3:
-				#both_teams_present = true
-		#if both_teams_present:
-			#for _unit in units_in_hex:
-				#_unit.in_close_combat = true
-			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
-			#close_combat_locations.add_child(close_combat_sign)
-			#close_combat_sign.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
-			#if not Globals.close_combat_locations.has(unit.current_hex):
-				#Globals.close_combat_locations.append(unit.current_hex)
-			#if not Globals.units_in_close_combat.has(unit):
-				#Globals.units_in_close_combat.append(unit)
-		#else:
-			#for _unit in units_in_hex:
-				#_unit.in_close_combat = false
+	CloseCombatCoordinator.set_close_combat_hexes_and_units(self)
 
 
 func setup_game() -> void:
@@ -473,141 +282,15 @@ func setup_game() -> void:
 		LOS._on_unit_entered_hex(unit, unit.current_hex)
 
 func set_objective_layer(team: Globals.Team, tilemap: TileMapLayer) -> void:
-	match team:
-		Globals.Team.AXIS:
-			axis_objective_tilemap = tilemap
-		Globals.Team.ALLIES:
-			allies_objective_tilemap = tilemap
+	MatchVictoryCoordinator.set_objective_layer(self, team, tilemap)
 
 
 func set_objective_cells(player_team: Globals.Team) -> void:
-	Globals.objective_hexes.clear()
-	var player_objective_tilemap: TileMapLayer
-	var ai_objective_tilemap: TileMapLayer
-	var ai_team: Globals.Team
-	if player_team == Globals.Team.AXIS:
-		ai_team = Globals.Team.ALLIES
-		ai_objective_tilemap = allies_objective_tilemap
-		player_objective_tilemap = axis_objective_tilemap
-	else:
-		ai_team = Globals.Team.AXIS
-		ai_objective_tilemap = axis_objective_tilemap
-		player_objective_tilemap = allies_objective_tilemap
-	player_objective_tilemap.show()
-	ai_objective_tilemap.hide()
-	#if player_team == Globals.Team.AXIS:
-		#match Globals.game_mode:
-			#Globals.GameMode.DEFEND:
-				#player_objective_tilemap = allies_objective_tilemap
-				#ai_objective_tilemap = allies_objective_tilemap
-			#Globals.GameMode.ATTACK:
-				#player_objective_tilemap = axis_objective_tilemap
-				#ai_objective_tilemap = axis_objective_tilemap
-	#if player_team == Globals.Team.ALLIES:
-		#match Globals.game_mode:
-			#Globals.GameMode.DEFEND:
-				#player_objective_tilemap = axis_objective_tilemap
-				#ai_objective_tilemap = axis_objective_tilemap
-			#Globals.GameMode.ATTACK:
-				#player_objective_tilemap = allies_objective_tilemap
-				#ai_objective_tilemap = allies_objective_tilemap
-	#if player_team == Globals.Team.AXIS:
-		#match Globals.game_mode:
-			#Globals.GameMode.DEFEND:
-				#axis_objective_tilemap.visible = false
-				#allies_objective_tilemap.visible = true
-			#Globals.GameMode.ATTACK:
-				#axis_objective_tilemap.visible = true
-				#allies_objective_tilemap.visible = false
-	#elif player_team == Globals.Team.ALLIES:
-		#match Globals.game_mode:
-			#Globals.GameMode.DEFEND:
-				#axis_objective_tilemap.visible = true
-				#allies_objective_tilemap.visible = false
-			#Globals.GameMode.ATTACK:
-				#axis_objective_tilemap.visible = false
-				#allies_objective_tilemap.visible = true
-	
-	var cells: Array[Vector2i] = player_objective_tilemap.get_used_cells()
-	if cells.size() > 0:
-		for cell: Vector2i in cells:
-			if not Globals.objective_hexes.has(player_team):
-				Globals.objective_hexes[player_team] = []
-			Globals.objective_hexes[player_team].append(cell)
-	#else:
-		#push_error("ObjectiveTileMapLayer has no tiles placed!")
-	
-	cells = ai_objective_tilemap.get_used_cells() 
-	if cells.size() > 0:
-		for cell: Vector2i in cells:
-			if not Globals.objective_hexes.has(ai_team):
-				Globals.objective_hexes[ai_team] = []
-			Globals.objective_hexes[ai_team].append(cell)
-	#else:
-		#push_error("ObjectiveTileMapLayer has no tiles placed!")
+	MatchVictoryCoordinator.set_objective_cells(self, player_team)
 
 
 func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option) -> void:
-	if not selected_unit:
-		return
-	
-	if selected_unit.in_close_combat:
-		return
-	
-	match option:
-		WheelOption.Option.NONE:
-			pass
-		WheelOption.Option.MOVE_NORMAL:
-			if selected_unit.broken or selected_unit.surrendered:
-				selected_unit.ui.show_broken()
-				return
-			if selected_unit.stress_system.state == STATES.MoraleState.PINNED:
-				selected_unit.ui.show_pinned()
-				return
-			selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
-		WheelOption.Option.FIRE_AT:
-			var can_shoot: bool = false
-			if not selected_unit.squad_type == Globals.SquadType.MORTAR:
-				var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(selected_unit.current_hex, [])
-				if unit_visible_hexes.has(map_hex):
-					can_shoot = true
-			else:
-				can_shoot = true
-			if can_shoot:
-				selected_unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
-				selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
-		WheelOption.Option.ASSAULT:
-			pass
-		WheelOption.Option.STOP:
-			selected_unit.order(Globals.UnitCmd.STOP, map_hex)
-	
-	var local_pos: Vector2 = ground_layer.map_to_local(map_hex)
-	hex_glow(local_pos)
-
-#func _on_mouse_button_right_pressed(event_pos: Vector2):
-	#event_pos = get_local_mouse_position()
-	#var map_hex = ground_layer.local_to_map(event_pos)
-	#
-	#if selected_unit:
-		#if selected_unit.broken:
-			#selected_unit.ui.show_failure()
-			#return
-		#var local_pos: Vector2
-		#if selected_unit.squad_type == Globals.SquadType.MORTAR:
-			#selected_unit.order(Globals.UnitCmd.ATTACK_GROUND, map_hex)
-		#else:
-			#var units: Array[Node2D] = _find_units_at(map_hex)
-			#for unit in units:
-				#if not unit.team == Globals.team_player or Debug.enemy_selectable:
-					#var _path: Array[Vector3i] = []
-					#selected_unit.order(Globals.UnitCmd.ATTACK_UNIT, unit)
-					#local_pos = ground_layer.map_to_local(map_hex)
-					#hex_glow(local_pos)
-					#return
-			#selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
-		#local_pos = ground_layer.map_to_local(map_hex)
-		#hex_glow(local_pos)
-	
+	MatchInteractionHandler.order_via_option_wheel(self, map_hex, option)
 
 
 var previous_selected_hex: Vector2i = Vector2i(-1, -1)
@@ -615,36 +298,9 @@ var selected_hex_index: int = 0
 
 
 func _on_mouse_button_left_pressed(event_pos: Vector2) -> void:
-	event_pos = get_local_mouse_position()
-	var map_hex: Vector2i = ground_layer.local_to_map(event_pos)
-	hex_selected.emit(map_hex, event_pos)
-	if previous_selected_hex == map_hex:
-		selected_hex_index += 1
-	else:
-		previous_selected_hex = map_hex
-		selected_hex_index = 0
-	var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
-	if units.is_empty():
-		if not selected_unit == null:
-			_deselect_unit(selected_unit)
-			hide_unit_details_in_ui.emit()
-		return
-	if selected_hex_index >= units.size():
-		selected_hex_index = 0
-	var unit: Unit = units[selected_hex_index]
-	if unit: # and not unit.broken  and not unit.surrendered
-		if not unit.team == Globals.team_player and not Debug.enemy_selectable:
-			return
-		if unit == selected_unit:
-			_deselect_unit(unit)
-			hide_unit_details_in_ui.emit()
-		else:
-			_select_unit(unit)
-			show_unit_details_in_ui.emit(unit)
-			LOSHelper.clear_los()
+	MatchInteractionHandler.on_mouse_button_left_pressed(self, event_pos)
 
 
-# Nullable tile coordinates: Vector2i when present, null when cleared.
 var origin_hex: Variant
 var target_hex: Variant
 var targetCover: int
@@ -694,58 +350,11 @@ func _on_mouse_event_position_changed(_event_pos: Vector2) -> void:
 
 
 func handle_mouse_event_position_changed(event_pos: Vector2) -> void:
-	mouse_event_position_changed.emit(event_pos)
-	if selected_unit:
-		var unit_pos: Vector2 = selected_unit.position
-		var local_event_pos: Vector2 = get_local_mouse_position()
-		LOSHelper.draw_los(unit_pos, local_event_pos)
-		
-		var screen_pos: Vector2 = get_viewport().get_mouse_position()
-		if (target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and origin_hex == selected_unit.current_hex):
-			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
-		else:
-			origin_hex = selected_unit.current_hex
-			target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
-			var origin_cube: Vector3i = selected_unit.current_cube
-			var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
-			distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
-			# safely grab the inner dict for this shooter-hex
-			var cover_map: Dictionary = LOSHelper.los_lookup.get(origin_hex, {})
-			if cover_map and cover_map.has(target_hex):
-				var data: Dictionary = cover_map[target_hex]
-				targetCover 	= data["target_cover"]
-			else:
-				targetCover = 0  # no LOS or no cover entry
-				get_parent().ui.hide_target_hex_cover_distance()
-				target_hex = null
-				origin_hex = null
-				return
-			# now display it
-			firepower = selected_unit.firepower
-			if distance > selected_unit.weapon_range:
-				if distance <= selected_unit.weapon_range * 2:
-					firepower = firepower / 2
-				else:
-					firepower = 0
-			
-			get_parent().ui.show_target_hex_cover_distance(screen_pos, targetCover, distance, firepower)
-			#selected_unit.set_cover(targetCover)
-	else:
-		get_parent().ui.hide_target_hex_cover_distance()
-
-
-#var last_mouse_position: Vector2
-#func _on_camera_moved():
-	#var pos = get_local_mouse_position()
-	#if abs(pos.x - last_mouse_position.x) > 1 or abs(pos.y - last_mouse_position.y) > 1:
-		#handle_mouse_event_position_changed(pos)
-		#last_mouse_position = pos
+	MatchInteractionHandler.handle_mouse_event_position_changed(self, event_pos)
 
 
 func hex_glow(pos: Vector2) -> void:
-	var glow: ColorRect = glow_maker_scene.instantiate()
-	glow.position = pos
-	add_child(glow)
+	MatchInteractionHandler.hex_glow(self, pos)
 
 
 func _on_key_space_pressed(_event_pos: Vector2) -> void:
@@ -753,20 +362,12 @@ func _on_key_space_pressed(_event_pos: Vector2) -> void:
 
 
 func _select_unit(unit: Unit) -> void:
-	if selected_unit:
-		selected_unit.deselect()
-	selected_unit = unit
-	unit.select()
-	influence_map_debug_draw.selected_unit = unit
+	MatchInteractionHandler.select_unit(self, unit)
 
 
 func _deselect_unit(unit: Unit) -> void:
-	if selected_unit == unit:
-		selected_unit.deselect()
-		selected_unit = null
-		LOSHelper.clear_los()
-		influence_map_debug_draw.selected_unit = null
-		
+	MatchInteractionHandler.deselect_unit(self, unit)
+
 
 func _on_unit_surrendered(_unit: Unit) -> void:
 	pass
@@ -970,52 +571,7 @@ func _process(delta: float) -> void:
 
 
 func update_los_time(delta: float) -> void:
-	var now_unix: float = Time.get_unix_time_from_system()
-
-	for unit_variant: Unit in Globals.get_units():
-		var unit: Unit = unit_variant as Unit
-		if unit == null:
-			continue
-
-		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
-			unit,
-			{} as Dictionary[Unit, EnemyTrack]
-		)
-
-		var enemies_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-		var seen_this_tick: Dictionary[Unit, bool] = {}
-
-		for enemy_variant: Variant in enemies_in_los:
-			var enemy: Unit = enemy_variant as Unit
-			if enemy == null:
-				continue
-
-			seen_this_tick[enemy] = true
-
-			var track: EnemyTrack = track_map.get(enemy, null)
-			if track == null:
-				track = EnemyTrack.new(unit, enemy)
-				track_map[enemy] = track
-
-			track.update_seen(delta, now_unix)
-
-		var tracked_enemies: Array[Unit] = track_map.keys()
-
-		for tracked_enemy: Unit in tracked_enemies:
-			if seen_this_tick.has(tracked_enemy):
-				continue
-
-			var existing_track: EnemyTrack = track_map.get(tracked_enemy, null)
-			if existing_track == null:
-				track_map.erase(tracked_enemy)
-				continue
-
-			existing_track.update_not_seen(delta)
-
-			if existing_track.should_delete():
-				track_map.erase(tracked_enemy)
-
-		Globals.unit_enemy_tracks[unit] = track_map
+	MatchVisibilityCoordinator.update_los_time(self, delta)
 
 
 func move_camera(hex: Vector2i) -> void:
@@ -1035,148 +591,15 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _on_unit_visibility_checker_timer_timeout() -> void:
-	var next_visible: Dictionary = {}
-
-	for unit_variant: Unit in Globals.get_units():
-		var unit: Unit = unit_variant as Unit
-		if unit == null:
-			continue
-
-		if not is_instance_valid(unit):
-			continue
-
-		var units_visible: Array[Unit] = []
-		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
-		var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
-
-		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
-			unit,
-			{} as Dictionary[Unit, EnemyTrack]
-		)
-
-		for enemy_variant: Variant in track_map.keys():
-			var enemy_tracked: Unit = enemy_variant as Unit
-			if enemy_tracked == null:
-				continue
-
-			if not is_instance_valid(enemy_tracked):
-				continue
-
-			var track: EnemyTrack = track_map.get(enemy_tracked, null)
-			if track == null:
-				continue
-
-			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
-				track.is_visible = true
-				units_visible.append(enemy_tracked)
-				continue
-
-			if not units_in_los.has(enemy_tracked):
-				track.is_visible = false
-				continue
-
-			var p_tick: float = _compute_detect_prob_per_tick(unit, enemy_tracked, 1.0)
-			var r: float = randf()
-
-			if r < p_tick:
-				track.confidence += 0.35
-			else:
-				track.confidence -= 0.10
-
-			track.confidence = clamp(track.confidence, 0.0, 1.0)
-
-			if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
-				track.is_visible = true
-				
-				units_visible.append(enemy_tracked)
-			else:
-				track.is_visible = false
-
-		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
-
-		for unit_in_current_hex_variant: Variant in units_at_current_hex:
-			var unit_in_current_hex: Unit = unit_in_current_hex_variant as Unit
-			if unit_in_current_hex == null:
-				continue
-
-			if unit_in_current_hex.team == unit.team:
-				continue
-
-			if not units_visible.has(unit_in_current_hex):
-				units_visible.append(unit_in_current_hex)
-
-			var same_hex_track: EnemyTrack = track_map.get(unit_in_current_hex, null)
-			if same_hex_track == null:
-				same_hex_track = EnemyTrack.new(unit, unit_in_current_hex)
-				track_map[unit_in_current_hex] = same_hex_track
-
-			same_hex_track.confidence = 1.0
-			same_hex_track.is_visible = true
-			same_hex_track.has_confirmed_lock = true
-			same_hex_track.currently_in_los = true
-			same_hex_track.last_known_global_position = unit_in_current_hex.global_position
-
-		Globals.unit_enemy_tracks[unit] = track_map
-		next_visible[unit] = units_visible
-
-	Globals.unit_visible_enemies = next_visible
-	show_visible_units()
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(self)
 
 
 func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) -> float:
-	var dist: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
-	if dist < 1:
-		dist = 1
+	return MatchVisibilityCoordinator.compute_detect_prob_per_tick(self, observer, enemy, delta)
 
-	var is_moving: bool = enemy.is_moving
-
-	var conceal: int = _get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
-	#if conceal > 0:
-		#conceal = 1
-
-	# score components (tune)
-	var score: float = 0.0
-
-	# movement: huge
-	if is_moving:
-		score += 3.0
-	else:
-		score += 0.5
-
-	# distance penalty (log-ish)
-	score -= 0.25 * float(dist)
-
-	# concealment penalty
-	if conceal > 0:
-		score -= 0.8 * float(conceal)
-	if conceal == 0:
-		score += 1
-	
-	# shooting stimulus (0..1) -> add to score
-	var fire_recent: float = enemy.squad_fire.fire_recent
-	var fire_recent_mod: float = 10.0 * fire_recent
-	score += fire_recent_mod
-	# convert score -> hazard rate (lambda >= 0)
-	# baseline ensures “sometimes” even if score small
-	var lambda: float = 0.00 + 0.15 * max(score, 0.0)
-	var p: float = 1.0 - exp(-lambda * delta)
-
-	return clamp(p, 0.0, 0.95)
 
 func _get_concealment(current_hex: Variant, enemy: Node) -> int:
-	var cover_map: Variant = LOSHelper.los_lookup.get(current_hex, null)
-	if cover_map == null:
-		return 0
-	if not cover_map.has(enemy.current_hex):
-		return 0
-	var data: Variant = cover_map[enemy.current_hex]
-	if data is Dictionary:
-		if data.has("target_conceal"):
-			return int(data["target_conceal"])
-		if data.has("target_cover"):
-			# fallback if you have nothing else
-			return int(data["target_cover"])
-	return 0
+	return MatchVisibilityCoordinator.get_concealment(self, current_hex, enemy)
 
 
 func _on_close_combat_resolve_timer_timeout() -> void:
@@ -1283,103 +706,11 @@ func select_target(
 
 
 func set_victory_conditions() -> void:
-	for team: int in Globals.victory_conditions:
-		var victory_conditions: VictoryConditionCollection = Globals.victory_conditions[team]
-		for victory_condition: VictoryCondition in victory_conditions.victory_conditions:
-			match victory_condition:
-				var condition when condition is OccupyObjectiveCondition:
-					victory_condition = victory_condition as OccupyObjectiveCondition
-					victory_condition.state = OccupyObjectiveState.new()
-					var objectives: ObjectivesCollection = Globals.objectives[team]
-					for objective: ObjectiveDefinition in objectives.objectives:
-						if objective.objective_id == victory_condition.objective_id:
-							victory_condition.state.hexes.append(objective.hex)
-							victory_condition.state.required_times_reached_s[objective.hex] = 0.0
-							victory_condition.state.units_in_objectives[objective.hex] = UnitsCollection.new()
-							victory_condition.state.victory_conditions_met[objective.hex] = false
-							#victory_condition.hex = objective.hex
-				var condition when condition is ExitUnitsCondition:
-					victory_condition = victory_condition as ExitUnitsCondition
-					victory_condition.state = ExitUnitsState.new()
-					var objectives: ObjectivesCollection = Globals.objectives[team]
-					for objective: ObjectiveDefinition in objectives.objectives:
-						if objective.objective_id == victory_condition.objective_id:
-							victory_condition.state.exit_hexes.append(objective.hex)
-				var condition when condition is DestroyUnitsCondition:
-					victory_condition = victory_condition as DestroyUnitsCondition
-					victory_condition.state = DestroyUnitsState.new()
-					pass
+	MatchVictoryCoordinator.set_victory_conditions(self)
 
 
 func _on_win_condition_timer_timeout() -> void:
-	if end_game_handled:
-		return
-	
-	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
-		Globals.Team.AXIS: false,
-		Globals.Team.ALLIES: false,
-	}
-	
-	var minor_victory_conditions_met: Dictionary[Globals.Team, bool] = {
-		Globals.Team.AXIS: false,
-		Globals.Team.ALLIES: false,
-	}
-	
-	var is_met: bool = false
-	for team: int in Globals.victory_conditions:
-		for victory_condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.outcome_level:
-				VictoryCondition.OutcomeLevel.MAJOR:
-					is_met = victory_condition.is_condition_met()
-					major_victory_conditions_met[team] = is_met
-					if not is_met:
-						break
-	
-	for team: int in Globals.victory_conditions:
-		for victory_condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.outcome_level:
-				VictoryCondition.OutcomeLevel.MINOR:
-					is_met = victory_condition.is_condition_met()
-					minor_victory_conditions_met[team] = is_met
-					if not is_met:
-						break
-	
-	if major_victory_conditions_met[Globals.Team.AXIS] and major_victory_conditions_met[Globals.Team.ALLIES]:
-		# Its a Draw
-		if time_left_seconds <= 0:
-			time_left_seconds = 0
-			timer_running = false
-			show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, false)
-			end_game_handled = true
-			return
-	else:
-		for team: Globals.Team in major_victory_conditions_met:
-			if major_victory_conditions_met[team]:
-				show_winner.emit(team, VictoryCondition.OutcomeLevel.MAJOR, false)
-				timer_running = false
-				end_game_handled = true
-				return
-	
-	if minor_victory_conditions_met[Globals.Team.AXIS] and minor_victory_conditions_met[Globals.Team.ALLIES]:
-		# Its a Draw
-		if time_left_seconds <= 0:
-			time_left_seconds = 0
-			timer_running = false
-			show_winner.emit(-1, VictoryCondition.OutcomeLevel.MINOR, false)
-			end_game_handled = true
-			return
-	else:
-		for team: Globals.Team in minor_victory_conditions_met:
-			if minor_victory_conditions_met[team]:
-				show_winner.emit(team, VictoryCondition.OutcomeLevel.MINOR, false)
-				timer_running = false
-				end_game_handled = true
-				return
-	
-	if time_left_seconds <= 0:
-		show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, true)
-		timer_running = false
-		end_game_handled = true
+	MatchVictoryCoordinator.on_win_condition_timer_timeout(self)
 
 
 func end_game_check() -> void:
@@ -1388,134 +719,14 @@ func end_game_check() -> void:
 
 
 func _on_unit_shooting(shooter: Unit) -> void:
-	for observer_variant: Unit in Globals.get_units():
-		var observer: Unit = observer_variant as Unit
-		if observer == null:
-			continue
-
-		if not is_instance_valid(observer):
-			continue
-
-		var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
-			observer,
-			{} as Dictionary[Unit, EnemyTrack]
-		)
-
-		if not track_map.has(shooter):
-			continue
-
-		var track: EnemyTrack = track_map.get(shooter, null)
-		if track == null:
-			continue
-
-		track.confidence += 0.1
-		track.confidence = clamp(track.confidence, 0.0, 1.0)
-
-		if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
-			track.is_visible = true
-
-		Globals.unit_enemy_tracks[observer] = track_map
-
-
-#func _on_unit_shooting(unit: Unit) -> void:
-	#for observer_variant in Globals.get_units():
-		#var observer: Unit = observer_variant as Unit
-		#if observer == null:
-			#continue
-#
-		#if not is_instance_valid(observer):
-			#continue
-#
-		#var track_map: Dictionary[Unit, EnemyTrack] = Globals.unit_enemy_tracks.get(
-			#observer,
-			#{} as Dictionary[Unit, EnemyTrack]
-		#)
-#
-		#if not track_map.has(unit):
-			#continue
-#
-		#var track: EnemyTrack = track_map.get(unit, null)
-		#if track == null:
-			#continue
-#
-		#track.confidence += 0.1
-		#track.confidence = clamp(track.confidence, 0.0, 1.0)
-#
-		#if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
-			#track.is_visible = true
-#
-		#Globals.unit_enemy_tracks[observer] = track_map
+	MatchVisibilityCoordinator.on_unit_shooting(self, shooter)
 
 
 func spawn_units_from_match_save(match_save: MatchSaveData) -> void:
-	for data: UnitSaveData in match_save.player_units:
-		var packed_scene: PackedScene = ResourceLoader.load(data.unit_scene_path) as PackedScene
-
-		if packed_scene == null:
-			push_error("Could not load unit scene: %s" % data.unit_scene_path)
-			continue
-		spawn_unit_from_save(data.team, Vector2.ZERO, data.squad_loadout, 0)
-		#var unit: Unit = packed_scene.instantiate() as Unit
-#
-		#if unit == null:
-			#push_error("Instanced scene is not Unit: %s" % unit_save_data.unit_scene_path)
-			#continue
-#
-		#add_child(unit)
-		#unit.apply_save_data(unit_save_data)
+	MatchUnitSpawner.spawn_units_from_match_save(self, match_save)
 
 
 func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int) -> void:
-	var unit: Unit = unit_scene.instantiate()
-	$UnitContainer.add_child(unit)
-	unit.ground_map = ground_layer
-	unit.team = team
-	unit.squad_loadout = squad_loadout
-	unit._setup_runtime_soldiers(squad_loadout)
-	unit.add_to_group("units")
-	#match squad_type:
-		#Globals.SquadType.Rifle:
-			#unit.make_rifle_squad = true
-		#Globals.SquadType.MG:
-			#unit.make_light_mg_team = true
-		#Globals.SquadType.PLATOON_HEADQUARTERS:
-			#unit.make_platoon_headquarters_squad = true
-	
-	unit.formation_id = formation_id 
-	#$UnitContainer.add_child(unit)
-	unit.position = LOSHelper.ground_layer.map_to_local(location)
-	#unit.position = ground_layer.map_to_local(location)
-	
-	var map_coords: Vector2i = LOSHelper.ground_layer.local_to_map(LOSHelper.ground_layer.map_to_local(location))
-	unit.position = LOSHelper.ground_layer.map_to_local(map_coords)
-	unit.current_hex = map_coords
-	unit.current_cube = LOSHelper.ground_layer.map_to_cube(map_coords)
-	
-	#unit.hide()
-	
-	
-	unit.set_team(team)
-	
-	unit.unit_died.connect(_on_unit_died)
-	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
-	unit.unit_entered_hex.connect(_on_unit_entered_hex)
-	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
-	unit.current_hex = ground_layer.local_to_map(unit.global_position)
-	unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
-	unit.deselect_unit.connect(_deselect_unit)
-	unit.started_moving.connect(_on_started_moving)
-	unit.unit_surrendered.connect(_on_unit_surrendered)
-	unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
-	unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
-	unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
-	unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
-	unit.squad_fire.shooting.connect(_on_unit_shooting)
-	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
-	unit.update_terrain_defense_bonus()
-			
-	# assign platoon headquarter to squad 
-	if not unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
-		unit.command_squad = Globals.get_unit(unit.team, unit.company, unit.platoon, 0)
-	# assign company headquarter to platoon headquarter 
-	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
-		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
+	MatchUnitSpawner.spawn_unit_from_save(self, team, location, squad_loadout, formation_id)
+
+

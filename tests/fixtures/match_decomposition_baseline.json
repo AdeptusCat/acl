@@ -1,0 +1,229 @@
+{
+	"spawning": {
+		"dynamic": {
+			"connections": [
+				"unit_died/match/_on_unit_died",
+				"unit_entered_hex/los/_on_unit_entered_hex",
+				"unit_entered_hex/match/_on_unit_entered_hex",
+				"unit_arrived_at_hex/movement/_on_arrived",
+				"deselect_unit/match/_deselect_unit",
+				"started_moving/match/_on_started_moving",
+				"unit_surrendered/match/_on_unit_surrendered"
+			],
+			"formation": 321,
+			"group": false,
+			"hex": [
+				5,
+				5
+			],
+			"legacy": 12,
+			"lifecycle": [
+				{
+					"event": "ready",
+					"ground_bound": true,
+					"team": 1
+				}
+			],
+			"members": 10,
+			"registered": true,
+			"roster": 0,
+			"team": 1
+		},
+		"saved": {
+			"connections": [
+				"unit_died/match/_on_unit_died",
+				"unit_entered_hex/los/_on_unit_entered_hex",
+				"unit_entered_hex/match/_on_unit_entered_hex",
+				"unit_arrived_at_hex/movement/_on_arrived",
+				"deselect_unit/match/_deselect_unit",
+				"started_moving/match/_on_started_moving",
+				"unit_surrendered/match/_on_unit_surrendered"
+			],
+			"formation": 0,
+			"group": true,
+			"hex": [
+				0,
+				0
+			],
+			"legacy": 0,
+			"lifecycle": [
+				{
+					"event": "ready",
+					"ground_bound": false,
+					"team": 0
+				},
+				{
+					"event": "roster",
+					"ground_bound": true,
+					"team": 1
+				}
+			],
+			"members": 3,
+			"registered": true,
+			"roster": 3,
+			"team": 1
+		}
+	},
+	"victory": {
+		"0": {
+			"evaluations": [
+				1,
+				1,
+				1,
+				1
+			],
+			"handled": true,
+			"running": false,
+			"signals": [
+				{
+					"handled_at_signal": false,
+					"level": 1,
+					"running_at_signal": true,
+					"team": 0,
+					"timeout": false
+				}
+			]
+		},
+		"1": {
+			"evaluations": [
+				2,
+				2,
+				2,
+				2
+			],
+			"handled": false,
+			"running": true,
+			"signals": []
+		},
+		"2": {
+			"evaluations": [
+				1,
+				1,
+				1,
+				1
+			],
+			"handled": true,
+			"running": false,
+			"signals": [
+				{
+					"handled_at_signal": false,
+					"level": 1,
+					"running_at_signal": false,
+					"team": -1,
+					"timeout": false
+				}
+			]
+		},
+		"3": {
+			"evaluations": [
+				1,
+				1,
+				1,
+				1
+			],
+			"handled": true,
+			"running": false,
+			"signals": [
+				{
+					"handled_at_signal": false,
+					"level": 0,
+					"running_at_signal": true,
+					"team": 1,
+					"timeout": false
+				}
+			]
+		},
+		"4": {
+			"evaluations": [
+				2,
+				2,
+				2,
+				2
+			],
+			"handled": false,
+			"running": true,
+			"signals": []
+		},
+		"5": {
+			"evaluations": [
+				1,
+				1,
+				1,
+				1
+			],
+			"handled": true,
+			"running": false,
+			"signals": [
+				{
+					"handled_at_signal": false,
+					"level": 0,
+					"running_at_signal": false,
+					"team": -1,
+					"timeout": false
+				}
+			]
+		},
+		"6": {
+			"evaluations": [
+				2,
+				2,
+				2,
+				2
+			],
+			"handled": false,
+			"running": true,
+			"signals": []
+		},
+		"7": {
+			"evaluations": [
+				1,
+				1,
+				1,
+				1
+			],
+			"handled": true,
+			"running": false,
+			"signals": [
+				{
+					"handled_at_signal": false,
+					"level": 1,
+					"running_at_signal": true,
+					"team": -1,
+					"timeout": true
+				}
+			]
+		}
+	},
+	"visibility": {
+		"detected": {
+			"confidence": 0.4,
+			"lock": true,
+			"los": true,
+			"los_time": 0.8,
+			"visible": false
+		},
+		"lost": {
+			"confidence": 0.35,
+			"lock": false,
+			"los": false,
+			"los_time": 0.0,
+			"visible": false
+		},
+		"published": false,
+		"rng_tail": 0.909451186656952,
+		"same_hex": {
+			"confidence": 1.0,
+			"lock": true,
+			"los": true,
+			"los_time": 0.0,
+			"visible": true
+		},
+		"shooting": {
+			"confidence": 0.45,
+			"lock": false,
+			"los": false,
+			"los_time": 0.0,
+			"visible": false
+		}
+	}
+}

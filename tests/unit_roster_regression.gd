@@ -11,15 +11,17 @@ class UnitUnderTest extends Unit:
 
 class RosterUiUnderTest extends UnitUi:
 	var displayed_members: int = -1
+	var events: Array[String] = []
 
 	func set_members_alive(count: int) -> void:
 		displayed_members = count
+		events.append("members:%d" % count)
 
 	func show_casualty() -> void:
-		pass
+		events.append("casualty")
 
 	func set_loadout(_soldiers: Array[Soldier]) -> void:
-		pass
+		events.append("loadout:%d" % _soldiers.size())
 
 	func set_leadership_rank(_grade: int) -> void:
 		pass
@@ -47,6 +49,8 @@ func _run() -> void:
 	_test_specific_and_ranged_casualties()
 	_test_runtime_leader_lookup()
 	_test_saved_roster_initialization()
+	_test_runtime_phase_order()
+	_test_specific_role_replacement()
 	for unit: UnitUnderTest in units:
 		unit.free()
 	units.clear()
@@ -169,6 +173,48 @@ func _create_unit(runtime_size: int, legacy_size: int) -> UnitUnderTest:
 	unit._setup_runtime_soldiers(unit.squad_loadout)
 	units.append(unit)
 	return unit
+
+
+func _test_runtime_phase_order() -> void:
+	seed(774)
+	var expected: Array[float] = []
+	for index: int in range(5):
+		expected.append(randf_range(0.0, 3.0))
+	var expected_tail: float = randf()
+	seed(774)
+	var unit: UnitUnderTest = _create_unit(5, 0)
+	for index: int in range(5):
+		_check(unit.squad_fire.soldiers[index].cadence_phase_s == expected[index], "Runtime phases consume RNG in roster order")
+	_check(randf() == expected_tail, "Roster construction preserves RNG continuation")
+
+
+func _test_specific_role_replacement() -> void:
+	var unit: UnitUnderTest = _create_unit(5, 0)
+	var leader: Soldier = unit.squad_fire.soldiers[0]
+	var assistant: Soldier = unit.squad_fire.soldiers[1]
+	var gunner: Soldier = unit.squad_fire.soldiers[2]
+	var loader: Soldier = unit.squad_fire.soldiers[3]
+	leader.role = RankGrades.Role.SQUAD_LEADER
+	assistant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+	gunner.role = RankGrades.Role.GUNNER
+	loader.role = RankGrades.Role.LOADER
+	var definition: WeaponSpec = load("res://resources/weapons/mg34.tres") as WeaponSpec
+	var gun: WeaponSpec = definition.create_runtime()
+	gun.ammunition -= 7
+	gun.is_setup = true
+	gunner.weapon = gun
+	var ui: RosterUiUnderTest = unit.ui as RosterUiUnderTest
+	ui.events.clear()
+	unit.soldiers_changed.connect(func() -> void:
+		ui.events.append("signal:%d" % unit.squad_fire.soldiers.size())
+	)
+	unit.apply_specific_casualty(leader)
+	_check(assistant.role == RankGrades.Role.SQUAD_LEADER, "Assistant takes over a specific leader casualty")
+	_check(ui.events == ["members:4", "casualty", "signal:4", "loadout:4"], "Specific casualty publishes the updated roster before loadout presentation")
+	unit.apply_specific_casualty(gunner)
+	_check(loader.role == RankGrades.Role.GUNNER and loader.weapon == gun, "Specific gunner loss transfers the physical weapon to the loader")
+	_check(gun.ammunition == definition.ammunition_start - 7 and gun.is_setup, "Casualty recrewing retains ammunition and setup")
+	_check(unit.squad_fire.soldiers[unit.squad_fire.soldiers.size() - 1].role == RankGrades.Role.LOADER, "Ordinary soldier fills the loader vacancy")
 
 
 func _make_loadout(size: int) -> SquadLoadoutSpec:
