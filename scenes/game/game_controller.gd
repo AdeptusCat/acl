@@ -480,7 +480,7 @@ func set_objective_layer(team: Globals.Team, tilemap: TileMapLayer):
 			allies_objective_tilemap = tilemap
 
 
-func set_objective_cells(player_team: Globals.Team): 
+func set_objective_cells(player_team: Globals.Team) -> void:
 	Globals.objective_hexes.clear()
 	var player_objective_tilemap: TileMapLayer
 	var ai_objective_tilemap: TileMapLayer
@@ -493,6 +493,7 @@ func set_objective_cells(player_team: Globals.Team):
 		ai_team = Globals.Team.AXIS
 		ai_objective_tilemap = axis_objective_tilemap
 		player_objective_tilemap = allies_objective_tilemap
+	player_objective_tilemap.show()
 	ai_objective_tilemap.hide()
 	#if player_team == Globals.Team.AXIS:
 		#match Globals.game_mode:
@@ -814,7 +815,6 @@ func start_game(team: Globals.Team, time: float):
 	
 	
 	set_objective_cells(team)
-	set_objective_cells(Globals.Team.ALLIES)
 	#timer_running = true
 	
 	start_match.emit()
