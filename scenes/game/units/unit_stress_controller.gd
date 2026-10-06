@@ -155,7 +155,7 @@ func _recompute_leadership() -> void:
 	var max_total_bonus: float = 0.0
 	#var max_rally: float = 0.0
 	var max_cohesion_mult: float = 1.0
-	for lm in _leadership_sources.values():
+	for lm: LeadershipMod in _leadership_sources.values():
 		if lm.bonus > max_total_bonus:
 			max_total_bonus = lm.bonus
 		if lm.cohesion_mult > max_total_bonus:
@@ -174,7 +174,7 @@ func _recompute_leadership() -> void:
 # Example stub you can call inside your recovery logic:
 func get_rally_bonus() -> float:
 	var s: float = 0.0
-	for lm in _leadership_sources.values():
+	for lm: LeadershipMod in _leadership_sources.values():
 		s += lm.rally
 	return s
 
@@ -209,7 +209,7 @@ func _process(delta: float) -> void:
 			_since_rout_check += delta
 			# HACK checking for route should be more complex than this
 			if not get_parent().surrendered:
-				for _unit in Globals.get_units():
+				for _unit: Unit in Globals.get_units():
 					if not _unit.alive:
 						continue
 					if not _unit.team == get_parent().team:
@@ -224,7 +224,7 @@ func _process(delta: float) -> void:
 		STATES.MoraleState.PANIC:
 			_since_rout_check += delta
 			if not get_parent().surrendered:
-				for _unit in Globals.get_units():
+				for _unit: Unit in Globals.get_units():
 					if not _unit.alive:
 						continue
 					if not _unit.team == get_parent().team:

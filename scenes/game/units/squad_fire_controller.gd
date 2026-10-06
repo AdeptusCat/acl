@@ -33,13 +33,13 @@ class_name SquadFireController
 @onready var calc: SquadFireCalculator = SquadFireCalculator.new()
 var fin: SquadFireCalculator.SquadFireInput = SquadFireCalculator.SquadFireInput.new()
 
-@export var base_accuracy := 0.35
-@export var volley_size := 1               # rounds per burst
-@export var seconds_per_volley := 1.2
-@export var base_seconds_per_volley := 1.2
+@export var base_accuracy: float = 0.35
+@export var volley_size: int = 1               # rounds per burst
+@export var seconds_per_volley: float = 1.2
+@export var base_seconds_per_volley: float = 1.2
 var accuracy_multiplier: float = 1.0
 
-@export var stress_scale := 1.0             # global tuning
+@export var stress_scale: float = 1.0             # global tuning
 @export var stress_fast_base: float = 10.0       # baseline shock of “being shot at” 
 @export var stress_fast_hit_factor: float = 20.0# adds with mean p_hit (0..1) 12
 @export var stress_slow_per_round: float = 0.6  # accrues with volume
@@ -82,12 +82,16 @@ var _accum_window_s: float = 0.0
 var fire_recent: float = 0.0 # 0..1 shows that they were shooting
 
 # Targeting
+var has_target_hex: bool = false
+var has_mortar_target_hex: bool = false
 var target_hex: Vector2i:
 	set(value):
 		target_hex = value
-		if unit.attackState == Unit.AttackState.MANUAL_GROUND:
-			pass
-var mortar_target_hex: Vector2i
+		has_target_hex = true
+var mortar_target_hex: Vector2i:
+	set(value):
+		mortar_target_hex = value
+		has_mortar_target_hex = true
 #var target_cover: float
 var target_unit: Unit
 #var target_distance: int
@@ -95,7 +99,7 @@ var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
 signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
 signal fire_riflegrenade
-signal draw_los_to_target_unit(from_hex, to_hex)
+signal draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i)
 signal shooting(unit: Unit)
 
 #func _ready() -> void:
@@ -110,8 +114,8 @@ signal shooting(unit: Unit)
 	#cover = cover_multiplier_exp(6.0)
 
 
-func set_soldiers_new_target_task(target_distance: int):
-	for s in soldiers:
+func set_soldiers_new_target_task(target_distance: int) -> void:
+	for s: Soldier in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		#if not s.aquire_target_task.target_id == target_unit:
@@ -131,8 +135,8 @@ func set_soldiers_new_target_task(target_distance: int):
 				s.aquire_target_task.done = false
 				s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
 
-func set_mg(machinge_guns : int):
-	for i in machinge_guns:
+func set_mg(machinge_guns : int) -> void:
+	for i: int in machinge_guns:
 		# Define the MG (crew-served)
 		var mg: WeaponSpec = WeaponSpec.new()
 		mg.name = "GPMG"
@@ -188,24 +192,27 @@ func set_target_unit(targetUnit: Unit) -> void:
 		target_unit = null
 	
 	target_hex = hex
+	has_target_hex = is_instance_valid(target_unit)
+	has_mortar_target_hex = has_target_hex
 	
 	var target_cover: int = 0
 	var target_distance: int = 0
 	
 	if is_instance_valid(target_unit):
 		target_hex = target_unit.current_hex
-		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+		mortar_target_hex = target_hex
+		var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 		if cover_map and cover_map.has(target_unit.current_hex):
-			var data = cover_map[target_unit.current_hex]
+			var data: Dictionary = cover_map[target_unit.current_hex]
 			target_cover = data["target_cover"]
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 	
 	var draw_los_to: Vector2i = target_hex
-	if target_hex == Vector2i.ZERO:
+	if not has_target_hex:
 		draw_los_to = unit.current_hex
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 	
-	for s in soldiers:
+	for s: Soldier in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		
@@ -227,8 +234,16 @@ func set_target_unit(targetUnit: Unit) -> void:
 					s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
 
 
-func set_target_hex(_target_hex: Vector2i):
+func set_target_hex(_target_hex: Vector2i) -> void:
+	target_unit = null
 	target_hex = _target_hex
+	mortar_target_hex = _target_hex
+
+
+func clear_target() -> void:
+	set_target_unit(null)
+	has_target_hex = false
+	has_mortar_target_hex = false
 
 
 
@@ -367,7 +382,7 @@ func handle_auto_fire(
 	var best_score: float = -INF
 	var best_cover: int = 0
 
-	for enemy in visible_enemies:
+	for enemy: Unit in visible_enemies:
 		if not is_instance_valid(enemy):
 			continue
 		if not enemy.alive:
@@ -377,7 +392,7 @@ func handle_auto_fire(
 		
 		var units_in_enemy_hex: Array[Unit] = LOSHelper.find_units_at(enemy.current_hex)
 		var has_friendly_in_target_hex: bool = false
-		for _unit in units_in_enemy_hex:
+		for _unit: Unit in units_in_enemy_hex:
 			if _unit.team == unit.team and not _unit.surrendered:
 				has_friendly_in_target_hex = true
 				break
@@ -411,7 +426,7 @@ func _score_enemy_for_target(shooter_unit: Unit, enemy: Unit, current_hex: Vecto
 	var best_ratio: float = 0.0
 	var has_range: bool = false
 
-	for soldier in shooter_unit.squad_fire.soldiers:
+	for soldier: Soldier in shooter_unit.squad_fire.soldiers:
 		var w_range: int = int(soldier.weapon.range_hexes)
 		if w_range >= distance:
 			has_range = true
@@ -423,10 +438,10 @@ func _score_enemy_for_target(shooter_unit: Unit, enemy: Unit, current_hex: Vecto
 	if not has_range:
 		return {"score": -INF, "cover": 0}
 
-	var cover_map = LOSHelper.los_lookup.get(current_hex, null)
-	var targetCover = 0
+	var cover_map: Dictionary = LOSHelper.los_lookup.get(current_hex, {})
+	var targetCover: int = 0
 	if cover_map and cover_map.has(enemy.current_hex):
-		var data = cover_map[enemy.current_hex]
+		var data: Dictionary = cover_map[enemy.current_hex]
 		targetCover = data["target_cover"]
 	enemy.set_cover(targetCover)
 	var cover_val: int = targetCover
@@ -450,9 +465,9 @@ func _score_enemy_for_target(shooter_unit: Unit, enemy: Unit, current_hex: Vecto
 
 
 
-func fire_mortar(map_hex: Vector2i):
+func fire_mortar(map_hex: Vector2i) -> void:
+	set_target_hex(map_hex)
 	aim_delay()
-	mortar_target_hex = map_hex
 	
 
 
@@ -461,9 +476,9 @@ func _tick_soldiers(delta: float) -> void:
 	var target_distance: int = 0
 	
 	if is_instance_valid(target_unit):
-		var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+		var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 		if cover_map and cover_map.has(target_unit.current_hex):
-			var data = cover_map[target_unit.current_hex]
+			var data: Dictionary = cover_map[target_unit.current_hex]
 			target_cover = data["target_cover"]
 		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
 		
@@ -509,9 +524,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
-	if target_unit and (Unit.AttackState.MANUAL_TRACK or Unit.AttackState.AUTO):
+	if is_instance_valid(target_unit) and (unit.attackState == Unit.AttackState.MANUAL_TRACK or unit.attackState == Unit.AttackState.AUTO):
 		if not target_unit.current_hex == target_hex:
 			target_hex = target_unit.current_hex
+		mortar_target_hex = target_hex
 	var _target_hex: Vector2i = target_hex
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = mortar_target_hex
@@ -533,18 +549,15 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if Debug.dont_fire_wepaons:
 		return 0
 	
-	if not _target_hex == Vector2i.ZERO:
-		pass
-	
-	if _target_hex == Vector2i.ZERO and not s.weapon.family == WeaponSpec.Family.MORTAR:
+	if s.weapon.family == WeaponSpec.Family.MORTAR:
+		if not has_mortar_target_hex:
+			return 0
+	elif not has_target_hex:
 		return 0
 	
-	if _target_hex == Vector2i.ZERO and s.weapon.family == WeaponSpec.Family.MORTAR:
-		return 0
-	
-	var cover_map = LOSHelper.los_lookup.get(unit.current_hex, null)
+	var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 	if cover_map and cover_map.has(_target_hex):
-		var data = cover_map[_target_hex]
+		var data: Dictionary = cover_map[_target_hex]
 		target_cover = data["target_cover"]
 	target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(_target_hex))
 	
@@ -561,7 +574,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
 	if not unit.attackState == Unit.AttackState.MANUAL_GROUND: 
-		for u in visible_enemies:
+		for u: Unit in visible_enemies:
 			if u.current_hex == _target_hex:
 				if is_instance_valid(u):
 					if u.alive:
@@ -793,12 +806,12 @@ func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
 	return shots
 
 
-func aim_delay():
+func aim_delay() -> void:
 	var state_idx: int = stress_controller.state
 	var acquire_mult: float = 1.0
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
-	for s in soldiers:
+	for s: Soldier in soldiers:
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		s.aquire_target_task.done = false
@@ -818,7 +831,7 @@ func aim_delay():
 
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_target_hex: Vector2i) -> void:
 	var interval: float = 60.0 / rpm
-	for shot in range(shots):
+	for shot: int in range(shots):
 		if not unit.alive:
 			return
 		fire_shot.emit(s.weapon, _mortar_target_hex)
@@ -828,7 +841,7 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_tar
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
 
 
-func fire_riflegrenades(s: Soldier):
+func fire_riflegrenades(s: Soldier) -> void:
 	fire_riflegrenade.emit(s.weapon)
 
 func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
@@ -880,7 +893,7 @@ func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_
 	# FIXME units that are not seen should not be as easily hit
 	if unit.team == Globals.Team.ALLIES:
 		pass
-	for _unit in Globals.get_units():
+	for _unit: Unit in Globals.get_units():
 		if _unit.current_hex == _target_hex:
 			if not batch_targets.has(_unit):
 				batch_targets.append(_unit)
@@ -1282,7 +1295,7 @@ func _indices_with_role(role: int) -> Array[int]:
 		i += 1
 	return res
 
-func _on_unit_arrived_at_hex(_new_hex: Vector2i):
+func _on_unit_arrived_at_hex(_new_hex: Vector2i) -> void:
 	_setup_after_arriving_at_hex()
 
 func _setup_after_arriving_at_hex() -> void:
@@ -1329,6 +1342,6 @@ func _on_fire_weapon(weapon_spec: WeaponSpec, pos: Vector2, is_auto: bool, owner
 	else:
 		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
 
-func _on_stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D):
+func _on_stop_mg_loop(weapon_spec: WeaponSpec, position: Vector2, owner_id: int, position_node: Node2D) -> void:
 	$"../WeaponAudio".stop_mg_loop(weapon_spec, position, owner_id, position_node)
 	

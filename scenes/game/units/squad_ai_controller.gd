@@ -157,14 +157,14 @@ func _withdraw_or_merge() -> void:
 			#known_enemies.append(u)
 		#i += 1
 	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
-	for u in visible_enemies1: # unit.units:
+	for u: Unit in visible_enemies1: # unit.units:
 		if u.team != unit.team and u.surrendered == false:
 			known_enemies.append(u)
 	
-	var retreat_distance := 3
+	var retreat_distance: int = 3
 	var retreat_hex: Vector2i = unit.action_controller.compute_retreat_hex(unit.current_hex, known_enemies, retreat_distance)
 	
-	if retreat_hex != Vector2i.ZERO:
+	if retreat_hex != unit.current_hex:
 		#unit.movement.move_to_hex(retreat_hex)
 		unit.order(Globals.UnitCmd.MOVE, retreat_hex)
 		#var path: Array[Vector3i] = MovementSystem._compute_path(unit.current_hex, retreat_hex, unit.team)

@@ -14,7 +14,7 @@ var soldiers_entries: Array[Dictionary]
 
 func _ready() -> void:
 	
-	for i in range(12):
+	for i: int in range(12):
 		var soldier_entries: Dictionary[Entry, Control]
 		
 		var name_label: Label = soldier_detail_label_scene.instantiate()
@@ -44,7 +44,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if is_instance_valid(unit):
-		for s in soldier_entries_by_soldier:
+		for s: Soldier in soldier_entries_by_soldier:
 			var progress_bar: ProgressBar = soldier_entries_by_soldier[s][Entry.PROGRESS_BAR]
 			if s:
 				var p2: float = get_makeready_progress(s)
@@ -65,11 +65,11 @@ func get_makeready_progress(soldier: Soldier) -> float:
 	return p
 
 
-func show_unit_detail(_unit: Unit):
+func show_unit_detail(_unit: Unit) -> void:
 	unit = _unit
 	soldiers = unit.squad_fire.soldiers
 	var i: int = 0
-	for s in soldiers:
+	for s: Soldier in soldiers:
 		var entries: Dictionary = soldiers_entries[i]
 		
 		entries[Entry.NAME].text = s.name
@@ -80,23 +80,23 @@ func show_unit_detail(_unit: Unit):
 		
 		soldier_entries_by_soldier[s] = entries
 		
-		for entry in entries.values():
+		for entry: Control in entries.values():
 			entry.show()
 		
 		i += 1
 	
 	while i < soldiers_entries.size():
 		var entries: Dictionary = soldiers_entries[i]
-		for entry in entries.values():
+		for entry: Control in entries.values():
 			entry.hide()
 		i += 1
 	
 	unit.soldiers_changed.connect(_on_soldiers_changed)
 
-func hide_unit_detail():
+func hide_unit_detail() -> void:
 	unit.soldiers_changed.disconnect(_on_soldiers_changed)
 	unit = null
 
-func _on_soldiers_changed():
+func _on_soldiers_changed() -> void:
 	if is_instance_valid(unit):
 		show_unit_detail(unit)

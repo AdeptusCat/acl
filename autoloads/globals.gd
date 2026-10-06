@@ -176,7 +176,7 @@ func _save_casualty_history() -> void:
 		push_error("Could not save casualty history: %s" % save_error)
 
 
-func reset():
+func reset() -> void:
 	battle_id = ""
 	battle_casualties.clear()
 	unit_visible_enemies.clear()
@@ -185,9 +185,9 @@ func reset():
 	units_in_close_combat.clear()
 	close_combat_locations.clear()
 	close_combat_instances.clear()
-	for team in victory_conditions:
+	for team: Team in victory_conditions:
 		victory_conditions[team].victory_conditions.clear()
-	for team in objectives:
+	for team: Team in objectives:
 		objectives[team].objectives.clear()
 	map_chosen = null
 	scenario_chosen = null

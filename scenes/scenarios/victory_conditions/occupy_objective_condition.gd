@@ -15,7 +15,7 @@ enum ObjectiveId {
 
 var state: OccupyObjectiveState
 
-const OBJECTIVE_NAMES := {
+const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 	ObjectiveId.A: "A",
 	ObjectiveId.B: "B",
 	ObjectiveId.C: "C",
@@ -49,9 +49,18 @@ func get_description() -> String:
 
 
 func is_condition_met() -> bool:
-	var is_met: bool = true
-	
-	for hex in state.hexes:
+	if state == null:
+		return false
+	for hex: Vector2i in state.victory_conditions_met:
+		if not state.victory_conditions_met[hex]:
+			return false
+	return true
+
+
+func advance_time(delta: float) -> void:
+	if state == null or delta <= 0.0:
+		return
+	for hex: Vector2i in state.hexes:
 		state.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.clear()
 		state.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.clear()
 	
@@ -61,8 +70,8 @@ func is_condition_met() -> bool:
 	else:
 		enemy_team = Globals.Team.AXIS
 	
-	for unit in Globals.get_units():
-		for hex in state.hexes:
+	for unit: Unit in Globals.get_units():
+		for hex: Vector2i in state.hexes:
 			if hex == unit.current_hex:
 				if unit.team == Globals.Team.AXIS:
 					if unit.is_good_order():
@@ -71,7 +80,7 @@ func is_condition_met() -> bool:
 					if unit.is_good_order():
 						state.units_in_objectives[hex].units_collection[Globals.Team.ALLIES].units.append(unit)
 	
-	for hex in state.hexes:
+	for hex: Vector2i in state.hexes:
 		var friendly_units: Array[Unit] = state.units_in_objectives[hex].units_collection[team].units
 		var enemy_units: Array[Unit] = state.units_in_objectives[hex].units_collection[enemy_team].units
 
@@ -82,7 +91,7 @@ func is_condition_met() -> bool:
 
 		
 		if objective_held:
-			state.required_times_reached_s[hex] += 1
+			state.required_times_reached_s[hex] += delta
 		else:
 			state.required_times_reached_s[hex] = 0
 
@@ -90,8 +99,3 @@ func is_condition_met() -> bool:
 			state.victory_conditions_met[hex] = true
 		else:
 			state.victory_conditions_met[hex] = false
-	
-	for hex in state.victory_conditions_met:
-		if not state.victory_conditions_met[hex]:
-			is_met = false
-	return is_met

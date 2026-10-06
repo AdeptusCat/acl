@@ -16,8 +16,8 @@ var state: ExitUnitsState
 func is_condition_met() -> bool:
 	var is_met: bool = false
 	
-	for unit in Globals.get_units():
-		for hex in state.exit_hexes:
+	for unit: Unit in Globals.get_units():
+		for hex: Vector2i in state.exit_hexes:
 			if hex == unit.current_hex:
 				if unit.team == team:
 					if not state.units_exited.has(unit):

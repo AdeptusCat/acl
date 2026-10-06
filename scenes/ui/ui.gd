@@ -3,25 +3,25 @@ extends CanvasLayer
 @export var unit_stats_details_scene : PackedScene
 @export var ground_layer : HexagonTileMapLayer
 
-@onready var countdown_panel_container = $Control/Countdown
+@onready var countdown_panel_container: PanelContainer = $Control/Countdown
 
 
-@onready var cover_icon_scene = preload("res://scenes/ui/cover_icon.tscn")
+@onready var cover_icon_scene: PackedScene = preload("res://scenes/ui/cover_icon.tscn")
 
-@onready var target_cover_distance = $Control/TargetCoverDistance
-@onready var cover_container = $Control/TargetCoverDistance/VBoxContainer/Cover
-@onready var firepower_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
-@onready var distance_label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
-@onready var selection_wheel = $Control/SelectionWheel
-@onready var selection_wheel_alt = $Control/SelectionWheelAlt
+@onready var target_cover_distance: Control = $Control/TargetCoverDistance
+@onready var cover_container: HBoxContainer = $Control/TargetCoverDistance/VBoxContainer/Cover
+@onready var firepower_label: Label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
+@onready var distance_label: Label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
+@onready var selection_wheel: Control = $Control/SelectionWheel
+@onready var selection_wheel_alt: Control = $Control/SelectionWheelAlt
 
-@onready var unit_details = $Control/UnitDetails
-@onready var tile_details = $Control/TileDetails
+@onready var unit_details: PanelContainer = $Control/UnitDetails
+@onready var tile_details: PanelContainer = $Control/TileDetails
 
 signal try_again
 
 # Configuration
-const HEX_DIRECTIONS = [
+const HEX_DIRECTIONS: Array[Vector2i] = [
 	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
 	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)
 ]
@@ -43,16 +43,16 @@ func setup() -> void:
 	tile_details.set_ground_layer(ground_layer)
 	unit_details.hide()
 
-func show_tile_data(result: Dictionary):
+func show_tile_data(result: Dictionary) -> void:
 	tile_details.show_tile_data(result)
 
 
-func show_target_hex_cover_distance(local_event_pos, targetCover, distance, firepower):
+func show_target_hex_cover_distance(local_event_pos: Vector2, targetCover: int, distance: int, firepower: float) -> void:
 	target_cover_distance.show()
 	target_cover_distance.position = local_event_pos
-	for child in cover_container.get_children():
+	for child: Control in cover_container.get_children():
 		child.queue_free()
-	for cover in targetCover:
+	for cover: int in targetCover:
 		var cover_icon: TextureRect = cover_icon_scene.instantiate()
 		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
 		cover_container.add_child(cover_icon)
@@ -62,19 +62,19 @@ func show_target_hex_cover_distance(local_event_pos, targetCover, distance, fire
 		#detail_ui.set_cover(targetCover)
 
 
-func hide_target_hex_cover_distance():
+func hide_target_hex_cover_distance() -> void:
 	target_cover_distance.hide()
 
 
-func _on_game_started_through_moving_unit():
+func _on_game_started_through_moving_unit() -> void:
 	countdown_panel_container.set_countdown(true)
 
 
-func _on_update_timer_label(time_left_seconds : float):
+func _on_update_timer_label(time_left_seconds : float) -> void:
 	countdown_panel_container.update_timer_label(time_left_seconds)
 
 
-func mouse_event_position_changed(_event_pos: Vector2):
+func mouse_event_position_changed(_event_pos: Vector2) -> void:
 	pass
 
 # legacy code that shows unit details
@@ -103,11 +103,11 @@ func mouse_event_position_changed(_event_pos: Vector2):
 		#unit_stats.visible = false
 
 
-func _on_show_unit_details(unit: Unit):
+func _on_show_unit_details(unit: Unit) -> void:
 	unit_details.show_unit_detail(unit)
 
 
-func _on_hide_unit_details():
+func _on_hide_unit_details() -> void:
 	unit_details.hide_unit_detail()
 
 

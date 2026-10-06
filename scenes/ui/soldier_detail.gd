@@ -6,7 +6,7 @@ class_name SoldierDetail
 var soldier: Soldier
 
 
-func set_soldier_detail(_soldier: Soldier):
+func set_soldier_detail(_soldier: Soldier) -> void:
 	soldier = _soldier
 	$HBoxContainer/ProgressBar.value = 0.0
 	#match soldier.weapon.type:

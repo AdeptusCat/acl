@@ -93,7 +93,7 @@ var _shader_material: ShaderMaterial
 
 var unit: Unit
 
-func set_unit(_unit):
+func set_unit(_unit: Unit) -> void:
 	unit = _unit
 
 

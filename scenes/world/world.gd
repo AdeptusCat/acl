@@ -10,12 +10,12 @@ extends Node2D
 @onready var fog_of_war_tile_map_layer: TileMapLayer = $TileMapLayers/FogOfWarTileMapLayer
 @onready var selected_tile_map_layer: HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
 
-@onready var result_screen := $ResultScreen
-@onready var start_screen := $StartScreen
-@onready var ui := $Ui
-@onready var game_controller := $GameController
-@onready var target_area := $TargetArea
-@onready var input_manager := $InputManager
+@onready var result_screen: CanvasLayer = $ResultScreen
+@onready var start_screen: CanvasLayer = $StartScreen
+@onready var ui: CanvasLayer = $Ui
+@onready var game_controller: Node2D = $GameController
+@onready var target_area: Node2D = $TargetArea
+@onready var input_manager: Node = $InputManager
 @onready var maps: Node2D = $Maps
 
 
@@ -34,11 +34,11 @@ var mouse_hover_hex: Vector2i
 var is_setup: bool = false
 
 
-func _exit_tree():
+func _exit_tree() -> void:
 	fully_freed.emit()
 
 
-func _ready():
+func _ready() -> void:
 	Globals.reset()
 	maps.hide()
 	var _maps: Array[Map] = []
@@ -109,7 +109,7 @@ func _ready():
 
 var selected_hex: Vector2i 
 
-func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2):
+func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2) -> void:
 	if map_hex == selected_hex:
 		return
 	selected_tile_map_layer.set_cell(selected_hex, -1, Vector2i(0, 0))  # Clear selected cell
@@ -119,19 +119,19 @@ func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2):
 
 
 func copy_astar(source: AStar2D) -> AStar2D:
-	var copy := AStar2D.new()
+	var copy: AStar2D = AStar2D.new()
 
 	# Step 1: Copy all points
-	for id in source.get_point_ids():
-		var pos = source.get_point_position(id)
-		var weight = source.get_point_weight_scale(id)
-		var disabled = source.is_point_disabled(id)
+	for id: int in source.get_point_ids():
+		var pos: Vector2 = source.get_point_position(id)
+		var weight: float = source.get_point_weight_scale(id)
+		var disabled: bool = source.is_point_disabled(id)
 		copy.add_point(id, pos, weight)
 		copy.set_point_disabled(id, disabled)
 
 	# Step 2: Copy connections
-	for id in source.get_point_ids():
-		for neighbor in source.get_point_connections(id):
+	for id: int in source.get_point_ids():
+		for neighbor: int in source.get_point_connections(id):
 			# Avoid duplicate connections (only add if id < neighbor)
 			if id < neighbor:
 				copy.connect_points(id, neighbor)
@@ -139,7 +139,7 @@ func copy_astar(source: AStar2D) -> AStar2D:
 	return copy
 
 
-func _on_mouse_event_position_changed(_event_pos: Vector2):
+func _on_mouse_event_position_changed(_event_pos: Vector2) -> void:
 	return
 	#event_pos = get_local_mouse_position()
 	#var map_hex = ground_layer.local_to_map(event_pos)
@@ -148,9 +148,9 @@ func _on_mouse_event_position_changed(_event_pos: Vector2):
 		#calc_unit_data_for_ui(event_pos)
 
 
-func calc_unit_data_for_ui(event_pos: Vector2):
+func calc_unit_data_for_ui(event_pos: Vector2) -> void:
 	event_pos = get_local_mouse_position()
-	var result = {
+	var result: Dictionary = {
 		"blocking" : false,
 		"hindrance": false,
 		"cover_in_hex" : 0,
@@ -247,25 +247,25 @@ func calc_unit_data_for_ui(event_pos: Vector2):
 			#units.append(unit)
 	#ui.show_unit_data(map_hex, units)
 
-func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
+func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer: TileMapLayer) -> Transform2D:
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
 	if not tile_data:
 		return Transform2D.IDENTITY
 
-	var flip_h = tile_data.get_flip_h()
-	var flip_v = tile_data.get_flip_v()
-	var transpose = tile_data.get_transpose()
+	var flip_h: bool = tile_data.get_flip_h()
+	var flip_v: bool = tile_data.get_flip_v()
+	var transpose: bool = tile_data.get_transpose()
 
-	var basis_x = Vector2(1, 0)
-	var basis_y = Vector2(0, 1)
+	var basis_x: Vector2 = Vector2(1, 0)
+	var basis_y: Vector2 = Vector2(0, 1)
 
 	# Apply transpose: swap axes
 	if transpose:
-		var temp = basis_x
+		var temp: Vector2 = basis_x
 		basis_x = basis_y
 		basis_y = temp
 		# Also swap meaning of flip_h and flip_v
-		var temp_flip = flip_h
+		var temp_flip: bool = flip_h
 		flip_h = flip_v
 		flip_v = temp_flip
 
@@ -277,25 +277,25 @@ func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer):
 
 	return Transform2D(basis_x, basis_y, Vector2.ZERO)
 
-func get_tilemaplayer_texture(map_hex: Vector2i, tilemaplayer):
-	var tile_id = tilemaplayer.get_cell_source_id(map_hex)
+func get_tilemaplayer_texture(map_hex: Vector2i, tilemaplayer: TileMapLayer) -> Texture2D:
+	var tile_id: int = tilemaplayer.get_cell_source_id(map_hex)
 	var texture: Texture
 	if not tile_id == -1:
-		var tileset = tilemaplayer.tile_set
+		var tileset: TileSet = tilemaplayer.tile_set
 		texture = tileset.get_source(tile_id).texture
 	return texture
 
 
-func get_wall_cover(event_pos: Vector2, direction_index: int):
-	var hex_cube = building_layer.local_to_cube(event_pos)
-	var top_cube = ground_layer.cube_direction(direction_index)
-	var hex_cube_top = hex_cube + top_cube
-	var top_pos = ground_layer.cube_to_local(hex_cube_top)
-	var res = LOSHelper.check_los(event_pos, top_pos, 0, 0, 0, 0)
+func get_wall_cover(event_pos: Vector2, direction_index: int) -> int:
+	var hex_cube: Vector3i = building_layer.local_to_cube(event_pos)
+	var top_cube: Vector3i = ground_layer.cube_direction(direction_index)
+	var hex_cube_top: Vector3i = hex_cube + top_cube
+	var top_pos: Vector2 = ground_layer.cube_to_local(hex_cube_top)
+	var res: Dictionary = LOSHelper.check_los(event_pos, top_pos, 0, 0, 0, 0)
 	return res.wall_cover
 
 
-func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globals.GameMode):
+func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globals.GameMode) -> void:
 	if is_setup:
 		return
 	is_setup = true
@@ -325,11 +325,11 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	
 	var layers: Array[Node] = map.get_tilemap_layers()
-	for layer in layers:
+	for layer: Node in layers:
 		layer.reparent(tile_map_layers)
 	
 	var units: Array[Node] = scenario.get_units()
-	for unit in units:
+	for unit: Node in units:
 		unit.setup()
 		unit.add_to_group("units")
 		unit.reparent(game_controller.unit_container)
@@ -417,7 +417,7 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	match_save.outcome_level = outcome_level
 	match_save.timeout = timeout
 	
-	for unit in Globals.get_units():
+	for unit: Unit in Globals.get_units():
 		if unit.team == Globals.team_player:
 			var unit_save_data: UnitSaveData = unit.create_save_data()
 			match_save.player_units.append(unit_save_data)

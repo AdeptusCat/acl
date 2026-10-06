@@ -98,7 +98,7 @@ var _cache_valid: bool = false
 				#influence_controller.connect("influence_maps_updated", callable)
 
 
-func setup():
+func setup() -> void:
 	refresh_cells()
 
 	if influence_controller != null:

@@ -98,8 +98,7 @@ func _enter_action_state(_prev: int, state: int) -> void:
 		SquadActionState.NO_ORDER:
 			_clear_order_context()
 			movement.is_moving = false
-			squad_fire.set_target_unit(null)
-			squad_fire.set_target_hex(Vector2i.ZERO)
+			squad_fire.clear_target()
 		
 		SquadActionState.MOVING_TO_POSITION:
 			pass
@@ -108,11 +107,11 @@ func _enter_action_state(_prev: int, state: int) -> void:
 			_start_establishing_timer()
 		
 		SquadActionState.HOLDING_POSITION:
-			if attack_hex != Vector2i.ZERO:
+			if has_attack_flag:
 				squad_fire.set_target_hex(attack_hex)
 			else:
 				#squad_fire.set_target_hex(Globals.objective_hexes[unit.team][0])
-				squad_fire.set_target_hex(Vector2i.ZERO)
+				squad_fire.clear_target()
 				
 		
 		SquadActionState.ADVANCING:
@@ -125,8 +124,7 @@ func _enter_action_state(_prev: int, state: int) -> void:
 			pass
 		
 		SquadActionState.ROUTING:
-			squad_fire.set_target_unit(null)
-			squad_fire.set_target_hex(Vector2i.ZERO)
+			squad_fire.clear_target()
 		
 		SquadActionState.REGROUPING:
 			movement.is_moving = false
@@ -370,13 +368,13 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 		TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE,
 		TileSet.CELL_NEIGHBOR_TOP_LEFT_SIDE,
 	]
-	var ground_layer = LOSHelper.ground_layer
+	var ground_layer: HexagonTileMapLayer = LOSHelper.ground_layer
 	
-	for direction_index in directions:
+	for direction_index: int in directions:
 		var direction_cube: Vector3i = ground_layer.cube_direction(direction_index)
 		var neighbor_cube: Vector3i = next_cube_to_check + direction_cube
 		var closer_to_enemy: bool = false
-		for enemy in known_enemies:
+		for enemy: Unit in known_enemies:
 			var enemy_pos_cube: Vector3i = ground_layer.map_to_cube(enemy.current_hex)
 			var distance_to_unit_from_origin: int = ground_layer.cube_distance(origin_cube, enemy_pos_cube)
 			var distance_to_unit_from_target: int = ground_layer.cube_distance(neighbor_cube, enemy_pos_cube)
@@ -527,13 +525,13 @@ func _start_rout() -> void:
 			#known_enemies.append(u)
 		#i += 1
 	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
-	for u in visible_enemies1: # unit.units:
+	for u: Unit in visible_enemies1: # unit.units:
 		if u.team != unit.team and u.surrendered == false:
 			known_enemies.append(u)
 	
-	var retreat_distance := 3
+	var retreat_distance: int = 3
 	var retreat_hex: Vector2i = compute_retreat_hex(unit.current_hex, known_enemies, retreat_distance)
-	if retreat_hex == Vector2i.ZERO:
+	if retreat_hex == unit.current_hex:
 		rout_failed.emit()
 		return
 	
@@ -566,11 +564,11 @@ func create_restricted_astar(_allowed_hexes: Array[Vector2i]) -> AStar2D:
 		allowed_ids.append(LOSHelper.ground_layer.pathfinding_get_point_id(allowed_hexes[i]))
 		i += 1
 	
-	for id in allowed_ids:
+	for id: int in allowed_ids:
 		var pos: Vector2 = original.get_point_position(id)
 		new_astar.add_point(id, pos)
 	
-	for id in allowed_ids:
+	for id: int in allowed_ids:
 		var connected_ids: PackedInt64Array = original.get_point_connections(id)
 		var j: int = 0
 		while j < connected_ids.size():

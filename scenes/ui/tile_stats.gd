@@ -50,7 +50,7 @@ func _ready() -> void:
 	coverNW1.mouse_exited.connect(_on_texture_rect_mouse_exited)
 	coverNW2.mouse_exited.connect(_on_texture_rect_mouse_exited)
 
-func set_offset_position(detail_tile_offset: Vector2, offset: Vector2, _size: Vector2, detail_zoom_factor: Vector2):
+func set_offset_position(detail_tile_offset: Vector2, offset: Vector2, _size: Vector2, detail_zoom_factor: Vector2) -> void:
 	blocked.scale = detail_zoom_factor * icon_scale_factor
 	hindrance.scale = detail_zoom_factor * icon_scale_factor
 	blocked.position = offset - (blocked.size * blocked.scale / 4)#+ Vector2(_size.x / 2, _size.y / 4)
@@ -69,8 +69,8 @@ func set_offset_position(detail_tile_offset: Vector2, offset: Vector2, _size: Ve
 	coverNE1.position = offset + Vector2(_size.x / 6 * 5, _size.y / 4)
 	coverNE2.position = offset + Vector2(_size.x / 6 * 5 + _size.x / 7, _size.y / 4)
 	
-func show_stats(result: Dictionary):
-	for child in get_children():
+func show_stats(result: Dictionary) -> void:
+	for child: Control in get_children():
 		child.visible = false
 	
 	if result.hindrance == true:

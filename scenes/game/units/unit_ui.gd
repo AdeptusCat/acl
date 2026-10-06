@@ -2,7 +2,7 @@
 extends Control
 class_name UnitUi
 
-var detail_ui = null
+var detail_ui: UnitUi = null
 
 @export var sprite_team_0: Texture2D
 @export var sprite_team_1: Texture2D
@@ -26,35 +26,35 @@ var detail_ui = null
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
-@onready var cover_label = $CoverLabel
-@onready var cover_container = $Cover
-@onready var broken_label = $BrokenLabel
-@onready var unit_selected_sprite = $UnitSelectedSprite
-@onready var unit_status_control = $UnitStatus
-@onready var broken_texture_rect = $UnitStatus/Broken
-@onready var moving_texture_rect = $UnitStatus/Moving
-@onready var routing_texture_rect = $UnitStatus/Routing
-@onready var shooting_texture_rect = $UnitStatus/Shooting
-@onready var pinned_texture_rect = $UnitStatus/Pinned
-@onready var idle_texture_rect = $UnitStatus/Idle
-@onready var surrendered_texture_rect = $UnitStatus/Surrendered
-@onready var members_count_label = $MembersCount
-@onready var unit_designation_label = $UnitDesignation
-@onready var rank_texture_rect =$Rank
+@onready var cover_label: Label = $CoverLabel
+@onready var cover_container: HBoxContainer = $Cover
+@onready var broken_label: Label = $BrokenLabel
+@onready var unit_selected_sprite: TextureRect = $UnitSelectedSprite
+@onready var unit_status_control: Control = $UnitStatus
+@onready var broken_texture_rect: TextureRect = $UnitStatus/Broken
+@onready var moving_texture_rect: TextureRect = $UnitStatus/Moving
+@onready var routing_texture_rect: TextureRect = $UnitStatus/Routing
+@onready var shooting_texture_rect: TextureRect = $UnitStatus/Shooting
+@onready var pinned_texture_rect: TextureRect = $UnitStatus/Pinned
+@onready var idle_texture_rect: TextureRect = $UnitStatus/Idle
+@onready var surrendered_texture_rect: TextureRect = $UnitStatus/Surrendered
+@onready var members_count_label: Label = $MembersCount
+@onready var unit_designation_label: Label = $UnitDesignation
+@onready var rank_texture_rect: TextureRect = $Rank
 @onready var dead: TextureRect = $Dead
 
 
-@onready var soldiers_detail_container = $Soldiers/SoldiersContainer
+@onready var soldiers_detail_container: VBoxContainer = $Soldiers/SoldiersContainer
 @export var soldier_detail_scene: PackedScene
 
 var _surrendered: bool = false
 
 signal debug_kill_soldier
 
-func set_ammunition_left(ammo: int):
+func set_ammunition_left(ammo: int) -> void:
 	$AmmunitionLeft.text = str(ammo)
 
-func set_loadout(soldiers: Array[Soldier]):
+func set_loadout(soldiers: Array[Soldier]) -> void:
 	if detail_ui:
 		soldiers_detail_container.hide()
 		detail_ui._set_loadout(soldiers)
@@ -62,11 +62,11 @@ func set_loadout(soldiers: Array[Soldier]):
 		soldiers_detail_container.hide()
 
 
-func _set_loadout(soldiers: Array[Soldier]):
+func _set_loadout(soldiers: Array[Soldier]) -> void:
 	soldiers_detail_container.show()
-	for child in soldiers_detail_container.get_children():
+	for child: Control in soldiers_detail_container.get_children():
 		child.queue_free()
-	for i in soldiers:
+	for i: Soldier in soldiers:
 		var soldier: Soldier = i
 		var soldier_detail: SoldierDetail = soldier_detail_scene.instantiate()
 		soldier_detail.set_soldier_detail(soldier)
@@ -148,19 +148,19 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 
 
 
-func select():
+func select() -> void:
 	unit_selected_sprite.visible = true
 	if detail_ui:
 		detail_ui.select()
 
 
-func deselect():
+func deselect() -> void:
 	unit_selected_sprite.visible = false
 	if detail_ui:
 		detail_ui.deselect()
 
 
-func state_changed(next:int):
+func state_changed(next:int) -> void:
 	match next:
 		STATES.MoraleState.NORMAL:
 			$UnitStates/StateTexture.hide()
@@ -178,7 +178,7 @@ func state_changed(next:int):
 			$UnitStates/StateTexture.texture = combat_ineffective_texture
 
 
-func update_team_sprite(team : int, _squad_type: Globals.SquadType):
+func update_team_sprite(team : int, _squad_type: Globals.SquadType) -> void:
 	if not sprite_node:
 		return
 	match team:
@@ -188,13 +188,13 @@ func update_team_sprite(team : int, _squad_type: Globals.SquadType):
 			sprite_node.texture = sprite_team_1
 	unit_status_control.set_status_image(team, _squad_type)
 	if detail_ui:
-		detail_ui.update_team_sprite(team)
+		detail_ui.update_team_sprite(team, _squad_type)
 
 
 func set_cover(cover_value: int) -> void:
-	for child in cover_container.get_children():
+	for child: Control in cover_container.get_children():
 		child.queue_free()
-	for cover in cover_value:
+	for cover: int in cover_value:
 		var cover_icon: TextureRect = cover_icon_scene.instantiate()
 		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
 		cover_container.add_child(cover_icon)
@@ -202,23 +202,23 @@ func set_cover(cover_value: int) -> void:
 		detail_ui.set_cover(cover_value)
 
 
-func set_members_alive(members_alive: int):
+func set_members_alive(members_alive: int) -> void:
 	members_count_label.text = str(members_alive)
 
 
-func set_unit_designation(designation: String):
+func set_unit_designation(designation: String) -> void:
 	unit_designation_label.text = designation
 
 
-func _on_unit_arrived_at_hex(_hex):
+func _on_unit_arrived_at_hex(_hex: Vector2i) -> void:
 	pass
 	if detail_ui:
 		pass
 
 
-func started_moving(broken: bool, surrendered: bool):
+func started_moving(broken: bool, surrendered: bool) -> void:
 	$Timer.stop()
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	if broken:
 		routing_texture_rect.visible = true
@@ -229,9 +229,9 @@ func started_moving(broken: bool, surrendered: bool):
 		detail_ui.started_moving(broken, surrendered)
 
 
-func stopped_moving(broken: bool, surrendered: bool):
+func stopped_moving(broken: bool, surrendered: bool) -> void:
 	$Timer.stop()
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	if broken == true:
 		broken_texture_rect.visible = true
@@ -245,21 +245,21 @@ func stopped_moving(broken: bool, surrendered: bool):
 		detail_ui.stopped_moving(broken, surrendered)
 
 
-func _on_morale_breaks():
+func _on_morale_breaks() -> void:
 	$Timer.stop()
 	#broken_label.visible = true
 	show_broken()
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	broken_texture_rect.visible = true
 	if detail_ui:
 		detail_ui._on_morale_breaks()
 
 
-func _on_morale_recovered():
+func _on_morale_recovered() -> void:
 	#broken_label.visible = false
 	show_success()
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
 	if _surrendered:
@@ -270,27 +270,27 @@ func _on_morale_recovered():
 		detail_ui._on_morale_recovered()
 
 
-func _on_morale_updated(current, _max):
+func _on_morale_updated(current: int, _max: int) -> void:
 	update_bar(current, _max)
 	if detail_ui:
 		detail_ui._on_morale_updated(current, _max)
 
 
-func _on_morale_failure():
+func _on_morale_failure() -> void:
 	show_broken()
 	if detail_ui:
 		detail_ui._on_morale_failure()
 
 
-func _on_morale_success():
+func _on_morale_success() -> void:
 	show_success()
 	if detail_ui:
 		detail_ui._on_morale_success()
 
 
-func update_bar(current: int, _max: int):
+func update_bar(current: int, _max: int) -> void:
 	if morale_bar:
-		var ratio = clamp(float(current) / float(_max), 0.0, 1.0)
+		var ratio: float = clamp(float(current) / float(_max), 0.0, 1.0)
 		morale_bar.scale.x = ratio
 
 		#morale_bar.color = Color(1, 0, 0)
@@ -305,9 +305,9 @@ func update_bar(current: int, _max: int):
 		
 
 func _on_cover_updated(cover_value: int) -> void:
-	for child in cover_container.get_children():
+	for child: Control in cover_container.get_children():
 		child.queue_free()
-	for cover in cover_value:
+	for cover: int in cover_value:
 		var cover_icon: TextureRect = cover_icon_scene.instantiate()
 		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
 		cover_container.add_child(cover_icon)
@@ -315,22 +315,22 @@ func _on_cover_updated(cover_value: int) -> void:
 		detail_ui._on_cover_updated(cover_value)
 
 
-func show_casualty():
+func show_casualty() -> void:
 	_spawn_popup("casualty")
 
 
-func show_broken():
+func show_broken() -> void:
 	_spawn_popup("broken")
 
 
-func show_pinned():
+func show_pinned() -> void:
 	_spawn_popup("pinned")
 	#_spawn_flash("failure")
 	#if detail_ui:
 		#detail_ui.show_failure()
 
 
-func show_success():
+func show_success() -> void:
 	update_bar(0, 100)
 	_spawn_popup("success")
 	#_spawn_flash("success")
@@ -338,8 +338,8 @@ func show_success():
 		#detail_ui.show_success()
 
 
-func _spawn_popup(type: String):
-	var popup = morale_popup_scene.instantiate()
+func _spawn_popup(type: String) -> void:
+	var popup: Node2D = morale_popup_scene.instantiate()
 	add_child(popup)
 	#popup.position = position + Vector2(0, -20)
 	match type:
@@ -359,8 +359,8 @@ func _spawn_popup(type: String):
 		detail_ui._spawn_popup(type)
 
 
-func _spawn_flash(type: String):
-	var flash = morale_flash_scene.instantiate()
+func _spawn_flash(type: String) -> void:
+	var flash: Node2D = morale_flash_scene.instantiate()
 	add_child(flash)
 	flash.position = position
 	if type == "failure":
@@ -370,87 +370,87 @@ func _spawn_flash(type: String):
 	if detail_ui:
 		detail_ui._spawn_flash(type)
 
-func shoot_rocket_launcher(from_pos: Vector2, to_pos, weapon: WeaponSpec):
-	var tracer = tracer_scene.instantiate() as Node2D
+func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
 	$Timer.start()
 	if detail_ui:
-		for child in detail_ui.unit_status_control.get_children():
+		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
 
-func shoot_mortar(from_pos: Vector2, to_pos, weapon: WeaponSpec):
-	var tracer = tracer_scene.instantiate() as Node2D
+func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
 	$Timer.start()
 	if detail_ui:
-		for child in detail_ui.unit_status_control.get_children():
+		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
 
 
-func shoot(from_pos: Vector2, to_pos, weapon: WeaponSpec):
-	var tracer = tracer_scene.instantiate() as Node2D
+func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos, weapon)
 	$Timer.start()
 	if detail_ui:
-		for child in detail_ui.unit_status_control.get_children():
+		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
 
-func shoot_riflegrenade(from_pos: Vector2, to_pos, weapon: WeaponSpec):
-	var tracer = tracer_scene.instantiate() as Node2D
+func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.riflegrenade_projectile_speed
 	tracer.tracer_texture = tracer_texture
 	get_tree().current_scene.add_child(tracer)
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos, weapon, true)
 	$Timer.start()
 	if detail_ui:
-		for child in detail_ui.unit_status_control.get_children():
+		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.shooting_texture_rect.visible = true
 
 
-func riflegrenade_explosion(_target_pos: Vector2):
+func riflegrenade_explosion(_target_pos: Vector2) -> void:
 	pass
 
 
-func surrender():
-	for child in unit_status_control.get_children():
+func surrender() -> void:
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	surrendered_texture_rect.visible = true
 	_surrendered = true
 	if detail_ui:
-		for child in detail_ui.unit_status_control.get_children():
+		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.surrendered_texture_rect.visible = true
 
 
-func die():
+func die() -> void:
 	dead.show()
 	$StressLevel.hide()
 	$MoraleBar.hide()
@@ -470,7 +470,7 @@ func die():
 func _on_timer_timeout() -> void:
 	if surrendered_texture_rect.visible == true or broken_texture_rect.visible or routing_texture_rect.visible:
 		return
-	for child in unit_status_control.get_children():
+	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	idle_texture_rect.visible = true
 	if _surrendered:

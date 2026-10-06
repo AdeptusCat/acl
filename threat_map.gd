@@ -1,41 +1,41 @@
 extends Node
 
 var thread: Thread
-var result_ready := false
+var result_ready: bool = false
 var current_threat_maps: Dictionary[int, Dictionary] = {
 	Globals.Team.AXIS: {},
 	Globals.Team.ALLIES: {},
 }
 
-var update_interval := 0.25  # seconds
-var update_timer := 0.0
+var update_interval: float = 0.25  # seconds
+var update_timer: float = 0.0
 
 var pending_visible_hexes: Dictionary[int, Array]
 var pending_lookup: Dictionary = {}
 
-var threat_weights = {}
+var threat_weights: Dictionary = {}
 
 signal draw_threat(current_threat_maps: Dictionary[int, Dictionary])
 
 
-func update_astart_for_team(team: Globals.Team):
+func update_astart_for_team(team: Globals.Team) -> void:
 	if not Globals.astars.has(team):
 		return
 	
-	for point_id in Globals.astars[team].get_point_ids():
-		var world_pos = Globals.astars[team].get_point_position(point_id)
-		var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-		var weight = current_threat_maps[team].get(hex_map, 1.0)
+	for point_id: int in Globals.astars[team].get_point_ids():
+		var world_pos: Vector2 = Globals.astars[team].get_point_position(point_id)
+		var hex_map: Vector2i = LOSHelper.ground_layer.local_to_map(world_pos)
+		var weight: float = current_threat_maps[team].get(hex_map, 1.0)
 		Globals.astars[team].set_point_weight_scale(point_id, weight)
 		
 
 
-func _exit_tree():
+func _exit_tree() -> void:
 	if thread:
 		thread.wait_to_finish()
 
 
-func thread_done():
+func thread_done() -> void:
 	if thread:
 		thread.wait_to_finish()
 		thread = null
@@ -53,15 +53,15 @@ func _process(delta: float) -> void:
 		#var observers: Array = LOSHelper.visible_hexes.get(enemy_team, [])
 		#request_threat_update(observers, LOSHelper.los_lookup)
 
-func _set_threat_map_result(result: Dictionary[int, Dictionary]):
+func _set_threat_map_result(result: Dictionary[int, Dictionary]) -> void:
 	#current_threat_map = result
 	current_threat_maps = result
 	draw_threat.emit(current_threat_maps)
 	# get_parent().draw_threat(current_threat_maps)
 	result_ready = true
 
-var updating_threat := false
-func _start_threat_map_update():
+var updating_threat: bool = false
+func _start_threat_map_update() -> void:
 	if updating_threat:
 		return
 	updating_threat = true
@@ -83,21 +83,21 @@ func _incremental_threat_map_update() -> void:
 	temp_threat_maps[Globals.Team.AXIS] = {}
 	temp_threat_maps[Globals.Team.ALLIES] = {}
 
-	for team in Globals.Team.values():
-		var points := Globals.astars[team].get_point_ids()
-		var index := 0
+	for team: int in Globals.Team.values():
+		var points: PackedInt64Array = Globals.astars[team].get_point_ids()
+		var index: int = 0
 		while index < points.size():
-			var batch_size := 30  # Lower this if still lagging
-			for j in range(batch_size):
+			var batch_size: int = 30  # Lower this if still lagging
+			for j: int in range(batch_size):
 				if index >= points.size():
 					break
-				var point_id := points[index]
-				var world_pos = Globals.astars[team].get_point_position(point_id)
+				var point_id: int = points[index]
+				var world_pos: Vector2 = Globals.astars[team].get_point_position(point_id)
 				# FIXME this thows error if ground_layer is freed on exit
 				if not is_instance_valid(LOSHelper.ground_layer):
 					break
-				var hex_map = LOSHelper.ground_layer.local_to_map(world_pos)
-				var weight := _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
+				var hex_map: Vector2i = LOSHelper.ground_layer.local_to_map(world_pos)
+				var weight: float = _calculate_threat_weight(hex_map, pending_lookup, pending_visible_hexes, team)
 				temp_threat_maps[team][hex_map] = weight
 				index += 1
 			if not is_instance_valid(LOSHelper.ground_layer):
@@ -109,8 +109,8 @@ func _incremental_threat_map_update() -> void:
 
 func _deferred_copy_dict_visible_hexes(source: Dictionary[int, Array]) -> Dictionary[int, Array]:
 	var copy:Dictionary[int, Array] = {}
-	for k in source.keys():
-		var v = source[k]
+	for k: Variant in source.keys():
+		var v: Variant = source[k]
 		if typeof(v) == TYPE_DICTIONARY:
 			copy[k] = v.duplicate(true)
 		elif typeof(v) == TYPE_ARRAY:
@@ -122,9 +122,9 @@ func _deferred_copy_dict_visible_hexes(source: Dictionary[int, Array]) -> Dictio
 	return copy
 
 func _deferred_copy_dict(source: Dictionary) -> Dictionary:
-	var copy := {}
-	for k in source.keys():
-		var v = source[k]
+	var copy: Dictionary = {}
+	for k: Variant in source.keys():
+		var v: Variant = source[k]
 		if typeof(v) == TYPE_DICTIONARY:
 			copy[k] = v.duplicate(true)
 		elif typeof(v) == TYPE_ARRAY:
@@ -136,7 +136,7 @@ func _deferred_copy_dict(source: Dictionary) -> Dictionary:
 
 
 func _calculate_threat_weight(hex: Vector2i, _pending_los_lookup: Dictionary, _pending_visible_hexes: Dictionary[int, Array], team: int) -> float:
-	var weight = 1.0  # Start with neutral weight scale
+	var weight: float = 1.0  # Start with neutral weight scale
 
 	var enemy_team: int = Globals.Team.ALLIES
 	if team == Globals.Team.ALLIES:
@@ -144,19 +144,19 @@ func _calculate_threat_weight(hex: Vector2i, _pending_los_lookup: Dictionary, _p
 	else:
 		enemy_team = Globals.Team.ALLIES
 	
-	var observed_hexes_by_enemy = _pending_visible_hexes.get(enemy_team, [])
+	var observed_hexes_by_enemy: Array = _pending_visible_hexes.get(enemy_team, [])
 	
 	if observed_hexes_by_enemy.has(hex):
-		for unit in Globals.get_units():
+		for unit: Unit in Globals.get_units():
 			if not is_instance_valid(unit):
 				continue
 			if not unit.alive:
 				continue
 			if not unit.team == enemy_team:
 				continue
-			var o_hex = unit.current_hex
+			var o_hex: Vector2i = unit.current_hex
 			if _pending_los_lookup.has(o_hex) and _pending_los_lookup[o_hex].has(hex):
-				var cover = _pending_los_lookup[o_hex][hex].target_cover
+				var cover: int = _pending_los_lookup[o_hex][hex].target_cover
 				weight += max((6.0 - float(cover)), 1.0) * 0.3  # Adjust scaling if needed
 	##for o_hex in observed_hexes_by_enemy:
 	#for o_hex in units:

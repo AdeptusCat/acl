@@ -2,9 +2,9 @@ extends Node
 
 @export var enabled: bool = true
 
-signal draw_los_to_enemy(from_hex, to_hex)
+signal draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i)
 
-func _on_unit_entered_hex(unit: Unit, _vector):
+func _on_unit_entered_hex(unit: Unit, _vector: Vector2i) -> void:
 	if not enabled:
 		return
 	if not unit.alive or unit.surrendered:
@@ -17,7 +17,7 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 	# Clear old visibility info for this unit
 	Globals.unit_enemies_in_los[unit] = []
 
-	for enemy_unit in Globals.get_units():
+	for enemy_unit: Unit in Globals.get_units():
 		if not enemy_unit.alive:
 			return
 		if enemy_unit == unit:
@@ -54,8 +54,8 @@ func _on_unit_entered_hex(unit: Unit, _vector):
 	update_all_unit_visibilities()
 
 
-func update_all_unit_visibilities():
-	for unit in Globals.get_units():
+func update_all_unit_visibilities() -> void:
+	for unit: Unit in Globals.get_units():
 		if not unit.alive:
 			continue
 		var visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
@@ -63,13 +63,13 @@ func update_all_unit_visibilities():
 		visible_hexes[unit.current_hex] = {"shooter_cover" = terrain_defence_bonus, "target_cover" = terrain_defence_bonus}
 		Globals.unit_enemies_in_los[unit] = []
 
-		for enemy_unit in Globals.get_units():
+		for enemy_unit: Unit in Globals.get_units():
 			if enemy_unit == unit or not enemy_unit.alive:
 				continue
 			if enemy_unit.team != unit.team and enemy_unit.current_hex in visible_hexes:
 				Globals.unit_enemies_in_los[unit].append(enemy_unit)
 		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
-		for unit_in_current_hex in units_at_current_hex:
+		for unit_in_current_hex: Unit in units_at_current_hex:
 			if not unit_in_current_hex.team == unit.team:
 				if not Globals.unit_enemies_in_los[unit].has(unit_in_current_hex):
 					Globals.unit_enemies_in_los[unit].append(unit_in_current_hex)

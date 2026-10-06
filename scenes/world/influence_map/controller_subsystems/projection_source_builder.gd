@@ -142,8 +142,6 @@ static func get_projected_line_hexes(
 		if hex == from_hex:
 			continue
 
-		if hex == Vector2i.ZERO:
-			continue
 
 		result.append(hex)
 

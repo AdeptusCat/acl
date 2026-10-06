@@ -51,7 +51,7 @@ func _update_aura() -> void:
 	var candidates: Array = get_tree().get_nodes_in_group("units")
 	var seen: Dictionary = {}
 
-	for u in candidates:
+	for u: Unit in candidates:
 		var unit: Node2D = u
 		if not is_instance_valid(unit):
 			continue
@@ -70,7 +70,7 @@ func _update_aura() -> void:
 			seen[unit] = true
 
 	# remove those who left
-	for prior in _affected.keys():
+	for prior: Unit in _affected.keys():
 		if not seen.has(prior):
 			if prior:
 				_remove_from(prior)

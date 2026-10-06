@@ -44,6 +44,11 @@ func is_condition_met() -> bool:
 	return false
 
 
+# The active match clock advances state; evaluation only reads it.
+func advance_time(_delta: float) -> void:
+	pass
+
+
 func get_description() -> String:
 	push_error("VictoryCondition.evaluate() must be overridden.")
 	return ""

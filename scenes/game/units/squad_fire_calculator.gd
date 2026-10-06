@@ -81,12 +81,12 @@ func build_volley(input: SquadFireInput) -> VolleyResult:
 
 	# 3) Crew-served fire for each equipment instance.
 	var mg_total: int = 0
-	for i in input.crew_equipment.size():
+	for i: int in input.crew_equipment.size():
 		var eq: EquipmentInstance = input.crew_equipment[i]
 		var per_item_rounds: int = 0
 		if eq.spec != null:
 			if eq.spec.kind == WeaponKind.CREW_SERVED:
-				for j in eq.count:
+				for j: int in eq.count:
 					var crew_for_this: int = int(floor(float(eq.assigned_crew) / float(eq.count)))
 					var rounds_j: int = _expected_crew_served_rounds(eq.spec, crew_for_this, input.state_rof_mult, input.dt_seconds)
 					per_item_rounds += rounds_j
@@ -118,14 +118,14 @@ func _allocate_crew(crew_eq: Array[EquipmentInstance], available: int) -> int:
 		return available
 
 	crew_eq.sort_custom(_cmp_priority_desc)
-	for idx in crew_eq.size():
+	for idx: int in crew_eq.size():
 		var eq: EquipmentInstance = crew_eq[idx]
 		eq.assigned_crew = 0
 
-	for i in crew_eq.size():
+	for i: int in crew_eq.size():
 		var eq_i: EquipmentInstance = crew_eq[i]
 		var needed_per_item: int = eq_i.spec.crew_required
-		for t in eq_i.count:
+		for t: int in eq_i.count:
 			if available <= 0:
 				break
 			# Assign as much as we can up to crew_required for this item, but allow partial manning.

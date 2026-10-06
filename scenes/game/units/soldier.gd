@@ -94,7 +94,7 @@ func is_weapon_setup_done(delta: float) -> bool:
 	return false
 
 
-func is_weapon_reload_done(delta: float):
+func is_weapon_reload_done(delta: float) -> bool:
 	if reload_task.done:
 		return true
 	if reload_task.remaining_time_s <= 0:
@@ -104,7 +104,7 @@ func is_weapon_reload_done(delta: float):
 	return false
 
 
-func is_acquiring_target_done(delta: float):
+func is_acquiring_target_done(delta: float) -> bool:
 	if aquire_target_task.done:
 		return true
 	if aquire_target_task.remaining_time_s <= 0:

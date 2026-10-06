@@ -483,8 +483,8 @@ func multiply_layers(layer_a: int, layer_b: int, target_layer: int) -> void:
 func create_origin_stamp(origin_hex: Vector2i) -> PackedFloat32Array:
 	var values: PackedFloat32Array = _layers[Layer.UNIT_INFLUENCE].duplicate()
 
-	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
-		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
+	for y: int in range(bounds.position.y, bounds.position.y + bounds.size.y):
+		for x: int in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
 			var distance: int = LOSHelper.get_hex_distance(origin_hex, hex)
 
@@ -545,8 +545,8 @@ func stamp_unit_influence(origin_hex: Vector2i) -> void:
 
 	var values: PackedFloat32Array = _layers[Layer.UNIT_INFLUENCE]
 
-	for y in range(bounds.position.y, bounds.position.y + bounds.size.y):
-		for x in range(bounds.position.x, bounds.position.x + bounds.size.x):
+	for y: int in range(bounds.position.y, bounds.position.y + bounds.size.y):
+		for x: int in range(bounds.position.x, bounds.position.x + bounds.size.x):
 			var hex: Vector2i = Vector2i(x, y)
 			var distance: int = LOSHelper.get_hex_distance(origin_hex, hex)
 

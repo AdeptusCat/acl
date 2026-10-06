@@ -43,7 +43,7 @@ func _update_follow_position() -> void:
 
 	global_position = Vector2(x, y)
 
-func toggle_on(tooltip: TooltipSignals.Tooltip):
+func toggle_on(tooltip: TooltipSignals.Tooltip) -> void:
 	var header: String = ""
 	var text: String = ""
 	match tooltip:
@@ -76,12 +76,12 @@ func toggle_on(tooltip: TooltipSignals.Tooltip):
 	await get_tree().process_frame
 	reset_size()
 
-func toggle_off():
+func toggle_off() -> void:
 	await tween_opacity(0.0).finished
 	hide()
 		
 
-func tween_opacity(to: float):
+func tween_opacity(to: float) -> Tween:
 	if opacity_tween: 
 		opacity_tween.kill()
 	opacity_tween = get_tree().create_tween()

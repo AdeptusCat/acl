@@ -15,7 +15,7 @@ func _pathfinding_does_tile_connect(_tile: Vector2i, _neighbor: Vector2i) -> boo
 		# Return whether tiles should be connected (default is true)
 		return true
 
-func _ready():
+func _ready() -> void:
 	#pathfinding_enabled = true
 	#if Engine.is_editor_hint():
 		## allow this CanvasItem to receive gui_input in the editor
@@ -25,7 +25,7 @@ func _ready():
 	var cube_clicks : Array = []
 	cube_clicks.append(map_to_cube(Vector2i(1,1)))
 	cube_clicks.append(map_to_cube(Vector2i(0,1)))
-	var _na = cube_direction_name(cube_clicks[0], cube_clicks[1])
+	var _na: String = cube_direction_name(cube_clicks[0], cube_clicks[1])
 	#print(na)
 	# Enable pathfinding
 	
@@ -42,7 +42,7 @@ func _ready():
 
 
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> String:
-	var d = nxt - cur
+	var d: Vector3i = nxt - cur
 	if d == Vector3i( 0,  1, -1): return "south"
 	if d == Vector3i( 1,  0, -1): return "southeast"
 	if d == Vector3i( 1, -1,  0): return "northeast"
@@ -84,20 +84,20 @@ func forward_canvas_gui_input(_event: InputEvent) -> void:
 # ─── draw a red line between the two selected centers ──────────────────
 func _draw() -> void:
 	if Engine.is_editor_hint() and _selected_map_hexes.size() == 2:
-		var a = _selected_map_hexes[0]
-		var b = _selected_map_hexes[1]
+		var a: Vector2i = _selected_map_hexes[0]
+		var b: Vector2i = _selected_map_hexes[1]
 		# map → cube → local to get exact pixel centers
-		var p1 = cube_to_local(map_to_cube(a))
-		var p2 = cube_to_local(map_to_cube(b))
+		var p1: Vector2 = cube_to_local(map_to_cube(a))
+		var p2: Vector2 = cube_to_local(map_to_cube(b))
 		draw_line(p1, p2, Color(1,0,0), 2)
 
 # ─── test if one of Δx,Δy,Δz == 0 in cube coords ────────────────────
 func _check_hexside(a: Vector2i, b: Vector2i) -> void:
 	var ca : Vector3i = map_to_cube(a)
 	var cb : Vector3i = map_to_cube(b)
-	var dx = cb.x - ca.x
-	var dy = cb.y - ca.y
-	var dz = cb.z - ca.z
+	var dx: int = cb.x - ca.x
+	var dy: int = cb.y - ca.y
+	var dz: int = cb.z - ca.z
 
 	if dx == 0 or dy == 0 or dz == 0:
 		print("✅ Line follows a hex-side direction.")

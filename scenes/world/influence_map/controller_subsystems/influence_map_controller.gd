@@ -518,7 +518,7 @@ func rebuild_los_influence_for_team(influence_map: InfluenceMap, team: int) -> v
 func _write_hq_support_need_for_team(influence_map: InfluenceMap, team: int) -> void:
 	var squads: Array[Unit] = Globals.get_units_for_team(team)
 	var squads_without_platoon_leader: Array[Unit]
-	for squad in squads:
+	for squad: Unit in squads:
 		if not squad.squad == 0:
 			squads_without_platoon_leader.append(squad)
 

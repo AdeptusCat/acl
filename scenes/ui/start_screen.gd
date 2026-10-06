@@ -9,8 +9,8 @@ signal time_changed(_time: float)
 
 #@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton
 #@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton
-@onready var animation_player = $AnimationPlayer
-@onready var time_spinbox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var time_spinbox: SpinBox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
 #@onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
 #@onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
 @onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/Team
@@ -31,7 +31,7 @@ var team_texture: Dictionary[Globals.Team, Texture] = {
 
 var time: float
 
-func _ready():
+func _ready() -> void:
 	if not SessionSettings.mission_time == 0:
 		time_spinbox.value = SessionSettings.mission_time
 	#if Globals.game_mode == Globals.GameMode.DEFEND:
@@ -47,14 +47,14 @@ func _ready():
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
 
-func setup_map_options(maps: Array[Map]):
-	for map in maps:
+func setup_map_options(maps: Array[Map]) -> void:
+	for map: Map in maps:
 		var scenarios: Array[Scenario] = map.get_scenarios()
 		var map_label: Label = Label.new()
 		map_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		map_label.text = map.map_name
 		maps_v_box_container.add_child(map_label)
-		for scenario in scenarios:
+		for scenario: Scenario in scenarios:
 			if not OS.is_debug_build() and not scenario.released:
 				continue
 			
@@ -72,11 +72,11 @@ func setup_map_options(maps: Array[Map]):
 					if not match_data.winner_team == match_data.player_team:
 						scenario_button.disabled = true
 			
-func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
+func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario) -> void:
 	scenario_description.text = scenario.scenario_description
 	team.texture = team_texture[scenario.player_team]
-	for victory_condition in scenario.victory_conditions:
-		var label = Label.new()
+	for victory_condition: VictoryCondition in scenario.victory_conditions:
+		var label: Label = Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.text = victory_condition.get_description()
@@ -87,15 +87,15 @@ func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario):
 			minor_objectives_label.show()
 			
 
-func _on_scenario_button_mouse_exited():
+func _on_scenario_button_mouse_exited() -> void:
 	scenario_description.text = ""
 	minor_objectives_label.hide()
-	for label in major_victory_conditions_v_box_container.get_children():
+	for label: Control in major_victory_conditions_v_box_container.get_children():
 		label.queue_free()
-	for label in minor_victory_conditions_v_box_container.get_children():
+	for label: Control in minor_victory_conditions_v_box_container.get_children():
 		label.queue_free()
 
-func _on_scenario_button_pressed(map: Map, scenario: Scenario):
+func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
 	animation_player.play("fade_out")
@@ -104,18 +104,18 @@ func _on_scenario_button_pressed(map: Map, scenario: Scenario):
 	game_started.emit(map, scenario, scenario.player_team, Globals.game_mode)
 
 
-func _on_set_objective_text(_hex: String):
+func _on_set_objective_text(_hex: String) -> void:
 	objective_label.text = "Hold objective (red circle) with an unbroken unit when the time runs out!"
 
 
-func _on_start_as_axis_pressed():
+func _on_start_as_axis_pressed() -> void:
 	animation_player.play("fade_out")
 	await animation_player.animation_finished
 	visible = false
 	game_started.emit(Globals.Team.AXIS, Globals.game_mode)
 
 
-func _on_start_as_allies_pressed():
+func _on_start_as_allies_pressed() -> void:
 	animation_player.play("fade_out")
 	await animation_player.animation_finished
 	visible = false

@@ -1,6 +1,6 @@
 extends Node2D
 
-var lines = []  # {from, to, timer, duration}
+var lines: Array[Dictionary] = []  # {from, to, timer, duration}
 var los_enemy_lines: Array = []
 var los_to_target: Array = []
 var movement_path: Array = []
@@ -13,8 +13,8 @@ var leader_presence_strength: Dictionary[Globals.Team, Array] = {
 
 
 func _on_draw_command_link_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
-	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
-	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
 
 	command_link_strength.append({
 		"from": from_pos,
@@ -28,8 +28,8 @@ func _on_draw_command_link_strength(team: Globals.Team, from_hex: Vector2i, to_h
 
 
 func _on_draw_leader_presence_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
-	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
-	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
 	
 	leader_presence_strength[team].append({
 		"from": from_pos,
@@ -42,13 +42,13 @@ func _on_draw_leader_presence_strength(team: Globals.Team, from_hex: Vector2i, t
 	queue_redraw()
 
 
-func _on_draw_chain_of_command(from_hex: Vector2i, path: Array[Vector2i]):
+func _on_draw_chain_of_command(from_hex: Vector2i, path: Array[Vector2i]) -> void:
 	var i: int = 0
-	for hex in path:
+	for hex: Vector2i in path:
 		if path.size() <= i + 1:
 			return
-		var from_pos = LOSHelper.ground_layer.map_to_local(path[i])
-		var to_pos = LOSHelper.ground_layer.map_to_local(path[i+1])
+		var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i])
+		var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i+1])
 
 		chain_of_command.append({
 			"from": from_pos,
@@ -62,13 +62,13 @@ func _on_draw_chain_of_command(from_hex: Vector2i, path: Array[Vector2i]):
 		i += 1
 
 
-func _on_draw_draw_movement_path(from_hex: Vector2i, path: Array[Vector2i]):
+func _on_draw_draw_movement_path(from_hex: Vector2i, path: Array[Vector2i]) -> void:
 	var i: int = 0
-	for hex in path:
+	for hex: Vector2i in path:
 		if path.size() <= i + 1:
 			return
-		var from_pos = LOSHelper.ground_layer.map_to_local(path[i])
-		var to_pos = LOSHelper.ground_layer.map_to_local(path[i+1])
+		var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i])
+		var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i+1])
 
 		movement_path.append({
 			"from": from_pos,
@@ -82,9 +82,9 @@ func _on_draw_draw_movement_path(from_hex: Vector2i, path: Array[Vector2i]):
 		i += 1
 
 
-func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i):
-	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
-	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
+func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
 
 	los_to_target.append({
 		"from": from_pos,
@@ -96,9 +96,9 @@ func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i):
 	queue_redraw()
 
 
-func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
-	var from_pos = LOSHelper.ground_layer.map_to_local(from_hex)
-	var to_pos = LOSHelper.ground_layer.map_to_local(to_hex)
+func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
 
 	los_enemy_lines.append({
 		"from": from_pos,
@@ -110,18 +110,18 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i):
 	queue_redraw()
 
 
-func _draw():
+func _draw() -> void:
 	#return
 	# 🔥 New: Draw blue lines to visible enemies
 	if Debug.show_los_lines:
-		for los_data in los_enemy_lines:
+		for los_data: Dictionary in los_enemy_lines:
 			draw_line(los_data["from"], los_data["to"], Color(0.36, 0.074, 0.005, 1.0), 2.0)
-		for los_data in los_to_target:
+		for los_data: Dictionary in los_to_target:
 			draw_line(los_data["from"], los_data["to"], Color(0.895, 0.0, 0.316, 1.0), 2.0)
 	if Debug.show_movement_lines:
-		for los_data in movement_path:
+		for los_data: Dictionary in movement_path:
 			draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
-	for los_data in chain_of_command:
+	for los_data: Dictionary in chain_of_command:
 		draw_line(los_data["from"], los_data["to"], Color(0.0, 0.391, 0.122, 1.0), 2.0)
 	#if SessionSettings.showCmdConnectivity:
 		#if Debug.showEnemyCmdConnectivity:
@@ -160,46 +160,52 @@ func strength_to_color_hsv(strength: float) -> Color:
 	var hue: float = 0.33 * s   # 0.0 → 0.33 (red → green)
 	return Color.from_hsv(hue, 1.0, 1.0, 1.0)
 
-func _process(delta):
-	for line in los_enemy_lines:
+func _process(delta: float) -> void:
+	for line: Dictionary in command_link_strength:
+		line["timer"] += delta
+	command_link_strength = command_link_strength.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+
+	for line: Dictionary in los_enemy_lines:
 		line["timer"] += delta
 	# Remove fully expired lines
-	los_enemy_lines = los_enemy_lines.filter(func(line):
+	los_enemy_lines = los_enemy_lines.filter(func(line: Dictionary) -> bool:
 		return line["timer"] < line["duration"]
 	)
 	
 	
 	
-	for line in los_to_target:
+	for line: Dictionary in los_to_target:
 		line["timer"] += delta
 	# Remove fully expired lines
-	los_to_target = los_to_target.filter(func(line):
+	los_to_target = los_to_target.filter(func(line: Dictionary) -> bool:
 		return line["timer"] < line["duration"]
 	)
 	
 	
-	for line in movement_path:
+	for line: Dictionary in movement_path:
 		line["timer"] += delta
 	# Remove fully expired lines
-	movement_path = movement_path.filter(func(line):
+	movement_path = movement_path.filter(func(line: Dictionary) -> bool:
 		return line["timer"] < line["duration"]
 	)
 	
 	
-	for line in movement_path:
+	for line: Dictionary in movement_path:
 		line["timer"] += delta
 	# Remove fully expired lines
-	movement_path = movement_path.filter(func(line):
+	movement_path = movement_path.filter(func(line: Dictionary) -> bool:
 		return line["timer"] < line["duration"]
 	)
 	
 	
-	for team in leader_presence_strength.values():
-		for line in team:
+	for team: Array in leader_presence_strength.values():
+		for line: Dictionary in team:
 			line["timer"] += delta
 	# Remove fully expired lines
-	for team in leader_presence_strength:
-		leader_presence_strength[team] = leader_presence_strength[team].filter(func(line):
+	for team: Globals.Team in leader_presence_strength:
+		leader_presence_strength[team] = leader_presence_strength[team].filter(func(line: Dictionary) -> bool:
 			return line["timer"] < line["duration"]
 		)
 	

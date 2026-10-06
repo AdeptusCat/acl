@@ -50,7 +50,7 @@ var enemy_memory: Dictionary[Unit, Dictionary] = {}
 const PHYSICS_DT: float = 1.0 / 60.0
 
 # === Exported ===
-@export var snap_to_grid := true
+@export var snap_to_grid: bool = true
 @export var ground_map: HexagonTileMapLayer
 @export var firepower: int = 4
 @export var weapon_range: int = 6
@@ -61,7 +61,7 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var broken_death_multiplier: float = 2.0
 @export var recovery_time_max: float = 5.0
 @export var team: Globals.Team = Globals.Team.AXIS
-@export var retreat_speed := 70.0
+@export var retreat_speed: float = 70.0
 @export var fire_rate: float = 0.75
 @export var machine_guns: int = 0
 
@@ -129,10 +129,10 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 # === Signals ===
 signal unit_entered_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
-signal unit_died(unit)
+signal unit_died(unit: Unit)
 signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
-signal deselect_unit(unit)
+signal deselect_unit(unit: Unit)
 signal started_moving
 signal unit_surrendered
 signal contacts_reported(unit: Unit, contact: Array[Unit])
@@ -146,7 +146,7 @@ signal draw_command_link_strength(from_hex: Vector2i, to_hex: Vector2i, strength
 signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, strength: float)
 
 # === Nodes ===
-@onready var ui := $UnitUi
+@onready var ui: UnitUi = $UnitUi
 @onready var stress_system: StressController = $UnitStressController
 @onready var movement:UnitMovement = $UnitMovement
 @onready var leader_aura: LeaderAura = $LeaderAura
@@ -163,7 +163,7 @@ signal draw_leader_presence_strength(from_hex: Vector2i, to_hex: Vector2i, stren
 
 
 # === DEBUG ===
-@onready var action_label := $ActionLabel
+@onready var action_label: Label = $ActionLabel
 
 # === Classes ===
 @onready var tactical_state: SquadTacticalState = SquadTacticalState.new()
@@ -174,7 +174,7 @@ func _ready() -> void:
 
 
 # === Ready ===
-func setup():
+func setup() -> void:
 	if Engine.is_editor_hint():
 		return
 	
@@ -228,17 +228,17 @@ func setup():
 	squad_ai_controller.unit = self
 
 
-func game_start():
+func game_start() -> void:
 	command_connectivity_timer.start()
 	enemy_visibility_checker_timer.start()
 	combat_stats_timer.start()
 
 
-func update_terrain_defense_bonus():
+func update_terrain_defense_bonus() -> void:
 	terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(current_hex))
 
 
-func setAttackState(_attackState: AttackState):
+func setAttackState(_attackState: AttackState) -> void:
 	attackState = _attackState
 	match attackState:
 		AttackState.MANUAL_GROUND:
@@ -262,7 +262,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 				var map_hex: Vector2i = parameter as Vector2i
 				var units: Array = Globals.unit_visible_enemies[self]
 				var has_target_unit: bool = false
-				for unit in units:
+				for unit: Node2D in units:
 					if unit.current_hex == map_hex:
 						if not unit.team == Globals.team_player or Debug.enemy_selectable:
 							var _path: Array[Vector3i] = []
@@ -270,10 +270,10 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 							squad_fire.set_target_unit(unit)
 							has_target_unit = true
 				if not has_target_unit:
-					if squad_fire.target_hex == map_hex:
+					if attackState == AttackState.MANUAL_GROUND and squad_fire.has_target_hex and squad_fire.target_hex == map_hex:
 						return
 					setAttackState(AttackState.MANUAL_GROUND)
-					squad_fire.target_hex = map_hex
+					squad_fire.set_target_hex(map_hex)
 					var target_distance: int = LOSHelper.ground_layer.cube_distance(current_cube, LOSHelper.ground_layer.map_to_cube(map_hex))
 					squad_fire.set_soldiers_new_target_task(target_distance)
 					
@@ -322,7 +322,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 			setAttackState(AttackState.AUTO)
 
 
-func _on_new_target_hex(end_of_path_hex: Vector2i):
+func _on_new_target_hex(end_of_path_hex: Vector2i) -> void:
 	target_hex = end_of_path_hex
 	new_target_hex.emit(self, target_hex)
 
@@ -330,7 +330,8 @@ func _now() -> float:
 	return float(Engine.get_physics_frames()) * PHYSICS_DT
 
 
-func fire_mortar(map_hex: Vector2i):
+func fire_mortar(map_hex: Vector2i) -> void:
+	setAttackState(AttackState.MANUAL_GROUND)
 	squad_fire.fire_mortar(map_hex)
 
 
@@ -341,16 +342,16 @@ func is_good_order() -> bool:
 		return true 
 
 
-func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i):
+func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i) -> void:
 	#if squad_fire.target_unit:
-	if squad_fire.target_hex:
+	if weapon.family != WeaponSpec.Family.MORTAR:
 		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.target_hex)
 		match weapon.family: 
 			WeaponSpec.Family.SMALL_ARM:
 				ui.shoot(global_position, pos, weapon)
 			WeaponSpec.Family.ROCKET_LAUNCHER:
 				ui.shoot_rocket_launcher(global_position, pos, weapon)
-	if not mortar_target_hex == Vector2i.ZERO:
+	if weapon.family == WeaponSpec.Family.MORTAR:
 		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(mortar_target_hex)
 		if weapon.family == WeaponSpec.Family.MORTAR:
 				ui.set_ammunition_left(weapon.ammunition)
@@ -364,13 +365,13 @@ func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i):
 				#ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)
 
 
-func _on_fire_riflegrenade(weapon_spec: WeaponSpec):
+func _on_fire_riflegrenade(weapon_spec: WeaponSpec) -> void:
 	if squad_fire.target_unit:
 		ui.shoot_riflegrenade(global_position, squad_fire.target_unit.global_position, weapon_spec)
 
 
 
-func _on_new_target_unit(unit: Unit):
+func _on_new_target_unit(unit: Unit) -> void:
 	squad_fire.set_target_unit(unit)
 
 
@@ -459,7 +460,7 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 		return
 	var list: Array[Soldier] = []
 	var i: int = 0
-	for soldier in _squad_loadout.soldiers:
+	for soldier: SoldierLoadout in _squad_loadout.soldiers:
 		var L: SoldierLoadout = soldier
 		var spec: WeaponSpec = L.resolve_weapon()
 		if spec == null:
@@ -556,27 +557,27 @@ func _resize_loadouts(n: int) -> void:
 		loadouts.pop_back()
 
 
-func set_squad_type(_squad_type: Globals.SquadType):
+func set_squad_type(_squad_type: Globals.SquadType) -> void:
 	squad_type = _squad_type
 	_make_squad()
 
 
-func set_squad_nr(_value: int):
+func set_squad_nr(_value: int) -> void:
 	squad = _value
 	_make_squad()
 
 
-func set_platoon_nr(_value: int):
+func set_platoon_nr(_value: int) -> void:
 	platoon = _value
 	_make_squad()
 
 
-func set_company_nr(_value: Company):
+func set_company_nr(_value: Company) -> void:
 	company = _value
 	_make_squad()
 
 
-func _make_squad():
+func _make_squad() -> void:
 	match squad_type:
 		Globals.SquadType.PLATOON_HEADQUARTERS:
 			if not squad == 0:
@@ -1148,7 +1149,7 @@ func _make_medium_mortar_squad(v: bool) -> void:
 		notify_property_list_changed()
 
 
-func _on_started_moving():
+func _on_started_moving() -> void:
 	setAttackState(Unit.AttackState.AUTO)
 	is_moving = true
 	ui.started_moving(broken, surrendered)
@@ -1157,7 +1158,7 @@ func _on_started_moving():
 	action_controller.on_started_moving()
 
 
-func _on_stopped_moving():
+func _on_stopped_moving() -> void:
 	is_moving = false
 	ui.stopped_moving(broken, surrendered)
 	#action_controller.on_stopped_moving()
@@ -1170,31 +1171,31 @@ func _on_unit_arrived_at_hex(new_hex: Vector2i) -> void:
 	action_controller.on_reached_hex(new_hex)
 
 
-func _on_rout_failed():
+func _on_rout_failed() -> void:
 	surrender()
 	#die()
 
 
-func _on_morale_breaks():
+func _on_morale_breaks() -> void:
 	#if selected:
 		#deselect_unit.emit(self)
 		#deselect()
 	broken = true
 
 
-func _on_morale_recovered():
+func _on_morale_recovered() -> void:
 	broken = false
 
 
 # === Process Loop ===
 
-func _process(_delta):
+func _process(_delta: float) -> void:
 	
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
 			return
 		snap_to_hex()
-		var map_coords = ground_map.local_to_map(position)
+		var map_coords: Vector2i = ground_map.local_to_map(position)
 		position = ground_map.map_to_local(map_coords)
 		current_hex = map_coords
 		if not Engine.is_editor_hint():
@@ -1218,7 +1219,7 @@ func _check_contacts() -> void:
 	
 	var enemies: Array[Unit] = []
 
-	for unit in raw:
+	for unit: Unit in raw:
 		if is_instance_valid(unit):
 			enemies.append(unit)
 
@@ -1228,7 +1229,7 @@ func _check_contacts() -> void:
 		has_reported_contact = true
 	
 	var _new_enemy: bool = false
-	for enemy_squad in enemies:
+	for enemy_squad: Unit in enemies:
 		if not enemy_squad in enemies_reported and not enemy_memory.has(enemy_squad):
 			_new_enemy = true
 		remember_enemy(enemy_squad)
@@ -1284,18 +1285,18 @@ func _get_enemy_hex_for_cover(enemy: Unit) -> Vector2i:
 	return Vector2i(-9999, -9999)
 	
 # === Utility ===
-func snap_to_hex():
+func snap_to_hex() -> void:
 	if ground_map:
-		var map_coords = ground_map.local_to_map(position)
+		var map_coords: Vector2i = ground_map.local_to_map(position)
 		position = ground_map.map_to_local(map_coords)
 
 
-func select():
+func select() -> void:
 	ui.select()
 	selected = true
 
 
-func deselect():
+func deselect() -> void:
 	ui.deselect()
 	selected = false
 
@@ -1308,18 +1309,18 @@ func get_visible_enemies() -> Array:
 	return Globals.unit_visible_enemies.get(self, [])
 
 
-func set_team(new_team: Globals.Team):
+func set_team(new_team: Globals.Team) -> void:
 	team = new_team
 	update_team_sprite(team, squad_type)
 
 
-func update_team_sprite(_team: Globals.Team, _squad_type: Globals.SquadType):
+func update_team_sprite(_team: Globals.Team, _squad_type: Globals.SquadType) -> void:
 	ui.update_team_sprite(_team, _squad_type)
 
 
 
 #func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
-func receive_fire(terrain_defense_bonus: float):
+func receive_fire(terrain_defense_bonus: float) -> void:
 	cover_updated.emit(int(terrain_defense_bonus))
 	#if is_moving and not broken and not surrendered:
 		#movement.recalc_path()
@@ -1369,7 +1370,7 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 
 
 func apply_specific_casualty(casualty: Soldier) -> bool:
-	for soldier in squad_fire.soldiers:
+	for soldier: Soldier in squad_fire.soldiers:
 		if soldier == casualty:
 			var members_alive_before: int = squad_fire.soldiers.size()
 			
@@ -1395,7 +1396,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 			squad_fire.soldiers.erase(casualty)
 			
 			effective_range = 0
-			for s in squad_fire.soldiers:
+			for s: Soldier in squad_fire.soldiers:
 				if s.weapon.range_hexes > effective_range:
 					effective_range = s.weapon.range_hexes
 
@@ -1489,7 +1490,7 @@ func _apply_casualties(n: int) -> void:
 				dropped_support.append(s.weapon)
 		c += 1
 	
-	for soldier in casualties:
+	for soldier: Soldier in casualties:
 		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
 		_record_casualty(soldier)
 		# FIXME this should fix the out of bounds
@@ -1505,7 +1506,7 @@ func _apply_casualties(n: int) -> void:
 	remove_indices(squad_fire.soldiers, casualty_indexes)
 	
 	effective_range = 0
-	for soldier in squad_fire.soldiers:
+	for soldier: Soldier in squad_fire.soldiers:
 		if soldier.weapon.range_hexes > effective_range:
 			effective_range = soldier.weapon.range_hexes
 
@@ -1684,7 +1685,7 @@ func get_unique_random_ints(n: int, _max: int) -> Array[int]:
 	all_nums.shuffle()
 	return all_nums.slice(0, n)
 
-func _set_combat_ineffective():
+func _set_combat_ineffective() -> void:
 	stress_system.state = STATES.MoraleState.COMBAT_INEFFECTIVE
 	ui.state_changed(stress_system.state)
 	die()
@@ -1713,7 +1714,7 @@ func get_squad_type_name(type: Globals.SquadType) -> String:
 		_: return "Unknown"
 		
 
-func surrender():
+func surrender() -> void:
 	#return
 	#movement.move_to_hex(current_hex)
 	#if not team == Globals.team_player:
@@ -1782,7 +1783,7 @@ func _record_casualty(soldier: Soldier) -> void:
 		casualty_records.append(record)
 
 
-func _on_retreat_complete(retreat_hex) -> void:
+func _on_retreat_complete(retreat_hex: Vector2i) -> void:
 	movement.is_moving = false
 	current_hex = retreat_hex
 	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
@@ -1791,7 +1792,7 @@ func _on_retreat_complete(retreat_hex) -> void:
 	action_controller.on_retreat_complete(retreat_hex)
 
 
-func _on_stress_changed(stress: float):
+func _on_stress_changed(stress: float) -> void:
 	ui.update_bar(int(stress), 100)
 
 
@@ -1809,7 +1810,7 @@ func _on_state_changed(prev:int, next:int) -> void:
 	movement.state_changed(next)
 	
 	## 2) ROF/accuracy from state table
-	var m = STATES.STATE_MOD[next]
+	var m: Dictionary = STATES.STATE_MOD[next]
 	## guard against silly zeros
 	var rof_mult: float = max(float(m.rof), 0.05)
 	squad_fire.seconds_per_volley = squad_fire.base_seconds_per_volley / rof_mult

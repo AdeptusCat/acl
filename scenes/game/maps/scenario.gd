@@ -52,7 +52,7 @@ func get_objectives() -> Dictionary[Globals.Team, ObjectivesCollection]:
 	
 	
 	var axis_used_cells: Array[Vector2i] = axis_objectives_tile_map_layer.get_used_cells()
-	for cell in axis_used_cells:
+	for cell: Vector2i in axis_used_cells:
 		var tile_data: TileData = axis_objectives_tile_map_layer.get_cell_tile_data(cell)
 		if tile_data == null:
 			continue
@@ -75,7 +75,7 @@ func get_objectives() -> Dictionary[Globals.Team, ObjectivesCollection]:
 			objectives[objective.team].objectives.append(objective)
 	
 	var allied_used_cells: Array[Vector2i] = allied_objectives_tile_map_layer.get_used_cells()
-	for cell in allied_used_cells:
+	for cell: Vector2i in allied_used_cells:
 		var tile_data: TileData = allied_objectives_tile_map_layer.get_cell_tile_data(cell)
 		if tile_data == null:
 			continue
@@ -105,7 +105,7 @@ func get_victory_conditions() -> Dictionary[Globals.Team, VictoryConditionCollec
 	victory_condition_collection[Globals.Team.AXIS] = VictoryConditionCollection.new()
 	victory_condition_collection[Globals.Team.ALLIES] = VictoryConditionCollection.new()
 	
-	for victory_condition in victory_conditions:
+	for victory_condition: VictoryCondition in victory_conditions:
 		victory_condition_collection[victory_condition.team].victory_conditions.append(victory_condition)
 	return victory_condition_collection
 

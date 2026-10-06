@@ -38,8 +38,8 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3
 
 	# Convert path to cube coordinates
 	var cube_path: Array[Vector3i] = []
-	for pid in id_path:
-		var pos = Globals.astars[team].get_point_position(pid)
+	for pid: int in id_path:
+		var pos: Vector2 = Globals.astars[team].get_point_position(pid)
 		cube_path.append(LOSHelper.ground_layer.local_to_cube(pos))
 
 	return cube_path
@@ -206,22 +206,22 @@ func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int) -> Array[Vector3
 			#await get_tree().create_timer(0.00).timeout  # Yield between small batches
 	#call_deferred("_set_threat_map_result", temp_threat_maps)
 
-func _on_arrived(hex):
+func _on_arrived(hex: Vector2i) -> void:
 	_restack_units_in_hex(hex)
 
 
-func _restack_units_in_hex(hex: Vector2i):
+func _restack_units_in_hex(hex: Vector2i) -> void:
 	# collect alive units in this hex
-	var stack := []
-	for u in Globals.get_units():
+	var stack: Array[Unit] = []
+	for u: Unit in Globals.get_units():
 		if u.alive and u.current_hex == hex:
 			stack.append(u)
 
-	var count = stack.size()
+	var count: int = stack.size()
 	if count == 0:
 		return
 
-	var base_pos = LOSHelper.ground_layer.map_to_local(hex)
+	var base_pos: Vector2 = LOSHelper.ground_layer.map_to_local(hex)
 
 	if count == 1:
 		# single‐unit stays centered
@@ -229,47 +229,48 @@ func _restack_units_in_hex(hex: Vector2i):
 		stack[0].z_index   = 0
 	else:
 		# spacing in pixels between each sprite
-		var spacing = 16
+		var spacing: int = 16
 		# center_index so that the whole column is centered on base_pos.y
-		var center_index = (count - 1) / 2.0
-		for i in range(count):
-			var u = stack[i]
+		var center_index: float = (count - 1) / 2.0
+		for i: int in range(count):
+			var u: Unit = stack[i]
 			# compute Y offset: units above get negative y, below get positive y
-			var y_off = (i - center_index) * spacing
+			var y_off: float = (i - center_index) * spacing
 			u.position = base_pos + Vector2(0, y_off)
 			u.z_index  = i   # draw in order, top to bottom
 
 
-func _restack_units():
+func _restack_units() -> void:
 	# 1) Group units by their current_hex
-	var groups := {}
-	for u in Globals.get_units():
+	var groups: Dictionary[Vector2i, Array] = {}
+	for u: Unit in Globals.get_units():
 		if not u.alive:
 			continue
-		var h = u.current_hex
+		var h: Vector2i = u.current_hex
 		if not groups.has(h):
-			groups[h] = []
+			var occupants: Array[Unit] = []
+			groups[h] = occupants
 		groups[h].append(u)
 
 	# 2) For each hex, if there’s 1 unit keep it centered;
 	#    if >1, spread them in a little circle.
-	var _center_offset = Vector2.ZERO
-	for h in groups.keys():
-		var group = groups[h]
-		var base_pos = LOSHelper.ground_layer.map_to_local(h)
-		var cnt = group.size()
+	var _center_offset: Vector2 = Vector2.ZERO
+	for h: Vector2i in groups.keys():
+		var group: Array[Unit] = groups[h]
+		var base_pos: Vector2 = LOSHelper.ground_layer.map_to_local(h)
+		var cnt: int = group.size()
 
 		if cnt == 1:
 			group[0].position = base_pos
 			group[0].z_index   = 0
 		else:
 			# radius in pixels you want units spread around
-			var radius = 16  
-			for i in range(cnt):
+			var radius: int = 16
+			for i: int in range(cnt):
 				# evenly space them in a circle
-				var angle = TAU * i / cnt  # TAU = 2*PI
-				var offset = Vector2(cos(angle), sin(angle)) * radius
-				var u = group[i]
+				var angle: float = TAU * i / cnt  # TAU = 2*PI
+				var offset: Vector2 = Vector2(cos(angle), sin(angle)) * radius
+				var u: Unit = group[i]
 				u.position = base_pos + offset
 				# Optional: layer them so they don’t z-fight
 				u.z_index = i

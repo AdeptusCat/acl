@@ -10,14 +10,14 @@ extends Node2D
 var grid_size: Vector2i
 
 # --- CONSTANTS ---
-const FLOOR_HEIGHT_METERS = 3.0
-const UNIT_HEIGHT_METERS = 1.5
-const STEP_SIZE_PIXELS = 1.0
+const FLOOR_HEIGHT_METERS: float = 3.0
+const UNIT_HEIGHT_METERS: float = 1.5
+const STEP_SIZE_PIXELS: float = 1.0
 
 enum COMPASS_DIRECTION {NORTH, NORTHEAST, SOUTHEAST, SOUTH, SOUTHWEST, NORTHWEST}
 
-const WALL_COVER = 1
-const BUILDING_COVER = 2
+const WALL_COVER: int = 1
+const BUILDING_COVER: int = 2
 # --- INTERNAL ---
 var origin_hex: Vector2i = Vector2i(-1, -1)
 var los_lines: Array = []
@@ -37,13 +37,13 @@ enum BetweenAxis {
 	Y_Z_POS, Y_Z_NEG,
 	Z_X_POS, Z_X_NEG
 }
-func _ready():
+func _ready() -> void:
 	z_index = 100  # Higher than other nodes
 	
 
-func load_prebaked_los(map: Map):
+func load_prebaked_los(map: Map) -> void:
 	var file_path: String = "res://scenes/game/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
-	var los_resource = load(file_path) as LosLookupData
+	var los_resource: LosLookupData = load(file_path) as LosLookupData
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
@@ -52,7 +52,7 @@ func load_prebaked_los(map: Map):
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 
-func bake_and_save_los_data(map: Map):
+func bake_and_save_los_data(map: Map) -> void:
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
@@ -60,25 +60,25 @@ func bake_and_save_los_data(map: Map):
 	grid_size = map.grid_size
 	prebake_los()
 
-	var los_resource = LosLookupData.new()
+	var los_resource: LosLookupData = LosLookupData.new()
 	los_resource.los_lookup = los_lookup
 	var file_path: String = "res://scenes/game/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	
 	ResourceSaver.save(los_resource, file_path)
 	print("LOS data saved to: ", file_path)
 
-func prebake_los():
-	for ox in range(grid_size.x):
-		for oy in range(grid_size.y):
-			var o_hex = Vector2i(ox, oy)
-			var o_pos = ground_layer.map_to_local(o_hex)
+func prebake_los() -> void:
+	for ox: int in range(grid_size.x):
+		for oy: int in range(grid_size.y):
+			var o_hex: Vector2i = Vector2i(ox, oy)
+			var o_pos: Vector2 = ground_layer.map_to_local(o_hex)
 
 			# make this a Dictionary, not an Array
 			los_lookup[o_hex] = {}
 
-			for tx in range(grid_size.x):
-				for ty in range(grid_size.y):
-					var t_hex = Vector2i(tx, ty)
+			for tx: int in range(grid_size.x):
+				for ty: int in range(grid_size.y):
+					var t_hex: Vector2i = Vector2i(tx, ty)
 					if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
 						pass
 					if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
@@ -86,8 +86,8 @@ func prebake_los():
 					if o_hex == t_hex:
 						continue
 					
-					var t_pos = ground_layer.map_to_local(t_hex)
-					var los = check_los(o_pos, t_pos, 1, 0, 1, 0)
+					var t_pos: Vector2 = ground_layer.map_to_local(t_hex)
+					var los: Dictionary = check_los(o_pos, t_pos, 1, 0, 1, 0)
 					
 					if not los["blocked"]:
 						if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
@@ -139,7 +139,7 @@ func prebake_los():
 #
 	## 3) origin/target hex in map coords
 	#var origin_hex = ground_layer.local_to_map(origin_pos)
-	#var target_hex = ground_layer.local_to_map(target_pos)
+	#var target_hex: Vector2i = ground_layer.local_to_map(target_pos)
 #
 	## 4) cube coords & hex‐distance
 	#var co = ground_layer.map_to_cube(origin_hex)
@@ -188,11 +188,11 @@ func prebake_los():
 
 
 func refine_entry(a: Vector2, b: Vector2) -> Vector2:
-	var dir = (b - a).normalized()
-	var dist = a.distance_to(b)
-	var steps = int(dist / STEP_SIZE_PIXELS)
-	for j in range(steps + 1):
-		var p = a + dir * (j * STEP_SIZE_PIXELS)
+	var dir: Vector2 = (b - a).normalized()
+	var dist: float = a.distance_to(b)
+	var steps: int = int(dist / STEP_SIZE_PIXELS)
+	for j: int in range(steps + 1):
+		var p: Vector2 = a + dir * (j * STEP_SIZE_PIXELS)
 		if is_sample_point_in_building(p):
 			return p
 	# fallback
@@ -212,19 +212,19 @@ func cube_to_axial_frac(c: Vector3) -> Vector2:
 #   x = radius * 1.5 * q
 #   y = radius * sqrt(3) * (r + q*0.5)
 func axial_to_pixel_flat(p: Vector2, tile_size: Vector2) -> Vector2:
-	var radius = tile_size.x * 0.5
-	var x = radius * 1.5 * p.x
-	var y = radius * sqrt(3) * (p.y + p.x * 0.5)
+	var radius: float = tile_size.x * 0.5
+	var x: float = radius * 1.5 * p.x
+	var y: float = radius * sqrt(3) * (p.y + p.x * 0.5)
 	return Vector2(x, y)
 
 
 # 3) All together:
 func fractional_cube_to_local(c: Vector3, tile_size: Vector2) -> Vector2:
-	var axial = cube_to_axial_frac(c)
+	var axial: Vector2 = cube_to_axial_frac(c)
 	return axial_to_pixel_flat(axial, tile_size)
 
 func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, target_elevation: int, origin_story: int, target_story: int) -> Dictionary:
-	var result = {
+	var result: Dictionary = {
 		"blocked": false,
 		"hindrance_count": 0,
 		"crossed_wall": false,
@@ -253,12 +253,12 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var hex_cover: int = result.hex_cover
 	var target_cover_target_hex: int = result.target_cover
 	
-	var shooter_height = calculate_absolute_height(origin_elevation, origin_story)
-	var target_height = calculate_absolute_height(target_elevation, target_story)
+	var shooter_height: float = calculate_absolute_height(origin_elevation, origin_story)
+	var target_height: float = calculate_absolute_height(target_elevation, target_story)
 
-	var delta = target_pos - origin_pos
-	var _distance = delta.length()
-	var _direction = delta.normalized()
+	var delta: Vector2 = target_pos - origin_pos
+	var _distance: float = delta.length()
+	var _direction: Vector2 = delta.normalized()
 
 	var origin_hex_map : Vector2i = ground_layer.local_to_map(origin_pos)
 	var target_hex_map : Vector2i = ground_layer.local_to_map(target_pos)
@@ -269,11 +269,11 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var origin_hex_cube : Vector3i = ground_layer.local_to_cube(origin_pos)
 	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
 	
-	var n = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
+	var n: int = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
 	
 	var _is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
 	
-	var direction_between_axes = check_dir_between_axes(origin_hex_map, target_hex_map)
+	var direction_between_axes: BetweenAxis = check_dir_between_axes(origin_hex_map, target_hex_map)
 	match direction_between_axes:
 		BetweenAxis.X_Y_POS:
 			var s_cube_vector : Vector3i = Vector3i(0, 1, -1)
@@ -386,7 +386,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	
 	var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
 	result.hexes = hexes
-	var steps = hexes.size()
+	var steps: int = hexes.size()
 	
 	if steps < 2:
 		return result
@@ -394,10 +394,10 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var prev_hex_cube : Vector3i = origin_hex_cube
 	var prev_hex_map : Vector2i = origin_hex_map
 	
-	for i in range(steps):
-		var t := float(i) / float(steps - 1)
+	for i: int in range(steps):
+		var t: float = float(i) / float(steps - 1)
 		var sample_point: Vector2 = origin_pos.lerp(target_pos, t)
-		var _los_height_at_sample = lerp(shooter_height, target_height, t)
+		var _los_height_at_sample: float = lerp(shooter_height, target_height, t)
 		var sample_hex_map: Vector2i = ground_layer.cube_to_map(hexes[i])
 		var sample_hex_cube: Vector3i = hexes[i]
 		
@@ -451,7 +451,7 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 				return result
 		
 		
-		var wall_result
+		var wall_result: Dictionary
 		if not prev_hex_map == origin_hex_map:
 			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
 			if wall_result.size() > 0:
@@ -488,7 +488,7 @@ func _walk_between_axes_and_check_walls(
 		_result : Dictionary
 	) -> Dictionary:
 
-	var result := {
+	var result: Dictionary = {
 		"blocked": false,
 		"block_point": Vector2.ZERO,
 		"hindrance" : 0,
@@ -612,13 +612,13 @@ func _walk_between_axes_and_check_walls(
 		
 		# from start to South
 		if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
-			var wall_result = is_wall_blocking(start_hex_cube, s_hex_cube, start_hex_map, ground_layer.map_to_local(s_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(start_hex_cube, s_hex_cube, start_hex_map, ground_layer.map_to_local(s_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 
 		if wall_layer.get_cell_source_id(s_hex_map) != -1 and not start_hex_map == origin_hex_map: 
-			var wall_result = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, ground_layer.map_to_local(start_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(s_hex_cube, start_hex_cube, s_hex_map, ground_layer.map_to_local(start_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
@@ -626,39 +626,39 @@ func _walk_between_axes_and_check_walls(
 		
 		# from South to next middle hex
 		if wall_layer.get_cell_source_id(s_hex_map) != -1 and not next_middle_hex_map == target_hex_map:
-			var wall_result = is_wall_blocking(s_hex_cube, next_middle_hex_cube, s_hex_map, ground_layer.map_to_local(next_middle_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(s_hex_cube, next_middle_hex_cube, s_hex_map, ground_layer.map_to_local(next_middle_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 
 		if wall_layer.get_cell_source_id(next_middle_hex_map) != -1 and not next_middle_hex_map == target_hex_map: 
-			var wall_result = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, ground_layer.map_to_local(s_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(next_middle_hex_cube, s_hex_cube, next_middle_hex_map, ground_layer.map_to_local(s_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 		
 		# from start to South-East
 		if wall_layer.get_cell_source_id(start_hex_map) != -1 and not start_hex_map == origin_hex_map:
-			var wall_result = is_wall_blocking(start_hex_cube, se_hex_cube, start_hex_map, ground_layer.map_to_local(se_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(start_hex_cube, se_hex_cube, start_hex_map, ground_layer.map_to_local(se_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 		
 		if wall_layer.get_cell_source_id(se_hex_map) and not start_hex_map == origin_hex_map:
-			var wall_result = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, ground_layer.map_to_local(start_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(se_hex_cube, start_hex_cube, se_hex_map, ground_layer.map_to_local(start_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 		
 		# from South-East to next middle hex
 		if wall_layer.get_cell_source_id(se_hex_map) != -1 and not next_middle_hex_map == target_hex_map:
-			var wall_result = is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, ground_layer.map_to_local(next_middle_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(se_hex_cube, next_middle_hex_cube, se_hex_map, ground_layer.map_to_local(next_middle_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
 
 		if wall_layer.get_cell_source_id(next_middle_hex_map) and not next_middle_hex_map == target_hex_map:
-			var wall_result = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, ground_layer.map_to_local(se_hex_map))
+			var wall_result: Dictionary = is_wall_blocking(next_middle_hex_cube, se_hex_cube, next_middle_hex_map, ground_layer.map_to_local(se_hex_map))
 			if wall_result.size() > 0:
 				result.merge(wall_result, true)
 				return result
@@ -672,12 +672,12 @@ func _walk_between_axes_and_check_walls(
 
 func cube_line(origin_hex_cube: Vector3i, target_hex_cube: Vector3i, n: int) -> Array[Vector3i]:
 	var hexes: Array[Vector3i] = []
-	for i in range(n + 1):
+	for i: int in range(n + 1):
 		var t: float = float(i) / float(n)
 		# Linear interpolation in 3D
-		var fx = lerp(origin_hex_cube.x, target_hex_cube.x, t)
-		var fy = lerp(origin_hex_cube.y, target_hex_cube.y, t)
-		var fz = lerp(origin_hex_cube.z, target_hex_cube.z, t)
+		var fx: float = lerp(origin_hex_cube.x, target_hex_cube.x, t)
+		var fy: float = lerp(origin_hex_cube.y, target_hex_cube.y, t)
+		var fz: float = lerp(origin_hex_cube.z, target_hex_cube.z, t)
 		# Round to nearest valid cube coord
 		var h: Vector3i = HexagonTileMap.cube_round(Vector3(fx, fy, fz))
 		hexes.append(h)
@@ -707,13 +707,13 @@ func _check_blocking_terrain(sample_hex_map: Vector2i, result: Dictionary) -> Di
 # Sub‐sampling between two points at 1px increments to find exactly
 # where you enter the building tile.
 func _refine_entry(a: Vector2, b: Vector2) -> Vector2:
-	var dir = (b - a).normalized()
-	var dist = a.distance_to(b)
-	var steps = int(dist / STEP_SIZE_PIXELS)
+	var dir: Vector2 = (b - a).normalized()
+	var dist: float = a.distance_to(b)
+	var steps: int = int(dist / STEP_SIZE_PIXELS)
 	var start_hex_map : Vector2i = ground_layer.local_to_map(a)
 	var target_hex_map : Vector2i = ground_layer.local_to_map(b)
-	for j in range(steps + 1):
-		var p = a + dir * (j * STEP_SIZE_PIXELS)
+	for j: int in range(steps + 1):
+		var p: Vector2 = a + dir * (j * STEP_SIZE_PIXELS)
 		var curr_hex_map : Vector2i = ground_layer.local_to_map(p)
 		if curr_hex_map == start_hex_map or curr_hex_map == target_hex_map:
 			continue
@@ -727,27 +727,27 @@ func _refine_entry(a: Vector2, b: Vector2) -> Vector2:
 
 func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLayer) -> bool:
 	var hex_map : Vector2i = tilemap.local_to_map(world_pos_to_check)
-	var hex_pos = tilemap.map_to_local(hex_map)
+	var hex_pos: Vector2 = tilemap.map_to_local(hex_map)
 	var vector : Vector2 = world_pos_to_check - hex_pos
 	var pos_on_hex : Vector2 = Vector2(32,32) + vector
 	
 	# 1. Convert world coordinates to tile (cell) coordinates
 	#var cell_coords = tilemap.local_to_map(world_pos)
 	# 2. Get the tile ID at the cell
-	var tile_id = tilemap.get_cell_source_id(hex_map)
+	var tile_id: int = tilemap.get_cell_source_id(hex_map)
 	if tile_id == -1:
 		return false  # No tile here
 
 	# 3. Get the atlas texture or tile texture
-	var tileset = tilemap.tile_set
+	var tileset: TileSet = tilemap.tile_set
 	
-	var texture = tileset.get_source(tile_id).texture
+	var texture: Texture2D = tileset.get_source(tile_id).texture
 	if texture == null:
 		return false
 
 	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var _tex_size = texture.get_size()
-	var image = texture.get_image()
+	var _tex_size: Vector2 = texture.get_size()
+	var image: Image = texture.get_image()
 	if image == null:
 		return false
 
@@ -758,7 +758,7 @@ func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLa
 	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
 	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
 		return false
-	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
+	var color: Color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
 	#print(pos_on_hex.x)
 	#print(pos_on_hex.y)
 	#print(color)
@@ -770,13 +770,13 @@ func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLa
 		return true
 
 func _refine_entry_alt(a: Vector2, b: Vector2, hex_to_check: Vector2i) -> Vector2:
-	var dir = (b - a).normalized()
-	var dist = a.distance_to(b)
-	var steps = int(dist / STEP_SIZE_PIXELS)
+	var dir: Vector2 = (b - a).normalized()
+	var dist: float = a.distance_to(b)
+	var steps: int = int(dist / STEP_SIZE_PIXELS)
 	var start_hex_map : Vector2i = ground_layer.local_to_map(a)
 	var target_hex_map : Vector2i = ground_layer.local_to_map(b)
-	for j in range(steps + 1):
-		var p = a + dir * (j * STEP_SIZE_PIXELS)
+	for j: int in range(steps + 1):
+		var p: Vector2 = a + dir * (j * STEP_SIZE_PIXELS)
 		var curr_hex_map : Vector2i = ground_layer.local_to_map(p)
 		if curr_hex_map == start_hex_map or curr_hex_map == target_hex_map:
 			continue
@@ -791,27 +791,27 @@ func _refine_entry_alt(a: Vector2, b: Vector2, hex_to_check: Vector2i) -> Vector
 
 func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileMapLayer, hex_map_to_check: Vector2i) -> bool:
 	var hex_map : Vector2i = hex_map_to_check
-	var hex_pos = tilemap.map_to_local(hex_map)
+	var hex_pos: Vector2 = tilemap.map_to_local(hex_map)
 	var vector : Vector2 = world_pos_to_check - hex_pos
 	var pos_on_hex : Vector2 = Vector2(32,32) + vector
 	
 	# 1. Convert world coordinates to tile (cell) coordinates
 	#var cell_coords = tilemap.local_to_map(world_pos)
 	# 2. Get the tile ID at the cell
-	var tile_id = tilemap.get_cell_source_id(hex_map)
+	var tile_id: int = tilemap.get_cell_source_id(hex_map)
 	if tile_id == -1:
 		return false  # No tile here
 
 	# 3. Get the atlas texture or tile texture
-	var tileset = tilemap.tile_set
+	var tileset: TileSet = tilemap.tile_set
 	
-	var texture = tileset.get_source(tile_id).texture
+	var texture: Texture2D = tileset.get_source(tile_id).texture
 	if texture == null:
 		return false
 
 	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var _tex_size = texture.get_size()
-	var image = texture.get_image()
+	var _tex_size: Vector2 = texture.get_size()
+	var image: Image = texture.get_image()
 	if image == null:
 		return false
 
@@ -822,7 +822,7 @@ func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileM
 	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
 	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
 		return false
-	var color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
+	var color: Color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
 	#print(pos_on_hex.x)
 	#print(pos_on_hex.y)
 	#print(color)
@@ -880,13 +880,13 @@ func is_wall_cover(
 		from_map:  Vector2i,
 		_sample_pt: Vector2
 	) -> Dictionary:
-	var result := {}
+	var result: Dictionary = {}
 	# early out if there's no tile here or it's the origin tile
 	if wall_layer.get_cell_source_id(from_map) == -1:
 		return result
 
-	var dir = cube_direction_name(from_cube, to_cube)
-	var label = compass_direction_to_label(dir)
+	var dir: int = cube_direction_name(from_cube, to_cube)
+	var label: String = compass_direction_to_label(dir)
 	if label == "":
 		return result   # some weird direction?
 
@@ -903,13 +903,13 @@ func is_wall_blocking(
 		from_map:  Vector2i,
 		sample_pt: Vector2
 	) -> Dictionary:
-	var result := {}
+	var result: Dictionary = {}
 	# early out if there's no tile here or it's the origin tile
 	if wall_layer.get_cell_source_id(from_map) == -1:
 		return result
 
-	var dir = cube_direction_name(from_cube, to_cube)
-	var label = compass_direction_to_label(dir)
+	var dir: int = cube_direction_name(from_cube, to_cube)
+	var label: String = compass_direction_to_label(dir)
 	if label == "":
 		return result   # some weird direction?
 
@@ -934,7 +934,7 @@ func calculate_absolute_height(hex_elevation: int, story_level: int) -> float:
 	#return false
 
 
-func is_hex_hindrance(hex_map: Vector2i):
+func is_hex_hindrance(hex_map: Vector2i) -> bool:
 	if terrain_layer.get_cell_source_id(hex_map) == -1:
 		return false
 	else:
@@ -945,7 +945,7 @@ func is_hex_hindrance(hex_map: Vector2i):
 
 
 func get_target_concealment(sample_point: Vector2) -> int:
-	var hex_map = building_layer.local_to_map(sample_point)
+	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
 		if tile_data and tile_data.has_custom_data("cover"):
@@ -959,7 +959,7 @@ func get_target_concealment(sample_point: Vector2) -> int:
 
 
 func is_sample_point_in_building(sample_point: Vector2) -> int:
-	var hex_map = building_layer.local_to_map(sample_point)
+	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) == -1:
 		return 0
 	else:
@@ -971,7 +971,7 @@ func is_sample_point_in_building(sample_point: Vector2) -> int:
 
 func get_tile_name(sample_point: Vector2) -> String:
 	var tile_name: String = ""
-	var hex_map = building_layer.local_to_map(sample_point)
+	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if not building_layer.get_cell_source_id(hex_map) == -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
 		if tile_data and tile_data.has_custom_data("name"):
@@ -983,35 +983,35 @@ func get_tile_name(sample_point: Vector2) -> String:
 	return tile_name
 
 func is_sample_point_crossing_wall(sample_point: Vector2) -> bool:
-	var space_state = get_world_2d().direct_space_state
-	var params = PhysicsPointQueryParameters2D.new()
+	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var params: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
 	params.position = sample_point
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	params.collision_mask = 2  # Assuming walls are on layer 2
-	var result = space_state.intersect_point(params, 1)
+	var result: Array[Dictionary] = space_state.intersect_point(params, 1)
 
-	for item in result:
+	for item: Dictionary in result:
 		if item.collider == wall_layer:
 			return true
 	return false
 
 func is_sample_point_blocked_by_crest(sample_point: Vector2, los_height_at_sample: float) -> bool:
-	var space_state = get_world_2d().direct_space_state
-	var params = PhysicsPointQueryParameters2D.new()
+	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var params: PhysicsPointQueryParameters2D = PhysicsPointQueryParameters2D.new()
 	params.position = sample_point
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	params.collision_mask = 4  # Assuming layer 4 is crest lines
-	var result = space_state.intersect_point(params, 1)
+	var result: Array[Dictionary] = space_state.intersect_point(params, 1)
 
 	if result.size() == 0:
 		return false
 
-	for item in result:
+	for item: Dictionary in result:
 		# Optionally check collider properties, etc.
 		# Assume crest elevation from custom data or fixed crest height
-		var crest_elevation = 6.0  # Or read from tile data
+		var crest_elevation: float = 6.0  # Or read from tile data
 
 		if los_height_at_sample < crest_elevation:
 			return true
@@ -1022,8 +1022,8 @@ func is_sample_point_blocked_by_crest(sample_point: Vector2, los_height_at_sampl
 	#prebake_los()
 
 func get_neighboring_hexes(hex: Vector2i) -> Array:
-	var neighbors = []
-	var even = hex.y % 2 == 0
+	var neighbors: Array = []
+	var even: bool = hex.y % 2 == 0
 
 	neighbors.append(hex + Vector2i(1, 0))   # East
 	neighbors.append(hex + Vector2i(-1, 0))  # West
@@ -1054,24 +1054,24 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 			#queue_redraw()
 
 
-func _draw():
+func _draw() -> void:
 	if not debug_draw_enabled:
 		return
 	
 	if origin_hex == Vector2i(-1, -1):
 		return
 	
-	var origin_pos = ground_layer.map_to_local(origin_hex)
+	var origin_pos: Vector2 = ground_layer.map_to_local(origin_hex)
 	
-	for line_data in los_lines:
+	for line_data: Dictionary in los_lines:
 		if line_data["blocked"]:
-			var block_point = line_data["block_point"]
+			var block_point: Variant = line_data["block_point"]
 			if block_point == null:
 				block_point = origin_pos  # Failsafe
 			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
 	
-	for line_data in los_lines:
-		var block_point = line_data["block_point"]
+	for line_data: Dictionary in los_lines:
+		var block_point: Variant = line_data["block_point"]
 		if block_point == null:
 			block_point = origin_pos  # Failsafe
 		if not line_data["blocked"]:
@@ -1085,22 +1085,22 @@ func _draw():
 			#orig = pos
 			
 
-func generate_los_lines_for_debug():
+func generate_los_lines_for_debug() -> void:
 	if not debug_draw_enabled:
 		return
 
 	los_lines.clear()
-	var origin_pos = ground_layer.map_to_local(origin_hex)
+	var origin_pos: Vector2 = ground_layer.map_to_local(origin_hex)
 
-	for tx in range(grid_size.x):
-		for ty in range(grid_size.y):
-			var target_hex = Vector2i(tx, ty)
+	for tx: int in range(grid_size.x):
+		for ty: int in range(grid_size.y):
+			var target_hex: Vector2i = Vector2i(tx, ty)
 			if origin_hex == target_hex:
 				continue
 
-			var target_pos = ground_layer.map_to_local(target_hex)
+			var target_pos: Vector2 = ground_layer.map_to_local(target_hex)
 
-			var los_result = check_los(origin_pos, target_pos, 1, 1, 1, 1)
+			var los_result: Dictionary = check_los(origin_pos, target_pos, 1, 1, 1, 1)
 			
 			if los_result["blocked"] == true:
 				pass
@@ -1116,11 +1116,12 @@ func generate_los_lines_for_debug():
 	queue_redraw()
 
 
-var _target_hex 
-var _origin_hex
-func draw_los(origin_pos, target_pos):
+# Nullable tile coordinates: Vector2i when present, null when cleared.
+var _target_hex: Variant
+var _origin_hex: Variant
+func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 	los_lines.clear()
-	var target_hex = ground_layer.local_to_map(target_pos)
+	var target_hex: Vector2i = ground_layer.local_to_map(target_pos)
 	origin_hex = ground_layer.local_to_map(origin_pos)
 	if origin_hex == target_hex:
 		return
@@ -1131,7 +1132,7 @@ func draw_los(origin_pos, target_pos):
 	
 	origin_pos = ground_layer.map_to_local(origin_hex)
 	target_pos = ground_layer.map_to_local(target_hex)
-	var los_result = check_los(origin_pos, target_pos, 1, 1, 1, 1)
+	var los_result: Dictionary = check_los(origin_pos, target_pos, 1, 1, 1, 1)
 	
 	if los_result["blocked"] == true:
 		pass
@@ -1144,13 +1145,13 @@ func draw_los(origin_pos, target_pos):
 	queue_redraw()
 
 
-func clear_los():
+func clear_los() -> void:
 	los_lines.clear()
 	queue_redraw()
 
 
 func cube_direction_name(cur: Vector3i, nxt: Vector3i) -> int:
-	var d = nxt - cur
+	var d: Vector3i = nxt - cur
 	if d == Vector3i( 0,  1, -1): return COMPASS_DIRECTION.SOUTH
 	if d == Vector3i( 1,  0, -1): return COMPASS_DIRECTION.SOUTHEAST
 	if d == Vector3i( 1, -1,  0): return COMPASS_DIRECTION.NORTHEAST
@@ -1168,9 +1169,9 @@ func check_between_axes(a: Vector2i, b: Vector2i) -> bool:
 	var cb: Vector3i = ground_layer.map_to_cube(b)
 
 	# 2) Compute the delta vector
-	var dx = cb.x - ca.x
-	var dy = cb.y - ca.y
-	var dz = cb.z - ca.z
+	var dx: int = cb.x - ca.x
+	var dy: int = cb.y - ca.y
+	var dz: int = cb.z - ca.z
 
 	# 3) Check for “between-axes”: two equal components, third == –2× them
 	#    This covers all multiples of (1,1,–2), (–2,1,1), etc.
@@ -1201,18 +1202,24 @@ func check_dir_between_axes(a: Vector2i, b: Vector2i) -> BetweenAxis:
 	var ndz: int = int(dz / gcd_val)
 
 	if ndx == ndy and ndz == -2 * ndx:
-		return BetweenAxis.X_Y_POS if ndx > 0 else BetweenAxis.X_Y_NEG
+		if ndx > 0:
+			return BetweenAxis.X_Y_POS
+		return BetweenAxis.X_Y_NEG
 	elif ndy == ndz and ndx == -2 * ndy:
-		return BetweenAxis.Y_Z_POS if ndy > 0 else BetweenAxis.Y_Z_NEG
+		if ndy > 0:
+			return BetweenAxis.Y_Z_POS
+		return BetweenAxis.Y_Z_NEG
 	elif ndz == ndx and ndy == -2 * ndz:
-		return BetweenAxis.Z_X_POS if ndz > 0 else BetweenAxis.Z_X_NEG
+		if ndz > 0:
+			return BetweenAxis.Z_X_POS
+		return BetweenAxis.Z_X_NEG
 	else:
 		return BetweenAxis.NONE
 
 # Helper: greatest common divisor
 func gcd(a: int, b: int) -> int:
 	while b != 0:
-		var temp = b
+		var temp: int = b
 		b = a % b
 		a = temp
 	return a
@@ -1220,7 +1227,7 @@ func gcd(a: int, b: int) -> int:
 
 func find_units_at(hex: Vector2i) -> Array[Unit]:
 	var units: Array[Unit]
-	for u in Globals.get_units():
+	for u: Unit in Globals.get_units():
 		if not u.alive:
 			continue
 		if u.current_hex == hex:
@@ -1240,7 +1247,7 @@ func get_hex_neighbors(a: Vector2i) -> Array[Vector2i]:
 	var cube: Vector3i = ground_layer.map_to_cube(a)
 	var cube_neighbors: Array[Vector3i] = ground_layer.cube_neighbors(cube)
 	var hex_neighbors: Array[Vector2i]
-	for cube_neighbor in cube_neighbors:
+	for cube_neighbor: Vector3i in cube_neighbors:
 		var hex: Vector2i = ground_layer.cube_to_map(cube_neighbor)
 		hex_neighbors.append(hex)
 	return hex_neighbors
@@ -1250,6 +1257,6 @@ func get_hex_ring(hex_center: Vector2i, radius: int, first_side: TileSet.CellNei
 	var cube_center: Vector3i = ground_layer.map_to_cube(hex_center)
 	var cube_ring: Array[Vector3i] = ground_layer.cube_ring(cube_center, radius, first_side)
 	var hex_ring: Array[Vector2i]
-	for cube in cube_ring:
+	for cube: Vector3i in cube_ring:
 		hex_ring.append(LOSHelper.ground_layer.cube_to_map(cube))
 	return hex_ring

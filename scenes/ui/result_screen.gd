@@ -2,7 +2,7 @@ extends CanvasLayer
 
 @export var victory_condition_result_scene: PackedScene
 
-@onready var result_label := $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResultLabel
+@onready var result_label: Label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResultLabel
 @onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer2/MajorVictoryConditionsVBoxContainer
 @onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer3/MinorObjectivesLabel
 @onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VictoryConditionsVBoxContainer2/VBoxContainer3/MinorVictoryConditionsVBoxContainer
@@ -10,7 +10,7 @@ extends CanvasLayer
 
 signal try_again
 
-func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel = VictoryCondition.OutcomeLevel.MAJOR, timeout: bool = false):
+func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel = VictoryCondition.OutcomeLevel.MAJOR, timeout: bool = false) -> void:
 	var outcome_level_text: String = ""
 	match outcome_level:
 		VictoryCondition.OutcomeLevel.MAJOR:
@@ -29,7 +29,7 @@ func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLe
 	
 	show()
 	
-	for victory_condition in Globals.scenario_chosen.victory_conditions:
+	for victory_condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
 		if not victory_condition.team == Globals.team_player:
 			continue
 		var victory_condition_result: VictoryConditionResult = victory_condition_result_scene.instantiate()

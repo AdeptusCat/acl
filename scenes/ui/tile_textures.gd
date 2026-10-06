@@ -2,20 +2,20 @@ extends Control
 
 
 
-@onready var ground_sprite = $GroundSprite
-@onready var wall_sprite = $WallSprite
-@onready var building_sprite = $BuildingSprite
-@onready var terrain_sprite = $TerrainSprite
+@onready var ground_sprite: Sprite2D = $GroundSprite
+@onready var wall_sprite: Sprite2D = $WallSprite
+@onready var building_sprite: Sprite2D = $BuildingSprite
+@onready var terrain_sprite: Sprite2D = $TerrainSprite
 
-@onready var wall_n_sprite = $WallNSprite
-@onready var wall_ne_sprite = $WallNESprite
-@onready var wall_se_sprite = $WallSESprite
-@onready var wall_s_sprite = $WallSSprite
-@onready var wall_sw_sprite = $WallSWSprite
-@onready var wall_nw_sprite = $WallNWSprite
+@onready var wall_n_sprite: Sprite2D = $WallNSprite
+@onready var wall_ne_sprite: Sprite2D = $WallNESprite
+@onready var wall_se_sprite: Sprite2D = $WallSESprite
+@onready var wall_s_sprite: Sprite2D = $WallSSprite
+@onready var wall_sw_sprite: Sprite2D = $WallSWSprite
+@onready var wall_nw_sprite: Sprite2D = $WallNWSprite
 
 
-func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : Vector2i, detail_tile_offset : Vector2):
+func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : Vector2i, detail_tile_offset : Vector2) -> void:
 	
 	if not result.ground_texture == null:
 		ground_sprite.texture = result.ground_texture
@@ -88,5 +88,5 @@ func show_textures(result: Dictionary, detail_zoom_factor: Vector2, tile_size : 
 	else:
 		terrain_sprite.texture = null
 		
-	for child in get_children():
+	for child: Sprite2D in get_children():
 		child.position += (Vector2(tile_size) * detail_zoom_factor) / 2 + (detail_tile_offset / 2)

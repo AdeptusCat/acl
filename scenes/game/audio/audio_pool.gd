@@ -16,7 +16,7 @@ func _ready() -> void:
 		i += 1
 
 func _get_free_player() -> AudioStreamPlayer2D:
-	for ap in pool:
+	for ap: AudioStreamPlayer2D in pool:
 		if not ap.playing:
 			return ap
 	# fallback: reuse first player (still safe)

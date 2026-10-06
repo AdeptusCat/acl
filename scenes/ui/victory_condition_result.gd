@@ -4,6 +4,6 @@ class_name VictoryConditionResult
 @onready var check_box: CheckBox = $CheckBox
 @onready var label: Label = $Label
 
-func set_victory_condition(is_met: bool, description: String):
+func set_victory_condition(is_met: bool, description: String) -> void:
 	check_box.button_pressed = is_met
 	label.text = description

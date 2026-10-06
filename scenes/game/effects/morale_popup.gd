@@ -1,9 +1,9 @@
 extends Node2D
 
-@onready var anim = $AnimationPlayer
-@onready var label = $PopupLabel
+@onready var anim: AnimationPlayer = $AnimationPlayer
+@onready var label: Label = $PopupLabel
 
-func start_success():
+func start_success() -> void:
 	$PopupLabel.show()
 	$TextureRect.hide()
 	label.text = "+OK"
@@ -11,7 +11,7 @@ func start_success():
 	await anim.animation_finished
 	queue_free()
 
-func start_broken():
+func start_broken() -> void:
 	$PopupLabel.show()
 	$TextureRect.hide()
 	label.text = "BROKEN"
@@ -19,7 +19,7 @@ func start_broken():
 	await anim.animation_finished
 	queue_free()
 
-func start_pinned():
+func start_pinned() -> void:
 	$PopupLabel.show()
 	$TextureRect.hide()
 	label.text = "PINNED"
@@ -27,7 +27,7 @@ func start_pinned():
 	await anim.animation_finished
 	queue_free()
 
-func start_casualty():
+func start_casualty() -> void:
 	$PopupLabel.hide()
 	$TextureRect.show()
 	anim.play("popup")

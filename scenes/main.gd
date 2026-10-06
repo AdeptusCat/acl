@@ -1,7 +1,7 @@
 extends Node2D
 
 @export var world_scene: PackedScene
-var world
+var world: Node2D
 
 
 func _ready() -> void:
@@ -11,12 +11,12 @@ func _ready() -> void:
 	add_child(world)
 	world.start_screen.show()
 
-func _on_try_again():
+func _on_try_again() -> void:
 	Globals.game_started = false
 	world.queue_free()
 
 
-func _on_fully_freed():
+func _on_fully_freed() -> void:
 	await get_tree().process_frame
 	world = world_scene.instantiate()
 	world.try_again.connect(_on_try_again)

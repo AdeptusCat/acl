@@ -1,8 +1,8 @@
 extends Node2D
 
 
-func setup():
-	for unit in Globals.get_units():
+func setup() -> void:
+	for unit: Unit in Globals.get_units():
 		
 		var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
 		add_child(aim_line)
@@ -11,9 +11,13 @@ func setup():
 
 func _process(_delta: float) -> void:
 	if not SessionSettings.showCmdConnectivity:
-		for line in get_children():
+		for line: MovingDottedDrawLine in get_children():
 			line.hide()
-	for line in get_children():
+		return
+	for line: MovingDottedDrawLine in get_children():
+		if not is_instance_valid(line.unit):
+			line.hide()
+			continue
 		if is_instance_valid(line.unit.command_squad):
 			line.set_line(
 				line.unit.position,

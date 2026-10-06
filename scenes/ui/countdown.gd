@@ -1,8 +1,8 @@
 extends PanelContainer
 
 
-@onready var timer_label = $HBoxContainer/TimerLabel
-@onready var timer = $Timer
+@onready var timer_label: Label = $HBoxContainer/TimerLabel
+@onready var timer: Timer = $Timer
 
 var opacity_tween: Tween = null
 var scale_tween: Tween = null
@@ -11,7 +11,7 @@ var started: bool = false
 var alert_threshold_s: int = 30
 
 
-func set_countdown(_started: bool):
+func set_countdown(_started: bool) -> void:
 	started = _started
 	if started:
 		timer.stop()
@@ -20,7 +20,7 @@ func set_countdown(_started: bool):
 		timer_label.modulate.a = 1.0
 
 
-func update_timer_label(time_left_seconds: float):
+func update_timer_label(time_left_seconds: float) -> void:
 	var minutes: int = int(time_left_seconds / 60.0)
 	var seconds: int = int(time_left_seconds) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
@@ -46,7 +46,7 @@ func _on_timer_timeout() -> void:
 	#await tween_opacity(0.0).finished
 
 
-func tween_scale():
+func tween_scale() -> Tween:
 	if scale_tween: 
 		scale_tween.kill()
 	scale_tween = get_tree().create_tween()
@@ -56,7 +56,7 @@ func tween_scale():
 
 
 
-func tween_opacity(to: float):
+func tween_opacity(to: float) -> Tween:
 	if opacity_tween: 
 		opacity_tween.kill()
 	opacity_tween = get_tree().create_tween()

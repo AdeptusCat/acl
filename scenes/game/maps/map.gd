@@ -14,19 +14,19 @@ func get_tilemap_layers() -> Array[Node]:
 	return tile_map_layers.get_children()
 
 
-func get_ground_layer():
+func get_ground_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./GroundTileMapLayer")
 
 
-func get_terrain_layer():
+func get_terrain_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./TerrainTileMapLayer")
 
 
-func get_wall_layer():
+func get_wall_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./WallTileMapLayer")
 
 
-func get_building_layer():
+func get_building_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./BuildingTileMapLayer")
 
 
@@ -50,5 +50,5 @@ func get_scenarios() -> Array[Scenario]:
 	return _scenarios
 
 
-func remove_scenarios():
+func remove_scenarios() -> void:
 	scenarios.queue_free()

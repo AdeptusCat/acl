@@ -35,7 +35,7 @@ extends Control
 @export var idle_mortar_us: Texture2D
 @export var shooting_mortar_us: Texture2D
 
-func set_status_image(team, _squad_type: Globals.SquadType):
+func set_status_image(team: Globals.Team, _squad_type: Globals.SquadType) -> void:
 	if team == 0:
 		$Idle.texture = idle_ger
 		$Moving.texture = moving_ger

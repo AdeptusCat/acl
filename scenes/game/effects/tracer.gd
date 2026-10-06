@@ -1,7 +1,7 @@
 # Tracer.gd
 extends Node2D
 
-@export var speed := 600.0          # pixels/sec
+@export var speed: float = 600.0          # pixels/sec
 @export var tracer_texture: Texture2D
 @onready var particles: CPUParticles2D = $CPUParticles2D
 @onready var explosion_particles: CPUParticles2D = $CPUParticles2D2
@@ -31,8 +31,8 @@ func _ready() -> void:
 	particles.emitting               = false
 
 
-func shoot_rocket_launcher(from: Vector2, to: Vector2, weapon: WeaponSpec):
-	var ang = (to - from).angle()
+func shoot_rocket_launcher(from: Vector2, to: Vector2, weapon: WeaponSpec) -> void:
+	var ang: float = (to - from).angle()
 	
 	#rocket_exhaust_particles.global_position = from
 	var deg: float = rad_to_deg(ang)
@@ -46,8 +46,8 @@ func shoot_rocket_launcher(from: Vector2, to: Vector2, weapon: WeaponSpec):
 	global_rotation  = (to - from).angle()
 	particles.angle_min = -rad_to_deg(ang)
 	particles.angle_max = -rad_to_deg(ang)
-	var dist = from.distance_to(to)
-	var life = dist / speed      # seconds
+	var dist: float = from.distance_to(to)
+	var life: float = dist / speed      # seconds
 	if life <= 0:
 		return
 	particles.lifetime = life
@@ -78,11 +78,11 @@ func shoot(from: Vector2, to: Vector2, weapon_spec: WeaponSpec, rilflegrenade: b
 	# position & aim the entire Node2D so its local +X points at target:
 	global_position  = from
 	global_rotation  = (to - from).angle()
-	var ang = (to - from).angle()
+	var ang: float = (to - from).angle()
 	particles.angle_min = -rad_to_deg(ang)
 	particles.angle_max = -rad_to_deg(ang)
-	var dist = from.distance_to(to)
-	var life = dist / speed      # seconds
+	var dist: float = from.distance_to(to)
+	var life: float = dist / speed      # seconds
 	if life <= 0:
 		return
 	particles.lifetime = life
