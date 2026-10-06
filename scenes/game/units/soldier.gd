@@ -23,6 +23,7 @@ var rank_grade: RankGrades.Grade
 var role: RankGrades.Role
 var weapon: WeaponSpec
 var is_alive: bool = true
+var casualty_record_id: String = ""
 
 # ammo & readiness
 var rounds_in_mag: int

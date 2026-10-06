@@ -11,10 +11,26 @@ class_name LeaderAura
 var _owner_unit: Unit
 var _since_scan: float = 0.0
 var _affected: Dictionary = {}  # Node2D -> bool
+var _active: bool = true
 
-func _ready() -> void:
-	_owner_unit = get_parent() as Node2D
-	add_to_group("leader_aura")
+func _enter_tree() -> void:
+	_owner_unit = get_parent() as Unit
+	_active = is_instance_valid(_owner_unit) and _owner_unit.alive
+	set_process(_active)
+	if _active:
+		add_to_group("leader_aura")
+
+func _exit_tree() -> void:
+	shutdown()
+
+func shutdown() -> void:
+	_active = false
+	set_process(false)
+	remove_from_group("leader_aura")
+	for affected_unit: Variant in _affected.keys():
+		if is_instance_valid(affected_unit):
+			_remove_from(affected_unit as Node2D)
+	_affected.clear()
 
 func _process(delta: float) -> void:
 	_since_scan += delta
@@ -24,6 +40,11 @@ func _process(delta: float) -> void:
 	_update_aura()
 
 func _update_aura() -> void:
+	if not _active:
+		return
+	if not is_instance_valid(_owner_unit) or not _owner_unit.alive:
+		shutdown()
+		return
 	if LOSHelper.ground_layer == null:
 		return
 	var leader_cube: Vector3i = _owner_unit.current_cube
@@ -61,6 +82,8 @@ func _update_aura() -> void:
 	#cohesion_mult = _cohesion_mult
 
 func _apply_to(unit: Node2D) -> void:
+	if not _active or not is_instance_valid(_owner_unit) or not _owner_unit.alive:
+		return
 	if _affected.has(unit):
 		return
 	if not unit.has_node("UnitStressController"):

@@ -69,6 +69,7 @@ const PHYSICS_DT: float = 1.0 / 60.0
 @export var members_alive: int = 10
 var original_size: int = 10
 var casualties_taken: int = 0
+var casualty_records: Array[CasualtyRecord] = []
 var embedded_leader_alive: bool = true
 
 
@@ -243,7 +244,9 @@ func setAttackState(_attackState: AttackState):
 		AttackState.MANUAL_GROUND:
 			attack_ground_rounds_budget = 50
 
-func order(cmd: Globals.UnitCmd, parameter):
+func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
+	if not alive:
+		return
 	#if in_close_combat:
 		#return
 	match cmd:
@@ -482,6 +485,7 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 		i += 1
 	squad_fire.set_soldiers(list)
 	squad_fire.casualties.clear()
+	casualty_records.clear()
 	members_alive = list.size()
 	original_size = members_alive
 	casualties_taken = 0
@@ -1319,12 +1323,14 @@ func receive_fire(terrain_defense_bonus: float):
 		#movement.recalc_path()
 
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) -> void:
-	if Debug.no_damage:
+	if not alive or Debug.no_damage:
 		return
 	if casualties > 0:
 		_apply_casualties(casualties)
 		ui.show_casualty()
 		soldiers_changed.emit()
+	if not alive:
+		return
 	stress_system.apply_stress(df, ds)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()
@@ -1378,6 +1384,7 @@ func apply_specific_casualty(casualty: Soldier) -> bool:
 					dropped_support.append(casualty.weapon)
 			
 			weapon_audio.stop_mg_loop(casualty.weapon, position, soldier.id, self)
+			_record_casualty(casualty)
 			squad_fire.casualties.append(casualty)
 			casualties_taken = squad_fire.casualties.size()
 			combat_stats.notify_casualty_taken(1)
@@ -1482,6 +1489,7 @@ func _apply_casualties(n: int) -> void:
 	
 	for soldier in casualties:
 		weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
+		_record_casualty(soldier)
 		# FIXME this should fix the out of bounds
 		squad_fire.casualties.append(soldier)
 	
@@ -1721,15 +1729,55 @@ func surrender():
 	ui.surrender()
 
 
-func die():
+func die() -> void:
+	if not alive:
+		return
 	alive = false
+	# Direct elimination must retain the remaining men and equipment as casualties.
+	for soldier: Soldier in squad_fire.soldiers:
+		_record_casualty(soldier)
+		if not squad_fire.casualties.has(soldier):
+			squad_fire.casualties.append(soldier)
+	squad_fire.soldiers.clear()
+	members_alive = 0
+	casualties_taken = squad_fire.casualties.size()
+	ui.set_members_alive(0)
+	is_moving = false
+	movement.is_moving = false
+	action_controller.clear_orders()
+	leader_aura.shutdown()
+	weapon_audio.shutdown()
+	for candidate: Unit in get_tree().get_nodes_in_group("units"):
+		if candidate != self and candidate.command_squad == self:
+			candidate._on_command_connectivity_timeout()
+	set_process(false)
+	# Keep controllers owned by the corpse so in-flight projectiles retain valid
+	# references. They are freed with the unit when the battlefield is cleared.
+	for child: Node in get_children():
+		if child != ui:
+			_shutdown_controller(child)
 	remove_from_group("units")
 	add_to_group("dead_units")
 	unit_died.emit(self)
 	await ui.die()
-	for node in get_children():
-		if not node == ui:
-			remove_child(node)
+
+
+func _shutdown_controller(node: Node) -> void:
+	node.process_mode = Node.PROCESS_MODE_DISABLED
+	if node is Timer:
+		var timer: Timer = node as Timer
+		timer.stop()
+	for child: Node in node.get_children():
+		_shutdown_controller(child)
+
+
+func _record_casualty(soldier: Soldier) -> void:
+	soldier.is_alive = false
+	if Engine.is_editor_hint() or not is_inside_tree():
+		return
+	var record: CasualtyRecord = Globals.record_casualty(self, soldier)
+	if record != null and not casualty_records.has(record):
+		casualty_records.append(record)
 
 
 func _on_retreat_complete(retreat_hex) -> void:
@@ -1845,7 +1893,9 @@ func _on_command_connectivity_timeout() -> void:
 		command_connectivity.compute_connectivity(self, command_squad)
 		draw_command_link_strength.emit(team, self.current_hex, command_squad.current_hex, command_connectivity.command_link_strength)
 		draw_leader_presence_strength.emit(team, self.current_hex, command_squad.current_hex, command_connectivity.leader_presence_strength)
-		stress_system.leader_presence_strength = command_connectivity.leader_presence_strength
+	else:
+		command_connectivity.clear_connectivity()
+	stress_system.leader_presence_strength = command_connectivity.leader_presence_strength
 
 
 func _on_enemy_visibility_checker_timer_timeout() -> void:
@@ -1899,6 +1949,7 @@ func create_save_data() -> UnitSaveData:
 
 	data.unit_scene_path = scene_file_path
 	data.team = team
+	data.casualty_records.assign(casualty_records)
 
 	data.soldiers.clear()
 	
@@ -1929,6 +1980,8 @@ func apply_save_data(data: UnitSaveData) -> void:
 		#var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
 	
 	_setup_runtime_soldiers(data.squad_loadout)
+	casualty_records.assign(data.casualty_records)
+	Globals.import_casualty_records(casualty_records)
 	
 		#if soldier != null:
 			#squad_fire.soldiers.append(soldier)

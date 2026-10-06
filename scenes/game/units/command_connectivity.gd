@@ -120,7 +120,18 @@ func compute_morale_link_strength() -> void:
 	leader_presence_strength = command_strength
 
 
-func compute_connectivity(unit: Unit, command_squad: Unit):
+func clear_connectivity() -> void:
+	los_to_leader = false
+	voice_range_to_leader = false
+	runner_chain_to_leader = false
+	radio_link_to_leader = false
+	command_unit_state = STATES.MoraleState.COMBAT_INEFFECTIVE
+
+
+func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
+	if not is_instance_valid(command_squad) or not command_squad.alive:
+		clear_connectivity()
+		return
 	if is_instance_valid(command_squad):
 		command_unit_state = command_squad.stress_system.state
 		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, command_squad.current_cube)

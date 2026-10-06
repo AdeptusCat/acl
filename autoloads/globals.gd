@@ -18,6 +18,10 @@ var victory_conditions: Dictionary[Team, VictoryConditionCollection]
 var map_chosen: Map
 var scenario_chosen: Scenario
 var units_destroyed: UnitsCollection = UnitsCollection.new()
+var casualty_history: CasualtyHistory = CasualtyHistory.new()
+var battle_casualties: Array[CasualtyRecord] = []
+var battle_id: String = ""
+var _casualty_save_queued: bool = false
 
 enum Team {
 	AXIS,
@@ -121,7 +125,60 @@ func get_units_for_team(team: Team) -> Array[Unit]:
 	return result
 
 
+func _ready() -> void:
+	if not Engine.is_editor_hint():
+		casualty_history = CasualtyHistory.load_history()
+
+
+func _exit_tree() -> void:
+	if _casualty_save_queued:
+		_save_casualty_history()
+
+
+func begin_battle() -> void:
+	battle_id = Crypto.new().generate_random_bytes(16).hex_encode()
+	battle_casualties.clear()
+
+
+func record_casualty(unit: Unit, soldier: Soldier) -> CasualtyRecord:
+	if not soldier.casualty_record_id.is_empty():
+		return casualty_history.find_record(soldier.casualty_record_id)
+	if battle_id.is_empty():
+		begin_battle()
+	var record: CasualtyRecord = CasualtyRecord.capture(unit, soldier, battle_id)
+	soldier.casualty_record_id = record.record_id
+	casualty_history.add_record(record)
+	battle_casualties.append(record)
+	_queue_casualty_save()
+	return record
+
+
+func import_casualty_records(records: Array[CasualtyRecord]) -> void:
+	var changed: bool = false
+	for record: CasualtyRecord in records:
+		if casualty_history.add_record(record):
+			changed = true
+	if changed:
+		_queue_casualty_save()
+
+
+func _queue_casualty_save() -> void:
+	if _casualty_save_queued:
+		return
+	_casualty_save_queued = true
+	_save_casualty_history.call_deferred()
+
+
+func _save_casualty_history() -> void:
+	_casualty_save_queued = false
+	var save_error: Error = casualty_history.save_history()
+	if save_error != OK:
+		push_error("Could not save casualty history: %s" % save_error)
+
+
 func reset():
+	battle_id = ""
+	battle_casualties.clear()
 	unit_visible_enemies.clear()
 	unit_enemies_in_los.clear()
 	unit_enemy_tracks.clear()
@@ -139,6 +196,7 @@ func reset():
 
 
 func save_match_data(match_save: MatchSaveData) -> void:
+	import_casualty_records(match_save.casualty_records)
 	var save_path: String = "user://matches/%s.tres" % match_save.match_id
 	print("Saved match as: " + save_path)
 	var dir_path: String = save_path.get_base_dir()
@@ -164,7 +222,7 @@ func load_match_data(match_id: String) -> MatchSaveData:
 		push_error("Match save does not exist: %s" % save_path)
 		return null
 
-	var loaded_resource: Resource = ResourceLoader.load(save_path)
+	var loaded_resource: Resource = ResourceLoader.load(save_path, "", ResourceLoader.CACHE_MODE_IGNORE)
 
 	if loaded_resource == null:
 		push_error("Could not load match save: %s" % save_path)
@@ -176,6 +234,7 @@ func load_match_data(match_id: String) -> MatchSaveData:
 		push_error("Loaded resource is not MatchSaveData: %s" % save_path)
 		return null
 
+	import_casualty_records(match_save.casualty_records)
 	return match_save
 
 

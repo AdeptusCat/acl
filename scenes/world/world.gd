@@ -299,6 +299,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	if is_setup:
 		return
 	is_setup = true
+	Globals.begin_battle()
 	
 	ground_layer = map.get_ground_layer()
 	terrain_layer = map.get_terrain_layer()
@@ -408,6 +409,8 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	
 	match_save.match_id = Globals.scenario_chosen.scenario_name.to_lower().replace(" ", "_")
 	match_save.scenario_id = Globals.scenario_chosen.scenario_name
+	match_save.battle_id = Globals.battle_id
+	match_save.casualty_records.assign(Globals.battle_casualties)
 	
 	match_save.player_team = Globals.team_player
 	match_save.winner_team = winner_team

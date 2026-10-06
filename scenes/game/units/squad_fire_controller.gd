@@ -234,6 +234,8 @@ func set_target_hex(_target_hex: Vector2i):
 
 
 func _process(delta: float) -> void:
+	if not unit.alive:
+		return
 	_now_s += delta
 	_accum_window_s += delta
 	
@@ -476,6 +478,8 @@ func _tick_soldiers(delta: float) -> void:
 	# handle gunners first (crew-served)
 	var j: int = 0
 	while j < gunners.size():
+		if not unit.alive:
+			return
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
@@ -489,6 +493,8 @@ func _tick_soldiers(delta: float) -> void:
 	# then everyone else
 	var i: int = 0
 	while i < soldiers.size():
+		if not unit.alive:
+			return
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
 			if s2.role != RankGrades.Role.GUNNER:
@@ -498,6 +504,8 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
+	if not unit.alive:
+		return 0
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
 	var delta_mod: float = delta * delta_multiplyer 
@@ -711,7 +719,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		life = dist / s.weapon.riflegrenade_projectile_speed
 	await get_tree().create_timer(life).timeout
 	
-	shooting.emit(unit)
+	if unit.alive:
+		shooting.emit(unit)
 	# handle result on enemy unit
 	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
 	return shots
@@ -807,13 +816,15 @@ func aim_delay():
 		#
 
 
-func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_target_hex: Vector2i):
+func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_target_hex: Vector2i) -> void:
 	var interval: float = 60.0 / rpm
 	for shot in range(shots):
+		if not unit.alive:
+			return
 		fire_shot.emit(s.weapon, _mortar_target_hex)
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
-	if auto_fire:
+	if auto_fire and unit.alive:
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
 
 
