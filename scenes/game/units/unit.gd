@@ -342,17 +342,17 @@ func is_good_order() -> bool:
 		return true 
 
 
-func _on_fire_shot(weapon: WeaponSpec, mortar_target_hex: Vector2i) -> void:
-	#if squad_fire.target_unit:
+func _on_fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i) -> void:
+	# Use the burst's captured destination even after sight loss clears the target.
 	if weapon.family != WeaponSpec.Family.MORTAR:
-		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(squad_fire.target_hex)
+		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(shot_target_hex)
 		match weapon.family: 
 			WeaponSpec.Family.SMALL_ARM:
 				ui.shoot(global_position, pos, weapon)
 			WeaponSpec.Family.ROCKET_LAUNCHER:
 				ui.shoot_rocket_launcher(global_position, pos, weapon)
 	if weapon.family == WeaponSpec.Family.MORTAR:
-		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(mortar_target_hex)
+		var pos: Vector2 = LOSHelper.ground_layer.map_to_local(shot_target_hex)
 		if weapon.family == WeaponSpec.Family.MORTAR:
 				ui.set_ammunition_left(weapon.ammunition)
 				ui.shoot_mortar(global_position, pos, weapon)

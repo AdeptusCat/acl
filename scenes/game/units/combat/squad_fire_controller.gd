@@ -97,7 +97,7 @@ var target_unit: Unit
 #var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
-signal fire_shot(weapon: WeaponSpec, _mortar_target_hex: Vector2i)
+signal fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i)
 signal fire_riflegrenade
 signal draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i)
 signal shooting(unit: Unit)
@@ -728,12 +728,12 @@ func aim_delay() -> void:
 		#
 
 
-func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, _mortar_target_hex: Vector2i) -> void:
+func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target_hex: Vector2i) -> void:
 	var interval: float = 60.0 / rpm
 	for shot: int in range(shots):
 		if not unit.alive:
 			return
-		fire_shot.emit(s.weapon, _mortar_target_hex)
+		fire_shot.emit(s.weapon, shot_target_hex)
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
 	if auto_fire and unit.alive:

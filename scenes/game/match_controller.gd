@@ -728,5 +728,3 @@ func spawn_units_from_match_save(match_save: MatchSaveData) -> void:
 
 func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int) -> void:
 	MatchUnitSpawner.spawn_unit_from_save(self, team, location, squad_loadout, formation_id)
-
-
