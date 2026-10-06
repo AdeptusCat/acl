@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/faction_save_compatibility_regression.gd" id="1"]
+
+[node name="FactionSaveCompatibilityRegression" type="Node"]
+script = ExtResource("1")

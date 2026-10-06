@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="MatchSaveData" format=3]
+
+[ext_resource type="Script" path="res://resources/casualties/casualty_record.gd" id="1_sxbvs"]
+[ext_resource type="Script" path="res://resources/saves/unit_save_data.gd" id="2_a5xrv"]
+[ext_resource type="Script" path="res://resources/soldiers/soldier_loadout.gd" id="3_xptxy"]
+[ext_resource type="Resource" path="res://resources/squads/german/rifle_squad.tres" id="4_2d23y"]
+[ext_resource type="Resource" path="res://resources/soldiers/us/rifleman.tres" id="5_54myt"]
+[ext_resource type="Resource" path="res://resources/squads/us/rifle_squad.tres" id="6_lu2qg"]
+[ext_resource type="Script" path="res://resources/saves/match_save_data.gd" id="7_gtdhj"]
+
+[sub_resource type="Resource" id="Resource_a07lp"]
+script = ExtResource("2_a5xrv")
+unit_id = 20
+unit_scene_path = "res://scenes/game/units/unit.tscn"
+squad_loadout = ExtResource("4_2d23y")
+
+[sub_resource type="Resource" id="Resource_nhyw2"]
+script = ExtResource("2_a5xrv")
+unit_id = 21
+unit_scene_path = "res://scenes/game/units/unit.tscn"
+team = 1
+soldiers = Array[ExtResource("3_xptxy")]([ExtResource("5_54myt")])
+squad_loadout = ExtResource("6_lu2qg")
+
+[resource]
+script = ExtResource("7_gtdhj")
+match_id = "tests/faction_folder_legacy"
+player_units = Array[ExtResource("2_a5xrv")]([SubResource("Resource_a07lp"), SubResource("Resource_nhyw2")])

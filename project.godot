@@ -41,7 +41,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg", "res://addons/faction_resource_compatibility/plugin.cfg")
 
 [input]
 

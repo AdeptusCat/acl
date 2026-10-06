@@ -2,6 +2,8 @@
 
 Implemented on 6 October 2026 in the order specified by the [plan](code_organization_refactor_plan.md): folder moves first, then filename renames. The [manifest](code_refactor_manifest.json) records every original path, intermediate path, final path, and batch.
 
+These results describe the organization refactor at completion. The subsequent [faction-folder migration](faction_folder_naming_proposal.md) changes country folder paths to `germany` and `united_states`; its [manifest](faction_folder_refactor_manifest.json) records those later moves and compatibility redirects.
+
 ## Changes
 
 - Moved 140 primary files into folders matching their responsibilities.
@@ -54,9 +56,11 @@ Checks ran with Godot `4.7.2.stable.arch_linux.ed1daf0bf` using isolated project
 
 The integration checks ran each map for 600 process frames with fixed FPS 60. They exercised scenario faction preview, unit details, command-wheel selection, command connectivity, tooltips, countdown, results, threat/influence drawing, and existing AI wiring. A small 2×2 LOS fixture exercised the relocated bake/save directory and reloaded the resulting resource before starting each map.
 
-Default Map had no script errors. Orchard Road reproduced four existing `follow_cube_path` calls on `Nil` in the phased platoon controller, with the same message and count in the baseline and final checks. This gameplay error remains unresolved. Missing `user://matches/debug.tres` diagnostics and shutdown leak/resource warnings also occur in the baseline; shutdown resource counts vary. Passing regression assertions do not imply that these existing diagnostics are fixed.
+Default Map had no script errors. Orchard Road reproduced four existing `follow_cube_path` calls on `Nil` in `SquadActionController`, triggered by movement orders from the defense controller, with the same message and count in the baseline and final checks. The earlier attribution to the phased controller was incorrect. This gameplay error remains unresolved. Missing `user://matches/debug.tres` diagnostics and shutdown leak/resource warnings also occur in the baseline; shutdown resource counts vary. Passing regression assertions do not imply that these existing diagnostics are fixed.
 
-Interactive visual inspection, exported builds, and a full gameplay/performance assessment were not performed. The phased controller remains excluded from the convention/parser coverage under the prior checking policy, although its scene wiring and active runtime path were exercised.
+Interactive visual inspection, exported builds, and a full gameplay/performance assessment were not performed. The phased controller remains excluded from the convention/parser coverage under the prior checking policy. Its scene instances were loaded, but its tactical loop was not exercised: `_physics_process()` immediately returns even when `is_active` is true. The [controller investigation](phased_controller_investigation.md) documents this existing disabled state.
+
+The subsequent support decision is to retain the phased controller as unfinished work requiring repair and dedicated coverage. That work is tracked in the [repair plan](phased_controller_repair_plan.md) and has not been implemented by the organization refactor.
 
 For a focused repeat check from the project root:
 

@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dqc5gsc8nyh6r" path="res://resources/squads/team_squad_loadout_catalog.gd" id="1_8jmih"]
 [ext_resource type="Script" uid="uid://bhetl3cslc2tj" path="res://resources/squads/squad_loadout_catalog.gd" id="2_lp85b"]
-[ext_resource type="Resource" uid="uid://lp0f0dhp86jk" path="res://resources/squads/german/squad_loadout_catalog.tres" id="3_ps3yt"]
-[ext_resource type="Resource" uid="uid://c3126its6x8x4" path="res://resources/squads/us/squad_loadout_catalog.tres" id="4_d36al"]
+[ext_resource type="Resource" uid="uid://lp0f0dhp86jk" path="res://resources/squads/germany/squad_loadout_catalog.tres" id="3_ps3yt"]
+[ext_resource type="Resource" uid="uid://c3126its6x8x4" path="res://resources/squads/united_states/squad_loadout_catalog.tres" id="4_d36al"]
 
 [resource]
 script = ExtResource("1_8jmih")

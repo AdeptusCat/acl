@@ -1,6 +1,6 @@
 # Code organization refactor plan
 
-Status: implemented on 6 October 2026 after authorization to execute the plan. Both folder moves and filename renames are complete. The tables retain the original paths and intermediate Task 1 names; consult the [manifest](code_refactor_manifest.json) for final paths and the [execution results](code_organization_refactor_results.md) for verification and limitations.
+Status: implemented on 6 October 2026 after authorization to execute the plan. Both folder moves and filename renames are complete. The tables retain the original paths and intermediate Task 1 names; consult the [manifest](code_refactor_manifest.json) for paths at the end of this refactor and the [execution results](code_organization_refactor_results.md) for verification and limitations. A subsequent [faction-folder migration](faction_folder_naming_proposal.md) establishes the current country folder names.
 
 ## Scope and order
 
@@ -13,7 +13,7 @@ The intended result is easier navigation without changes to gameplay, save forma
 
 - The root contains runtime AI, influence-map scenes, loadout catalogs, save resources, and commented reference implementations.
 - `ai/platoon_alternative/platoon_ai.gd` declares `PlatoonAI` and assigns squads to defensive positions using influence-map results. The world scene instantiates it for both teams. Its folder name does not describe its role.
-- `ai/platoon/platoon_ai_controller.gd` declares `PlatoonAiController` and coordinates tactical phases and tasks. Although the convention checker and previous validation notes call it retired, `scenes/world/world.tscn` instantiates it in two scenarios and sets `is_active = true` in the Orchard Road Outpost Probe scenario. Preserve it as a scene dependency.
+- `ai/platoon/platoon_ai_controller.gd` declares `PlatoonAiController` and contains tactical-phase and task planning. `scenes/world/world.tscn` instantiates it in two scenarios and sets `is_active = true` in the Orchard Road Outpost Probe scenario, but an unconditional return at the start of `_physics_process()` disables its decision loop. Preserve it as a scene dependency; its presence does not establish active AI behavior. See the [controller investigation](phased_controller_investigation.md).
 - `EnemyTrack` is used by the game controller, and `SquadTacticalState` is used by `Unit`. These are shared runtime types, not files to archive with an older controller.
 - Root `influence_map.gd`, `influence_map_controller.gd`, and `platoon_ai.gd` contain only commented-out code. The actual influence-map classes are under `scenes/world/influence_map/`.
 - `scenes/ui/` mixes screens, panels, labels, command wheels, and effects. `unit_status.gd` also exists under the unit folder, where it manages status images rather than a tooltip label.
@@ -135,7 +135,7 @@ Keep `unit.tscn` and weapon `.tres` paths stable in these two tasks. They are re
 | `ai/platoon/squad_tactical_state.gd` | `ai/squad/squad_tactical_state.gd` | Tactical state used by units and platoon reasoning. |
 | `scenes/game/units/squad_ai_controller.gd` | `ai/squad/squad_ai_controller.gd` | AI decision making and execution of `AiOrder`. |
 
-Keep `ai/platoon/platoon_types.gd` at its existing path: both shared types and phased reasoning use it. Update the convention checker's excluded-controller path when moving the phase-based controller; keep its existing coverage policy during this cleanup. Its documented retirement status needs a separate correction based on the scene evidence, not removal of the scene instances.
+Keep `ai/platoon/platoon_types.gd` at its existing path: both shared types and phased reasoning use it. Update the convention checker's excluded-controller path when moving the phase-based controller; keep its existing coverage policy during this cleanup. The controller remains a dormant prototype referenced by scenes; scene references alone do not establish whether it should be developed or retired.
 
 ### Move batch 3: influence-map subsystem
 
@@ -329,12 +329,12 @@ The following requirements guided implementation. The baseline passed 16 regress
 | AI and influence moves/renames | Start scenarios that instantiate both defense controllers and the phase-based controller, including Orchard Road Outpost Probe. Verify existing activation settings, exported references, influence overlays, and squad orders. Existing regressions do not establish coverage of all AI paths. |
 | End of each task | Run all 11 existing regression suites, including the startup variants and fresh-process persistence cases; run an active-match smoke check with unit details, command links, and threat/influence drawing enabled. Compare diagnostics with the captured baseline. |
 
-Checks used isolated copies and user data so test saves did not affect normal match history. Baseline diagnostics were compared with the completed refactor, including the existing Orchard Road phase-controller error, missing debug-match data, and shutdown warnings.
+Checks used isolated copies and user data so test saves did not affect normal match history. Baseline diagnostics were compared with the completed refactor, including the existing Orchard Road movement error triggered by defense-controller orders, missing debug-match data, and shutdown warnings. The earlier attribution of that error to the phased controller was incorrect.
 
 ## Deferred decisions
 
-- Confirm whether the supposedly retired phase-based controller should remain supported. Its current scene references require preservation during this refactor.
+- Resolved: retain the dormant phased controller as unfinished work requiring repair and dedicated coverage. Its decision loop remains disabled regardless of `is_active`. Follow the [repair and coverage plan](phased_controller_repair_plan.md); the existing refactor checks do not validate its tactical behavior.
 - Development diagnostics and placeholder scenes were preserved under `tests/manual/`; any broader usage review remains separate work.
 - Serialized script-path compatibility was resolved with five inheritance scripts at the old save/loadout paths. Unit-scene and weapon-definition paths remain stable. These compatibility scripts must remain while old saves are supported.
-- Consolidating faction folder labels (`german`, `germany`, `ger`, `us`) across resources/assets is separate work. The present tasks do not need broad asset renames.
+- Resolved: faction directories use full country names in lowercase `snake_case`, with `germany` and `united_states` consistently across resources/assets. See the [implemented naming convention](faction_folder_naming_proposal.md) and [migration manifest](faction_folder_refactor_manifest.json). Old resource paths remain available through compatibility redirects; image basenames are unchanged.
 - Large scripts such as `unit.gd`, `game_controller.gd`, and `squad_fire_controller.gd` may merit decomposition later. Their responsibilities must be analyzed separately; folder moves and filenames alone do not require that change.

@@ -1765,5 +1765,8 @@
     "soldier_save_data.gd": "resources/saves/soldier_save_data.gd",
     "squad_loadout_spec.gd": "resources/squads/squad_loadout_spec.gd",
     "scenes/game/units/soldier_loadout.gd": "resources/soldiers/soldier_loadout.gd"
-  }
+  },
+  "subsequent_refactors": [
+    "faction_folder_refactor_manifest.json"
+  ]
 }
