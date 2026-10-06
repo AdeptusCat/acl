@@ -65,7 +65,7 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze(main)
 	_test_link_history()
-	_test_link_visibility()
+	_test_link_visibility(world)
 	await _test_origin_targets()
 	_test_occupation()
 	_test_match_clock(world.game_controller)
@@ -91,30 +91,38 @@ func _test_link_history() -> void:
 	renderer.queue_free()
 
 
-func _test_link_visibility() -> void:
-	var renderer: Node2D = load("res://scenes/world/command_connectivity_renderer.gd").new()
-	add_child(renderer)
-	renderer.set_process(false)
-	renderer.setup()
+func _test_link_visibility(world: Node) -> void:
+	var renderer: Node2D = world.game_controller.get_node("CommandConnectivityRenderer")
+	var checkbox: CheckBox = world.ui.get_node("Control/Settings/FoldableContainer/VBoxContainer/ShowCmdConnectivity")
 	var show_links: bool = SessionSettings.showCmdConnectivity
 	var show_enemy: bool = Debug.showEnemyCmdConnectivity
+	var checkbox_pressed: bool = checkbox.button_pressed
+	_check(renderer.is_visible_in_tree(), "The actual world renderer is visible with connectivity enabled at startup")
 	for enemy_enabled: bool in [false, true]:
-		SessionSettings.showCmdConnectivity = false
 		Debug.showEnemyCmdConnectivity = enemy_enabled
+		checkbox.button_pressed = false
 		renderer._process(0.1)
+		_check(not SessionSettings.showCmdConnectivity, "The settings checkbox disables command connectivity")
+		_check(not renderer.is_visible_in_tree(), "Disabled connectivity hides the renderer parent")
 		for line: MovingDottedDrawLine in renderer.get_children():
-			_check(not line.visible, "Disabled command connectivity hides every line, including enemy debug lines")
-	SessionSettings.showCmdConnectivity = true
-	Debug.showEnemyCmdConnectivity = true
-	renderer._process(0.1)
-	var visible: int = 0
-	for line: MovingDottedDrawLine in renderer.get_children():
-		if line.visible:
-			visible += 1
-	_check(visible > 0, "Re-enabling command connectivity restores eligible lines")
+			_check(not line.visible and not line.is_visible_in_tree(), "Disabled command connectivity hides every line, including enemy debug lines")
+		checkbox.button_pressed = true
+		renderer._process(0.1)
+		_check(SessionSettings.showCmdConnectivity, "The settings checkbox enables command connectivity")
+		_check(renderer.is_visible_in_tree(), "Re-enabling connectivity shows the actual renderer parent")
+		var visible: int = 0
+		for line: MovingDottedDrawLine in renderer.get_children():
+			var eligible: bool = is_instance_valid(line.unit.command_squad)
+			if line.unit.team != Globals.team_player and not enemy_enabled:
+				eligible = false
+			_check(line.is_visible_in_tree() == eligible, "Effective line visibility respects command ownership and enemy debug settings")
+			if line.is_visible_in_tree():
+				visible += 1
+		_check(visible > 0, "Re-enabling command connectivity restores eligible lines in the scene tree")
+	checkbox.button_pressed = checkbox_pressed
 	SessionSettings.showCmdConnectivity = show_links
 	Debug.showEnemyCmdConnectivity = show_enemy
-	renderer.queue_free()
+	renderer._process(0.1)
 
 
 func _test_origin_targets() -> void:

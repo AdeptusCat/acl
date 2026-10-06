@@ -2,6 +2,7 @@ extends Node2D
 
 
 func setup() -> void:
+	visible = SessionSettings.showCmdConnectivity
 	for unit: Unit in Globals.get_units():
 		
 		var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
@@ -10,6 +11,7 @@ func setup() -> void:
 
 
 func _process(_delta: float) -> void:
+	visible = SessionSettings.showCmdConnectivity
 	if not SessionSettings.showCmdConnectivity:
 		for line: MovingDottedDrawLine in get_children():
 			line.hide()

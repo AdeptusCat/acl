@@ -743,7 +743,7 @@ func handle_mouse_event_position_changed(event_pos: Vector2) -> void:
 
 
 func hex_glow(pos: Vector2) -> void:
-	var glow: Node2D = glow_maker_scene.instantiate()
+	var glow: ColorRect = glow_maker_scene.instantiate()
 	glow.position = pos
 	add_child(glow)
 
