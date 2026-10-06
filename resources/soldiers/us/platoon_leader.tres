@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="SoldierLoadout" format=3 uid="uid://cntsjxepp043a"]
 
-[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="1_cwrc8"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="1_cwrc8"]
 [ext_resource type="Resource" uid="uid://cpg80ftqo60wb" path="res://resources/weapons/m1_carbine.tres" id="2_ib73s"]
 
 [resource]

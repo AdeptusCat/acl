@@ -1,0 +1,1769 @@
+{
+  "description": "Original path, folder-move path, and final filename. Script UID companions are explicit entries.",
+  "files": [
+    {
+      "original": "squad_loadout_spec.gd",
+      "moved": "resources/squads/squad_loadout_spec.gd",
+      "move_batch": 1,
+      "final": "resources/squads/squad_loadout_spec.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "squads.gd",
+      "moved": "resources/squads/squads.gd",
+      "move_batch": 1,
+      "final": "resources/squads/squad_loadout_catalog.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "squads_collection.gd",
+      "moved": "resources/squads/squads_collection.gd",
+      "move_batch": 1,
+      "final": "resources/squads/team_squad_loadout_catalog.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "squads_collection.tres",
+      "moved": "resources/squads/squads_collection.tres",
+      "move_batch": 1,
+      "final": "resources/squads/team_squad_loadout_catalog.tres",
+      "rename_batch": 1
+    },
+    {
+      "original": "squads_german.tres",
+      "moved": "resources/squads/german/squads_german.tres",
+      "move_batch": 1,
+      "final": "resources/squads/german/squad_loadout_catalog.tres",
+      "rename_batch": 1
+    },
+    {
+      "original": "squads_us.tres",
+      "moved": "resources/squads/us/squads_us.tres",
+      "move_batch": 1,
+      "final": "resources/squads/us/squad_loadout_catalog.tres",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/soldier_loadout.gd",
+      "moved": "resources/soldiers/soldier_loadout.gd",
+      "move_batch": 1,
+      "final": "resources/soldiers/soldier_loadout.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "match_save_data.gd",
+      "moved": "resources/saves/match_save_data.gd",
+      "move_batch": 1,
+      "final": "resources/saves/match_save_data.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "unit_save_data.gd",
+      "moved": "resources/saves/unit_save_data.gd",
+      "move_batch": 1,
+      "final": "resources/saves/unit_save_data.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "soldier_save_data.gd",
+      "moved": "resources/saves/soldier_save_data.gd",
+      "move_batch": 1,
+      "final": "resources/saves/soldier_save_data.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "threat_map.gd",
+      "moved": "autoloads/threat_map.gd",
+      "move_batch": 1,
+      "final": "autoloads/threat_map.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "threat_map.tscn",
+      "moved": "autoloads/threat_map.tscn",
+      "move_batch": 1,
+      "final": "autoloads/threat_map.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/los/los_helper.gd",
+      "moved": "autoloads/los_helper.gd",
+      "move_batch": 1,
+      "final": "autoloads/los_service.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los/los_helper.tscn",
+      "moved": "autoloads/los_helper.tscn",
+      "move_batch": 1,
+      "final": "autoloads/los_service.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los/los_lookup_data.gd",
+      "moved": "resources/los/los_lookup_data.gd",
+      "move_batch": 1,
+      "final": "resources/los/los_lookup_data.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/los/default_map.tres",
+      "moved": "resources/los/default_map.tres",
+      "move_batch": 1,
+      "final": "resources/los/default_map.tres",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/los/orchard_road.tres",
+      "moved": "resources/los/orchard_road.tres",
+      "move_batch": 1,
+      "final": "resources/los/orchard_road.tres",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/los/los_data.tres",
+      "moved": "resources/los/los_data.tres",
+      "move_batch": 1,
+      "final": "resources/los/los_data.tres",
+      "rename_batch": null
+    },
+    {
+      "original": "autoloads/rolls_stats.gd",
+      "moved": "tests/manual/rolls_stats.gd",
+      "move_batch": 1,
+      "final": "tests/manual/roll_distribution_stats.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "ai_order.gd",
+      "moved": "ai/orders/ai_order.gd",
+      "move_batch": 2,
+      "final": "ai/orders/squad_ai_order.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "mission_order.gd",
+      "moved": "ai/orders/mission_order.gd",
+      "move_batch": 2,
+      "final": "ai/orders/platoon_mission_order.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon_alternative/platoon_ai.gd",
+      "moved": "ai/platoon/defense/platoon_ai.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/platoon_defense_controller.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon_alternative/platoon_ai.tscn",
+      "moved": "ai/platoon/defense/platoon_ai.tscn",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/platoon_defense_controller.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "defense_director.gd",
+      "moved": "ai/platoon/defense/defense_director.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/defense_mission_director.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "defense_director.tscn",
+      "moved": "ai/platoon/defense/defense_director.tscn",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/defense_mission_director.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon/platoon_ai_controller.gd",
+      "moved": "ai/platoon/phased/platoon_ai_controller.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_phase_controller.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon/platoon_ai_controller.tscn",
+      "moved": "ai/platoon/phased/platoon_ai_controller.tscn",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_phase_controller.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon/platoon_blackboard.gd",
+      "moved": "ai/platoon/phased/platoon_blackboard.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_blackboard.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/platoon_task.gd",
+      "moved": "ai/platoon/phased/platoon_task.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_task.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/suspected_enemy_zone.gd",
+      "moved": "ai/platoon/phased/suspected_enemy_zone.gd",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/suspected_enemy_zone.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/enemy_track.gd",
+      "moved": "ai/perception/enemy_track.gd",
+      "move_batch": 2,
+      "final": "ai/perception/enemy_track.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/squad_tactical_state.gd",
+      "moved": "ai/squad/squad_tactical_state.gd",
+      "move_batch": 2,
+      "final": "ai/squad/squad_tactical_state.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_ai_controller.gd",
+      "moved": "ai/squad/squad_ai_controller.gd",
+      "move_batch": 2,
+      "final": "ai/squad/squad_ai_controller.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/influence_map_controller.gd",
+      "moved": "scenes/world/influence_map/influence_map_controller.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/influence_map_controller.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map_controller.tscn",
+      "moved": "scenes/world/influence_map/influence_map_controller.tscn",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/influence_map_controller.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map_debug_draw.gd",
+      "moved": "scenes/world/influence_map/debug/influence_map_debug_draw.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/debug/influence_map_debug_draw.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map_debug_draw.tscn",
+      "moved": "scenes/world/influence_map/debug/influence_map_debug_draw.tscn",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/debug/influence_map_debug_draw.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/composite_term.gd",
+      "moved": "scenes/world/influence_map/core/composite_term.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/core/composite_term.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/threat_axis_composite.gd",
+      "moved": "scenes/world/influence_map/core/threat_axis_composite.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/core/threat_axis_composite.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/los_influence_projector.gd",
+      "moved": "scenes/world/influence_map/projection/los_influence_projector.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/los_influence_projector.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/projection_source_builder.gd",
+      "moved": "scenes/world/influence_map/projection/projection_source_builder.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/projection_source_builder.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/influence_unit_query.gd",
+      "moved": "scenes/world/influence_map/projection/influence_unit_query.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/influence_unit_query.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/projection_source.gd",
+      "moved": "scenes/world/influence_map/projection/projection_source.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/projection_source.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/influence_projection_config.gd",
+      "moved": "scenes/world/influence_map/projection/influence_projection_config.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/influence_projection_config.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/los_rebuild_job.gd",
+      "moved": "scenes/world/influence_map/projection/los_rebuild_job.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/los_rebuild_job.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/formation_analyzer.gd",
+      "moved": "scenes/world/influence_map/formations/formation_analyzer.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_analyzer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/formation_group.gd",
+      "moved": "scenes/world/influence_map/formations/formation_group.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_group.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/formation_identification.gd",
+      "moved": "scenes/world/influence_map/formations/formation_identification.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_identification.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_analyzer.gd",
+      "moved": "scenes/world/influence_map/defense/defense_position_analyzer.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_analyzer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_planner.gd",
+      "moved": "scenes/world/influence_map/defense/defense_position_planner.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_planner.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_result.gd",
+      "moved": "scenes/world/influence_map/defense/defense_position_result.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_result.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "threat_axis.gd",
+      "moved": "scenes/world/influence_map/defense/threat_axis.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/threat_axis.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/hq_support_need/hq_support_need_layer.gd",
+      "moved": "scenes/world/influence_map/layers/hq_support_need_layer.gd",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/layers/hq_support_need_layer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/input_manager.gd",
+      "moved": "scenes/game/input/input_manager.gd",
+      "move_batch": 4,
+      "final": "scenes/game/input/input_manager.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/input_manager.tscn",
+      "moved": "scenes/game/input/input_manager.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/input/input_manager.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/close_combat_instance.gd",
+      "moved": "scenes/game/combat/close_combat_instance.gd",
+      "move_batch": 4,
+      "final": "scenes/game/combat/close_combat_instance.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/close_combat_instance.tscn",
+      "moved": "scenes/game/combat/close_combat_instance.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/combat/close_combat_instance.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/map.gd",
+      "moved": "scenes/world/maps/map.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/map.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/map.tscn",
+      "moved": "scenes/world/maps/map.tscn",
+      "move_batch": 4,
+      "final": "scenes/world/maps/map.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/ground_tile_map_layer.gd",
+      "moved": "scenes/world/maps/layers/ground_tile_map_layer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/ground_tile_map_layer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/ground_tile_map_layer.tscn",
+      "moved": "scenes/world/maps/layers/ground_tile_map_layer.tscn",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/ground_tile_map_layer.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/terrain_tile_map_layer.gd",
+      "moved": "scenes/world/maps/layers/terrain_tile_map_layer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/terrain_tile_map_layer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/wall_tile_map_layer.gd",
+      "moved": "scenes/world/maps/layers/wall_tile_map_layer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/wall_tile_map_layer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/building_tile_map_layer.gd",
+      "moved": "scenes/world/maps/layers/building_tile_map_layer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/building_tile_map_layer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/enums.gd",
+      "moved": "scenes/world/maps/layers/enums.gd",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/terrain_types.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/maps/scenario.gd",
+      "moved": "scenes/scenarios/scenario.gd",
+      "move_batch": 4,
+      "final": "scenes/scenarios/scenario.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/scenario.tscn",
+      "moved": "scenes/scenarios/scenario.tscn",
+      "move_batch": 4,
+      "final": "scenes/scenarios/scenario.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/camera_2d.gd",
+      "moved": "scenes/world/camera/camera_2d.gd",
+      "move_batch": 4,
+      "final": "scenes/world/camera/battle_camera.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los_renderer.gd",
+      "moved": "scenes/world/overlays/los_renderer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/tactical_lines_overlay.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los_renderer.tscn",
+      "moved": "scenes/world/overlays/los_renderer.tscn",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/tactical_lines_overlay.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/world/command_connectivity_renderer.gd",
+      "moved": "scenes/world/overlays/command_connectivity_renderer.gd",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/command_connectivity_renderer.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/target_area.gd",
+      "moved": "scenes/world/overlays/target_area.gd",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/scenario_start_area_preview.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/soldier.gd",
+      "moved": "scenes/game/units/soldiers/soldier.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/soldiers/soldier.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/soldier_task.gd",
+      "moved": "scenes/game/units/soldiers/soldier_task.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/soldiers/soldier_task.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/units.gd",
+      "moved": "scenes/game/units/collections/units.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/collections/unit_list.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/units_collection.gd",
+      "moved": "scenes/game/units/collections/units_collection.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/collections/team_unit_lists.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/squad_action_controller.gd",
+      "moved": "scenes/game/units/actions/squad_action_controller.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/actions/squad_action_controller.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_action_controller.tscn",
+      "moved": "scenes/game/units/actions/squad_action_controller.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/actions/squad_action_controller.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_movement.gd",
+      "moved": "scenes/game/units/movement/unit_movement.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/movement/unit_movement.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_movement.tscn",
+      "moved": "scenes/game/units/movement/unit_movement.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/movement/unit_movement.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_fire_controller.gd",
+      "moved": "scenes/game/units/combat/squad_fire_controller.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/squad_fire_controller.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_fire_controller.tscn",
+      "moved": "scenes/game/units/combat/squad_fire_controller.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/squad_fire_controller.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_fire_calculator.gd",
+      "moved": "scenes/game/units/combat/squad_fire_calculator.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/squad_fire_calculator.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_combat_stats.gd",
+      "moved": "scenes/game/units/combat/unit_combat_stats.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/unit_combat_stats.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_stress_controller.gd",
+      "moved": "scenes/game/units/combat/unit_stress_controller.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/unit_stress_controller.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_stress_controller.tscn",
+      "moved": "scenes/game/units/combat/unit_stress_controller.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/unit_stress_controller.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/command_connectivity.gd",
+      "moved": "scenes/game/units/command/command_connectivity.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/command_connectivity.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/command_connectivity.tscn",
+      "moved": "scenes/game/units/command/command_connectivity.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/command_connectivity.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/leader_aura.gd",
+      "moved": "scenes/game/units/command/leader_aura.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/leader_aura.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/leader_aura.tscn",
+      "moved": "scenes/game/units/command/leader_aura.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/leader_aura.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/enemy_visibility_checker.gd",
+      "moved": "scenes/game/units/visibility/enemy_visibility_checker.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/visibility/enemy_visibility_checker.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/enemy_visibility_checker.tscn",
+      "moved": "scenes/game/units/visibility/enemy_visibility_checker.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/visibility/enemy_visibility_checker.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_ui.gd",
+      "moved": "scenes/game/units/presentation/unit_ui.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/presentation/unit_battlefield_view.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/unit_ui.tscn",
+      "moved": "scenes/game/units/presentation/unit_ui.tscn",
+      "move_batch": 4,
+      "final": "scenes/game/units/presentation/unit_battlefield_view.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/unit_status.gd",
+      "moved": "scenes/game/units/presentation/unit_status.gd",
+      "move_batch": 4,
+      "final": "scenes/game/units/presentation/unit_status_icons.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/ui/ui.gd",
+      "moved": "scenes/ui/hud/ui.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/hud/battle_hud.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/ui.tscn",
+      "moved": "scenes/ui/hud/ui.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/hud/battle_hud.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/countdown.gd",
+      "moved": "scenes/ui/hud/countdown.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/hud/match_countdown_panel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/start_screen.gd",
+      "moved": "scenes/ui/screens/start_screen.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/scenario_selection_screen.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/start_screen.tscn",
+      "moved": "scenes/ui/screens/start_screen.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/scenario_selection_screen.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/result_screen.gd",
+      "moved": "scenes/ui/screens/result_screen.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/match_result_screen.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/result_screen.tscn",
+      "moved": "scenes/ui/screens/result_screen.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/match_result_screen.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/victory_condition_result.gd",
+      "moved": "scenes/ui/screens/victory_condition_result.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/victory_condition_result_row.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/victory_condition_result.tscn",
+      "moved": "scenes/ui/screens/victory_condition_result.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/victory_condition_result_row.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/settings.gd",
+      "moved": "scenes/ui/panels/settings.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/panels/settings_panel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/debug.gd",
+      "moved": "scenes/ui/panels/debug.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/panels/debug_panel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_details.gd",
+      "moved": "scenes/ui/units/unit_details.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_details_panel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_stats_details.gd",
+      "moved": "scenes/ui/units/unit_stats_details.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_stats_summary.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/UnitStatsDetails.tscn",
+      "moved": "scenes/ui/units/UnitStatsDetails.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_stats_summary.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/soldier_detail.gd",
+      "moved": "scenes/ui/units/soldier_detail.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_details_row.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/soldier_detail.tscn",
+      "moved": "scenes/ui/units/soldier_detail.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_details_row.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/soldier_detail_label.tscn",
+      "moved": "scenes/ui/units/soldier_detail_label.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_detail_label.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/soldier_detail_progress_bar.tscn",
+      "moved": "scenes/ui/units/soldier_detail_progress_bar.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_detail_progress_bar.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/soldiers_grid_container.gd",
+      "moved": "scenes/ui/units/soldiers_grid_container.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_roster_grid.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_status.gd",
+      "moved": "scenes/ui/units/unit_status.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_status_label.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_type.gd",
+      "moved": "scenes/ui/units/unit_type.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_type_label.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/leadership_bonus.gd",
+      "moved": "scenes/ui/units/leadership_bonus.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/units/leadership_bonus_label.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_details.gd",
+      "moved": "scenes/ui/tiles/tile_details.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_details_panel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_stats.gd",
+      "moved": "scenes/ui/tiles/tile_stats.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_cover_overlay.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_textures.gd",
+      "moved": "scenes/ui/tiles/tile_textures.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_texture_preview.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/selection_wheel.gd",
+      "moved": "scenes/ui/orders/selection_wheel.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/unit_command_wheel.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/selection_wheel.tscn",
+      "moved": "scenes/ui/orders/selection_wheel.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/move_fire_command_wheel.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/selection_wheel_alt.tscn",
+      "moved": "scenes/ui/orders/selection_wheel_alt.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/unit_command_wheel.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/wheel_option.gd",
+      "moved": "scenes/ui/orders/wheel_option.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/unit_command_wheel_option.gd",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/rout_button.gd",
+      "moved": "scenes/ui/orders/rout_button.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/rout_button.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/tooltip.gd",
+      "moved": "scenes/ui/tooltips/tooltip.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/tooltips/tooltip.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/glow_marker.tscn",
+      "moved": "scenes/ui/effects/glow_marker.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/effects/glow_marker.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/cover_icon.tscn",
+      "moved": "scenes/ui/effects/cover_icon.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/effects/cover_icon.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/close_combat_sign.tscn",
+      "moved": "scenes/ui/effects/close_combat_sign.tscn",
+      "move_batch": 5,
+      "final": "scenes/ui/effects/close_combat_indicator.tscn",
+      "rename_batch": 2
+    },
+    {
+      "original": "glow_marker.gd",
+      "moved": "scenes/ui/effects/glow_marker.gd",
+      "move_batch": 5,
+      "final": "scenes/ui/effects/glow_marker.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map.gd",
+      "moved": "sources/archive/influence_map/influence_map.gd",
+      "move_batch": 6,
+      "final": "sources/archive/influence_map/influence_map_reference.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "influence_map_controller.gd",
+      "moved": "sources/archive/influence_map/influence_map_controller.gd",
+      "move_batch": 6,
+      "final": "sources/archive/influence_map/influence_map_controller_reference.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "platoon_ai.gd",
+      "moved": "sources/archive/ai/platoon_ai.gd",
+      "move_batch": 6,
+      "final": "sources/archive/ai/platoon_defense_reference.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "AI.odt",
+      "moved": "docs/design/ai/AI.odt",
+      "move_batch": 6,
+      "final": "docs/design/ai/ai_design_notes.odt",
+      "rename_batch": 3
+    },
+    {
+      "original": "phase_evaluation",
+      "moved": "docs/design/ai/phase_evaluation",
+      "move_batch": 6,
+      "final": "docs/design/ai/platoon_phase_evaluation_notes.md",
+      "rename_batch": 3
+    },
+    {
+      "original": "hexagon_tile_map_layer_test.tscn",
+      "moved": "tests/manual/maps/hexagon_tile_map_layer_test.tscn",
+      "move_batch": 6,
+      "final": "tests/manual/maps/hexagon_tile_map_layer_test.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/node_2d.gd",
+      "moved": "tests/manual/audio/node_2d.gd",
+      "move_batch": 6,
+      "final": "tests/manual/audio/stereo_panning_probe.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "scenes/game/los/draw_los.gd",
+      "moved": "tests/manual/los/draw_los.gd",
+      "move_batch": 6,
+      "final": "tests/manual/los/los_sampling_debug_draw.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "scenes/world/formation_ai_controllers.tscn",
+      "moved": "tests/manual/ai/formation_ai_controllers.tscn",
+      "move_batch": 6,
+      "final": "tests/manual/ai/formation_ai_controllers.tscn",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/map.gd",
+      "moved": "sources/archive/world/map.gd",
+      "move_batch": 6,
+      "final": "sources/archive/world/map.gd",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/game_controller.gd",
+      "moved": "scenes/game/game_controller.gd",
+      "move_batch": null,
+      "final": "scenes/game/match_controller.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/game_controller.tscn",
+      "moved": "scenes/game/game_controller.tscn",
+      "move_batch": null,
+      "final": "scenes/game/match_controller.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/los.gd",
+      "moved": "autoloads/los.gd",
+      "move_batch": null,
+      "final": "autoloads/unit_visibility_system.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/globals.gd",
+      "moved": "autoloads/globals.gd",
+      "move_batch": null,
+      "final": "autoloads/game_globals.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/debug.gd",
+      "moved": "autoloads/debug.gd",
+      "move_batch": null,
+      "final": "autoloads/debug_settings.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/effects/moving_dotted_line.gd",
+      "moved": "scenes/game/effects/moving_dotted_line.gd",
+      "move_batch": null,
+      "final": "scenes/game/effects/movement_path_line.gd",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/effects/moving_dotted_line.tscn",
+      "moved": "scenes/game/effects/moving_dotted_line.tscn",
+      "move_batch": null,
+      "final": "scenes/game/effects/movement_path_line.tscn",
+      "rename_batch": 1
+    },
+    {
+      "original": "tests/review_batch_regression.gd",
+      "moved": "tests/review_batch_regression.gd",
+      "move_batch": null,
+      "final": "tests/match_systems_regression.gd",
+      "rename_batch": 3
+    },
+    {
+      "original": "tests/review_batch_regression.tscn",
+      "moved": "tests/review_batch_regression.tscn",
+      "move_batch": null,
+      "final": "tests/match_systems_regression.tscn",
+      "rename_batch": 3
+    },
+    {
+      "original": "squad_loadout_spec.gd.uid",
+      "moved": "resources/squads/squad_loadout_spec.gd.uid",
+      "move_batch": 1,
+      "final": "resources/squads/squad_loadout_spec.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "squads.gd.uid",
+      "moved": "resources/squads/squads.gd.uid",
+      "move_batch": 1,
+      "final": "resources/squads/squad_loadout_catalog.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "squads_collection.gd.uid",
+      "moved": "resources/squads/squads_collection.gd.uid",
+      "move_batch": 1,
+      "final": "resources/squads/team_squad_loadout_catalog.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/soldier_loadout.gd.uid",
+      "moved": "resources/soldiers/soldier_loadout.gd.uid",
+      "move_batch": 1,
+      "final": "resources/soldiers/soldier_loadout.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "match_save_data.gd.uid",
+      "moved": "resources/saves/match_save_data.gd.uid",
+      "move_batch": 1,
+      "final": "resources/saves/match_save_data.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "unit_save_data.gd.uid",
+      "moved": "resources/saves/unit_save_data.gd.uid",
+      "move_batch": 1,
+      "final": "resources/saves/unit_save_data.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "soldier_save_data.gd.uid",
+      "moved": "resources/saves/soldier_save_data.gd.uid",
+      "move_batch": 1,
+      "final": "resources/saves/soldier_save_data.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "threat_map.gd.uid",
+      "moved": "autoloads/threat_map.gd.uid",
+      "move_batch": 1,
+      "final": "autoloads/threat_map.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/los/los_helper.gd.uid",
+      "moved": "autoloads/los_helper.gd.uid",
+      "move_batch": 1,
+      "final": "autoloads/los_service.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los/los_lookup_data.gd.uid",
+      "moved": "resources/los/los_lookup_data.gd.uid",
+      "move_batch": 1,
+      "final": "resources/los/los_lookup_data.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "autoloads/rolls_stats.gd.uid",
+      "moved": "tests/manual/rolls_stats.gd.uid",
+      "move_batch": 1,
+      "final": "tests/manual/roll_distribution_stats.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "ai_order.gd.uid",
+      "moved": "ai/orders/ai_order.gd.uid",
+      "move_batch": 2,
+      "final": "ai/orders/squad_ai_order.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "mission_order.gd.uid",
+      "moved": "ai/orders/mission_order.gd.uid",
+      "move_batch": 2,
+      "final": "ai/orders/platoon_mission_order.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon_alternative/platoon_ai.gd.uid",
+      "moved": "ai/platoon/defense/platoon_ai.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/platoon_defense_controller.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "defense_director.gd.uid",
+      "moved": "ai/platoon/defense/defense_director.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/defense/defense_mission_director.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon/platoon_ai_controller.gd.uid",
+      "moved": "ai/platoon/phased/platoon_ai_controller.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_phase_controller.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "ai/platoon/platoon_blackboard.gd.uid",
+      "moved": "ai/platoon/phased/platoon_blackboard.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_blackboard.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/platoon_task.gd.uid",
+      "moved": "ai/platoon/phased/platoon_task.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/platoon_task.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/suspected_enemy_zone.gd.uid",
+      "moved": "ai/platoon/phased/suspected_enemy_zone.gd.uid",
+      "move_batch": 2,
+      "final": "ai/platoon/phased/suspected_enemy_zone.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/enemy_track.gd.uid",
+      "moved": "ai/perception/enemy_track.gd.uid",
+      "move_batch": 2,
+      "final": "ai/perception/enemy_track.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "ai/platoon/squad_tactical_state.gd.uid",
+      "moved": "ai/squad/squad_tactical_state.gd.uid",
+      "move_batch": 2,
+      "final": "ai/squad/squad_tactical_state.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_ai_controller.gd.uid",
+      "moved": "ai/squad/squad_ai_controller.gd.uid",
+      "move_batch": 2,
+      "final": "ai/squad/squad_ai_controller.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/influence_map_controller.gd.uid",
+      "moved": "scenes/world/influence_map/influence_map_controller.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/influence_map_controller.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map_debug_draw.gd.uid",
+      "moved": "scenes/world/influence_map/debug/influence_map_debug_draw.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/debug/influence_map_debug_draw.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/composite_term.gd.uid",
+      "moved": "scenes/world/influence_map/core/composite_term.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/core/composite_term.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/threat_axis_composite.gd.uid",
+      "moved": "scenes/world/influence_map/core/threat_axis_composite.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/core/threat_axis_composite.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/los_influence_projector.gd.uid",
+      "moved": "scenes/world/influence_map/projection/los_influence_projector.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/los_influence_projector.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/projection_source_builder.gd.uid",
+      "moved": "scenes/world/influence_map/projection/projection_source_builder.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/projection_source_builder.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/influence_unit_query.gd.uid",
+      "moved": "scenes/world/influence_map/projection/influence_unit_query.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/influence_unit_query.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/projection_source.gd.uid",
+      "moved": "scenes/world/influence_map/projection/projection_source.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/projection_source.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/influence_projection_config.gd.uid",
+      "moved": "scenes/world/influence_map/projection/influence_projection_config.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/influence_projection_config.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/los_rebuild_job.gd.uid",
+      "moved": "scenes/world/influence_map/projection/los_rebuild_job.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/projection/los_rebuild_job.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/formation_analyzer.gd.uid",
+      "moved": "scenes/world/influence_map/formations/formation_analyzer.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_analyzer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/formation_group.gd.uid",
+      "moved": "scenes/world/influence_map/formations/formation_group.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_group.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_data_objects/formation_identification.gd.uid",
+      "moved": "scenes/world/influence_map/formations/formation_identification.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/formations/formation_identification.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_analyzer.gd.uid",
+      "moved": "scenes/world/influence_map/defense/defense_position_analyzer.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_analyzer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_planner.gd.uid",
+      "moved": "scenes/world/influence_map/defense/defense_position_planner.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_planner.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/controller_subsystems/defense_position_result.gd.uid",
+      "moved": "scenes/world/influence_map/defense/defense_position_result.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/defense_position_result.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "threat_axis.gd.uid",
+      "moved": "scenes/world/influence_map/defense/threat_axis.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/defense/threat_axis.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/influence_map/hq_support_need/hq_support_need_layer.gd.uid",
+      "moved": "scenes/world/influence_map/layers/hq_support_need_layer.gd.uid",
+      "move_batch": 3,
+      "final": "scenes/world/influence_map/layers/hq_support_need_layer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/input_manager.gd.uid",
+      "moved": "scenes/game/input/input_manager.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/input/input_manager.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/close_combat_instance.gd.uid",
+      "moved": "scenes/game/combat/close_combat_instance.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/combat/close_combat_instance.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/map.gd.uid",
+      "moved": "scenes/world/maps/map.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/map.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/ground_tile_map_layer.gd.uid",
+      "moved": "scenes/world/maps/layers/ground_tile_map_layer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/ground_tile_map_layer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/terrain_tile_map_layer.gd.uid",
+      "moved": "scenes/world/maps/layers/terrain_tile_map_layer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/terrain_tile_map_layer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/wall_tile_map_layer.gd.uid",
+      "moved": "scenes/world/maps/layers/wall_tile_map_layer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/wall_tile_map_layer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/building_tile_map_layer.gd.uid",
+      "moved": "scenes/world/maps/layers/building_tile_map_layer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/building_tile_map_layer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/maps/enums.gd.uid",
+      "moved": "scenes/world/maps/layers/enums.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/maps/layers/terrain_types.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/maps/scenario.gd.uid",
+      "moved": "scenes/scenarios/scenario.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/scenarios/scenario.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/camera_2d.gd.uid",
+      "moved": "scenes/world/camera/camera_2d.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/camera/battle_camera.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/los_renderer.gd.uid",
+      "moved": "scenes/world/overlays/los_renderer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/tactical_lines_overlay.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/world/command_connectivity_renderer.gd.uid",
+      "moved": "scenes/world/overlays/command_connectivity_renderer.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/command_connectivity_renderer.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/world/target_area.gd.uid",
+      "moved": "scenes/world/overlays/target_area.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/world/overlays/scenario_start_area_preview.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/soldier.gd.uid",
+      "moved": "scenes/game/units/soldiers/soldier.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/soldiers/soldier.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/soldier_task.gd.uid",
+      "moved": "scenes/game/units/soldiers/soldier_task.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/soldiers/soldier_task.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/units.gd.uid",
+      "moved": "scenes/game/units/collections/units.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/collections/unit_list.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/units_collection.gd.uid",
+      "moved": "scenes/game/units/collections/units_collection.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/collections/team_unit_lists.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/squad_action_controller.gd.uid",
+      "moved": "scenes/game/units/actions/squad_action_controller.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/actions/squad_action_controller.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_movement.gd.uid",
+      "moved": "scenes/game/units/movement/unit_movement.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/movement/unit_movement.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_fire_controller.gd.uid",
+      "moved": "scenes/game/units/combat/squad_fire_controller.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/squad_fire_controller.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/squad_fire_calculator.gd.uid",
+      "moved": "scenes/game/units/combat/squad_fire_calculator.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/squad_fire_calculator.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_combat_stats.gd.uid",
+      "moved": "scenes/game/units/combat/unit_combat_stats.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/unit_combat_stats.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_stress_controller.gd.uid",
+      "moved": "scenes/game/units/combat/unit_stress_controller.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/combat/unit_stress_controller.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/command_connectivity.gd.uid",
+      "moved": "scenes/game/units/command/command_connectivity.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/command_connectivity.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/leader_aura.gd.uid",
+      "moved": "scenes/game/units/command/leader_aura.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/command/leader_aura.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/enemy_visibility_checker.gd.uid",
+      "moved": "scenes/game/units/visibility/enemy_visibility_checker.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/visibility/enemy_visibility_checker.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/units/unit_ui.gd.uid",
+      "moved": "scenes/game/units/presentation/unit_ui.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/presentation/unit_battlefield_view.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/units/unit_status.gd.uid",
+      "moved": "scenes/game/units/presentation/unit_status.gd.uid",
+      "move_batch": 4,
+      "final": "scenes/game/units/presentation/unit_status_icons.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/ui/ui.gd.uid",
+      "moved": "scenes/ui/hud/ui.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/hud/battle_hud.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/countdown.gd.uid",
+      "moved": "scenes/ui/hud/countdown.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/hud/match_countdown_panel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/start_screen.gd.uid",
+      "moved": "scenes/ui/screens/start_screen.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/scenario_selection_screen.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/result_screen.gd.uid",
+      "moved": "scenes/ui/screens/result_screen.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/match_result_screen.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/victory_condition_result.gd.uid",
+      "moved": "scenes/ui/screens/victory_condition_result.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/screens/victory_condition_result_row.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/settings.gd.uid",
+      "moved": "scenes/ui/panels/settings.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/panels/settings_panel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/debug.gd.uid",
+      "moved": "scenes/ui/panels/debug.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/panels/debug_panel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_details.gd.uid",
+      "moved": "scenes/ui/units/unit_details.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_details_panel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_stats_details.gd.uid",
+      "moved": "scenes/ui/units/unit_stats_details.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_stats_summary.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/soldier_detail.gd.uid",
+      "moved": "scenes/ui/units/soldier_detail.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_details_row.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/soldiers_grid_container.gd.uid",
+      "moved": "scenes/ui/units/soldiers_grid_container.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/soldier_roster_grid.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_status.gd.uid",
+      "moved": "scenes/ui/units/unit_status.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_status_label.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/unit_type.gd.uid",
+      "moved": "scenes/ui/units/unit_type.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/unit_type_label.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/leadership_bonus.gd.uid",
+      "moved": "scenes/ui/units/leadership_bonus.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/units/leadership_bonus_label.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_details.gd.uid",
+      "moved": "scenes/ui/tiles/tile_details.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_details_panel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_stats.gd.uid",
+      "moved": "scenes/ui/tiles/tile_stats.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_cover_overlay.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/tile_textures.gd.uid",
+      "moved": "scenes/ui/tiles/tile_textures.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/tiles/tile_texture_preview.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/selection_wheel.gd.uid",
+      "moved": "scenes/ui/orders/selection_wheel.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/unit_command_wheel.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/wheel_option.gd.uid",
+      "moved": "scenes/ui/orders/wheel_option.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/unit_command_wheel_option.gd.uid",
+      "rename_batch": 2
+    },
+    {
+      "original": "scenes/ui/rout_button.gd.uid",
+      "moved": "scenes/ui/orders/rout_button.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/orders/rout_button.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/ui/tooltip.gd.uid",
+      "moved": "scenes/ui/tooltips/tooltip.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/tooltips/tooltip.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "glow_marker.gd.uid",
+      "moved": "scenes/ui/effects/glow_marker.gd.uid",
+      "move_batch": 5,
+      "final": "scenes/ui/effects/glow_marker.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "influence_map.gd.uid",
+      "moved": "sources/archive/influence_map/influence_map.gd.uid",
+      "move_batch": 6,
+      "final": "sources/archive/influence_map/influence_map_reference.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "influence_map_controller.gd.uid",
+      "moved": "sources/archive/influence_map/influence_map_controller.gd.uid",
+      "move_batch": 6,
+      "final": "sources/archive/influence_map/influence_map_controller_reference.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "platoon_ai.gd.uid",
+      "moved": "sources/archive/ai/platoon_ai.gd.uid",
+      "move_batch": 6,
+      "final": "sources/archive/ai/platoon_defense_reference.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "scenes/world/node_2d.gd.uid",
+      "moved": "tests/manual/audio/node_2d.gd.uid",
+      "move_batch": 6,
+      "final": "tests/manual/audio/stereo_panning_probe.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "scenes/game/los/draw_los.gd.uid",
+      "moved": "tests/manual/los/draw_los.gd.uid",
+      "move_batch": 6,
+      "final": "tests/manual/los/los_sampling_debug_draw.gd.uid",
+      "rename_batch": 3
+    },
+    {
+      "original": "scenes/world/map.gd.uid",
+      "moved": "sources/archive/world/map.gd.uid",
+      "move_batch": 6,
+      "final": "sources/archive/world/map.gd.uid",
+      "rename_batch": null
+    },
+    {
+      "original": "scenes/game/game_controller.gd.uid",
+      "moved": "scenes/game/game_controller.gd.uid",
+      "move_batch": null,
+      "final": "scenes/game/match_controller.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/los.gd.uid",
+      "moved": "autoloads/los.gd.uid",
+      "move_batch": null,
+      "final": "autoloads/unit_visibility_system.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/globals.gd.uid",
+      "moved": "autoloads/globals.gd.uid",
+      "move_batch": null,
+      "final": "autoloads/game_globals.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "autoloads/debug.gd.uid",
+      "moved": "autoloads/debug.gd.uid",
+      "move_batch": null,
+      "final": "autoloads/debug_settings.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "scenes/game/effects/moving_dotted_line.gd.uid",
+      "moved": "scenes/game/effects/moving_dotted_line.gd.uid",
+      "move_batch": null,
+      "final": "scenes/game/effects/movement_path_line.gd.uid",
+      "rename_batch": 1
+    },
+    {
+      "original": "tests/review_batch_regression.gd.uid",
+      "moved": "tests/review_batch_regression.gd.uid",
+      "move_batch": null,
+      "final": "tests/match_systems_regression.gd.uid",
+      "rename_batch": 3
+    }
+  ],
+  "compatibility_scripts": {
+    "match_save_data.gd": "resources/saves/match_save_data.gd",
+    "unit_save_data.gd": "resources/saves/unit_save_data.gd",
+    "soldier_save_data.gd": "resources/saves/soldier_save_data.gd",
+    "squad_loadout_spec.gd": "resources/squads/squad_loadout_spec.gd",
+    "scenes/game/units/soldier_loadout.gd": "resources/soldiers/soldier_loadout.gd"
+  }
+}

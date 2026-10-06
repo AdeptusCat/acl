@@ -163,7 +163,7 @@ func _test_missing_weapon_resources() -> void:
 	var missing: SoldierLoadout = _soldier_loadout(null, "Missing source file")
 	missing.weapon_resource_path = "res://resources/weapons/does_not_exist.tres"
 	var wrong_type: SoldierLoadout = _soldier_loadout(null, "Wrong source type")
-	wrong_type.weapon_resource_path = "res://squad_loadout_spec.gd"
+	wrong_type.weapon_resource_path = "res://resources/squads/squad_loadout_spec.gd"
 	loadout.soldiers = [missing, wrong_type]
 	var restored: Unit = _create_unit(loadout)
 	for soldier: Soldier in restored.squad_fire.soldiers:

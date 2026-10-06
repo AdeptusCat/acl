@@ -61,8 +61,8 @@ func _ready() -> void:
 	#LOSHelper.bake_and_save_los_data($Maps/Map2)
 	#LOSHelper.load_prebaked_los($Maps/Map2)
 	
-	#LOSHelper.bake_and_save_los_data("res://scenes/game/los/los_data.tres")
-	#LOSHelper.load_prebaked_los("res://scenes/game/los/los_data.tres")
+	#LOSHelper.bake_and_save_los_data("res://resources/los/los_data.tres")
+	#LOSHelper.load_prebaked_los("res://resources/los/los_data.tres")
 	
 	game_controller.mouse_event_position_changed.connect(_on_mouse_event_position_changed)
 	start_screen.game_started.connect(_on_game_started)

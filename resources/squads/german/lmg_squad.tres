@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://1vun3vkkv6cn"]
 
-[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_vsdpt"]
-[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_kyptg"]
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://resources/squads/squad_loadout_spec.gd" id="1_vsdpt"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="2_kyptg"]
 [ext_resource type="Resource" uid="uid://dghlcxe7d1oeg" path="res://resources/soldiers/germany/squad_leader.tres" id="3_o5v1o"]
 [ext_resource type="Resource" uid="uid://bs4o437s5ifcu" path="res://resources/weapons/mg34_heavy.tres" id="4_kk5bg"]
 [ext_resource type="Resource" uid="uid://cmyjkaqf4h1am" path="res://resources/soldiers/germany/loader.tres" id="5_ibmfg"]

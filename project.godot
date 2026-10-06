@@ -22,14 +22,14 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-LOSHelper="*res://scenes/game/los/los_helper.tscn"
-Globals="*res://autoloads/globals.gd"
+LOSHelper="*res://autoloads/los_service.tscn"
+Globals="*res://autoloads/game_globals.gd"
 STATES="*res://autoloads/unit_states.gd"
 RankGrades="*res://autoloads/rank_grades.gd"
 TooltipSignals="*res://autoloads/tooltip_signals.gd"
 SessionAudio="*res://autoloads/session_audio.gd"
 SessionSettings="*res://autoloads/session_settings.gd"
-Debug="*res://autoloads/debug.gd"
+Debug="*res://autoloads/debug_settings.gd"
 MovementSystem="*uid://dla50r83yg10r"
 LOS="*uid://bkkx84cy8adyu"
 ThreatMap="*uid://smksvypix41r"

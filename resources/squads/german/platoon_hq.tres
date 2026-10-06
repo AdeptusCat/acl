@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="SquadLoadoutSpec" format=3 uid="uid://boephgpg2cfao"]
 
-[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://squad_loadout_spec.gd" id="1_6iaqu"]
-[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://scenes/game/units/soldier_loadout.gd" id="2_hbw5k"]
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://resources/squads/squad_loadout_spec.gd" id="1_6iaqu"]
+[ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="2_hbw5k"]
 [ext_resource type="Resource" uid="uid://dbwswwg50br4a" path="res://resources/soldiers/germany/platoon_leader.tres" id="3_gp2qa"]
 [ext_resource type="Resource" uid="uid://sglwlumhj57d" path="res://resources/soldiers/germany/squad_leader_assistant.tres" id="4_gp2qa"]
 [ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="5_gcfgx"]

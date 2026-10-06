@@ -1,7 +1,7 @@
 """Check explicit GDScript annotations and the project's no-ternary rule.
 
 Run: python3 tests/check_gdscript_conventions.py
-Vendor addons, reference sources, and the retired platoon controller are excluded.
+Vendor addons, reference sources, and the phased platoon controller are excluded.
 Property setters use the type supplied by their property, as required by GDScript.
 """
 from pathlib import Path
@@ -10,7 +10,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED_DIRS = {".git", ".godot", "addons", "sources"}
-RETIRED_CONTROLLER = Path("ai/platoon/platoon_ai_controller.gd")
+EXCLUDED_PHASE_CONTROLLER = Path("ai/platoon/phased/platoon_phase_controller.gd")
 
 
 def mask_non_code(source: str) -> str:
@@ -105,7 +105,7 @@ def main() -> int:
     failures = 0
     for path in sorted(ROOT.rglob("*.gd")):
         relative = path.relative_to(ROOT)
-        if set(relative.parts) & EXCLUDED_DIRS or relative == RETIRED_CONTROLLER:
+        if set(relative.parts) & EXCLUDED_DIRS or relative == EXCLUDED_PHASE_CONTROLLER:
             continue
         count += 1
         for line, message in violations(path.read_text()):
