@@ -69,12 +69,27 @@ var opening_shock_done: bool = false
 
 
 
-func setup_close_combat():
+func setup_close_combat() -> void:
 	terrain_defense_value = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(hex))
 	
 
 
-func add_unit(unit: Unit):
+func can_unit_participate(unit: Unit) -> bool:
+	if not is_instance_valid(unit) or unit.is_queued_for_deletion():
+		return false
+	if not unit.alive or unit.surrendered or unit.current_hex != hex:
+		return false
+	if not is_instance_valid(unit.squad_fire):
+		return false
+	for soldier: Soldier in unit.squad_fire.soldiers:
+		if soldier.is_alive:
+			return true
+	return false
+
+
+func add_unit(unit: Unit) -> void:
+	if not ongoing or is_queued_for_deletion() or not can_unit_participate(unit):
+		return
 	if units_by_team[unit.team].has(unit):
 		return
 	var participant: Participant = Participant.new(unit)
@@ -96,13 +111,73 @@ func add_unit(unit: Unit):
 	participant.joined_at = elapsed
 	participant.time_in_instance = 0.0 # ?
 	participant.active = true
-	for soldier in participant.unit.squad_fire.soldiers:
+	for soldier: Soldier in participant.unit.squad_fire.soldiers:
+		if not soldier.is_alive:
+			continue
 		soldier.cooldown_remaining = get_soldier_colldown_time(soldier, participant.unit.stress_system.state)
 		soldiers_by_team[participant.team].append(soldier)
 	units_by_team[unit.team].append(unit)
 	unit.in_close_combat = true
 	participants.append(participant)
-	
+	unit.unit_died.connect(remove_unit)
+	unit.unit_surrendered.connect(remove_unit)
+	unit.unit_entered_hex.connect(_on_unit_entered_hex)
+	unit.soldiers_changed.connect(refresh_participants)
+	unit.tree_exiting.connect(remove_unit.bind(unit))
+
+
+func remove_unit(unit: Unit) -> void:
+	for participant: Participant in participants.duplicate():
+		if participant.unit == unit:
+			_remove_participant(participant)
+	refresh_participants()
+
+
+func _on_unit_entered_hex(unit: Unit, hex_entered: Vector2i) -> void:
+	if hex_entered != hex:
+		remove_unit(unit)
+
+
+func _disconnect_unit(unit: Unit) -> void:
+	if unit.unit_died.is_connected(remove_unit):
+		unit.unit_died.disconnect(remove_unit)
+	if unit.unit_surrendered.is_connected(remove_unit):
+		unit.unit_surrendered.disconnect(remove_unit)
+	if unit.unit_entered_hex.is_connected(_on_unit_entered_hex):
+		unit.unit_entered_hex.disconnect(_on_unit_entered_hex)
+	if unit.soldiers_changed.is_connected(refresh_participants):
+		unit.soldiers_changed.disconnect(refresh_participants)
+	var on_exit: Callable = remove_unit.bind(unit)
+	if unit.tree_exiting.is_connected(on_exit):
+		unit.tree_exiting.disconnect(on_exit)
+
+
+func _remove_participant(participant: Participant) -> void:
+	participant.active = false
+	units_by_team[participant.team].erase(participant.unit)
+	if is_instance_valid(participant.unit):
+		_disconnect_unit(participant.unit)
+		participant.unit.in_close_combat = false
+	participants.erase(participant)
+	participant.unit = null
+
+
+func refresh_participants() -> void:
+	if not ongoing:
+		return
+	# Ranged fire and roster replacement can change soldiers outside this timer.
+	for participant: Participant in participants.duplicate():
+		if not is_instance_valid(participant.unit) or not can_unit_participate(participant.unit):
+			_remove_participant(participant)
+	for team: Globals.Team in soldiers_by_team:
+		soldiers_by_team[team].clear()
+	for participant: Participant in participants:
+		for soldier: Soldier in participant.unit.squad_fire.soldiers:
+			if soldier.is_alive:
+				soldiers_by_team[participant.team].append(soldier)
+	if soldiers_by_team[Globals.Team.AXIS].is_empty() or soldiers_by_team[Globals.Team.ALLIES].is_empty():
+		quit_close_combat()
+
 
 #func test():
 	#get_close_morale_attack_mult(attackers[0].unit.stress_system.state)
@@ -112,7 +187,7 @@ func add_unit(unit: Unit):
 	#get_close_location_mods(terrain_defence_bonus, defenders[0].is_defender)
 
 
-func get_soldier_colldown_time(soldier: Soldier, state: UnitStates.MoraleState):
+func get_soldier_colldown_time(soldier: Soldier, state: UnitStates.MoraleState) -> float:
 	var cooldown_time: float = 0.0
 	match soldier.weapon.type:
 		WeaponSpec.WeaponType.Rifle:
@@ -251,40 +326,24 @@ func get_soldier_attack_strength(soldier: Soldier) -> float:
 
 
 func _on_timer_timeout() -> void:
-	if units_by_team[Globals.Team.AXIS].is_empty():
-		quit_close_combat()
-	if units_by_team[Globals.Team.ALLIES].is_empty():
-		quit_close_combat()
-	
-	var has_axis: bool = false
-	var has_allis: bool = false
-	for participant in participants:
-		if participant.team == Globals.Team.AXIS:
-			has_axis = true
-		if participant.team == Globals.Team.ALLIES:
-			has_allis = true
-	if not has_allis and not has_axis:
-		quit_close_combat()
-	
+	refresh_participants()
+	if not ongoing:
+		return
+
 	var participants_duplicate: Array[Participant] = participants.duplicate()
-	for participant in participants_duplicate:
-		if not participants.has(participant):
-			continue
-		if participant.unit == null:
-			participants.erase(participant)
-			continue
-		if participant.unit.surrendered:
-			units_by_team[participant.team].erase(participant.unit)
-			participants.erase(participant)
-			if units_by_team[Globals.Team.AXIS].is_empty():
-				quit_close_combat()
-				return
-			if units_by_team[Globals.Team.ALLIES].is_empty():
-				quit_close_combat()
-				return
+	for participant: Participant in participants_duplicate:
+		if not participant.active:
 			continue
 		participant.defense_preparedness = participant.unit.close_combat_defense_preparedness
-		for soldier in participant.unit.squad_fire.soldiers:
+		# Casualty signals can remove either participant while this loop is running.
+		var fighters: Array[Soldier] = participant.unit.squad_fire.soldiers.duplicate()
+		for soldier: Soldier in fighters:
+			if not ongoing:
+				return
+			if not participant.active:
+				break
+			if not soldier.is_alive or not participant.unit.squad_fire.soldiers.has(soldier):
+				continue
 			soldier.cooldown_remaining -= 0.1
 			if soldier.cooldown_remaining <= 0.0:
 				soldier.cooldown_remaining = get_soldier_colldown_time(soldier, participant.unit.stress_system.state)
@@ -306,8 +365,8 @@ func _on_timer_timeout() -> void:
 					casualty_chance = get_soldier_defense_strength(soldier) / (get_soldier_defense_strength(soldier) + get_soldier_attack_strength(enemy_soldier))
 				var lethality_scale: float = 0.3
 				casualty_chance *= lethality_scale
-				var min_chance = 0.05
-				var max_chance = 0.80
+				var min_chance: float = 0.05
+				var max_chance: float = 0.80
 				if casualty_chance < min_chance or casualty_chance > max_chance:
 					pass
 				casualty_chance = clamp(casualty_chance, min_chance, max_chance)
@@ -315,26 +374,35 @@ func _on_timer_timeout() -> void:
 				var roll: float = randf()
 				if roll < casualty_chance:
 					#continue
-					soldiers_by_team[enemy_soldier.team].erase(enemy_soldier)
 					if enemy_soldier.unit.apply_specific_casualty(enemy_soldier):
-						for p in participants:
-							if p == enemy_soldier.unit:
-								participants.erase(p)
-						#participants.erase(participant)
-						units_by_team[enemy_soldier.team].erase(enemy_soldier.unit)
 						enemy_soldier.unit._set_combat_ineffective()
-						
-						if units_by_team[Globals.Team.AXIS].is_empty():
-							quit_close_combat()
-						if units_by_team[Globals.Team.ALLIES].is_empty():
-							quit_close_combat()
-						break
+					refresh_participants()
+					if not ongoing:
+						return
 
-func quit_close_combat():
-	for p in participants:
-		if is_instance_valid(p):
-			p.unit.in_close_combat = false
+
+func _clear_participants() -> void:
+	for participant: Participant in participants.duplicate():
+		_remove_participant(participant)
+	for team: Globals.Team in soldiers_by_team:
+		soldiers_by_team[team].clear()
+
+
+func quit_close_combat() -> void:
+	if not ongoing:
+		return
+	ongoing = false
+	var timer: Timer = get_node_or_null("Timer") as Timer
+	if timer != null:
+		timer.stop()
+	hide()
+	_clear_participants()
 	queue_free()
+
+
+func _exit_tree() -> void:
+	ongoing = false
+	_clear_participants()
 
 # TODO add rout button so unit can rout if pinned
 # TODO soldiers should get simple system that leads them to use the weapon that is appropriate to the task

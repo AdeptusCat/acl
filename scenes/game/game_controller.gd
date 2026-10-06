@@ -357,21 +357,24 @@ func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i):
 			
 
 
-func set_close_combat_hexes_and_units():
+func set_close_combat_hexes_and_units() -> void:
 	#Globals.units_in_close_combat.clear()
 	#Globals.close_combat_locations.clear()
 	
 	#for child in close_combat_locations.get_children():
 		#child.queue_free()
 	
-	for unit in Globals.get_units():
-		if not unit.is_good_order():
+	for combat: CloseCombatInstance in close_combat_instances.get_children():
+		combat.refresh_participants()
+
+	for unit: Unit in Globals.get_units():
+		if not unit.is_good_order() or unit.squad_fire.soldiers.is_empty():
 			continue
 		var mask: int = 0
 		var both_teams_present: bool = false
 		var units_in_hex: Array[Unit] = LOSHelper.find_units_at(unit.current_hex)
-		for _unit in units_in_hex:
-			if not _unit.is_good_order():
+		for _unit: Unit in units_in_hex:
+			if not _unit.is_good_order() or _unit.squad_fire.soldiers.is_empty():
 				continue
 			match _unit.team:
 				Globals.Team.AXIS:
@@ -382,7 +385,9 @@ func set_close_combat_hexes_and_units():
 				both_teams_present = true
 		if both_teams_present:
 			var close_combat_instance: CloseCombatInstance
-			for close_combat_instance_present in close_combat_instances.get_children():
+			for close_combat_instance_present: CloseCombatInstance in close_combat_instances.get_children():
+				if not close_combat_instance_present.ongoing or close_combat_instance_present.is_queued_for_deletion():
+					continue
 				if close_combat_instance_present.hex == unit.current_hex:
 					close_combat_instance = close_combat_instance_present
 					break
@@ -391,12 +396,10 @@ func set_close_combat_hexes_and_units():
 				close_combat_instance.hex = unit.current_hex
 				close_combat_instance.terrain_defense_value = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
 				
-			for _unit in units_in_hex:
-				if not close_combat_instance.units_by_team[_unit.team].has(_unit):
-					close_combat_instance.add_unit(_unit)
-			
-			for _unit in units_in_hex:
-				_unit.in_close_combat = true
+			for _unit: Unit in units_in_hex:
+				if not close_combat_instance.can_unit_participate(_unit):
+					continue
+				close_combat_instance.add_unit(_unit)
 				_unit.movement.stop()
 			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
 			#close_combat_locations.add_child(close_combat_sign)
@@ -408,9 +411,6 @@ func set_close_combat_hexes_and_units():
 			if close_combat_instance.get_parent() == null:
 				close_combat_instance.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
 				close_combat_instances.add_child(close_combat_instance)
-		else:
-			for _unit in units_in_hex:
-				_unit.in_close_combat = false
 
 
 #func set_close_combat_hexes_and_units():
