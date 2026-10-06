@@ -1163,9 +1163,8 @@ func _on_stopped_moving():
 # FIXME stress > 100 is weird since the player doesnt see stress go down and wonders why the unit wont rally
 
 
-func _on_unit_arrived_at_hex(new_hex: Vector2i):
-	pass
-	#action_controller.on_reached_hex(new_hex)
+func _on_unit_arrived_at_hex(new_hex: Vector2i) -> void:
+	action_controller.on_reached_hex(new_hex)
 
 
 func _on_rout_failed():

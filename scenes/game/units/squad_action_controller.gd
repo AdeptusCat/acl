@@ -293,9 +293,12 @@ func on_stopped_moving() -> void:
 
 
 func on_reached_hex(hex: Vector2i) -> void:
-	if hex == objective_hex:
-		if action_state == SquadActionState.MOVING_TO_POSITION or action_state == SquadActionState.CROSSING_EXPOSED:
-			_set_action_state(SquadActionState.ESTABLISHING_POSITION)
+	if not unit.alive or unit.surrendered or movement.is_moving:
+		return
+	if hex != unit.current_hex:
+		return
+	# This event completes the whole path; stopped_moving also fires at waypoints.
+	on_stopped_moving()
 
 
 func on_retreat_complete(_retreat_hex: Vector2i) -> void:
