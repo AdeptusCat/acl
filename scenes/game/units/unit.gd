@@ -461,10 +461,13 @@ func _setup_runtime_soldiers(_squad_loadout: SquadLoadoutSpec) -> void:
 	var i: int = 0
 	for soldier in _squad_loadout.soldiers:
 		var L: SoldierLoadout = soldier
-		var spec: WeaponSpec = L.weapon
+		var spec: WeaponSpec = L.resolve_weapon()
 		if spec == null:
 			spec = default_rifle
 		spec = spec.create_runtime()
+		if L.weapon != null and L.weapon.is_built_in():
+			# Embedded save definitions must not become references to the save file.
+			spec.source_resource_path = L.weapon_resource_path
 		var s: Soldier = Soldier.new(
 			i,
 			L.nickname,

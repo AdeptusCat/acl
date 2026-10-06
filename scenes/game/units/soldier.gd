@@ -126,6 +126,9 @@ func create_save_data() -> SoldierLoadout:
 		data.weapon_resource_path = weapon.source_resource_path
 		if data.weapon_resource_path.is_empty():
 			data.weapon_resource_path = weapon.resource_path
+		# Built-in or anonymous weapons have no standalone asset to reference.
+		if data.weapon_resource_path.is_empty() or data.weapon_resource_path.contains("::") or not ResourceLoader.exists(data.weapon_resource_path):
+			data.weapon = weapon.duplicate() as WeaponSpec
 	else:
 		data.weapon_resource_path = ""
 
