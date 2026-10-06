@@ -21,7 +21,6 @@ class SaveUiUnderTest extends UnitUi:
 
 var failures: int = 0
 var units: Array[Unit] = []
-var soldiers_created: Array[Soldier] = []
 
 
 func _ready() -> void:
@@ -182,14 +181,12 @@ func _create_unit(loadout: SquadLoadoutSpec) -> Unit:
 	var unit: Unit = _empty_unit()
 	unit.squad_loadout = loadout
 	unit._setup_runtime_soldiers(loadout)
-	soldiers_created.append_array(unit.squad_fire.soldiers)
 	return unit
 
 
 func _restore_unit(data: UnitSaveData) -> Unit:
 	var unit: Unit = _empty_unit()
 	unit.apply_save_data(data)
-	soldiers_created.append_array(unit.squad_fire.soldiers)
 	return unit
 
 
@@ -206,13 +203,6 @@ func _empty_unit() -> Unit:
 
 
 func _finish() -> void:
-	for soldier: Soldier in soldiers_created:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			task.free()
 	for unit: Unit in units:
 		unit.free()
 	print("Weapon save regression failures: ", failures)

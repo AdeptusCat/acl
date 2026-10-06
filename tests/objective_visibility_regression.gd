@@ -63,18 +63,6 @@ func _run() -> void:
 		controller.set_objective_cells(team)
 		_check_view(controller, team, "Empty objective layers")
 		_check(Globals.objective_hexes.is_empty(), "Empty layers clear previous objective hexes")
-	var soldiers: Array[Soldier] = []
-	for unit: Unit in Globals.get_units():
-		soldiers.append_array(unit.squad_fire.soldiers)
-	# Free the fixture's existing unparented soldier tasks separately.
-	for soldier: Soldier in soldiers:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			if is_instance_valid(task):
-				task.free()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

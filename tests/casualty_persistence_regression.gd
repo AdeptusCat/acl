@@ -13,7 +13,6 @@ class UnitUnderTest extends Unit:
 		pass
 
 var failures: int = 0
-var soldiers_created: Array[Soldier] = []
 
 
 func _ready() -> void:
@@ -121,17 +120,11 @@ func _run() -> void:
 	Globals.casualty_history = original_history
 	DirAccess.remove_absolute("user://matches/%s.tres" % match_save.match_id)
 	DirAccess.remove_absolute("user://matches/%s.tres" % legacy.match_id)
-	for created: Soldier in soldiers_created:
-		var tasks: Array[SoldierTask] = [created.setup_weapon_task, created.aquire_target_task, created.reload_task, created.fire_weapon_task, created.assist_task, created.close_combat_task]
-		for task: SoldierTask in tasks:
-			task.free()
-	soldiers_created.clear()
 	_finish()
 
 
 func _make_soldier(id: int, nickname: String, unit: Unit, weapon: WeaponSpec) -> Soldier:
 	var soldier: Soldier = Soldier.new(id, nickname, RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, weapon, unit, unit.team)
-	soldiers_created.append(soldier)
 	return soldier
 
 

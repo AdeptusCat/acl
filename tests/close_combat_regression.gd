@@ -7,7 +7,6 @@ var failures: int = 0
 var main: Node
 var controller: Node
 var fixture_units: Array[Unit] = []
-var soldiers_created: Array[Soldier] = []
 
 
 func _ready() -> void:
@@ -29,8 +28,6 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	controller = world.game_controller
 	_freeze_simulation(main)
-	for unit: Unit in Globals.get_units():
-		soldiers_created.append_array(unit.squad_fire.soldiers)
 	Debug.no_damage = false
 	_test_admission_and_surrender()
 	await _clear_fixtures()
@@ -58,15 +55,6 @@ func _run() -> void:
 	main._on_try_again()
 	await get_tree().create_timer(0.2).timeout
 	_check(Globals.get_units().is_empty(), "Restart clears surviving units and corpses")
-	for soldier: Soldier in soldiers_created:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			if is_instance_valid(task):
-				task.free()
-	soldiers_created.clear()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -134,7 +122,6 @@ func _test_roster_replacement_and_missing_notifications() -> void:
 	var combat: CloseCombatInstance = _discover_combat()
 	var replaced_soldiers: Array[Soldier] = axis.squad_fire.soldiers.duplicate()
 	axis._setup_runtime_soldiers(axis.squad_loadout)
-	soldiers_created.append_array(axis.squad_fire.soldiers)
 	for soldier: Soldier in axis.squad_fire.soldiers:
 		soldier.cooldown_remaining = 100.0
 	combat._on_timer_timeout()
@@ -301,7 +288,6 @@ func _create_unit(team: Globals.Team, size: int) -> Unit:
 	_freeze_simulation(unit)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
 	fixture_units.append(unit)
-	soldiers_created.append_array(unit.squad_fire.soldiers)
 	return unit
 
 

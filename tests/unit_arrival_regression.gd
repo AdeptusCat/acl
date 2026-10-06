@@ -26,9 +26,6 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze_simulation(main)
-	var soldiers: Array[Soldier] = []
-	for candidate: Unit in Globals.get_units():
-		soldiers.append_array(candidate.squad_fire.soldiers)
 	unit = Globals.get_units()[0]
 	unit.unit_arrived_at_hex.connect(_on_arrival)
 	unit.action_controller.action_state_changed.connect(_on_action_state_changed)
@@ -62,14 +59,6 @@ func _run() -> void:
 	main._on_try_again()
 	await get_tree().create_timer(0.2).timeout
 	_check(Globals.get_units().is_empty(), "Restart clears units and action timers")
-	for soldier: Soldier in soldiers:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			if is_instance_valid(task):
-				task.free()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

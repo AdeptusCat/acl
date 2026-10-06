@@ -25,8 +25,6 @@ func _run() -> void:
 	_test_mortar_ammunition()
 	_test_support_weapon_transfer()
 	for unit: Unit in units:
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			_free_tasks(soldier)
 		unit.free()
 	units.clear()
 	print("Weapon state regression failures: ", failures)
@@ -115,7 +113,6 @@ func _test_support_weapon_transfer() -> void:
 	_check(replacement.weapon.is_setup, "Re-crewing retains existing weapon state")
 	_check(second.squad_fire.soldiers[0].weapon.ammunition == source.ammunition_start, "Other support weapons remain independent")
 	_check(replacement.create_save_data().weapon_resource_path == source.resource_path, "Transferred weapons retain their source asset path")
-	_free_tasks(old_gunner)
 
 
 func _loadout(weapon: WeaponSpec, role: RankGrades.Role = RankGrades.Role.SOLDIER) -> SoldierLoadout:
@@ -135,15 +132,6 @@ func _create_unit(loadout: SquadLoadoutSpec, default_weapon: WeaponSpec = null) 
 	unit._setup_runtime_soldiers(loadout)
 	units.append(unit)
 	return unit
-
-
-func _free_tasks(soldier: Soldier) -> void:
-	var tasks: Array[SoldierTask] = [
-		soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-		soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-	]
-	for task: SoldierTask in tasks:
-		task.free()
 
 
 func _check(condition: bool, message: String) -> void:

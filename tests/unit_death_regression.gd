@@ -14,7 +14,6 @@ class ImpactProbe extends SquadFireController:
 var failures: int = 0
 var shots: int = 0
 var deaths: int = 0
-var soldiers_created: Array[Soldier] = []
 
 
 func _ready() -> void:
@@ -36,8 +35,6 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze_simulation(main)
 	var units: Array[Unit] = Globals.get_units()
-	for unit: Unit in units:
-		soldiers_created.append_array(unit.squad_fire.soldiers)
 	var hq: Unit = units[0]
 	var recipient: Unit = units[1]
 	var hq_soldiers: Array[Soldier] = hq.squad_fire.soldiers.duplicate()
@@ -70,7 +67,6 @@ func _run() -> void:
 	projectile_soldier.setup_weapon_task.done = true
 	projectile_soldier.reload_task.done = true
 	projectile_soldier.aquire_target_task.done = true
-	soldiers_created.append(projectile_soldier)
 	hq.attackState = Unit.AttackState.MANUAL_GROUND
 	impact_probe.target_hex = enemy_recipient.current_hex
 	Debug.dont_fire_wepaons = false
@@ -93,7 +89,6 @@ func _run() -> void:
 	var weapon: WeaponSpec = WeaponSpec.new()
 	weapon.snd_mg_loop = AudioStreamGenerator.new()
 	var soldier: Soldier = Soldier.new(999, "Burst probe", RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, weapon, hq, hq.team)
-	soldiers_created.append(soldier)
 	hq.weapon_audio.start_mg_loop(soldier.id, weapon, hq)
 	var loop_player: AudioStreamPlayer2D = hq.weapon_audio._mg_loops[soldier.id]
 	_check(loop_player.playing, "Fixture starts a weapon loop")
@@ -192,7 +187,6 @@ func _run() -> void:
 	_check(reloaded_history.records.size() == Globals.casualty_history.records.size(), "Automatic history saves survive loading from disk")
 	# Allow outstanding burst/watchdog timers to resume after scene cleanup.
 	await get_tree().create_timer(6.0).timeout
-	_free_soldier_tasks()
 	# Clean up the old implementation's detached children when testing the baseline.
 	for child_id: int in child_ids:
 		if is_instance_id_valid(child_id):
@@ -215,18 +209,6 @@ func _freeze_simulation(node: Node) -> void:
 		timer.stop()
 	for child: Node in node.get_children():
 		_freeze_simulation(child)
-
-
-func _free_soldier_tasks() -> void:
-	for soldier: Soldier in soldiers_created:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			if is_instance_valid(task):
-				task.free()
-	soldiers_created.clear()
 
 
 func _on_shot(_weapon: WeaponSpec, _hex: Vector2i) -> void:

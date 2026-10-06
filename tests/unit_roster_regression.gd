@@ -32,7 +32,6 @@ class WeaponAudioUnderTest extends WeaponAudio:
 
 var failures: int = 0
 var units: Array[UnitUnderTest] = []
-var soldiers_created: Array[Soldier] = []
 
 
 func _ready() -> void:
@@ -48,16 +47,8 @@ func _run() -> void:
 	_test_specific_and_ranged_casualties()
 	_test_runtime_leader_lookup()
 	_test_saved_roster_initialization()
-	for soldier: Soldier in soldiers_created:
-		var tasks: Array[SoldierTask] = [
-			soldier.setup_weapon_task, soldier.aquire_target_task, soldier.reload_task,
-			soldier.fire_weapon_task, soldier.assist_task, soldier.close_combat_task,
-		]
-		for task: SoldierTask in tasks:
-			task.free()
 	for unit: UnitUnderTest in units:
 		unit.free()
-	soldiers_created.clear()
 	units.clear()
 	print("Unit roster regression failures: ", failures)
 	get_tree().quit(failures)
@@ -149,7 +140,6 @@ func _test_saved_roster_initialization() -> void:
 	data.team = Globals.Team.ALLIES
 	data.squad_loadout = _make_loadout(3)
 	unit.apply_save_data(data)
-	soldiers_created.append_array(unit.squad_fire.soldiers)
 	_check_strength(unit, 3, "Saved roster updates displayed and cached strength")
 	_check(unit.original_size == 3, "Saved roster sets the new starting baseline")
 	_check(unit.casualties_taken == 0 and unit.squad_fire.casualties.is_empty(), "Replacing the roster clears previous loss accounting")
@@ -177,7 +167,6 @@ func _create_unit(runtime_size: int, legacy_size: int) -> UnitUnderTest:
 	unit.original_size = legacy_size
 	unit.squad_loadout = _make_loadout(runtime_size)
 	unit._setup_runtime_soldiers(unit.squad_loadout)
-	soldiers_created.append_array(unit.squad_fire.soldiers)
 	units.append(unit)
 	return unit
 
