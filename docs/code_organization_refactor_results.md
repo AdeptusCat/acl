@@ -2,7 +2,7 @@
 
 Implemented on 6 October 2026 in the order specified by the [plan](code_organization_refactor_plan.md): folder moves first, then filename renames. The [manifest](code_refactor_manifest.json) records every original path, intermediate path, final path, and batch.
 
-These results describe the organization refactor at completion. The subsequent [faction-folder migration](faction_folder_naming_proposal.md) changes country folder paths to `germany` and `united_states`; its [manifest](faction_folder_refactor_manifest.json) records those later moves and compatibility redirects.
+These results describe the organization refactor at completion. The subsequent [faction-folder migration](faction_folder_naming_proposal.md) changes country folder paths to `germany` and `united_states`; its [manifest](faction_folder_refactor_manifest.json) records those later moves and compatibility redirects. A later [diagnostic review and cleanup](development_diagnostics_review.md) removed unused temporary saves, influence-map archives, and obsolete scene stubs; its [manifest](development_diagnostics_cleanup_manifest.json) records those removals.
 
 ## Changes
 

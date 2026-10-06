@@ -1,0 +1,233 @@
+{
+  "date": "2026-10-06",
+  "description": "Unused-file cleanup only. Runtime scripts and useful diagnostic probes are preserved. Removed files had no current path or UID consumers and matched their tracked source-commit versions.",
+  "source_commit": "5e23367dc2e5e470e099075373c22f52f0d03d16",
+  "removed_file_count": 32,
+  "removed_total_bytes": 2445812,
+  "files": [
+    {
+      "path": "assets/tiles/buildings/orchard.png40275238561.tmp",
+      "bytes": 5654,
+      "sha256": "ee329e29c2725639e16679d7d75adae5d7105cbaf90bd60c7563eba731da7722",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "assets/units/unit_tb_alt.png262699985.tmp",
+      "bytes": 4015,
+      "sha256": "5f9e7a07c95afea9f60e35e7a4c1972b29df5488cbbd48d79731560343fe7a79",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn1033487933.tmp",
+      "bytes": 2807,
+      "sha256": "275c1919b116332527891fbf2e58680a01daa0c38dfda5bc8fe4372c1f8b94db",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn16129291347.tmp",
+      "bytes": 2139,
+      "sha256": "d2cee822eaf2de8559007d838a21ffb96f9cf0e6daecf6feabf7ecd19dd46876",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn3246295297.tmp",
+      "bytes": 2807,
+      "sha256": "275c1919b116332527891fbf2e58680a01daa0c38dfda5bc8fe4372c1f8b94db",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn3262441774.tmp",
+      "bytes": 3581,
+      "sha256": "965b57dce460ea54535ab4ee63e81aa10bc9508b4ea8dec80c9d63be233c1e12",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn3289363397.tmp",
+      "bytes": 2832,
+      "sha256": "1644844e67f253e8c4f09ca5133e0f46e83053b5c356027f538d0c37d11b15ef",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn3932947620.tmp",
+      "bytes": 1176,
+      "sha256": "eb469c30ff8b0fcca1fc876db834d9c23683cf9f27bcfc0767d046a6523bbbd3",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn3940439980.tmp",
+      "bytes": 1176,
+      "sha256": "eb469c30ff8b0fcca1fc876db834d9c23683cf9f27bcfc0767d046a6523bbbd3",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn43347079223.tmp",
+      "bytes": 2807,
+      "sha256": "275c1919b116332527891fbf2e58680a01daa0c38dfda5bc8fe4372c1f8b94db",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn4516203250.tmp",
+      "bytes": 1431,
+      "sha256": "e226454519abdb1cd657fb87d928a699cf47f5628b4ccdaa2143e40f2c52e45a",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn4599191397.tmp",
+      "bytes": 1431,
+      "sha256": "e226454519abdb1cd657fb87d928a699cf47f5628b4ccdaa2143e40f2c52e45a",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn714084780.tmp",
+      "bytes": 3026,
+      "sha256": "5ae0ee903685464dd4383a72ed0770d7fe9c0af61bfb5b4ef998fc6234513b4d",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/game/units/unit.tscn956448626.tmp",
+      "bytes": 2807,
+      "sha256": "275c1919b116332527891fbf2e58680a01daa0c38dfda5bc8fe4372c1f8b94db",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/ui/ui.tscn2297517976.tmp",
+      "bytes": 4442,
+      "sha256": "6957c38c8289c73d0ce69c87a0be9acaa7729ecdf79ffb4811dd7979767be6ae",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/ui/ui.tscn5101125052.tmp",
+      "bytes": 11678,
+      "sha256": "82d17f7048afd1946ab3b46bf9592646da81e268610616821875aad299276df7",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/node_2d.tscn3731878108.tmp",
+      "bytes": 9254,
+      "sha256": "bde3a16407eb26583edb38b727879eeed5aab250d6bdd003e5874b8a5cf75192",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/node_2d.tscn971304179.tmp",
+      "bytes": 7555,
+      "sha256": "dc84dcd9de24d5a7f01491448e0c5fac7cc25803f990eb51cb2616462e5f2fd9",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/world.tscn1300252041.tmp",
+      "bytes": 56058,
+      "sha256": "5eac711ef13594de14e0ae6e57faa8f349071b47256366a2a668205b8568763f",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/world.tscn1310094601.tmp",
+      "bytes": 56058,
+      "sha256": "5eac711ef13594de14e0ae6e57faa8f349071b47256366a2a668205b8568763f",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/world.tscn18622959338.tmp",
+      "bytes": 13947,
+      "sha256": "6affec3a5753d82b1660c0f86a84d121d47cae8a52133c5180ca30256d9bca1d",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/world.tscn796635151.tmp",
+      "bytes": 52137,
+      "sha256": "fec53ab5878b2fc7411b2383d7a7aae4c36e7b0372f34fee359218dfe13e8c4f",
+      "uid": null,
+      "reason": "Unused editor temporary save; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map (1).zip",
+      "bytes": 30690,
+      "sha256": "5342624f093a4818b6b61b2455179dd46c2be213e9917794c1b72a8a68013466",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map (2).zip",
+      "bytes": 31294,
+      "sha256": "25c00376b87636a70e078ec8dde5cf62efa8c41aa50d05138df3d1f4ea6835c6",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map (3).zip",
+      "bytes": 31526,
+      "sha256": "a92ddd0520055d26cdef7b30fb1756a4a7190044bfc90f952ef237080b7f3bae",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map.tar.gz",
+      "bytes": 17602,
+      "sha256": "2b05c7950001d8b14a94c9e237366389a4f19b2d12808da4df48297b7b475c98",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map.zip",
+      "bytes": 29652,
+      "sha256": "be0d80ca1c90ac1463b74d5c7761f570d7ff2bef3661a27a02fa829b73d3c550",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "scenes/world/influence_map_team_threat_axis_storage.zip",
+      "bytes": 32916,
+      "sha256": "54789fc2fa2bad47ad8921342b597550a18f0b17bf74aadc94ba971e18bd81c2",
+      "uid": null,
+      "reason": "Unused influence-map snapshot archive; cleanup explicitly requested."
+    },
+    {
+      "path": "assets/splash_screen/splash_02.png~",
+      "bytes": 2022528,
+      "sha256": "95d8f0dc43a03055cb396027aadd3790ed4f1012d27c59464d5266ef3b10d420",
+      "uid": null,
+      "reason": "Byte-identical backup of the current splash image."
+    },
+    {
+      "path": "tests/manual/ai/formation_ai_controllers.tscn",
+      "bytes": 268,
+      "sha256": "645e276a9787fa22ee4feb067a67b6e2cc63369f7290f900f3ff8c0fc25d9b08",
+      "uid": "uid://vrnwdhsu251x",
+      "reason": "Unreferenced empty or broken scene stub, superseded by canonical runtime components."
+    },
+    {
+      "path": "influence_map_debug_draw.tscn",
+      "bytes": 234,
+      "sha256": "00814cf24313e9e847a3c48976fef492d4766b347914ab06ae614f2af5d327ff",
+      "uid": "uid://dlay4avs8k84o",
+      "reason": "Unreferenced empty or broken scene stub, superseded by canonical runtime components."
+    },
+    {
+      "path": "influence_map_controller.tscn",
+      "bytes": 284,
+      "sha256": "504a9e7601cae1f2d17b13e68f5f2274fbac5b95f58109223cfe3813ffe31532",
+      "uid": "uid://d04f8y07era0o",
+      "reason": "Unreferenced empty or broken scene stub, superseded by canonical runtime components."
+    }
+  ]
+}

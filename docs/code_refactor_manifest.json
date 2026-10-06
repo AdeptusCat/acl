@@ -1767,6 +1767,7 @@
     "scenes/game/units/soldier_loadout.gd": "resources/soldiers/soldier_loadout.gd"
   },
   "subsequent_refactors": [
-    "faction_folder_refactor_manifest.json"
+    "faction_folder_refactor_manifest.json",
+    "development_diagnostics_cleanup_manifest.json"
   ]
 }

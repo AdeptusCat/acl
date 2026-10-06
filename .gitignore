@@ -2,3 +2,11 @@
 .godot/
 /android/
 /export/
+
+# Editor temporary saves and backup copies
+*.tmp
+*~
+
+# Local influence-map snapshots
+/scenes/world/influence_map*.zip
+/scenes/world/influence_map*.tar.gz
