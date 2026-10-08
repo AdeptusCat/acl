@@ -5,6 +5,7 @@ var version: int = 0
 var captured_at: float = 0.0
 var maps: Dictionary[int, InfluenceMap] = {}
 var contacts: Dictionary[int, Array] = {}
+var defensive_contacts: Dictionary[int, Array] = {}
 var positions: Dictionary[Unit, Vector2i] = {}
 var teams: Dictionary[Unit, int] = {}
 var routes: Dictionary[int, AStar2D] = {}
@@ -17,6 +18,13 @@ var _forecasts: Dictionary[int, Dictionary] = {}
 func get_contacts(team: int) -> Array[InfluenceContact]:
 	var result: Array[InfluenceContact] = []
 	for contact: InfluenceContact in contacts.get(team, []):
+		result.append(contact)
+	return result
+
+
+func get_defensive_contacts(team: int) -> Array[InfluenceContact]:
+	var result: Array[InfluenceContact] = []
+	for contact: InfluenceContact in defensive_contacts.get(team, contacts.get(team, [])):
 		result.append(contact)
 	return result
 

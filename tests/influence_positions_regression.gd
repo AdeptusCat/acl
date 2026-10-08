@@ -107,6 +107,7 @@ func _run() -> void:
 	controller.set_objective_for_team(Globals.Team.ALLIES, Vector2i(5, 3))
 	_publish()
 	_test_knowledge()
+	controller.defensive_memory.clear()
 	_test_publication()
 	_test_selection()
 	_test_geography()
@@ -121,6 +122,9 @@ func _run() -> void:
 	_test_reserve_policy()
 	_test_planner_activation()
 	_test_position_overlay()
+	_test_defensive_posture()
+	_test_defensive_commitment()
+	_test_defensive_memory()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -173,6 +177,8 @@ func _query(mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND) -> Positio
 	query.snapshot = controller.snapshot
 	query.objective_hex = Vector2i(3, 3)
 	query.profile = PositionProfile.for_mode(mode)
+	# This geometry/acceptance fixture has no buildings. Posture tests use production limits.
+	query.profile.minimum_cover = 0.0
 	query.defense_radius = 3
 	return query
 
@@ -481,7 +487,7 @@ func _test_route_and_context() -> void:
 	var dangerous: Vector2i = path[1]
 	map.set_layer_value(InfluenceMap.Layer.THREAT, dangerous, 100.0)
 	var advice: PositionResult = PositionQueryService.query_positions(query)
-	_check(not advice.is_valid() and advice.rejections.has("risk"), "A dangerous route step is rejected even when the destination is safe")
+	_check(not advice.is_valid() or not advice.path.has(dangerous), "A dangerous route step is avoided even when the destination is safe")
 	map.set_layer_value(InfluenceMap.Layer.THREAT, dangerous, 0.0)
 	map.set_layer_value(InfluenceMap.Layer.FORECAST_THREAT, query.sector_cells[0], 100.0)
 	query.objective_hex = Vector2i(4, 3)
@@ -567,6 +573,7 @@ func _test_axis_diagnostics() -> void:
 	_check(is_zero_approx(empty_map.get_layer_value(InfluenceMap.Layer.THREAT, own.current_hex)), "An explicitly empty contact capture cannot resample live enemies")
 	Globals.unit_visible_enemies[own] = []
 	second_enemy.free()
+	controller.defensive_memory.clear()
 	_publish()
 
 
@@ -697,3 +704,177 @@ func _test_position_overlay() -> void:
 	draw.set_selected_unit(null)
 	_check(draw.selected_unit == null and draw.position_advice == null and draw.debug_view == InfluenceMapDebugDraw.DebugView.THREAT and draw.team == enemy.team, "Deselection restores the previous team layer and clears position advice")
 	draw.free()
+
+
+func _test_defensive_posture() -> void:
+	Globals.unit_visible_enemies[own] = []
+	own.enemy_memory.clear()
+	_publish()
+	var map: InfluenceMap = controller.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+	var query: PositionQuery = _query()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.sector_cells = [Vector2i(3, 3)]
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, query.sector_cells[0], 0.0)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "An open objective hex is not an eligible defensive position even without known enemies")
+	query.sector_cells = [Vector2i(4, 3)]
+	var path: Array[Vector2i] = query.snapshot.get_path(own.team, own.current_hex, query.sector_cells[0])
+	var open_step: Vector2i = path[1]
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, open_step, 0.0)
+	map.set_layer_value(InfluenceMap.Layer.THREAT, open_step, 0.5)
+	var graph: AStar2D = query.snapshot.routes[own.team]
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, not path.has(ground.local_to_map(graph.get_point_position(id))))
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A strong destination cannot justify crossing open ground under known fire")
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, false)
+	var safer: PositionResult = PositionQueryService.query_positions(query)
+	_check(safer.is_valid() and not safer.path.has(open_step), "Defense finds a covered detour when the shortest route is exposed")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, open_step, 0.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, open_step, 1.0)
+	var axis: ThreatAxis = ThreatAxis.new()
+	axis.axis_name = "visible_contact"
+	query.axis = axis
+	var context: String = query.context_key()
+	query.axis = null
+	_check(query.context_key() == context, "Losing an approach axis does not discard defensive position commitment")
+	query.has_accepted_target = true
+	query.accepted_target = query.sector_cells[0]
+	query.accepted_context = query.context_key()
+	var step_id: int = query.snapshot.point_ids[own.team][path[1]]
+	graph.set_point_disabled(step_id, true)
+	var detour: Array[Vector2i] = query.snapshot.get_path(own.team, own.current_hex, query.accepted_target)
+	graph.set_point_disabled(step_id, false)
+	own.movement.path_hexes = detour
+	own.movement.path_index = 1
+	own.movement.target_hex = query.accepted_target
+	own.movement.is_moving = true
+	var retained: PositionResult = PositionQueryService.query_positions(query)
+	_check(not detour.is_empty() and not retained.should_move and retained.path == detour, "An existing safe route survives a cheaper alternate route becoming available")
+	own.movement.is_moving = false
+	own.movement.path_hexes.clear()
+	query.has_accepted_target = false
+	var enemy_power: float = enemy.firepower
+	var enemy_hex: Vector2i = enemy.current_hex
+	enemy.firepower = 1.0
+	Globals.unit_visible_enemies[own] = [enemy]
+	own.remember_enemy(enemy)
+	_publish()
+	query.snapshot = controller.snapshot
+	map = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+	query.sector_cells = [Vector2i(5, 3)]
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Defense does not advance adjacent to a known armed enemy")
+	Globals.unit_visible_enemies[own] = []
+	own.enemy_memory.clear()
+	enemy.current_hex = Vector2i(8, 6)
+	_publish()
+	query.snapshot = controller.snapshot
+	map = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Losing sight does not invite a return to the last confirmed enemy's adjacent hex")
+	enemy.firepower = enemy_power
+	enemy.current_hex = enemy_hex
+
+
+func _test_defensive_commitment() -> void:
+	controller.defensive_memory.clear()
+	_publish()
+	var query: PositionQuery = _query()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.objective_hex = own.current_hex
+	var better: Vector2i = Vector2i(3, 4)
+	query.sector_cells = [own.current_hex, better]
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, own.current_hex, 1.0 / 3.0)
+	query.has_accepted_target = true
+	query.accepted_target = own.current_hex
+	query.accepted_context = query.context_key()
+	query.accepted_at = query.snapshot.captured_at
+	var initial_time: float = query.snapshot.captured_at
+	_check(PositionQueryService.query_positions(query).target_hex == own.current_hex, "A safe accepted position ignores score fluctuations during its commitment interval")
+	query.snapshot.captured_at += 9.0
+	_check(PositionQueryService.query_positions(query).target_hex == better, "A materially better covered position is available after commitment expires")
+	query.snapshot.captured_at = initial_time
+	map.set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 100.0)
+	_check(PositionQueryService.query_positions(query).target_hex == better, "An unsafe accepted position can be abandoned immediately during commitment")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 0.0)
+	query.objective_hex = better
+	_check(PositionQueryService.query_positions(query).target_hex == better, "A changed objective invalidates the old defensive commitment")
+	query.objective_hex = own.current_hex
+	query.accepted_at = -INF
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, own.current_hex, 1.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, better, 1.0)
+	query.objective_hex = better
+	query.accepted_context = query.context_key()
+	query.defense_radius = 10
+	query.accepted_context = query.context_key()
+	_check(PositionQueryService.query_positions(query).target_hex == own.current_hex, "A small coverage improvement cannot trigger repeated defensive shuffling")
+
+
+func _test_defensive_memory() -> void:
+	var memory: DefensiveContactMemory = DefensiveContactMemory.new()
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.maps[own.team] = InfluenceMap.new()
+	snapshot.positions[own as Unit] = own.current_hex
+	snapshot.teams[own as Unit] = own.team
+	snapshot.captured_at = 10.0
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = Vector2i(6, 3)
+	contact.firepower = 2.0
+	contact.weapon_range = 6
+	contact.observed = true
+	snapshot.contacts[own.team] = [contact]
+	memory.capture_into(snapshot)
+	var published: InfluenceContact = snapshot.get_defensive_contacts(own.team)[0]
+	snapshot.contacts[own.team] = []
+	snapshot.captured_at = 100.0
+	memory.capture_into(snapshot)
+	var remembered: InfluenceContact = snapshot.get_defensive_contacts(own.team)[0]
+	_check(not remembered.observed and remembered.hex == contact.hex and remembered.firepower == contact.firepower and remembered.confidence == 0.5, "Last-confirmed tactical danger persists at bounded confidence beyond firing-track expiry")
+	_check(published.observed and published.confidence == 1.0, "Remembering a contact does not mutate a previously published contact")
+	snapshot.los = {contact.hex: {own.current_hex: {"target_cover": 0.8, "hindrance": 0.0}}}
+	var query: PositionQuery = _query()
+	query.snapshot = snapshot
+	var observed_risk: float = PositionFeatureEvaluator._contact_fire_risk(query, [published], own.current_hex, true)
+	var remembered_risk: float = PositionFeatureEvaluator._contact_fire_risk(query, [remembered], own.current_hex, true)
+	_check(observed_risk > 0.0 and is_equal_approx(observed_risk, remembered_risk), "Fading location confidence does not turn a last-confirmed firing lane into a safe route")
+	_check(observed_risk > PositionFeatureEvaluator._contact_fire_risk(query, [published], own.current_hex, false), "Moving squads do not claim stationary target cover in exposure checks")
+	snapshot.positions[own as Unit] = contact.hex
+	snapshot.captured_at = 14.0
+	contact.observed = false
+	contact.confidence = 1.0 - 4.0 / Unit.ENEMY_MEMORY_LIFETIME
+	snapshot.contacts[own.team] = [contact]
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "Physically checking an unoccupied last-known hex clears its danger")
+	snapshot.positions[own as Unit] = own.current_hex
+	snapshot.captured_at = 15.0
+	contact.confidence = 1.0 - 5.0 / Unit.ENEMY_MEMORY_LIFETIME
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "Old firing memory cannot resurrect a cleared danger location")
+	contact.observed = true
+	contact.confidence = 1.0
+	contact.hex = Vector2i(8, 6)
+	snapshot.captured_at = 16.0
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team)[0].hex == contact.hex, "A new confirmed sighting updates the tactical danger location")
+	var was_alive: bool = enemy.alive
+	enemy.alive = false
+	snapshot.contacts[own.team] = []
+	memory.capture_into(snapshot)
+	_check(not snapshot.get_defensive_contacts(own.team).is_empty(), "An unobserved casualty cannot leak hidden live state into danger knowledge")
+	Globals.unit_visible_enemies[own] = [enemy]
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "A reported visible casualty clears the remembered threat")
+	enemy.alive = was_alive
+	Globals.unit_visible_enemies[own] = []
+	controller.reset_for_match()
+	_check(controller.defensive_memory.contacts_by_team.is_empty(), "Starting a new match clears prior tactical danger")

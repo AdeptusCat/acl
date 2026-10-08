@@ -1,0 +1,146 @@
+extends Node
+
+var checks: int = 0
+var failures: int = 0
+
+
+func _ready() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	seed(6049)
+	var main: Node = load("res://scenes/main.tscn").instantiate()
+	get_tree().root.add_child(main)
+	var world: Node = main.world
+	var map_index: int = 1
+	if OS.get_cmdline_user_args().has("--default-map"):
+		map_index = 0
+	var map: Map = world.maps.get_child(map_index)
+	var scenario: Scenario = map.get_scenario(0)
+	var player_team: Globals.Team = scenario.player_team
+	if OS.get_cmdline_user_args().has("--axis"):
+		player_team = Globals.Team.AXIS
+	Globals.map_chosen = map
+	Globals.scenario_chosen = scenario
+	world.start_screen.hide()
+	await world._on_game_started(map, scenario, player_team, Globals.GameMode.ATTACK)
+	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	var planner: PlatoonAI = world.game_controller.platoon_ai
+	if planner.team == player_team:
+		planner = world.game_controller.get_node("PlatoonAi2")
+	# Keep combat strength fixed to isolate positional decisions, while running real movement/perception.
+	for unit: Unit in Globals.get_units():
+		unit.squad_fire.process_mode = Node.PROCESS_MODE_DISABLED
+		unit.squad_ai_controller.process_mode = Node.PROCESS_MODE_DISABLED
+		unit.stress_system.process_mode = Node.PROCESS_MODE_DISABLED
+		unit.combat_stats_timer.stop()
+		unit.movement.base_speed = 90.0
+	for frame: int in range(600):
+		await get_tree().process_frame
+	var player: Unit = null
+	for unit: Unit in Globals.get_units_for_team(player_team):
+		if unit.squad_type == Globals.SquadType.Rifle:
+			player = unit
+			break
+	_check(player != null and not planner.squads.is_empty(), "Authored scenario has player and defender squads")
+	var target: Vector2i = _relocation_hex(controller, player, planner.squads[0])
+	_check(target != Vector2i(-999, -999), "A different reachable player position exists two hexes from the defense")
+	if target == Vector2i(-999, -999):
+		get_tree().quit(failures)
+		return
+	player.order(Globals.UnitCmd.MOVE, target)
+	for frame: int in range(1800):
+		await get_tree().process_frame
+		if not player.movement.is_moving:
+			break
+	_check(player.current_hex == target, "Player relocates through the real order and movement APIs")
+	player.give_hold_order()
+	var player_order: int = player.action_controller.action_order_id
+	# Provide one confirmed sighting; subsequent visibility loss is handled by normal perception.
+	for defender: Unit in planner.squads:
+		if LOSHelper.los_lookup.get(defender.current_hex, {}).has(player.current_hex):
+			Globals.unit_visible_enemies[defender] = [player]
+			defender.remember_enemy(player)
+	controller.create_maps(0.0)
+	var last_targets: Dictionary[Unit, String] = {}
+	var changes: Dictionary[Unit, int] = {}
+	var initial_orders: Dictionary[Unit, int] = {}
+	var samples: Array[Dictionary] = []
+	var valid_positions: int = 0
+	var no_candidates: int = 0
+	for frame: int in range(2400):
+		await get_tree().process_frame
+		if frame % 60 != 59:
+			continue
+		_check(player.current_hex == target and not player.movement.is_moving and player.action_controller.action_order_id == player_order, "Player stays stationary after relocation")
+		for unit: Unit in planner.squads:
+			var advice: PositionResult = unit.position_advice
+			if advice == null:
+				continue
+			var target_key: String = "none"
+			if advice.is_valid():
+				valid_positions += 1
+				target_key = str(advice.target_hex)
+				_check(advice.features["cover"] >= 0.1, "Defensive endpoints have cover on authored terrain")
+				_check(advice.features["open_fire"] <= 0.15 and advice.features["peak_exposure"] <= 0.65, "Routes obey moving-squad exposure limits")
+				_check(advice.features["contact_distance"] >= 2 and advice.features["route_contact_distance"] >= 2, "Defense does not approach a known opponent's adjacent hex")
+			elif advice.status == PositionResult.Status.NO_CANDIDATE:
+				no_candidates += 1
+				_check(not planner.executor.pending.has(unit) and not unit.movement.is_moving, "No safe candidate leaves the defender holding rather than moving into danger")
+			if frame >= 599:
+				if not initial_orders.has(unit):
+					initial_orders[unit] = unit.action_controller.action_order_id
+					changes[unit] = 0
+				elif last_targets[unit] != target_key:
+					changes[unit] += 1
+			last_targets[unit] = target_key
+			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason})
+	_check(valid_positions + no_candidates > 0, "Stationary opposition produces safe position advice or an explicit no-candidate result")
+	_check(not controller.snapshot.get_defensive_contacts(planner.team).is_empty(), "Defense retains confirmed danger after short firing memory expires")
+	for unit: Unit in changes:
+		_check(changes[unit] <= 1, "Static opposition does not cause repeated defensive target changes")
+		_check(unit.action_controller.action_order_id - initial_orders[unit] <= 2, "Static opposition does not repeatedly restart defensive orders")
+	print("Defensive posture trace: ", JSON.stringify({"map": str(map.name), "player_team": player_team, "player_hex": str(target), "valid_positions": valid_positions, "no_candidates": no_candidates, "changes": _named_changes(changes), "samples": samples}))
+	main.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	print("Defensive posture match checks: ", checks, "; failures: ", failures)
+	get_tree().quit(failures)
+
+
+func _relocation_hex(controller: InfluenceMapController, player: Unit, defender: Unit) -> Vector2i:
+	var best: Vector2i = Vector2i(-999, -999)
+	var best_distance: int = 999999
+	var cells: Array[Vector2i] = LOSHelper.ground_layer.get_used_cells()
+	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		if a.x != b.x:
+			return a.x < b.x
+		return a.y < b.y)
+	for cell: Vector2i in cells:
+		if cell == player.current_hex or LOSHelper.get_hex_distance(cell, defender.current_hex) != 2 or not LOSHelper.los_lookup.get(defender.current_hex, {}).has(cell):
+			continue
+		var occupied: bool = false
+		for unit: Unit in Globals.get_units():
+			occupied = occupied or unit.current_hex == cell
+		if occupied or controller.snapshot.get_path(player.team, player.current_hex, cell).is_empty():
+			continue
+		var distance: int = LOSHelper.get_hex_distance(player.current_hex, cell)
+		if distance < best_distance:
+			best = cell
+			best_distance = distance
+	return best
+
+
+func _named_changes(changes: Dictionary[Unit, int]) -> Dictionary:
+	var named: Dictionary = {}
+	for unit: Unit in changes:
+		named[str(unit.name)] = changes[unit]
+	return named
+
+
+func _check(condition: bool, message: String) -> void:
+	checks += 1
+	if not condition:
+		failures += 1
+		push_error(message)

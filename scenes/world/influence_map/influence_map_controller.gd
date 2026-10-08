@@ -13,6 +13,7 @@ enum KnowledgePolicy { OBSERVED_AND_MEMORY, OMNISCIENT }
 @export var knowledge_policy: KnowledgePolicy = KnowledgePolicy.OBSERVED_AND_MEMORY
 var maps_by_team: Dictionary[int, InfluenceMap] = {}
 var snapshot: InfluenceSnapshot = null
+var defensive_memory: DefensiveContactMemory = DefensiveContactMemory.new()
 var pending_snapshot: InfluenceSnapshot = null
 var objectives_by_team: Dictionary[int, Vector2i] = {}
 # Compatibility for legacy debug/test-axis callers. Team mission contexts are authoritative.
@@ -37,6 +38,7 @@ func _process(delta: float) -> void:
 
 
 func reset_for_match() -> void:
+	defensive_memory.clear()
 	los_rebuild_jobs.clear()
 	pending_snapshot = null
 	snapshot = null
@@ -61,6 +63,8 @@ func create_maps(_delta: float) -> void:
 	if snapshot != null:
 		version = snapshot.version + 1
 	pending_snapshot = InfluenceSnapshotBuilder.capture(version, objectives_by_team, knowledge_policy, create_default_weights())
+	if knowledge_policy == KnowledgePolicy.OBSERVED_AND_MEMORY:
+		defensive_memory.capture_into(pending_snapshot)
 	for team: int in _get_processed_teams():
 		var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
 		config.contacts = pending_snapshot.get_contacts(team)

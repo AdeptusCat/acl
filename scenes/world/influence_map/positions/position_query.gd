@@ -9,6 +9,7 @@ var objective_hex: Vector2i = Vector2i.ZERO
 var profile: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
 var snapshot: InfluenceSnapshot = null
 var forecast_data: PackedFloat32Array = PackedFloat32Array()
+var route_graph: AStar2D = null
 var geography: Geography = Geography.OBJECTIVE_OR_SECTOR
 var defense_radius: int = 4
 var movement_radius: int = 6
@@ -18,6 +19,7 @@ var reservations: Dictionary = {}
 var has_accepted_target: bool = false
 var accepted_target: Vector2i = Vector2i.ZERO
 var accepted_context: String = ""
+var accepted_at: float = -INF
 var axis: ThreatAxis = null
 var include_score_map: bool = true
 var max_alternatives: int = 5
@@ -25,6 +27,7 @@ var max_alternatives: int = 5
 
 func context_key() -> String:
 	var axis_key: String = ""
-	if axis != null:
+	# Axis observations can change without changing the defensive mission.
+	if axis != null and profile.mode != PositionProfile.Mode.DEFEND:
 		axis_key = axis.axis_name
 	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes])

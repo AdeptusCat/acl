@@ -13,23 +13,41 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var start_distance: int = LOSHelper.get_hex_distance(origin, query.objective_hex)
 	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		contacts = query.snapshot.get_defensive_contacts(query.team)
+		incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
 	var exposure: float = 0.0
 	var travel: float = 0.0
 	var peak_exposure: float = 0.0
+	var open_ground: float = 0.0
+	var open_fire: float = 0.0
+	var route_contact_distance: int = 999999
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
+		if query.profile.mode == PositionProfile.Mode.DEFEND:
+			# A moving squad cannot claim stationary cover while crossing a hex.
+			step_risk = maxf(step_risk, _contact_fire_risk(query, contacts, step, true))
+			if query.forecast_data.size() == map.cell_count:
+				step_risk = maxf(step_risk, risk(query.forecast_data[map.cell_to_index(step)]))
+		var step_cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, step), 0.0, 1.0)
+		open_ground += 1.0 - step_cover
+		if step_cover < query.profile.minimum_cover:
+			open_fire = maxf(open_fire, step_risk)
+		route_contact_distance = mini(route_contact_distance, _nearest_contact_distance(contacts, step))
 		exposure += step_risk
 		peak_exposure = maxf(peak_exposure, step_risk)
 		travel += 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, step)
 	if path.size() > 1:
 		exposure /= float(path.size() - 1)
+		open_ground /= float(path.size() - 1)
 	var support: float = 0.0
 	for friendly: Unit in query.snapshot.positions:
 		if friendly != query.unit and query.snapshot.teams[friendly] == query.team:
 			support += maxf(0.0, 1.0 - float(LOSHelper.get_hex_distance(cell, query.snapshot.positions[friendly])) / 5.0)
 	var targets: Array[Vector2i] = []
-	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
+	for contact: InfluenceContact in contacts:
 		if query.axis != null and not query.axis.enemy_units.is_empty() and not query.axis.enemy_units.has(contact.unit):
 			continue
 		if query.profile.mode == PositionProfile.Mode.DEFEND or query.profile.mode == PositionProfile.Mode.LEGACY_DEFENSE:
@@ -64,7 +82,46 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		"forecast": forecast,
 		"firing": firing, "firing_lanes": visible_count, "objective_coverage": coverage,
 		"support": minf(support, 1.0), "travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
+		"open_ground": open_ground, "open_fire": open_fire,
+		"contact_distance": _nearest_contact_distance(contacts, cell), "route_contact_distance": route_contact_distance,
 		"progress": float(start_distance - objective_distance) / float(maxi(start_distance, 1)), "legacy": legacy}
+
+
+static func _nearest_contact_distance(contacts: Array[InfluenceContact], cell: Vector2i) -> int:
+	var distance: int = 999999
+	for contact: InfluenceContact in contacts:
+		distance = mini(distance, LOSHelper.get_hex_distance(cell, contact.hex))
+	return distance
+
+
+static func _contact_fire_risk(query: PositionQuery, contacts: Array[InfluenceContact], cell: Vector2i, moving: bool) -> float:
+	var incoming: float = 0.0
+	for contact: InfluenceContact in contacts:
+		var distance: int = LOSHelper.get_hex_distance(contact.hex, cell)
+		var records: Dictionary = query.snapshot.los.get(contact.hex, {})
+		if distance > contact.weapon_range or not records.has(cell):
+			continue
+		var record: Dictionary = records[cell]
+		var cover: float = record.get("target_cover", 0.0)
+		if moving:
+			cover = 0.0
+		# Uncertainty about location does not make the last confirmed firing lane safe.
+		incoming += LosInfluenceProjector.calculate_los_fire_threat(contact.firepower,
+			contact.effectiveness, cover, record.get("hindrance", 0.0), distance)
+	return risk(incoming)
+
+
+static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
+	var danger: float = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), _contact_fire_risk(query, contacts, cell, true))
+	if query.forecast_data.size() == map.cell_count:
+		danger = maxf(danger, risk(query.forecast_data[map.cell_to_index(cell)]))
+	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	var open_fire: float = 0.0
+	if cover < query.profile.minimum_cover:
+		open_fire = danger
+	return {"risk": danger, "open_fire": open_fire, "cover": cover, "contact_distance": _nearest_contact_distance(contacts, cell)}
 
 
 static func outgoing_utility(query: PositionQuery, from_hex: Vector2i, target_hex: Vector2i) -> float:

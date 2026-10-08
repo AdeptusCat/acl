@@ -153,6 +153,7 @@ func _assign_offensive_positions(units: Array[Unit]) -> void:
 			query.has_accepted_target = true
 			query.accepted_target = accepted_positions[unit]["hex"]
 			query.accepted_context = accepted_positions[unit]["context"]
+			query.accepted_at = accepted_positions[unit].get("at", -INF)
 		var result: PositionResult = influence_map_controller.query_positions(query)
 		_apply_position_results([DefensePositionAnalyzer.adapt_result(result, null, "offense")], "offense", null)
 
@@ -176,7 +177,11 @@ func _issue_orders() -> void:
 		squad.position_advice = result
 		squad.influence_map = result.score_map
 		if result.is_valid() and executor.execute(result, current_order.execution_intent):
-			accepted_positions[squad] = {"hex": result.target_hex, "context": result.context}
+			var accepted_at: float = influence_map_controller.snapshot.captured_at
+			var previous: Dictionary = accepted_positions.get(squad, {})
+			if previous.get("hex") == result.target_hex and previous.get("context") == result.context:
+				accepted_at = previous.get("at", accepted_at)
+			accepted_positions[squad] = {"hex": result.target_hex, "context": result.context, "at": accepted_at}
 			squad.best_index = result.target_index
 		else:
 			executor.cancel(squad, true)

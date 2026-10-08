@@ -17,12 +17,30 @@ enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
 @export var progress_weight: float = 0.0
 @export var improvement_absolute: float = 0.15
 @export var improvement_relative: float = 0.1
+@export var minimum_cover: float = 0.0
+@export var minimum_contact_distance: int = 0
+@export var max_open_fire_risk: float = 1.0
+@export var open_ground_weight: float = 0.0
+@export var commitment_seconds: float = 0.0
 
 
 static func for_mode(p_mode: Mode) -> PositionProfile:
 	var profile: PositionProfile = PositionProfile.new()
 	profile.mode = p_mode
-	if p_mode == Mode.SUPPORT_BY_FIRE:
+	if p_mode == Mode.DEFEND:
+		profile.minimum_cover = 0.1
+		profile.minimum_contact_distance = 2
+		profile.max_open_fire_risk = 0.15
+		profile.max_incoming_risk = 0.65
+		profile.max_route_exposure = 0.65
+		profile.cover_weight = 3.0
+		profile.travel_weight = 0.12
+		profile.exposure_weight = 3.0
+		profile.open_ground_weight = 1.0
+		profile.improvement_absolute = 0.35
+		profile.improvement_relative = 0.2
+		profile.commitment_seconds = 8.0
+	elif p_mode == Mode.SUPPORT_BY_FIRE:
 		profile.firing_weight = 3.0
 		profile.objective_weight = 0.0
 	elif p_mode == Mode.ADVANCE:
@@ -56,4 +74,5 @@ func score(features: Dictionary, unit: Unit) -> float:
 		- features["forecast"] * forecast_weight + features["firing"] * role_fire_weight
 		+ features["objective_coverage"] * objective_weight + features["support"] * support_weight
 		- features["travel"] * travel_weight - features["route_exposure"] * exposure_weight
+		- features.get("open_ground", 0.0) * open_ground_weight
 		+ features["progress"] * progress_weight)

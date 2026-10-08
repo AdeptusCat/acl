@@ -43,6 +43,7 @@ static func _analyze(controller: InfluenceMapController, config: InfluenceProjec
 			query.has_accepted_target = true
 			query.accepted_target = config.accepted_positions[unit]["hex"]
 			query.accepted_context = config.accepted_positions[unit]["context"]
+			query.accepted_at = config.accepted_positions[unit].get("at", -INF)
 		var advice: PositionResult = controller.query_positions(query)
 		var adapted: DefensePositionResult = adapt_result(advice, config.threat_axis, role)
 		result.append(adapted)
