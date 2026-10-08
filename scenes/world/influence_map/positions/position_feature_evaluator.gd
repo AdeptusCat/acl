@@ -23,6 +23,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var exposure_seconds: float = 0.0
 	var open_exposure_seconds: float = 0.0
 	var route_seconds: float = 0.0
+	var open_crossing_seconds: float = 0.0
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
@@ -41,6 +42,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		exposure_seconds += seconds * step_risk
 		if step_cover < query.profile.minimum_cover:
 			open_exposure_seconds += seconds * step_risk
+			open_crossing_seconds += seconds
 		exposure += step_risk
 		peak_exposure = maxf(peak_exposure, step_risk)
 		travel += 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, step)
@@ -49,7 +51,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		open_ground /= float(path.size() - 1)
 	features.merge({"travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
 		"open_ground": open_ground, "open_fire": open_fire, "route_contact_distance": route_contact_distance,
-		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds})
+		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds, "open_crossing_seconds": open_crossing_seconds})
 	if query.defense_area != null:
 		features["deadline_slack_seconds"] = features.get("arrival_seconds", INF) - route_seconds - query.profile.establishment_seconds
 	return features

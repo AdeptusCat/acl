@@ -1,7 +1,7 @@
 class_name DefenseAreaJob
 extends RefCounted
 
-enum Phase { GEOMETRY, OBJECTIVE_FIELD, SOURCES, APPROACH_FIELD, CORRIDOR, RESPONSE_FIELD, FINISH }
+enum Phase { GEOMETRY, OBJECTIVE_FIELD, RETURN_FIELD, SOURCES, APPROACH_FIELD, CORRIDOR, RESPONSE_FIELD, FINISH }
 
 var _snapshot_ref: WeakRef
 var snapshot: InfluenceSnapshot:
@@ -17,7 +17,7 @@ var manual_axes: Array[ThreatAxis] = []
 var result: DefenseAreaAssessment
 var completed: bool = false
 var phase: Phase = Phase.GEOMETRY
-var geometry: Dictionary = {"cells": [], "neighbors": {}, "costs": {}, "cover": {}, "covered": [], "edges": [], "boundary": {}, "objective_distances": {}, "response_fields": {}}
+var geometry: Dictionary = {"cells": [], "neighbors": {}, "costs": {}, "open_costs": {}, "cover": {}, "covered": [], "edges": [], "boundary": {}, "objective_distances": {}, "return_open_costs": {}, "response_fields": {}}
 var field: DefenseTravelField
 var cache_key: String
 var cursor: int = 0
@@ -61,6 +61,18 @@ func advance(deadline_usec: int) -> void:
 				field.advance(deadline_usec)
 				if field.completed:
 					geometry["objective_distances"] = field.distances
+					var guards: Array[Vector2i] = [objective]
+					# Covered adjacent guard positions can protect an open objective without entering it.
+					for neighbor: Vector2i in geometry["neighbors"].get(objective, []):
+						if geometry["cover"].get(neighbor, 0.0) >= 0.1:
+							guards.append(neighbor)
+					field = DefenseTravelField.new()
+					field.start_sources(geometry, guards, true, "open_costs")
+					phase = Phase.RETURN_FIELD
+			Phase.RETURN_FIELD:
+				field.advance(deadline_usec)
+				if field.completed:
+					geometry["return_open_costs"] = field.distances
 					if snapshot.defense_geometry_cache.size() >= 8:
 						snapshot.defense_geometry_cache.erase(snapshot.defense_geometry_cache.keys()[0])
 					snapshot.defense_geometry_cache[cache_key] = geometry
@@ -117,6 +129,7 @@ func advance(deadline_usec: int) -> void:
 				field = null
 				phase = Phase.APPROACH_FIELD
 			Phase.FINISH:
+				_limit_inferred_priorities()
 				result.geometry = geometry
 				result.covered_positions.assign(geometry["covered"])
 				result.edge_positions.assign(geometry["edges"])
@@ -133,6 +146,9 @@ func _capture_cell(cell: Vector2i) -> void:
 	var cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell)
 	geometry["cover"][cell] = cover
 	geometry["costs"][cell] = 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell)
+	geometry["open_costs"][cell] = 0.0
+	if cover < 0.1:
+		geometry["open_costs"][cell] = geometry["costs"][cell]
 	var neighbors: Array[Vector2i] = []
 	var edge: bool = false
 	var ids: Dictionary = snapshot.point_ids.get(team, {})
@@ -167,20 +183,28 @@ func _prepare_sources() -> void:
 		if contact.observed:
 			freshness = 1.0
 		var priority: float = clampf(contact.firepower * contact.effectiveness, 0.5, 3.0) * maxf(0.03, freshness) * contact.confidence
+		var evidence: String = "remembered"
+		if contact.observed:
+			evidence = "observed"
 		if not grouped.has(sector):
-			grouped[sector] = {"id": sector, "source": contact.hex, "priority": 0.0, "confirmed": false, "crossing_seconds": contact.crossing_seconds}
-		if geometry["objective_distances"][contact.hex] < geometry["objective_distances"][grouped[sector]["source"]]:
+			grouped[sector] = {"id": sector, "source": contact.hex, "priority": 0.0, "confirmed": false, "evidence": evidence, "crossing_seconds": contact.crossing_seconds, "source_priority": -INF}
+		# A stale nearby contact must not anchor the corridor for fresher pressure in the same sector.
+		var urgency: float = priority * (1.0 + 10.0 / (3.0 + geometry["objective_distances"][contact.hex] * contact.crossing_seconds))
+		var observed_source: bool = grouped[sector]["evidence"] == "observed"
+		if (contact.observed and not observed_source) or (contact.observed == observed_source and urgency > grouped[sector]["source_priority"]):
 			grouped[sector]["source"] = contact.hex
 			grouped[sector]["crossing_seconds"] = contact.crossing_seconds
+			grouped[sector]["source_priority"] = urgency
+			grouped[sector]["evidence"] = evidence
 		grouped[sector]["priority"] += priority
 		grouped[sector]["confirmed"] = grouped[sector]["confirmed"] or contact.observed
 	for axis: ThreatAxis in manual_axes:
 		var sector: int = result.sector_at(axis.source_hex)
 		if not grouped.has(sector) and geometry["objective_distances"].has(axis.source_hex):
-			grouped[sector] = {"id": sector, "source": axis.source_hex, "priority": maxf(0.12, axis.confidence), "confirmed": false, "crossing_seconds": 2.0}
+			grouped[sector] = {"id": sector, "source": axis.source_hex, "priority": maxf(0.12, axis.confidence), "confirmed": false, "evidence": "mission", "crossing_seconds": 2.0}
 	for sector: int in geometry["boundary"]:
 		if not grouped.has(sector) and geometry["objective_distances"].has(geometry["boundary"][sector]):
-			grouped[sector] = {"id": sector, "source": geometry["boundary"][sector], "priority": 0.08, "confirmed": false, "crossing_seconds": 2.0}
+			grouped[sector] = {"id": sector, "source": geometry["boundary"][sector], "priority": 0.08, "confirmed": false, "evidence": "inferred", "crossing_seconds": 2.0}
 	var sectors: Array = grouped.keys()
 	sectors.sort()
 	for sector: int in sectors:
@@ -195,6 +219,9 @@ func _add_corridor_cell(cell: Vector2i) -> void:
 	var best: float = field.distances.get(objective, INF)
 	if not is_finite(best) or not is_finite(objective_cost) or not is_finite(source_cost):
 		return
+	# Do not draw branches reached by first arriving at, then walking away from, the objective.
+	if source_cost > best or objective_cost > best:
+		return
 	var detour: float = maxf(0.0, source_cost + objective_cost - best)
 	if detour > 2.5:
 		return
@@ -202,3 +229,16 @@ func _add_corridor_cell(cell: Vector2i) -> void:
 	var vulnerability: float = 1.0 - clampf(geometry["cover"][cell], 0.0, 1.0)
 	corridor["cells"].append(cell)
 	corridor["weights"][cell] = exp(-detour) * (1.0 + vulnerability * minf(corridor["crossing_seconds"] * geometry["costs"][cell], 4.0))
+
+
+func _limit_inferred_priorities() -> void:
+	var known_priority: float = 0.0
+	for approach: Dictionary in result.approaches:
+		if approach["evidence"] != "inferred":
+			known_priority = maxf(known_priority, approach["priority"])
+	result.max_priority = 0.0
+	for approach: Dictionary in result.approaches:
+		# Aging known pressure does not promote an arbitrary boundary guess above it.
+		if known_priority > 0.0 and approach["evidence"] == "inferred":
+			approach["priority"] = minf(approach["priority"], known_priority * 0.2)
+		result.max_priority = maxf(result.max_priority, approach["priority"])

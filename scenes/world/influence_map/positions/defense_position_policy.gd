@@ -176,6 +176,8 @@ static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary
 		return "handoff_wait"
 	if features["responsibility"] == "":
 		return "responsibility"
+	if query.defense_area != null and (not is_finite(features["objective_return_seconds"]) or not is_finite(features["return_open_seconds"])):
+		return "objective_access"
 	if not features["preserves_screen"]:
 		return "screen_gap"
 	if needs_withdrawal(query) and features["contact_distance"] < PositionFeatureEvaluator.nearest_contact_distance(query.snapshot.get_defensive_contacts(query.team), query.unit.current_hex):

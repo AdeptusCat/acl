@@ -6,6 +6,7 @@ var distances: Dictionary[Vector2i, float] = {}
 var completed: bool = false
 var geometry: Dictionary
 var reverse: bool = false
+var cost_key: String = "costs"
 var _heap: Array[Dictionary] = []
 
 
@@ -13,12 +14,13 @@ func start(area_geometry: Dictionary, source: Vector2i, reversed: bool = false) 
 	start_sources(area_geometry, [source], reversed)
 
 
-func start_sources(area_geometry: Dictionary, sources: Array[Vector2i], reversed: bool = false) -> void:
+func start_sources(area_geometry: Dictionary, sources: Array[Vector2i], reversed: bool = false, costs: String = "costs") -> void:
 	distances.clear()
 	_heap.clear()
 	completed = false
 	geometry = area_geometry
 	reverse = reversed
+	cost_key = costs
 	for source: Vector2i in sources:
 		if geometry["neighbors"].has(source):
 			distances[source] = 0.0
@@ -37,7 +39,7 @@ func advance(deadline_usec: int) -> void:
 			var destination: Vector2i = neighbor
 			if reverse:
 				destination = cell
-			var next_cost: float = cost + geometry["costs"][destination]
+			var next_cost: float = cost + geometry[cost_key][destination]
 			if next_cost < distances.get(neighbor, INF):
 				distances[neighbor] = next_cost
 				_push({"cell": neighbor, "cost": next_cost})

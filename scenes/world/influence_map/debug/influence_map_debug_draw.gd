@@ -261,11 +261,9 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 	if debug_view == DebugView.POSITION_SCORE:
 		var advice: PositionResult = _get_position_advice()
 		if advice != null:
-			for cell: Vector2i in advice.approach_cells:
-				if influence_map.is_playable_cell(cell):
-					var polygon: PackedVector2Array = _make_hex_polygon(_cell_to_local_position(cell), radius_x, radius_y)
-					polygon.append(polygon[0])
-					draw_polyline(polygon, Color(1.0, 0.5, 0.1, 0.65), 1.5, true)
+			_draw_corridor(influence_map, advice.inferred_approach_cells, radius_x, radius_y, Color(0.65, 0.7, 0.75, 0.35), true)
+			_draw_corridor(influence_map, advice.remembered_approach_cells, radius_x, radius_y, Color(0.8, 0.6, 0.25, 0.6), true)
+			_draw_corridor(influence_map, advice.approach_cells, radius_x, radius_y, Color(1.0, 0.5, 0.1, 0.8), false)
 
 	for cell: Vector2i in _cached_cells:
 		if not _should_draw_cell(influence_map, cell):
@@ -291,6 +289,19 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 
 		if draw_cell_values:
 			_draw_value_text(center, value)
+
+
+func _draw_corridor(influence_map: InfluenceMap, cells: Array[Vector2i], radius_x: float, radius_y: float, color: Color, dashed: bool) -> void:
+	for cell: Vector2i in cells:
+		if not influence_map.is_playable_cell(cell):
+			continue
+		var polygon: PackedVector2Array = _make_hex_polygon(_cell_to_local_position(cell), radius_x, radius_y)
+		polygon.append(polygon[0])
+		if dashed:
+			for index: int in range(polygon.size() - 1):
+				draw_line(polygon[index], polygon[index].lerp(polygon[index + 1], 0.6), color, 1.0, true)
+		else:
+			draw_polyline(polygon, color, 1.5, true)
 
 
 func _recalculate_value_range(influence_map: InfluenceMap) -> void:
@@ -649,12 +660,16 @@ func _debug_report_layer_access(reason: String) -> void:
 		if advice != null:
 			var candidate_count: int = advice.eligibility.count(1)
 			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
-			if not advice.approach_cells.is_empty():
-				_layer_access_text += "\nOrange: predicted approach corridor"
+			if not advice.approach_cells.is_empty() or not advice.remembered_approach_cells.is_empty() or not advice.inferred_approach_cells.is_empty():
+				_layer_access_text += "\nCorridors: orange = observed/mission | amber dashes = last seen | gray dashes = inferred"
 			if advice.is_valid():
 				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
 				if advice.features.has("assigned_sector"):
 					_layer_access_text += "\nSector=%d | coverage=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features["interdiction"]]
+					var sector: int = advice.features["assigned_sector"]
+					if advice.approach_sources.has(sector):
+						_layer_access_text += " | %s source=%s" % [advice.approach_evidence[sector], advice.approach_sources[sector]]
+					_layer_access_text += "\nOpen crossing=%.1fs | minimum open return to objective=%.1fs" % [advice.features.get("open_crossing_seconds", 0.0), advice.features.get("return_open_seconds", 0.0)]
 					if advice.features.get("responsibility") == "reserve":
 						_layer_access_text += " | readiness=%.2f" % advice.features["reserve_readiness"]
 		return

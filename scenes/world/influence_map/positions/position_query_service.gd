@@ -42,13 +42,26 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	if query.defense_area != null:
 		result.features["assigned_sector"] = query.assigned_sector
 		var cells: Dictionary = {}
+		var remembered: Dictionary = {}
+		var inferred: Dictionary = {}
 		for approach: Dictionary in query.defense_area.approaches:
 			result.sector_priorities[approach["id"]] = approach["priority"]
+			result.approach_evidence[approach["id"]] = approach["evidence"]
+			result.approach_sources[approach["id"]] = approach["source"]
 			if query.assigned_sector >= 0 and query.assigned_sector != approach["id"]:
 				continue
+			if query.assigned_sector < 0 and approach["priority"] < query.defense_area.max_priority * 0.4:
+				continue
+			var destination: Dictionary = cells
+			if approach["evidence"] == "remembered":
+				destination = remembered
+			elif approach["evidence"] == "inferred":
+				destination = inferred
 			for cell: Vector2i in approach["cells"]:
-				cells[cell] = true
+				destination[cell] = true
 		result.approach_cells.assign(cells.keys())
+		result.remembered_approach_cells.assign(remembered.keys())
+		result.inferred_approach_cells.assign(inferred.keys())
 	return true
 
 

@@ -34,6 +34,8 @@ enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
 @export var area_blocking_weight: float = 2.0
 @export var reserve_readiness_weight: float = 4.0
 @export var establishment_seconds: float = 3.0
+@export var open_crossing_time_weight: float = 0.35
+@export var objective_return_open_weight: float = 0.75
 
 
 static func for_mode(p_mode: Mode) -> PositionProfile:
@@ -99,6 +101,9 @@ func score(features: Dictionary, unit: Unit) -> float:
 			position_weight = 0.0
 			coverage_weight = 0.0
 			capture_weight = 0.5
+		# Detached fire positions must justify both the outward crossing and reopening it to respond.
+		area_bonus -= features.get("open_crossing_seconds", 0.0) * open_crossing_time_weight
+		area_bonus -= features.get("return_open_seconds", 0.0) * objective_return_open_weight
 		var deadline: float = features.get("arrival_seconds", INF)
 		var response: float = features.get("route_seconds", 0.0) + establishment_seconds
 		if is_finite(deadline) and response > deadline:

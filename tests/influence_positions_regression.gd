@@ -131,6 +131,8 @@ func _run() -> void:
 	_test_defensive_memory()
 	_test_budgeted_position_queries()
 	_test_defense_area()
+	_test_corridor_evidence()
+	_test_objective_connected_defense()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -1298,6 +1300,7 @@ func _test_defense_area() -> void:
 	reverse_query.assigned_sector = query.assigned_sector
 	var mirrored: PositionResult = PositionQueryService.query_positions(reverse_query)
 	_check(mirrored.is_valid() and mirrored.target_hex == east, "The same terrain and approach responsibility work for either team")
+	_check(reverse_job.result.geometry["return_open_costs"] == shifted.result.geometry["return_open_costs"], "Objective return geography is identical for mirrored teams")
 	var assignments: Dictionary[Unit, int] = DefenseSectorAllocator.assign(query.defense_area, [own, other], {})
 	_check(assignments[own as Unit] == query.assigned_sector, "The strongest firing role receives the dominant current approach")
 	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(0, 3), 140.0), _area_contact(Vector2i(8, 3), 140.0)]
@@ -1379,6 +1382,163 @@ func _test_defense_area() -> void:
 	_check(advice.is_valid() and advice.target_hex == own.current_hex and advice.decision == PositionResult.Decision.HOLD_DEFENSE, "A lone healthy capture guard holds the covered objective even when its distant firing corridor is incomplete")
 	own.squad_type = original_role
 	other.squad_type = guard_role
+
+
+func _test_corridor_evidence() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(4, 3)
+	query.use_defense_area = true
+	query.snapshot.captured_at = 100.0
+	var fresh: Vector2i = Vector2i(8, 6)
+	var sector: int = DefenseAreaAssessment.sector_for(query.objective_hex, fresh)
+	var stale: Vector2i = fresh
+	for cell: Vector2i in query.snapshot.maps[own.team].playable_cells:
+		if cell != query.objective_hex and DefenseAreaAssessment.sector_for(query.objective_hex, cell) == sector and LOSHelper.get_hex_distance(cell, query.objective_hex) < LOSHelper.get_hex_distance(stale, query.objective_hex):
+			stale = cell
+	var stale_enemy: UnitProbe = _unit(enemy.team, stale)
+	var stale_contact: InfluenceContact = _area_contact(stale, 20.0, false)
+	stale_contact.unit = stale_enemy
+	query.snapshot.defensive_contacts[own.team] = [stale_contact, _area_contact(fresh, 100.0)]
+	var job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 4, 7)
+	job.advance(-1)
+	var approach: Dictionary = job.result.approach_for_sector(sector)
+	_check(stale != fresh and approach["source"] == fresh and approach["evidence"] == "observed", "Fresh observed pressure anchors a sector corridor rather than its nearest stale contact")
+	var passes_objective: bool = false
+	for cell: Vector2i in approach["cells"]:
+		passes_objective = passes_objective or approach["distances"][cell] > approach["distances"][query.objective_hex]
+	_check(not passes_objective, "An approach corridor does not include branches beyond arrival at the objective")
+	query.defense_area = job.result
+	query.sector_cells = [own.current_hex]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(not advice.approach_cells.is_empty() and advice.inferred_approach_cells.is_empty() and advice.approach_sources[sector] == fresh, "Inspection shows the important observed approach without speculative opposite-sector corridors")
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(fresh, 95.0, false)]
+	job = DefenseAreaJob.new()
+	job.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	job.advance(-1)
+	query.defense_area = job.result
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.approach_cells.is_empty() and not advice.remembered_approach_cells.is_empty() and advice.approach_evidence[sector] == "remembered", "Last-seen approaches remain useful but have distinct inspection evidence")
+	query.snapshot.captured_at = 1000.0
+	job = DefenseAreaJob.new()
+	job.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	job.advance(-1)
+	query.defense_area = job.result
+	advice = PositionQueryService.query_positions(query)
+	_check(not advice.remembered_approach_cells.is_empty() and advice.inferred_approach_cells.is_empty() and DefenseSectorAllocator.priorities(job.result)[0]["id"] == sector, "Aging confirmed knowledge cannot make a speculative opposite approach the dominant duty")
+	query.snapshot.captured_at = 100.0
+	query.snapshot.defensive_contacts[own.team] = []
+	job = DefenseAreaJob.new()
+	job.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	job.advance(-1)
+	query.defense_area = job.result
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.approach_cells.is_empty() and advice.remembered_approach_cells.is_empty() and not advice.inferred_approach_cells.is_empty(), "Terrain-only approach estimates never appear as observed enemy corridors")
+	var adapted: DefensePositionResult = DefensePositionAnalyzer.adapt_result(advice, null, "test")
+	_check(adapted.inferred_approach_cells == advice.inferred_approach_cells and adapted.approach_evidence == advice.approach_evidence, "Defense adapters preserve approach evidence diagnostics")
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(LOSHelper.get_hex_neighbors(query.objective_hex)[0], 100.0)]
+	job = DefenseAreaJob.new()
+	job.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	job.advance(-1)
+	approach = job.result.approach_for_sector(job.result.sector_at(query.snapshot.get_defensive_contacts(own.team)[0].hex))
+	var excluded_branches: int = 0
+	var branch_in_corridor: bool = false
+	for cell: Vector2i in query.snapshot.maps[own.team].playable_cells:
+		var source_cost: float = approach["distances"].get(cell, INF)
+		var best: float = approach["distances"][query.objective_hex]
+		var detour: float = source_cost + job.result.geometry["objective_distances"].get(cell, INF) - best
+		if source_cost > best and detour <= 2.5:
+			excluded_branches += 1
+			branch_in_corridor = branch_in_corridor or approach["cells"].has(cell)
+	_check(excluded_branches > 0 and not branch_in_corridor, "A close attacker cannot generate the former cheap corridor branches behind the objective")
+	stale_enemy.free()
+
+
+func _test_objective_connected_defense() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(3, 3)
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	var local: Vector2i = Vector2i(4, 3)
+	var detached: Vector2i = Vector2i(7, 3)
+	var role: Globals.SquadType = own.squad_type
+	own.squad_type = Globals.SquadType.MG
+	for cell: Vector2i in map.playable_cells:
+		var wooded: bool = cell.x >= 2 and cell.x <= 4 and cell.y >= 2 and cell.y <= 4
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, float(wooded or cell == detached))
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, 0.0)
+	query.snapshot.captured_at = 100.0
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(8, 6), 100.0)]
+	var job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 5, 8)
+	job.advance(-1)
+	query.defense_area = job.result
+	query.assigned_sector = job.result.sector_at(Vector2i(8, 6))
+	query.sector_cells = [local, detached]
+	var approach: Dictionary = job.result.approach_for_sector(query.assigned_sector)
+	# Both woods positions fulfil the duty; the detached one has a somewhat wider firing lane.
+	var total: float = 0.0
+	for cell: Vector2i in approach["cells"]:
+		total += approach["weights"][cell]
+	var supplied: float = 0.0
+	query.snapshot.los = query.snapshot.los.duplicate(true)
+	query.snapshot.los[local] = {}
+	query.snapshot.los[detached] = {}
+	for cell: Vector2i in approach["cells"]:
+		var record: Dictionary = {"target_cover": map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), "hindrance": 0.0}
+		query.snapshot.los[detached][cell] = record
+		if supplied < total * 0.7:
+			query.snapshot.los[local][cell] = record
+			supplied += approach["weights"][cell]
+	query.profile.cover_weight = 0.0
+	query.profile.incoming_weight = 0.0
+	query.profile.forecast_weight = 0.0
+	query.profile.support_weight = 0.0
+	query.profile.travel_weight = 0.0
+	query.profile.exposure_weight = 0.0
+	query.profile.open_ground_weight = 0.0
+	query.profile.proximity_weight = 0.0
+	query.profile.area_interposition_weight = 0.0
+	query.profile.area_objective_weight = 0.0
+	query.profile.area_blocking_weight = 0.0
+	query.profile.open_crossing_time_weight = 0.0
+	query.profile.objective_return_open_weight = 0.0
+	var outward_only: PositionResult = PositionQueryService.query_positions(query)
+	_check(outward_only.is_valid() and outward_only.target_hex == detached and outward_only.features["open_crossing_seconds"] > 0.0, "An interdiction-only assessment reproduces the unnecessary crossing to a detached firing position")
+	query.profile.open_crossing_time_weight = 0.35
+	query.profile.objective_return_open_weight = 0.75
+	var sustainable: PositionResult = PositionQueryService.query_positions(query)
+	_check(sustainable.is_valid() and sustainable.target_hex == local and sustainable.features["assigned_coverage"] >= 0.5 and sustainable.features["objective_connected_cover"], "The woods at the objective cover the approach without abandoning protected access to it")
+	_check(sustainable.features["return_open_seconds"] == 0.0 and outward_only.features["return_open_seconds"] >= 2.0 * query.defense_crossing_seconds(), "The shared return field distinguishes connected woodland from several open hexes of objective response")
+	query.sector_cells = [detached]
+	var necessary: PositionResult = PositionQueryService.query_positions(query)
+	_check(necessary.is_valid() and necessary.target_hex == detached, "A detached position remains possible when the mission has no suitable connected firing position")
+	query.sector_cells = [local, detached]
+	query.has_accepted_target = true
+	query.accepted_target = local
+	query.accepted_context = sustainable.context
+	query.accepted_at = 100.0
+	var repeated: PositionResult = PositionQueryService.query_positions(query)
+	_check(repeated.target_hex == local and not repeated.path.has(Vector2i(6, 3)), "Repeated assessment retains the connected defense rather than sending it back across the field")
+	query.objective_hex = detached
+	job = query.snapshot.defense_area_job(own.team, detached, 5, 8)
+	job.advance(-1)
+	_check(job.result.geometry["return_open_costs"][detached] == 0.0 and job.result.geometry["return_open_costs"][local] > 0.0, "Changing the objective rebuilds protected return access rather than retaining the former woodland anchor")
+	var graph: AStar2D = query.snapshot.routes[own.team]
+	var objective_id: int = query.snapshot.point_ids[own.team][detached]
+	for neighbor: int in graph.get_point_connections(objective_id):
+		graph.disconnect_points(objective_id, neighbor)
+	query.snapshot.defense_geometry_cache.clear()
+	job = DefenseAreaJob.new()
+	job.start(query.snapshot, own.team, detached, 5, 8, [])
+	job.advance(-1)
+	query.defense_area = job.result
+	query.assigned_sector = -1
+	query.has_accepted_target = false
+	query.defense_responsibility = PositionQuery.Responsibility.AUTO
+	query.sector_cells = [local]
+	query.snapshot.los[local][detached] = {"target_cover": 1.0, "hindrance": 0.0}
+	var disconnected: PositionResult = PositionQueryService.query_positions(query)
+	_check(not disconnected.is_valid() and disconnected.rejections.has("objective_access"), "Fire visibility cannot authorize a position with no terrain route back to objective protection")
+	own.squad_type = role
 
 
 func _test_defensive_memory() -> void:

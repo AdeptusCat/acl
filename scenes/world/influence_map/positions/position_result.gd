@@ -25,7 +25,11 @@ var objective_hex: Vector2i = Vector2i.ZERO
 var reason: String = ""
 var decision: Decision = Decision.POSITION
 var approach_cells: Array[Vector2i] = []
+var remembered_approach_cells: Array[Vector2i] = []
+var inferred_approach_cells: Array[Vector2i] = []
 var sector_priorities: Dictionary[int, float] = {}
+var approach_evidence: Dictionary[int, String] = {}
+var approach_sources: Dictionary[int, Vector2i] = {}
 
 
 func is_valid() -> bool:

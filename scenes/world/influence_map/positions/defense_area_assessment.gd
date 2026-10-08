@@ -64,6 +64,7 @@ func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var coverage_by_sector: Dictionary = {}
 	var arrival_seconds: float = INF
 	var worst_response: float = 0.0
+	var crossing_seconds: float = query.defense_crossing_seconds()
 	for approach: Dictionary in approaches:
 		var data: Dictionary = coverage(query, query.unit, cell, approach)
 		coverage_by_sector[approach["id"]] = data["coverage"]
@@ -81,10 +82,13 @@ func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		if query.assigned_sector == approach["id"]:
 			assigned = data["coverage"]
 			arrival_seconds = approach["arrival_seconds"]
-		var response: float = approach["response_distances"].get(cell, INF) * query.defense_crossing_seconds()
+		var response: float = approach["response_distances"].get(cell, INF) * crossing_seconds
 		if approach["priority"] >= max_priority * 0.4:
 			worst_response = maxf(worst_response, response)
 		readiness += priority / (1.0 + response / 8.0)
 	return {"assigned_sector": query.assigned_sector, "assigned_coverage": assigned,
 		"sector_coverage": coverage_by_sector, "interdiction": interdiction / maxf(total_priority, 0.001), "arrival_seconds": arrival_seconds,
-		"reserve_readiness": 0.5 * readiness / maxf(total_priority, 0.001) + 0.5 / (1.0 + worst_response / 8.0), "cover_edge": edge_positions.has(cell)}
+		"reserve_readiness": 0.5 * readiness / maxf(total_priority, 0.001) + 0.5 / (1.0 + worst_response / 8.0), "cover_edge": edge_positions.has(cell),
+		"objective_return_seconds": geometry["objective_distances"].get(cell, INF) * crossing_seconds,
+		"return_open_seconds": geometry["return_open_costs"].get(cell, INF) * crossing_seconds,
+		"objective_connected_cover": geometry["return_open_costs"].get(cell, INF) <= 0.000001}
