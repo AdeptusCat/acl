@@ -28,30 +28,35 @@ static func _analyze(controller: InfluenceMapController, config: InfluenceProjec
 			ordered.append(unit)
 	ordered.sort_custom(InfluenceUnitQuery.compare_units_by_squad_type_priority)
 	for unit: Unit in ordered:
-		var query: PositionQuery = PositionQuery.new()
-		query.unit = unit
-		query.team = config.unit_team
-		query.objective_hex = config.objective_hex
-		query.sector_cells = config.sector_cells
-		query.fallback_hexes = config.fallback_hexes
-		query.defense_radius = config.defense_radius
-		query.geography = config.geography
-		query.profile = config.profile
-		query.defense_responsibility = config.defense_responsibility
-		query.withdrawal_requested = config.withdrawal_requested
-		query.axis = config.threat_axis
-		query.reservations = planned
-		if config.accepted_positions.has(unit):
-			query.has_accepted_target = true
-			query.accepted_target = config.accepted_positions[unit]["hex"]
-			query.accepted_context = config.accepted_positions[unit]["context"]
-			query.accepted_at = config.accepted_positions[unit].get("at", -INF)
+		var query: PositionQuery = make_query(config, unit, planned)
 		var advice: PositionResult = controller.query_positions(query)
 		var adapted: DefensePositionResult = adapt_result(advice, config.threat_axis, role)
 		result.append(adapted)
 		if adapted.is_valid():
 			planned[unit] = adapted.target_hex
 	return result
+
+
+static func make_query(config: InfluenceProjectionConfig, unit: Unit, reservations: Dictionary) -> PositionQuery:
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = config.unit_team
+	query.objective_hex = config.objective_hex
+	query.sector_cells = config.sector_cells
+	query.fallback_hexes = config.fallback_hexes
+	query.defense_radius = config.defense_radius
+	query.geography = config.geography
+	query.profile = config.profile
+	query.defense_responsibility = config.defense_responsibility
+	query.withdrawal_requested = config.withdrawal_requested
+	query.axis = config.threat_axis
+	query.reservations = reservations
+	if config.accepted_positions.has(unit):
+		query.has_accepted_target = true
+		query.accepted_target = config.accepted_positions[unit]["hex"]
+		query.accepted_context = config.accepted_positions[unit]["context"]
+		query.accepted_at = config.accepted_positions[unit].get("at", -INF)
+	return query
 
 
 static func adapt_result(advice: PositionResult, axis: ThreatAxis, role: String) -> DefensePositionResult:

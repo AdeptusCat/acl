@@ -27,6 +27,28 @@ var accepted_at: float = -INF
 var axis: ThreatAxis = null
 var include_score_map: bool = true
 var max_alternatives: int = 5
+var destination_features: Dictionary[Vector2i, Dictionary] = {}
+var firing_targets: Array[Vector2i] = []
+var firing_targets_prepared: bool = false
+var firepower_by_unit: Dictionary[Unit, Dictionary] = {}
+var origin_hex: Vector2i = Vector2i.ZERO
+
+
+func reset_evaluation() -> void:
+	route_field = null
+	origin_hex = unit.current_hex
+	destination_features.clear()
+	firing_targets.clear()
+	firing_targets_prepared = false
+	firepower_by_unit.clear()
+
+
+func firepower_at_range(friendly: Unit, distance: int) -> float:
+	if not firepower_by_unit.has(friendly):
+		firepower_by_unit[friendly] = {}
+	if not firepower_by_unit[friendly].has(distance):
+		firepower_by_unit[friendly][distance] = InfluenceUnitQuery.get_firepower_at_range(friendly, distance)
+	return firepower_by_unit[friendly][distance]
 
 
 func context_key() -> String:

@@ -5,6 +5,7 @@ signal influence_maps_updated()
 
 const REBUILD_CELLS_PER_FRAME: int = 400
 const LOS_SOURCES_PER_FRAME: int = 2
+const POSITION_QUERY_BUDGET_USEC: int = 2000
 
 enum CompositeSource { SELF, ENEMY }
 enum TacticalTask { NONE, DEFEND_OBJECTIVE, ATTACK_OBJECTIVE }
@@ -26,6 +27,10 @@ var update_threshold: float = 1.0
 var threat_axis_composites_by_team: Dictionary[int, Array] = {}
 var center_of_mass: Dictionary[Globals.Team, Vector2i] = {}
 var formations: Dictionary[Globals.Team, FormationIdentification] = {}
+var position_jobs: Array[PositionQueryJob] = []
+var inspection_jobs: Dictionary[Unit, PositionQueryJob] = {}
+var inspection_results: Dictionary[Unit, PositionResult] = {}
+var last_position_slice_usec: int = 0
 
 
 func _process(delta: float) -> void:
@@ -35,9 +40,15 @@ func _process(delta: float) -> void:
 		create_maps(delta)
 	_process_los_rebuild()
 	_process_budgeted_rebuild()
+	_process_position_queries()
 
 
 func reset_for_match() -> void:
+	for job: PositionQueryJob in position_jobs:
+		job.cancel()
+	position_jobs.clear()
+	inspection_jobs.clear()
+	inspection_results.clear()
 	defensive_memory.clear()
 	los_rebuild_jobs.clear()
 	pending_snapshot = null
@@ -144,6 +155,70 @@ func get_movement_weight(team: int, cell: Vector2i) -> float:
 func query_positions(query: PositionQuery) -> PositionResult:
 	query.snapshot = snapshot
 	return PositionQueryService.query_positions(query)
+
+
+func enqueue_position_query(query: PositionQuery) -> PositionQueryJob:
+	if query.snapshot == null:
+		query.snapshot = snapshot
+	query.origin_hex = query.unit.current_hex
+	var job: PositionQueryJob = PositionQueryJob.new()
+	job.query = query
+	position_jobs.append(job)
+	return job
+
+
+func cancel_position_query(job: PositionQueryJob) -> void:
+	if job != null:
+		job.cancel()
+		position_jobs.erase(job)
+
+
+func _process_position_queries() -> void:
+	var started: int = Time.get_ticks_usec()
+	var deadline: int = started + POSITION_QUERY_BUDGET_USEC
+	while not position_jobs.is_empty() and Time.get_ticks_usec() < deadline:
+		var job: PositionQueryJob = position_jobs[0]
+		if not InfluenceUnitQuery.is_valid_living_unit(job.query.unit):
+			job.cancel()
+		if not job.canceled:
+			job.advance(deadline)
+		if job.completed or job.canceled:
+			position_jobs.pop_front()
+		else:
+			break
+	last_position_slice_usec = Time.get_ticks_usec() - started
+
+
+func query_inspection_positions(query: PositionQuery) -> PositionResult:
+	# Frozen/off-tree callers retain the synchronous API; live overlays share the frame budget.
+	if not can_process():
+		return query_positions(query)
+	for inspected: Unit in inspection_jobs.keys():
+		if inspected != query.unit:
+			cancel_position_query(inspection_jobs[inspected])
+			inspection_jobs.erase(inspected)
+			inspection_results.erase(inspected)
+	var previous: PositionQueryJob = inspection_jobs.get(query.unit)
+	if previous != null and previous.completed:
+		inspection_results[query.unit] = previous.result
+	if previous != null and previous.query.snapshot == snapshot and previous.query.origin_hex == query.unit.current_hex and previous.query.context_key() == query.context_key():
+		return inspection_results.get(query.unit)
+	if previous != null and not previous.completed:
+		cancel_position_query(previous)
+	inspection_jobs[query.unit] = enqueue_position_query(query)
+	return inspection_results.get(query.unit)
+
+
+func clear_inspection_queries() -> void:
+	for job: PositionQueryJob in inspection_jobs.values():
+		cancel_position_query(job)
+	inspection_jobs.clear()
+	inspection_results.clear()
+
+
+func _exit_tree() -> void:
+	for job: PositionQueryJob in position_jobs:
+		job.cancel()
 
 
 func analyze_defense_positions_for_threat_axis(team: int, objective: Vector2i, axis: ThreatAxis, units: Array[Unit], reservations: Dictionary, mission: MissionOrder = null, accepted: Dictionary = {}) -> Array[DefensePositionResult]:

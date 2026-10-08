@@ -155,6 +155,7 @@ static func hex_glow(controller: Node2D, pos: Vector2) -> void:
 
 
 static func select_unit(controller: Node2D, unit: Unit) -> void:
+	controller.influence_map_controller.clear_inspection_queries()
 	if controller.selected_unit:
 		controller.selected_unit.deselect()
 	controller.selected_unit = unit
@@ -164,6 +165,7 @@ static func select_unit(controller: Node2D, unit: Unit) -> void:
 
 static func deselect_unit(controller: Node2D, unit: Unit) -> void:
 	if controller.selected_unit == unit:
+		controller.influence_map_controller.clear_inspection_queries()
 		controller.selected_unit.deselect()
 		controller.selected_unit = null
 		LOSHelper.clear_los()
@@ -193,9 +195,14 @@ static func get_position_advice(unit: Unit, controller: Node2D) -> PositionResul
 		query.movement_radius = mission.movement_radius
 		query.sector_cells = mission.sector_cells
 		query.fallback_hexes = mission.fallback_hexes
+		query.defense_responsibility = mission.defense_responsibility
+		query.withdrawal_requested = mission.execution_intent == TacticalPositionExecutor.Intent.WITHDRAW
+		if mission.position_mode == PositionProfile.Mode.DEFEND:
+			query.profile.max_exposure_seconds = mission.exposure_budget_seconds
+			query.profile.max_open_exposure_seconds = mission.open_crossing_budget_seconds
 		query.reservations = planner.reserved_hexes_by_squad.duplicate()
 		break
 	for friendly: Unit in Globals.get_units_for_team(unit.team):
 		if friendly.movement != null and friendly.movement.is_moving:
 			query.reservations[friendly] = friendly.movement.target_hex
-	return controller.influence_map_controller.query_positions(query)
+	return controller.influence_map_controller.query_inspection_positions(query)

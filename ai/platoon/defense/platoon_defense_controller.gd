@@ -13,23 +13,33 @@ var reserved_hexes_by_squad: Dictionary = {}
 var accepted_positions: Dictionary = {}
 var time_until_reconsider: float = 0.0
 var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+var _planning_requests: Array[Dictionary] = []
+var _planning_results: Array[DefensePositionResult] = []
+var _planning_reservations: Dictionary = {}
+var _planning_job: PositionQueryJob
+var _planning_index: int = 0
 
 
 func _process(delta: float) -> void:
 	if not active or current_order == null:
 		return
+	if _planning_job != null:
+		_continue_budgeted_plan()
+		return
 	time_until_reconsider -= delta
 	if time_until_reconsider <= 0.0:
 		time_until_reconsider = reconsider_interval
-		reconsider_assignments()
+		_start_plan(true)
 
 
 func _exit_tree() -> void:
+	_cancel_plan()
 	_set_defensive_control(false)
 	executor.cancel_all()
 
 
 func set_active(is_active: bool) -> void:
+	_cancel_plan()
 	active = is_active
 	if active:
 		_set_defensive_control(current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
@@ -47,15 +57,17 @@ func set_active(is_active: bool) -> void:
 func receive_mission_order(order: MissionOrder) -> void:
 	if not active:
 		return
+	_cancel_plan()
 	executor.cancel_all(true)
 	accepted_positions.clear()
 	current_order = order
 	_set_defensive_control(order.position_mode == PositionProfile.Mode.DEFEND)
-	time_until_reconsider = 0.0
-	reconsider_assignments()
+	time_until_reconsider = reconsider_interval
+	_start_plan(is_inside_tree())
 
 
 func set_squads(new_squads: Array[Unit]) -> void:
+	_cancel_plan()
 	_set_defensive_control(false)
 	squads.clear()
 	for squad: Unit in new_squads:
@@ -84,6 +96,11 @@ func bind_active_squads(active_units: Array[Unit]) -> void:
 
 
 func reconsider_assignments() -> void:
+	_start_plan(false)
+
+
+func _start_plan(budgeted: bool) -> void:
+	_cancel_plan()
 	if not active or current_order == null or influence_map_controller == null:
 		return
 	influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
@@ -94,37 +111,127 @@ func reconsider_assignments() -> void:
 		if not available.has(unit):
 			accepted_positions.erase(unit)
 			executor.cancel(unit)
-	squad_assignments.clear()
-	reserved_hexes_by_squad = _create_current_reserved_hexes(available)
+	_planning_reservations = _create_current_reserved_hexes(available)
+	_build_planning_requests(available)
+	if budgeted and not _planning_requests.is_empty():
+		_submit_planning_query()
+		return
+	for request: Dictionary in _planning_requests:
+		var query: PositionQuery = request["query"]
+		_accept_planning_result(request, PositionQueryService.query_positions(query))
+	_commit_plan()
+
+
+func _build_planning_requests(available: Array[Unit]) -> void:
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
-		_assign_offensive_positions(available)
+		var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+		for unit: Unit in available:
+			_add_planning_requests(config, [unit], "offense", null)
+		return
+	if current_order.reserve_policy != MissionOrder.ReservePolicy.NONE and available.size() >= 3:
+		var reserve: Unit = _select_reserve_squad(available)
+		available.erase(reserve)
+		var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+		reserve_config.defense_radius = 2
+		reserve_config.profile.firing_weight = 0.0
+		reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
+		_add_planning_requests(reserve_config, [reserve], "reserve", null)
+	if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+		var guard: Unit = available.pop_front()
+		var guard_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+		guard_config.defense_responsibility = PositionQuery.Responsibility.GUARD
+		_add_planning_requests(guard_config, [guard], "guard_objective", null)
+	var axes: Array[ThreatAxis] = _get_sorted_threat_axes()
+	if axes.is_empty():
+		var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+		_add_planning_requests(config, available, "defend_objective", null)
 	else:
-		if current_order.reserve_policy != MissionOrder.ReservePolicy.NONE and available.size() >= 3:
-			var reserve: Unit = _select_reserve_squad(available)
-			available.erase(reserve)
-			var reserves: Array[Unit] = [reserve]
-			var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
-			reserve_config.defense_radius = 2
-			reserve_config.accepted_positions = accepted_positions
-			reserve_config.profile.firing_weight = 0.0
-			reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
-			_apply_position_results(DefensePositionAnalyzer.analyze_objective_defense_positions(influence_map_controller, reserve_config, reserves, reserved_hexes_by_squad), "reserve", null)
-		if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
-			var guard: Unit = available.pop_front()
-			var guard_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
-			guard_config.defense_responsibility = PositionQuery.Responsibility.GUARD
-			_apply_position_results(DefensePositionAnalyzer.analyze_objective_defense_positions(influence_map_controller, guard_config, [guard], reserved_hexes_by_squad), "guard_objective", null)
-		var axes: Array[ThreatAxis] = _get_sorted_threat_axes()
-		if axes.is_empty():
-			_apply_position_results(influence_map_controller.analyze_objective_defense_positions(team, current_order.objective_hex, available, reserved_hexes_by_squad, current_order, accepted_positions), "defend_objective", null)
-		else:
-			var assignments: Dictionary = _distribute_squads_over_axes(available, axes)
-			for axis: ThreatAxis in axes:
-				var assigned: Array[Unit] = assignments[axis]
-				if assigned.is_empty():
-					continue
-				_apply_position_results(influence_map_controller.analyze_defense_positions_for_threat_axis(team, current_order.objective_hex, axis, assigned, reserved_hexes_by_squad, current_order, accepted_positions), "defend_axis", axis)
+		var assignments: Dictionary = _distribute_squads_over_axes(available, axes)
+		for axis: ThreatAxis in axes:
+			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			config.threat_axis = axis
+			_add_planning_requests(config, assignments[axis], "defend_axis", axis)
+
+
+func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit], role: String, axis: ThreatAxis) -> void:
+	for unit: Unit in units:
+		var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
+		query.snapshot = influence_map_controller.snapshot
+		_planning_requests.append({"query": query, "role": role, "axis": axis})
+
+
+func _submit_planning_query() -> void:
+	_planning_job = influence_map_controller.enqueue_position_query(_planning_requests[_planning_index]["query"])
+
+
+func _continue_budgeted_plan() -> void:
+	if _planning_job.canceled or _planning_job.query.objective_hex != current_order.objective_hex:
+		_cancel_plan()
+		time_until_reconsider = 0.0
+		return
+	if not _planning_job.completed:
+		return
+	var query: PositionQuery = _planning_job.query
+	# A route computed from an old occupied hex cannot authorize a new move.
+	if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.current_hex != query.origin_hex:
+		_cancel_plan()
+		time_until_reconsider = 0.0
+		return
+	_accept_planning_result(_planning_requests[_planning_index], _planning_job.result)
+	_planning_index += 1
+	if _planning_index < _planning_requests.size():
+		_submit_planning_query()
+	else:
+		_commit_plan()
+
+
+func _accept_planning_result(request: Dictionary, advice: PositionResult) -> void:
+	var result: DefensePositionResult = DefensePositionAnalyzer.adapt_result(advice, request["axis"], request["role"])
+	_planning_results.append(result)
+	if result.is_valid():
+		_planning_reservations[result.unit] = result.target_hex
+
+
+func _commit_plan() -> void:
+	for request: Dictionary in _planning_requests:
+		var query: PositionQuery = request["query"]
+		if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.current_hex != query.origin_hex:
+			_cancel_plan()
+			time_until_reconsider = 0.0
+			return
+	for index: int in range(_planning_results.size()):
+		var result: DefensePositionResult = _planning_results[index]
+		var query: PositionQuery = _planning_requests[index]["query"]
+		if result.context != query.context_key():
+			_cancel_plan()
+			time_until_reconsider = 0.0
+			return
+		if result.is_valid() and query.profile.mode == PositionProfile.Mode.DEFEND:
+			query.firepower_by_unit.clear()
+			var protection: Dictionary = DefensePositionPolicy.evaluate(query, result.target_hex)
+			if protection["responsibility"] == "" or not protection["preserves_screen"]:
+				_cancel_plan()
+				time_until_reconsider = 0.0
+				return
+	squad_assignments.clear()
+	reserved_hexes_by_squad = _planning_reservations
+	for result: DefensePositionResult in _planning_results:
+		_apply_position_results([result], result.role, result.axis)
 	_issue_orders()
+	_planning_job = null
+	_planning_requests.clear()
+	_planning_results.clear()
+	_planning_index = 0
+
+
+func _cancel_plan() -> void:
+	if influence_map_controller != null and _planning_job != null:
+		influence_map_controller.cancel_position_query(_planning_job)
+	_planning_job = null
+	_planning_requests.clear()
+	_planning_results.clear()
+	_planning_reservations = {}
+	_planning_index = 0
 
 
 func _select_reserve_squad(available: Array[Unit]) -> Unit:
@@ -156,24 +263,6 @@ func _distribute_squads_over_axes(available: Array[Unit], axes: Array[ThreatAxis
 	for index: int in range(available.size()):
 		result[axes[index % axes.size()]].append(available[index])
 	return result
-
-
-func _assign_offensive_positions(units: Array[Unit]) -> void:
-	for unit: Unit in units:
-		var query: PositionQuery = PositionQuery.new()
-		query.unit = unit
-		query.team = team
-		query.objective_hex = current_order.objective_hex
-		query.profile = PositionProfile.for_mode(current_order.position_mode)
-		query.movement_radius = current_order.movement_radius
-		query.reservations = reserved_hexes_by_squad
-		if accepted_positions.has(unit):
-			query.has_accepted_target = true
-			query.accepted_target = accepted_positions[unit]["hex"]
-			query.accepted_context = accepted_positions[unit]["context"]
-			query.accepted_at = accepted_positions[unit].get("at", -INF)
-		var result: PositionResult = influence_map_controller.query_positions(query)
-		_apply_position_results([DefensePositionAnalyzer.adapt_result(result, null, "offense")], "offense", null)
 
 
 func _apply_position_results(results: Array[DefensePositionResult], _fallback_role: String, _fallback_axis: ThreatAxis) -> void:
@@ -234,4 +323,4 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if (mouse.ctrl_pressed and team == Globals.Team.AXIS) or (mouse.shift_pressed and team == Globals.Team.ALLIES):
 		current_order.objective_hex = LOSHelper.ground_layer.local_to_map(get_parent().get_global_mouse_position())
-		reconsider_assignments()
+		_start_plan(is_inside_tree())

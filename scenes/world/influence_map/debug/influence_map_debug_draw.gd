@@ -125,7 +125,7 @@ func _process(delta: float) -> void:
 
 	if debug_view == DebugView.POSITION_SCORE:
 		_advice_refresh_time += delta
-		if _advice_refresh_time >= 1.0 or (is_instance_valid(selected_unit) and selected_unit.current_hex != _advice_origin):
+		if _advice_refresh_time >= 0.1 or (is_instance_valid(selected_unit) and selected_unit.current_hex != _advice_origin):
 			_refresh_position_advice()
 	queue_redraw()
 

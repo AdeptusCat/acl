@@ -8,7 +8,9 @@ const MIN_APPROACH_COVERAGE: float = 0.5
 static func prepare(query: PositionQuery) -> void:
 	query.defense_approaches.clear()
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
-	var graph: AStar2D = _approach_graph(query, contacts)
+	var graph: AStar2D = null
+	if not contacts.is_empty():
+		graph = _approach_graph(query, contacts)
 	var ids: Dictionary = query.snapshot.point_ids.get(query.team, {})
 	for contact: InfluenceContact in contacts:
 		var cells: Array[Vector2i] = []
@@ -90,7 +92,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 static func _can_cover(query: PositionQuery, unit: Unit, from: Vector2i, target: Vector2i) -> bool:
 	if from == target:
 		return true
-	return query.snapshot.los.get(from, {}).has(target) and InfluenceUnitQuery.get_firepower_at_range(unit, LOSHelper.get_hex_distance(from, target)) > 0.0
+	return query.snapshot.los.get(from, {}).has(target) and query.firepower_at_range(unit, LOSHelper.get_hex_distance(from, target)) > 0.0
 
 
 static func _approach_coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictionary) -> float:

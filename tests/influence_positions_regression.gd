@@ -129,6 +129,7 @@ func _run() -> void:
 	_test_defensive_withdrawal()
 	_test_defense_mission_context()
 	_test_defensive_memory()
+	_test_budgeted_position_queries()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -1053,6 +1054,87 @@ func _test_defense_mission_context() -> void:
 	controller.set_objective_for_team(own.team, Vector2i(3, 3))
 	director.free()
 	platoon.free()
+
+
+func _test_budgeted_position_queries() -> void:
+	var query: PositionQuery = _defense_fixture()
+	_add_defense_contact(query)
+	query.sector_cells = [own.current_hex, Vector2i(4, 3), Vector2i(5, 3)]
+	var expected: PositionResult = PositionQueryService.query_positions(query)
+	var job: PositionQueryJob = PositionQueryJob.new()
+	job.query = query
+	job.advance(Time.get_ticks_usec() - 1)
+	_check(not job.completed and job.phase == PositionQueryJob.Phase.INITIALIZE, "An exhausted frame budget does not begin expensive query work")
+	var slices: int = 0
+	while not job.completed and slices < 10000:
+		job.advance(Time.get_ticks_usec() + 100)
+		slices += 1
+	_check(job.completed and slices > 1 and job.result.target_hex == expected.target_hex and job.result.path == expected.path and job.result.eligibility == expected.eligibility and job.result.score_map == expected.score_map, "Incremental queries preserve synchronous positions, paths, scores and eligibility")
+	_check(query.route_field._query == null, "Completed fields release their query reference instead of retaining a reference cycle")
+	var field: PositionRouteField = PositionRouteField.new()
+	field.start(query, [own.current_hex])
+	field.advance(-1)
+	_check(field.completed and field.expanded_labels == 0 and field.path_to(own.current_hex) == [own.current_hex], "A flood stops as soon as its requested destinations settle")
+	field.release_query()
+	query.profile.max_exposure_seconds = 0.0
+	field.start(query, [own.current_hex, Vector2i(4, 3)])
+	field.expanded_labels = 256
+	field.advance(-1)
+	_check(field.completed and field._bounds_prepared and field.path_to(own.current_hex) == [own.current_hex] and field.path_to(Vector2i(4, 3)).is_empty(), "Minimum-exposure pruning excludes impossible destinations while retaining a valid hold")
+	field.release_query()
+	field.start(query, [Vector2i(4, 3)])
+	field.expanded_labels = 256
+	field.advance(-1)
+	_check(field.completed and field.path_to(Vector2i(4, 3)).is_empty(), "A search completes safely when every requested destination exceeds the exposure lower bound")
+	field.release_query()
+	var canceled: PositionQueryJob = controller.enqueue_position_query(_defense_fixture())
+	controller.cancel_position_query(canceled)
+	_check(canceled.canceled and not controller.position_jobs.has(canceled), "Canceled advice is removed from the scheduler")
+	var platoon: PlatoonAI = PlatoonAI.new()
+	platoon.influence_map_controller = controller
+	platoon.set_squads([own])
+	var mission: MissionOrder = MissionOrder.new()
+	mission.objective_hex = own.current_hex
+	platoon.receive_mission_order(mission)
+	platoon._start_plan(true)
+	var pending: PositionQueryJob = platoon._planning_job
+	platoon.set_active(false)
+	_check(pending != null and pending.canceled and platoon._planning_job == null and controller.position_jobs.is_empty(), "Player handoff cancels queued planning without publishing stale orders")
+	platoon.set_active(true)
+	platoon.receive_mission_order(mission)
+	platoon._start_plan(true)
+	pending = platoon._planning_job
+	mission.objective_hex += Vector2i(1, 0)
+	platoon._continue_budgeted_plan()
+	_check(pending.canceled and platoon._planning_job == null, "An objective change cancels the old budgeted plan")
+	platoon._start_plan(true)
+	pending = platoon._planning_job
+	while not pending.completed:
+		controller._process_position_queries()
+	var origin: Vector2i = own.current_hex
+	var order_id: int = own.action_controller.action_order_id
+	own.current_hex += Vector2i(1, 0)
+	platoon._continue_budgeted_plan()
+	_check(pending.canceled and platoon._planning_job == null and own.action_controller.action_order_id == order_id, "Moving off the query origin discards completed advice without issuing a stale route")
+	own.current_hex = origin
+	platoon.free()
+	add_child(controller)
+	var preview: PositionQuery = _defense_fixture()
+	preview.geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
+	_check(controller.query_inspection_positions(preview) == null and controller.position_jobs.size() == 1, "Live player inspection queues work instead of blocking selection")
+	controller.query_inspection_positions(_query())
+	_check(controller.position_jobs.size() == 1, "Repeated overlay refreshes reuse the pending query")
+	while not controller.position_jobs.is_empty():
+		controller._process_position_queries()
+	var completed_preview: PositionResult = controller.query_inspection_positions(_query())
+	_check(completed_preview != null and controller.position_jobs.is_empty(), "Completed player inspection reuses its published result")
+	_publish()
+	var retained_preview: PositionResult = controller.query_inspection_positions(_query())
+	var pending_preview: PositionResult = controller.query_inspection_positions(_query())
+	_check(retained_preview == completed_preview and pending_preview == completed_preview and controller.position_jobs.size() == 1, "A new snapshot keeps the last completed overlay visible throughout queued work")
+	controller.clear_inspection_queries()
+	_check(controller.position_jobs.is_empty() and controller.inspection_results.is_empty(), "Deselection releases pending inspection and its cached results")
+	remove_child(controller)
 
 
 func _test_defensive_memory() -> void:

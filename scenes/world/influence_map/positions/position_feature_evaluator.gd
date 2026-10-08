@@ -7,16 +7,13 @@ static func risk(value: float) -> float:
 
 
 static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]) -> Dictionary:
+	if not query.destination_features.has(cell):
+		query.destination_features[cell] = _destination_features(query, cell)
+	var features: Dictionary = query.destination_features[cell].duplicate()
 	var map: InfluenceMap = query.snapshot.maps[query.team]
-	var origin: Vector2i = query.unit.current_hex
-	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
-	var start_distance: int = LOSHelper.get_hex_distance(origin, query.objective_hex)
-	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
-	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
-		incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
 	var exposure: float = 0.0
 	var travel: float = 0.0
 	var peak_exposure: float = 0.0
@@ -30,7 +27,10 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
-			step_risk = route_step(query, step)["risk"]
+			if query.route_field != null:
+				step_risk = query.route_field.step_data(step)["risk"]
+			else:
+				step_risk = route_step(query, step)["risk"]
 		var step_cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, step), 0.0, 1.0)
 		open_ground += 1.0 - step_cover
 		if step_cover < query.profile.minimum_cover:
@@ -47,24 +47,30 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	if path.size() > 1:
 		exposure /= float(path.size() - 1)
 		open_ground /= float(path.size() - 1)
+	features.merge({"travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
+		"open_ground": open_ground, "open_fire": open_fire, "route_contact_distance": route_contact_distance,
+		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds})
+	return features
+
+
+static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dictionary:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
+	var start_distance: int = LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex)
+	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
+	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		contacts = query.snapshot.get_defensive_contacts(query.team)
+		incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
 	var support: float = 0.0
 	for friendly: Unit in query.snapshot.positions:
 		if friendly != query.unit and query.snapshot.teams[friendly] == query.team:
 			support += maxf(0.0, 1.0 - float(LOSHelper.get_hex_distance(cell, query.snapshot.positions[friendly])) / 5.0)
-	var targets: Array[Vector2i] = []
-	for contact: InfluenceContact in contacts:
-		if query.axis != null and not query.axis.enemy_units.is_empty() and not query.axis.enemy_units.has(contact.unit):
-			continue
-		if query.profile.mode == PositionProfile.Mode.DEFEND or query.profile.mode == PositionProfile.Mode.LEGACY_DEFENSE:
-			var line: Array[Vector2i] = ProjectionSourceBuilder.get_projected_line_hexes(query.objective_hex, contact.hex, 5, 1, 3)
-			targets.append_array(line)
-		else:
-			targets.append(contact.hex)
-	if query.axis != null and targets.is_empty():
-		targets.append_array(query.axis.approach_hexes)
-		targets.append(query.axis.source_hex)
-	if targets.is_empty() or query.profile.mode != PositionProfile.Mode.DEFEND:
-		targets.append(query.objective_hex)
+	var targets: Array[Vector2i] = query.firing_targets
+	if not query.firing_targets_prepared:
+		query.firing_targets_prepared = true
+		_prepare_firing_targets(query, contacts)
 	var firing: float = 0.0
 	var visible_count: int = 0
 	for target: Vector2i in targets:
@@ -86,10 +92,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var features: Dictionary = {"cover": cover, "incoming": incoming,
 		"forecast": forecast,
 		"firing": firing, "firing_lanes": visible_count, "objective_coverage": coverage,
-		"support": minf(support, 1.0), "travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
-		"open_ground": open_ground, "open_fire": open_fire,
-		"contact_distance": nearest_contact_distance(contacts, cell), "route_contact_distance": route_contact_distance,
-		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds,
+		"support": minf(support, 1.0),
+		"contact_distance": nearest_contact_distance(contacts, cell),
 		"progress": float(start_distance - objective_distance) / float(maxi(start_distance, 1)), "legacy": legacy}
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		features.merge(DefensePositionPolicy.evaluate(query, cell))
@@ -98,6 +102,23 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		features["exposure_budget_seconds"] = query.profile.max_exposure_seconds
 		features["open_exposure_budget_seconds"] = query.profile.max_open_exposure_seconds
 	return features
+
+
+static func _prepare_firing_targets(query: PositionQuery, contacts: Array[InfluenceContact]) -> void:
+	var targets: Array[Vector2i] = query.firing_targets
+	for contact: InfluenceContact in contacts:
+		if query.axis != null and not query.axis.enemy_units.is_empty() and not query.axis.enemy_units.has(contact.unit):
+			continue
+		if query.profile.mode == PositionProfile.Mode.DEFEND or query.profile.mode == PositionProfile.Mode.LEGACY_DEFENSE:
+			var line: Array[Vector2i] = ProjectionSourceBuilder.get_projected_line_hexes(query.objective_hex, contact.hex, 5, 1, 3)
+			targets.append_array(line)
+		else:
+			targets.append(contact.hex)
+	if query.axis != null and targets.is_empty():
+		targets.append_array(query.axis.approach_hexes)
+		targets.append(query.axis.source_hex)
+	if targets.is_empty() or query.profile.mode != PositionProfile.Mode.DEFEND:
+		targets.append(query.objective_hex)
 
 
 static func nearest_contact_distance(contacts: Array[InfluenceContact], cell: Vector2i) -> int:
@@ -165,7 +186,7 @@ static func outgoing_utility(query: PositionQuery, from_hex: Vector2i, target_he
 	if not records.has(target_hex):
 		return 0.0
 	var distance: int = LOSHelper.get_hex_distance(from_hex, target_hex)
-	var power: float = InfluenceUnitQuery.get_firepower_at_range(query.unit, distance)
+	var power: float = query.firepower_at_range(query.unit, distance)
 	if power <= 0.0:
 		return 0.0
 	var data: Dictionary = records[target_hex]

@@ -3,48 +3,53 @@ extends RefCounted
 
 
 static func query_positions(query: PositionQuery) -> PositionResult:
-	var result: PositionResult = PositionResult.new()
+	var job: PositionQueryJob = PositionQueryJob.new()
+	job.query = query
+	job.advance(-1)
+	return job.result
+
+
+static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	result.unit = query.unit
 	result.context = query.context_key()
 	result.objective_hex = query.objective_hex
 	result.profile_mode = query.profile.mode
 	if query.snapshot == null or not query.snapshot.maps.has(query.team):
 		result.reason = "No completed influence snapshot"
-		return result
+		return false
 	result.snapshot_version = query.snapshot.version
 	result.status = PositionResult.Status.NO_CANDIDATE
 	if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.team != query.team:
 		result.reason = "Unit is outside the query's ownership"
-		return result
+		return false
 	if query.unit.members_alive <= 0 or query.unit.surrendered or not can_follow_intent(query.unit):
 		result.reason = "Unit cannot execute tactical movement"
-		return result
+		return false
 	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
 		result.reason = "Unit is not fit for an assault"
-		return result
+		return false
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
-	query.route_field = null
+	query.reset_evaluation()
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		DefensePositionPolicy.prepare(query)
 		if DefensePositionPolicy.needs_withdrawal(query):
 			result.decision = PositionResult.Decision.WITHDRAW
-		query.route_field = PositionRouteField.new()
-		query.route_field.build(query)
 	if query.include_score_map:
 		result.score_map.resize(map.cell_count)
 		result.score_map.fill(0.0)
 	result.eligibility.resize(map.cell_count)
-	var candidates: Array[PositionCandidate] = _candidates(query, false, result)
-	if candidates.is_empty() and not query.fallback_hexes.is_empty():
-		candidates = _candidates(query, true, result)
+	return true
+
+
+static func finish(query: PositionQuery, result: PositionResult, candidates: Array[PositionCandidate]) -> void:
 	if candidates.is_empty():
 		result.reason = "No reachable position satisfies geography, capacity and risk limits"
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
 				result.reason = "Holding until relocation can preserve existing approach coverage"
-		return result
+		return
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
 	result.proposed_hex = best.hex
@@ -99,51 +104,62 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 		result.reason = "Mission-constrained withdrawal preserves approach coverage"
 		if result.target_hex == query.unit.current_hex:
 			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
-	return result
+	return
 
 
-static func _candidates(query: PositionQuery, fallback: bool, diagnostics: PositionResult) -> Array[PositionCandidate]:
-	var result: Array[PositionCandidate] = []
+static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, diagnostics: PositionResult) -> bool:
 	var map: InfluenceMap = query.snapshot.maps[query.team]
-	for index: int in range(map.cell_count):
-		var cell: Vector2i = map.index_to_cell(index)
-		if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0:
-			_reject(diagnostics, "terrain")
-			continue
-		if not _in_geography(query, cell, fallback):
-			_reject(diagnostics, "geography")
-			continue
-		if _occupied(query, cell):
-			_reject(diagnostics, "capacity")
-			continue
-		var path: Array[Vector2i] = _path_to_candidate(query, cell)
-		if path.is_empty():
-			_reject(diagnostics, "route")
-			continue
-		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
+	var cell: Vector2i = map.index_to_cell(index)
+	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0:
+		_reject(diagnostics, "terrain")
+		return false
+	if not _in_geography(query, cell, fallback):
+		_reject(diagnostics, "geography")
+		return false
+	if _occupied(query, cell):
+		_reject(diagnostics, "capacity")
+		return false
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
 		if features["cover"] < query.profile.minimum_cover:
 			_reject(diagnostics, "cover")
-			continue
-		if query.profile.mode == PositionProfile.Mode.DEFEND:
-			var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
-			if rejection != "":
-				_reject(diagnostics, rejection)
-				continue
-		elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
-			_reject(diagnostics, "risk")
-			continue
-		if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0:
-			_reject(diagnostics, "firing")
-			continue
-		diagnostics.eligibility[index] = 1
-		var candidate: PositionCandidate = PositionCandidate.new()
-		candidate.hex = cell
-		candidate.index = index
-		candidate.features = features
-		candidate.path = path
-		candidate.score = query.profile.score(features, query.unit)
-		result.append(candidate)
-	return result
+			return false
+		var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
+		if rejection != "":
+			_reject(diagnostics, rejection)
+			return false
+	return true
+
+
+static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: PositionResult) -> PositionCandidate:
+	var cell: Vector2i = query.snapshot.maps[query.team].index_to_cell(index)
+	var path: Array[Vector2i] = _path_to_candidate(query, cell)
+	if path.is_empty():
+		_reject(diagnostics, "route")
+		return null
+	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
+	if features["cover"] < query.profile.minimum_cover:
+		_reject(diagnostics, "cover")
+		return null
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
+		if rejection != "":
+			_reject(diagnostics, rejection)
+			return null
+	elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
+		_reject(diagnostics, "risk")
+		return null
+	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0:
+		_reject(diagnostics, "firing")
+		return null
+	diagnostics.eligibility[index] = 1
+	var candidate: PositionCandidate = PositionCandidate.new()
+	candidate.hex = cell
+	candidate.index = index
+	candidate.features = features
+	candidate.path = path
+	candidate.score = query.profile.score(features, query.unit)
+	return candidate
 
 
 static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:
