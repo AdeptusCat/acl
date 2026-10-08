@@ -1,6 +1,9 @@
 class_name ProjectionSource
 extends RefCounted
 
+var forecast: bool = false
+var weapon_range: int = 999
+
 var unit: Unit = null
 var observer_hex: Vector2i = Vector2i.ZERO
 var firepower: float = 0.0

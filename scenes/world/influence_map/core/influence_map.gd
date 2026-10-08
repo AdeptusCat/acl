@@ -25,6 +25,7 @@ enum Layer {
 	
 	HQ_SUPPORT_NEED,
 	
+	FORECAST_THREAT,
 	COUNT,
 }
 
@@ -59,6 +60,8 @@ const UNIT_INFLUENCE_RADIUS: int = 5
 const UNIT_INFLUENCE_VALUE: float = 5.0
 const UNIT_INFLUENCE_CENTER_PULL_WEIGHT: float = 0.25
 
+var playable_cells: Dictionary[Vector2i, bool] = {}
+
 var bounds: Rect2i = Rect2i()
 var width: int = 0
 var height: int = 0
@@ -79,6 +82,7 @@ var unit_influence_decay_timer_s: float = 0.0
 
 
 func configure(p_bounds: Rect2i) -> void:
+	playable_cells.clear()
 	bounds = p_bounds
 	width = bounds.size.x
 	height = bounds.size.y
@@ -154,6 +158,10 @@ func is_valid_cell(cell: Vector2i) -> bool:
 		return false
 
 	return true
+
+
+func is_playable_cell(cell: Vector2i) -> bool:
+	return is_valid_cell(cell) and playable_cells.get(cell, false)
 
 
 func cell_to_index(cell: Vector2i) -> int:
@@ -534,7 +542,7 @@ func create_reserved_stamp(reserved_hexes: Array[Vector2i]) -> PackedFloat32Arra
 			continue
 
 		var index: int = cell_to_index(hex)
-		values[index] = 0.6
+		values[index] = 0.0
 
 	return values
 

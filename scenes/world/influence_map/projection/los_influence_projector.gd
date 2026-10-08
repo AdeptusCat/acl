@@ -7,6 +7,7 @@ static func rebuild_los_influence_for_team(
 	config: InfluenceProjectionConfig
 ) -> void:
 	project_actual_friendly_los(influence_map, config)
+	project_actual_enemy_los(influence_map, config)
 	project_simulated_enemy_los(influence_map, config)
 
 
@@ -17,6 +18,7 @@ static func clear_los_layers(influence_map: InfluenceMap) -> void:
 	influence_map.clear_layer(InfluenceMap.Layer.VISIBILITY_HINDRANCE, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.RETURN_FIRE_PENALTY, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
+	influence_map.clear_layer(InfluenceMap.Layer.FORECAST_THREAT, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VISIBILITY, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.ENEMY_VULNERABILITY, 0.0)
 	influence_map.clear_layer(InfluenceMap.Layer.HQ_SUPPORT_NEED, 0.0)
@@ -45,6 +47,7 @@ static func project_actual_friendly_los(
 			InfluenceUnitQuery.get_unit_effectiveness(unit)
 		)
 
+		source.weapon_range = InfluenceUnitQuery.get_unit_range(unit)
 		project_los_from_source(
 			influence_map,
 			source,
@@ -52,71 +55,36 @@ static func project_actual_friendly_los(
 		)
 
 
-static func project_simulated_enemy_los(
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig
-) -> void:
-	var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-	project_simulated_enemy_los_from_units(influence_map, config, enemy_units)
+static func project_simulated_enemy_los(influence_map: InfluenceMap, config: InfluenceProjectionConfig) -> void:
+	for source: ProjectionSource in ProjectionSourceBuilder.build_from_contacts(config.contacts, config):
+		project_los_from_source(influence_map, source, false)
 
 
-static func project_actual_enemy_los(
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig
-) -> void:
-	var units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-	var los_lookup: Dictionary = LOSHelper.los_lookup
-
-	for unit: Unit in units:
-		if not InfluenceUnitQuery.is_valid_living_unit(unit):
-			continue
-
-		var observer_hex: Vector2i = unit.current_hex
-
-		if not los_lookup.has(observer_hex):
-			continue
-
-		var source: ProjectionSource = ProjectionSource.new(
-			unit,
-			observer_hex,
-			InfluenceUnitQuery.get_unit_firepower(unit),
-			InfluenceUnitQuery.get_unit_effectiveness(unit)
-		)
-
-		project_los_from_source(
-			influence_map,
-			source,
-			false
-		)
+static func project_actual_enemy_los(influence_map: InfluenceMap, config: InfluenceProjectionConfig) -> void:
+	for contact: InfluenceContact in config.contacts:
+		var source: ProjectionSource = ProjectionSource.new(contact.unit, contact.hex, contact.firepower * contact.confidence, contact.effectiveness)
+		source.weapon_range = contact.weapon_range
+		project_los_from_source(influence_map, source, false)
 
 
-static func project_simulated_enemy_los_from_units(
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig,
-	enemy_units: Array[Unit]
-) -> void:
-	var sources: Array[ProjectionSource] = ProjectionSourceBuilder.build_from_units(
-		enemy_units,
-		config.objective_hex,
-		config.projected_line_max_cells,
-		config.los_skip_front,
-		config.los_count
-	)
-
-	for source: ProjectionSource in sources:
-		project_los_from_source(
-			influence_map,
-			source,
-			false
-		)
+static func project_simulated_enemy_los_from_units(influence_map: InfluenceMap, config: InfluenceProjectionConfig, enemy_units: Array[Unit]) -> void:
+	var selected: Array[InfluenceContact] = []
+	for contact: InfluenceContact in config.contacts:
+		if enemy_units.has(contact.unit):
+			selected.append(contact)
+	for source: ProjectionSource in ProjectionSourceBuilder.build_from_contacts(selected, config):
+		project_los_from_source(influence_map, source, false)
 
 
 static func project_los_from_source(
 	influence_map: InfluenceMap,
 	source: ProjectionSource,
-	project_as_friendly: bool
+	project_as_friendly: bool,
+	captured_los: Variant = null
 ) -> int:
 	var los_lookup: Dictionary = LOSHelper.los_lookup
+	if captured_los != null:
+		los_lookup = captured_los
 	var observer_hex: Vector2i = source.observer_hex
 
 	if not los_lookup.has(observer_hex):
@@ -129,7 +97,13 @@ static func project_los_from_source(
 		if not influence_map.is_valid_cell(target_hex):
 			continue
 
+		if LOSHelper.get_hex_distance(observer_hex, target_hex) > source.weapon_range:
+			continue
 		var los_data: Dictionary = visible_targets[target_hex]
+		if source.forecast:
+			influence_map.add_layer_value(InfluenceMap.Layer.FORECAST_THREAT, target_hex, calculate_los_fire_threat(source.firepower, source.effectiveness, los_data.get("target_cover", 0.0), los_data.get("hindrance", 0.0), LOSHelper.get_hex_distance(observer_hex, target_hex)))
+			written_target_count += 1
+			continue
 
 		if project_as_friendly:
 			project_friendly_los_record(
@@ -330,186 +304,50 @@ static func create_axis_composite_from_enemy_units(
 		source_map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_MOVE_COST)
 	)
 
-	project_actual_friendly_los(axis_map, config)
-	project_simulated_enemy_los_from_units(axis_map, config, axis_enemy_units)
+	# Reuse captured friendly layers; an axis diagnostic must not resample live units.
+	for layer: int in [InfluenceMap.Layer.VISIBILITY, InfluenceMap.Layer.FIRE_POWER, InfluenceMap.Layer.VISIBILITY_HINDRANCE, InfluenceMap.Layer.RETURN_FIRE_PENALTY]:
+		axis_map.set_layer_data_copy(layer, source_map.get_layer_data_copy(layer))
+	var selected: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+	selected.objective_hex = config.objective_hex
+	selected.has_objective = config.has_objective
+	for contact: InfluenceContact in config.contacts:
+		if axis_enemy_units.has(contact.unit):
+			selected.contacts.append(contact)
+	project_actual_enemy_los(axis_map, selected)
+	project_simulated_enemy_los(axis_map, selected)
 	axis_map.rebuild_all_composite()
 
 	return axis_map.get_composite_data_copy()
 
 
-static func begin_budgeted_rebuild_for_team(
-	controller: InfluenceMapController,
-	influence_map: InfluenceMap,
-	config: InfluenceProjectionConfig
-) -> void:
-	#controller.los_rebuild_active = true
-	#controller.los_rebuild_map = influence_map
-	#controller.los_rebuild_sources.clear()
-	#controller.los_rebuild_modes.clear()
-	#controller.los_rebuild_cursor = 0
+static func begin_budgeted_rebuild_for_team(controller: InfluenceMapController, influence_map: InfluenceMap, config: InfluenceProjectionConfig) -> void:
 	var job: LosRebuildJob = LosRebuildJob.new()
 	job.influence_map = influence_map
 	job.defending_team = config.unit_team
-	
-	var friendly_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group)
-	var los_lookup: Dictionary = LOSHelper.los_lookup
-
-	for unit: Unit in friendly_units:
-		if not InfluenceUnitQuery.is_valid_living_unit(unit):
-			continue
-
-		if not los_lookup.has(unit.current_hex):
-			continue
-
-		var friendly_source: ProjectionSource = ProjectionSource.new(
-			unit,
-			unit.current_hex,
-			InfluenceUnitQuery.get_unit_firepower(unit),
-			InfluenceUnitQuery.get_unit_effectiveness(unit)
-		)
-
-		#controller.los_rebuild_sources.append(friendly_source)
-		#controller.los_rebuild_modes.append(true)
-		job.sources.append(friendly_source)
+	job.los_lookup = controller.pending_snapshot.los
+	for unit: Unit in InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group):
+		var source: ProjectionSource = ProjectionSource.new(unit, unit.current_hex, InfluenceUnitQuery.get_unit_firepower(unit), InfluenceUnitQuery.get_unit_effectiveness(unit))
+		source.weapon_range = InfluenceUnitQuery.get_unit_range(unit)
+		job.sources.append(source)
 		job.projection_modes.append(true)
-	
-	var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-	var enemy_sources: Array[ProjectionSource] = ProjectionSourceBuilder.build_from_units(
-		enemy_units,
-		config.objective_hex,
-		config.projected_line_max_cells,
-		config.los_skip_front,
-		config.los_count
-	)
-
-	for enemy_source: ProjectionSource in enemy_sources:
-		#controller.los_rebuild_sources.append(enemy_source)
-		#controller.los_rebuild_modes.append(false)
-		job.sources.append(enemy_source)
+	for contact: InfluenceContact in config.contacts:
+		var source: ProjectionSource = ProjectionSource.new(contact.unit, contact.hex, contact.firepower * contact.confidence, contact.effectiveness)
+		source.weapon_range = contact.weapon_range
+		job.sources.append(source)
 		job.projection_modes.append(false)
-	
+	for source: ProjectionSource in ProjectionSourceBuilder.build_from_contacts(config.contacts, config):
+		job.sources.append(source)
+		job.projection_modes.append(false)
 	controller.los_rebuild_jobs.append(job)
-	
-	print(
-		"[LOS JOB] defending_team=",
-		Globals.TEAM_NAMES[config.unit_team],
-		" enemy_team=",
-		Globals.TEAM_NAMES[config.enemy_team],
-		" friendly_units=",
-		friendly_units.size(),
-		" friendly_sources=",
-		job.sources.size(),
-		" enemy_units=",
-		enemy_units.size(),
-		" projected_enemy_sources=",
-		enemy_sources.size()
-	)
 
-static func process_budgeted_rebuild(
-	controller: InfluenceMapController,
-	sources_per_frame: int
-) -> void:
-	var had_jobs: bool = not controller.los_rebuild_jobs.is_empty()
 
-	if not had_jobs:
-		return
-
+static func process_budgeted_rebuild(controller: InfluenceMapController, sources_per_frame: int) -> void:
 	var processed: int = 0
-
 	while processed < sources_per_frame and not controller.los_rebuild_jobs.is_empty():
-		var current_job: LosRebuildJob = controller.los_rebuild_jobs[0]
-
-		if current_job.cursor >= current_job.sources.size():
-			controller.los_rebuild_jobs.remove_at(0)
-			continue
-
-		var source: ProjectionSource = current_job.sources[current_job.cursor]
-		var project_as_friendly: bool = current_job.projection_modes[current_job.cursor]
-
-		var target_record_count: int = project_los_from_source(
-			current_job.influence_map,
-			source,
-			project_as_friendly
-		)
-
-		var write_mode_name: String = "ENEMY"
-
-		if project_as_friendly:
-			write_mode_name = "FRIENDLY"
-
-		print(
-			"[LOS SOURCE] defending_team=",
-			Globals.TEAM_NAMES[current_job.defending_team],
-			" mode=",
-			write_mode_name,
-			" observer=",
-			source.observer_hex,
-			" firepower=",
-			source.firepower,
-			" effectiveness=",
-			source.effectiveness,
-			" targets=",
-			target_record_count,
-			" los_exists=",
-			LOSHelper.los_lookup.has(source.observer_hex)
-		)
-
-		current_job.cursor += 1
-		processed += 1
-
-		var job_is_complete: bool = current_job.cursor >= current_job.sources.size()
-
-		controller.los_rebuild_jobs.remove_at(0)
-
-		if not job_is_complete:
-			controller.los_rebuild_jobs.append(current_job)
-
-	if controller.los_rebuild_jobs.is_empty():
-		controller.rebuild_pending = true
-
-
-
-#static func process_budgeted_rebuild(controller: InfluenceMapController, sources_per_frame: int) -> void:
-	##if not controller.los_rebuild_active:
-		##return
-	#var processed: int = 0
-#
-	##while controller.los_rebuild_cursor < controller.los_rebuild_sources.size() and processed < sources_per_frame:
-		##var source: ProjectionSource = controller.los_rebuild_sources[controller.los_rebuild_cursor]
-		##var project_as_friendly: bool = controller.los_rebuild_modes[controller.los_rebuild_cursor]
-#
-	#while processed < sources_per_frame and not controller.los_rebuild_jobs.is_empty():
-		#var job: LosRebuildJob = controller.los_rebuild_jobs[0]
-#
-		#if job.cursor >= job.sources.size():
-			#controller.los_rebuild_jobs.remove_at(0)
-			#controller.rebuild_pending = true
-			#continue
-#
-		#var source: ProjectionSource = job.sources[job.cursor]
-		#var project_as_friendly: bool = job.projection_modes[job.cursor]
-#
-		#project_los_from_source(
-			##controller.los_rebuild_map,
-			#job.influence_map,
-			#source,
-			#project_as_friendly
-		#)
-#
-		##controller.los_rebuild_cursor += 1
-		#job.cursor += 1
-		#processed += 1
-#
-	#if controller.los_rebuild_cursor >= controller.los_rebuild_sources.size():
-		##controller.los_rebuild_active = false
-		##controller.los_rebuild_map = null
-		##controller.los_rebuild_sources.clear()
-		##controller.los_rebuild_modes.clear()
-		##controller.los_rebuild_cursor = 0
-		##controller.rebuild_pending = true
-		#controller.los_rebuild_jobs.remove_at(0)
-#
-		#if job.cursor >= job.sources.size():
-			#controller.rebuild_pending = true
-		#else:
-			#controller.los_rebuild_jobs.append(job)
+		var job: LosRebuildJob = controller.los_rebuild_jobs.pop_front()
+		if job.cursor < job.sources.size():
+			project_los_from_source(job.influence_map, job.sources[job.cursor], job.projection_modes[job.cursor], job.los_lookup)
+			job.cursor += 1
+			processed += 1
+		if job.cursor < job.sources.size():
+			controller.los_rebuild_jobs.append(job)

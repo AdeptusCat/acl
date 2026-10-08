@@ -19,6 +19,8 @@ enum DebugView {
 	UNIT_INFLUENCE,
 	
 	HQ_SUPPORT_NEED,
+	FORECAST_THREAT,
+	POSITION_SCORE,
 	#RETURN_FIRE_PENALTY,
 	
 	#FRIENDLY_SUPPORT,
@@ -40,6 +42,8 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 	DebugView.ENEMY_VULNERABILITY: "ENEMY_VULNERABILITY",
 	DebugView.UNIT_INFLUENCE: "UNIT_INFLUENCE",
 	DebugView.HQ_SUPPORT_NEED: "HQ_SUPPORT_NEED",
+	DebugView.FORECAST_THREAT: "FORECAST_THREAT",
+	DebugView.POSITION_SCORE: "POSITION_SCORE",
 	DebugView.ENEMY_VISIBILITY: "ENEMY_VISIBILITY",
 }
 
@@ -113,6 +117,8 @@ func _process(_delta: float) -> void:
 	if debug_view == DebugView.NONE:
 		return
 
+	if debug_view == DebugView.POSITION_SCORE:
+		_cache_valid = false
 	queue_redraw()
 
 
@@ -212,10 +218,6 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 
 		var value: float = _get_debug_value(influence_map, cell)
 		
-		if selected_unit:
-			var index: int = influence_map.cell_to_index(cell)
-			if selected_unit.influence_map.size() > index:
-				value = selected_unit.influence_map[index]
 
 		if hide_zero_values:
 			if abs(value) <= zero_epsilon:
@@ -270,6 +272,10 @@ func _recalculate_value_range(influence_map: InfluenceMap) -> void:
 
 
 func _get_debug_value(influence_map: InfluenceMap, cell: Vector2i) -> float:
+	if debug_view == DebugView.POSITION_SCORE:
+		if is_instance_valid(selected_unit) and selected_unit.team == team and selected_unit.influence_map.size() == influence_map.cell_count:
+			return selected_unit.influence_map[influence_map.cell_to_index(cell)]
+		return 0.0
 	if debug_view == DebugView.COMPOSITE:
 		return influence_map.get_composite_value(cell, 0.0)
 
@@ -300,6 +306,9 @@ func _debug_view_to_layer_id(p_debug_view: int) -> int:
 	if p_debug_view == DebugView.VISIBILITY_HINDRANCE:
 		return InfluenceMap.Layer.VISIBILITY_HINDRANCE
 	
+	if p_debug_view == DebugView.FORECAST_THREAT:
+		return InfluenceMap.Layer.FORECAST_THREAT
+
 	if p_debug_view == DebugView.THREAT:
 		return InfluenceMap.Layer.THREAT
 	
@@ -488,6 +497,13 @@ func _input(event: InputEvent) -> void:
 		set_debug_view(DebugView.ENEMY_VULNERABILITY)
 		return
 
+	if key_event.keycode == KEY_F1:
+		set_debug_view(DebugView.POSITION_SCORE)
+		return
+	if key_event.keycode == KEY_F2:
+		set_debug_view(DebugView.FORECAST_THREAT)
+		return
+
 	if key_event.keycode == KEY_TAB:
 		_cycle_team()
 		return
@@ -561,6 +577,12 @@ func _debug_report_layer_access(reason: String) -> void:
 		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
+	if debug_view == DebugView.POSITION_SCORE:
+		_layer_access_text = "Position scores require a selected owned unit"
+		if is_instance_valid(selected_unit) and selected_unit.position_advice != null:
+			var advice: PositionResult = selected_unit.position_advice
+			_layer_access_text = "Snapshot %d | %s | target=%s | score=%.3f | %s" % [advice.snapshot_version, selected_unit.name, advice.target_hex, advice.score, advice.reason]
+		return
 	var layer_id: int = _debug_view_to_layer_id(debug_view)
 
 	if layer_id < 0:

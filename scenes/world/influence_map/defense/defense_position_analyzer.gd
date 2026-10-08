@@ -1,297 +1,95 @@
 class_name DefensePositionAnalyzer
 extends RefCounted
 
-
-static func analyze_best_positions_for_config(
-	controller: InfluenceMapController,
-	config: InfluenceProjectionConfig,
-	reserved_hexes_by_unit: Dictionary = {}
-) -> Array[DefensePositionResult]:
-	var units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group)
-	var enemy_units: Array[Unit] = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-
-	if units.is_empty():
-		var empty_units_result: Array[DefensePositionResult] = []
-		return empty_units_result
-
-	if enemy_units.is_empty():
-		var empty_enemy_result: Array[DefensePositionResult] = []
-		return empty_enemy_result
-
-	return analyze_best_positions_against_enemy_units(
-		controller,
-		config,
-		units,
-		enemy_units,
-		reserved_hexes_by_unit
-	)
+# Compatibility adapters. Allocation/scoring live in the shared query pipeline.
+static func analyze_best_positions_for_config(controller: InfluenceMapController, config: InfluenceProjectionConfig, reservations: Dictionary = {}) -> Array[DefensePositionResult]:
+	return _analyze(controller, config, InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group), reservations, "defend_objective")
 
 
-static func analyze_best_positions_against_enemy_units(
-	controller: InfluenceMapController,
-	config: InfluenceProjectionConfig,
-	units: Array[Unit],
-	enemy_units: Array[Unit],
-	reserved_hexes_by_unit: Dictionary
-) -> Array[DefensePositionResult]:
-	var results: Array[DefensePositionResult] = []
-
-	if units.is_empty():
-		return results
-
-	if enemy_units.is_empty():
-		return results
-
-	var planned_reserved_hexes: Dictionary = reserved_hexes_by_unit.duplicate()
-	var ordered_units: Array[Unit] = get_ordered_living_units(controller, units)
-
-	for unit: Unit in ordered_units:
-		var influence_map: InfluenceMap = controller.get_map_for_team(unit.team)
-		if influence_map == null:
-			continue
-
-		var approach_stamp: InfluenceStamp = create_projected_approach_stamp(
-			influence_map,
-			config,
-			enemy_units
-		)
-
-		var reserved_hexes_for_other_units: Array[Vector2i] = get_reserved_hexes_except_unit(
-			planned_reserved_hexes,
-			unit
-		)
-		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(
-			reserved_hexes_for_other_units
-		)
-		var score_map: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
-			influence_map._composite,
-			approach_stamp,
-			InfluenceMap.WriteMode.MULTIPLY,
-			true
-		)
-
-		score_map = influence_map.multiply_layers_with_return(score_map, reserved_stamp)
-
-		var result: DefensePositionResult = create_result_from_score_map(
-			influence_map,
-			unit,
-			null,
-			"defend_objective",
-			score_map,
-			config.move_improvement_ratio
-		)
-
-		if not result.is_valid():
-			continue
-
-		planned_reserved_hexes[unit] = result.target_hex
-		results.append(result)
-
-	return results
+static func analyze_best_positions_against_enemy_units(controller: InfluenceMapController, config: InfluenceProjectionConfig, units: Array[Unit], _enemies: Array[Unit], reservations: Dictionary) -> Array[DefensePositionResult]:
+	return _analyze(controller, config, units, reservations, "defend_objective")
 
 
-static func analyze_best_positions_for_threat_axis(
-	controller: InfluenceMapController,
-	config: InfluenceProjectionConfig,
-	axis_units: Array[Unit],
-	axis_enemy_units: Array[Unit],
-	reserved_hexes_by_unit: Dictionary
-) -> Array[DefensePositionResult]:
-	var results: Array[DefensePositionResult] = []
-	var units: Array[Unit] = axis_units
-
-	if units.is_empty():
-		units = InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group)
-
-	if units.is_empty():
-		return results
-
-	var enemy_units: Array[Unit] = axis_enemy_units
-	if enemy_units.is_empty() and config.threat_axis != null:
-		enemy_units = config.threat_axis.enemy_units
-
-	if enemy_units.is_empty():
-		enemy_units = InfluenceUnitQuery.get_config_units(config.enemy_team, config.enemy_group)
-
-	if enemy_units.is_empty():
-		return results
-
-	var first_unit: Unit = units[0]
-	if first_unit == null:
-		return results
-
-	var influence_map: InfluenceMap = controller.get_map_for_team(first_unit.team)
-	if influence_map == null:
-		return results
-
-	var axis_composite: PackedFloat32Array = LosInfluenceProjector.create_axis_composite_from_enemy_units(
-		influence_map,
-		config,
-		enemy_units,
-		controller.create_default_weights()
-	)
-
-	var planned_reserved_hexes: Dictionary = reserved_hexes_by_unit.duplicate()
-	var ordered_units: Array[Unit] = get_ordered_living_units(controller, units)
-
-	for unit: Unit in ordered_units:
-		var approach_stamp: InfluenceStamp = create_projected_approach_stamp_for_threat_axis(
-			influence_map,
-			config
-		)
-
-		var reserved_hexes_for_other_units: Array[Vector2i] = get_reserved_hexes_except_unit(
-			planned_reserved_hexes,
-			unit
-		)
-		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(
-			reserved_hexes_for_other_units
-		)
-		var score_map: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
-			axis_composite,
-			approach_stamp,
-			InfluenceMap.WriteMode.MULTIPLY,
-			true
-		)
-
-		score_map = influence_map.multiply_layers_with_return(score_map, reserved_stamp)
-		score_map = apply_unit_influence_and_objective_mask(
-			influence_map,
-			score_map,
-			config.objective_hex
-		)
-
-		var result: DefensePositionResult = create_result_from_score_map(
-			influence_map,
-			unit,
-			config.threat_axis,
-			"defend_axis",
-			score_map,
-			config.move_improvement_ratio
-		)
-
-		if not result.is_valid():
-			continue
-
-		planned_reserved_hexes[unit] = result.target_hex
-		results.append(result)
-
-	return results
+static func analyze_best_positions_for_threat_axis(controller: InfluenceMapController, config: InfluenceProjectionConfig, units: Array[Unit], _enemies: Array[Unit], reservations: Dictionary) -> Array[DefensePositionResult]:
+	# An empty explicit assignment is never expanded to a team-wide assignment.
+	return _analyze(controller, config, units, reservations, "defend_axis")
 
 
-static func analyze_objective_defense_positions(
-	controller: InfluenceMapController,
-	config: InfluenceProjectionConfig,
-	units: Array[Unit],
-	reserved_hexes_by_unit: Dictionary
-) -> Array[DefensePositionResult]:
-	var results: Array[DefensePositionResult] = []
-
-	if units.is_empty():
-		return results
-
-	var planned_reserved_hexes: Dictionary = reserved_hexes_by_unit.duplicate()
-	var ordered_units: Array[Unit] = get_ordered_living_units(controller, units)
-
-	for unit: Unit in ordered_units:
-		var influence_map: InfluenceMap = controller.get_map_for_team(unit.team)
-		if influence_map == null:
-			continue
-
-		var objective_stamp: InfluenceStamp = create_objective_anchor_stamp(
-			influence_map,
-			config.objective_hex
-		)
-		var reserved_hexes_for_other_units: Array[Vector2i] = get_reserved_hexes_except_unit(
-			planned_reserved_hexes,
-			unit
-		)
-		var reserved_stamp: PackedFloat32Array = influence_map.create_reserved_stamp(
-			reserved_hexes_for_other_units
-		)
-		var score_map: PackedFloat32Array = influence_map.write_stamp_to_layer_with_return(
-			influence_map._composite,
-			objective_stamp,
-			InfluenceMap.WriteMode.MULTIPLY,
-			true
-		)
-
-		score_map = influence_map.multiply_layers_with_return(score_map, reserved_stamp)
-		score_map = apply_unit_influence_and_objective_mask(
-			influence_map,
-			score_map,
-			config.objective_hex
-		)
-
-		var result: DefensePositionResult = create_result_from_score_map(
-			influence_map,
-			unit,
-			null,
-			"defend_objective",
-			score_map,
-			config.move_improvement_ratio
-		)
-
-		if not result.is_valid():
-			continue
-
-		planned_reserved_hexes[unit] = result.target_hex
-		results.append(result)
-
-	return results
+static func analyze_objective_defense_positions(controller: InfluenceMapController, config: InfluenceProjectionConfig, units: Array[Unit], reservations: Dictionary) -> Array[DefensePositionResult]:
+	return _analyze(controller, config, units, reservations, "defend_objective")
 
 
-static func create_result_from_score_map(
-	influence_map: InfluenceMap,
-	unit: Unit,
-	axis: ThreatAxis,
-	role: String,
-	score_map: PackedFloat32Array,
-	move_improvement_ratio: float
-) -> DefensePositionResult:
+static func _analyze(controller: InfluenceMapController, config: InfluenceProjectionConfig, units: Array[Unit], reservations: Dictionary, role: String) -> Array[DefensePositionResult]:
+	var result: Array[DefensePositionResult] = []
+	var planned: Dictionary = reservations.duplicate()
+	var ordered: Array[Unit] = []
+	for unit: Unit in units:
+		if InfluenceUnitQuery.is_valid_living_unit(unit) and unit.team == config.unit_team and not ordered.has(unit):
+			ordered.append(unit)
+	ordered.sort_custom(InfluenceUnitQuery.compare_units_by_squad_type_priority)
+	for unit: Unit in ordered:
+		var query: PositionQuery = PositionQuery.new()
+		query.unit = unit
+		query.team = config.unit_team
+		query.objective_hex = config.objective_hex
+		query.sector_cells = config.sector_cells
+		query.fallback_hexes = config.fallback_hexes
+		query.defense_radius = config.defense_radius
+		query.geography = config.geography
+		query.profile = config.profile
+		query.axis = config.threat_axis
+		query.reservations = planned
+		if config.accepted_positions.has(unit):
+			query.has_accepted_target = true
+			query.accepted_target = config.accepted_positions[unit]["hex"]
+			query.accepted_context = config.accepted_positions[unit]["context"]
+		var advice: PositionResult = controller.query_positions(query)
+		var adapted: DefensePositionResult = adapt_result(advice, config.threat_axis, role)
+		result.append(adapted)
+		if adapted.is_valid():
+			planned[unit] = adapted.target_hex
+	return result
+
+
+static func adapt_result(advice: PositionResult, axis: ThreatAxis, role: String) -> DefensePositionResult:
+	var result: DefensePositionResult = DefensePositionResult.new()
+	for property: String in ["unit", "status", "target_hex", "target_index", "proposed_hex", "score", "previous_score", "should_move", "score_map", "eligibility", "rejections", "features", "alternatives", "path", "snapshot_version", "context", "profile_mode", "objective_hex", "reason"]:
+		result.set(property, advice.get(property))
+	result.axis = axis
+	result.role = role
+	return result
+
+
+static func create_result_from_score_map(map: InfluenceMap, unit: Unit, axis: ThreatAxis, role: String, scores: PackedFloat32Array, improvement_ratio: float) -> DefensePositionResult:
+	# Legacy diagnostic callers lack an eligibility mask: require positive playable cells.
 	var result: DefensePositionResult = DefensePositionResult.new()
 	result.unit = unit
 	result.axis = axis
 	result.role = role
-	result.score_map = score_map
-
-	var best_index: int = influence_map.get_max_value_index(score_map)
-	if best_index == -1:
+	result.status = PositionResult.Status.NO_CANDIDATE
+	result.score_map = scores
+	if not InfluenceUnitQuery.is_valid_living_unit(unit) or scores.size() != map.cell_count:
 		return result
-
-	result.target_index = best_index
-	result.target_hex = influence_map.index_to_cell(best_index)
-	result.score = score_map[best_index]
+	var best: int = -1
+	for index: int in range(scores.size()):
+		if scores[index] > 0.0 and map.is_playable_cell(map.index_to_cell(index)) and (best < 0 or scores[index] > scores[best]):
+			best = index
+	if best < 0:
+		return result
+	var current: int = map.cell_to_index(unit.current_hex)
 	result.previous_score = -INF
-
-	if unit.best_index >= 0 and unit.best_index < score_map.size():
-		result.previous_score = score_map[unit.best_index]
-
-	if result.score * move_improvement_ratio > result.previous_score:
-		result.should_move = true
+	if map.is_playable_cell(unit.current_hex):
+		result.previous_score = scores[current]
+	if result.previous_score > 0.0 and scores[best] * improvement_ratio <= result.previous_score:
+		best = current
+		result.status = PositionResult.Status.RETAINED
 	else:
-		result.should_move = false
-
+		result.status = PositionResult.Status.ACCEPTED
+	result.target_index = best
+	result.target_hex = map.index_to_cell(best)
+	result.score = scores[best]
+	result.should_move = result.target_hex != unit.current_hex
 	return result
-
-
-static func get_ordered_living_units(
-	controller: InfluenceMapController,
-	units: Array[Unit]
-) -> Array[Unit]:
-	var ordered_units: Array[Unit] = []
-
-	for unit: Unit in units:
-		if not InfluenceUnitQuery.is_valid_living_unit(unit):
-			continue
-
-		if not controller.maps_by_team.has(unit.team):
-			continue
-
-		ordered_units.append(unit)
-
-	sort_units_by_squad_priority(ordered_units)
-	return ordered_units
 
 
 static func create_projected_approach_stamp(
@@ -299,13 +97,14 @@ static func create_projected_approach_stamp(
 	config: InfluenceProjectionConfig,
 	enemy_units: Array[Unit]
 ) -> InfluenceStamp:
-	var sources: Array[ProjectionSource] = ProjectionSourceBuilder.build_from_units(
-		enemy_units,
-		config.objective_hex,
-		config.projected_line_max_cells,
-		config.anchor_skip_front,
-		config.anchor_count
-	)
+	var selected: Array[InfluenceContact] = []
+	for contact: InfluenceContact in config.contacts:
+		if enemy_units.has(contact.unit):
+			selected.append(contact)
+	var sources: Array[ProjectionSource] = []
+	for contact: InfluenceContact in selected:
+		for cell: Vector2i in ProjectionSourceBuilder.get_projected_line_hexes(config.objective_hex, contact.hex, config.projected_line_max_cells, config.anchor_skip_front, config.anchor_count):
+			sources.append(ProjectionSource.new(contact.unit, cell, contact.firepower * contact.confidence, contact.effectiveness))
 
 	return create_combined_source_stamp(influence_map, sources, false, config.objective_hex)
 
@@ -426,29 +225,10 @@ static func apply_unit_influence_and_objective_mask(
 		influence_map._layers[InfluenceMap.Layer.UNIT_INFLUENCE],
 		objective_stamp,
 		InfluenceMap.WriteMode.MAX,
-		true
+		false
 	)
 
 	return influence_map.apply_positive_mask_layer_with_return(
 		score_map,
 		unit_influence_with_objective
 	)
-
-
-static func sort_units_by_squad_priority(units: Array[Unit]) -> void:
-	var sorted: bool = false
-
-	while not sorted:
-		sorted = true
-		var index: int = 0
-
-		while index < units.size() - 1:
-			var current_unit: Unit = units[index]
-			var next_unit: Unit = units[index + 1]
-
-			if not InfluenceUnitQuery.compare_units_by_squad_type_priority(current_unit, next_unit):
-				units[index] = next_unit
-				units[index + 1] = current_unit
-				sorted = false
-
-			index += 1

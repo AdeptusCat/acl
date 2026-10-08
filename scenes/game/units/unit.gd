@@ -30,8 +30,9 @@ var terrain_defense_bonus: int = 0
 
 var close_combat_defense_preparedness: float = 0.0
 
+var position_advice: PositionResult
 var influence_map: PackedFloat32Array
-var best_index: int = 0
+var best_index: int = -1
 
 @export var squad: int = 0 : set = set_squad_nr
 @export var platoon: int = 0 : set = set_platoon_nr
@@ -260,7 +261,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 					fire_mortar(map_hex)
 			else:
 				var map_hex: Vector2i = parameter as Vector2i
-				var units: Array = Globals.unit_visible_enemies[self]
+				var units: Array = Globals.unit_visible_enemies.get(self, [])
 				var has_target_unit: bool = false
 				for unit: Node2D in units:
 					if unit.current_hex == map_hex:
@@ -646,6 +647,9 @@ func remember_enemy(enemy: Unit) -> void:
 	var info: Dictionary = {}
 	info["last_seen_time"] = _now()
 	info["last_seen_hex"] = enemy.current_hex
+	info["firepower"] = InfluenceUnitQuery.get_unit_firepower(enemy)
+	info["effectiveness"] = InfluenceUnitQuery.get_unit_effectiveness(enemy)
+	info["weapon_range"] = InfluenceUnitQuery.get_unit_range(enemy)
 	enemy_memory[enemy] = info
 
 

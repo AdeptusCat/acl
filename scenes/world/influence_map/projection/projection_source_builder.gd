@@ -48,33 +48,6 @@ static func build_from_units(
 		if not InfluenceUnitQuery.is_valid_living_unit(unit):
 			continue
 		
-		var from_hex: Vector2i = objective
-		var to_hex: Vector2i = unit.current_hex
-
-		var from_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(from_hex)
-		var to_cube: Vector3i = LOSHelper.ground_layer.map_to_cube(to_hex)
-		var line: Array[Vector3i] = LOSHelper.ground_layer.cube_linedraw(
-			from_cube,
-			to_cube
-		)
-
-		print(
-			"[ProjectionSourceBuilder] unit_team=",
-			unit.team,
-			" unit_hex=",
-			unit.current_hex,
-			" objective=",
-			objective,
-			" line_cells=",
-			line.size(),
-			" skip_front=",
-			skip_front,
-			" max_cells=",
-			max_cells,
-			" count=",
-			count
-		)
-		
 		var projected_hexes: Array[Vector2i] = get_projected_line_hexes(
 			objective,
 			unit.current_hex,
@@ -145,4 +118,20 @@ static func get_projected_line_hexes(
 
 		result.append(hex)
 
+	return result
+
+
+static func build_from_contacts(contacts: Array[InfluenceContact], config: InfluenceProjectionConfig) -> Array[ProjectionSource]:
+	var result: Array[ProjectionSource] = []
+	if not config.has_objective:
+		return result
+	for contact: InfluenceContact in contacts:
+		var cells: Array[Vector2i] = get_projected_line_hexes(config.objective_hex, contact.hex, config.projected_line_max_cells, config.los_skip_front, config.los_count)
+		if cells.is_empty():
+			cells.append(contact.hex)
+		for cell: Vector2i in cells:
+			var source: ProjectionSource = ProjectionSource.new(contact.unit, cell, contact.firepower * contact.confidence / float(cells.size()), contact.effectiveness)
+			source.weapon_range = contact.weapon_range
+			source.forecast = true
+			result.append(source)
 	return result

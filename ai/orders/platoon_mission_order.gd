@@ -22,3 +22,10 @@ var sector_cells: Array[Vector2i] = []
 var fallback_hexes: Array[Vector2i] = []
 var threat_axes: Array[ThreatAxis] = []
 var reserve_policy: ReservePolicy = ReservePolicy.KEEP_ONE_SQUAD_IF_POSSIBLE
+
+# Position advice is independent of execution intent.
+var execution_intent: TacticalPositionExecutor.Intent = TacticalPositionExecutor.Intent.FROM_PROFILE
+var position_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
+var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
+var defense_radius: int = 4
+var movement_radius: int = 6

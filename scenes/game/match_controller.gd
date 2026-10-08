@@ -448,6 +448,9 @@ func start_game(team: Globals.Team, time: float) -> void:
 	
 	
 	#defense_director.manual_threat_axes = create_test_axes()
+	influence_map_controller.reset_for_match()
+	defense_director.configure_for_match(Globals.get_units())
+	$DefenseDirector2.configure_for_match(Globals.get_units())
 	defense_director.assign_order_to_platoon()
 	$DefenseDirector2.assign_order_to_platoon()
 	$PlatoonAi

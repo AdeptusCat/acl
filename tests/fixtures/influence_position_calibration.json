@@ -1,0 +1,566 @@
+{
+  "seed": 6049,
+  "simulation_frames": 600,
+  "frames_per_second": 60,
+  "comparison": "Legacy objective scoring and calibrated defense on the same completed snapshot after eligibility and knowledge repairs.",
+  "limits": "Initial checks on two authored maps; no full-match balance or large-force performance benchmark.",
+  "maps": [
+    {
+      "map": "DefaultMap",
+      "checks": 142,
+      "failures": 0,
+      "stability": [
+        {
+          "team": 0,
+          "nonempty_samples": 9,
+          "target_changes_after_initial_assignment": 0,
+          "final_targets": [
+            "CA_P1_S1_Axis_MG:(11, 13)",
+            "CA_P1_S2_Axis_Rifle:(12, 14)"
+          ]
+        },
+        {
+          "team": 1,
+          "nonempty_samples": 9,
+          "target_changes_after_initial_assignment": 0,
+          "final_targets": [
+            "CA_P1_S1_Allies_Rifle:(10, 9)",
+            "CA_P1_S2_Allies_Rifle:(9, 8)"
+          ]
+        }
+      ],
+      "offensive_recommendations": [
+        {
+          "mode": "support_by_fire",
+          "valid": 6,
+          "queried": 6
+        },
+        {
+          "mode": "advance",
+          "valid": 6,
+          "queried": 6
+        },
+        {
+          "mode": "assault",
+          "valid": 4,
+          "queried": 6
+        }
+      ],
+      "defensive_comparison": [
+        {
+          "features": {
+            "cover": 0.333333343267441,
+            "firing": 0.614237223604764,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.029814241254931,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.029814241254931,
+          "legacy_target": "(10, 14)",
+          "mode": "defend",
+          "score": 2.56666668653488,
+          "target": "(10, 14)",
+          "team": 0,
+          "unit": "CA_P1_S0_Axis_PlatoonHQ",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.666666686534882,
+            "firing": 0.713537171868577,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0666666701436043,
+            "objective_coverage": 1.0,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.0666666701436043,
+          "legacy_target": "(11, 13)",
+          "mode": "defend",
+          "score": 5.08894920368166,
+          "target": "(11, 13)",
+          "team": 0,
+          "unit": "CA_P1_S1_Axis_MG",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.333333343267441,
+            "firing": 0.72406509694453,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.029814241254931,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.029814241254931,
+          "legacy_target": "(12, 14)",
+          "mode": "defend",
+          "score": 3.43554480286832,
+          "target": "(12, 14)",
+          "team": 0,
+          "unit": "CA_P1_S2_Axis_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.462650084428736,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0774596680783873,
+            "objective_coverage": 0.6,
+            "peak_exposure": 0.0,
+            "progress": -1.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 3.0
+          },
+          "legacy_score": 0.0,
+          "legacy_target": "(12, 9)",
+          "mode": "defend",
+          "score": 3.26,
+          "target": "(10, 10)",
+          "team": 1,
+          "unit": "CA_P1_S0_Allies_PlatoonHQ",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.852084993127358,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.089442720432792,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.089442720432792,
+          "legacy_target": "(10, 9)",
+          "mode": "defend",
+          "score": 4.92250199175283,
+          "target": "(10, 9)",
+          "team": 1,
+          "unit": "CA_P1_S1_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.789225880741396,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0774596680783873,
+            "objective_coverage": 0.6,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.0774596680783873,
+          "legacy_target": "(9, 8)",
+          "mode": "defend",
+          "score": 4.44707105688968,
+          "target": "(9, 8)",
+          "team": 1,
+          "unit": "CA_P1_S2_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.333333343267441,
+            "firing": 0.0,
+            "firing_lanes": 0,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.029814241254931,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 2.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Accepted a feasible position",
+          "score": 2.40666668653488,
+          "target": "(11, 14)",
+          "team": 0,
+          "unit": "CA_P1_S0_Axis_PlatoonHQ",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.666666686534882,
+            "firing": 0.758654992900345,
+            "firing_lanes": 9,
+            "forecast": 0.635120983337703,
+            "incoming": 0.0,
+            "legacy": 0.0666666701436043,
+            "objective_coverage": 1.0,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 4.54586857524876,
+          "target": "(11, 13)",
+          "team": 0,
+          "unit": "CA_P1_S1_Axis_MG",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.333333343267441,
+            "firing": 0.629677552840206,
+            "firing_lanes": 8,
+            "forecast": 0.6867079613509,
+            "incoming": 0.0,
+            "legacy": 0.029814241254931,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 2.63557178859223,
+          "target": "(12, 14)",
+          "team": 0,
+          "unit": "CA_P1_S2_Axis_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.256081832154256,
+            "firing_lanes": 4,
+            "forecast": 0.340541931787514,
+            "incoming": 0.0,
+            "legacy": 0.0632455541457998,
+            "objective_coverage": 0.4,
+            "peak_exposure": 0.0,
+            "progress": -2.0,
+            "route_exposure": 0.0,
+            "support": 0.2,
+            "travel": 3.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Accepted a feasible position",
+          "score": 2.27945806821249,
+          "target": "(14, 8)",
+          "team": 1,
+          "unit": "CA_P1_S0_Allies_PlatoonHQ",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.496679573898022,
+            "firing_lanes": 6,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.089442720432792,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 4.49601548867763,
+          "target": "(10, 9)",
+          "team": 1,
+          "unit": "CA_P1_S1_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 1.0,
+            "firing": 0.0,
+            "firing_lanes": 0,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0774596680783873,
+            "objective_coverage": 0.6,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 3.5,
+          "target": "(9, 8)",
+          "team": 1,
+          "unit": "CA_P1_S2_Allies_Rifle",
+          "valid": true
+        }
+      ]
+    },
+    {
+      "map": "OrchardRoad",
+      "checks": 108,
+      "failures": 0,
+      "stability": [
+        {
+          "team": 0,
+          "nonempty_samples": 9,
+          "target_changes_after_initial_assignment": 0,
+          "final_targets": [
+            "CA_P1_S2_Axis_Rifle:(12, 3)"
+          ]
+        },
+        {
+          "team": 1,
+          "nonempty_samples": 9,
+          "target_changes_after_initial_assignment": 0,
+          "final_targets": [
+            "CA_P1_S1_Allies_Rifle:(5, 5)",
+            "CA_P1_S2_Allies_Rifle:(5, 4)"
+          ]
+        }
+      ],
+      "offensive_recommendations": [
+        {
+          "mode": "support_by_fire",
+          "valid": 4,
+          "queried": 4
+        },
+        {
+          "mode": "advance",
+          "valid": 4,
+          "queried": 4
+        },
+        {
+          "mode": "assault",
+          "valid": 3,
+          "queried": 4
+        }
+      ],
+      "defensive_comparison": [
+        {
+          "features": {
+            "cover": 0.666666686534882,
+            "firing": 0.816879108953989,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0596284825098619,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 0.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.0596284825098619,
+          "legacy_target": "(12, 3)",
+          "mode": "defend",
+          "score": 3.91358830381455,
+          "target": "(12, 3)",
+          "team": 0,
+          "unit": "CA_P1_S2_Axis_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.852084993127358,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 1.0,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.0,
+          "legacy_target": "(5, 5)",
+          "mode": "defend",
+          "score": 3.32250199175283,
+          "target": "(5, 5)",
+          "team": 1,
+          "unit": "CA_P1_S1_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.852084993127358,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "legacy_score": 0.0,
+          "legacy_target": "(5, 4)",
+          "mode": "defend",
+          "score": 2.92250199175283,
+          "target": "(5, 4)",
+          "team": 1,
+          "unit": "CA_P1_S2_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.690904768822387,
+            "firing_lanes": 1,
+            "forecast": 0.0,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.75,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 3.0
+          },
+          "legacy_score": 0.0,
+          "legacy_target": "(4, 2)",
+          "mode": "defend",
+          "score": 1.66,
+          "target": "(4, 5)",
+          "team": 1,
+          "unit": "CA_P1_S0_Allies_PlatoonHQ",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.666666686534882,
+            "firing": 0.674559138362474,
+            "firing_lanes": 8,
+            "forecast": 0.285873862779303,
+            "incoming": 0.0,
+            "legacy": 0.0596284825098619,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 0.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 3.45693047632543,
+          "target": "(12, 3)",
+          "team": 0,
+          "unit": "CA_P1_S2_Axis_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.712100029441919,
+            "firing_lanes": 3,
+            "forecast": 0.279418616809508,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 1.0,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 2.87510141852079,
+          "target": "(5, 5)",
+          "team": 1,
+          "unit": "CA_P1_S1_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.712100029441919,
+            "firing_lanes": 3,
+            "forecast": 0.279418616809508,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.0,
+            "progress": 0.0,
+            "route_exposure": 0.0,
+            "support": 1.0,
+            "travel": 0.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Retained the feasible position within the improvement margin",
+          "score": 2.47510141852079,
+          "target": "(5, 4)",
+          "team": 1,
+          "unit": "CA_P1_S2_Allies_Rifle",
+          "valid": true
+        },
+        {
+          "features": {
+            "cover": 0.0,
+            "firing": 0.354382420014747,
+            "firing_lanes": 3,
+            "forecast": 0.209401390916338,
+            "incoming": 0.0,
+            "legacy": 0.0,
+            "objective_coverage": 0.8,
+            "peak_exposure": 0.189829768534032,
+            "progress": 0.75,
+            "route_exposure": 0.126553179022688,
+            "support": 1.0,
+            "travel": 3.0
+          },
+          "mode": "defend_known_danger",
+          "reason": "Accepted a feasible position",
+          "score": 1.19749225103829,
+          "target": "(4, 5)",
+          "team": 1,
+          "unit": "CA_P1_S0_Allies_PlatoonHQ",
+          "valid": true
+        }
+      ]
+    }
+  ]
+}

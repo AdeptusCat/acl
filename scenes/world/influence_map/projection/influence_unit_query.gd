@@ -29,14 +29,95 @@ static func is_valid_living_unit(unit: Unit) -> bool:
 	return true
 
 
-static func get_unit_firepower(_unit: Unit) -> float:
-	var firepower: float = 1.0
-	return firepower
+static func get_unit_firepower(unit: Unit) -> float:
+	return get_firepower_at_range(unit, 0)
+
+
+static func get_firepower_at_range(unit: Unit, distance: int) -> float:
+	if not is_valid_living_unit(unit) or unit.surrendered:
+		return 0.0
+	if unit.squad_fire == null:
+		if distance > unit.weapon_range:
+			return 0.0
+		return float(unit.firepower) / 4.0
+	var power: float = 0.0
+	for soldier: Soldier in unit.squad_fire.soldiers:
+		if not soldier.is_alive or soldier.weapon == null or soldier.jammed:
+			continue
+		var weapon: WeaponSpec = soldier.weapon
+		if weapon.ammunition <= 0 or distance > weapon.range_hexes:
+			continue
+		var rounds: float = float(maxi(weapon.burst_rounds, 1))
+		var cycle: float = rounds * 60.0 / maxf(weapon.rpm, 1.0) + weapon.burst_pause_s
+		cycle += rounds * weapon.reload_s / float(maxi(weapon.mag_capacity, 1))
+		var crew_factor: float = 1.0
+		if weapon.crew_required > 1:
+			crew_factor = minf(1.0, float(unit.members_alive) / float(weapon.crew_required))
+		power += minf(rounds / maxf(cycle, 0.1), 8.0) * clampf(weapon.accuracy_base, 0.0, 1.0) * crew_factor
+	return power / 4.0
+
+
+static func get_unit_range(unit: Unit) -> int:
+	if unit.squad_fire == null:
+		return unit.weapon_range
+	var result: int = 0
+	for soldier: Soldier in unit.squad_fire.soldiers:
+		if soldier.is_alive and soldier.weapon != null and soldier.weapon.ammunition > 0:
+			result = maxi(result, soldier.weapon.range_hexes)
+	return result
 
 
 static func get_unit_effectiveness(unit: Unit) -> float:
-	var effectiveness: float = remap(unit.stress_system.S_eff, 0.0, 100.0, 1.0, 0.0)
-	return effectiveness
+	if unit.combat_stats != null:
+		return clampf(unit.combat_stats.combat_effectiveness, 0.0, 1.0)
+	if unit.stress_system != null:
+		return clampf(1.0 - unit.stress_system.S_eff / 100.0, 0.0, 1.0)
+	return 1.0
+
+
+static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
+	var known: Dictionary = {}
+	var now: float = float(Engine.get_physics_frames()) / float(Engine.physics_ticks_per_second)
+	for observer: Unit in get_config_units(team, ""):
+		for enemy: Unit in observer.enemy_memory:
+			if not is_instance_valid(enemy):
+				continue
+			var memory: Dictionary = observer.enemy_memory[enemy]
+			var age: float = now - float(memory.get("last_seen_time", -INF))
+			if age < 0.0 or age > Unit.ENEMY_MEMORY_LIFETIME:
+				continue
+			var contact: InfluenceContact = InfluenceContact.new()
+			contact.unit = enemy
+			contact.hex = memory.get("last_seen_hex", Vector2i.ZERO)
+			contact.confidence = 1.0 - age / Unit.ENEMY_MEMORY_LIFETIME
+			# Memory uses captured capability, never a hidden live loadout/state.
+			contact.firepower = memory.get("firepower", 1.0)
+			contact.effectiveness = memory.get("effectiveness", 1.0)
+			contact.weapon_range = memory.get("weapon_range", 6)
+			if not known.has(enemy) or contact.confidence > known[enemy].confidence:
+				known[enemy] = contact
+	var observed: Array = []
+	for observer: Unit in get_config_units(team, ""):
+		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+			if not observed.has(enemy):
+				observed.append(enemy)
+	if policy == 1:
+		observed = Globals.get_units_for_team(Globals.get_enemy_team(team))
+	for enemy: Unit in observed:
+		if not is_valid_living_unit(enemy) or enemy.team == team:
+			continue
+		var contact: InfluenceContact = InfluenceContact.new()
+		contact.unit = enemy
+		contact.hex = enemy.current_hex
+		contact.firepower = get_unit_firepower(enemy)
+		contact.effectiveness = get_unit_effectiveness(enemy)
+		contact.weapon_range = get_unit_range(enemy)
+		contact.observed = true
+		known[enemy] = contact
+	var result: Array[InfluenceContact] = []
+	for contact: InfluenceContact in known.values():
+		result.append(contact)
+	return result
 
 
 static func get_squad_type_priority(squad_type: Globals.SquadType) -> int:
