@@ -12,6 +12,7 @@ var current_order: AiOrder = null
 var decision_timer: float = 0.0
 
 var withdraw_active: bool = false
+var defensive_mission_controlled: bool = false
 
 func setup(p_unit: Unit) -> void:
 	unit = p_unit
@@ -33,6 +34,9 @@ func _physics_process(delta: float) -> void:
 
 
 func _decision_tick() -> void:
+	# Mission-controlled defense owns repositioning and withdrawal; do not open a gap independently.
+	if defensive_mission_controlled:
+		return
 	if unit.stress_system.state == STATES.MoraleState.PANIC:
 		#_retreat_to_cover()
 		return

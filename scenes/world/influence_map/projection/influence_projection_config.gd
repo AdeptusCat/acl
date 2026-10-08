@@ -32,3 +32,5 @@ var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SE
 var defense_radius: int = 4
 var accepted_positions: Dictionary = {}
 var profile: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
+var withdrawal_requested: bool = false

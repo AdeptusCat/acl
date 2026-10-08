@@ -1,7 +1,7 @@
 class_name DefenseDirector
 extends Node
 
-enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET }
+enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET, OPPONENT_CAPTURE_TARGET }
 
 @export var objective_source: ObjectiveSource = ObjectiveSource.AUTHORED
 @export var execution_intent: TacticalPositionExecutor.Intent = TacticalPositionExecutor.Intent.FROM_PROFILE
@@ -9,6 +9,10 @@ enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET }
 @export var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
 @export var defense_radius: int = 4
 @export var movement_radius: int = 6
+@export var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
+@export var capture_objective_id: int = 1
+@export var exposure_budget_seconds: float = 6.0
+@export var open_crossing_budget_seconds: float = 2.0
 
 @export var objective_hex: Vector2i #= Vector2i(11,13)# Vector2i.ZERO
 @export var sector_cells: Array[Vector2i] = [Vector2i(9,17), Vector2i(10,17), Vector2i(11,17), Vector2i(8,17)]
@@ -35,6 +39,9 @@ func create_initial_order() -> MissionOrder:
 	order.geography = geography
 	order.defense_radius = defense_radius
 	order.movement_radius = movement_radius
+	order.defense_responsibility = defense_responsibility
+	order.exposure_budget_seconds = exposure_budget_seconds
+	order.open_crossing_budget_seconds = open_crossing_budget_seconds
 	order.sector_cells = sector_cells
 	order.fallback_hexes = fallback_hexes
 	order.reserve_policy = MissionOrder.ReservePolicy.KEEP_ONE_SQUAD_IF_POSSIBLE
@@ -53,6 +60,16 @@ func configure_for_match(active_units: Array[Unit]) -> void:
 		var objectives: ObjectivesCollection = Globals.objectives.get(platoon_ai.team)
 		if objectives != null and not objectives.objectives.is_empty():
 			objective_hex = objectives.objectives[0].hex
+	elif objective_source == ObjectiveSource.OPPONENT_CAPTURE_TARGET:
+		# The attacker's capture marker is the defender's protected objective.
+		if not platoon_ai.squads.is_empty():
+			objective_hex = platoon_ai.squads[0].current_hex
+		var targets: ObjectivesCollection = Globals.objectives.get(Globals.get_enemy_team(platoon_ai.team))
+		if targets != null:
+			for target: ObjectiveDefinition in targets.objectives:
+				if target.objective_id == capture_objective_id:
+					objective_hex = target.hex
+					break
 	# Advice remains available for both teams, independently of automatic execution.
 	if platoon_ai.influence_map_controller != null:
 		platoon_ai.influence_map_controller.set_objective_for_team(platoon_ai.team, objective_hex)

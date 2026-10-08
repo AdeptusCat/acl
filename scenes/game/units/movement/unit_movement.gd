@@ -300,6 +300,13 @@ func _mf_to_speed_mult(mf_total: float) -> float:
 	return mult
 
 
+func estimate_travel_seconds(from: Vector2, to: Vector2, movement_factor: float) -> float:
+	var speed: float = move_speed * _mf_to_speed_mult(movement_factor)
+	if speed <= 0.0:
+		return INF
+	return from.distance_to(to) / speed
+
+
 func _terrain_mf(t: int) -> float:
 	var idx: int = t
 	if idx < 0:

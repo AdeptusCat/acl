@@ -124,6 +124,10 @@ func _run() -> void:
 	_test_position_overlay()
 	_test_defensive_posture()
 	_test_defensive_commitment()
+	_test_defensive_responsibility()
+	_test_crossing_budget()
+	_test_defensive_withdrawal()
+	_test_defense_mission_context()
 	_test_defensive_memory()
 	controller.free()
 	own.free()
@@ -276,7 +280,8 @@ func _test_selection() -> void:
 
 
 func _test_geography() -> void:
-	var query: PositionQuery = _query()
+	# Legacy queries isolate geography; calibrated defense also requires mission responsibility.
+	var query: PositionQuery = _query(PositionProfile.Mode.LEGACY_DEFENSE)
 	query.geography = PositionQuery.Geography.SECTOR_ONLY
 	query.sector_cells = [Vector2i(6, 4)]
 	query.defense_radius = 1
@@ -723,11 +728,11 @@ func _test_defensive_posture() -> void:
 	var path: Array[Vector2i] = query.snapshot.get_path(own.team, own.current_hex, query.sector_cells[0])
 	var open_step: Vector2i = path[1]
 	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, open_step, 0.0)
-	map.set_layer_value(InfluenceMap.Layer.THREAT, open_step, 0.5)
+	map.set_layer_value(InfluenceMap.Layer.THREAT, open_step, 100.0)
 	var graph: AStar2D = query.snapshot.routes[own.team]
 	for id: int in graph.get_point_ids():
 		graph.set_point_disabled(id, not path.has(ground.local_to_map(graph.get_point_position(id))))
-	_check(not PositionQueryService.query_positions(query).is_valid(), "A strong destination cannot justify crossing open ground under known fire")
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Catastrophic transit danger remains excluded even toward a strong destination")
 	for id: int in graph.get_point_ids():
 		graph.set_point_disabled(id, false)
 	var safer: PositionResult = PositionQueryService.query_positions(query)
@@ -767,7 +772,9 @@ func _test_defensive_posture() -> void:
 	for cell: Vector2i in map.playable_cells:
 		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
 	query.sector_cells = [Vector2i(5, 3)]
-	_check(not PositionQueryService.query_positions(query).is_valid(), "Defense does not advance adjacent to a known armed enemy")
+	var adjacent: PositionResult = PositionQueryService.query_positions(query)
+	_check(adjacent.is_valid() and adjacent.features["contact_distance"] == 1, "A covered defensive position adjacent to a known enemy is eligible")
+	_check(adjacent.features.get("contact_pressure", 0.0) > 0.0, "Enemy proximity contributes contextual pressure rather than exclusion")
 	Globals.unit_visible_enemies[own] = []
 	own.enemy_memory.clear()
 	enemy.current_hex = Vector2i(8, 6)
@@ -776,7 +783,8 @@ func _test_defensive_posture() -> void:
 	map = query.snapshot.maps[own.team]
 	for cell: Vector2i in map.playable_cells:
 		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
-	_check(not PositionQueryService.query_positions(query).is_valid(), "Losing sight does not invite a return to the last confirmed enemy's adjacent hex")
+	var remembered: PositionResult = PositionQueryService.query_positions(query)
+	_check(remembered.is_valid() and remembered.target_hex == adjacent.target_hex and remembered.features["contact_distance"] == 1, "Losing sight preserves captured danger without an artificial adjacent-hex ban")
 	enemy.firepower = enemy_power
 	enemy.current_hex = enemy_hex
 
@@ -786,6 +794,7 @@ func _test_defensive_commitment() -> void:
 	_publish()
 	var query: PositionQuery = _query()
 	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.profile.cover_weight = 4.0
 	query.geography = PositionQuery.Geography.SECTOR_ONLY
 	query.objective_hex = own.current_hex
 	var better: Vector2i = Vector2i(3, 4)
@@ -804,7 +813,12 @@ func _test_defensive_commitment() -> void:
 	_check(PositionQueryService.query_positions(query).target_hex == better, "A materially better covered position is available after commitment expires")
 	query.snapshot.captured_at = initial_time
 	map.set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 100.0)
-	_check(PositionQueryService.query_positions(query).target_hex == better, "An unsafe accepted position can be abandoned immediately during commitment")
+	var under_fire: PositionResult = PositionQueryService.query_positions(query)
+	_check(under_fire.target_hex == own.current_hex and under_fire.decision == PositionResult.Decision.HOLD_DEFENSE, "A healthy covered defender holds its responsibility under pressure")
+	var effectiveness: float = own.combat_stats.combat_effectiveness
+	own.combat_stats.combat_effectiveness = 0.3
+	_check(PositionQueryService.query_positions(query).target_hex == better, "A weakened defender can withdraw to a covered mission position during commitment")
+	own.combat_stats.combat_effectiveness = effectiveness
 	map.set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 0.0)
 	query.objective_hex = better
 	_check(PositionQueryService.query_positions(query).target_hex == better, "A changed objective invalidates the old defensive commitment")
@@ -815,8 +829,230 @@ func _test_defensive_commitment() -> void:
 	query.objective_hex = better
 	query.accepted_context = query.context_key()
 	query.defense_radius = 10
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
 	query.accepted_context = query.context_key()
 	_check(PositionQueryService.query_positions(query).target_hex == own.current_hex, "A small coverage improvement cannot trigger repeated defensive shuffling")
+
+
+func _defense_fixture() -> PositionQuery:
+	Globals.unit_visible_enemies[own] = []
+	own.enemy_memory.clear()
+	controller.defensive_memory.clear()
+	_publish()
+	var query: PositionQuery = _query()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+		map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 0.0)
+	own.position = ground.map_to_local(own.current_hex)
+	return query
+
+
+func _add_defense_contact(query: PositionQuery) -> void:
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = Vector2i(6, 3)
+	contact.firepower = 0.15
+	contact.weapon_range = 6
+	contact.observed = true
+	query.snapshot.defensive_contacts[own.team] = [contact]
+
+
+func _test_defensive_responsibility() -> void:
+	var query: PositionQuery = _defense_fixture()
+	_add_defense_contact(query)
+	query.objective_hex = own.current_hex
+	var front: Vector2i = Vector2i(4, 3)
+	var rear: Vector2i = Vector2i(0, 3)
+	query.sector_cells = [front, rear]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == front and advice.features["interposition"] > 0.0 and advice.features["blocking"] >= 0.5, "Defense prefers a covered interception position between enemy and objective")
+	var rear_los: Dictionary = query.snapshot.los[rear].duplicate()
+	query.snapshot.los[rear] = {Vector2i(0, 4): {"target_cover": 1.0, "hindrance": 0.0}}
+	query.sector_cells = [rear]
+	advice = PositionQueryService.query_positions(query)
+	_check(not advice.is_valid() and advice.rejections.has("responsibility"), "Safe rear cover that cannot protect the objective or approach is excluded")
+	query.snapshot.los[rear] = rear_los
+	query.sector_cells = [front, query.objective_hex]
+	query.defense_responsibility = PositionQuery.Responsibility.OCCUPY
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == query.objective_hex and advice.features["responsibility"] == "occupy", "An explicit occupation responsibility cannot be traded for a nearby firing position")
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.sector_cells = [front]
+	_check(PositionQueryService.query_positions(query).features.get("responsibility") == "cover_approach", "An approach-cover responsibility uses usable fire over the incoming route")
+	var blocked: Vector2i = Vector2i(5, 3)
+	var contact_los: Dictionary = query.snapshot.los[Vector2i(6, 3)].duplicate()
+	query.sector_cells = [blocked]
+	advice = PositionQueryService.query_positions(query)
+	query.snapshot.los[Vector2i(6, 3)].erase(blocked)
+	var through_wall: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and through_wall.is_valid() and advice.features["contact_pressure"] > through_wall.features["contact_pressure"], "A wall removes contact pressure without imposing a proximity exclusion")
+	query.snapshot.los[Vector2i(6, 3)] = contact_los
+	query.defense_responsibility = PositionQuery.Responsibility.AUTO
+	query.sector_cells = [own.current_hex, rear]
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.target_hex == own.current_hex and advice.decision == PositionResult.Decision.HOLD_DEFENSE, "A healthy covered objective defender does not retreat merely because an enemy is visible")
+	var origin: Vector2i = own.current_hex
+	own.current_hex = front
+	own.position = ground.map_to_local(front)
+	query.snapshot.positions[own as Unit] = front
+	query.snapshot.defensive_contacts[own.team][0].hex = Vector2i(3, 3)
+	query.sector_cells = [front, query.objective_hex]
+	query.has_accepted_target = true
+	query.accepted_target = front
+	query.accepted_context = query.context_key()
+	var intercept: PositionResult = PositionQueryService.query_positions(query)
+	_check(intercept.is_valid() and intercept.target_hex == query.objective_hex, "A passed screen can reposition to intercept between the enemy and objective despite pressure")
+	own.current_hex = origin
+	own.position = ground.map_to_local(origin)
+	query.snapshot.positions[own as Unit] = origin
+
+
+func _test_crossing_budget() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(4, 3)
+	query.sector_cells = [query.objective_hex]
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	var open: Vector2i = Vector2i(3, 3)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, open, 0.0)
+	map.set_layer_value(InfluenceMap.Layer.THREAT, open, 1.0)
+	var graph: AStar2D = query.snapshot.routes[own.team]
+	var path: Array[Vector2i] = [own.current_hex, open, query.objective_hex]
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, not path.has(ground.local_to_map(graph.get_point_position(id))))
+	var speed: float = own.movement.move_speed
+	own.movement.move_speed = 30.0
+	var short_crossing: PositionResult = PositionQueryService.query_positions(query)
+	_check(short_crossing.is_valid() and short_crossing.features["open_fire"] > 0.15 and short_crossing.features["open_exposure_seconds"] <= query.profile.max_open_exposure_seconds, "A short necessary exposed crossing fits the mission exposure budget")
+	query.snapshot.los[own.current_hex][open]["wall_cover"] = 1.0
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A wall delays the same exposed crossing enough to exceed its mission budget")
+	query.snapshot.los[own.current_hex][open].erase("wall_cover")
+	own.movement.move_speed = 10.0
+	_check(not PositionQueryService.query_positions(query).is_valid(), "The same route is rejected when slow movement exceeds its exposure budget")
+	own.movement.move_speed = 30.0
+	query.objective_hex = Vector2i(5, 3)
+	query.sector_cells = [query.objective_hex]
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(4, 3), 0.0)
+	map.set_layer_value(InfluenceMap.Layer.THREAT, Vector2i(4, 3), 1.0)
+	path = [own.current_hex, open, Vector2i(4, 3), query.objective_hex]
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, not path.has(ground.local_to_map(graph.get_point_position(id))))
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Exposure accumulates across multiple individually acceptable open steps")
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, false)
+	var detour: PositionResult = PositionQueryService.query_positions(query)
+	_check(detour.is_valid() and detour.features["open_exposure_seconds"] <= query.profile.max_open_exposure_seconds and detour.path != path, "Weighted flood retains a feasible detour when the direct crossing exhausts its budget")
+	query.objective_hex = Vector2i(6, 3)
+	query.sector_cells = [query.objective_hex]
+	path = [own.current_hex, open, Vector2i(4, 3), Vector2i(5, 3), query.objective_hex]
+	for cell: Vector2i in path:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+		if cell != own.current_hex and cell != query.objective_hex:
+			map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 20.0)
+	for id: int in graph.get_point_ids():
+		graph.set_point_disabled(id, not path.has(ground.local_to_map(graph.get_point_position(id))))
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Long covered transit is also rejected when accumulated fire exposure exceeds the budget")
+	own.movement.move_speed = speed
+
+
+func _test_defensive_withdrawal() -> void:
+	var query: PositionQuery = _defense_fixture()
+	_add_defense_contact(query)
+	query.objective_hex = own.current_hex
+	var retreat: Vector2i = Vector2i(2, 4)
+	query.sector_cells = [retreat]
+	var retreat_los: Dictionary = query.snapshot.los[retreat].duplicate()
+	query.snapshot.los[retreat] = {query.objective_hex: {"target_cover": 1.0, "hindrance": 0.0}}
+	var effectiveness: float = own.combat_stats.combat_effectiveness
+	var other_effectiveness: float = other.combat_stats.combat_effectiveness
+	own.combat_stats.combat_effectiveness = 0.3
+	other.combat_stats.combat_effectiveness = 0.2
+	var gap: PositionResult = PositionQueryService.query_positions(query)
+	_check(not gap.is_valid() and gap.rejections.has("screen_gap"), "The sole established defender cannot withdraw and leave its approach uncovered")
+	other.combat_stats.combat_effectiveness = 0.8
+	var covered: PositionResult = PositionQueryService.query_positions(query)
+	_check(covered.is_valid() and covered.decision == PositionResult.Decision.WITHDRAW and covered.features["preserves_screen"], "A weakened defender can withdraw after another established squad covers its approach")
+	var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+	_check(executor.execute(covered) and executor.pending[own as Unit]["intent"] == TacticalPositionExecutor.Intent.WITHDRAW, "Explicit withdrawal advice dispatches through existing order execution")
+	executor.cancel_all(true)
+	var other_action: int = other.action_controller.action_state
+	other.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A squad still establishing its position cannot provide a completed covering handoff")
+	other.action_controller.action_state = other_action
+	query.reservations[other] = other.current_hex + Vector2i(1, 0)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Another squad's planned departure cannot provide a covering handoff in the same allocation")
+	other.movement.is_moving = true
+	query.reservations[other] = other.current_hex
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A moving squad or future reservation cannot serve as a completed covering handoff")
+	other.movement.is_moving = false
+	query.snapshot.los[retreat] = retreat_los
+	var same_screen: PositionResult = PositionQueryService.query_positions(query)
+	_check(same_screen.is_valid() and same_screen.decision == PositionResult.Decision.WITHDRAW, "Retreat is permitted when the withdrawing squad still covers the incoming route")
+	query.sector_cells = [own.current_hex, retreat]
+	query.snapshot.maps[own.team].set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 4.0)
+	var safer: PositionResult = PositionQueryService.query_positions(query)
+	_check(safer.is_valid() and safer.target_hex == retreat and safer.decision == PositionResult.Decision.WITHDRAW, "A weakened defender chooses a safer covered withdrawal over its exposed current position")
+	own.combat_stats.combat_effectiveness = effectiveness
+	query.withdrawal_requested = true
+	var requested: PositionResult = PositionQueryService.query_positions(query)
+	_check(requested.is_valid() and requested.target_hex == retreat and requested.decision == PositionResult.Decision.WITHDRAW, "An explicitly requested withdrawal can move a healthy unit while retaining objective protection")
+	query.withdrawal_requested = false
+	own.combat_stats.combat_effectiveness = 0.3
+	var platoon: PlatoonAI = PlatoonAI.new()
+	platoon.influence_map_controller = controller
+	platoon.set_squads([own])
+	var mission: MissionOrder = MissionOrder.new()
+	mission.objective_hex = query.objective_hex
+	platoon.receive_mission_order(mission)
+	var action_order: int = own.action_controller.action_order_id
+	var commands: int = own.commanded.size()
+	own.squad_ai_controller._decision_tick()
+	_check(own.squad_ai_controller.defensive_mission_controlled and own.action_controller.action_order_id == action_order and own.commanded.size() == commands, "Local squad AI cannot override mission-controlled withdrawal with an unconstrained retreat")
+	platoon.set_active(false)
+	_check(not own.squad_ai_controller.defensive_mission_controlled, "Player handoff releases defensive mission control")
+	platoon.free()
+	own.combat_stats.combat_effectiveness = effectiveness
+	other.combat_stats.combat_effectiveness = other_effectiveness
+
+
+func _test_defense_mission_context() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.sector_cells = [own.current_hex]
+	var old_context: String = query.context_key()
+	query.defense_responsibility = PositionQuery.Responsibility.OCCUPY
+	_check(query.context_key() != old_context, "Changing defensive responsibility invalidates the old position commitment")
+	var platoon: PlatoonAI = PlatoonAI.new()
+	platoon.influence_map_controller = controller
+	platoon.set_squads([own])
+	var director: DefenseDirector = DefenseDirector.new()
+	director.platoon_ai = platoon
+	director.objective_source = DefenseDirector.ObjectiveSource.OPPONENT_CAPTURE_TARGET
+	var previous: Dictionary[Globals.Team, ObjectivesCollection] = Globals.objectives.duplicate()
+	var targets: ObjectivesCollection = ObjectivesCollection.new()
+	var objective: ObjectiveDefinition = ObjectiveDefinition.new()
+	objective.objective_id = 1
+	objective.hex = Vector2i(4, 3)
+	targets.objectives.append(objective)
+	Globals.objectives[enemy.team] = targets
+	director.configure_for_match([own])
+	_check(director.objective_hex == objective.hex, "Defender resolves the opponent's actual capture marker rather than its starting anchor")
+	director.exposure_budget_seconds = 3.0
+	director.open_crossing_budget_seconds = 0.75
+	director.defense_responsibility = PositionQuery.Responsibility.GUARD
+	var mission: MissionOrder = director.create_initial_order()
+	var config: InfluenceProjectionConfig = controller._mission_config(own.team, objective.hex, mission, {})
+	_check(config.defense_responsibility == PositionQuery.Responsibility.GUARD and config.profile.max_exposure_seconds == 3.0 and config.profile.max_open_exposure_seconds == 0.75, "Explicit mission responsibility and exposure budgets reach the position pipeline")
+	mission.execution_intent = TacticalPositionExecutor.Intent.WITHDRAW
+	_check(controller._mission_config(own.team, objective.hex, mission, {}).withdrawal_requested, "Explicit withdrawal intent reaches position advice separately from execution")
+	Globals.objectives.erase(enemy.team)
+	director.configure_for_match([own])
+	_check(director.objective_hex == own.current_hex, "A side without an opponent capture target retains an explicit platoon-anchor fallback")
+	Globals.objectives = previous
+	controller.set_objective_for_team(own.team, Vector2i(3, 3))
+	director.free()
+	platoon.free()
 
 
 func _test_defensive_memory() -> void:

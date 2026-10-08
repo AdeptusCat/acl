@@ -2,6 +2,7 @@ class_name PositionResult
 extends RefCounted
 
 enum Status { NO_SNAPSHOT, NO_CANDIDATE, ACCEPTED, RETAINED }
+enum Decision { POSITION, HOLD_DEFENSE, WITHDRAW }
 
 var status: Status = Status.NO_SNAPSHOT
 var unit: Unit = null
@@ -22,6 +23,7 @@ var context: String = ""
 var profile_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
 var objective_hex: Vector2i = Vector2i.ZERO
 var reason: String = ""
+var decision: Decision = Decision.POSITION
 
 
 func is_valid() -> bool:

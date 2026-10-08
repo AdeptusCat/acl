@@ -29,3 +29,6 @@ var position_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
 var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
 var defense_radius: int = 4
 var movement_radius: int = 6
+var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
+var exposure_budget_seconds: float = 6.0
+var open_crossing_budget_seconds: float = 2.0

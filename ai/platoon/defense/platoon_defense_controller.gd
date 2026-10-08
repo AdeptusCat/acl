@@ -25,13 +25,16 @@ func _process(delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	_set_defensive_control(false)
 	executor.cancel_all()
 
 
 func set_active(is_active: bool) -> void:
 	active = is_active
 	if active:
+		_set_defensive_control(current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
 		return
+	_set_defensive_control(false)
 	# Release only actions owned by this planner when handing control to the player.
 	executor.cancel_all(true)
 	current_order = null
@@ -47,15 +50,24 @@ func receive_mission_order(order: MissionOrder) -> void:
 	executor.cancel_all(true)
 	accepted_positions.clear()
 	current_order = order
+	_set_defensive_control(order.position_mode == PositionProfile.Mode.DEFEND)
 	time_until_reconsider = 0.0
 	reconsider_assignments()
 
 
 func set_squads(new_squads: Array[Unit]) -> void:
+	_set_defensive_control(false)
 	squads.clear()
 	for squad: Unit in new_squads:
 		if InfluenceUnitQuery.is_valid_living_unit(squad) and squad.team == team and not squads.has(squad):
 			squads.append(squad)
+	_set_defensive_control(active and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
+
+
+func _set_defensive_control(enabled: bool) -> void:
+	for squad: Unit in squads:
+		if is_instance_valid(squad) and squad.squad_ai_controller != null:
+			squad.squad_ai_controller.defensive_mission_controlled = enabled
 
 
 func bind_active_squads(active_units: Array[Unit]) -> void:
@@ -91,11 +103,17 @@ func reconsider_assignments() -> void:
 			var reserve: Unit = _select_reserve_squad(available)
 			available.erase(reserve)
 			var reserves: Array[Unit] = [reserve]
-			var reserve_config: InfluenceProjectionConfig = influence_map_controller.create_axis_defense_config(team, current_order.objective_hex)
+			var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 			reserve_config.defense_radius = 2
 			reserve_config.accepted_positions = accepted_positions
 			reserve_config.profile.firing_weight = 0.0
+			reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
 			_apply_position_results(DefensePositionAnalyzer.analyze_objective_defense_positions(influence_map_controller, reserve_config, reserves, reserved_hexes_by_squad), "reserve", null)
+		if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+			var guard: Unit = available.pop_front()
+			var guard_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			guard_config.defense_responsibility = PositionQuery.Responsibility.GUARD
+			_apply_position_results(DefensePositionAnalyzer.analyze_objective_defense_positions(influence_map_controller, guard_config, [guard], reserved_hexes_by_squad), "guard_objective", null)
 		var axes: Array[ThreatAxis] = _get_sorted_threat_axes()
 		if axes.is_empty():
 			_apply_position_results(influence_map_controller.analyze_objective_defense_positions(team, current_order.objective_hex, available, reserved_hexes_by_squad, current_order, accepted_positions), "defend_objective", null)

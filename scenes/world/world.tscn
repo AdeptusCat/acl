@@ -1722,7 +1722,7 @@ player_team = 1
 victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
 
 [node name="CA_P1_S0_Axis_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="0" unique_id=437595144 instance=ExtResource("19_sh7a8")]
-position = Vector2(507, 930)
+position = Vector2(508, 989)
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])
 squad_loadout = ExtResource("62_bmoad")
@@ -1730,7 +1730,7 @@ formation_id = 1
 squad_type = 4
 
 [node name="CA_P1_S1_Axis_MG" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="1" unique_id=792412617 instance=ExtResource("19_sh7a8")]
-position = Vector2(562, 904)
+position = Vector2(561, 961)
 squad = 1
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
@@ -1739,7 +1739,7 @@ formation_id = 1
 squad_type = 1
 
 [node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="2" unique_id=1782881041 instance=ExtResource("19_sh7a8")]
-position = Vector2(612, 935)
+position = Vector2(610, 987)
 squad = 2
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
@@ -2354,12 +2354,12 @@ draw_cell_values = true
 [node name="InfluenceMapController" parent="GameController" unique_id=1942260574 instance=ExtResource("91_mdkuk")]
 
 [node name="DefenseDirector" parent="GameController" unique_id=837909797 node_paths=PackedStringArray("platoon_ai") instance=ExtResource("92_i1y2t")]
-objective_source = 1
+objective_source = 3
 objective_hex = Vector2i(11, 13)
 platoon_ai = NodePath("../PlatoonAi")
 
 [node name="DefenseDirector2" parent="GameController" unique_id=1039800395 node_paths=PackedStringArray("platoon_ai") instance=ExtResource("92_i1y2t")]
-objective_source = 1
+objective_source = 3
 objective_hex = Vector2i(9, 8)
 platoon_ai = NodePath("../PlatoonAi2")
 

@@ -2,6 +2,7 @@ class_name PositionQuery
 extends RefCounted
 
 enum Geography { OBJECTIVE_RADIUS, SECTOR_ONLY, OBJECTIVE_OR_SECTOR }
+enum Responsibility { AUTO, OCCUPY, GUARD, COVER_APPROACH }
 
 var unit: Unit = null
 var team: int = -1
@@ -9,7 +10,10 @@ var objective_hex: Vector2i = Vector2i.ZERO
 var profile: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
 var snapshot: InfluenceSnapshot = null
 var forecast_data: PackedFloat32Array = PackedFloat32Array()
-var route_graph: AStar2D = null
+var route_field: PositionRouteField = null
+var defense_approaches: Array[Dictionary] = []
+var defense_responsibility: Responsibility = Responsibility.AUTO
+var withdrawal_requested: bool = false
 var geography: Geography = Geography.OBJECTIVE_OR_SECTOR
 var defense_radius: int = 4
 var movement_radius: int = 6
@@ -30,4 +34,7 @@ func context_key() -> String:
 	# Axis observations can change without changing the defensive mission.
 	if axis != null and profile.mode != PositionProfile.Mode.DEFEND:
 		axis_key = axis.axis_name
-	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes])
+	var withdrawing: bool = false
+	if profile.mode == PositionProfile.Mode.DEFEND and is_instance_valid(unit):
+		withdrawing = withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(unit) < profile.withdrawal_effectiveness
+	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing])

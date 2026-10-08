@@ -105,6 +105,7 @@ func prebake_los() -> void:
 						los_lookup[o_hex][t_hex] = {
 							"shooter_cover": los["shooter_cover"],
 							"target_cover":  los["target_cover"],
+							"wall_cover": los["wall_cover"],
 							"hindrance": los["hindrance"],
 							"target_concealment": los["target_concealment"]
 						}

@@ -24,9 +24,13 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 		return result
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
-	query.route_graph = null
+	query.route_field = null
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
-		_prepare_defensive_routes(query)
+		DefensePositionPolicy.prepare(query)
+		if DefensePositionPolicy.needs_withdrawal(query):
+			result.decision = PositionResult.Decision.WITHDRAW
+		query.route_field = PositionRouteField.new()
+		query.route_field.build(query)
 	if query.include_score_map:
 		result.score_map.resize(map.cell_count)
 		result.score_map.fill(0.0)
@@ -36,6 +40,10 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 		candidates = _candidates(query, true, result)
 	if candidates.is_empty():
 		result.reason = "No reachable position satisfies geography, capacity and risk limits"
+		if query.profile.mode == PositionProfile.Mode.DEFEND:
+			result.reason = "No covered reachable position protects the objective within the exposure budget"
+			if result.rejections.has("screen_gap"):
+				result.reason = "Holding until relocation can preserve existing approach coverage"
 		return result
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
@@ -57,6 +65,11 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 		result.previous_score = retained.score
 		var margin: float = maxf(query.profile.improvement_absolute, absf(retained.score) * query.profile.improvement_relative)
 		committed = _maintains_commitment(query, retained.hex, result.context)
+		var holding_pressure: bool = retained.features.get("holding_under_pressure", false)
+		# A healthy front holds; an enemy that passed the screen can require a new interception.
+		if retained.features.get("responsibility") == "cover_approach" and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
+			holding_pressure = false
+		committed = committed or holding_pressure
 		if committed or best.score <= retained.score + margin:
 			best = retained
 			result.status = PositionResult.Status.RETAINED
@@ -65,15 +78,27 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 	result.score = best.score
 	result.features = best.features
 	result.path = best.path
+	if best.features.get("withdrawal", false):
+		result.decision = PositionResult.Decision.WITHDRAW
+	elif best.features.get("holding_under_pressure", false):
+		result.decision = PositionResult.Decision.HOLD_DEFENSE
 	result.should_move = best.hex != query.unit.current_hex
 	# Continuing an already accepted move should not restart the action every tick.
 	if query.has_accepted_target and query.accepted_context == result.context and best.hex == query.accepted_target and query.unit.movement != null and query.unit.movement.is_moving and query.unit.movement.target_hex == best.hex and _is_following_path(query.unit, best.path):
 		result.should_move = false
 	result.reason = "Accepted a feasible position"
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		result.reason = "Accepted defensive " + str(best.features["responsibility"]) + " position"
 	if result.status == PositionResult.Status.RETAINED:
 		result.reason = "Retained the feasible position within the improvement margin"
 		if committed:
 			result.reason = "Maintained a safe defensive position commitment"
+	if result.decision == PositionResult.Decision.HOLD_DEFENSE:
+		result.reason = "Holding covered defensive responsibility under pressure"
+	elif result.decision == PositionResult.Decision.WITHDRAW:
+		result.reason = "Mission-constrained withdrawal preserves approach coverage"
+		if result.target_hex == query.unit.current_hex:
+			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
 	return result
 
 
@@ -99,10 +124,12 @@ static func _candidates(query: PositionQuery, fallback: bool, diagnostics: Posit
 		if features["cover"] < query.profile.minimum_cover:
 			_reject(diagnostics, "cover")
 			continue
-		if features["contact_distance"] < query.profile.minimum_contact_distance or features["route_contact_distance"] < query.profile.minimum_contact_distance:
-			_reject(diagnostics, "contact_distance")
-			continue
-		if features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure or features["open_fire"] > query.profile.max_open_fire_risk:
+		if query.profile.mode == PositionProfile.Mode.DEFEND:
+			var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
+			if rejection != "":
+				_reject(diagnostics, rejection)
+				continue
+		elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
 			_reject(diagnostics, "risk")
 			continue
 		if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0:
@@ -204,36 +231,11 @@ static func _path_to_candidate(query: PositionQuery, cell: Vector2i) -> Array[Ve
 		var remaining: Array[Vector2i] = _remaining_path(query.unit)
 		if _valid_snapshot_path(query, remaining, cell):
 			var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, remaining)
-			if features["peak_exposure"] <= query.profile.max_route_exposure and features["open_fire"] <= query.profile.max_open_fire_risk and features["route_contact_distance"] >= query.profile.minimum_contact_distance:
+			if DefensePositionPolicy.allows_route(query, features):
 				return remaining
-	if query.route_graph != null:
-		var ids: Dictionary = query.snapshot.point_ids[query.team]
-		if not ids.has(query.unit.current_hex) or not ids.has(cell) or query.route_graph.is_point_disabled(ids[query.unit.current_hex]) or query.route_graph.is_point_disabled(ids[cell]):
-			return []
-		var path: Array[Vector2i] = []
-		for id: int in query.route_graph.get_id_path(ids[query.unit.current_hex], ids[cell]):
-			path.append(LOSHelper.ground_layer.local_to_map(query.route_graph.get_point_position(id)))
-		return path
+	if query.route_field != null:
+		return query.route_field.path_to(cell)
 	return query.snapshot.get_path(query.team, query.unit.current_hex, cell)
-
-
-static func _prepare_defensive_routes(query: PositionQuery) -> void:
-	if not query.snapshot.routes.has(query.team):
-		return
-	var source: AStar2D = query.snapshot.routes[query.team]
-	var graph: AStar2D = AStar2D.new()
-	var map: InfluenceMap = query.snapshot.maps[query.team]
-	for id: int in source.get_point_ids():
-		var position: Vector2 = source.get_point_position(id)
-		var cell: Vector2i = LOSHelper.ground_layer.local_to_map(position)
-		var step: Dictionary = PositionFeatureEvaluator.route_step(query, cell)
-		graph.add_point(id, position, 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell) + 2.0 * (1.0 - step["cover"]) + 4.0 * step["risk"])
-		var unsafe: bool = step["risk"] > query.profile.max_route_exposure or step["open_fire"] > query.profile.max_open_fire_risk or step["contact_distance"] < query.profile.minimum_contact_distance
-		graph.set_point_disabled(id, source.is_point_disabled(id) or (cell != query.unit.current_hex and unsafe))
-	for id: int in source.get_point_ids():
-		for neighbor: int in source.get_point_connections(id):
-			graph.connect_points(id, neighbor, false)
-	query.route_graph = graph
 
 
 static func _valid_snapshot_path(query: PositionQuery, path: Array[Vector2i], target: Vector2i) -> bool:

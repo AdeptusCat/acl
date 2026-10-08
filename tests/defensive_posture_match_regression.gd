@@ -36,6 +36,7 @@ func _run() -> void:
 		unit.stress_system.process_mode = Node.PROCESS_MODE_DISABLED
 		unit.combat_stats_timer.stop()
 		unit.movement.base_speed = 90.0
+		unit.movement.move_speed = 90.0
 	for frame: int in range(600):
 		await get_tree().process_frame
 	var player: Unit = null
@@ -83,8 +84,8 @@ func _run() -> void:
 				valid_positions += 1
 				target_key = str(advice.target_hex)
 				_check(advice.features["cover"] >= 0.1, "Defensive endpoints have cover on authored terrain")
-				_check(advice.features["open_fire"] <= 0.15 and advice.features["peak_exposure"] <= 0.65, "Routes obey moving-squad exposure limits")
-				_check(advice.features["contact_distance"] >= 2 and advice.features["route_contact_distance"] >= 2, "Defense does not approach a known opponent's adjacent hex")
+				_check(advice.features["exposure_seconds"] <= 6.0 and advice.features["open_exposure_seconds"] <= 2.0 and advice.features["peak_exposure"] <= 0.98, "Routes obey accumulated movement exposure budgets")
+				_check(advice.features["responsibility"] != "" and advice.features["preserves_screen"], "Every defensive position fulfils its objective responsibility without opening a screen gap")
 			elif advice.status == PositionResult.Status.NO_CANDIDATE:
 				no_candidates += 1
 				_check(not planner.executor.pending.has(unit) and not unit.movement.is_moving, "No safe candidate leaves the defender holding rather than moving into danger")
@@ -95,13 +96,29 @@ func _run() -> void:
 				elif last_targets[unit] != target_key:
 					changes[unit] += 1
 			last_targets[unit] = target_key
-			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason})
+			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason, "responsibility": advice.features.get("responsibility", ""), "blocking": advice.features.get("blocking", 0.0)})
+		if frame >= 599:
+			_check(_objective_guarded(planner), "A stationary nearby opponent does not leave the objective or its approach unprotected")
 	_check(valid_positions + no_candidates > 0, "Stationary opposition produces safe position advice or an explicit no-candidate result")
 	_check(not controller.snapshot.get_defensive_contacts(planner.team).is_empty(), "Defense retains confirmed danger after short firing memory expires")
 	for unit: Unit in changes:
 		_check(changes[unit] <= 1, "Static opposition does not cause repeated defensive target changes")
 		_check(unit.action_controller.action_order_id - initial_orders[unit] <= 2, "Static opposition does not repeatedly restart defensive orders")
-	print("Defensive posture trace: ", JSON.stringify({"map": str(map.name), "player_team": player_team, "player_hex": str(target), "valid_positions": valid_positions, "no_candidates": no_candidates, "changes": _named_changes(changes), "samples": samples}))
+	var advance: Vector2i = _advance_hex(controller, player, planner.current_order.objective_hex)
+	_check(advance != Vector2i(-999, -999), "The player can advance to an unoccupied hex beside the protected objective")
+	if advance != Vector2i(-999, -999):
+		player.order(Globals.UnitCmd.MOVE, advance)
+		for frame: int in range(1800):
+			await get_tree().process_frame
+			if not player.movement.is_moving:
+				break
+		_check(player.current_hex == advance, "Player advances through real movement toward the objective")
+		player.give_hold_order()
+		for frame: int in range(600):
+			await get_tree().process_frame
+			if frame % 60 == 59:
+				_check(_objective_guarded(planner), "Healthy defenders continue protecting the objective against an advancing adjacent player")
+	print("Defensive posture trace: ", JSON.stringify({"map": str(map.name), "player_team": player_team, "player_hex": str(target), "advance_hex": str(advance), "objective": str(planner.current_order.objective_hex), "valid_positions": valid_positions, "no_candidates": no_candidates, "changes": _named_changes(changes), "samples": samples}))
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -137,6 +154,35 @@ func _named_changes(changes: Dictionary[Unit, int]) -> Dictionary:
 	for unit: Unit in changes:
 		named[str(unit.name)] = changes[unit]
 	return named
+
+
+func _objective_guarded(planner: PlatoonAI) -> bool:
+	for unit: Unit in planner.squads:
+		if unit.current_hex == planner.current_order.objective_hex and not unit.movement.is_moving:
+			return true
+		var advice: PositionResult = unit.position_advice
+		if advice != null and advice.is_valid() and not unit.movement.is_moving and unit.current_hex == advice.target_hex:
+			if advice.features.get("responsibility") in ["occupy", "guard"]:
+				return true
+			if planner.squads.size() == 1 and advice.features.get("covered_approaches", 0) > 0 and advice.features["covered_approaches"] == advice.features["approach_count"]:
+				return true
+	return false
+
+
+func _advance_hex(controller: InfluenceMapController, player: Unit, objective: Vector2i) -> Vector2i:
+	var best: Vector2i = Vector2i(-999, -999)
+	var distance: int = 999999
+	for cell: Vector2i in LOSHelper.get_hex_neighbors(objective):
+		var occupied: bool = false
+		for unit: Unit in Globals.get_units():
+			occupied = occupied or unit.current_hex == cell
+		if occupied or cell == player.current_hex or not LOSHelper.los_lookup.get(cell, {}).has(objective) or controller.snapshot.get_path(player.team, player.current_hex, cell).is_empty():
+			continue
+		var candidate_distance: int = LOSHelper.get_hex_distance(player.current_hex, cell)
+		if candidate_distance < distance:
+			best = cell
+			distance = candidate_distance
+	return best
 
 
 func _check(condition: bool, message: String) -> void:

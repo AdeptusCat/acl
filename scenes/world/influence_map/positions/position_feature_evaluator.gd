@@ -23,19 +23,24 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var open_ground: float = 0.0
 	var open_fire: float = 0.0
 	var route_contact_distance: int = 999999
+	var exposure_seconds: float = 0.0
+	var open_exposure_seconds: float = 0.0
+	var route_seconds: float = 0.0
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
-			# A moving squad cannot claim stationary cover while crossing a hex.
-			step_risk = maxf(step_risk, _contact_fire_risk(query, contacts, step, true))
-			if query.forecast_data.size() == map.cell_count:
-				step_risk = maxf(step_risk, risk(query.forecast_data[map.cell_to_index(step)]))
+			step_risk = route_step(query, step)["risk"]
 		var step_cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, step), 0.0, 1.0)
 		open_ground += 1.0 - step_cover
 		if step_cover < query.profile.minimum_cover:
 			open_fire = maxf(open_fire, step_risk)
-		route_contact_distance = mini(route_contact_distance, _nearest_contact_distance(contacts, step))
+		route_contact_distance = mini(route_contact_distance, nearest_contact_distance(contacts, step))
+		var seconds: float = crossing_seconds(query, path[index - 1], step)
+		route_seconds += seconds
+		exposure_seconds += seconds * step_risk
+		if step_cover < query.profile.minimum_cover:
+			open_exposure_seconds += seconds * step_risk
 		exposure += step_risk
 		peak_exposure = maxf(peak_exposure, step_risk)
 		travel += 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, step)
@@ -78,16 +83,24 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	if cell == query.objective_hex or (query.snapshot.los.get(cell, {}).has(query.objective_hex) and objective_distance <= maxi(InfluenceUnitQuery.get_unit_range(query.unit), query.defense_radius)):
 		coverage = maxf(0.0, 1.0 - float(objective_distance) / float(query.defense_radius + 1))
 	var legacy: float = map.get_composite_value(cell) * sqrt(maxf(0.0, 1.0 - float(objective_distance) / float(query.defense_radius + 1)))
-	return {"cover": cover, "incoming": incoming,
+	var features: Dictionary = {"cover": cover, "incoming": incoming,
 		"forecast": forecast,
 		"firing": firing, "firing_lanes": visible_count, "objective_coverage": coverage,
 		"support": minf(support, 1.0), "travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
 		"open_ground": open_ground, "open_fire": open_fire,
-		"contact_distance": _nearest_contact_distance(contacts, cell), "route_contact_distance": route_contact_distance,
+		"contact_distance": nearest_contact_distance(contacts, cell), "route_contact_distance": route_contact_distance,
+		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds,
 		"progress": float(start_distance - objective_distance) / float(maxi(start_distance, 1)), "legacy": legacy}
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		features.merge(DefensePositionPolicy.evaluate(query, cell))
+		features["holding_under_pressure"] = incoming > 0.0 and DefensePositionPolicy.can_hold_under_pressure(query, cell, features)
+		features["contact_pressure"] = _contact_pressure(query, contacts, cell, cover)
+		features["exposure_budget_seconds"] = query.profile.max_exposure_seconds
+		features["open_exposure_budget_seconds"] = query.profile.max_open_exposure_seconds
+	return features
 
 
-static func _nearest_contact_distance(contacts: Array[InfluenceContact], cell: Vector2i) -> int:
+static func nearest_contact_distance(contacts: Array[InfluenceContact], cell: Vector2i) -> int:
 	var distance: int = 999999
 	for contact: InfluenceContact in contacts:
 		distance = mini(distance, LOSHelper.get_hex_distance(cell, contact.hex))
@@ -116,12 +129,35 @@ static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
 	var danger: float = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), _contact_fire_risk(query, contacts, cell, true))
 	if query.forecast_data.size() == map.cell_count:
-		danger = maxf(danger, risk(query.forecast_data[map.cell_to_index(cell)]))
+		danger = maxf(danger, query.profile.forecast_route_weight * risk(query.forecast_data[map.cell_to_index(cell)]))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
 	var open_fire: float = 0.0
 	if cover < query.profile.minimum_cover:
 		open_fire = danger
-	return {"risk": danger, "open_fire": open_fire, "cover": cover, "contact_distance": _nearest_contact_distance(contacts, cell)}
+	return {"risk": danger, "open_fire": open_fire, "cover": cover}
+
+
+static func crossing_seconds(query: PositionQuery, from: Vector2i, to: Vector2i) -> float:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var from_position: Vector2 = LOSHelper.ground_layer.map_to_local(from)
+	var to_position: Vector2 = LOSHelper.ground_layer.map_to_local(to)
+	if query.unit.movement != null and query.unit.movement.is_moving and from == query.unit.current_hex and LOSHelper.ground_layer.local_to_map(query.unit.position) == from:
+		from_position = query.unit.position
+	var movement_factor: float = 1.0 + map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, to)
+	if query.snapshot.los.get(from, {}).get(to, {}).get("wall_cover", 0.0) > 0.0:
+		movement_factor += 1.0
+	if query.unit.movement == null:
+		return INF
+	return query.unit.movement.estimate_travel_seconds(from_position, to_position, movement_factor)
+
+
+static func _contact_pressure(query: PositionQuery, contacts: Array[InfluenceContact], cell: Vector2i, cover: float) -> float:
+	var pressure: float = 0.0
+	for contact: InfluenceContact in contacts:
+		var distance: int = LOSHelper.get_hex_distance(contact.hex, cell)
+		if distance <= 2 and query.snapshot.los.get(contact.hex, {}).has(cell):
+			pressure = maxf(pressure, (1.0 - float(distance) / 3.0) * (1.0 - 0.5 * cover) * risk(contact.firepower * contact.effectiveness))
+	return pressure
 
 
 static func outgoing_utility(query: PositionQuery, from_hex: Vector2i, target_hex: Vector2i) -> float:

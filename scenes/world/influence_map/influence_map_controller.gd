@@ -167,6 +167,11 @@ func _mission_config(team: int, objective: Vector2i, mission: MissionOrder, acce
 		config.defense_radius = mission.defense_radius
 		config.geography = mission.geography
 		config.profile = PositionProfile.for_mode(mission.position_mode)
+		config.defense_responsibility = mission.defense_responsibility
+		config.withdrawal_requested = mission.execution_intent == TacticalPositionExecutor.Intent.WITHDRAW
+		if mission.position_mode == PositionProfile.Mode.DEFEND:
+			config.profile.max_exposure_seconds = mission.exposure_budget_seconds
+			config.profile.max_open_exposure_seconds = mission.open_crossing_budget_seconds
 	return config
 
 

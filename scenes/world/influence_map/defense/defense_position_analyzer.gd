@@ -37,6 +37,8 @@ static func _analyze(controller: InfluenceMapController, config: InfluenceProjec
 		query.defense_radius = config.defense_radius
 		query.geography = config.geography
 		query.profile = config.profile
+		query.defense_responsibility = config.defense_responsibility
+		query.withdrawal_requested = config.withdrawal_requested
 		query.axis = config.threat_axis
 		query.reservations = planned
 		if config.accepted_positions.has(unit):
@@ -54,7 +56,7 @@ static func _analyze(controller: InfluenceMapController, config: InfluenceProjec
 
 static func adapt_result(advice: PositionResult, axis: ThreatAxis, role: String) -> DefensePositionResult:
 	var result: DefensePositionResult = DefensePositionResult.new()
-	for property: String in ["unit", "status", "target_hex", "target_index", "proposed_hex", "score", "previous_score", "should_move", "score_map", "eligibility", "rejections", "features", "alternatives", "path", "snapshot_version", "context", "profile_mode", "objective_hex", "reason"]:
+	for property: String in ["unit", "status", "target_hex", "target_index", "proposed_hex", "score", "previous_score", "should_move", "score_map", "eligibility", "rejections", "features", "alternatives", "path", "snapshot_version", "context", "profile_mode", "objective_hex", "reason", "decision"]:
 		result.set(property, advice.get(property))
 	result.axis = axis
 	result.role = role

@@ -1,7 +1,7 @@
 class_name TacticalPositionExecutor
 extends RefCounted
 
-enum Intent { FROM_PROFILE, HOLD, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
+enum Intent { FROM_PROFILE, HOLD, SUPPORT_BY_FIRE, ADVANCE, ASSAULT, WITHDRAW }
 
 var pending: Dictionary[Unit, Dictionary] = {}
 var completed: Dictionary[Unit, Dictionary] = {}
@@ -13,6 +13,8 @@ func execute(result: PositionResult, intent: Intent = Intent.FROM_PROFILE) -> bo
 	var unit: Unit = result.unit
 	if intent == Intent.FROM_PROFILE:
 		intent = intent_for_profile(result.profile_mode)
+		if result.decision == PositionResult.Decision.WITHDRAW:
+			intent = Intent.WITHDRAW
 	if unit.surrendered or unit.members_alive <= 0 or not PositionQueryService.can_follow_intent(unit):
 		return false
 	if intent == Intent.ASSAULT and not PositionQueryService.can_assault(unit):
@@ -78,7 +80,7 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, result.objective_hex)
 		if LOSHelper.los_lookup.get(unit.current_hex, {}).has(result.objective_hex) and InfluenceUnitQuery.get_firepower_at_range(unit, distance) > 0.0:
 			unit.order(Globals.UnitCmd.FIRE_AT_HEX, result.objective_hex)
-	elif intent == Intent.HOLD or intent == Intent.ADVANCE:
+	elif intent == Intent.HOLD or intent == Intent.ADVANCE or intent == Intent.WITHDRAW:
 		# A move-and-hold action already handles establishment and its preparation timer.
 		var state: int = unit.action_controller.action_state
 		if state != SquadActionController.SquadActionState.ESTABLISHING_POSITION and state != SquadActionController.SquadActionState.HOLDING_POSITION:
