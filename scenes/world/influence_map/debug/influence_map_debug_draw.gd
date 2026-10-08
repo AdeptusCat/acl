@@ -70,6 +70,12 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 @export var value_text_min_zoom: float = 0.75
 
 var selected_unit: Unit
+var position_advice: PositionResult
+var position_advice_provider: Callable
+var _view_before_selection: DebugView = DebugView.NONE
+var _team_before_selection: int = 0
+var _advice_refresh_time: float = 0.0
+var _advice_origin: Vector2i = Vector2i.ZERO
 
 #var low_color: Color = Color(0.1, 0.25, 1.0, 1.0)
 #var mid_color: Color = Color(0.1, 1.0, 0.1, 1.0)
@@ -113,13 +119,54 @@ func setup() -> void:
 				influence_controller.connect("influence_maps_updated", callable)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if debug_view == DebugView.NONE:
 		return
 
 	if debug_view == DebugView.POSITION_SCORE:
-		_cache_valid = false
+		_advice_refresh_time += delta
+		if _advice_refresh_time >= 1.0 or (is_instance_valid(selected_unit) and selected_unit.current_hex != _advice_origin):
+			_refresh_position_advice()
 	queue_redraw()
+
+
+func set_selected_unit(unit: Unit) -> void:
+	if not is_instance_valid(selected_unit) and unit != null:
+		_view_before_selection = debug_view
+		_team_before_selection = team
+	selected_unit = unit
+	position_advice = null
+	if unit == null:
+		if debug_view == DebugView.POSITION_SCORE:
+			set_team(_team_before_selection)
+			set_debug_view(_view_before_selection)
+		return
+	set_team(unit.team)
+	_refresh_position_advice()
+	set_debug_view(DebugView.POSITION_SCORE)
+
+
+func _refresh_position_advice() -> void:
+	position_advice = null
+	_advice_refresh_time = 0.0
+	if is_instance_valid(selected_unit):
+		_advice_origin = selected_unit.current_hex
+		if position_advice_provider.is_valid():
+			position_advice = position_advice_provider.call(selected_unit)
+		else:
+			position_advice = selected_unit.position_advice
+	_cache_valid = false
+	if debug_view == DebugView.POSITION_SCORE:
+		_debug_report_layer_access("Advice refreshed")
+	queue_redraw()
+
+
+func _get_position_advice() -> PositionResult:
+	if not is_instance_valid(selected_unit) or selected_unit.team != team:
+		return null
+	if position_advice != null and position_advice.unit == selected_unit:
+		return position_advice
+	return selected_unit.position_advice
 
 
 func set_debug_view(p_debug_view: int) -> void:
@@ -155,6 +202,8 @@ func refresh_cells() -> void:
 
 func _on_influence_maps_updated() -> void:
 	_cache_valid = false
+	if is_instance_valid(selected_unit):
+		_refresh_position_advice()
 	queue_redraw()
 
 
@@ -196,15 +245,13 @@ func _draw() -> void:
 	_draw_cells(influence_map, min_value, max_value)
 	
 	if draw_layer_access_text:
-		draw_string(
-			ThemeDB.fallback_font,
-			Vector2(20.0, 30.0),
-			_layer_access_text,
-			HORIZONTAL_ALIGNMENT_LEFT,
-			-1,
-			14,
-			Color.WHITE
-		)
+		# Keep the diagnostic legend on screen while the world camera moves/zooms.
+		draw_set_transform_matrix(get_global_transform_with_canvas().affine_inverse())
+		var line_position: Vector2 = Vector2(20.0, 30.0)
+		for line: String in _layer_access_text.split("\n"):
+			draw_string(ThemeDB.fallback_font, line_position, line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+			line_position.y += 20.0
+		draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
 func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float) -> void:
@@ -213,21 +260,26 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 	var radius_y: float = float(tile_size.y) * 0.5 * hex_draw_scale
 
 	for cell: Vector2i in _cached_cells:
-		if not influence_map.is_valid_cell(cell):
+		if not _should_draw_cell(influence_map, cell):
 			continue
 
 		var value: float = _get_debug_value(influence_map, cell)
 		
-
-		if hide_zero_values:
-			if abs(value) <= zero_epsilon:
-				continue
 
 		var center: Vector2 = _cell_to_local_position(cell)
 		var color: Color = _value_to_color(value, min_value, max_value)
 		var polygon: PackedVector2Array = _make_hex_polygon(center, radius_x, radius_y)
 
 		draw_colored_polygon(polygon, color)
+		if debug_view == DebugView.POSITION_SCORE:
+			var outline_color: Color = Color(0.35, 1.0, 0.5, 0.9)
+			var outline_width: float = 1.5
+			var advice: PositionResult = _get_position_advice()
+			if advice.is_valid() and cell == advice.target_hex:
+				outline_color = Color(1.0, 0.8, 0.15, 1.0)
+				outline_width = 3.0
+			polygon.append(polygon[0])
+			draw_polyline(polygon, outline_color, outline_width, true)
 
 		if draw_cell_values:
 			_draw_value_text(center, value)
@@ -239,14 +291,10 @@ func _recalculate_value_range(influence_map: InfluenceMap) -> void:
 	var max_value: float = 0.0
 
 	for cell: Vector2i in _cached_cells:
-		if not influence_map.is_valid_cell(cell):
+		if not _should_draw_cell(influence_map, cell):
 			continue
 
 		var value: float = _get_debug_value(influence_map, cell)
-
-		if hide_zero_values:
-			if abs(value) <= zero_epsilon:
-				continue
 
 		if not found_value:
 			min_value = value
@@ -271,10 +319,20 @@ func _recalculate_value_range(influence_map: InfluenceMap) -> void:
 	_cache_valid = true
 
 
+func _should_draw_cell(influence_map: InfluenceMap, cell: Vector2i) -> bool:
+	if not influence_map.is_valid_cell(cell):
+		return false
+	if debug_view == DebugView.POSITION_SCORE:
+		var advice: PositionResult = _get_position_advice()
+		return advice != null and advice.eligibility.size() == influence_map.cell_count and advice.eligibility[influence_map.cell_to_index(cell)] != 0
+	return not hide_zero_values or absf(_get_debug_value(influence_map, cell)) > zero_epsilon
+
+
 func _get_debug_value(influence_map: InfluenceMap, cell: Vector2i) -> float:
 	if debug_view == DebugView.POSITION_SCORE:
-		if is_instance_valid(selected_unit) and selected_unit.team == team and selected_unit.influence_map.size() == influence_map.cell_count:
-			return selected_unit.influence_map[influence_map.cell_to_index(cell)]
+		var advice: PositionResult = _get_position_advice()
+		if advice != null and advice.score_map.size() == influence_map.cell_count:
+			return advice.score_map[influence_map.cell_to_index(cell)]
 		return 0.0
 	if debug_view == DebugView.COMPOSITE:
 		return influence_map.get_composite_value(cell, 0.0)
@@ -578,10 +636,13 @@ func _debug_report_layer_access(reason: String) -> void:
 		return
 
 	if debug_view == DebugView.POSITION_SCORE:
-		_layer_access_text = "Position scores require a selected owned unit"
-		if is_instance_valid(selected_unit) and selected_unit.position_advice != null:
-			var advice: PositionResult = selected_unit.position_advice
-			_layer_access_text = "Snapshot %d | %s | target=%s | score=%.3f | %s" % [advice.snapshot_version, selected_unit.name, advice.target_hex, advice.score, advice.reason]
+		_layer_access_text = "Select a unit to inspect position candidates"
+		var advice: PositionResult = _get_position_advice()
+		if advice != null:
+			var candidate_count: int = advice.eligibility.count(1)
+			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
+			if advice.is_valid():
+				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
 		return
 	var layer_id: int = _debug_view_to_layer_id(debug_view)
 

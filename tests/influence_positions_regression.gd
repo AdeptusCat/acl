@@ -119,6 +119,8 @@ func _run() -> void:
 	_test_route_and_context()
 	_test_route_retention()
 	_test_reserve_policy()
+	_test_planner_activation()
+	_test_position_overlay()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -539,6 +541,7 @@ func _test_legacy_score_parity() -> void:
 	draw.selected_unit = own
 	draw.team = own.team
 	own.influence_map = result.score_map
+	draw.position_advice = result
 	draw.debug_view = InfluenceMapDebugDraw.DebugView.POSITION_SCORE
 	_check(is_equal_approx(draw._get_debug_value(map, result.target_hex), result.score), "Position diagnostic displays query utility")
 	draw.debug_view = InfluenceMapDebugDraw.DebugView.THREAT
@@ -604,3 +607,93 @@ func _test_reserve_policy() -> void:
 	other.combat_stats.combat_effectiveness = other_effectiveness
 	other.squad_type = other_role
 	platoon.free()
+
+
+func _test_planner_activation() -> void:
+	var platoon: PlatoonAI = PlatoonAI.new()
+	platoon.influence_map_controller = controller
+	platoon.set_squads([own])
+	platoon.current_order = MissionOrder.new()
+	var query: PositionQuery = _query(PositionProfile.Mode.ADVANCE)
+	query.objective_hex = Vector2i(4, 3)
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.sector_cells = [query.objective_hex]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(platoon.executor.execute(advice) and own.movement.is_moving, "Active planner owns movement before player handoff")
+	platoon._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "test")], "test", null)
+	platoon.accepted_positions[own] = {"hex": advice.target_hex, "context": advice.context}
+	platoon.set_active(false)
+	_check(not platoon.active and platoon.current_order == null and platoon.squad_assignments.is_empty() and platoon.accepted_positions.is_empty() and platoon.reserved_hexes_by_squad.is_empty(), "Player handoff clears automatic mission and allocation state")
+	_check(not own.movement.is_moving and platoon.executor.pending.is_empty() and platoon.executor.completed.is_empty(), "Player handoff stops owned movement and releases arrival callbacks")
+	own.give_hold_order()
+	var manual_order_id: int = own.action_controller.action_order_id
+	var order: MissionOrder = MissionOrder.new()
+	order.objective_hex = own.current_hex
+	order.geography = PositionQuery.Geography.SECTOR_ONLY
+	order.sector_cells = [own.current_hex]
+	platoon.receive_mission_order(order)
+	platoon.reconsider_assignments()
+	platoon._process(2.0)
+	_check(platoon.current_order == null and own.action_controller.action_order_id == manual_order_id, "Disabled planner preserves manual orders through direct updates and ticks")
+	platoon.set_active(true)
+	platoon.receive_mission_order(order)
+	_check(platoon.active and platoon.current_order == order and platoon.squad_assignments.has(own), "Automatic control can resume for a new enemy-side mission")
+	_check(platoon.executor.execute(advice), "Reactivated planner can own a new movement")
+	own.give_hold_order()
+	manual_order_id = own.action_controller.action_order_id
+	platoon.set_active(false)
+	_check(own.action_controller.action_order_id == manual_order_id and platoon.executor.pending.is_empty(), "Player handoff preserves a manual command replacing an automatic action")
+	platoon.free()
+
+
+func _test_position_overlay() -> void:
+	var map: InfluenceMap = controller.snapshot.maps[own.team]
+	var advice: PositionResult = PositionResult.new()
+	advice.unit = own
+	advice.status = PositionResult.Status.ACCEPTED
+	advice.score_map.resize(map.cell_count)
+	advice.eligibility.resize(map.cell_count)
+	var zero_cell: Vector2i = Vector2i(3, 3)
+	var negative_cell: Vector2i = Vector2i(4, 3)
+	var excluded_cell: Vector2i = Vector2i(5, 3)
+	advice.target_hex = zero_cell
+	advice.target_index = map.cell_to_index(zero_cell)
+	advice.eligibility[map.cell_to_index(zero_cell)] = 1
+	advice.eligibility[map.cell_to_index(negative_cell)] = 1
+	advice.score_map[map.cell_to_index(negative_cell)] = -2.0
+	advice.score_map[map.cell_to_index(excluded_cell)] = 100.0
+	var responses: Array[PositionResult] = [advice]
+	var draw: InfluenceMapDebugDraw = InfluenceMapDebugDraw.new()
+	draw.influence_controller = controller
+	draw.tile_map_layer = ground
+	draw.team = enemy.team
+	draw.debug_view = InfluenceMapDebugDraw.DebugView.THREAT
+	draw.position_advice_provider = func(_unit: Unit) -> PositionResult:
+		return responses[0]
+	draw.refresh_cells()
+	var order_id: int = own.action_controller.action_order_id
+	var tactical_advice: PositionResult = own.position_advice
+	draw.set_selected_unit(own)
+	_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and draw.team == own.team and draw.position_advice == advice, "Selection automatically displays the unit's team and read-only position advice")
+	_check(own.action_controller.action_order_id == order_id and own.position_advice == tactical_advice, "Inspection preserves tactical orders and planner-owned advice")
+	_check(draw._should_draw_cell(map, zero_cell) and draw._should_draw_cell(map, negative_cell), "Eligible zero and negative scores remain visible candidates")
+	_check(not draw._should_draw_cell(map, excluded_cell), "Excluded cells cannot appear as candidates even with positive scores")
+	draw._recalculate_value_range(map)
+	_check(draw._cached_min_value == -2.0 and draw._cached_max_value == 0.0, "Heatmap scaling uses only eligible candidates")
+	var empty: PositionResult = PositionResult.new()
+	empty.unit = own
+	empty.status = PositionResult.Status.NO_CANDIDATE
+	empty.eligibility.resize(map.cell_count)
+	empty.reason = "No feasible candidate"
+	responses[0] = empty
+	draw._on_influence_maps_updated()
+	_check(draw.position_advice == empty and not draw._should_draw_cell(map, zero_cell) and draw._layer_access_text.contains("0 candidates"), "Snapshot refresh clears obsolete candidates and explains no-candidate advice")
+	responses[0] = advice
+	draw._process(1.1)
+	_check(draw.position_advice == advice, "Periodic inspection refresh picks up updated planning diagnostics")
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
+	_check(is_equal_approx(draw._get_debug_value(map, own.current_hex), map.get_layer_value(InfluenceMap.Layer.THREAT, own.current_hex)), "Layer shortcuts remain usable while a unit is selected")
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.POSITION_SCORE)
+	draw.set_selected_unit(null)
+	_check(draw.selected_unit == null and draw.position_advice == null and draw.debug_view == InfluenceMapDebugDraw.DebugView.THREAT and draw.team == enemy.team, "Deselection restores the previous team layer and clears position advice")
+	draw.free()

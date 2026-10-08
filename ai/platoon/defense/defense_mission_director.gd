@@ -53,10 +53,13 @@ func configure_for_match(active_units: Array[Unit]) -> void:
 		var objectives: ObjectivesCollection = Globals.objectives.get(platoon_ai.team)
 		if objectives != null and not objectives.objectives.is_empty():
 			objective_hex = objectives.objectives[0].hex
+	# Advice remains available for both teams, independently of automatic execution.
+	if platoon_ai.influence_map_controller != null:
+		platoon_ai.influence_map_controller.set_objective_for_team(platoon_ai.team, objective_hex)
 
 
 func assign_order_to_platoon() -> void:
-	if platoon_ai == null:
+	if platoon_ai == null or not platoon_ai.active:
 		return
 
 	var order: MissionOrder = create_initial_order()

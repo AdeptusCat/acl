@@ -130,6 +130,7 @@ func setup() -> void:
 	influence_map_controller.create_maps(1.0)
 	influence_map_debug_draw.tile_map_layer = LOSHelper.ground_layer
 	influence_map_debug_draw.influence_controller = influence_map_controller
+	influence_map_debug_draw.position_advice_provider = MatchInteractionHandler.get_position_advice.bind(self)
 	influence_map_debug_draw.set_team(Globals.Team.ALLIES)
 	influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.FIRE_POWER)
 	
@@ -439,21 +440,13 @@ func start_game(team: Globals.Team, time: float) -> void:
 	win_condition_timer.start()
 	set_victory_conditions()
 	
-	var axis_ai_active: bool = false
-	var allies_ai_active: bool = false
-	if team == Globals.Team.ALLIES:
-		axis_ai_active = true
-	else:
-		allies_ai_active = true
-	
-	
 	#defense_director.manual_threat_axes = create_test_axes()
 	influence_map_controller.reset_for_match()
-	defense_director.configure_for_match(Globals.get_units())
-	$DefenseDirector2.configure_for_match(Globals.get_units())
-	defense_director.assign_order_to_platoon()
-	$DefenseDirector2.assign_order_to_platoon()
-	$PlatoonAi
+	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
+	for director: DefenseDirector in directors:
+		director.platoon_ai.set_active(director.platoon_ai.team == Globals.team_enemy)
+		director.configure_for_match(Globals.get_units())
+		director.assign_order_to_platoon()
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 	#match Globals.game_mode:

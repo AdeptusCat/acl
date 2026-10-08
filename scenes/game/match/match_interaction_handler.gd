@@ -159,7 +159,7 @@ static func select_unit(controller: Node2D, unit: Unit) -> void:
 		controller.selected_unit.deselect()
 	controller.selected_unit = unit
 	unit.select()
-	controller.influence_map_debug_draw.selected_unit = unit
+	controller.influence_map_debug_draw.set_selected_unit(unit)
 
 
 static func deselect_unit(controller: Node2D, unit: Unit) -> void:
@@ -167,4 +167,35 @@ static func deselect_unit(controller: Node2D, unit: Unit) -> void:
 		controller.selected_unit.deselect()
 		controller.selected_unit = null
 		LOSHelper.clear_los()
-		controller.influence_map_debug_draw.selected_unit = null
+		controller.influence_map_debug_draw.set_selected_unit(null)
+
+
+static func get_position_advice(unit: Unit, controller: Node2D) -> PositionResult:
+	# Inspection never assigns a mission or invokes the tactical executor.
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = unit.team
+	query.objective_hex = controller.influence_map_controller.objectives_by_team.get(unit.team, unit.current_hex)
+	var directors: Array[DefenseDirector] = [controller.defense_director, controller.get_node("DefenseDirector2")]
+	for director: DefenseDirector in directors:
+		var planner: PlatoonAI = director.platoon_ai
+		if planner == null or planner.team != unit.team:
+			continue
+		if planner.active and planner.squad_assignments.has(unit):
+			return planner.squad_assignments[unit]["result"]
+		var mission: MissionOrder = planner.current_order
+		if mission == null:
+			mission = director.create_initial_order()
+		query.objective_hex = mission.objective_hex
+		query.profile = PositionProfile.for_mode(mission.position_mode)
+		query.geography = mission.geography
+		query.defense_radius = mission.defense_radius
+		query.movement_radius = mission.movement_radius
+		query.sector_cells = mission.sector_cells
+		query.fallback_hexes = mission.fallback_hexes
+		query.reservations = planner.reserved_hexes_by_squad.duplicate()
+		break
+	for friendly: Unit in Globals.get_units_for_team(unit.team):
+		if friendly.movement != null and friendly.movement.is_moving:
+			query.reservations[friendly] = friendly.movement.target_hex
+	return controller.influence_map_controller.query_positions(query)

@@ -6,6 +6,7 @@ extends Node
 @export var squads: Array[Unit] = []
 @export var influence_map_controller: InfluenceMapController
 
+var active: bool = true
 var current_order: MissionOrder = null
 var squad_assignments: Dictionary = {}
 var reserved_hexes_by_squad: Dictionary = {}
@@ -15,7 +16,7 @@ var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
 
 
 func _process(delta: float) -> void:
-	if current_order == null:
+	if not active or current_order == null:
 		return
 	time_until_reconsider -= delta
 	if time_until_reconsider <= 0.0:
@@ -27,7 +28,22 @@ func _exit_tree() -> void:
 	executor.cancel_all()
 
 
+func set_active(is_active: bool) -> void:
+	active = is_active
+	if active:
+		return
+	# Release only actions owned by this planner when handing control to the player.
+	executor.cancel_all(true)
+	current_order = null
+	squad_assignments.clear()
+	reserved_hexes_by_squad.clear()
+	accepted_positions.clear()
+	time_until_reconsider = 0.0
+
+
 func receive_mission_order(order: MissionOrder) -> void:
+	if not active:
+		return
 	executor.cancel_all(true)
 	accepted_positions.clear()
 	current_order = order
@@ -56,7 +72,7 @@ func bind_active_squads(active_units: Array[Unit]) -> void:
 
 
 func reconsider_assignments() -> void:
-	if current_order == null or influence_map_controller == null:
+	if not active or current_order == null or influence_map_controller == null:
 		return
 	influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
 	if influence_map_controller.snapshot == null:
@@ -153,6 +169,8 @@ func _apply_position_results(results: Array[DefensePositionResult], _fallback_ro
 
 
 func _issue_orders() -> void:
+	if not active:
+		return
 	for squad: Unit in squad_assignments:
 		var result: PositionResult = squad_assignments[squad]["result"]
 		squad.position_advice = result
@@ -186,7 +204,7 @@ func _create_current_reserved_hexes(units: Array[Unit]) -> Dictionary:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if current_order == null:
+	if not active or current_order == null:
 		return
 	var mouse: InputEventMouseButton = event as InputEventMouseButton
 	if mouse == null or mouse.button_index != MOUSE_BUTTON_LEFT or not mouse.pressed:

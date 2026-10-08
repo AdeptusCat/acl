@@ -21,13 +21,38 @@ func _run() -> void:
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
 	world.start_screen.hide()
-	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
+	var player_team: Globals.Team = scenario.player_team
+	if OS.get_cmdline_user_args().has("--axis"):
+		player_team = Globals.Team.AXIS
+	await world._on_game_started(map, scenario, player_team, Globals.GameMode.ATTACK)
 	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	var planners: Array[PlatoonAI] = [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]
+	var manual_orders: Dictionary[Unit, int] = {}
+	for planner: PlatoonAI in planners:
+		if planner.team == player_team:
+			_check(not planner.active and planner.current_order == null and planner.squad_assignments.is_empty(), "Player platoon receives no automatic mission at startup")
+			for unit: Unit in planner.squads:
+				unit.give_hold_order()
+				manual_orders[unit] = unit.action_controller.action_order_id
+			# Direct director updates and reconsideration must also respect player control.
+			var director: DefenseDirector = world.game_controller.defense_director
+			if planner.team == Globals.Team.ALLIES:
+				director = world.game_controller.get_node("DefenseDirector2")
+			director.assign_order_to_platoon()
+			planner.reconsider_assignments()
+			_check(planner.current_order == null and planner.squad_assignments.is_empty() and planner.executor.pending.is_empty(), "Player planner rejects automatic mission updates")
+		else:
+			_check(planner.active and planner.current_order != null, "Enemy platoon retains its automatic mission")
+	_check(not manual_orders.is_empty(), "Scenario includes player squads previously controlled by the planner")
 	var samples: Array[Dictionary] = []
 	for frame: int in range(600):
 		await get_tree().process_frame
 		if frame % 60 == 59:
-			for planner: PlatoonAI in [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]:
+			for planner: PlatoonAI in planners:
+				if planner.team == player_team:
+					_check(planner.current_order == null and planner.squad_assignments.is_empty() and planner.executor.pending.is_empty(), "Player remains outside automatic planning across tactical ticks")
+					for unit: Unit in manual_orders:
+						_check(unit.action_controller.action_order_id == manual_orders[unit] and not unit.movement.is_moving, "Player hold commands survive automatic reconsideration")
 				var targets: Array[String] = []
 				var claimed: Array[Vector2i] = []
 				for owned: Unit in planner.squad_assignments:
@@ -38,9 +63,13 @@ func _run() -> void:
 						claimed.append(advice.target_hex)
 						targets.append("%s:%s" % [owned.name, advice.target_hex])
 				samples.append({"frame": frame + 1, "team": planner.team, "targets": targets})
+	for planner: PlatoonAI in planners:
+		if planner.team != player_team:
+			_check(planner.active and not planner.squad_assignments.is_empty(), "Enemy continues to allocate positions during the match")
 	_check(controller.snapshot != null and controller.snapshot.maps.size() == 2, "Active match publishes both teams")
 	# Freeze execution while comparing policies over exactly the same match snapshot.
 	main.process_mode = Node.PROCESS_MODE_DISABLED
+	_test_position_inspection(world, player_team)
 	var observations: Array[Dictionary] = []
 	var covered_teams: int = 0
 	var valid_offense: int = 0
@@ -121,7 +150,7 @@ func _run() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--report="):
 			var file: FileAccess = FileAccess.open(argument.trim_prefix("--report="), FileAccess.WRITE)
-			file.store_string(JSON.stringify({"map": str(map.name), "checks": checks, "failures": failures, "snapshot_version": controller.snapshot.version, "observations": observations, "planning_samples": samples}, "  "))
+			file.store_string(JSON.stringify({"map": str(map.name), "player_team": player_team, "checks": checks, "failures": failures, "snapshot_version": controller.snapshot.version, "observations": observations, "planning_samples": samples}, "  "))
 	var map_name: String = str(map.name)
 	main.queue_free()
 	await get_tree().process_frame
@@ -190,3 +219,33 @@ func _test_support_fire(controller: InfluenceMapController) -> void:
 		if exercised:
 			break
 	_check(exercised, "Authored match exercises real support-by-fire execution")
+
+
+func _test_position_inspection(world: Node, player_team: Globals.Team) -> void:
+	var draw: InfluenceMapDebugDraw = world.game_controller.influence_map_debug_draw
+	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
+	var valid_previews: int = 0
+	for unit: Unit in Globals.get_units_for_team(player_team):
+		var order_id: int = unit.action_controller.action_order_id
+		var tactical_advice: PositionResult = unit.position_advice
+		world.game_controller._select_unit(unit)
+		_check(draw.selected_unit == unit and draw.team == player_team and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE, "Click selection opens the player's position overlay without a keyboard shortcut")
+		var advice: PositionResult = draw.position_advice
+		_check(advice != null and advice.unit == unit and advice.snapshot_version == controller.snapshot.version, "Player inspection queries the completed snapshot without an AI mission")
+		_check(unit.action_controller.action_order_id == order_id and unit.position_advice == tactical_advice, "Player inspection neither issues orders nor replaces tactical advice")
+		if advice != null and advice.is_valid():
+			valid_previews += 1
+			_check(draw._should_draw_cell(controller.snapshot.maps[player_team], advice.target_hex), "The advised destination is visibly marked as a feasible candidate")
+		world.game_controller._deselect_unit(unit)
+		_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.THREAT and draw.position_advice == null, "Deselecting returns to the previous layer")
+	_check(valid_previews > 0, "Manually controlled scenario units retain inspectable position candidates")
+	var planners: Array[PlatoonAI] = [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]
+	for planner: PlatoonAI in planners:
+		if planner.team == player_team:
+			_check(not planner.active and planner.current_order == null and planner.executor.pending.is_empty(), "Inspection does not re-enable player AI")
+		else:
+			for unit: Unit in planner.squad_assignments:
+				world.game_controller._select_unit(unit)
+				_check(draw.position_advice == planner.squad_assignments[unit]["result"], "AI inspection preserves the exact assigned query and reservation diagnostics")
+				world.game_controller._deselect_unit(unit)
