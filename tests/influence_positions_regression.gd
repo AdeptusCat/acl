@@ -130,6 +130,7 @@ func _run() -> void:
 	_test_defense_mission_context()
 	_test_defensive_memory()
 	_test_budgeted_position_queries()
+	_test_defense_area()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -177,6 +178,8 @@ func _publish() -> void:
 
 func _query(mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND) -> PositionQuery:
 	var query: PositionQuery = PositionQuery.new()
+	# Low-level policy regressions isolate the original explicit approach contract.
+	query.use_defense_area = false
 	query.unit = own
 	query.team = own.team
 	query.snapshot = controller.snapshot
@@ -1064,7 +1067,7 @@ func _test_budgeted_position_queries() -> void:
 	var job: PositionQueryJob = PositionQueryJob.new()
 	job.query = query
 	job.advance(Time.get_ticks_usec() - 1)
-	_check(not job.completed and job.phase == PositionQueryJob.Phase.INITIALIZE, "An exhausted frame budget does not begin expensive query work")
+	_check(not job.completed and job.phase == PositionQueryJob.Phase.AREA, "An exhausted frame budget does not begin expensive query work")
 	var slices: int = 0
 	while not job.completed and slices < 10000:
 		job.advance(Time.get_ticks_usec() + 100)
@@ -1097,17 +1100,20 @@ func _test_budgeted_position_queries() -> void:
 	mission.objective_hex = own.current_hex
 	platoon.receive_mission_order(mission)
 	platoon._start_plan(true)
+	_finish_area_plan(platoon)
 	var pending: PositionQueryJob = platoon._planning_job
 	platoon.set_active(false)
 	_check(pending != null and pending.canceled and platoon._planning_job == null and controller.position_jobs.is_empty(), "Player handoff cancels queued planning without publishing stale orders")
 	platoon.set_active(true)
 	platoon.receive_mission_order(mission)
 	platoon._start_plan(true)
+	_finish_area_plan(platoon)
 	pending = platoon._planning_job
 	mission.objective_hex += Vector2i(1, 0)
 	platoon._continue_budgeted_plan()
 	_check(pending.canceled and platoon._planning_job == null, "An objective change cancels the old budgeted plan")
 	platoon._start_plan(true)
+	_finish_area_plan(platoon)
 	pending = platoon._planning_job
 	while not pending.completed:
 		controller._process_position_queries()
@@ -1135,6 +1141,244 @@ func _test_budgeted_position_queries() -> void:
 	controller.clear_inspection_queries()
 	_check(controller.position_jobs.is_empty() and controller.inspection_results.is_empty(), "Deselection releases pending inspection and its cached results")
 	remove_child(controller)
+
+
+func _finish_area_plan(platoon: PlatoonAI) -> void:
+	if platoon._area_job != null:
+		platoon._area_job.advance(-1)
+		platoon._process(0.0)
+
+
+func _area_contact(hex: Vector2i, capture_time: float, observed: bool = true) -> InfluenceContact:
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = hex
+	contact.firepower = 0.01
+	contact.weapon_range = 6
+	contact.observed = observed
+	contact.last_seen_at = capture_time
+	contact.crossing_seconds = 2.0
+	return contact
+
+
+func _test_defense_area() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(4, 3)
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	var west: Vector2i = Vector2i(2, 3)
+	var east: Vector2i = Vector2i(5, 3)
+	var interior: Vector2i = Vector2i(3, 3)
+	var original_role: Globals.SquadType = own.squad_type
+	own.squad_type = Globals.SquadType.MG
+	# Woods use the same building-layer cover custom data as the authored maps.
+	var woods: HexagonTileMapLayer = HexagonTileMapLayer.new()
+	woods.tile_set = ground.tile_set.duplicate(true)
+	woods.tile_set.add_custom_data_layer()
+	woods.tile_set.set_custom_data_layer_name(0, "cover")
+	woods.tile_set.set_custom_data_layer_type(0, TYPE_INT)
+	var atlas: TileSetAtlasSource = woods.tile_set.get_source(0) as TileSetAtlasSource
+	atlas.get_tile_data(Vector2i.ZERO, 0).set_custom_data("cover", 3)
+	for cell: Vector2i in map.playable_cells:
+		var wooded: bool = cell.x >= 2 and cell.x <= 5 and cell.y >= 2 and cell.y <= 4
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, float(wooded))
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, float(wooded))
+		if wooded:
+			woods.set_cell(cell, 0, Vector2i.ZERO)
+	add_child(woods)
+	LOSHelper.building_layer = woods
+	var capture: InfluenceSnapshot = InfluenceSnapshotBuilder.capture(88, {}, 0, controller.create_default_weights())
+	_check(capture.maps[own.team].get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, west) == 1.0 and capture.maps[own.team].get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(0, 3)) == 0.0, "Building-layer woods supply defensive cover while adjacent fields stay open")
+	LOSHelper.building_layer = null
+	woods.free()
+	query.snapshot.terrain_key = 888
+	query.snapshot.defense_geometry_cache = {}
+	query.snapshot.los = query.snapshot.los.duplicate(true)
+	query.snapshot.los[west] = {}
+	query.snapshot.los[east] = {}
+	query.snapshot.los[interior] = {}
+	for cell: Vector2i in map.playable_cells:
+		var record: Dictionary = {"target_cover": map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), "hindrance": 0.0}
+		if cell.x <= 4:
+			query.snapshot.los[west][cell] = record
+		if cell.x >= 4:
+			query.snapshot.los[east][cell] = record
+		if cell.x >= 2 and cell.x <= 5:
+			query.snapshot.los[interior][cell] = record
+	query.snapshot.captured_at = 100.0
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(0, 3), 100.0)]
+	var area_job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 4, 7)
+	area_job.advance(Time.get_ticks_usec() - 1)
+	_check(not area_job.completed and area_job.phase == DefenseAreaJob.Phase.GEOMETRY, "Area work respects an exhausted frame budget")
+	var slices: int = 0
+	while not area_job.completed and slices < 10000:
+		area_job.advance(Time.get_ticks_usec() + 100)
+		slices += 1
+	query.defense_area = area_job.result
+	query.assigned_sector = query.defense_area.sector_at(Vector2i(0, 3))
+	query.sector_cells = [west, east, interior]
+	query.reservations = {}
+	_check(area_job.completed and slices > 1 and area_job.snapshot == null, "Area assessment resumes across slices and releases its captured snapshot")
+	_check(query.defense_area.edge_positions.has(west) and query.defense_area.edge_positions.has(east) and not query.defense_area.edge_positions.has(interior), "Terrain assessment identifies woodland boundaries rather than treating all covered hexes alike")
+	var approach: Dictionary = query.defense_area.approach_for_sector(query.assigned_sector)
+	_check(approach["cells"].size() > 3 and approach["cells"].has(Vector2i(1, 2)), "Approach corridors include competitive route alternatives rather than one shortest path")
+	_check(approach["weights"][Vector2i(1, 3)] > approach["weights"][interior], "Exposed crossing time makes open approach cells valuable to cover")
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == west and advice.features["interdiction"] > 0.0, "An MG selects the woodland edge covering the western crossing instead of hugging the objective")
+	_check(advice.approach_cells.has(Vector2i(1, 3)) and advice.eligibility[map.cell_to_index(Vector2i(1, 3))] == 0 and advice.sector_priorities.has(query.assigned_sector), "Diagnostics distinguish exposed approach corridors from covered position candidates")
+	query.reset_evaluation()
+	var edge_value: float = query.defense_area.features(query, west)["interdiction"]
+	var interior_value: float = query.defense_area.features(query, interior)["interdiction"]
+	_check(edge_value > interior_value, "Long open firing lanes outrank concealed woodland interior without those lanes")
+	var guard_role: Globals.SquadType = other.squad_type
+	other.squad_type = Globals.SquadType.Rifle
+	_check(DefenseSectorAllocator.select_guard([own, other]) == other, "Guard assignment preserves the MG for approach interdiction")
+	var armed_power: int = own.firepower
+	own.firepower = 0
+	_check(DefenseSectorAllocator.select_guard([own, other]) == own, "An MG without usable firing capability does not displace an armed approach defender")
+	own.firepower = armed_power
+	var original_context: String = query.context_key()
+	query.has_accepted_target = true
+	query.accepted_target = west
+	query.accepted_context = original_context
+	query.accepted_at = 100.0
+	map.set_layer_value(InfluenceMap.Layer.THREAT, west, 1.0)
+	# A fresh confirmed eastern attack outranks an old western hazard without erasing it.
+	query.snapshot.captured_at = 140.0
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(0, 3), 100.0, false), _area_contact(Vector2i(8, 3), 140.0)]
+	var shifted: DefenseAreaJob = DefenseAreaJob.new()
+	shifted.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	_check(shifted.phase == DefenseAreaJob.Phase.SOURCES, "Changing intelligence reuses the objective and terrain assessment")
+	shifted.advance(-1)
+	query.defense_area = shifted.result
+	query.assigned_sector = query.defense_area.sector_at(Vector2i(8, 3))
+	_check(query.context_key() != original_context, "A changed coverage responsibility invalidates commitment to the old axis")
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == east and advice.should_move and advice.features["assigned_coverage"] >= 0.5, "A healthy pressured defender repositions to cover a newly urgent eastern approach")
+	_check(query.snapshot.get_defensive_contacts(own.team).size() == 2, "Reprioritizing the old axis does not erase its known movement danger")
+	query.has_accepted_target = true
+	query.accepted_target = east
+	query.accepted_context = advice.context
+	query.accepted_at = 140.0
+	var repeated: PositionResult = PositionQueryService.query_positions(query)
+	_check(repeated.target_hex == east, "Unchanged sector pressure preserves the selected defensive position")
+	query.relocation_allowed = false
+	query.has_accepted_target = false
+	advice = PositionQueryService.query_positions(query)
+	_check(not advice.is_valid() and advice.rejections.has("handoff_wait"), "A second redeployment waits for established covering fire")
+	query.relocation_allowed = true
+	var handoff: PlatoonAI = PlatoonAI.new()
+	own.movement.is_moving = true
+	other.movement.is_moving = false
+	handoff._reset_relocation([own, other])
+	query.relocation_allowed = handoff._can_relocate(own)
+	query.has_accepted_target = true
+	query.accepted_target = west
+	query.accepted_context = original_context
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == east and not handoff._can_relocate(other), "A defender already moving can redirect to cover after an axis change while another relocation waits")
+	own.movement.is_moving = false
+	query.has_accepted_target = false
+	handoff.free()
+	var reverse_query: PositionQuery = PositionQuery.new()
+	reverse_query.unit = enemy
+	reverse_query.team = enemy.team
+	reverse_query.objective_hex = query.objective_hex
+	reverse_query.snapshot = query.snapshot
+	reverse_query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	reverse_query.geography = PositionQuery.Geography.SECTOR_ONLY
+	reverse_query.sector_cells = [west, east, interior]
+	for cell: Vector2i in map.playable_cells:
+		reverse_query.snapshot.maps[enemy.team].set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell))
+		reverse_query.snapshot.maps[enemy.team].set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, map.get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell))
+	reverse_query.snapshot.defensive_contacts[enemy.team] = [_area_contact(Vector2i(8, 3), 140.0)]
+	var reverse_job: DefenseAreaJob = reverse_query.snapshot.defense_area_job(enemy.team, query.objective_hex, 4, 7)
+	reverse_job.advance(-1)
+	reverse_query.defense_area = reverse_job.result
+	reverse_query.assigned_sector = query.assigned_sector
+	var mirrored: PositionResult = PositionQueryService.query_positions(reverse_query)
+	_check(mirrored.is_valid() and mirrored.target_hex == east, "The same terrain and approach responsibility work for either team")
+	var assignments: Dictionary[Unit, int] = DefenseSectorAllocator.assign(query.defense_area, [own, other], {})
+	_check(assignments[own as Unit] == query.assigned_sector, "The strongest firing role receives the dominant current approach")
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(0, 3), 140.0), _area_contact(Vector2i(8, 3), 140.0)]
+	var balanced: DefenseAreaJob = DefenseAreaJob.new()
+	balanced.start(query.snapshot, own.team, query.objective_hex, 4, 7, [])
+	balanced.advance(-1)
+	var west_sector: int = balanced.result.sector_at(Vector2i(0, 3))
+	var east_sector: int = balanced.result.sector_at(Vector2i(8, 3))
+	assignments = DefenseSectorAllocator.assign(balanced.result, [own], {own: {"sector": west_sector}})
+	_check(assignments[own as Unit] == west_sector, "Minor pressure differences retain the existing sector assignment")
+	query.defense_area = balanced.result
+	query.reserve_position = true
+	query.assigned_sector = -1
+	query.defense_responsibility = PositionQuery.Responsibility.AUTO
+	query.reset_evaluation()
+	var center_readiness: float = query.defense_area.features(query, interior)["reserve_readiness"]
+	var west_readiness: float = query.defense_area.features(query, west)["reserve_readiness"]
+	var east_readiness: float = query.defense_area.features(query, east)["reserve_readiness"]
+	_check(center_readiness > west_readiness and center_readiness > east_readiness, "A mobile reserve values response to both fronts rather than hugging one firing edge")
+	var third: UnitProbe = _unit(own.team, Vector2i(6, 5))
+	third.squad_type = Globals.SquadType.Rifle
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.influence_map_controller = controller
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = query.objective_hex
+	planner.defense_area = balanced.result
+	planner._planning_snapshot = query.snapshot
+	planner._build_sector_requests([own, other, third])
+	var guard_count: int = 0
+	var reserve_count: int = 0
+	var tasked: Array[int] = []
+	for request: Dictionary in planner._planning_requests:
+		if request["role"] == "guard_objective":
+			guard_count += 1
+		if request["role"] == "reserve":
+			reserve_count += 1
+		var planned: PositionQuery = request["query"]
+		if planned.assigned_sector >= 0:
+			tasked.append(planned.assigned_sector)
+	_check(guard_count == 1 and reserve_count == 0 and tasked.has(west_sector) and tasked.has(east_sector), "Two significant fronts mobilize the reserve while retaining an objective guard")
+	planner._planning_requests.clear()
+	planner.defense_area = shifted.result
+	planner._build_sector_requests([own, other, third])
+	reserve_count = 0
+	for request: Dictionary in planner._planning_requests:
+		if request["role"] == "reserve":
+			reserve_count += 1
+			_check(request["query"].reserve_position and request["query"].defense_responsibility == PositionQuery.Responsibility.AUTO, "An unneeded reserve receives readiness advice rather than another forced guard duty")
+	_check(reserve_count == 1, "A single significant front retains the mobile reserve")
+	planner._planning_requests.clear()
+	planner.current_order.defense_responsibility = PositionQuery.Responsibility.GUARD
+	planner._build_sector_requests([own, other])
+	var explicit_guards: bool = planner._planning_requests.size() == 2
+	for request: Dictionary in planner._planning_requests:
+		explicit_guards = explicit_guards and request["query"].assigned_sector == -1 and request["query"].defense_responsibility == PositionQuery.Responsibility.GUARD
+	_check(explicit_guards, "An explicit objective guard mission does not acquire an unrelated sector coverage duty")
+	planner.free()
+	third.free()
+	balanced.result.approach_for_sector(east_sector)["priority"] = balanced.result.approach_for_sector(west_sector)["priority"] * 2.0
+	assignments = DefenseSectorAllocator.assign(balanced.result, [own], {own: {"sector": west_sector}})
+	_check(assignments[own as Unit] == east_sector, "A substantial priority change overrides sector assignment hysteresis")
+	var moved_objective: DefenseAreaJob = query.snapshot.defense_area_job(own.team, Vector2i(3, 2), 4, 7)
+	moved_objective.advance(-1)
+	_check(moved_objective.result.objective_hex == Vector2i(3, 2) and moved_objective.result.geometry["objective_distances"][Vector2i(3, 2)] == 0.0, "A changed objective receives a distinct reverse travel field")
+	query.use_defense_area = true
+	query.reserve_position = false
+	query.area_job = balanced
+	query.objective_hex = Vector2i(3, 2)
+	query.assigned_sector = -1
+	PositionQueryService.query_positions(query)
+	_check(query.defense_area.objective_hex == query.objective_hex, "Reusing a query after an objective change replaces its stale assessment")
+	query.objective_hex = own.current_hex
+	query.sector_cells = [own.current_hex]
+	query.defense_responsibility = PositionQuery.Responsibility.AUTO
+	query.assigned_sector = east_sector
+	query.profile.max_incoming_risk = 0.0
+	map.set_layer_value(InfluenceMap.Layer.THREAT, own.current_hex, 10.0)
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == own.current_hex and advice.decision == PositionResult.Decision.HOLD_DEFENSE, "A lone healthy capture guard holds the covered objective even when its distant firing corridor is incomplete")
+	own.squad_type = original_role
+	other.squad_type = guard_role
 
 
 func _test_defensive_memory() -> void:

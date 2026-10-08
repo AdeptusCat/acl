@@ -90,6 +90,8 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 			contact.unit = enemy
 			contact.hex = memory.get("last_seen_hex", Vector2i.ZERO)
 			contact.confidence = 1.0 - age / Unit.ENEMY_MEMORY_LIFETIME
+			contact.last_seen_at = memory.get("last_seen_time", now)
+			contact.crossing_seconds = memory.get("crossing_seconds", 2.0)
 			# Memory uses captured capability, never a hidden live loadout/state.
 			contact.firepower = memory.get("firepower", 1.0)
 			contact.effectiveness = memory.get("effectiveness", 1.0)
@@ -113,11 +115,21 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 		contact.effectiveness = get_unit_effectiveness(enemy)
 		contact.weapon_range = get_unit_range(enemy)
 		contact.observed = true
+		contact.last_seen_at = now
+		contact.crossing_seconds = captured_crossing_seconds(enemy)
 		known[enemy] = contact
 	var result: Array[InfluenceContact] = []
 	for contact: InfluenceContact in known.values():
 		result.append(contact)
 	return result
+
+
+static func captured_crossing_seconds(unit: Unit) -> float:
+	if unit.movement == null or not is_instance_valid(LOSHelper.ground_layer):
+		return 2.0
+	var origin: Vector2 = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+	var neighbor: Vector2i = LOSHelper.get_hex_neighbors(unit.current_hex)[0]
+	return unit.movement.estimate_travel_seconds(origin, LOSHelper.ground_layer.map_to_local(neighbor), 1.0)
 
 
 static func get_squad_type_priority(squad_type: Globals.SquadType) -> int:

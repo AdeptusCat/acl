@@ -650,6 +650,7 @@ func remember_enemy(enemy: Unit) -> void:
 	info["firepower"] = InfluenceUnitQuery.get_unit_firepower(enemy)
 	info["effectiveness"] = InfluenceUnitQuery.get_unit_effectiveness(enemy)
 	info["weapon_range"] = InfluenceUnitQuery.get_unit_range(enemy)
+	info["crossing_seconds"] = InfluenceUnitQuery.captured_crossing_seconds(enemy)
 	enemy_memory[enemy] = info
 
 

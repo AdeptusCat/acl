@@ -50,6 +50,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	features.merge({"travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
 		"open_ground": open_ground, "open_fire": open_fire, "route_contact_distance": route_contact_distance,
 		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds})
+	if query.defense_area != null:
+		features["deadline_slack_seconds"] = features.get("arrival_seconds", INF) - route_seconds - query.profile.establishment_seconds
 	return features
 
 
@@ -96,6 +98,10 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 		"contact_distance": nearest_contact_distance(contacts, cell),
 		"progress": float(start_distance - objective_distance) / float(maxi(start_distance, 1)), "legacy": legacy}
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		if query.defense_area != null:
+			features.merge(query.defense_area.features(query, cell))
+			# Capture protection is a duty; distance alone adds no firing value.
+			features["objective_coverage"] = float(cell == query.objective_hex or (objective_distance <= 1 and coverage > 0.0))
 		features.merge(DefensePositionPolicy.evaluate(query, cell))
 		features["holding_under_pressure"] = incoming > 0.0 and DefensePositionPolicy.can_hold_under_pressure(query, cell, features)
 		features["contact_pressure"] = _contact_pressure(query, contacts, cell, cover)
@@ -106,6 +112,9 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 
 static func _prepare_firing_targets(query: PositionQuery, contacts: Array[InfluenceContact]) -> void:
 	var targets: Array[Vector2i] = query.firing_targets
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null:
+		# The area features evaluate weighted corridors, rather than near-objective samples.
+		return
 	for contact: InfluenceContact in contacts:
 		if query.axis != null and not query.axis.enemy_units.is_empty() and not query.axis.enemy_units.has(contact.unit):
 			continue

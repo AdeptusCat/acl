@@ -39,6 +39,9 @@ static func capture(version: int, objectives: Dictionary[int, Vector2i], knowled
 		var source: AStar2D = Globals.astars.get(team, ground.astar)
 		if source != null:
 			copy_routes(snapshot, team, source)
+	var map: InfluenceMap = snapshot.maps[Globals.Team.ALLIES]
+	snapshot.terrain_key = hash([ground.get_instance_id(), map.bounds, snapshot.route_topology_key,
+		map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_COVER), map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_MOVE_COST)])
 	return snapshot
 
 
@@ -54,6 +57,7 @@ static func copy_routes(snapshot: InfluenceSnapshot, team: int, source: AStar2D)
 		graph.set_point_disabled(id, source.is_point_disabled(id))
 		ids[cell] = id
 	for id: int in graph.get_point_ids():
+		snapshot.route_topology_key = hash([snapshot.route_topology_key, id, source.get_point_connections(id)])
 		for other: int in source.get_point_connections(id):
 			if graph.has_point(other):
 				graph.connect_points(id, other, false)

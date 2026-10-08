@@ -7,6 +7,9 @@ const MIN_APPROACH_COVERAGE: float = 0.5
 
 static func prepare(query: PositionQuery) -> void:
 	query.defense_approaches.clear()
+	if query.defense_area != null:
+		query.defense_approaches = query.defense_area.approaches.duplicate()
+		return
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
 	var graph: AStar2D = null
 	if not contacts.is_empty():
@@ -59,18 +62,29 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var interposition: float = 0.0
 	var approach_covered: bool = false
 	var covered_approaches: int = 0
+	var total_priority: float = 0.0
+	var important_count: int = 0
+	var important_covered: int = 0
 	for approach: Dictionary in query.defense_approaches:
 		var coverage: float = _approach_coverage(query, query.unit, cell, approach)
-		blocking += coverage
-		approach_covered = approach_covered or coverage >= MIN_APPROACH_COVERAGE
+		var priority: float = approach.get("priority", 1.0)
+		if query.defense_area == null or priority >= query.defense_area.max_priority * 0.4:
+			important_count += 1
+			if coverage >= MIN_APPROACH_COVERAGE:
+				important_covered += 1
+		total_priority += priority
+		blocking += coverage * priority
+		if (query.assigned_sector < 0 and (query.defense_area == null or priority >= query.defense_area.max_priority * 0.4)) or query.assigned_sector == approach.get("id", -1):
+			approach_covered = approach_covered or coverage >= MIN_APPROACH_COVERAGE
 		if coverage >= MIN_APPROACH_COVERAGE:
 			covered_approaches += 1
 		var enemy_distance: int = LOSHelper.get_hex_distance(query.objective_hex, approach["source"])
 		var detour: int = distance + LOSHelper.get_hex_distance(cell, approach["source"]) - enemy_distance
 		if distance <= enemy_distance and detour <= 1:
-			interposition = maxf(interposition, 1.0 - 0.5 * float(maxi(detour, 0)))
+			if query.assigned_sector < 0 or query.assigned_sector == approach.get("id", -1):
+				interposition = maxf(interposition, 1.0 - 0.5 * float(maxi(detour, 0)))
 	if not query.defense_approaches.is_empty():
-		blocking /= float(query.defense_approaches.size())
+		blocking /= maxf(total_priority, 0.001)
 	var responsibility: String = ""
 	if cell == query.objective_hex:
 		responsibility = "occupy"
@@ -78,6 +92,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		responsibility = "guard"
 	elif approach_covered:
 		responsibility = "cover_approach"
+	if query.reserve_position and query.defense_area != null and query.defense_area.geometry["objective_distances"].has(cell):
+		responsibility = "reserve"
 	if query.defense_responsibility == PositionQuery.Responsibility.OCCUPY and cell != query.objective_hex:
 		responsibility = ""
 	elif query.defense_responsibility == PositionQuery.Responsibility.GUARD and not guard and cell != query.objective_hex:
@@ -86,6 +102,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		responsibility = ""
 	return {"responsibility": responsibility, "blocking": blocking, "interposition": interposition,
 		"covered_approaches": covered_approaches, "approach_count": query.defense_approaches.size(),
+		"important_approaches_covered": important_covered, "important_approach_count": important_count,
 		"preserves_screen": _preserves_screen(query, cell), "withdrawal": needs_withdrawal(query)}
 
 
@@ -96,6 +113,8 @@ static func _can_cover(query: PositionQuery, unit: Unit, from: Vector2i, target:
 
 
 static func _approach_coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictionary) -> float:
+	if query.defense_area != null:
+		return query.defense_area.coverage(query, unit, cell, approach)["coverage"]
 	var covered: int = 0
 	for target: Vector2i in approach["cells"]:
 		if _can_cover(query, unit, cell, target):
@@ -107,6 +126,13 @@ static func _preserves_screen(query: PositionQuery, cell: Vector2i) -> bool:
 	if cell == query.unit.current_hex:
 		return true
 	for approach: Dictionary in query.defense_approaches:
+		if query.defense_area != null:
+			# Hazard knowledge persists, while low-priority old approaches may release their screen.
+			if approach["priority"] < query.defense_area.max_priority * 0.4:
+				continue
+			var assigned: Dictionary = query.defense_area.approach_for_sector(query.assigned_sector)
+			if not assigned.is_empty() and assigned["id"] != approach["id"] and assigned["priority"] > approach["priority"] * 1.4:
+				continue
 		if _approach_coverage(query, query.unit, query.unit.current_hex, approach) < MIN_APPROACH_COVERAGE or _approach_coverage(query, query.unit, cell, approach) >= MIN_APPROACH_COVERAGE:
 			continue
 		var covered_by_other: bool = false
@@ -135,6 +161,9 @@ static func needs_withdrawal(query: PositionQuery) -> bool:
 
 
 static func can_hold_under_pressure(query: PositionQuery, cell: Vector2i, features: Dictionary) -> bool:
+	var capture_guard: bool = features["responsibility"] in ["occupy", "guard"] and query.defense_responsibility != PositionQuery.Responsibility.COVER_APPROACH
+	if query.assigned_sector >= 0 and features.get("assigned_coverage", 0.0) < MIN_APPROACH_COVERAGE and not capture_guard:
+		return false
 	return not needs_withdrawal(query) and cell == query.unit.current_hex and not (query.unit.movement != null and query.unit.movement.is_moving) and InfluenceUnitQuery.get_unit_effectiveness(query.unit) >= query.profile.hold_effectiveness and features["cover"] >= query.profile.minimum_cover and features["responsibility"] != ""
 
 
@@ -143,6 +172,8 @@ static func allows_route(query: PositionQuery, features: Dictionary) -> bool:
 
 
 static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary) -> String:
+	if query.defense_area != null and not query.relocation_allowed and cell != query.unit.current_hex and not (query.has_accepted_target and query.accepted_context == query.context_key() and cell == query.accepted_target):
+		return "handoff_wait"
 	if features["responsibility"] == "":
 		return "responsibility"
 	if not features["preserves_screen"]:

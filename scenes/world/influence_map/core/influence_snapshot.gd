@@ -13,6 +13,22 @@ var point_ids: Dictionary[int, Dictionary] = {}
 var objectives: Dictionary[int, Vector2i] = {}
 var los: Dictionary = {}
 var _forecasts: Dictionary[int, Dictionary] = {}
+var terrain_key: int = 0
+var route_topology_key: int = 0
+var defense_geometry_cache: Dictionary = {}
+var defense_area_jobs: Dictionary[String, DefenseAreaJob] = {}
+
+
+func defense_area_job(team: int, objective: Vector2i, radius: int = 8, horizon: int = 12, axes: Array[ThreatAxis] = []) -> DefenseAreaJob:
+	var axis_context: Array = []
+	for axis: ThreatAxis in axes:
+		axis_context.append([axis.source_hex, axis.confidence])
+	var key: String = str([team, objective, radius, horizon, axis_context])
+	if not defense_area_jobs.has(key):
+		var job: DefenseAreaJob = DefenseAreaJob.new()
+		job.start(self, team, objective, radius, horizon, axes)
+		defense_area_jobs[key] = job
+	return defense_area_jobs[key]
 
 
 func get_contacts(team: int) -> Array[InfluenceContact]:

@@ -31,6 +31,8 @@ var position_jobs: Array[PositionQueryJob] = []
 var inspection_jobs: Dictionary[Unit, PositionQueryJob] = {}
 var inspection_results: Dictionary[Unit, PositionResult] = {}
 var last_position_slice_usec: int = 0
+var defense_geometry_cache: Dictionary = {}
+var defense_area_jobs: Array[DefenseAreaJob] = []
 
 
 func _process(delta: float) -> void:
@@ -47,6 +49,8 @@ func reset_for_match() -> void:
 	for job: PositionQueryJob in position_jobs:
 		job.cancel()
 	position_jobs.clear()
+	defense_area_jobs.clear()
+	defense_geometry_cache.clear()
 	inspection_jobs.clear()
 	inspection_results.clear()
 	defensive_memory.clear()
@@ -74,6 +78,9 @@ func create_maps(_delta: float) -> void:
 	if snapshot != null:
 		version = snapshot.version + 1
 	pending_snapshot = InfluenceSnapshotBuilder.capture(version, objectives_by_team, knowledge_policy, create_default_weights())
+	if snapshot != null and snapshot.terrain_key != pending_snapshot.terrain_key:
+		defense_geometry_cache.clear()
+	pending_snapshot.defense_geometry_cache = defense_geometry_cache
 	if knowledge_policy == KnowledgePolicy.OBSERVED_AND_MEMORY:
 		defensive_memory.capture_into(pending_snapshot)
 	for team: int in _get_processed_teams():
@@ -154,17 +161,39 @@ func get_movement_weight(team: int, cell: Vector2i) -> float:
 
 func query_positions(query: PositionQuery) -> PositionResult:
 	query.snapshot = snapshot
+	_attach_defense_area(query)
 	return PositionQueryService.query_positions(query)
 
 
 func enqueue_position_query(query: PositionQuery) -> PositionQueryJob:
 	if query.snapshot == null:
 		query.snapshot = snapshot
+	_attach_defense_area(query)
 	query.origin_hex = query.unit.current_hex
 	var job: PositionQueryJob = PositionQueryJob.new()
 	job.query = query
 	position_jobs.append(job)
 	return job
+
+
+func request_defense_area(team: int, objective: Vector2i, radius: int = 8, horizon: int = 12, axes: Array[ThreatAxis] = []) -> DefenseAreaJob:
+	var job: DefenseAreaJob = snapshot.defense_area_job(team, objective, radius, horizon, axes)
+	if not job.completed and not defense_area_jobs.has(job):
+		defense_area_jobs.append(job)
+	return job
+
+
+func _attach_defense_area(query: PositionQuery) -> void:
+	if query.use_defense_area and query.profile.mode == PositionProfile.Mode.DEFEND and query.axis != null and query.assigned_sector < 0 and not query.reserve_position and query.defense_responsibility not in [PositionQuery.Responsibility.OCCUPY, PositionQuery.Responsibility.GUARD] and is_instance_valid(LOSHelper.ground_layer):
+		query.assigned_sector = DefenseAreaAssessment.sector_for(query.objective_hex, query.axis.source_hex)
+	if not query.use_defense_area or query.profile.mode != PositionProfile.Mode.DEFEND or query.snapshot == null or query.defense_area != null or query.area_job != null:
+		return
+	if not query.snapshot.maps.has(query.team) or not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.team != query.team:
+		return
+	var axes: Array[ThreatAxis] = []
+	if query.axis != null:
+		axes.append(query.axis)
+	query.area_job = query.snapshot.defense_area_job(query.team, query.objective_hex, query.defense_radius, maxi(query.defense_radius + 2, 10), axes)
 
 
 func cancel_position_query(job: PositionQueryJob) -> void:
@@ -176,6 +205,13 @@ func cancel_position_query(job: PositionQueryJob) -> void:
 func _process_position_queries() -> void:
 	var started: int = Time.get_ticks_usec()
 	var deadline: int = started + POSITION_QUERY_BUDGET_USEC
+	while not defense_area_jobs.is_empty() and Time.get_ticks_usec() < deadline:
+		var area_job: DefenseAreaJob = defense_area_jobs[0]
+		area_job.advance(deadline)
+		if area_job.completed:
+			defense_area_jobs.pop_front()
+		else:
+			break
 	while not position_jobs.is_empty() and Time.get_ticks_usec() < deadline:
 		var job: PositionQueryJob = position_jobs[0]
 		if not InfluenceUnitQuery.is_valid_living_unit(job.query.unit):
@@ -193,6 +229,9 @@ func query_inspection_positions(query: PositionQuery) -> PositionResult:
 	# Frozen/off-tree callers retain the synchronous API; live overlays share the frame budget.
 	if not can_process():
 		return query_positions(query)
+	if query.snapshot == null:
+		query.snapshot = snapshot
+	_attach_defense_area(query)
 	for inspected: Unit in inspection_jobs.keys():
 		if inspected != query.unit:
 			cancel_position_query(inspection_jobs[inspected])

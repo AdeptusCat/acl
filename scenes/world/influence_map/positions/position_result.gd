@@ -24,6 +24,8 @@ var profile_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
 var objective_hex: Vector2i = Vector2i.ZERO
 var reason: String = ""
 var decision: Decision = Decision.POSITION
+var approach_cells: Array[Vector2i] = []
+var sector_priorities: Dictionary[int, float] = {}
 
 
 func is_valid() -> bool:

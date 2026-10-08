@@ -9,3 +9,5 @@ var firepower: float = 0.0
 var effectiveness: float = 1.0
 var weapon_range: int = 0
 var observed: bool = false
+var last_seen_at: float = 0.0
+var crossing_seconds: float = 2.0

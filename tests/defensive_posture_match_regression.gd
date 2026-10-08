@@ -164,7 +164,9 @@ func _objective_guarded(planner: PlatoonAI) -> bool:
 		if advice != null and advice.is_valid() and not unit.movement.is_moving and unit.current_hex == advice.target_hex:
 			if advice.features.get("responsibility") in ["occupy", "guard"]:
 				return true
-			if planner.squads.size() == 1 and advice.features.get("covered_approaches", 0) > 0 and advice.features["covered_approaches"] == advice.features["approach_count"]:
+			var required: int = advice.features.get("important_approach_count", advice.features.get("approach_count", 0))
+			var covered: int = advice.features.get("important_approaches_covered", advice.features.get("covered_approaches", 0))
+			if planner.squads.size() == 1 and required > 0 and covered == required:
 				return true
 	return false
 

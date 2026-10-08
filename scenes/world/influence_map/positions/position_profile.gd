@@ -28,6 +28,12 @@ enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
 @export var proximity_weight: float = 0.0
 @export var hold_effectiveness: float = 0.45
 @export var withdrawal_effectiveness: float = 0.35
+@export var interdiction_weight: float = 6.0
+@export var area_interposition_weight: float = 1.5
+@export var area_objective_weight: float = 1.5
+@export var area_blocking_weight: float = 2.0
+@export var reserve_readiness_weight: float = 4.0
+@export var establishment_seconds: float = 3.0
 
 
 static func for_mode(p_mode: Mode) -> PositionProfile:
@@ -74,6 +80,29 @@ func score(features: Dictionary, unit: Unit) -> float:
 	var role_fire_weight: float = firing_weight
 	var role_risk_weight: float = incoming_weight
 	var position_weight: float = interposition_weight
+	var area_bonus: float = 0.0
+	var capture_weight: float = objective_weight
+	var coverage_weight: float = blocking_weight
+	if mode == Mode.DEFEND and features.has("interdiction"):
+		position_weight = area_interposition_weight
+		capture_weight = area_objective_weight
+		coverage_weight = area_blocking_weight
+		area_bonus = features["interdiction"] * interdiction_weight
+		if unit.squad_type == Globals.SquadType.MG:
+			area_bonus *= 1.7
+		elif unit.squad_type == Globals.SquadType.MORTAR:
+			area_bonus *= 1.3
+		elif unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+			area_bonus = 0.0
+		if features.get("responsibility") == "reserve":
+			area_bonus = features["reserve_readiness"] * reserve_readiness_weight
+			position_weight = 0.0
+			coverage_weight = 0.0
+			capture_weight = 0.5
+		var deadline: float = features.get("arrival_seconds", INF)
+		var response: float = features.get("route_seconds", 0.0) + establishment_seconds
+		if is_finite(deadline) and response > deadline:
+			area_bonus -= minf(3.0, (response - deadline) / 4.0)
 	if unit.squad_type == Globals.SquadType.MG:
 		role_fire_weight *= 1.7
 	elif unit.squad_type == Globals.SquadType.MORTAR:
@@ -90,9 +119,9 @@ func score(features: Dictionary, unit: Unit) -> float:
 		route_cost = features.get("exposure_seconds", route_cost)
 	return (features["cover"] * cover_weight - features["incoming"] * role_risk_weight
 		- features["forecast"] * forecast_weight + features["firing"] * role_fire_weight
-		+ features["objective_coverage"] * objective_weight + features["support"] * support_weight
+		+ features["objective_coverage"] * capture_weight + features["support"] * support_weight
 		- features["travel"] * travel_weight - route_cost * exposure_weight
 		- features.get("open_ground", 0.0) * open_ground_weight
-		+ features.get("interposition", 0.0) * position_weight + features.get("blocking", 0.0) * blocking_weight
+		+ features.get("interposition", 0.0) * position_weight + features.get("blocking", 0.0) * coverage_weight + area_bonus
 		- features.get("contact_pressure", 0.0) * proximity_weight
 		+ features["progress"] * progress_weight)

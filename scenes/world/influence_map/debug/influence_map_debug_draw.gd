@@ -258,6 +258,14 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 	var tile_size: Vector2i = tile_map_layer.tile_set.tile_size
 	var radius_x: float = float(tile_size.x) * 0.5 * hex_draw_scale
 	var radius_y: float = float(tile_size.y) * 0.5 * hex_draw_scale
+	if debug_view == DebugView.POSITION_SCORE:
+		var advice: PositionResult = _get_position_advice()
+		if advice != null:
+			for cell: Vector2i in advice.approach_cells:
+				if influence_map.is_playable_cell(cell):
+					var polygon: PackedVector2Array = _make_hex_polygon(_cell_to_local_position(cell), radius_x, radius_y)
+					polygon.append(polygon[0])
+					draw_polyline(polygon, Color(1.0, 0.5, 0.1, 0.65), 1.5, true)
 
 	for cell: Vector2i in _cached_cells:
 		if not _should_draw_cell(influence_map, cell):
@@ -641,8 +649,14 @@ func _debug_report_layer_access(reason: String) -> void:
 		if advice != null:
 			var candidate_count: int = advice.eligibility.count(1)
 			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
+			if not advice.approach_cells.is_empty():
+				_layer_access_text += "\nOrange: predicted approach corridor"
 			if advice.is_valid():
 				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
+				if advice.features.has("assigned_sector"):
+					_layer_access_text += "\nSector=%d | coverage=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features["interdiction"]]
+					if advice.features.get("responsibility") == "reserve":
+						_layer_access_text += " | readiness=%.2f" % advice.features["reserve_readiness"]
 		return
 	var layer_id: int = _debug_view_to_layer_id(debug_view)
 

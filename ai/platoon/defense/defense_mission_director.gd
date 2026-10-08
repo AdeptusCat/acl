@@ -8,6 +8,8 @@ enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET, OPPONENT_CAPTU
 @export var position_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
 @export var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
 @export var defense_radius: int = 4
+@export var defense_area_radius: int = 8
+@export var approach_analysis_radius: int = 12
 @export var movement_radius: int = 6
 @export var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
 @export var capture_objective_id: int = 1
@@ -38,6 +40,8 @@ func create_initial_order() -> MissionOrder:
 	order.execution_intent = execution_intent
 	order.geography = geography
 	order.defense_radius = defense_radius
+	order.defense_area_radius = defense_area_radius
+	order.approach_analysis_radius = approach_analysis_radius
 	order.movement_radius = movement_radius
 	order.defense_responsibility = defense_responsibility
 	order.exposure_budget_seconds = exposure_budget_seconds

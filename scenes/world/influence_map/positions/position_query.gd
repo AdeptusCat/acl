@@ -32,6 +32,13 @@ var firing_targets: Array[Vector2i] = []
 var firing_targets_prepared: bool = false
 var firepower_by_unit: Dictionary[Unit, Dictionary] = {}
 var origin_hex: Vector2i = Vector2i.ZERO
+var defense_area: DefenseAreaAssessment
+var use_defense_area: bool = true
+var area_job: DefenseAreaJob
+var assigned_sector: int = -1
+var reserve_position: bool = false
+var relocation_allowed: bool = true
+var sector_features: Dictionary[Unit, Dictionary] = {}
 
 
 func reset_evaluation() -> void:
@@ -41,6 +48,11 @@ func reset_evaluation() -> void:
 	firing_targets.clear()
 	firing_targets_prepared = false
 	firepower_by_unit.clear()
+	sector_features.clear()
+
+
+func defense_crossing_seconds() -> float:
+	return InfluenceUnitQuery.captured_crossing_seconds(unit)
 
 
 func firepower_at_range(friendly: Unit, distance: int) -> float:
@@ -59,4 +71,4 @@ func context_key() -> String:
 	var withdrawing: bool = false
 	if profile.mode == PositionProfile.Mode.DEFEND and is_instance_valid(unit):
 		withdrawing = withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(unit) < profile.withdrawal_effectiveness
-	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing])
+	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, reserve_position, use_defense_area])

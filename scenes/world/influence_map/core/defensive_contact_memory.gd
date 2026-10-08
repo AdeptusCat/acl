@@ -46,6 +46,7 @@ func capture_into(snapshot: InfluenceSnapshot) -> void:
 			var age: float = maxf(0.0, snapshot.captured_at - remembered[unit]["seen_at"])
 			contact.confidence = maxf(MIN_CONFIDENCE, 1.0 - age / CONFIDENCE_DECAY_SECONDS)
 			contact.observed = observed.has(unit)
+			contact.last_seen_at = remembered[unit]["seen_at"]
 			captured.append(contact)
 		contacts_by_team[team] = remembered
 		snapshot.defensive_contacts[team] = captured
@@ -74,4 +75,6 @@ static func _copy_contact(source: InfluenceContact) -> InfluenceContact:
 	contact.effectiveness = source.effectiveness
 	contact.weapon_range = source.weapon_range
 	contact.observed = source.observed
+	contact.last_seen_at = source.last_seen_at
+	contact.crossing_seconds = source.crossing_seconds
 	return contact

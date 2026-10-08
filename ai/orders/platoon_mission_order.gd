@@ -28,6 +28,9 @@ var execution_intent: TacticalPositionExecutor.Intent = TacticalPositionExecutor
 var position_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
 var geography: PositionQuery.Geography = PositionQuery.Geography.OBJECTIVE_OR_SECTOR
 var defense_radius: int = 4
+# Automatic objective-or-sector missions may use covered firing positions farther out.
+var defense_area_radius: int = 8
+var approach_analysis_radius: int = 12
 var movement_radius: int = 6
 var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
 var exposure_budget_seconds: float = 6.0

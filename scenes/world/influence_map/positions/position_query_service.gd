@@ -39,6 +39,16 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 		result.score_map.resize(map.cell_count)
 		result.score_map.fill(0.0)
 	result.eligibility.resize(map.cell_count)
+	if query.defense_area != null:
+		result.features["assigned_sector"] = query.assigned_sector
+		var cells: Dictionary = {}
+		for approach: Dictionary in query.defense_area.approaches:
+			result.sector_priorities[approach["id"]] = approach["priority"]
+			if query.assigned_sector >= 0 and query.assigned_sector != approach["id"]:
+				continue
+			for cell: Vector2i in approach["cells"]:
+				cells[cell] = true
+		result.approach_cells.assign(cells.keys())
 	return true
 
 
@@ -49,6 +59,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
 				result.reason = "Holding until relocation can preserve existing approach coverage"
+			if result.rejections.has("handoff_wait"):
+				result.reason = "Waiting for the relocating defender to establish covering fire"
 		return
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
@@ -94,12 +106,16 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	result.reason = "Accepted a feasible position"
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		result.reason = "Accepted defensive " + str(best.features["responsibility"]) + " position"
+		if query.assigned_sector >= 0:
+			result.reason += " for sector %d (coverage %.0f%%)" % [query.assigned_sector, best.features.get("assigned_coverage", 0.0) * 100.0]
 	if result.status == PositionResult.Status.RETAINED:
 		result.reason = "Retained the feasible position within the improvement margin"
 		if committed:
 			result.reason = "Maintained a safe defensive position commitment"
 	if result.decision == PositionResult.Decision.HOLD_DEFENSE:
 		result.reason = "Holding covered defensive responsibility under pressure"
+		if query.assigned_sector >= 0:
+			result.reason += " in sector %d" % query.assigned_sector
 	elif result.decision == PositionResult.Decision.WITHDRAW:
 		result.reason = "Mission-constrained withdrawal preserves approach coverage"
 		if result.target_hex == query.unit.current_hex:

@@ -1,13 +1,13 @@
 class_name PositionQueryJob
 extends RefCounted
 
-enum Phase { INITIALIZE, FILTER, FLOOD, EVALUATE, FINISH }
+enum Phase { AREA, INITIALIZE, FILTER, FLOOD, EVALUATE, FINISH }
 
 var query: PositionQuery
 var result: PositionResult = PositionResult.new()
 var completed: bool = false
 var canceled: bool = false
-var phase: Phase = Phase.INITIALIZE
+var phase: Phase = Phase.AREA
 var indices: Array[int] = []
 var cursor: int = 0
 var fallback: bool = false
@@ -17,6 +17,26 @@ var candidates: Array[PositionCandidate] = []
 func advance(deadline_usec: int) -> void:
 	while not completed and not canceled and (deadline_usec < 0 or Time.get_ticks_usec() < deadline_usec):
 		match phase:
+			Phase.AREA:
+				if query.area_job != null and (query.snapshot == null or query.area_job.objective != query.objective_hex or query.area_job.result.snapshot_version != query.snapshot.version):
+					query.area_job = null
+					query.defense_area = null
+				if query.defense_area != null and (query.profile.mode != PositionProfile.Mode.DEFEND or query.snapshot == null or query.defense_area.objective_hex != query.objective_hex or query.defense_area.snapshot_version != query.snapshot.version):
+					query.defense_area = null
+					query.area_job = null
+				if query.use_defense_area and query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area == null and query.area_job == null and query.snapshot != null and query.snapshot.maps.has(query.team) and InfluenceUnitQuery.is_valid_living_unit(query.unit) and query.unit.team == query.team:
+					var axes: Array[ThreatAxis] = []
+					if query.axis != null:
+						axes.append(query.axis)
+					query.area_job = query.snapshot.defense_area_job(query.team, query.objective_hex, query.defense_radius, maxi(query.defense_radius + 2, 10), axes)
+				if query.area_job != null:
+					query.area_job.advance(deadline_usec)
+					if not query.area_job.completed:
+						return
+					query.defense_area = query.area_job.result
+				if query.defense_area != null and query.axis != null and query.assigned_sector < 0 and not query.reserve_position and query.defense_responsibility not in [PositionQuery.Responsibility.OCCUPY, PositionQuery.Responsibility.GUARD]:
+					query.assigned_sector = query.defense_area.sector_at(query.axis.source_hex)
+				phase = Phase.INITIALIZE
 			Phase.INITIALIZE:
 				if not PositionQueryService.initialize(query, result):
 					completed = true
