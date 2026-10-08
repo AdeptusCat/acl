@@ -133,6 +133,7 @@ func _run() -> void:
 	_test_defense_area()
 	_test_corridor_evidence()
 	_test_objective_connected_defense()
+	_test_local_interception()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -1539,6 +1540,51 @@ func _test_objective_connected_defense() -> void:
 	var disconnected: PositionResult = PositionQueryService.query_positions(query)
 	_check(not disconnected.is_valid() and disconnected.rejections.has("objective_access"), "Fire visibility cannot authorize a position with no terrain route back to objective protection")
 	own.squad_type = role
+
+
+func _test_local_interception() -> void:
+	var query: PositionQuery = _defense_fixture()
+	var original_hex: Vector2i = own.current_hex
+	var original_range: int = own.weapon_range
+	var local: Vector2i = Vector2i(7, 3)
+	var upstream: Vector2i = Vector2i(2, 3)
+	own.current_hex = local
+	own.weapon_range = 3
+	query.snapshot.positions[own as Unit] = local
+	query.objective_hex = Vector2i(8, 3)
+	query.defense_radius = 3
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.sector_cells = [local, upstream]
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(Vector2i(0, 3), query.snapshot.captured_at)]
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, float(cell.x >= 6 or cell == upstream))
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, 0.0)
+	query.snapshot.los = query.snapshot.los.duplicate(true)
+	query.snapshot.los[local] = {}
+	query.snapshot.los[upstream] = {}
+	for cell: Vector2i in map.playable_cells:
+		var record: Dictionary = {"target_cover": map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), "hindrance": 0.0}
+		if LOSHelper.get_hex_distance(cell, query.objective_hex) <= query.defense_radius:
+			query.snapshot.los[local][cell] = record
+		if cell.x <= 4:
+			query.snapshot.los[upstream][cell] = record
+	var job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 8, 10)
+	job.advance(-1)
+	query.defense_area = job.result
+	query.assigned_sector = job.result.sector_at(Vector2i(0, 3))
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == local and not advice.should_move, "A short-range defender can hold the woods covering the final approach of a long incoming route")
+	_check(advice.features.get("assigned_coverage", 0.0) >= 0.5 and advice.features.get("assigned_corridor_coverage", 1.0) < 0.5, "Local interception responsibility is independent of whole-corridor visibility")
+	_check(advice.eligibility[map.cell_to_index(upstream)] == 0, "An upstream firing position that cannot cover the objective-side approach is not a valid interception duty")
+	var shorter: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 4, 8)
+	shorter.advance(-1)
+	query.defense_area = shorter.result
+	var repeated: PositionResult = PositionQueryService.query_positions(query)
+	_check(repeated.target_hex == local and is_equal_approx(repeated.features.get("assigned_coverage", 0.0), advice.features.get("assigned_coverage", 1.0)), "Extending the outer analysis horizon does not change an unchanged local interception duty")
+	own.current_hex = original_hex
+	own.weapon_range = original_range
+	own.position = ground.map_to_local(original_hex)
 
 
 func _test_defensive_memory() -> void:

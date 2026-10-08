@@ -665,7 +665,7 @@ func _debug_report_layer_access(reason: String) -> void:
 			if advice.is_valid():
 				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
 				if advice.features.has("assigned_sector"):
-					_layer_access_text += "\nSector=%d | coverage=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features["interdiction"]]
+					_layer_access_text += "\nSector=%d | interception=%.0f%% | full corridor=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features.get("assigned_corridor_coverage", advice.features["assigned_coverage"]) * 100.0, advice.features["interdiction"]]
 					var sector: int = advice.features["assigned_sector"]
 					if advice.approach_sources.has(sector):
 						_layer_access_text += " | %s source=%s" % [advice.approach_evidence[sector], advice.approach_sources[sector]]

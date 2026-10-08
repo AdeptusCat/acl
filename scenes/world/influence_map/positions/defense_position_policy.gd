@@ -127,6 +127,9 @@ static func _preserves_screen(query: PositionQuery, cell: Vector2i) -> bool:
 		return true
 	for approach: Dictionary in query.defense_approaches:
 		if query.defense_area != null:
+			# Terrain guesses guide positioning; they cannot lock a squad to every unseen direction.
+			if approach["evidence"] == "inferred":
+				continue
 			# Hazard knowledge persists, while low-priority old approaches may release their screen.
 			if approach["priority"] < query.defense_area.max_priority * 0.4:
 				continue
