@@ -246,10 +246,8 @@ func setAttackState(_attackState: AttackState) -> void:
 			attack_ground_rounds_budget = 50
 
 func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
-	if not alive:
+	if not alive or in_close_combat:
 		return
-	#if in_close_combat:
-		#return
 	match cmd:
 		Globals.UnitCmd.FIRE_AT_HEX:
 			if squad_type == Globals.SquadType.MORTAR:

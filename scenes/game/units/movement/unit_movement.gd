@@ -64,6 +64,18 @@ func _process(delta: float) -> void:
 
 func stop() -> void:
 	_clear_path_state()
+	if unit.in_close_combat:
+		# Combat locks the occupied hex immediately, without recentering or arrival callbacks.
+		var was_moving: bool = is_moving or unit.is_moving
+		is_moving = false
+		unit.is_moving = false
+		unit.goal_hex = unit.current_hex
+		target_hex = unit.current_hex
+		target_position = unit.position
+		if was_moving:
+			stopped_moving.emit()
+		new_target_hex.emit(target_hex)
+		return
 	if is_moving:
 		_start_move_to_hex(unit.current_hex)
 		target_hex = unit.current_hex
@@ -76,6 +88,9 @@ func move_to_hex(new_hex: Vector2i) -> void:
 
 
 func _start_move_to_hex(new_hex: Vector2i) -> void:
+	if unit.in_close_combat:
+		stop()
+		return
 	_get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
@@ -122,6 +137,9 @@ func _clear_path_state() -> void:
 # covered_path: cubes from A* (safe route)
 # exposed_segment: cubes for the final open-ground leg
 func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
+	if unit.in_close_combat:
+		stop()
+		return
 	_clear_path_state()
 	is_moving = false
 	attack_in_progress = true
@@ -158,6 +176,9 @@ func start_covered_phase() -> void:
 
 # Internal: once covered path finished, switch into exposed segment
 func _start_exposed_phase() -> void:
+	if unit.in_close_combat:
+		stop()
+		return
 	if not attack_in_progress:
 		return
 	if exposed_path_hexes.is_empty():
@@ -188,7 +209,9 @@ func _start_exposed_phase() -> void:
 # ----------------------------------------------------------------------
 
 func _process_movement(delta: float) -> void:
-	
+	if unit.in_close_combat:
+		stop()
+		return
 	var dir: Vector2 = (target_position - unit.position).normalized()
 	var dist: float = unit.position.distance_to(target_position)
 	var step: float = move_speed * terrain_mult * delta
@@ -198,6 +221,10 @@ func _process_movement(delta: float) -> void:
 		# arrive at hex
 		unit.position = target_position
 		_update_current_hex(unit.goal_hex)
+		# Hex-entry signals can synchronously admit this unit to close combat.
+		if unit.in_close_combat:
+			stop()
+			return
 		is_moving = false
 		stopped_moving.emit()
 		

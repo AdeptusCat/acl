@@ -124,6 +124,11 @@ func add_unit(unit: Unit) -> void:
 	unit.unit_entered_hex.connect(_on_unit_entered_hex)
 	unit.soldiers_changed.connect(refresh_participants)
 	unit.tree_exiting.connect(remove_unit.bind(unit))
+	# Entry roles were captured before canceling the action that brought the unit here.
+	if unit.action_controller != null and unit.action_controller.movement != null:
+		unit.action_controller.clear_orders()
+	elif unit.movement != null:
+		unit.movement.stop()
 
 
 func remove_unit(unit: Unit) -> void:

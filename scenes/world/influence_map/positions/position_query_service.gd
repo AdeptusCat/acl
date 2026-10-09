@@ -300,6 +300,8 @@ static func _valid_snapshot_path(query: PositionQuery, path: Array[Vector2i], ta
 
 
 static func can_follow_intent(unit: Unit) -> bool:
+	if unit.in_close_combat:
+		return false
 	if unit.stress_system == null:
 		return true
 	return unit.stress_system.state != Unit.MoraleState.PANIC and unit.stress_system.state != Unit.MoraleState.COMBAT_INEFFECTIVE

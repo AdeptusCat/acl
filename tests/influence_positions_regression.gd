@@ -448,6 +448,11 @@ func _test_execution() -> void:
 		result.path = query.snapshot.get_path(own.team, own.current_hex, result.target_hex)
 	_check(executor.execute(result), "Executor accepts a validated route")
 	_check(own.action_controller.get("intent") == "defend", "Support fire uses move-and-hold execution")
+	own.in_close_combat = true
+	var locked_order_id: int = own.action_controller.action_order_id
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Engaged squad cannot receive a new position recommendation")
+	_check(not executor.execute(result) and own.action_controller.action_order_id == locked_order_id, "Combat entry invalidates cached movement advice before execution")
+	own.in_close_combat = false
 	own.unit_arrived_at_hex.emit(own.current_hex)
 	_check(own.commanded.is_empty(), "Arrival at a stopped waypoint cannot trigger the destination's support intent")
 	executor.execute(result)

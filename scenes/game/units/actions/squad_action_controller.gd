@@ -138,6 +138,8 @@ func _enter_action_state(_prev: int, state: int) -> void:
 # ----------------------------------------------------------------------
 
 func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	if unit.in_close_combat:
+		return
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -153,6 +155,8 @@ func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void
 
 
 func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
+	if unit.in_close_combat:
+		return
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -168,6 +172,8 @@ func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_an
 
 
 func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
+	if unit.in_close_combat:
+		return
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -183,6 +189,8 @@ func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], 
 
 
 func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
+	if unit.in_close_combat:
+		return
 	action_order_id += 1
 	
 	withdraw_hex = target_hex
@@ -291,7 +299,7 @@ func on_stopped_moving() -> void:
 
 
 func on_reached_hex(hex: Vector2i) -> void:
-	if not unit.alive or unit.surrendered or movement.is_moving:
+	if not unit.alive or unit.surrendered or unit.in_close_combat or movement.is_moving:
 		return
 	if hex != unit.current_hex:
 		return
@@ -517,6 +525,10 @@ func _is_adjacent_to_any_enemy(hex: Vector2i, known_enemies: Array[Unit]) -> boo
 
 
 func _start_rout() -> void:
+	if unit.in_close_combat:
+		# A locked encounter has no legal rout; retain the existing failed-rout outcome.
+		rout_failed.emit()
+		return
 	var known_enemies: Array[Unit] = []
 	#var i: int = 0
 	#while i < unit.units.size():

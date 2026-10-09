@@ -41,6 +41,11 @@ func _run() -> void:
 	await _clear_fixtures()
 	_test_last_side_and_same_frame_reentry()
 	await _clear_fixtures()
+	_test_movement_lock()
+	await _clear_fixtures()
+	await _test_path_interception()
+	_test_rout_lock()
+	await _clear_fixtures()
 	await _test_movement_and_freeing()
 	await _clear_fixtures()
 	_test_empty_combat()
@@ -218,14 +223,104 @@ func _test_last_side_and_same_frame_reentry() -> void:
 	_check(Globals.casualty_history.records.size() == records_before, "Repeated ended-combat ticks cannot create casualties")
 
 
+func _test_movement_lock() -> void:
+	var axis: Unit = _create_unit(Globals.Team.AXIS, 2)
+	var destination: Vector2i = COMBAT_HEX + Vector2i(1, 0)
+	var path: Array[Vector3i] = [LOSHelper.ground_layer.map_to_cube(COMBAT_HEX), LOSHelper.ground_layer.map_to_cube(destination)]
+	var exposed: Array[Vector3i] = [LOSHelper.ground_layer.map_to_cube(destination + Vector2i(1, 0))]
+	axis.give_attack_hex_order(destination + Vector2i(1, 0), path, exposed)
+	var allies: Unit = _create_unit(Globals.Team.ALLIES, 2)
+	var combat: CloseCombatInstance = _discover_combat()
+	_check(not axis.movement.is_moving and not axis.is_moving, "Admission immediately stops both movement flags")
+	_check(axis.movement.path_hexes.is_empty() and axis.movement.exposed_path_hexes.is_empty(), "Admission cancels the old movement and exposed assault segment")
+	_check(axis.action_controller.action_state == SquadActionController.SquadActionState.NO_ORDER, "Admission clears the previous action")
+	for unit: Unit in [axis, allies]:
+		var position_before: Vector2 = unit.position
+		var order_before: int = unit.action_controller.action_order_id
+		unit.give_defend_area_order(destination, path)
+		unit.give_move_to_hex_order(destination, path, false)
+		unit.give_attack_hex_order(destination, path, exposed)
+		unit.give_withdraw_to_hex_order(destination, path)
+		unit.order(Globals.UnitCmd.MOVE, destination)
+		_check(unit.action_controller.action_order_id == order_before, "Close combat rejects AI and direct movement orders without replacing action ownership")
+		var advice: PositionResult = PositionResult.new()
+		advice.unit = unit
+		advice.status = PositionResult.Status.ACCEPTED
+		advice.target_index = 0
+		advice.target_hex = destination
+		advice.should_move = true
+		advice.path = [COMBAT_HEX, destination]
+		var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+		_check(not PositionQueryService.can_follow_intent(unit) and not executor.execute(advice), "Close combat rejects previously computed position advice")
+		unit.movement.move_to_hex(destination)
+		unit.movement.follow_cube_path(path)
+		unit.movement.set_attack_paths(path, exposed)
+		unit.movement.start_covered_phase()
+		unit.movement.stop()
+		unit.movement._process(100.0)
+		_check(unit.current_hex == COMBAT_HEX and unit.position == position_before, "Direct movement and assault phases cannot move a combat participant")
+		_check(not unit.movement.is_moving and not unit.is_moving and unit.movement.path_hexes.is_empty() and not unit.movement.attack_in_progress, "Rejected movement leaves no queued path or assault")
+		_check(combat.units_by_team[unit.team].has(unit) and unit.in_close_combat, "Rejected movement keeps the unit in its encounter")
+	allies.surrender()
+	_check(not axis.in_close_combat, "Ending the encounter releases movement eligibility")
+	axis.movement._process(100.0)
+	_check(axis.current_hex == COMBAT_HEX, "Combat end cannot resume a canceled movement order")
+	axis.give_defend_area_order(destination, path)
+	axis.movement._process(100.0)
+	_check(axis.current_hex == destination, "A fresh movement order works after close combat ends")
+
+
+func _test_path_interception() -> void:
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		var holder: Unit = _create_unit(Globals.get_enemy_team(team), 2)
+		var mover: Unit = _create_unit(team, 2)
+		var start: Vector2i = COMBAT_HEX + Vector2i(-1, 0)
+		var destination: Vector2i = COMBAT_HEX + Vector2i(1, 0)
+		mover.current_hex = start
+		mover.current_cube = LOSHelper.ground_layer.map_to_cube(start)
+		mover.position = LOSHelper.ground_layer.map_to_local(start)
+		var arrivals: Array[Vector2i] = []
+		mover.unit_arrived_at_hex.connect(func(cell: Vector2i) -> void: arrivals.append(cell))
+		var path: Array[Vector3i] = [LOSHelper.ground_layer.map_to_cube(start), LOSHelper.ground_layer.map_to_cube(COMBAT_HEX), LOSHelper.ground_layer.map_to_cube(destination)]
+		mover.give_defend_area_order(destination, path)
+		var step_seconds: float = 100.0
+		if team == Globals.Team.ALLIES:
+			step_seconds = 0.75 * mover.position.distance_to(mover.movement.target_position) / (mover.movement.move_speed * mover.movement.terrain_mult)
+		mover.movement._process(step_seconds)
+		var entry_position: Vector2 = mover.position
+		var combat: CloseCombatInstance = _discover_combat()
+		_check(combat != null and mover.in_close_combat, "A moving squad enters combat at an intercepted waypoint")
+		_check(mover.current_hex == COMBAT_HEX and not mover.movement.is_moving and not mover.is_moving, "Combat entry interrupts the current movement step immediately")
+		_check(mover.movement.path_hexes.is_empty() and arrivals.is_empty(), "Intercepted movement discards subsequent waypoints without emitting destination arrival")
+		mover.movement._process(100.0)
+		_check(mover.position == entry_position, "Locked movement cannot recenter or continue after a partial hex-entry step")
+		for participant: CloseCombatInstance.Participant in combat.participants:
+			if participant.unit == mover:
+				_check(participant.side_role == CloseCombatInstance.SideRole.ATTACKER, "Movement locking preserves the entering squad's attacker role")
+		holder.surrender()
+		mover.movement._process(100.0)
+		_check(mover.current_hex == COMBAT_HEX and arrivals.is_empty(), "A canceled intercepted path stays canceled after resolution")
+		await _clear_fixtures()
+
+
+func _test_rout_lock() -> void:
+	var axis: Unit = _create_unit(Globals.Team.AXIS, 2)
+	var reserve: Unit = _create_unit(Globals.Team.AXIS, 2)
+	var allies: Unit = _create_unit(Globals.Team.ALLIES, 2)
+	var combat: CloseCombatInstance = _discover_combat()
+	axis.action_controller._start_rout()
+	_check(axis.surrendered and axis.current_hex == COMBAT_HEX and not axis.movement.is_moving, "Close combat cannot rout; the existing failed-rout rule resolves surrender")
+	_check(combat.ongoing and reserve.in_close_combat and allies.in_close_combat, "Failed rout does not release the remaining combat participants")
+
+
 func _test_movement_and_freeing() -> void:
 	var axis: Unit = _create_unit(Globals.Team.AXIS, 2)
 	var reserve: Unit = _create_unit(Globals.Team.AXIS, 2)
 	var allies: Unit = _create_unit(Globals.Team.ALLIES, 2)
 	var combat: CloseCombatInstance = _discover_combat()
 	axis.movement._update_current_hex(COMBAT_HEX + Vector2i(1, 0))
-	_check_removed(combat, axis, "Leaving the combat hex removes soldiers immediately")
-	_check(combat.ongoing and reserve.in_close_combat, "Remaining units continue after a withdrawal")
+	_check_removed(combat, axis, "Forced hex displacement removes soldiers immediately")
+	_check(combat.ongoing and reserve.in_close_combat, "Remaining units continue after forced displacement")
 	axis.movement._update_current_hex(COMBAT_HEX)
 	controller.set_close_combat_hexes_and_units()
 	_check(combat.units_by_team[axis.team].count(axis) == 1, "Returning unit joins exactly once")

@@ -47,7 +47,6 @@ static func set_close_combat_hexes_and_units(controller: Node2D) -> void:
 				if not close_combat_instance.can_unit_participate(_unit):
 					continue
 				close_combat_instance.add_unit(_unit)
-				_unit.movement.stop()
 			#var close_combat_sign: Sprite2D = close_combat_sign_scene.instantiate()
 			#close_combat_locations.add_child(close_combat_sign)
 			#if not Globals.close_combat_locations.has(unit.current_hex):
