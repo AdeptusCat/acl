@@ -288,10 +288,12 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 	for other: Unit in query.reservations:
 		if other != query.unit and is_instance_valid(other) and other.alive and query.reservations[other] == cell:
-			return true
+			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
+				return true
 	for other: Unit in query.snapshot.positions:
 		if other != query.unit and query.snapshot.teams[other] == query.team and query.snapshot.positions[other] == cell:
-			return true
+			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
+				return true
 	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
 		if contact.hex == cell:
 			return true

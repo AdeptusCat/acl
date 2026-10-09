@@ -153,7 +153,8 @@ func _free_destination(cell: Vector2i) -> bool:
 		return false
 	for unit: Unit in query.snapshot.positions:
 		if unit != reserve and query.snapshot.teams[unit] == query.team and query.snapshot.positions[unit] == cell:
-			return false
+			if not HqSupportPositionPolicy.can_share_position(reserve, unit):
+				return false
 	return true
 
 

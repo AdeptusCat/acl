@@ -141,6 +141,7 @@ func _run() -> void:
 	_test_sector_pressure_and_protected_reserve()
 	_test_flexible_defense()
 	await _test_headquarters_support()
+	_test_headquarters_stacking()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -991,6 +992,113 @@ func _test_headquarters_support() -> void:
 	stressed.free()
 	foreign.free()
 	remove_child(controller)
+	_publish()
+
+
+func _test_headquarters_stacking() -> void:
+	var saved_own: Vector2i = own.current_hex
+	var saved_other: Vector2i = other.current_hex
+	var saved_enemy: Vector2i = enemy.current_hex
+	var saved_role: Globals.SquadType = own.squad_type
+	own.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	own.current_hex = Vector2i(2, 3)
+	other.current_hex = Vector2i(4, 3)
+	enemy.current_hex = Vector2i(1, 3)
+	own.position = ground.map_to_local(own.current_hex)
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		own.team = team
+		other.team = team
+		enemy.team = Globals.get_enemy_team(team) as Globals.Team
+		_publish()
+		var snapshot: InfluenceSnapshot = controller.snapshot
+		var map: InfluenceMap = snapshot.maps[team]
+		map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER)
+		map.clear_layer(InfluenceMap.Layer.THREAT)
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, own.current_hex, 0.6)
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, other.current_hex, 0.6)
+		var contact: InfluenceContact = InfluenceContact.new()
+		contact.unit = enemy
+		contact.hex = enemy.current_hex
+		contact.observed = true
+		contact.confidence = 1.0
+		contact.firepower = 0.01
+		contact.effectiveness = 1.0
+		contact.weapon_range = 6
+		snapshot.contacts[team] = [contact]
+		snapshot.defensive_contacts[team] = [contact]
+		snapshot.los = snapshot.los.duplicate(true)
+		snapshot.los[contact.hex] = {own.current_hex: {"target_cover": 2.0, "hindrance": 0.0}}
+		var query: PositionQuery = PositionQuery.new()
+		query.unit = own
+		query.team = team
+		query.snapshot = snapshot
+		query.reservations[other as Unit] = other.current_hex
+		var result: PositionResult = PositionQueryService.query_positions(query)
+		_check(result.is_valid() and result.should_move and result.target_hex == other.current_hex, "Headquarters can escape an adjacent known enemy into the only covered friendly stack")
+		_check(result.eligibility[map.cell_to_index(other.current_hex)] == 1 and result.rejection_reasons[map.cell_to_index(own.current_hex)] == "hq_frontline", "Friendly occupancy and reservations cannot hide the safe support candidate")
+		if result.is_valid():
+			var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+			_check(executor.execute(result), "The existing movement executor accepts a headquarters route ending in a friendly squad hex")
+			executor.cancel_all(true)
+			query.has_accepted_target = true
+			query.accepted_target = result.target_hex
+			query.accepted_context = result.context
+			var retained: PositionResult = PositionQueryService.query_positions(query)
+			_check(retained.is_valid() and retained.target_hex == result.target_hex and retained.status == PositionResult.Status.RETAINED, "A squad reservation does not invalidate an accepted headquarters support stack")
+			query.has_accepted_target = false
+		var job: PositionQueryJob = PositionQueryJob.new()
+		job.query = query
+		while not job.completed:
+			job.advance(Time.get_ticks_usec() + 50)
+		_check(job.result.target_hex == result.target_hex and job.result.eligibility == result.eligibility, "Budgeted and synchronous advice agree on stacked support candidates")
+		own.current_hex = other.current_hex
+		own.position = ground.map_to_local(own.current_hex)
+		snapshot.positions[own as Unit] = own.current_hex
+		var held: PositionResult = PositionQueryService.query_positions(query)
+		_check(held.is_valid() and held.target_hex == own.current_hex and not held.should_move, "Headquarters can retain its current hex after stacking with a friendly squad")
+		own.in_close_combat = true
+		_check(not PositionQueryService.query_positions(query).is_valid(), "Stacking cannot release headquarters from the close-combat movement lock")
+		own.in_close_combat = false
+		own.current_hex = Vector2i(2, 3)
+		own.position = ground.map_to_local(own.current_hex)
+		snapshot.positions[own as Unit] = own.current_hex
+		contact.hex = other.current_hex
+		var blocked: PositionResult = PositionQueryService.query_positions(query)
+		_check(blocked.rejection_reasons[map.cell_to_index(other.current_hex)] == "capacity", "A friendly stack with a known enemy remains unavailable to headquarters")
+		contact.hex = enemy.current_hex
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, other.current_hex, 0.0)
+		blocked = PositionQueryService.query_positions(query)
+		_check(blocked.rejection_reasons[map.cell_to_index(other.current_hex)] == "cover", "Friendly stacking does not waive headquarters cover requirements")
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, other.current_hex, 0.6)
+		map.set_layer_value(InfluenceMap.Layer.THREAT, other.current_hex, 100.0)
+		blocked = PositionQueryService.query_positions(query)
+		_check(blocked.rejection_reasons[map.cell_to_index(other.current_hex)] == "risk", "Friendly stacking does not waive headquarters incoming-danger limits")
+		map.clear_layer(InfluenceMap.Layer.THREAT)
+		var squad_query: PositionQuery = PositionQuery.new()
+		squad_query.unit = other
+		squad_query.team = team
+		squad_query.snapshot = snapshot
+		squad_query.profile = PositionProfile.for_mode(PositionProfile.Mode.LEGACY_DEFENSE)
+		squad_query.geography = PositionQuery.Geography.SECTOR_ONLY
+		squad_query.sector_cells = [own.current_hex]
+		squad_query.objective_hex = own.current_hex
+		squad_query.reservations[own as Unit] = own.current_hex
+		var shared: PositionResult = PositionQueryService.query_positions(squad_query)
+		_check(shared.is_valid() and shared.target_hex == own.current_hex, "A squad can use cover occupied or reserved by its headquarters")
+		var readiness: DefenseReadinessJob = DefenseReadinessJob.new()
+		readiness.query = squad_query
+		readiness.reserve = other
+		_check(readiness._free_destination(own.current_hex), "Reserve response assessment treats headquarters-occupied cover as an available interception position")
+		_check(not HqSupportPositionPolicy.can_share_position(own, enemy), "Headquarters stacking permission cannot include an opposing unit")
+		own.current_hex = Vector2i(2, 3)
+	own.team = Globals.Team.AXIS
+	other.team = Globals.Team.AXIS
+	enemy.team = Globals.Team.ALLIES
+	own.current_hex = saved_own
+	own.position = ground.map_to_local(saved_own)
+	other.current_hex = saved_other
+	enemy.current_hex = saved_enemy
+	own.squad_type = saved_role
 	_publish()
 
 

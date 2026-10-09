@@ -82,14 +82,15 @@ func _run() -> void:
 						_check(unit.action_controller.action_order_id == manual_orders[unit] and not unit.movement.is_moving, "Player hold commands survive automatic reconsideration")
 				var targets: Array[String] = []
 				var diagnostics: Array[Dictionary] = []
-				var claimed: Array[Vector2i] = []
+				var claimed: Dictionary[Unit, Vector2i] = {}
 				for owned: Unit in planner.squad_assignments:
 					_check(Globals.get_units().has(owned) and owned.team == planner.team and planner.squads.has(owned), "Match orders remain inside active platoon ownership")
 					var advice: PositionResult = planner.squad_assignments[owned]["result"]
 					diagnostics.append({"unit": str(owned.name), "reason": advice.reason, "rejections": advice.rejections, "sector": advice.features.get("assigned_sector", -1)})
 					if advice.is_valid():
-						_check(not claimed.has(advice.target_hex), "Owned squads reserve distinct destinations")
-						claimed.append(advice.target_hex)
+						for previous: Unit in claimed:
+							_check(claimed[previous] != advice.target_hex or HqSupportPositionPolicy.can_share_position(owned, previous), "Shared destinations contain headquarters support rather than competing combat duties")
+						claimed[owned] = advice.target_hex
 						targets.append("%s:%s" % [owned.name, advice.target_hex])
 				samples.append({"frame": frame + 1, "team": planner.team, "targets": targets, "diagnostics": diagnostics})
 	for planner: PlatoonAI in planners:
@@ -224,6 +225,8 @@ func _complete_rebuild(controller: InfluenceMapController) -> void:
 func _test_support_fire(controller: InfluenceMapController) -> void:
 	var exercised: bool = false
 	for unit: Unit in Globals.get_units():
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			continue
 		for cell: Vector2i in controller.snapshot.los.get(unit.current_hex, {}):
 			if cell == unit.current_hex or InfluenceUnitQuery.get_firepower_at_range(unit, LOSHelper.get_hex_distance(unit.current_hex, cell)) <= 0.0:
 				continue

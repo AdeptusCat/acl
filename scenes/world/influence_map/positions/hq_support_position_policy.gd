@@ -6,6 +6,12 @@ static func is_headquarters(unit: Unit) -> bool:
 	return is_instance_valid(unit) and unit.squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]
 
 
+static func can_share_position(first: Unit, second: Unit) -> bool:
+	if not is_instance_valid(first) or not is_instance_valid(second) or first.team != second.team:
+		return false
+	return is_headquarters(first) or is_headquarters(second)
+
+
 static func configure(query: PositionQuery) -> void:
 	query.profile = PositionProfile.for_unit(query.profile, query.unit)
 	query.use_defense_area = false
