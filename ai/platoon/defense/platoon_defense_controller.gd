@@ -3,9 +3,9 @@ extends Node
 
 @export var reconsider_interval: float = 1.0
 @export var team: Globals.Team = Globals.Team.AXIS
-@export var squads: Array[Unit] = []
 @export var influence_map_controller: InfluenceMapController
 
+var squads: Array[Unit] = []
 var active: bool = true
 var current_order: MissionOrder = null
 var squad_assignments: Dictionary = {}
@@ -89,12 +89,20 @@ func receive_mission_order(order: MissionOrder) -> void:
 
 
 func set_squads(new_squads: Array[Unit]) -> void:
+	var owned: Array[Unit] = []
+	for squad: Unit in new_squads:
+		if InfluenceUnitQuery.is_valid_living_unit(squad) and squad.team == team and not owned.has(squad):
+			owned.append(squad)
 	_cancel_plan()
 	_set_defensive_control(false)
-	squads.clear()
-	for squad: Unit in new_squads:
-		if InfluenceUnitQuery.is_valid_living_unit(squad) and squad.team == team and not squads.has(squad):
-			squads.append(squad)
+	executor.cancel_all(true)
+	squad_assignments.clear()
+	reserved_hexes_by_squad.clear()
+	accepted_positions.clear()
+	defense_area = null
+	defense_gaps.clear()
+	time_until_reconsider = 0.0
+	squads = owned
 	_set_defensive_control(active and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
 
 
@@ -105,16 +113,8 @@ func _set_defensive_control(enabled: bool) -> void:
 
 
 func bind_active_squads(active_units: Array[Unit]) -> void:
-	# Inspector references identify owned slots, even when another map is selected.
-	var slots: Array[Vector3i] = []
-	for squad: Unit in squads:
-		if is_instance_valid(squad) and squad.team == team:
-			slots.append(Vector3i(squad.company, squad.platoon, squad.squad))
-	var owned: Array[Unit] = []
-	for unit: Unit in active_units:
-		if unit.team == team and slots.has(Vector3i(unit.company, unit.platoon, unit.squad)):
-			owned.append(unit)
-	set_squads(owned)
+	# Each match supplies its complete runtime roster; squad numbers do not gate ownership.
+	set_squads(active_units)
 
 
 func reconsider_assignments() -> void:

@@ -112,6 +112,7 @@ func _run() -> void:
 	_test_selection()
 	_test_geography()
 	_test_ownership_and_reservations()
+	_test_automatic_registration()
 	_test_legacy_score_parity()
 	_test_profiles()
 	_test_mirrored_teams()
@@ -339,7 +340,9 @@ func _test_ownership_and_reservations() -> void:
 	var map: InfluenceMap = controller.snapshot.maps[own.team]
 	_check(is_zero_approx(map.create_reserved_stamp([Vector2i.ZERO])[0]), "Legacy reservation stamp also enforces capacity")
 	platoon.bind_active_squads([own, other, enemy])
-	_check(platoon.squads == [own], "Active scenario binding preserves the configured ownership slots")
+	_check(platoon.squads == [own, other], "Active scenario binding includes every living squad on the planner's team")
+	# Explicit subset ownership remains available to low-level allocation callers.
+	platoon.set_squads([own])
 	platoon.influence_map_controller = controller
 	platoon.current_order = MissionOrder.new()
 	platoon.current_order.objective_hex = Vector2i(3, 3)
@@ -360,6 +363,56 @@ func _test_ownership_and_reservations() -> void:
 	platoon.executor.cancel_all()
 	own.movement.is_moving = false
 	platoon.free()
+
+
+func _test_automatic_registration() -> void:
+	var added: UnitProbe = _unit(own.team, Vector2i(3, 5))
+	added.company = Unit.Company.B
+	added.platoon = 4
+	added.squad = 17
+	added.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	var dormant: UnitProbe = _unit(own.team, Vector2i(4, 5))
+	var dead: UnitProbe = _unit(own.team, Vector2i(5, 5))
+	dead.alive = false
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.current_order = MissionOrder.new()
+	planner.set_squads([dormant])
+	planner.accepted_positions[dormant] = {"hex": dormant.current_hex, "context": "previous scenario"}
+	planner.reserved_hexes_by_squad[dormant] = dormant.current_hex
+	var active_units: Array[Unit] = [own, other, added, enemy, own, null, dead]
+	planner.bind_active_squads(active_units)
+	_check(planner.squads == [own, other, added], "Automatic registration includes extra squads and headquarters regardless of company, platoon or squad slot")
+	_check(not planner.squads.has(dormant) and not planner.squads.has(enemy) and not planner.squads.has(dead), "Binding excludes another scenario, the other team, dead units and duplicate references")
+	_check(planner.accepted_positions.is_empty() and planner.reserved_hexes_by_squad.is_empty() and not dormant.squad_ai_controller.defensive_mission_controlled, "Replacing a roster releases previous scenario reservations and defensive ownership")
+	_check(own.squad_ai_controller.defensive_mission_controlled and added.squad_ai_controller.defensive_mission_controlled, "Every newly registered enemy squad receives defensive movement ownership")
+	var query: PositionQuery = _defense_fixture()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
+	query.objective_hex = Vector2i(4, 3)
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.sector_cells = [query.objective_hex]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(planner.executor.execute(advice) and own.movement.is_moving, "The previous roster owns a movement before rebinding")
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "test")], "test", null)
+	planner.bind_active_squads([added, enemy])
+	_check(planner.squads == [added] and planner.squad_assignments.is_empty() and planner.executor.pending.is_empty() and not own.movement.is_moving, "Rebinding cancels obsolete squad orders and assignments before publishing the new roster")
+	_check(not own.squad_ai_controller.defensive_mission_controlled and not other.squad_ai_controller.defensive_mission_controlled, "Units removed from the active roster no longer belong to defensive planning")
+	var player_planner: PlatoonAI = PlatoonAI.new()
+	player_planner.team = enemy.team
+	player_planner.set_active(false)
+	enemy.give_hold_order()
+	var player_order: int = enemy.action_controller.action_order_id
+	player_planner.bind_active_squads(active_units)
+	player_planner.receive_mission_order(MissionOrder.new())
+	_check(player_planner.squads == [enemy] and player_planner.current_order == null and not enemy.squad_ai_controller.defensive_mission_controlled and enemy.action_controller.action_order_id == player_order, "Automatic player-team registration preserves manual orders and never enables an AI mission")
+	planner.bind_active_squads([])
+	_check(planner.squads.is_empty() and not added.squad_ai_controller.defensive_mission_controlled, "A scenario with no matching team units clears the previous roster")
+	planner.free()
+	player_planner.free()
+	added.free()
+	dormant.free()
+	dead.free()
+	_publish()
 
 
 func _test_profiles() -> void:

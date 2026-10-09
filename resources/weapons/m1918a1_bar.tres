@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="WeaponSpec" load_steps=4 format=3 uid="uid://bvg8b7n4h7vbj"]
+[gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://bvg8b7n4h7vbj"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_amuyw"]
 [ext_resource type="AudioStream" uid="uid://y76kx0cbr80n" path="res://assets/audio/fx/weapons/m1918a1_bar/m1918a1_bar.mp3" id="2_c7ut7"]

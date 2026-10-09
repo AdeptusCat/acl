@@ -24,14 +24,31 @@ func _run() -> void:
 	var player_team: Globals.Team = scenario.player_team
 	if OS.get_cmdline_user_args().has("--axis"):
 		player_team = Globals.Team.AXIS
+	var extra: Unit = null
+	if OS.get_cmdline_user_args().has("--extra-squad"):
+		extra = _add_scenario_squad(map, scenario, Globals.get_enemy_team(player_team))
+		_check(extra != null, "A new enemy squad can be authored without an AI roster reference")
+	var authored: Array[Unit] = []
+	for child: Node in scenario.get_units():
+		var unit: Unit = child as Unit
+		if unit != null:
+			authored.append(unit)
 	await world._on_game_started(map, scenario, player_team, Globals.GameMode.ATTACK)
 	var controller: InfluenceMapController = world.game_controller.influence_map_controller
 	var planners: Array[PlatoonAI] = [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]
 	var manual_orders: Dictionary[Unit, int] = {}
 	for planner: PlatoonAI in planners:
+		var expected: Array[Unit] = []
+		for unit: Unit in authored:
+			if unit.team == planner.team:
+				expected.append(unit)
+		_check(planner.squads.size() == expected.size(), "Startup automatically registers every selected-scenario unit for its team, including headquarters")
+		for unit: Unit in planner.squads:
+			_check(expected.has(unit) and unit.get_parent() == world.game_controller.unit_container, "Registration never imports units from another map or inactive scenario")
 		if planner.team == player_team:
 			_check(not planner.active and planner.current_order == null and planner.squad_assignments.is_empty(), "Player platoon receives no automatic mission at startup")
 			for unit: Unit in planner.squads:
+				_check(not unit.squad_ai_controller.defensive_mission_controlled, "Automatically registered player squads retain manual movement ownership")
 				unit.give_hold_order()
 				manual_orders[unit] = unit.action_controller.action_order_id
 			# Direct director updates and reconsideration must also respect player control.
@@ -68,6 +85,8 @@ func _run() -> void:
 	for planner: PlatoonAI in planners:
 		if planner.team != player_team:
 			_check(planner.active and not planner.squad_assignments.is_empty(), "Enemy continues to allocate positions during the match")
+			if extra != null:
+				_check(planner.squads.has(extra) and planner.squad_assignments.has(extra) and extra.squad_ai_controller.defensive_mission_controlled, "The newly authored enemy squad participates in real tactical planning without manual registration")
 	_check(controller.snapshot != null and controller.snapshot.maps.size() == 2, "Active match publishes both teams")
 	# Freeze execution while comparing policies over exactly the same match snapshot.
 	main.process_mode = Node.PROCESS_MODE_DISABLED
@@ -221,6 +240,37 @@ func _test_support_fire(controller: InfluenceMapController) -> void:
 		if exercised:
 			break
 	_check(exercised, "Authored match exercises real support-by-fire execution")
+
+
+func _add_scenario_squad(map: Map, scenario: Scenario, team: Globals.Team) -> Unit:
+	var ground: HexagonTileMapLayer = map.get_ground_layer()
+	var units: Array[Node] = scenario.get_units()
+	for child: Node in units:
+		var base: Unit = child as Unit
+		if base == null or base.team != team:
+			continue
+		var origin: Vector2i = ground.local_to_map(ground.to_local(base.global_position))
+		for cell: Vector2i in ground.get_surrounding_cells(origin):
+			if ground.get_cell_source_id(cell) < 0:
+				continue
+			var occupied: bool = false
+			for other_child: Node in units:
+				var other: Unit = other_child as Unit
+				if other != null and ground.local_to_map(ground.to_local(other.global_position)) == cell:
+					occupied = true
+			if occupied:
+				continue
+			var added: Unit = load("res://scenes/game/units/unit.tscn").instantiate() as Unit
+			added.team = team
+			added.company = Unit.Company.F
+			added.platoon = 7
+			added.squad = 31
+			if team == Globals.Team.ALLIES:
+				added.squad_loadout = load("res://resources/squads/united_states/rifle_squad.tres") as SquadLoadoutSpec
+			scenario.units.add_child(added)
+			added.global_position = ground.to_global(ground.map_to_local(cell))
+			return added
+	return null
 
 
 func _test_position_inspection(world: Node, player_team: Globals.Team) -> void:

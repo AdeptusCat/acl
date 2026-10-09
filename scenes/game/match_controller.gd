@@ -442,11 +442,7 @@ func start_game(team: Globals.Team, time: float) -> void:
 	
 	#defense_director.manual_threat_axes = create_test_axes()
 	influence_map_controller.reset_for_match()
-	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
-	for director: DefenseDirector in directors:
-		director.platoon_ai.set_active(director.platoon_ai.team == Globals.team_enemy)
-		director.configure_for_match(Globals.get_units())
-		director.assign_order_to_platoon()
+	_configure_platoon_ai()
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 	#match Globals.game_mode:
@@ -467,6 +463,20 @@ func start_game(team: Globals.Team, time: float) -> void:
 		#if controller.active:
 			#controller.active = allies_ai_active
 			#controller.mission_mode = ai_mission_mode
+
+
+func _configure_platoon_ai() -> void:
+	var active_units: Array[Unit] = []
+	# Only the selected scenario's units and runtime spawns are moved into this container.
+	for child: Node in unit_container.get_children():
+		var unit: Unit = child as Unit
+		if InfluenceUnitQuery.is_valid_living_unit(unit) and unit.is_in_group("units"):
+			active_units.append(unit)
+	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
+	for director: DefenseDirector in directors:
+		director.platoon_ai.set_active(director.platoon_ai.team == Globals.team_enemy)
+		director.configure_for_match(active_units)
+		director.assign_order_to_platoon()
 
 
 func create_test_axes() -> Array[ThreatAxis]:
