@@ -670,6 +670,9 @@ func _debug_report_layer_access(reason: String) -> void:
 					if advice.approach_sources.has(sector):
 						_layer_access_text += " | %s source=%s" % [advice.approach_evidence[sector], advice.approach_sources[sector]]
 					_layer_access_text += "\nOpen crossing=%.1fs | minimum open return to objective=%.1fs" % [advice.features.get("open_crossing_seconds", 0.0), advice.features.get("return_open_seconds", 0.0)]
+					_layer_access_text += "\nAdditional firing value=%.2f | connected cover=%s" % [advice.features.get("additional_interdiction", advice.features["interdiction"]), str(advice.features.get("objective_connected_cover", false))]
+					if advice.features.get("connected_cover_preferred", false):
+						_layer_access_text += " | detached gain below improvement margin"
 					if advice.features.get("responsibility") == "reserve":
 						_layer_access_text += " | readiness=%.2f" % advice.features["reserve_readiness"]
 		return

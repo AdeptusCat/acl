@@ -102,6 +102,7 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		if query.defense_area != null:
 			features.merge(query.defense_area.features(query, cell))
+			features["approach_duty"] = query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
 			# Capture protection is a duty; distance alone adds no firing value.
 			features["objective_coverage"] = float(cell == query.objective_hex or (objective_distance <= 1 and coverage > 0.0))
 		features.merge(DefensePositionPolicy.evaluate(query, cell))

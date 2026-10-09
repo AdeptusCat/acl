@@ -39,6 +39,7 @@ var assigned_sector: int = -1
 var reserve_position: bool = false
 var relocation_allowed: bool = true
 var sector_features: Dictionary[Unit, Dictionary] = {}
+var support_fire_by_sector: Dictionary[int, Dictionary] = {}
 
 
 func reset_evaluation() -> void:
@@ -49,6 +50,7 @@ func reset_evaluation() -> void:
 	firing_targets_prepared = false
 	firepower_by_unit.clear()
 	sector_features.clear()
+	support_fire_by_sector.clear()
 
 
 func defense_crossing_seconds() -> float:

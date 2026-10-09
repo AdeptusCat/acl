@@ -134,6 +134,7 @@ func _run() -> void:
 	_test_corridor_evidence()
 	_test_objective_connected_defense()
 	_test_local_interception()
+	_test_complementary_defense()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -1480,6 +1481,7 @@ func _test_objective_connected_defense() -> void:
 	query.assigned_sector = job.result.sector_at(Vector2i(8, 6))
 	query.sector_cells = [local, detached]
 	var approach: Dictionary = job.result.approach_for_sector(query.assigned_sector)
+	approach["arrival_seconds"] = INF
 	# Both woods positions fulfil the duty; the detached one has a somewhat wider firing lane.
 	var total: float = 0.0
 	for cell: Vector2i in approach["cells"]:
@@ -1507,8 +1509,20 @@ func _test_objective_connected_defense() -> void:
 	query.profile.area_blocking_weight = 0.0
 	query.profile.open_crossing_time_weight = 0.0
 	query.profile.objective_return_open_weight = 0.0
+	query.profile.connected_cover_improvement_absolute = 0.0
+	query.profile.connected_cover_improvement_relative = 0.0
 	var outward_only: PositionResult = PositionQueryService.query_positions(query)
 	_check(outward_only.is_valid() and outward_only.target_hex == detached and outward_only.features["open_crossing_seconds"] > 0.0, "An interdiction-only assessment reproduces the unnecessary crossing to a detached firing position")
+	query.profile.connected_cover_improvement_absolute = 0.75
+	query.profile.connected_cover_improvement_relative = 0.2
+	query.profile.interdiction_weight = 1.0
+	var marginal_excursion: PositionResult = PositionQueryService.query_positions(query)
+	_check(marginal_excursion.target_hex == local and marginal_excursion.features.get("connected_cover_preferred", false), "A small firing gain cannot send the defender across unknown open ground when useful connected woods exist")
+	_check(marginal_excursion.eligibility[map.cell_to_index(detached)] == 1, "Protected-cover preference preserves detached candidates for exceptional tactical gains")
+	query.profile.interdiction_weight = 12.0
+	var exceptional: PositionResult = PositionQueryService.query_positions(query)
+	_check(exceptional.target_hex == detached, "A substantial firing advantage can justify a detached position without a blanket exclusion")
+	query.profile.interdiction_weight = 6.0
 	query.profile.open_crossing_time_weight = 0.35
 	query.profile.objective_return_open_weight = 0.75
 	var sustainable: PositionResult = PositionQueryService.query_positions(query)
@@ -1590,6 +1604,90 @@ func _test_local_interception() -> void:
 	own.current_hex = original_hex
 	own.weapon_range = original_range
 	own.position = ground.map_to_local(original_hex)
+
+
+func _test_complementary_defense() -> void:
+	var query: PositionQuery = _defense_fixture()
+	var original_hex: Vector2i = own.current_hex
+	var original_role: Globals.SquadType = own.squad_type
+	var original_own_power: int = own.firepower
+	var original_power: int = other.firepower
+	var near: Vector2i = Vector2i(4, 3)
+	var edge: Vector2i = Vector2i(5, 3)
+	var common: Array[Vector2i] = [Vector2i(4, 2), Vector2i(4, 4)]
+	var first_crossing: Vector2i = Vector2i(6, 2)
+	var second_crossing: Vector2i = Vector2i(6, 4)
+	query.objective_hex = Vector2i(3, 3)
+	query.defense_radius = 4
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.sector_cells = [near, edge]
+	own.squad_type = Globals.SquadType.MG
+	own.firepower = 16
+	other.firepower = 16
+	own.current_hex = near
+	own.position = ground.map_to_local(near)
+	query.snapshot.positions[own as Unit] = near
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, float(cell.x >= 2 and cell.x <= 5 and cell.y >= 2 and cell.y <= 4))
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, 0.0)
+	query.snapshot.terrain_key = 9234
+	query.snapshot.defense_geometry_cache = {}
+	var axis: ThreatAxis = ThreatAxis.new()
+	axis.source_hex = Vector2i(8, 3)
+	axis.confidence = 1.0
+	var job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 8, 10, [axis])
+	job.advance(-1)
+	query.defense_area = job.result
+	query.assigned_sector = job.result.sector_at(axis.source_hex)
+	var approach: Dictionary = job.result.approach_for_sector(query.assigned_sector).duplicate()
+	approach["cells"] = [common[0], common[1], first_crossing, second_crossing]
+	approach["weights"] = {common[0]: 0.5, common[1]: 0.5, first_crossing: 4.0, second_crossing: 4.0}
+	approach["arrival_seconds"] = INF
+	query.defense_area.approaches = [approach]
+	query.defense_area.max_priority = approach["priority"]
+	query.snapshot.los = query.snapshot.los.duplicate(true)
+	query.snapshot.los[near] = {query.objective_hex: {"target_cover": 1.0, "hindrance": 0.0}}
+	query.snapshot.los[edge] = {}
+	query.snapshot.los[query.objective_hex] = {}
+	for target: Vector2i in common:
+		query.snapshot.los[near][target] = {"target_cover": 1.0, "hindrance": 0.0}
+		query.snapshot.los[edge][target] = {"target_cover": 1.0, "hindrance": 1.0}
+		query.snapshot.los[query.objective_hex][target] = {"target_cover": 1.0, "hindrance": 0.0}
+	query.snapshot.los[near][first_crossing] = {"target_cover": 0.0, "hindrance": 0.0}
+	query.snapshot.los[edge][second_crossing] = {"target_cover": 0.0, "hindrance": 1.0}
+	query.snapshot.los[query.objective_hex][first_crossing] = {"target_cover": 0.0, "hindrance": 0.0}
+	var alone: PositionResult = PositionQueryService.query_positions(query)
+	_check(alone.target_hex == near and not alone.should_move, "Useful woods beside the objective remain a stable approach position without a distance requirement")
+	query.reservations[other as Unit] = query.objective_hex
+	var complementary: PositionResult = PositionQueryService.query_positions(query)
+	var near_features: Dictionary = PositionFeatureEvaluator.evaluate(query, near, [])
+	var edge_features: Dictionary = PositionFeatureEvaluator.evaluate(query, edge, [])
+	_check(is_equal_approx(near_features["assigned_coverage"], edge_features["assigned_coverage"]), "Both woodland firing lanes satisfy the same final-approach responsibility")
+	_check(edge_features["additional_interdiction"] > near_features["additional_interdiction"], "Covering another open crossing contributes more than duplicating the guard's firing lane")
+	_check(complementary.target_hex == edge and complementary.features["objective_connected_cover"] and complementary.features["open_crossing_seconds"] == 0.0, "An approach squad uses the connected woodland edge to complement the guard without an open crossing")
+	query.has_accepted_target = true
+	query.accepted_target = edge
+	query.accepted_context = complementary.context
+	query.accepted_at = query.snapshot.captured_at
+	_check(PositionQueryService.query_positions(query).target_hex == edge, "The complementary firing position remains stable on repeated advice")
+	query.has_accepted_target = false
+	other.firepower = 0
+	var unarmed: PositionResult = PositionQueryService.query_positions(query)
+	_check(unarmed.target_hex == near and is_equal_approx(unarmed.features["additional_interdiction"], unarmed.features["interdiction"]), "An unarmed guard cannot claim firing coverage or displace the established defender")
+	other.firepower = original_power
+	other.in_close_combat = true
+	var engaged: PositionResult = PositionQueryService.query_positions(query)
+	_check(engaged.target_hex == near and is_equal_approx(engaged.features["additional_interdiction"], engaged.features["interdiction"]), "A guard occupied in close combat cannot supply supporting fire")
+	other.in_close_combat = false
+	query.reservations.clear()
+	query.snapshot.los[edge] = query.snapshot.los[near].duplicate(true)
+	var same_lane: PositionResult = PositionQueryService.query_positions(query)
+	_check(same_lane.target_hex == near and not same_lane.should_move, "Greater distance from the objective does not reward the same firing lane")
+	own.current_hex = original_hex
+	own.position = ground.map_to_local(original_hex)
+	own.squad_type = original_role
+	own.firepower = original_own_power
 
 
 func _test_defensive_memory() -> void:

@@ -36,6 +36,8 @@ enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
 @export var establishment_seconds: float = 3.0
 @export var open_crossing_time_weight: float = 0.35
 @export var objective_return_open_weight: float = 0.75
+@export var connected_cover_improvement_absolute: float = 0.75
+@export var connected_cover_improvement_relative: float = 0.2
 
 
 static func for_mode(p_mode: Mode) -> PositionProfile:
@@ -89,7 +91,10 @@ func score(features: Dictionary, unit: Unit) -> float:
 		position_weight = area_interposition_weight
 		capture_weight = area_objective_weight
 		coverage_weight = area_blocking_weight
-		area_bonus = features["interdiction"] * interdiction_weight
+		area_bonus = features.get("additional_interdiction", features["interdiction"]) * interdiction_weight
+		if features.get("approach_duty", false):
+			# The objective guard protects capture; this squad earns utility from its firing lane.
+			capture_weight = 0.0
 		if unit.squad_type == Globals.SquadType.MG:
 			area_bonus *= 1.7
 		elif unit.squad_type == Globals.SquadType.MORTAR:

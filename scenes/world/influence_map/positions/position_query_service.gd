@@ -78,6 +78,9 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
 	result.proposed_hex = best.hex
+	var protected_choice: PositionCandidate = _prefer_connected_cover(query, best, candidates)
+	var protected_preference: bool = protected_choice != best
+	best = protected_choice
 	var retained: PositionCandidate = null
 	var prior: Vector2i = query.unit.current_hex
 	if query.has_accepted_target and query.accepted_context == result.context:
@@ -107,6 +110,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	result.target_index = best.index
 	result.score = best.score
 	result.features = best.features
+	result.features["connected_cover_preferred"] = protected_preference and best == protected_choice
 	result.path = best.path
 	if best.features.get("withdrawal", false):
 		result.decision = PositionResult.Decision.WITHDRAW
@@ -133,7 +137,28 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = "Mission-constrained withdrawal preserves approach coverage"
 		if result.target_hex == query.unit.current_hex:
 			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
+	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
+		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
 	return
+
+
+static func _prefer_connected_cover(query: PositionQuery, best: PositionCandidate, candidates: Array[PositionCandidate]) -> PositionCandidate:
+	if query.profile.mode != PositionProfile.Mode.DEFEND or query.defense_area == null or best.features.get("objective_connected_cover", false):
+		return best
+	var starts_connected: bool = query.defense_area.geometry["return_open_costs"].get(query.origin_hex, INF) <= 0.000001
+	for candidate: PositionCandidate in candidates:
+		if not candidate.features.get("objective_connected_cover", false):
+			continue
+		# An established defense must not make a longer excursion to obtain connected cover.
+		# A squad starting outside that cover can still deploy into the objective's woods.
+		if starts_connected and candidate.features.get("open_crossing_seconds", 0.0) > best.features.get("open_crossing_seconds", 0.0) + 0.000001:
+			continue
+		var margin: float = maxf(query.profile.connected_cover_improvement_absolute, absf(candidate.score) * query.profile.connected_cover_improvement_relative)
+		if best.score <= candidate.score + margin:
+			return candidate
+		# Candidates are sorted by utility; weaker connected positions cannot justify this preference.
+		return best
+	return best
 
 
 static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, diagnostics: PositionResult) -> bool:

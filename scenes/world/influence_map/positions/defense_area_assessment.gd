@@ -38,6 +38,7 @@ func coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictio
 	var visible: float = 0.0
 	var local_visible: float = 0.0
 	var fire: float = 0.0
+	var target_fire: Dictionary[Vector2i, float] = {}
 	var records: Dictionary = query.snapshot.los.get(cell, {})
 	var interception: Dictionary = _interception_zone(query.defense_radius, approach)
 	for target: Vector2i in approach["cells"]:
@@ -55,9 +56,12 @@ func coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictio
 		var record: Dictionary = records.get(target, {})
 		var ability: float = LosInfluenceProjector.calculate_los_fire_threat(power,
 			InfluenceUnitQuery.get_unit_effectiveness(unit), record.get("target_cover", 0.0), record.get("hindrance", 0.0), distance)
-		fire += weight * PositionFeatureEvaluator.risk(ability)
+		var utility: float = PositionFeatureEvaluator.risk(ability)
+		target_fire[target] = utility
+		fire += weight * utility
 	var result: Dictionary = {"coverage": local_visible / maxf(interception["total"], 0.001),
-		"corridor_coverage": visible / maxf(total, 0.001), "fire": fire / maxf(total, 0.001)}
+		"corridor_coverage": visible / maxf(total, 0.001), "fire": fire / maxf(total, 0.001),
+		"target_fire": target_fire, "total_weight": total}
 	query.sector_features[unit][key] = result
 	return result
 
@@ -76,10 +80,28 @@ func _interception_zone(radius: int, approach: Dictionary) -> Dictionary:
 	return _interception_zones[key]
 
 
+func _support_fire(query: PositionQuery, approach: Dictionary) -> Dictionary:
+	var sector: int = approach["id"]
+	if not query.support_fire_by_sector.has(sector):
+		var support: Dictionary[Vector2i, float] = {}
+		# Reservations coordinate future firing positions; established screen checks remain separate.
+		for friendly: Unit in query.reservations:
+			if friendly == query.unit or not query.snapshot.positions.has(friendly) or query.snapshot.teams[friendly] != query.team or not InfluenceUnitQuery.is_valid_living_unit(friendly):
+				continue
+			if not PositionQueryService.can_follow_intent(friendly) or friendly.broken or InfluenceUnitQuery.get_unit_effectiveness(friendly) < query.profile.withdrawal_effectiveness:
+				continue
+			var data: Dictionary = coverage(query, friendly, query.reservations[friendly], approach)
+			for target: Vector2i in data["target_fire"]:
+				support[target] = maxf(support.get(target, 0.0), data["target_fire"][target])
+		query.support_fire_by_sector[sector] = support
+	return query.support_fire_by_sector[sector]
+
+
 func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var assigned: float = 0.0
 	var assigned_corridor: float = 0.0
 	var interdiction: float = 0.0
+	var additional_interdiction: float = 0.0
 	var readiness: float = 0.0
 	var total_priority: float = 0.0
 	var coverage_by_sector: Dictionary = {}
@@ -91,15 +113,17 @@ func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		coverage_by_sector[approach["id"]] = data["coverage"]
 		var priority: float = approach["priority"]
 		total_priority += priority
-		var marginal: float = 1.0
-		for friendly: Unit in query.reservations:
-			if friendly == query.unit or not query.snapshot.positions.has(friendly) or not InfluenceUnitQuery.is_valid_living_unit(friendly) or query.snapshot.teams[friendly] != query.team:
-				continue
-			marginal = minf(marginal, 1.0 - 0.6 * coverage(query, friendly, query.reservations[friendly], approach)["coverage"])
+		var support: Dictionary = _support_fire(query, approach)
+		var additional_fire: float = 0.0
+		for target: Vector2i in data["target_fire"]:
+			# Overlapping fire remains useful, but covering an uncovered crossing adds more.
+			additional_fire += approach["weights"][target] * data["target_fire"][target] * (1.0 - 0.6 * support.get(target, 0.0))
+		additional_fire /= maxf(data["total_weight"], 0.001)
 		var mission_weight: float = 0.35
 		if query.assigned_sector == approach["id"] or query.assigned_sector < 0:
 			mission_weight = 1.0
-		interdiction += priority * data["fire"] * marginal * mission_weight
+		interdiction += priority * data["fire"] * mission_weight
+		additional_interdiction += priority * additional_fire * mission_weight
 		if query.assigned_sector == approach["id"]:
 			assigned = data["coverage"]
 			assigned_corridor = data["corridor_coverage"]
@@ -111,6 +135,7 @@ func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	return {"assigned_sector": query.assigned_sector, "assigned_coverage": assigned,
 		"assigned_corridor_coverage": assigned_corridor,
 		"sector_coverage": coverage_by_sector, "interdiction": interdiction / maxf(total_priority, 0.001), "arrival_seconds": arrival_seconds,
+		"additional_interdiction": additional_interdiction / maxf(total_priority, 0.001),
 		"reserve_readiness": 0.5 * readiness / maxf(total_priority, 0.001) + 0.5 / (1.0 + worst_response / 8.0), "cover_edge": edge_positions.has(cell),
 		"objective_return_seconds": geometry["objective_distances"].get(cell, INF) * crossing_seconds,
 		"return_open_seconds": geometry["return_open_costs"].get(cell, INF) * crossing_seconds,
