@@ -95,7 +95,11 @@ static func branch_priorities(area: DefenseAreaAssessment) -> Array[Dictionary]:
 	return ordered
 
 
-static func assign_branches(area: DefenseAreaAssessment, units: Array[Unit], previous: Dictionary) -> Dictionary[Unit, String]:
+static func combat_reserve_capable(unit: Unit) -> bool:
+	return InfluenceUnitQuery.is_valid_living_unit(unit) and PositionQueryService.can_follow_intent(unit) and unit.squad_type not in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS, Globals.SquadType.MORTAR] and not unit.broken and not unit.surrendered and InfluenceUnitQuery.get_unit_effectiveness(unit) >= 0.45 and InfluenceUnitQuery.get_unit_firepower(unit) > 0.0
+
+
+static func assign_branches(area: DefenseAreaAssessment, units: Array[Unit], previous: Dictionary, coverage: Dictionary[String, float] = {}) -> Dictionary[Unit, String]:
 	var result: Dictionary[Unit, String] = {}
 	var unassigned: Array[Unit] = units.duplicate()
 	var counts: Dictionary[String, int] = {}
@@ -111,6 +115,8 @@ static func assign_branches(area: DefenseAreaAssessment, units: Array[Unit], pre
 		for branch: Dictionary in ordered:
 			var key: String = DefenseAreaAssessment.duty_key(branch)
 			var marginal: float = area.duty_priority(branch) / pow(3.0, counts.get(key, 0))
+			if coverage.get(key, 0.0) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE:
+				marginal *= 0.05
 			var continuity: float = 1.0
 			for unit: Unit in unassigned:
 				if previous.get(unit, {}).get("branch", "") == key:

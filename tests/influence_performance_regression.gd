@@ -36,6 +36,12 @@ func _run() -> void:
 				controller._process_budgeted_rebuild()
 		if OS.get_cmdline_user_args().has("--spread-contacts"):
 			_spread_contacts(controller.snapshot)
+		if policy == InfluenceMapController.KnowledgePolicy.OBSERVED_AND_MEMORY and OS.get_cmdline_user_args().has("--hidden-pressure"):
+			# Stress mature coarse estimates without admitting exact hidden locations to contacts.
+			var estimates: Dictionary[int, Dictionary] = {}
+			for sector: int in range(6):
+				estimates[sector] = {"pressure": 0.75, "arrival_seconds": 20.0}
+			controller.snapshot.sector_pressure[Globals.get_enemy_team(Globals.team_player)] = estimates
 		for unit: Unit in Globals.get_units():
 			var query: PositionQuery = PositionQuery.new()
 			query.unit = unit
@@ -83,7 +89,9 @@ func _run() -> void:
 			controller._process_position_queries()
 			plan_max_slice = maxi(plan_max_slice, controller.last_position_slice_usec)
 			var phase: String = "start"
-			if planner._area_job != null:
+			if planner._readiness_job != null:
+				phase = "reserve_readiness:%d:%d" % [planner._readiness_job.phase, planner._readiness_job.branch_index]
+			elif planner._area_job != null:
 				phase = "allocation"
 			elif planner._validation_job != null:
 				phase = "validation:%d:%d" % [planner._validation_job.index, planner._validation_job.branch_index]

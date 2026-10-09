@@ -6,6 +6,7 @@ var captured_at: float = 0.0
 var maps: Dictionary[int, InfluenceMap] = {}
 var contacts: Dictionary[int, Array] = {}
 var defensive_contacts: Dictionary[int, Array] = {}
+var sector_pressure: Dictionary[int, Dictionary] = {}
 var positions: Dictionary[Unit, Vector2i] = {}
 var teams: Dictionary[Unit, int] = {}
 var routes: Dictionary[int, AStar2D] = {}

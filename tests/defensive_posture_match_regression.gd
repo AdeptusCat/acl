@@ -37,8 +37,24 @@ func _run() -> void:
 		unit.combat_stats_timer.stop()
 		unit.movement.base_speed = 90.0
 		unit.movement.move_speed = 90.0
-	for frame: int in range(600):
+	var initial_plan_frames: int = 0
+	for frame: int in range(1800):
 		await get_tree().process_frame
+		initial_plan_frames += 1
+		if frame >= 599 and not planner.squad_assignments.is_empty():
+			break
+	_check(not planner.squad_assignments.is_empty(), "The initial complete defensive batch publishes before posture observation")
+	var combat_squads: int = 0
+	for unit: Unit in planner.squads:
+		if DefenseSectorAllocator.combat_reserve_capable(unit):
+			combat_squads += 1
+	if combat_squads >= 3:
+		_check(DefenseSectorAllocator.combat_reserve_capable(planner.reserve_squad), "The authored platoon retains a combat-capable designated reserve")
+		var mobile_mount: WeaponSpec.Mount = WeaponSpec.Mount.TRIPOD
+		for unit: Unit in planner.squads:
+			if DefenseSectorAllocator.combat_reserve_capable(unit) and planner.squad_assignments.get(unit, {}).get("role") != "guard_objective":
+				mobile_mount = mini(mobile_mount, InfluenceUnitQuery.get_defensive_mount(unit)) as WeaponSpec.Mount
+		_check(InfluenceUnitQuery.get_defensive_mount(planner.reserve_squad) == mobile_mount, "The authored reserve uses the least stationary available equipment, including mixed rifle and bipod loadouts")
 	var tripod_anchor: Unit = null
 	var tripod_count: int = 0
 	for unit: Unit in planner.squads:
@@ -132,7 +148,7 @@ func _run() -> void:
 			await get_tree().process_frame
 			if frame % 60 == 59:
 				_check(_objective_guarded(planner), "Healthy defenders continue protecting the objective against an advancing adjacent player")
-	print("Defensive posture trace: ", JSON.stringify({"map": str(map.name), "player_team": player_team, "player_hex": str(target), "advance_hex": str(advance), "objective": str(planner.current_order.objective_hex), "valid_positions": valid_positions, "no_candidates": no_candidates, "changes": _named_changes(changes), "samples": samples}))
+	print("Defensive posture trace: ", JSON.stringify({"map": str(map.name), "player_team": player_team, "initial_plan_frames": initial_plan_frames, "player_hex": str(target), "advance_hex": str(advance), "objective": str(planner.current_order.objective_hex), "valid_positions": valid_positions, "no_candidates": no_candidates, "changes": _named_changes(changes), "samples": samples}))
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

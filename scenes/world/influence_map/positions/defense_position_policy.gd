@@ -170,7 +170,7 @@ static func _preserves_branch_screen(query: PositionQuery, cell: Vector2i) -> bo
 		assigned = query.defense_area.approach_for_sector(query.assigned_sector)
 	for branch: Dictionary in query.defense_area.duties():
 		var priority: float = query.defense_area.duty_priority(branch)
-		if branch["evidence"] == "inferred" or priority < highest * 0.4:
+		if branch["evidence"] in ["inferred", "estimated"] or priority < highest * 0.4:
 			continue
 		# A dominant new axis can release a less urgent old front, as in sector planning.
 		if not assigned.is_empty() and assigned["id"] != branch["id"] and query.defense_area.duty_priority(assigned) > priority * 1.4:

@@ -38,6 +38,9 @@ var area_job: DefenseAreaJob
 var assigned_sector: int = -1
 var assigned_branch: String = ""
 var reserve_position: bool = false
+var reserve_responses: Dictionary[String, Dictionary] = {}
+var reserve_reason: String = ""
+var reserve_response_context: String = ""
 var relocation_allowed: bool = true
 var sector_features: Dictionary[Unit, Dictionary] = {}
 var support_fire_by_branch: Dictionary[String, Dictionary] = {}
@@ -76,4 +79,7 @@ func context_key() -> String:
 	var withdrawing: bool = false
 	if profile.mode == PositionProfile.Mode.DEFEND and is_instance_valid(unit):
 		withdrawing = withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(unit) < profile.withdrawal_effectiveness
-	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount])
+	var response_capability: String = ""
+	if reserve_position and not reserve_responses.is_empty():
+		response_capability = DefenseReadinessJob.capability_key(unit)
+	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount, response_capability])

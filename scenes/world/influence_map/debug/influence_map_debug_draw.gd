@@ -681,8 +681,11 @@ func _debug_report_layer_access(reason: String) -> void:
 			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
 			_layer_access_text += "\nGreen = available | amber = useful, waiting for covering fire | hover a hex for its reason"
 			_layer_access_text += "\nWaiting positions: %d" % waiting_count
+			var reserve_reason: String = advice.features.get("reserve_reason", "")
+			if reserve_reason != "":
+				_layer_access_text += "\nReserve policy: " + reserve_reason.replace("_", " ")
 			if not advice.approach_cells.is_empty() or not advice.remembered_approach_cells.is_empty() or not advice.inferred_approach_cells.is_empty():
-				_layer_access_text += "\nCorridors: orange = observed/mission | amber dashes = last seen | gray dashes = inferred"
+				_layer_access_text += "\nCorridors: orange = observed/mission | amber dashes = last seen | gray dashes = terrain/sector estimate"
 			if advice.is_valid():
 				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
 				if advice.features.has("assigned_sector"):
@@ -699,6 +702,16 @@ func _debug_report_layer_access(reason: String) -> void:
 						_layer_access_text += " | detached gain below improvement margin"
 					if advice.features.get("responsibility") == "reserve":
 						_layer_access_text += " | readiness=%.2f" % advice.features["reserve_readiness"]
+						for key: String in advice.features.get("reserve_branch_status", {}):
+							var protection: Dictionary = advice.features["reserve_branch_status"][key]
+							var protection_text: String = "unprotected"
+							if protection["covered"]:
+								protection_text = "established cover"
+							elif protection["protected"]:
+								protection_text = "reserve can intercept"
+							_layer_access_text += "\nBranch %s: %s" % [key, protection_text]
+							if not protection["covered"]:
+								_layer_access_text += " | response %.1fs / arrival %.1fs" % [protection["response_seconds"], protection["arrival_seconds"]]
 		return
 	var layer_id: int = _debug_view_to_layer_id(debug_view)
 

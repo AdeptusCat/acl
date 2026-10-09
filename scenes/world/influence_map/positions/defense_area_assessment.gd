@@ -243,11 +243,40 @@ func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		if priority >= highest * 0.4:
 			worst_response = maxf(worst_response, response)
 		readiness += priority / (1.0 + response / 8.0)
+	var reserve_data: Dictionary = _reserve_features(query, cell)
 	return {"assigned_sector": query.assigned_sector, "assigned_branch": query.assigned_branch, "assigned_coverage": assigned,
 		"assigned_corridor_coverage": assigned_corridor,
 		"sector_coverage": coverage_by_sector, "branch_coverage": coverage_by_branch, "interdiction": interdiction / maxf(total_priority, 0.001), "arrival_seconds": arrival_seconds,
 		"additional_interdiction": additional_interdiction / maxf(total_priority, 0.001),
-		"reserve_readiness": 0.5 * readiness / maxf(total_priority, 0.001) + 0.5 / (1.0 + worst_response / 8.0), "cover_edge": edge_positions.has(cell),
+		"reserve_readiness": reserve_data.get("readiness", 0.5 * readiness / maxf(total_priority, 0.001) + 0.5 / (1.0 + worst_response / 8.0)),
+		"reserve_branch_status": reserve_data.get("branches", {}), "reserve_reason": query.reserve_reason, "cover_edge": edge_positions.has(cell),
 		"objective_return_seconds": geometry["objective_distances"].get(cell, INF) * crossing_seconds,
 		"return_open_seconds": geometry["return_open_costs"].get(cell, INF) * crossing_seconds,
 		"objective_connected_cover": geometry["return_open_costs"].get(cell, INF) <= 0.000001}
+
+
+func _reserve_features(query: PositionQuery, cell: Vector2i, mobilization_seconds: float = 0.0) -> Dictionary:
+	if not query.reserve_position or query.reserve_responses.is_empty():
+		return {}
+	var total: float = 0.0
+	var readiness: float = 0.0
+	var worst: float = 1.0
+	var branches: Dictionary[String, Dictionary] = {}
+	for key: String in query.reserve_responses:
+		var data: Dictionary = query.reserve_responses[key]
+		var response: float = data["seconds"].get(cell, INF) + mobilization_seconds
+		var arrival: float = data["arrival_seconds"]
+		var timely: bool = response <= arrival
+		var protected: bool = data["covered"] or timely
+		branches[key] = {"covered": data["covered"], "response_seconds": response, "arrival_seconds": arrival, "protected": protected}
+		if data["covered"]:
+			continue
+		var utility: float = 1.0 / (1.0 + response / 8.0)
+		if not timely:
+			utility *= 0.25
+		total += data["weight"]
+		readiness += data["weight"] * utility
+		worst = minf(worst, utility)
+	if total <= 0.0:
+		return {"readiness": 1.0, "branches": branches}
+	return {"readiness": 0.5 * readiness / total + 0.5 * worst, "branches": branches}

@@ -100,7 +100,7 @@ func advance(deadline_usec: int) -> void:
 					visible.merge(area.coverage(queries[0], unit, positions[unit], branch)["visible_targets"])
 				unit_index += 1
 			else:
-				if area.duty_priority(branch) >= highest_priority * 0.4 and area.coverage_of_targets(queries[0].defense_radius, visible, branch) < DefensePositionPolicy.MIN_APPROACH_COVERAGE:
+				if area.duty_priority(branch) >= highest_priority * 0.4 and area.coverage_of_targets(queries[0].defense_radius, visible, branch) < DefensePositionPolicy.MIN_APPROACH_COVERAGE and not _reserve_can_intercept(DefenseAreaAssessment.duty_key(branch)):
 					branch_gaps.append(DefenseAreaAssessment.duty_key(branch))
 				visible = {}
 				unit_index = 0
@@ -124,6 +124,15 @@ func unchanged() -> bool:
 		if not is_instance_valid(unit) or states[unit] != _state(unit):
 			return false
 	return true
+
+
+func _reserve_can_intercept(key: String) -> bool:
+	for result_index: int in range(results.size()):
+		if queries[result_index].reserve_position and results[result_index].is_valid() and DefenseSectorAllocator.combat_reserve_capable(queries[result_index].unit):
+			var status: Dictionary = results[result_index].features.get("reserve_branch_status", {}).get(key, {})
+			if not status.is_empty() and status["response_seconds"] <= status["arrival_seconds"]:
+				return true
+	return false
 
 
 static func _state(unit: Unit) -> Array:

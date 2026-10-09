@@ -33,6 +33,9 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
 		result.reason = "Unit is not fit for an assault"
 		return false
+	if query.reserve_response_context != "" and query.reserve_response_context != DefenseReadinessJob.capability_key(query.unit):
+		result.reason = "Reserve capability changed; response assessment needs rebuilding"
+		return false
 	result.cell_states.fill(PositionResult.CellState.UNEVALUATED)
 	result.rejection_reasons.fill("")
 	query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
@@ -48,6 +51,7 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	if query.defense_area != null:
 		result.features["assigned_sector"] = query.assigned_sector
 		result.features["assigned_branch"] = query.assigned_branch
+		result.features["reserve_reason"] = query.reserve_reason
 		var cells: Dictionary = {}
 		var remembered: Dictionary = {}
 		var inferred: Dictionary = {}
@@ -68,7 +72,7 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 			var destination: Dictionary = cells
 			if approach["evidence"] == "remembered":
 				destination = remembered
-			elif approach["evidence"] == "inferred":
+			elif approach["evidence"] in ["inferred", "estimated"]:
 				destination = inferred
 			for cell: Vector2i in approach["cells"]:
 				destination[cell] = true

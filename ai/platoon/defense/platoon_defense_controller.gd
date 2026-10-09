@@ -26,10 +26,34 @@ var _planning_available: Array[Unit] = []
 var _relocation_claimed: bool = false
 var _planning_snapshot: InfluenceSnapshot
 var _validation_job: DefensePlanValidationJob
+var _readiness_job: DefenseReadinessJob
+var _planning_readiness: DefenseReadinessJob
+var reserve_squad: Unit
+var reserve_deployed: bool = false
+var reserve_reason: String = ""
+var _reserve_quiet_since: float = -INF
+
+const RESERVE_RECOVERY_SECONDS: float = 8.0
 
 
 func _process(delta: float) -> void:
 	if not active or current_order == null:
+		return
+	if _readiness_job != null:
+		if _readiness_job.area.objective_hex != current_order.objective_hex:
+			_cancel_plan()
+			time_until_reconsider = 0.0
+			return
+		_readiness_job.advance(Time.get_ticks_usec() + InfluenceMapController.POSITION_QUERY_BUDGET_USEC)
+		if _readiness_job.completed:
+			_planning_readiness = _readiness_job
+			_readiness_job = null
+			_area_job = null
+			_build_planning_requests(_planning_available)
+			if not _planning_requests.is_empty():
+				_submit_planning_query()
+			else:
+				_commit_plan()
 		return
 	if _area_job != null:
 		if _area_job.objective != current_order.objective_hex:
@@ -38,12 +62,7 @@ func _process(delta: float) -> void:
 			return
 		if _area_job.completed:
 			defense_area = _area_job.result
-			_area_job = null
-			_build_planning_requests(_planning_available)
-			if not _planning_requests.is_empty():
-				_submit_planning_query()
-			else:
-				_commit_plan()
+			_prepare_readiness(true)
 		return
 	if _validation_job != null:
 		_validation_job.advance(Time.get_ticks_usec() + InfluenceMapController.POSITION_QUERY_BUDGET_USEC)
@@ -76,6 +95,7 @@ func set_active(is_active: bool) -> void:
 		_set_defensive_control(current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
 		return
 	_set_defensive_control(false)
+	_clear_reserve()
 	# Release only actions owned by this planner when handing control to the player.
 	executor.cancel_all(true)
 	current_order = null
@@ -92,6 +112,7 @@ func receive_mission_order(order: MissionOrder) -> void:
 	if not active:
 		return
 	_cancel_plan()
+	_clear_reserve()
 	executor.cancel_all(true)
 	accepted_positions.clear()
 	current_order = order
@@ -106,6 +127,7 @@ func set_squads(new_squads: Array[Unit]) -> void:
 		if InfluenceUnitQuery.is_valid_living_unit(squad) and squad.team == team and not owned.has(squad):
 			owned.append(squad)
 	_cancel_plan()
+	_clear_reserve()
 	_set_defensive_control(false)
 	executor.cancel_all(true)
 	squad_assignments.clear()
@@ -156,7 +178,9 @@ func _start_plan(budgeted: bool) -> void:
 			return
 		_area_job.advance(-1)
 		defense_area = _area_job.result
-		_area_job = null
+		_prepare_readiness(budgeted)
+		if budgeted:
+			return
 	_build_planning_requests(available)
 	if budgeted and not _planning_requests.is_empty():
 		_submit_planning_query()
@@ -166,6 +190,43 @@ func _start_plan(budgeted: bool) -> void:
 		query.relocation_allowed = _can_relocate(query.unit)
 		_accept_planning_result(request, PositionQueryService.query_positions(query))
 	_commit_plan()
+
+
+func _prepare_readiness(budgeted: bool) -> void:
+	var available: Array[Unit] = _planning_available.duplicate()
+	var reserve: Unit = null
+	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+		available.erase(_select_guard_squad(available))
+	if _can_keep_reserve(_planning_available):
+		reserve = _select_reserve_squad(available)
+	_readiness_job = DefenseReadinessJob.new()
+	_readiness_job.start(defense_area, _planning_snapshot, team, _planning_available, reserve, current_order.defense_radius)
+	_readiness_job.query.profile.max_exposure_seconds = current_order.exposure_budget_seconds
+	_readiness_job.query.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
+	if not budgeted:
+		_readiness_job.advance(-1)
+		_planning_readiness = _readiness_job
+		_readiness_job = null
+		_area_job = null
+
+
+func _can_keep_reserve(available: Array[Unit]) -> bool:
+	if current_order.reserve_policy == MissionOrder.ReservePolicy.NONE:
+		return false
+	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
+		return available.size() >= 3
+	var combat_count: int = 0
+	for unit: Unit in available:
+		if DefenseSectorAllocator.combat_reserve_capable(unit):
+			combat_count += 1
+	return combat_count >= 3
+
+
+func _clear_reserve() -> void:
+	reserve_squad = null
+	reserve_deployed = false
+	reserve_reason = ""
+	_reserve_quiet_since = -INF
 
 
 func _build_planning_requests(available: Array[Unit]) -> void:
@@ -186,12 +247,13 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 		_add_planning_requests(guard_config, [guard], "guard_objective", null)
 	if can_reserve:
 		var reserve: Unit = _select_reserve_squad(available)
-		available.erase(reserve)
-		var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
-		reserve_config.defense_radius = 2
-		reserve_config.profile.firing_weight = 0.0
-		reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
-		_add_planning_requests(reserve_config, [reserve], "reserve", null)
+		if reserve != null:
+			available.erase(reserve)
+			var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			reserve_config.defense_radius = 2
+			reserve_config.profile.firing_weight = 0.0
+			reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
+			_add_planning_requests(reserve_config, [reserve], "reserve", null)
 	var axes: Array[ThreatAxis] = _get_sorted_threat_axes()
 	if axes.is_empty():
 		var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
@@ -223,7 +285,7 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 		return
 	var reserve: Unit = null
 	var has_guard: bool = false
-	var can_reserve: bool = available.size() >= 3 and current_order.reserve_policy != MissionOrder.ReservePolicy.NONE
+	var can_reserve: bool = _can_keep_reserve(available)
 	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
 		var guard: Unit = _select_guard_squad(available)
 		available.erase(guard)
@@ -231,15 +293,29 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 		has_guard = true
 	if can_reserve:
 		reserve = _select_reserve_squad(available)
-		available.erase(reserve)
-	# Deploy the mobile reserve when its absence would leave a significant sector unassigned.
-	if reserve != null and DefenseSectorAllocator.critical_count(defense_area) > available.size() and current_order.reserve_policy != MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
-		available.append(reserve)
-		reserve = null
+		if reserve != null:
+			reserve_squad = reserve
+			available.erase(reserve)
+			_update_reserve_state()
+			if reserve_deployed:
+				available.append(reserve)
+				reserve = null
+		else:
+			_clear_reserve()
+	else:
+		_clear_reserve()
 	var previous: Dictionary = {}
 	for unit: Unit in squad_assignments:
 		previous[unit] = {"sector": squad_assignments[unit]["result"].features.get("assigned_sector", -1), "branch": squad_assignments[unit]["result"].features.get("assigned_branch", "")}
-	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(defense_area, available, previous)
+	var coverage: Dictionary[String, float] = {}
+	if _planning_readiness != null:
+		coverage = _planning_readiness.coverage.duplicate()
+		if reserve != null:
+			for key: String in _planning_readiness.responses:
+				var response: Dictionary = _planning_readiness.responses[key]
+				if response["seconds"].get(reserve.current_hex, INF) <= response["arrival_seconds"]:
+					coverage[key] = maxf(coverage.get(key, 0.0), DefensePositionPolicy.MIN_APPROACH_COVERAGE)
+	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(defense_area, available, previous, coverage)
 	for approach: Dictionary in DefenseSectorAllocator.branch_priorities(defense_area):
 		for unit: Unit in available:
 			if assignments.get(unit, "") == DefenseAreaAssessment.duty_key(approach):
@@ -252,6 +328,30 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 			_add_sector_request(unit, "defend_objective", -1, current_order.defense_responsibility)
 	if reserve != null:
 		_add_sector_request(reserve, "reserve", -1, PositionQuery.Responsibility.AUTO)
+
+
+func _update_reserve_state() -> void:
+	var emergency: String = ""
+	if _planning_readiness != null:
+		emergency = _planning_readiness.emergency
+	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
+		reserve_deployed = false
+		reserve_reason = "explicit_hq_reserve"
+		return
+	if emergency != "":
+		reserve_deployed = true
+		reserve_reason = emergency
+		_reserve_quiet_since = -INF
+	elif reserve_deployed:
+		if not is_finite(_reserve_quiet_since):
+			_reserve_quiet_since = _planning_snapshot.captured_at
+		if _planning_snapshot.captured_at - _reserve_quiet_since >= RESERVE_RECOVERY_SECONDS:
+			reserve_deployed = false
+			reserve_reason = "recovering_reserve"
+		else:
+			reserve_reason = "emergency_settling"
+	else:
+		reserve_reason = "protected_reserve"
 
 
 func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: PositionQuery.Responsibility, branch: String = "") -> void:
@@ -268,6 +368,10 @@ func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: 
 	query.assigned_sector = sector
 	query.assigned_branch = branch
 	query.reserve_position = role == "reserve"
+	query.reserve_reason = reserve_reason
+	if query.reserve_position and _planning_readiness != null and _planning_readiness.reserve == unit:
+		query.reserve_responses = _planning_readiness.responses
+		query.reserve_response_context = _planning_readiness.reserve_capability
 	query.relocation_allowed = _can_relocate(unit)
 	if query.reserve_position:
 		query.profile.firing_weight = 0.0
@@ -368,6 +472,10 @@ func _commit_plan() -> void:
 		var highest: float = defense_area.max_duty_priority()
 		for approach: Dictionary in defense_area.duties():
 			var covered: bool = defense_area.coverage_of_positions(query, positions, approach) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
+			for result: DefensePositionResult in _planning_results:
+				if result.is_valid() and result.features.get("responsibility") == "reserve" and DefenseSectorAllocator.combat_reserve_capable(result.unit):
+					var status: Dictionary = result.features.get("reserve_branch_status", {}).get(DefenseAreaAssessment.duty_key(approach), {})
+					covered = covered or (not status.is_empty() and status["response_seconds"] <= status["arrival_seconds"])
 			if not covered and defense_area.duty_priority(approach) >= highest * 0.4:
 				defense_branch_gaps.append(DefenseAreaAssessment.duty_key(approach))
 				if not defense_gaps.has(approach["id"]):
@@ -379,6 +487,7 @@ func _commit_plan() -> void:
 	_planning_index = 0
 	_planning_snapshot = null
 	_validation_job = null
+	_planning_readiness = null
 
 
 func _defense_plan_outdated() -> bool:
@@ -395,6 +504,8 @@ func _defense_plan_outdated() -> bool:
 
 
 func _cancel_plan() -> void:
+	_readiness_job = null
+	_planning_readiness = null
 	_validation_job = null
 	if influence_map_controller != null and _planning_job != null:
 		influence_map_controller.cancel_position_query(_planning_job)
@@ -423,13 +534,15 @@ func _select_reserve_squad(available: Array[Unit]) -> Unit:
 		for unit: Unit in available:
 			if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 				return unit
-	var reserve: Unit = available[-1]
+	if InfluenceUnitQuery.is_valid_living_unit(reserve_squad) and available.has(reserve_squad) and DefenseSectorAllocator.combat_reserve_capable(reserve_squad):
+		return reserve_squad
+	var reserve: Unit = null
 	for unit: Unit in available:
-		var effectiveness: float = InfluenceUnitQuery.get_unit_effectiveness(unit)
-		var reserve_effectiveness: float = InfluenceUnitQuery.get_unit_effectiveness(reserve)
-		if effectiveness < reserve_effectiveness:
+		if not DefenseSectorAllocator.combat_reserve_capable(unit):
+			continue
+		if reserve == null or InfluenceUnitQuery.get_defensive_mount(unit) < InfluenceUnitQuery.get_defensive_mount(reserve):
 			reserve = unit
-		elif is_equal_approx(effectiveness, reserve_effectiveness) and InfluenceUnitQuery.get_defensive_mount(unit) < InfluenceUnitQuery.get_defensive_mount(reserve):
+		elif InfluenceUnitQuery.get_defensive_mount(unit) == InfluenceUnitQuery.get_defensive_mount(reserve) and InfluenceUnitQuery.get_unit_effectiveness(unit) > InfluenceUnitQuery.get_unit_effectiveness(reserve):
 			reserve = unit
 	return reserve
 

@@ -3,6 +3,7 @@ extends RefCounted
 
 # Scalar terrain travel cost. This predicts approaches, independently of defender danger.
 var distances: Dictionary[Vector2i, float] = {}
+var next_cells: Dictionary[Vector2i, Vector2i] = {}
 var completed: bool = false
 var geometry: Dictionary
 var reverse: bool = false
@@ -16,6 +17,7 @@ func start(area_geometry: Dictionary, source: Vector2i, reversed: bool = false) 
 
 func start_sources(area_geometry: Dictionary, sources: Array[Vector2i], reversed: bool = false, costs: String = "costs") -> void:
 	distances.clear()
+	next_cells.clear()
 	_heap.clear()
 	completed = false
 	geometry = area_geometry
@@ -42,6 +44,7 @@ func advance(deadline_usec: int) -> void:
 			var next_cost: float = cost + geometry[cost_key][destination]
 			if next_cost < distances.get(neighbor, INF):
 				distances[neighbor] = next_cost
+				next_cells[neighbor] = cell
 				_push({"cell": neighbor, "cost": next_cost})
 	completed = _heap.is_empty()
 

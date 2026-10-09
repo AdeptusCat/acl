@@ -54,6 +54,11 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds, "open_crossing_seconds": open_crossing_seconds})
 	if query.defense_area != null:
 		features["deadline_slack_seconds"] = features.get("arrival_seconds", INF) - route_seconds - query.profile.establishment_seconds
+		if query.reserve_position and path.size() > 1:
+			var response: Dictionary = query.defense_area._reserve_features(query, cell, route_seconds + query.profile.establishment_seconds)
+			if not response.is_empty():
+				features["reserve_readiness"] = response["readiness"]
+				features["reserve_branch_status"] = response["branches"]
 	return features
 
 

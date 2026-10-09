@@ -99,6 +99,8 @@ func advance(deadline_usec: int) -> void:
 					corridor["weights"] = {}
 					corridor["distances"] = field.distances
 					corridor["arrival_seconds"] = field.distances.get(objective, INF) * corridor["crossing_seconds"]
+					if corridor.has("estimated_arrival_seconds"):
+						corridor["arrival_seconds"] = corridor["estimated_arrival_seconds"]
 					cursor = 0
 					phase = Phase.CORRIDOR
 			Phase.CORRIDOR:
@@ -241,6 +243,11 @@ func _prepare_sources() -> void:
 	for sector: int in geometry["boundary"]:
 		if not grouped.has(sector) and geometry["objective_distances"].has(geometry["boundary"][sector]):
 			grouped[sector] = [{"id": sector, "key": str(sector) + ":terrain", "source": geometry["boundary"][sector], "priority": 0.08, "confirmed": false, "evidence": "inferred", "crossing_seconds": 2.0}]
+			var estimate: Dictionary = snapshot.sector_pressure.get(team, {}).get(sector, {})
+			if not estimate.is_empty():
+				grouped[sector][0]["priority"] = maxf(0.08, estimate["pressure"])
+				grouped[sector][0]["evidence"] = "estimated"
+				grouped[sector][0]["estimated_arrival_seconds"] = estimate["arrival_seconds"]
 	var sectors: Array = grouped.keys()
 	sectors.sort()
 	for sector: int in sectors:
@@ -305,7 +312,7 @@ func _add_corridor_cell(cell: Vector2i) -> void:
 func _limit_inferred_priorities() -> void:
 	var known_priority: float = 0.0
 	for approach: Dictionary in result.approaches:
-		if approach["evidence"] != "inferred":
+		if approach["evidence"] not in ["inferred", "estimated"]:
 			for branch: Dictionary in approach["branches"]:
 				known_priority = maxf(known_priority, branch["priority"])
 	result.max_priority = 0.0
@@ -313,6 +320,9 @@ func _limit_inferred_priorities() -> void:
 		# Aging known pressure does not promote an arbitrary boundary guess above it.
 		if known_priority > 0.0 and approach["evidence"] == "inferred":
 			approach["priority"] = minf(approach["priority"], known_priority * 0.2)
+		var estimate: Dictionary = snapshot.sector_pressure.get(team, {}).get(approach["id"], {})
+		if not estimate.is_empty() and approach["evidence"] not in ["inferred", "estimated"]:
+			approach["priority"] += estimate["pressure"]
 		result.max_priority = maxf(result.max_priority, approach["priority"])
 		var total: float = 0.0
 		for branch: Dictionary in approach["branches"]:

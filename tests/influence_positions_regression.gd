@@ -138,6 +138,7 @@ func _run() -> void:
 	_test_complementary_defense()
 	_test_loadout_stationary_roles()
 	_test_branch_defense()
+	_test_sector_pressure_and_protected_reserve()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -556,7 +557,7 @@ func _test_loadout_stationary_roles() -> void:
 		area.approaches.append({"id": 3, "priority": 1.0, "response_distances": response})
 		planner._planning_requests.clear()
 		planner._build_sector_requests([rifle, tripod, spare])
-		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, rifle) == "defend_sector" and _planned_role(planner, spare) == "defend_sector", "A second significant front deploys the mobile reserve without moving the MG anchor into that role")
+		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, rifle) == "reserve" and _planned_role(planner, spare) == "defend_sector", "A second significant front preserves a protected mobile reserve and the MG anchor")
 		area.approaches[1]["priority"] = 1.4
 		var assignments: Dictionary[Unit, int] = DefenseSectorAllocator.assign(area, [spare], {spare: {"sector": 0}})
 		_check(assignments[spare as Unit] == 0, "An established spare tripod team retains its firing sector through a moderate priority fluctuation")
@@ -846,7 +847,7 @@ func _test_reserve_policy() -> void:
 	var other_role: Globals.SquadType = other.squad_type
 	other.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
 	var available: Array[Unit] = [own, other]
-	_check(platoon._select_reserve_squad(available) == own, "Reserve selection retains the least-effective-squad policy")
+	_check(platoon._select_reserve_squad(available) == null, "An ineffective squad or headquarters cannot substitute for a combat-capable mobile reserve")
 	platoon.current_order.reserve_policy = MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE
 	_check(platoon._select_reserve_squad(available) == other, "Explicit HQ reserve policy keeps the headquarters near the objective")
 	own.combat_stats.combat_effectiveness = own_effectiveness
@@ -1374,8 +1375,10 @@ func _test_budgeted_position_queries() -> void:
 
 
 func _finish_area_plan(platoon: PlatoonAI) -> void:
-	if platoon._area_job != null:
+	while platoon._area_job != null:
 		platoon._area_job.advance(-1)
+		if platoon._readiness_job != null:
+			platoon._readiness_job.advance(-1)
 		platoon._process(0.0)
 
 
@@ -1568,7 +1571,7 @@ func _test_defense_area() -> void:
 		var planned: PositionQuery = request["query"]
 		if planned.assigned_sector >= 0:
 			tasked.append(planned.assigned_sector)
-	_check(guard_count == 1 and reserve_count == 0 and tasked.has(west_sector) and tasked.has(east_sector), "Two significant fronts mobilize the reserve while retaining an objective guard")
+	_check(guard_count == 1 and reserve_count == 1 and tasked.size() == 1, "Two significant fronts retain a protected mobile reserve rather than consuming it on branch count alone")
 	planner._planning_requests.clear()
 	planner.defense_area = shifted.result
 	planner._build_sector_requests([own, other, third])
@@ -2196,3 +2199,219 @@ func _test_branch_defense() -> void:
 	other.current_hex = other_hex
 	other.firepower = other_power
 	_publish()
+
+
+func _test_sector_pressure_and_protected_reserve() -> void:
+	var fixture: PositionQuery = _defense_fixture()
+	var snapshot: InfluenceSnapshot = fixture.snapshot
+	var pressure: DefensiveSectorPressure = DefensiveSectorPressure.new()
+	var objective: Vector2i = Vector2i(4, 3)
+	snapshot.objectives[own.team] = objective
+	snapshot.contacts[own.team] = []
+	snapshot.positions[enemy as Unit] = Vector2i(8, 3)
+	var old_sector: int = DefenseAreaAssessment.sector_for(objective, Vector2i(8, 3))
+	var new_sector: int = DefenseAreaAssessment.sector_for(objective, Vector2i(0, 3))
+	var threat_before: PackedFloat32Array = snapshot.maps[own.team].get_layer_data_copy(InfluenceMap.Layer.THREAT)
+	snapshot.captured_at = 100.0
+	pressure.capture_into(snapshot, own.team)
+	_check(snapshot.sector_pressure[own.team].is_empty(), "Hidden pressure is delayed rather than exposing current locations at startup")
+	snapshot.positions[enemy as Unit] = Vector2i(0, 3)
+	snapshot.captured_at = 103.0
+	pressure.capture_into(snapshot, own.team)
+	_check(snapshot.sector_pressure[own.team].is_empty(), "Hidden movement cannot update estimates before the four-second sample boundary")
+	snapshot.captured_at = 104.0
+	pressure.capture_into(snapshot, own.team)
+	var prior_estimate: Dictionary = snapshot.sector_pressure[own.team]
+	_check(prior_estimate.has(old_sector) and not prior_estimate.has(new_sector) and is_equal_approx(prior_estimate[old_sector]["pressure"], 0.125), "Published pressure uses the previous sample and smooths a quarter-weight hidden squad")
+	snapshot.captured_at = 108.0
+	pressure.capture_into(snapshot, own.team)
+	_check(snapshot.sector_pressure[own.team].has(new_sector) and snapshot.sector_pressure[own.team][old_sector]["pressure"] < prior_estimate[old_sector]["pressure"] and prior_estimate.size() == 1, "A hidden flank shift appears gradually without mutating previously published estimates")
+	_check(snapshot.maps[own.team].get_layer_data_copy(InfluenceMap.Layer.THREAT) == threat_before and snapshot.get_contacts(own.team).is_empty(), "Coarse hidden pressure never writes actual threat or creates firing contacts")
+	var estimated_area: DefenseAreaJob = DefenseAreaJob.new()
+	estimated_area.start(snapshot, own.team, objective, 5, 8, [])
+	estimated_area.advance(-1)
+	_check(estimated_area.result.approach_for_sector(new_sector)["evidence"] == "estimated" and estimated_area.result.approach_for_sector(new_sector)["source"] != snapshot.positions[enemy as Unit], "Hidden pressure creates an explicitly estimated terrain branch instead of a corridor anchored on the hidden hex")
+	var observed: InfluenceContact = _area_contact(Vector2i(0, 3), 108.0)
+	snapshot.contacts[own.team] = [observed]
+	snapshot.captured_at = 112.0
+	pressure.capture_into(snapshot, own.team)
+	snapshot.captured_at = 116.0
+	pressure.capture_into(snapshot, own.team)
+	_check(snapshot.sector_pressure[own.team][new_sector]["pressure"] < 0.25, "Observed attackers stop contributing fresh hidden pressure instead of being counted twice")
+	snapshot.objectives[own.team] = Vector2i(3, 3)
+	pressure.capture_into(snapshot, own.team)
+	_check(snapshot.sector_pressure[own.team].is_empty(), "Changing the objective resets delayed sector geography")
+	pressure.clear()
+	_check(pressure.published.is_empty() and not is_finite(pressure.sampled_at), "Resetting a match clears hidden estimates and pending samples")
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		_test_four_squad_reserve(team)
+	_publish()
+
+
+func _test_four_squad_reserve(team: Globals.Team) -> void:
+	var rifle_weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	var tripod_weapon: WeaponSpec = load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec
+	var bipod_weapon: WeaponSpec = load("res://resources/weapons/mg34.tres") as WeaponSpec
+	var anchor: UnitProbe = _unit(team, Vector2i(4, 3))
+	var gun: UnitProbe = _unit(team, Vector2i(5, 3))
+	var infantry: UnitProbe = _unit(team, Vector2i(5, 4))
+	var reserve: UnitProbe = _unit(team, Vector2i(4, 4))
+	anchor.squad_type = Globals.SquadType.MG
+	gun.squad_type = Globals.SquadType.MG
+	infantry.squad_type = Globals.SquadType.Rifle
+	reserve.squad_type = Globals.SquadType.Rifle
+	_equip(anchor, [tripod_weapon])
+	_equip(gun, [bipod_weapon])
+	_equip(infantry, [rifle_weapon])
+	_equip(reserve, [rifle_weapon])
+	var defenders: Array[Unit] = [anchor, gun, infantry, reserve]
+	_publish()
+	var snapshot: InfluenceSnapshot = controller.snapshot
+	snapshot.contacts[team] = []
+	snapshot.defensive_contacts[team] = []
+	for cell: Vector2i in snapshot.maps[team].playable_cells:
+		snapshot.maps[team].set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+		snapshot.maps[team].set_layer_value(InfluenceMap.Layer.THREAT, cell, 0.0)
+	var area_job: DefenseAreaJob = DefenseAreaJob.new()
+	area_job.start(snapshot, team, anchor.current_hex, 5, 8, [])
+	area_job.advance(-1)
+	var area: DefenseAreaAssessment = area_job.result
+	var main_target: Vector2i = Vector2i(6, 3)
+	var flank_target: Vector2i = Vector2i(0, 3)
+	var record: Dictionary = {"target_cover": 0.0, "hindrance": 0.0}
+	snapshot.los = snapshot.los.duplicate(true)
+	for cell: Vector2i in snapshot.maps[team].playable_cells:
+		snapshot.los[cell] = {}
+		if cell.x <= 3:
+			snapshot.los[cell][flank_target] = record
+		else:
+			snapshot.los[cell][main_target] = record
+	var main: Dictionary = {"id": 0, "key": "main", "priority": 4.0, "source": Vector2i(8, 3), "evidence": "observed", "cells": [main_target], "weights": {main_target: 1.0}, "arrival_seconds": 20.0, "response_distances": area.geometry["response_fields"][0]}
+	var flank: Dictionary = {"id": 3, "key": "flank", "priority": 0.3, "source": Vector2i(0, 3), "evidence": "estimated", "cells": [flank_target], "weights": {flank_target: 1.0}, "arrival_seconds": 20.0, "response_distances": area.geometry["response_fields"][3]}
+	area.approaches = [main, flank]
+	area.max_priority = 4.0
+	var readiness: DefenseReadinessJob = DefenseReadinessJob.new()
+	readiness.start(area, snapshot, team, defenders, reserve, 5)
+	readiness.advance(Time.get_ticks_usec() - 1)
+	_check(not readiness.completed, "Reserve response work respects an exhausted frame budget")
+	var slices: int = 0
+	while not readiness.completed and slices < 10000:
+		readiness.advance(Time.get_ticks_usec() + 100)
+		slices += 1
+	_check(readiness.completed and slices > 1 and readiness.coverage["main"] == 1.0 and readiness.coverage["flank"] == 0.0 and readiness.emergency == "", "Established MG coverage satisfies the attacked branch without releasing the rifle reserve")
+	var query: PositionQuery = readiness.query
+	query.reserve_position = true
+	query.reserve_responses = readiness.responses
+	var reserve_features: Dictionary = area.features(query, reserve.current_hex)
+	_check(reserve_features["reserve_branch_status"]["main"]["protected"] and reserve_features["reserve_branch_status"]["flank"]["protected"] and reserve_features["reserve_branch_status"]["flank"]["response_seconds"] < 20.0, "A quiet low-priority flank is protected by timely response to covered interception ground")
+	readiness.responses["flank"]["arrival_seconds"] = 0.5
+	_check(not area.features(query, reserve.current_hex)["reserve_branch_status"]["flank"]["protected"], "A response arriving after the attacker cannot count as protection of an unattended branch")
+	readiness.responses["flank"]["arrival_seconds"] = 20.0
+	var graph: AStar2D = snapshot.routes[team]
+	var disabled: Dictionary[int, bool] = {}
+	for neighbor: Vector2i in LOSHelper.get_hex_neighbors(reserve.current_hex):
+		var id: int = snapshot.point_ids[team][neighbor]
+		disabled[id] = graph.is_point_disabled(id)
+		graph.set_point_disabled(id, true)
+	var blocked: DefenseReadinessJob = DefenseReadinessJob.new()
+	blocked.start(area, snapshot, team, defenders, reserve, 5)
+	blocked.advance(-1)
+	_check(not is_finite(blocked.responses["flank"]["seconds"][reserve.current_hex]), "A blocked response route cannot protect an unattended approach")
+	for id: int in disabled:
+		graph.set_point_disabled(id, disabled[id])
+	for neighbor: Vector2i in LOSHelper.get_hex_neighbors(reserve.current_hex):
+		snapshot.maps[team].set_layer_value(InfluenceMap.Layer.THREAT, neighbor, 100.0)
+	var dangerous: DefenseReadinessJob = DefenseReadinessJob.new()
+	dangerous.start(area, snapshot, team, defenders, reserve, 5)
+	dangerous.advance(-1)
+	_check(not is_finite(dangerous.responses["flank"]["seconds"][reserve.current_hex]), "An exposed response exceeding the mission budget cannot count as ready protection")
+	for neighbor: Vector2i in LOSHelper.get_hex_neighbors(reserve.current_hex):
+		snapshot.maps[team].set_layer_value(InfluenceMap.Layer.THREAT, neighbor, 0.0)
+	main["arrival_seconds"] = 8.0
+	readiness.coverage["main"] = 0.0
+	anchor.combat_stats.combat_effectiveness = 0.3
+	_check(readiness._emergency_reason() == "failing_defense", "A weakened established defense with an imminent uncovered observed approach releases the reserve")
+	anchor.combat_stats.combat_effectiveness = 1.0
+	readiness.coverage["main"] = 1.0
+	main["arrival_seconds"] = 20.0
+	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(area, [infantry], {}, {"main": 1.0})
+	_check(assignments[infantry as Unit] == "flank", "An already protected strong branch offers less reinforcement value than an unattended weaker branch")
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = team
+	planner.influence_map_controller = controller
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = area.objective_hex
+	planner.defense_area = area
+	planner.reserve_squad = reserve
+	planner._planning_snapshot = snapshot
+	planner._planning_readiness = readiness
+	planner._build_sector_requests(defenders.duplicate())
+	_check(_planned_role(planner, anchor) == "guard_objective" and _planned_role(planner, reserve) == "reserve" and _planned_role(planner, gun) == "defend_sector" and _planned_role(planner, infantry) == "defend_sector", "Two MGs and two rifles retain an MG anchor, a rifle reserve and two approach defenders for either team")
+	var reserve_query: PositionQuery = null
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == reserve:
+			reserve_query = request["query"]
+	_check(reserve_query != null and reserve_query.reserve_responses == readiness.responses and not planner.reserve_deployed, "Protected reserve advice carries response coverage instead of turning branch count into deployment")
+	reserve_query.geography = PositionQuery.Geography.SECTOR_ONLY
+	reserve_query.sector_cells = [reserve.current_hex]
+	var hold: PositionResult = PositionQueryService.query_positions(reserve_query)
+	_check(hold.is_valid() and not hold.should_move and hold.features["responsibility"] == "reserve", "Extra response estimates permit a useful covered reserve to hold without forcing a flank move")
+	var reserve_job: PositionQueryJob = PositionQueryJob.new()
+	reserve_job.query = reserve_query
+	while not reserve_job.completed:
+		reserve_job.advance(Time.get_ticks_usec() + 100)
+	_check(reserve_job.result.target_hex == hold.target_hex and reserve_job.result.path == hold.path and reserve_job.result.features["reserve_branch_status"] == hold.features["reserve_branch_status"] and reserve_job.result.cell_states == hold.cell_states, "Budgeted reserve advice preserves response deadlines and diagnostic parity")
+	reserve_query.route_field = null
+	var intercept: Vector2i = Vector2i(3, 4)
+	var intercept_response: float = readiness.responses["flank"]["seconds"][intercept]
+	readiness.responses["flank"]["arrival_seconds"] = intercept_response + 0.1
+	reserve_query.destination_features.clear()
+	var settled: Dictionary = PositionFeatureEvaluator.evaluate(reserve_query, intercept, [])
+	var mobilizing: Dictionary = PositionFeatureEvaluator.evaluate(reserve_query, intercept, [reserve.current_hex, intercept])
+	_check(settled["reserve_branch_status"]["flank"]["protected"] and not mobilizing["reserve_branch_status"]["flank"]["protected"], "Reserve relocation and establishment time count against the interception deadline")
+	readiness.responses["flank"]["arrival_seconds"] = 20.0
+	reserve_query.destination_features.clear()
+	var validation: DefensePlanValidationJob = DefensePlanValidationJob.new()
+	validation.queries = [reserve_query]
+	validation.results = [DefensePositionAnalyzer.adapt_result(hold, null, "reserve")]
+	_check(not validation._reserve_can_intercept("main") and validation._reserve_can_intercept("flank"), "Publication does not treat a stale established-coverage flag as timely reserve response")
+	var capability: String = reserve_query.context_key()
+	reserve.squad_fire.soldiers[0].jammed = true
+	_check(reserve_query.context_key() != capability and not PositionQueryService.query_positions(reserve_query).is_valid() and not validation._reserve_can_intercept("flank"), "Losing usable reserve weapons invalidates old response advice and branch protection")
+	reserve.squad_fire.soldiers[0].jammed = false
+	var speed: float = reserve.movement.move_speed
+	reserve.movement.move_speed *= 0.5
+	_check(reserve_query.context_key() != capability and not PositionQueryService.query_positions(reserve_query).is_valid(), "Slower reserve mobility invalidates previously computed interception times")
+	reserve.movement.move_speed = speed
+	var contact: InfluenceContact = _area_contact(area.objective_hex + Vector2i(1, 0), snapshot.captured_at)
+	snapshot.contacts[team] = [contact]
+	_check(readiness._emergency_reason() == "imminent_breach", "A confirmed attacker adjacent to the objective releases the reserve for an imminent breach")
+	readiness.emergency = readiness._emergency_reason()
+	planner._planning_requests.clear()
+	planner._build_sector_requests(defenders.duplicate())
+	_check(planner.reserve_deployed and planner.reserve_reason == "imminent_breach" and _planned_role(planner, reserve) == "defend_sector" and _planned_role(planner, anchor) == "guard_objective", "Emergency deployment retains the designated reserve identity and the stationary MG anchor")
+	snapshot.contacts[team] = []
+	readiness.emergency = ""
+	snapshot.captured_at = 200.0
+	planner._planning_requests.clear()
+	planner._build_sector_requests(defenders.duplicate())
+	_check(planner.reserve_deployed, "A brief lull cannot immediately rotate a deployed reserve back out of its duty")
+	snapshot.captured_at = 209.0
+	planner._planning_requests.clear()
+	planner._build_sector_requests(defenders.duplicate())
+	_check(not planner.reserve_deployed and _planned_role(planner, reserve) == "reserve" and planner.reserve_squad == reserve, "After sustained recovery the same squad resumes reserve duty through normal safe position advice")
+	reserve.in_close_combat = true
+	_check(not DefenseSectorAllocator.combat_reserve_capable(reserve), "A squad locked in close combat cannot count as an available mobile reserve")
+	reserve.in_close_combat = false
+	planner._readiness_job = DefenseReadinessJob.new()
+	planner._readiness_job.start(area, snapshot, team, defenders, reserve, 5)
+	planner.current_order.objective_hex += Vector2i(1, 0)
+	planner._process(0.0)
+	_check(planner._readiness_job == null and planner._planning_readiness == null, "An objective change cancels unfinished reserve response geography")
+	planner.set_active(false)
+	_check(planner.reserve_squad == null and not planner.reserve_deployed and planner._planning_readiness == null, "Player handoff releases protected reserve state and pending response work")
+	planner.free()
+	for unit: Unit in defenders:
+		unit.squad_fire.free()
+		unit.squad_fire = null
+		unit.free()

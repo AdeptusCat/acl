@@ -12,9 +12,11 @@ enum TacticalTask { NONE, DEFEND_OBJECTIVE, ATTACK_OBJECTIVE }
 enum KnowledgePolicy { OBSERVED_AND_MEMORY, OMNISCIENT }
 
 @export var knowledge_policy: KnowledgePolicy = KnowledgePolicy.OBSERVED_AND_MEMORY
+@export var hidden_sector_pressure_enabled: bool = true
 var maps_by_team: Dictionary[int, InfluenceMap] = {}
 var snapshot: InfluenceSnapshot = null
 var defensive_memory: DefensiveContactMemory = DefensiveContactMemory.new()
+var sector_pressure: DefensiveSectorPressure = DefensiveSectorPressure.new()
 var pending_snapshot: InfluenceSnapshot = null
 var objectives_by_team: Dictionary[int, Vector2i] = {}
 # Compatibility for legacy debug/test-axis callers. Team mission contexts are authoritative.
@@ -54,6 +56,7 @@ func reset_for_match() -> void:
 	inspection_jobs.clear()
 	inspection_results.clear()
 	defensive_memory.clear()
+	sector_pressure.clear()
 	los_rebuild_jobs.clear()
 	pending_snapshot = null
 	snapshot = null
@@ -83,6 +86,12 @@ func create_maps(_delta: float) -> void:
 	pending_snapshot.defense_geometry_cache = defense_geometry_cache
 	if knowledge_policy == KnowledgePolicy.OBSERVED_AND_MEMORY:
 		defensive_memory.capture_into(pending_snapshot)
+		if hidden_sector_pressure_enabled:
+			sector_pressure.capture_into(pending_snapshot, Globals.get_enemy_team(Globals.team_player))
+		else:
+			sector_pressure.clear()
+	else:
+		sector_pressure.clear()
 	for team: int in _get_processed_teams():
 		var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
 		config.contacts = pending_snapshot.get_contacts(team)
