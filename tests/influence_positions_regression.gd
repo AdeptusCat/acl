@@ -137,6 +137,7 @@ func _run() -> void:
 	_test_local_interception()
 	_test_complementary_defense()
 	_test_loadout_stationary_roles()
+	_test_branch_defense()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -1861,6 +1862,7 @@ func _test_complementary_defense() -> void:
 	query.defense_area = job.result
 	query.assigned_sector = job.result.sector_at(axis.source_hex)
 	var approach: Dictionary = job.result.approach_for_sector(query.assigned_sector).duplicate()
+	approach.erase("branches")
 	approach["cells"] = [common[0], common[1], first_crossing, second_crossing]
 	approach["weights"] = {common[0]: 0.5, common[1]: 0.5, first_crossing: 4.0, second_crossing: 4.0}
 	approach["arrival_seconds"] = INF
@@ -1969,3 +1971,228 @@ func _test_defensive_memory() -> void:
 	Globals.unit_visible_enemies[own] = []
 	controller.reset_for_match()
 	_check(controller.defensive_memory.contacts_by_team.is_empty(), "Starting a new match clears prior tactical danger")
+
+
+func _test_branch_defense() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(1, 3)
+	query.defense_radius = 6
+	query.snapshot.captured_at = 100.0
+	var upper_source: Vector2i = Vector2i(8, 1)
+	var lower_source: Vector2i = Vector2i(8, 5)
+	var spread_enemy: UnitProbe = _unit(enemy.team, lower_source)
+	var lower_contact: InfluenceContact = _area_contact(lower_source, 99.0, false)
+	lower_contact.unit = spread_enemy
+	query.snapshot.defensive_contacts[own.team] = [_area_contact(upper_source, 100.0), lower_contact]
+	var job: DefenseAreaJob = query.snapshot.defense_area_job(own.team, query.objective_hex, 6, 10)
+	job.advance(-1)
+	var sector: int = job.result.sector_at(upper_source)
+	var parent: Dictionary = job.result.approach_for_sector(sector)
+	_check(sector == job.result.sector_at(lower_source) and parent["branches"].size() == 2, "Separated observed and remembered enemy groups in one sector receive distinct branches")
+	_check(parent["source"] == upper_source and parent["branches"][1]["source"] == lower_source and parent["branches"][1]["evidence"] == "remembered", "Each branch retains its own captured source and knowledge evidence")
+	var primary: Dictionary = parent["branches"][0]
+	var margin_count: int = 0
+	var bounded: bool = true
+	for cell: Vector2i in primary["cells"]:
+		if parent["cells"].has(cell):
+			continue
+		margin_count += 1
+		var adjacent: bool = false
+		for core: Vector2i in parent["cells"]:
+			adjacent = adjacent or job.result.geometry["neighbors"].get(core, []).has(cell)
+		bounded = bounded and adjacent and primary["distances"][cell] <= primary["distances"][query.objective_hex]
+	_check(margin_count > 0 and bounded, "Lateral uncertainty adds one connected terrain step and never branches beyond objective arrival")
+	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(job.result, [own, other], {})
+	_check(assignments.size() == 2 and assignments[own as Unit] != assignments[other as Unit] and DefenseSectorAllocator.critical_count(job.result) == 2, "Two credible branches in one sector receive separate defenders and can mobilize a reserve")
+	var previous: Dictionary = {own: {"branch": assignments[own as Unit]}, other: {"branch": assignments[other as Unit]}}
+	_check(DefenseSectorAllocator.assign_branches(job.result, [own, other], previous) == assignments, "Repeated branch assignments preserve existing responsibilities")
+	spread_enemy.current_hex = Vector2i(0, 0)
+	var remembered_job: DefenseAreaJob = DefenseAreaJob.new()
+	remembered_job.start(query.snapshot, own.team, query.objective_hex, 6, 10, [])
+	remembered_job.advance(-1)
+	_check(remembered_job.result.approach_for_sector(sector)["branches"][1]["source"] == lower_source, "Unseen live movement cannot shift a remembered approach branch")
+	var freshness_planner: PlatoonAI = PlatoonAI.new()
+	freshness_planner.influence_map_controller = controller
+	freshness_planner.team = own.team
+	freshness_planner.current_order = MissionOrder.new()
+	freshness_planner.defense_area = job.result
+	var captured_contact: InfluenceContact = query.snapshot.defensive_contacts[own.team][0]
+	query.snapshot.contacts[own.team] = [captured_contact]
+	_check(not freshness_planner._defense_plan_outdated(), "An unchanged observed branch permits the completed batch to publish")
+	captured_contact.hex = lower_source
+	_check(freshness_planner._defense_plan_outdated(), "Observed movement to a different branch within the same sector invalidates old branch advice")
+	captured_contact.observed = false
+	_check(not freshness_planner._defense_plan_outdated(), "Remembered hidden movement cannot invalidate a captured branch plan")
+	captured_contact.hex = upper_source
+	captured_contact.observed = true
+	freshness_planner.free()
+	var reverse: DefenseAreaJob = query.snapshot.defense_area_job(enemy.team, query.objective_hex, 6, 10)
+	for cell: Vector2i in query.snapshot.maps[own.team].playable_cells:
+		query.snapshot.maps[enemy.team].set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, query.snapshot.maps[own.team].get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell))
+		query.snapshot.maps[enemy.team].set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, query.snapshot.maps[own.team].get_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell))
+	query.snapshot.defensive_contacts[enemy.team] = query.snapshot.defensive_contacts[own.team]
+	reverse.advance(-1)
+	_check(reverse.result.approach_for_sector(sector)["branches"].size() == 2 and reverse.result.geometry["return_open_costs"] == job.result.geometry["return_open_costs"], "Mirrored teams produce the same branch and return geography from the same knowledge")
+	spread_enemy.free()
+	# Isolate complementary firing lanes: one side position sees only one of three target cells.
+	var candidate: Vector2i = Vector2i(4, 3)
+	var upper: Vector2i = Vector2i(5, 2)
+	var lower: Vector2i = Vector2i(5, 4)
+	var bottom: Vector2i = Vector2i(6, 4)
+	var other_hex: Vector2i = other.current_hex
+	var other_power: int = other.firepower
+	other.current_hex = Vector2i(3, 4)
+	other.firepower = 16
+	query.snapshot.positions[other as Unit] = other.current_hex
+	query.snapshot.los = query.snapshot.los.duplicate(true)
+	var record: Dictionary = {"target_cover": 0.0, "hindrance": 0.0}
+	query.snapshot.los[own.current_hex] = {upper: record}
+	query.snapshot.los[candidate] = {upper: record}
+	query.snapshot.los[other.current_hex] = {lower: record, bottom: record}
+	query.snapshot.defensive_contacts[own.team] = []
+	var upper_branch: Dictionary = {"id": sector, "key": "upper", "source": upper_source, "evidence": "observed", "priority": 1.0, "share": 0.5,
+		"cells": [upper], "weights": {upper: 1.0}, "arrival_seconds": INF, "response_distances": parent["response_distances"]}
+	var lower_branch: Dictionary = {"id": sector, "key": "lower", "source": lower_source, "evidence": "remembered", "priority": 1.0, "share": 0.5,
+		"cells": [lower, bottom], "weights": {lower: 1.0, bottom: 1.0}, "arrival_seconds": INF, "response_distances": parent["response_distances"]}
+	var pooled: Dictionary = upper_branch.duplicate()
+	pooled.erase("key")
+	pooled.erase("share")
+	pooled["priority"] = 2.0
+	pooled["cells"] = [upper, lower, bottom]
+	pooled["weights"] = {upper: 1.0, lower: 1.0, bottom: 1.0}
+	pooled["branches"] = [upper_branch, lower_branch]
+	var area: DefenseAreaAssessment = DefenseAreaAssessment.new()
+	area.objective_hex = query.objective_hex
+	area.snapshot_version = query.snapshot.version
+	area.geometry = job.result.geometry.duplicate(true)
+	area.approaches = [pooled]
+	area.max_priority = 2.0
+	query.defense_area = area
+	query.assigned_sector = sector
+	query.sector_cells = [candidate]
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.reservations = {}
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	var index: int = map.cell_to_index(candidate)
+	var pooled_advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(not pooled_advice.is_valid() and pooled_advice.rejection_reasons[index] == "responsibility", "The old pooled fifty-percent rule reproduces exclusion of a useful side firing position")
+	query.assigned_branch = "upper"
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == candidate and advice.features["assigned_coverage"] == 1.0 and advice.features["branch_coverage"]["lower"] == 0.0, "A woodland side position qualifies by covering its branch while another established squad covers the remainder")
+	_check(advice.branch_sources["lower"] == lower_source and advice.branch_evidence["lower"] == "remembered" and not advice.approach_cells.has(lower), "The position overlay publishes the assigned branch and separate captured branch evidence")
+	var upper_context: String = query.context_key()
+	query.assigned_branch = "lower"
+	_check(query.context_key() != upper_context and not PositionQueryService.query_positions(query).is_valid(), "Changing branch responsibility invalidates a commitment to a different firing lane")
+	query.assigned_branch = "upper"
+	query.sector_cells.append(own.current_hex)
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.target_hex == own.current_hex and not advice.should_move, "Additional branch alternatives do not force movement from a useful covered position")
+	query.sector_cells = [candidate]
+	query.relocation_allowed = false
+	advice = PositionQueryService.query_positions(query)
+	_check(not advice.is_valid() and advice.cell_states[index] == PositionResult.CellState.WAITING_HANDOFF and advice.eligibility[index] == 0 and advice.rejection_reasons[index] == "handoff_wait", "A fully safe useful hex waiting for a handoff is diagnosed separately from executable candidates")
+	query.fallback_hexes = [own.current_hex]
+	var fallback_advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(fallback_advice.is_valid() and fallback_advice.target_hex == own.current_hex and fallback_advice.cell_states[index] == PositionResult.CellState.WAITING_HANDOFF, "A fallback hold preserves the useful primary hex's handoff diagnosis")
+	query.fallback_hexes = []
+	var draw: InfluenceMapDebugDraw = InfluenceMapDebugDraw.new()
+	draw.influence_controller = controller
+	draw.tile_map_layer = ground
+	draw.team = own.team
+	draw.debug_view = InfluenceMapDebugDraw.DebugView.POSITION_SCORE
+	draw.selected_unit = own
+	draw.position_advice = advice
+	_check(draw._should_draw_cell(map, candidate) and draw.hex_diagnostic(candidate).contains("waiting"), "Waiting positions remain visible with a hover explanation")
+	draw.free()
+	var adapted: DefensePositionResult = DefensePositionAnalyzer.adapt_result(advice, null, "test")
+	_check(adapted.cell_states == advice.cell_states and adapted.rejection_reasons == advice.rejection_reasons and adapted.branch_sources == advice.branch_sources, "Defense adapters preserve per-hex and branch diagnostics")
+	var incremental: PositionQueryJob = PositionQueryJob.new()
+	incremental.query = query
+	while not incremental.completed:
+		incremental.advance(Time.get_ticks_usec() + 100)
+	_check(incremental.result.cell_states == advice.cell_states and incremental.result.rejection_reasons == advice.rejection_reasons and incremental.result.score_map == advice.score_map, "Incremental queries preserve waiting states, per-hex reasons and useful-position scores")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, candidate, 0.0)
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.cell_states[index] == PositionResult.CellState.REJECTED and advice.rejection_reasons[index] == "cover", "An open destination is unsuitable even while a handoff is pending")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, candidate, 1.0)
+	query.reservations[other as Unit] = candidate
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "capacity", "A reserved branch position remains unavailable")
+	query.reservations.clear()
+	area.geometry["return_open_costs"].erase(candidate)
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "objective_access", "Branch usefulness cannot override missing objective access")
+	area.geometry["return_open_costs"][candidate] = 0.0
+	map.set_layer_value(InfluenceMap.Layer.THREAT, candidate, 100.0)
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "risk", "Excessive fire danger is not mislabeled as a temporary handoff wait")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, candidate, 0.0)
+	var graph: AStar2D = query.snapshot.routes[own.team]
+	var origin_id: int = query.snapshot.point_ids[own.team][own.current_hex]
+	var connected: PackedInt64Array = graph.get_point_connections(origin_id)
+	for neighbor: int in connected:
+		graph.disconnect_points(origin_id, neighbor)
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "route", "An unreachable useful firing hex is unsuitable rather than merely waiting for a handoff")
+	for neighbor: int in connected:
+		graph.connect_points(origin_id, neighbor)
+	query.relocation_allowed = true
+	query.snapshot.los[own.current_hex][lower] = record
+	query.snapshot.los[own.current_hex][bottom] = record
+	_check(PositionQueryService.query_positions(query).is_valid(), "Established covering fire permits a branch handoff without opening the other branch")
+	other.movement.is_moving = true
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "A moving squad cannot replace the established coverage of another branch")
+	other.movement.is_moving = false
+	var captured_support: Vector2i = other.current_hex
+	other.current_hex = Vector2i(3, 5)
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "A stationary squad at a different live hex cannot provide covering fire from its old snapshot position")
+	other.current_hex = captured_support
+	query.reservations[other as Unit] = Vector2i(4, 4)
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "A future firing reservation cannot authorize abandoning an established branch")
+	query.reservations.clear()
+	other.firepower = 0
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "An unarmed supporting squad cannot supply a branch handoff")
+	other.firepower = 16
+	other.in_close_combat = true
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "A supporting squad in close combat cannot supply a branch handoff")
+	other.in_close_combat = false
+	# Shared coverage matters even when no individual squad covers half a branch.
+	var shared_a: Vector2i = Vector2i(5, 1)
+	var shared_b: Vector2i = Vector2i(6, 1)
+	var shared_c: Vector2i = Vector2i(7, 1)
+	var shared: Dictionary = upper_branch.duplicate()
+	shared["key"] = "shared"
+	shared["cells"] = [shared_a, shared_b, shared_c]
+	shared["weights"] = {shared_a: 1.0, shared_b: 1.0, shared_c: 1.0}
+	pooled["branches"].append(shared)
+	for branch: Dictionary in pooled["branches"]:
+		branch["share"] = 1.0 / 3.0
+	pooled["priority"] = 3.0
+	area.max_priority = 3.0
+	query.defense_radius = 8
+	query.snapshot.los[own.current_hex][shared_a] = record
+	query.snapshot.los[other.current_hex][shared_b] = record
+	_check(PositionQueryService.query_positions(query).rejection_reasons[index] == "screen_gap", "Relocation preserves established combined coverage even when each defender covers less than half individually")
+	query.snapshot.los[candidate][shared_a] = record
+	_check(PositionQueryService.query_positions(query).is_valid(), "Complementary partial firing lanes jointly preserve a branch during relocation")
+	advice = PositionQueryService.query_positions(query)
+	var requests: Array[Dictionary] = [{"query": query}]
+	var results: Array[DefensePositionResult] = [DefensePositionAnalyzer.adapt_result(advice, null, "test")]
+	var validation: DefensePlanValidationJob = DefensePlanValidationJob.new()
+	validation.start(area, requests, results)
+	validation.advance(Time.get_ticks_usec() - 1)
+	_check(not validation.completed and validation.index == 0, "Live final validation respects an exhausted frame budget without publishing a partial plan")
+	other.movement.is_moving = true
+	validation.advance(-1)
+	_check(validation.completed and not validation.valid, "Supporting movement during deferred validation invalidates the entire pending plan")
+	other.movement.is_moving = false
+	validation = DefensePlanValidationJob.new()
+	validation.start(area, requests, results)
+	var validation_slices: int = 0
+	while not validation.completed and validation_slices < 1000:
+		validation.advance(Time.get_ticks_usec() + 100)
+		validation_slices += 1
+	_check(validation.completed and validation.valid and validation_slices > 1 and validation.branch_gaps.is_empty(), "Incremental final validation publishes complete shared branch coverage when supporting state remains unchanged")
+	_check(query.destination_features.is_empty() and query.route_field == null and advice.target_hex == candidate and advice.eligibility[index] == 1, "Incremental cache release preserves the completed advice and its candidate diagnostics")
+	other.firepower = 0
+	_check(not validation.unchanged(), "Equipment loss after final validation prevents publishing stale supporting fire")
+	other.firepower = 16
+	other.current_hex = other_hex
+	other.firepower = other_power
+	_publish()

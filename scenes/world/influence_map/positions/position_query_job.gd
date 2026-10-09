@@ -1,7 +1,7 @@
 class_name PositionQueryJob
 extends RefCounted
 
-enum Phase { AREA, INITIALIZE, FILTER, FLOOD, EVALUATE, FINISH }
+enum Phase { AREA, INITIALIZE, SUPPORT, FILTER, FLOOD, EVALUATE, FINISH }
 
 var query: PositionQuery
 var result: PositionResult = PositionResult.new()
@@ -12,6 +12,9 @@ var indices: Array[int] = []
 var cursor: int = 0
 var fallback: bool = false
 var candidates: Array[PositionCandidate] = []
+var support_duties: Array[Dictionary] = []
+var support_units: Array[Unit] = []
+var support_cursor: int = 0
 
 
 func advance(deadline_usec: int) -> void:
@@ -41,6 +44,23 @@ func advance(deadline_usec: int) -> void:
 				if not PositionQueryService.initialize(query, result):
 					completed = true
 				else:
+					phase = Phase.FILTER
+					if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null:
+						support_duties = query.defense_area.support_duties(query)
+						support_units.assign(query.snapshot.positions.keys())
+						phase = Phase.SUPPORT
+			Phase.SUPPORT:
+				if cursor < support_duties.size():
+					var duty: Dictionary = support_duties[cursor]
+					if support_cursor < support_units.size():
+						query.defense_area.warm_support(query, duty, support_units[support_cursor])
+						support_cursor += 1
+					else:
+						query.defense_area.warm_support(query, duty, null)
+						support_cursor = 0
+						cursor += 1
+				else:
+					cursor = 0
 					phase = Phase.FILTER
 			Phase.FILTER:
 				if cursor < query.snapshot.maps[query.team].cell_count:

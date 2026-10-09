@@ -20,10 +20,12 @@ var _planning_job: PositionQueryJob
 var _planning_index: int = 0
 var defense_area: DefenseAreaAssessment
 var defense_gaps: Array[int] = []
+var defense_branch_gaps: Array[String] = []
 var _area_job: DefenseAreaJob
 var _planning_available: Array[Unit] = []
 var _relocation_claimed: bool = false
 var _planning_snapshot: InfluenceSnapshot
+var _validation_job: DefensePlanValidationJob
 
 
 func _process(delta: float) -> void:
@@ -42,6 +44,15 @@ func _process(delta: float) -> void:
 				_submit_planning_query()
 			else:
 				_commit_plan()
+		return
+	if _validation_job != null:
+		_validation_job.advance(Time.get_ticks_usec() + InfluenceMapController.POSITION_QUERY_BUDGET_USEC)
+		if _validation_job.completed:
+			if _validation_job.valid:
+				_commit_plan()
+			else:
+				_cancel_plan()
+				time_until_reconsider = 0.0
 		return
 	if _planning_job != null:
 		_continue_budgeted_plan()
@@ -73,6 +84,7 @@ func set_active(is_active: bool) -> void:
 	accepted_positions.clear()
 	defense_area = null
 	defense_gaps.clear()
+	defense_branch_gaps.clear()
 	time_until_reconsider = 0.0
 
 
@@ -101,6 +113,7 @@ func set_squads(new_squads: Array[Unit]) -> void:
 	accepted_positions.clear()
 	defense_area = null
 	defense_gaps.clear()
+	defense_branch_gaps.clear()
 	time_until_reconsider = 0.0
 	squads = owned
 	_set_defensive_control(active and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
@@ -225,15 +238,15 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 		reserve = null
 	var previous: Dictionary = {}
 	for unit: Unit in squad_assignments:
-		previous[unit] = {"sector": squad_assignments[unit]["result"].features.get("assigned_sector", -1)}
-	var assignments: Dictionary[Unit, int] = DefenseSectorAllocator.assign(defense_area, available, previous)
-	for approach: Dictionary in DefenseSectorAllocator.priorities(defense_area):
+		previous[unit] = {"sector": squad_assignments[unit]["result"].features.get("assigned_sector", -1), "branch": squad_assignments[unit]["result"].features.get("assigned_branch", "")}
+	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(defense_area, available, previous)
+	for approach: Dictionary in DefenseSectorAllocator.branch_priorities(defense_area):
 		for unit: Unit in available:
-			if assignments.get(unit, -1) == approach["id"]:
+			if assignments.get(unit, "") == DefenseAreaAssessment.duty_key(approach):
 				var responsibility: PositionQuery.Responsibility = current_order.defense_responsibility
 				if responsibility == PositionQuery.Responsibility.AUTO and has_guard:
 					responsibility = PositionQuery.Responsibility.COVER_APPROACH
-				_add_sector_request(unit, "defend_sector", approach["id"], responsibility)
+				_add_sector_request(unit, "defend_sector", approach["id"], responsibility, DefenseAreaAssessment.duty_key(approach))
 	if assignments.is_empty():
 		for unit: Unit in available:
 			_add_sector_request(unit, "defend_objective", -1, current_order.defense_responsibility)
@@ -241,7 +254,7 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 		_add_sector_request(reserve, "reserve", -1, PositionQuery.Responsibility.AUTO)
 
 
-func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: PositionQuery.Responsibility) -> void:
+func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: PositionQuery.Responsibility, branch: String = "") -> void:
 	var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 	config.defense_responsibility = responsibility
 	if role != "guard_objective" and config.geography == PositionQuery.Geography.OBJECTIVE_OR_SECTOR:
@@ -253,6 +266,7 @@ func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: 
 	query.snapshot = _planning_snapshot
 	query.defense_area = defense_area
 	query.assigned_sector = sector
+	query.assigned_branch = branch
 	query.reserve_position = role == "reserve"
 	query.relocation_allowed = _can_relocate(unit)
 	if query.reserve_position:
@@ -293,7 +307,8 @@ func _continue_budgeted_plan() -> void:
 	if _planning_index < _planning_requests.size():
 		_submit_planning_query()
 	else:
-		_commit_plan()
+		_validation_job = DefensePlanValidationJob.new()
+		_validation_job.start(query.defense_area, _planning_requests, _planning_results)
 
 
 func _accept_planning_result(request: Dictionary, advice: PositionResult) -> void:
@@ -306,7 +321,7 @@ func _accept_planning_result(request: Dictionary, advice: PositionResult) -> voi
 
 
 func _commit_plan() -> void:
-	if _defense_plan_outdated():
+	if _defense_plan_outdated() or (_validation_job != null and (not _validation_job.completed or not _validation_job.valid or not _validation_job.unchanged())):
 		_cancel_plan()
 		time_until_reconsider = 0.0
 		return
@@ -323,9 +338,10 @@ func _commit_plan() -> void:
 			_cancel_plan()
 			time_until_reconsider = 0.0
 			return
-		if result.is_valid() and query.profile.mode == PositionProfile.Mode.DEFEND:
+		if _validation_job == null and result.is_valid() and query.profile.mode == PositionProfile.Mode.DEFEND:
 			query.firepower_by_unit.clear()
 			query.sector_features.clear()
+			query.established_screen.clear()
 			var protection: Dictionary = DefensePositionPolicy.evaluate(query, result.target_hex)
 			if protection["responsibility"] == "" or not protection["preserves_screen"]:
 				_cancel_plan()
@@ -333,34 +349,53 @@ func _commit_plan() -> void:
 				return
 	squad_assignments.clear()
 	defense_gaps.clear()
+	defense_branch_gaps.clear()
 	reserved_hexes_by_squad = _planning_reservations
 	for result: DefensePositionResult in _planning_results:
 		_apply_position_results([result], result.role, result.axis)
-	if defense_area != null and current_order.position_mode == PositionProfile.Mode.DEFEND:
-		for approach: Dictionary in defense_area.approaches:
-			var covered: bool = false
-			for result: DefensePositionResult in _planning_results:
-				covered = covered or (result.is_valid() and result.features.get("sector_coverage", {}).get(approach["id"], 0.0) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE)
-			if not covered and approach["priority"] >= defense_area.max_priority * 0.4:
-				defense_gaps.append(approach["id"])
+	if _validation_job != null:
+		defense_branch_gaps = _validation_job.branch_gaps.duplicate()
+		for key: String in defense_branch_gaps:
+			var sector: int = defense_area.branch_for_key(key)["id"]
+			if not defense_gaps.has(sector):
+				defense_gaps.append(sector)
+	elif defense_area != null and not _planning_requests.is_empty() and current_order.position_mode == PositionProfile.Mode.DEFEND:
+		var positions: Dictionary[Unit, Vector2i] = {}
+		for result: DefensePositionResult in _planning_results:
+			if result.is_valid():
+				positions[result.unit] = result.target_hex
+		var query: PositionQuery = _planning_requests[0]["query"]
+		var highest: float = defense_area.max_duty_priority()
+		for approach: Dictionary in defense_area.duties():
+			var covered: bool = defense_area.coverage_of_positions(query, positions, approach) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
+			if not covered and defense_area.duty_priority(approach) >= highest * 0.4:
+				defense_branch_gaps.append(DefenseAreaAssessment.duty_key(approach))
+				if not defense_gaps.has(approach["id"]):
+					defense_gaps.append(approach["id"])
 	_issue_orders()
 	_planning_job = null
 	_planning_requests.clear()
 	_planning_results.clear()
 	_planning_index = 0
 	_planning_snapshot = null
+	_validation_job = null
 
 
 func _defense_plan_outdated() -> bool:
 	if current_order.position_mode != PositionProfile.Mode.DEFEND or defense_area == null:
 		return false
 	for contact: InfluenceContact in influence_map_controller.snapshot.get_contacts(team):
-		if contact.observed and (not defense_area.observed_contacts.has(contact.unit) or defense_area.sector_at(contact.hex) != defense_area.sector_at(defense_area.observed_contacts[contact.unit])):
-			return true
+		if contact.observed:
+			if not defense_area.observed_contacts.has(contact.unit):
+				return true
+			var captured: Vector2i = defense_area.observed_contacts[contact.unit]
+			if defense_area.sector_at(contact.hex) != defense_area.sector_at(captured) or LOSHelper.get_hex_distance(contact.hex, captured) >= 2:
+				return true
 	return false
 
 
 func _cancel_plan() -> void:
+	_validation_job = null
 	if influence_map_controller != null and _planning_job != null:
 		influence_map_controller.cancel_position_query(_planning_job)
 	_planning_job = null

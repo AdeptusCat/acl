@@ -61,6 +61,16 @@ func _run() -> void:
 		else:
 			_check(planner.active and planner.current_order != null, "Enemy platoon retains its automatic mission")
 	_check(not manual_orders.is_empty(), "Scenario includes player squads previously controlled by the planner")
+	# Initial advice is published as a complete budgeted batch; expanded rosters need more slices.
+	var initial_plan_completed: bool = false
+	for frame: int in range(1800):
+		for planner: PlatoonAI in planners:
+			if planner.team != player_team and not planner.squad_assignments.is_empty():
+				initial_plan_completed = true
+		if initial_plan_completed:
+			break
+		await get_tree().process_frame
+	_check(initial_plan_completed, "The initial budgeted enemy batch completes before match observation")
 	var samples: Array[Dictionary] = []
 	for frame: int in range(600):
 		await get_tree().process_frame

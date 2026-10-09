@@ -19,6 +19,11 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 		return false
 	result.snapshot_version = query.snapshot.version
 	result.status = PositionResult.Status.NO_CANDIDATE
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	result.cell_states.resize(map.cell_count)
+	result.cell_states.fill(PositionResult.CellState.REJECTED)
+	result.rejection_reasons.resize(map.cell_count)
+	result.rejection_reasons.fill("unit_unavailable")
 	if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.team != query.team:
 		result.reason = "Unit is outside the query's ownership"
 		return false
@@ -28,7 +33,8 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
 		result.reason = "Unit is not fit for an assault"
 		return false
-	var map: InfluenceMap = query.snapshot.maps[query.team]
+	result.cell_states.fill(PositionResult.CellState.UNEVALUATED)
+	result.rejection_reasons.fill("")
 	query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
 	query.reset_evaluation()
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
@@ -41,6 +47,7 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	result.eligibility.resize(map.cell_count)
 	if query.defense_area != null:
 		result.features["assigned_sector"] = query.assigned_sector
+		result.features["assigned_branch"] = query.assigned_branch
 		var cells: Dictionary = {}
 		var remembered: Dictionary = {}
 		var inferred: Dictionary = {}
@@ -48,9 +55,15 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 			result.sector_priorities[approach["id"]] = approach["priority"]
 			result.approach_evidence[approach["id"]] = approach["evidence"]
 			result.approach_sources[approach["id"]] = approach["source"]
+		for approach: Dictionary in query.defense_area.duties():
+			var branch_key: String = DefenseAreaAssessment.duty_key(approach)
+			result.branch_sources[branch_key] = approach["source"]
+			result.branch_evidence[branch_key] = approach["evidence"]
+			if query.assigned_branch != "" and query.assigned_branch != branch_key:
+				continue
 			if query.assigned_sector >= 0 and query.assigned_sector != approach["id"]:
 				continue
-			if query.assigned_sector < 0 and approach["priority"] < query.defense_area.max_priority * 0.4:
+			if query.assigned_sector < 0 and query.defense_area.approach_for_sector(approach["id"]).get("priority", approach["priority"]) < query.defense_area.max_priority * 0.4:
 				continue
 			var destination: Dictionary = cells
 			if approach["evidence"] == "remembered":
@@ -72,7 +85,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
 				result.reason = "Holding until relocation can preserve existing approach coverage"
-			if result.rejections.has("handoff_wait"):
+			if result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
 				result.reason = "Waiting for the relocating defender to establish covering fire"
 		return
 	candidates.sort_custom(_prefer_candidate)
@@ -165,22 +178,24 @@ static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, 
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var cell: Vector2i = map.index_to_cell(index)
 	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0:
-		_reject(diagnostics, "terrain")
+		_reject(diagnostics, "terrain", index)
 		return false
 	if not _in_geography(query, cell, fallback):
-		_reject(diagnostics, "geography")
+		# A fallback search must not erase a completed primary-position diagnosis.
+		if not fallback or diagnostics.rejection_reasons[index] == "geography":
+			_reject(diagnostics, "geography", index)
 		return false
 	if _occupied(query, cell):
-		_reject(diagnostics, "capacity")
+		_reject(diagnostics, "capacity", index)
 		return false
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
 		if features["cover"] < query.profile.minimum_cover:
-			_reject(diagnostics, "cover")
+			_reject(diagnostics, "cover", index)
 			return false
-		var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
+		var rejection: String = DefensePositionPolicy.rejection(query, cell, features, false)
 		if rejection != "":
-			_reject(diagnostics, rejection)
+			_reject(diagnostics, rejection, index)
 			return false
 	return true
 
@@ -189,24 +204,30 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 	var cell: Vector2i = query.snapshot.maps[query.team].index_to_cell(index)
 	var path: Array[Vector2i] = _path_to_candidate(query, cell)
 	if path.is_empty():
-		_reject(diagnostics, "route")
+		_reject(diagnostics, "route", index)
 		return null
 	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
 	if features["cover"] < query.profile.minimum_cover:
-		_reject(diagnostics, "cover")
+		_reject(diagnostics, "cover", index)
 		return null
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
 		if rejection != "":
-			_reject(diagnostics, rejection)
+			_reject(diagnostics, rejection, index)
+			if rejection == "handoff_wait":
+				diagnostics.cell_states[index] = PositionResult.CellState.WAITING_HANDOFF
+				if query.include_score_map:
+					diagnostics.score_map[index] = query.profile.score(features, query.unit)
 			return null
 	elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
-		_reject(diagnostics, "risk")
+		_reject(diagnostics, "risk", index)
 		return null
 	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0:
-		_reject(diagnostics, "firing")
+		_reject(diagnostics, "firing", index)
 		return null
 	diagnostics.eligibility[index] = 1
+	diagnostics.cell_states[index] = PositionResult.CellState.AVAILABLE
+	diagnostics.rejection_reasons[index] = ""
 	var candidate: PositionCandidate = PositionCandidate.new()
 	candidate.hex = cell
 	candidate.index = index
@@ -264,8 +285,10 @@ static func can_assault(unit: Unit) -> bool:
 	return unit.squad_type != Globals.SquadType.PLATOON_HEADQUARTERS and unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and unit.squad_type != Globals.SquadType.MORTAR
 
 
-static func _reject(diagnostics: PositionResult, reason: String) -> void:
+static func _reject(diagnostics: PositionResult, reason: String, index: int) -> void:
 	diagnostics.rejections[reason] = diagnostics.rejections.get(reason, 0) + 1
+	diagnostics.cell_states[index] = PositionResult.CellState.REJECTED
+	diagnostics.rejection_reasons[index] = reason
 
 
 static func _is_following_path(unit: Unit, recommended: Array[Vector2i]) -> bool:

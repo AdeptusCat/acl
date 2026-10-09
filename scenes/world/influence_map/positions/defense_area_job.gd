@@ -1,7 +1,10 @@
 class_name DefenseAreaJob
 extends RefCounted
 
-enum Phase { GEOMETRY, OBJECTIVE_FIELD, RETURN_FIELD, SOURCES, APPROACH_FIELD, CORRIDOR, RESPONSE_FIELD, FINISH }
+enum Phase { GEOMETRY, OBJECTIVE_FIELD, RETURN_FIELD, SOURCES, APPROACH_FIELD, CORRIDOR, MARGIN, RESPONSE_FIELD, FINISH }
+
+const MAX_BRANCHES_PER_SECTOR: int = 3
+const LATERAL_WEIGHT: float = 0.2
 
 var _snapshot_ref: WeakRef
 var snapshot: InfluenceSnapshot:
@@ -25,6 +28,8 @@ var seeds: Array[Dictionary] = []
 var seed_index: int = 0
 var corridor: Dictionary = {}
 var response_field: DefenseTravelField
+var core_cells: Array[Vector2i] = []
+var core_weights: Dictionary = {}
 
 
 func start(capture: InfluenceSnapshot, own_team: int, target: Vector2i, radius: int, horizon: int, axes: Array[ThreatAxis]) -> void:
@@ -101,6 +106,15 @@ func advance(deadline_usec: int) -> void:
 					_add_corridor_cell(geometry["cells"][cursor])
 					cursor += 1
 				else:
+					core_cells.assign(corridor["cells"])
+					core_weights = corridor["weights"].duplicate()
+					cursor = 0
+					phase = Phase.MARGIN
+			Phase.MARGIN:
+				if cursor < core_cells.size():
+					_add_lateral_margin(core_cells[cursor])
+					cursor += 1
+				else:
 					response_field = null
 					if not geometry["response_fields"].has(corridor["id"]):
 						var entries: Array[Vector2i] = []
@@ -123,8 +137,7 @@ func advance(deadline_usec: int) -> void:
 				corridor["response_distances"] = geometry["response_fields"][corridor["id"]]
 				if not corridor["cells"].is_empty():
 					corridor["priority"] *= 1.0 + 10.0 / (3.0 + corridor["arrival_seconds"])
-					result.approaches.append(corridor)
-					result.max_priority = maxf(result.max_priority, corridor["priority"])
+					_publish_branch()
 				seed_index += 1
 				field = null
 				phase = Phase.APPROACH_FIELD
@@ -172,6 +185,7 @@ func _capture_cell(cell: Vector2i) -> void:
 
 func _prepare_sources() -> void:
 	var grouped: Dictionary = {}
+	var contacts: Array[Dictionary] = []
 	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
 		if contact.observed and is_instance_valid(contact.unit):
 			result.observed_contacts[contact.unit] = contact.hex
@@ -186,29 +200,86 @@ func _prepare_sources() -> void:
 		var evidence: String = "remembered"
 		if contact.observed:
 			evidence = "observed"
-		if not grouped.has(sector):
-			grouped[sector] = {"id": sector, "source": contact.hex, "priority": 0.0, "confirmed": false, "evidence": evidence, "crossing_seconds": contact.crossing_seconds, "source_priority": -INF}
-		# A stale nearby contact must not anchor the corridor for fresher pressure in the same sector.
 		var urgency: float = priority * (1.0 + 10.0 / (3.0 + geometry["objective_distances"][contact.hex] * contact.crossing_seconds))
-		var observed_source: bool = grouped[sector]["evidence"] == "observed"
-		if (contact.observed and not observed_source) or (contact.observed == observed_source and urgency > grouped[sector]["source_priority"]):
-			grouped[sector]["source"] = contact.hex
-			grouped[sector]["crossing_seconds"] = contact.crossing_seconds
-			grouped[sector]["source_priority"] = urgency
-			grouped[sector]["evidence"] = evidence
-		grouped[sector]["priority"] += priority
-		grouped[sector]["confirmed"] = grouped[sector]["confirmed"] or contact.observed
+		var identity: String = str(contact.hex)
+		if is_instance_valid(contact.unit):
+			identity = str(contact.unit.get_instance_id())
+		contacts.append({"id": sector, "key": str(sector) + ":" + identity, "source": contact.hex, "priority": priority,
+			"confirmed": contact.observed, "evidence": evidence, "crossing_seconds": contact.crossing_seconds, "source_priority": urgency})
+	contacts.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a["confirmed"] != b["confirmed"]:
+			return a["confirmed"]
+		if not is_equal_approx(a["source_priority"], b["source_priority"]):
+			return a["source_priority"] > b["source_priority"]
+		return a["key"] < b["key"])
+	for contact: Dictionary in contacts:
+		var sector: int = contact["id"]
+		if not grouped.has(sector):
+			grouped[sector] = []
+		var cluster: Dictionary = {}
+		var nearest: int = 999999
+		for branch: Dictionary in grouped[sector]:
+			var distance: int = LOSHelper.get_hex_distance(contact["source"], branch["source"])
+			if distance < nearest:
+				nearest = distance
+				cluster = branch
+		if nearest >= 2 and grouped[sector].size() < MAX_BRANCHES_PER_SECTOR:
+			# Distinct groups retain their own approach rather than widening one aggregate duty.
+			for branch: Dictionary in grouped[sector]:
+				if branch["key"] == contact["key"]:
+					contact["key"] += ":" + str(contact["source"])
+			grouped[sector].append(contact)
+		else:
+			cluster["priority"] += contact["priority"]
+			# The sorted freshest source anchors nearby contacts; identity remains stable.
+			if contact["key"] < cluster["key"]:
+				cluster["key"] = contact["key"]
 	for axis: ThreatAxis in manual_axes:
 		var sector: int = result.sector_at(axis.source_hex)
 		if not grouped.has(sector) and geometry["objective_distances"].has(axis.source_hex):
-			grouped[sector] = {"id": sector, "source": axis.source_hex, "priority": maxf(0.12, axis.confidence), "confirmed": false, "evidence": "mission", "crossing_seconds": 2.0}
+			grouped[sector] = [{"id": sector, "key": str(sector) + ":mission", "source": axis.source_hex, "priority": maxf(0.12, axis.confidence), "confirmed": false, "evidence": "mission", "crossing_seconds": 2.0}]
 	for sector: int in geometry["boundary"]:
 		if not grouped.has(sector) and geometry["objective_distances"].has(geometry["boundary"][sector]):
-			grouped[sector] = {"id": sector, "source": geometry["boundary"][sector], "priority": 0.08, "confirmed": false, "evidence": "inferred", "crossing_seconds": 2.0}
+			grouped[sector] = [{"id": sector, "key": str(sector) + ":terrain", "source": geometry["boundary"][sector], "priority": 0.08, "confirmed": false, "evidence": "inferred", "crossing_seconds": 2.0}]
 	var sectors: Array = grouped.keys()
 	sectors.sort()
 	for sector: int in sectors:
-		seeds.append(grouped[sector])
+		for branch: Dictionary in grouped[sector]:
+			seeds.append(branch)
+
+
+func _add_lateral_margin(core: Vector2i) -> void:
+	var best: float = field.distances.get(objective, INF)
+	for cell: Vector2i in geometry["neighbors"].get(core, []):
+		if cell == objective or core_weights.has(cell) or LOSHelper.get_hex_distance(cell, objective) > analysis_radius:
+			continue
+		var source_cost: float = field.distances.get(cell, INF)
+		var objective_cost: float = geometry["objective_distances"].get(cell, INF)
+		if source_cost > best or objective_cost > best:
+			continue
+		# One connected step only; expensive terrain cannot create a broad speculative fan.
+		var detour: float = maxf(0.0, source_cost + objective_cost - best)
+		if detour > 2.5 + 2.0 * geometry["costs"][cell]:
+			continue
+		var weight: float = core_weights[core] * LATERAL_WEIGHT / geometry["costs"][cell]
+		if not corridor["weights"].has(cell):
+			corridor["cells"].append(cell)
+		corridor["weights"][cell] = maxf(corridor["weights"].get(cell, 0.0), weight)
+
+
+func _publish_branch() -> void:
+	var parent: Dictionary = result.approach_for_sector(corridor["id"])
+	if parent.is_empty():
+		parent = corridor.duplicate()
+		# Preserve the representative sector summary for legacy queries and diagnostics.
+		parent.erase("key")
+		parent["cells"] = core_cells.duplicate()
+		parent["weights"] = core_weights.duplicate()
+		parent["branches"] = []
+		parent["priority"] = 0.0
+		result.approaches.append(parent)
+	parent["priority"] += corridor["priority"]
+	parent["branches"].append(corridor)
 
 
 func _add_corridor_cell(cell: Vector2i) -> void:
@@ -235,10 +306,16 @@ func _limit_inferred_priorities() -> void:
 	var known_priority: float = 0.0
 	for approach: Dictionary in result.approaches:
 		if approach["evidence"] != "inferred":
-			known_priority = maxf(known_priority, approach["priority"])
+			for branch: Dictionary in approach["branches"]:
+				known_priority = maxf(known_priority, branch["priority"])
 	result.max_priority = 0.0
 	for approach: Dictionary in result.approaches:
 		# Aging known pressure does not promote an arbitrary boundary guess above it.
 		if known_priority > 0.0 and approach["evidence"] == "inferred":
 			approach["priority"] = minf(approach["priority"], known_priority * 0.2)
 		result.max_priority = maxf(result.max_priority, approach["priority"])
+		var total: float = 0.0
+		for branch: Dictionary in approach["branches"]:
+			total += branch["priority"]
+		for branch: Dictionary in approach["branches"]:
+			branch["share"] = branch["priority"] / maxf(total, 0.001)

@@ -243,12 +243,16 @@ func _draw() -> void:
 		max_value = _cached_max_value
 
 	_draw_cells(influence_map, min_value, max_value)
+	var legend: String = _layer_access_text
+	if debug_view == DebugView.POSITION_SCORE:
+		var hovered: Vector2i = tile_map_layer.local_to_map(tile_map_layer.to_local(get_global_mouse_position()))
+		legend += "\n" + hex_diagnostic(hovered)
 	
 	if draw_layer_access_text:
 		# Keep the diagnostic legend on screen while the world camera moves/zooms.
 		draw_set_transform_matrix(get_global_transform_with_canvas().affine_inverse())
 		var line_position: Vector2 = Vector2(20.0, 30.0)
-		for line: String in _layer_access_text.split("\n"):
+		for line: String in legend.split("\n"):
 			draw_string(ThemeDB.fallback_font, line_position, line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 			line_position.y += 20.0
 		draw_set_transform_matrix(Transform2D.IDENTITY)
@@ -281,6 +285,9 @@ func _draw_cells(influence_map: InfluenceMap, min_value: float, max_value: float
 			var outline_color: Color = Color(0.35, 1.0, 0.5, 0.9)
 			var outline_width: float = 1.5
 			var advice: PositionResult = _get_position_advice()
+			var index: int = influence_map.cell_to_index(cell)
+			if advice.cell_states.size() == influence_map.cell_count and advice.cell_states[index] == PositionResult.CellState.WAITING_HANDOFF:
+				outline_color = Color(1.0, 0.65, 0.15, 1.0)
 			if advice.is_valid() and cell == advice.target_hex:
 				outline_color = Color(1.0, 0.8, 0.15, 1.0)
 				outline_width = 3.0
@@ -343,8 +350,19 @@ func _should_draw_cell(influence_map: InfluenceMap, cell: Vector2i) -> bool:
 		return false
 	if debug_view == DebugView.POSITION_SCORE:
 		var advice: PositionResult = _get_position_advice()
+		if advice != null and advice.cell_states.size() == influence_map.cell_count:
+			var state: int = advice.cell_states[influence_map.cell_to_index(cell)]
+			return state == PositionResult.CellState.AVAILABLE or state == PositionResult.CellState.WAITING_HANDOFF
 		return advice != null and advice.eligibility.size() == influence_map.cell_count and advice.eligibility[influence_map.cell_to_index(cell)] != 0
 	return not hide_zero_values or absf(_get_debug_value(influence_map, cell)) > zero_epsilon
+
+
+func hex_diagnostic(cell: Vector2i) -> String:
+	var advice: PositionResult = _get_position_advice()
+	var map: InfluenceMap = influence_controller.get_map_for_team(team)
+	if advice == null or map == null or not map.is_valid_cell(cell):
+		return "Hex %s: no completed assessment" % cell
+	return "Hex %s: %s" % [cell, advice.describe_cell(map.cell_to_index(cell))]
 
 
 func _get_debug_value(influence_map: InfluenceMap, cell: Vector2i) -> float:
@@ -659,7 +677,10 @@ func _debug_report_layer_access(reason: String) -> void:
 		var advice: PositionResult = _get_position_advice()
 		if advice != null:
 			var candidate_count: int = advice.eligibility.count(1)
+			var waiting_count: int = advice.cell_states.count(PositionResult.CellState.WAITING_HANDOFF)
 			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
+			_layer_access_text += "\nGreen = available | amber = useful, waiting for covering fire | hover a hex for its reason"
+			_layer_access_text += "\nWaiting positions: %d" % waiting_count
 			if not advice.approach_cells.is_empty() or not advice.remembered_approach_cells.is_empty() or not advice.inferred_approach_cells.is_empty():
 				_layer_access_text += "\nCorridors: orange = observed/mission | amber dashes = last seen | gray dashes = inferred"
 			if advice.is_valid():
@@ -667,7 +688,10 @@ func _debug_report_layer_access(reason: String) -> void:
 				if advice.features.has("assigned_sector"):
 					_layer_access_text += "\nSector=%d | interception=%.0f%% | full corridor=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features.get("assigned_corridor_coverage", advice.features["assigned_coverage"]) * 100.0, advice.features["interdiction"]]
 					var sector: int = advice.features["assigned_sector"]
-					if advice.approach_sources.has(sector):
+					var branch: String = advice.features.get("assigned_branch", "")
+					if advice.branch_sources.has(branch):
+						_layer_access_text += " | branch %s source=%s" % [advice.branch_evidence[branch], advice.branch_sources[branch]]
+					elif advice.approach_sources.has(sector):
 						_layer_access_text += " | %s source=%s" % [advice.approach_evidence[sector], advice.approach_sources[sector]]
 					_layer_access_text += "\nOpen crossing=%.1fs | minimum open return to objective=%.1fs" % [advice.features.get("open_crossing_seconds", 0.0), advice.features.get("return_open_seconds", 0.0)]
 					_layer_access_text += "\nAdditional firing value=%.2f | connected cover=%s" % [advice.features.get("additional_interdiction", advice.features["interdiction"]), str(advice.features.get("objective_connected_cover", false))]

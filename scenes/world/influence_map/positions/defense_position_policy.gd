@@ -9,6 +9,8 @@ static func prepare(query: PositionQuery) -> void:
 	query.defense_approaches.clear()
 	if query.defense_area != null:
 		query.defense_approaches = query.defense_area.approaches.duplicate()
+		if query.assigned_branch != "":
+			query.defense_approaches = query.defense_area.duties()
 		return
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
 	var graph: AStar2D = null
@@ -65,23 +67,33 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var total_priority: float = 0.0
 	var important_count: int = 0
 	var important_covered: int = 0
+	var highest: float = 0.0
+	if query.defense_area != null:
+		highest = query.defense_area.max_priority
+		if query.assigned_branch != "":
+			highest = query.defense_area.max_duty_priority()
 	for approach: Dictionary in query.defense_approaches:
 		var coverage: float = _approach_coverage(query, query.unit, cell, approach)
 		var priority: float = approach.get("priority", 1.0)
-		if query.defense_area == null or priority >= query.defense_area.max_priority * 0.4:
+		if query.defense_area != null:
+			priority = query.defense_area.duty_priority(approach)
+		if query.defense_area == null or priority >= highest * 0.4:
 			important_count += 1
 			if coverage >= MIN_APPROACH_COVERAGE:
 				important_covered += 1
 		total_priority += priority
 		blocking += coverage * priority
-		if (query.assigned_sector < 0 and (query.defense_area == null or priority >= query.defense_area.max_priority * 0.4)) or query.assigned_sector == approach.get("id", -1):
+		var assigned: bool = query.assigned_sector == approach.get("id", -1)
+		if query.assigned_branch != "":
+			assigned = query.assigned_branch == DefenseAreaAssessment.duty_key(approach)
+		if (query.assigned_sector < 0 and (query.defense_area == null or priority >= highest * 0.4)) or assigned:
 			approach_covered = approach_covered or coverage >= MIN_APPROACH_COVERAGE
 		if coverage >= MIN_APPROACH_COVERAGE:
 			covered_approaches += 1
 		var enemy_distance: int = LOSHelper.get_hex_distance(query.objective_hex, approach["source"])
 		var detour: int = distance + LOSHelper.get_hex_distance(cell, approach["source"]) - enemy_distance
 		if distance <= enemy_distance and detour <= 1:
-			if query.assigned_sector < 0 or query.assigned_sector == approach.get("id", -1):
+			if query.assigned_sector < 0 or assigned:
 				interposition = maxf(interposition, 1.0 - 0.5 * float(maxi(detour, 0)))
 	if not query.defense_approaches.is_empty():
 		blocking /= maxf(total_priority, 0.001)
@@ -125,17 +137,9 @@ static func _approach_coverage(query: PositionQuery, unit: Unit, cell: Vector2i,
 static func _preserves_screen(query: PositionQuery, cell: Vector2i) -> bool:
 	if cell == query.unit.current_hex:
 		return true
+	if query.defense_area != null:
+		return _preserves_branch_screen(query, cell)
 	for approach: Dictionary in query.defense_approaches:
-		if query.defense_area != null:
-			# Terrain guesses guide positioning; they cannot lock a squad to every unseen direction.
-			if approach["evidence"] == "inferred":
-				continue
-			# Hazard knowledge persists, while low-priority old approaches may release their screen.
-			if approach["priority"] < query.defense_area.max_priority * 0.4:
-				continue
-			var assigned: Dictionary = query.defense_area.approach_for_sector(query.assigned_sector)
-			if not assigned.is_empty() and assigned["id"] != approach["id"] and assigned["priority"] > approach["priority"] * 1.4:
-				continue
 		if _approach_coverage(query, query.unit, query.unit.current_hex, approach) < MIN_APPROACH_COVERAGE or _approach_coverage(query, query.unit, cell, approach) >= MIN_APPROACH_COVERAGE:
 			continue
 		var covered_by_other: bool = false
@@ -159,6 +163,23 @@ static func _preserves_screen(query: PositionQuery, cell: Vector2i) -> bool:
 	return true
 
 
+static func _preserves_branch_screen(query: PositionQuery, cell: Vector2i) -> bool:
+	var highest: float = query.defense_area.max_duty_priority()
+	var assigned: Dictionary = query.defense_area.branch_for_key(query.assigned_branch)
+	if assigned.is_empty():
+		assigned = query.defense_area.approach_for_sector(query.assigned_sector)
+	for branch: Dictionary in query.defense_area.duties():
+		var priority: float = query.defense_area.duty_priority(branch)
+		if branch["evidence"] == "inferred" or priority < highest * 0.4:
+			continue
+		# A dominant new axis can release a less urgent old front, as in sector planning.
+		if not assigned.is_empty() and assigned["id"] != branch["id"] and query.defense_area.duty_priority(assigned) > priority * 1.4:
+			continue
+		if query.defense_area.combined_coverage(query, query.unit.current_hex, branch) >= MIN_APPROACH_COVERAGE and query.defense_area.combined_coverage(query, cell, branch) < MIN_APPROACH_COVERAGE:
+			return false
+	return true
+
+
 static func needs_withdrawal(query: PositionQuery) -> bool:
 	return query.withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(query.unit) < query.profile.withdrawal_effectiveness
 
@@ -174,9 +195,7 @@ static func allows_route(query: PositionQuery, features: Dictionary) -> bool:
 	return features["peak_exposure"] <= query.profile.max_route_exposure and features["exposure_seconds"] <= query.profile.max_exposure_seconds and features["open_exposure_seconds"] <= query.profile.max_open_exposure_seconds
 
 
-static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary) -> String:
-	if query.defense_area != null and not query.relocation_allowed and cell != query.unit.current_hex and not (query.has_accepted_target and query.accepted_context == query.context_key() and cell == query.accepted_target):
-		return "handoff_wait"
+static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary, check_handoff: bool = true) -> String:
 	if features["responsibility"] == "":
 		return "responsibility"
 	if query.defense_area != null and (not is_finite(features["objective_return_seconds"]) or not is_finite(features["return_open_seconds"])):
@@ -189,4 +208,6 @@ static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary
 		return "exposure_budget"
 	if features["incoming"] > query.profile.max_incoming_risk and not can_hold_under_pressure(query, cell, features):
 		return "risk"
+	if check_handoff and query.defense_area != null and not query.relocation_allowed and cell != query.unit.current_hex and not (query.has_accepted_target and query.accepted_context == query.context_key() and cell == query.accepted_target):
+		return "handoff_wait"
 	return ""

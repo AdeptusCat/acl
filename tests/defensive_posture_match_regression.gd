@@ -103,10 +103,12 @@ func _run() -> void:
 				if not initial_orders.has(unit):
 					initial_orders[unit] = unit.action_controller.action_order_id
 					changes[unit] = 0
-				elif last_targets[unit] != target_key:
+				elif advice.is_valid() and last_targets.get(unit, target_key) != target_key:
 					changes[unit] += 1
-			last_targets[unit] = target_key
-			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason, "responsibility": advice.features.get("responsibility", ""), "blocking": advice.features.get("blocking", 0.0)})
+			# A temporary no-candidate/waiting diagnosis issues no destination; track real target changes.
+			if advice.is_valid():
+				last_targets[unit] = target_key
+			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason, "responsibility": advice.features.get("responsibility", ""), "blocking": advice.features.get("blocking", 0.0), "branch": advice.features.get("assigned_branch", ""), "rejections": advice.rejections})
 		if frame >= 599:
 			_check(_objective_guarded(planner), "A stationary nearby opponent does not leave the objective or its approach unprotected")
 			if tripod_anchor != null:
@@ -147,11 +149,14 @@ func _relocation_hex(controller: InfluenceMapController, player: Unit, defender:
 			return a.x < b.x
 		return a.y < b.y)
 	for cell: Vector2i in cells:
-		if cell == player.current_hex or LOSHelper.get_hex_distance(cell, defender.current_hex) != 2 or not LOSHelper.los_lookup.get(defender.current_hex, {}).has(cell):
+		if cell == player.current_hex or cell == controller.objectives_by_team[defender.team] or LOSHelper.get_hex_distance(cell, defender.current_hex) != 2 or not LOSHelper.los_lookup.get(defender.current_hex, {}).has(cell):
 			continue
 		var occupied: bool = false
 		for unit: Unit in Globals.get_units():
 			occupied = occupied or unit.current_hex == cell
+			# The positional fixture must not send the player into an AI destination/close combat.
+			occupied = occupied or (unit.movement.is_moving and unit.movement.target_hex == cell)
+			occupied = occupied or (unit.position_advice != null and unit.position_advice.is_valid() and unit.position_advice.target_hex == cell)
 		if occupied or controller.snapshot.get_path(player.team, player.current_hex, cell).is_empty():
 			continue
 		var distance: int = LOSHelper.get_hex_distance(player.current_hex, cell)
