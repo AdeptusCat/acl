@@ -222,7 +222,7 @@ func _test_reserve_crossing(controller: InfluenceMapController, team: int) -> vo
 		_check(result.features.get("objective_connected_cover", false) and result.features.get("return_open_seconds", INF) == 0.0 and result.features.get("open_crossing_seconds", INF) <= query.defense_crossing_seconds() + 0.001 and result.features.get("open_exposure_seconds", INF) <= query.profile.max_open_exposure_seconds, "Entrance coverage keeps woodland return access and stays within the short-crossing risk budget")
 		_check(result.rejection_reasons[snapshot.maps[team].cell_to_index(reserve.current_hex)] == "crossing_gap", "Diagnostics expose why the high-scoring sheltered origin cannot fulfill the entrance duty")
 		var watch: Dictionary = readiness.area.branch_for_key(readiness.watch_branch)
-		_check(readiness.area.coverage(query, reserve, result.target_hex, watch)["visible_targets"].has(contact.hex), "The forward reserve has usable fire on the known open-ground attacker")
+		_check(PositionFeatureEvaluator.outgoing_utility(query, result.target_hex, contact.hex) > 0.0, "The forward reserve has usable fire on the known open-ground attacker")
 		var validation: DefensePlanValidationJob = DefensePlanValidationJob.new()
 		validation.start(readiness.area, [{"query": query}], [DefensePositionAnalyzer.adapt_result(result, null, "reserve")])
 		validation.advance(-1)
@@ -265,6 +265,7 @@ func _test_reserve_crossing(controller: InfluenceMapController, team: int) -> vo
 		_check(established.responses.get(established.watch_branch, {}).get("seconds", {}).get(reserve.current_hex, INF) == 0.0, "An established interception position has no repeated movement or setup delay")
 		query.defense_area = established.area
 		query.reserve_responses = established.responses
+		query.reserve_response_limits = established.response_limits()
 		query.assigned_branch = established.watch_branch
 		query.required_crossing_branch = established.watch_branch
 		query.reservations.erase(reserve)

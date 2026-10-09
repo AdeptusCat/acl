@@ -42,6 +42,7 @@ var reserve_responses: Dictionary[String, Dictionary] = {}
 var reserve_reason: String = ""
 var reserve_response_context: String = ""
 var required_crossing_branch: String = ""
+var reserve_response_limits: Dictionary[String, float] = {}
 var relocation_allowed: bool = true
 var sector_features: Dictionary[Unit, Dictionary] = {}
 var support_fire_by_branch: Dictionary[String, Dictionary] = {}

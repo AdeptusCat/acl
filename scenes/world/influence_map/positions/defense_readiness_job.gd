@@ -8,6 +8,7 @@ enum Phase { COVERAGE, TARGETS, FIELD, RESPONSES, FINISH }
 const WATCH_SECONDS: float = 12.0
 const ESTIMATED_WATCH_SECONDS: float = 20.0
 const WATCH_MEMORY_SECONDS: float = 8.0
+const QUIET_RESPONSE_SECONDS: float = 8.0
 
 var completed: bool = false
 var area: DefenseAreaAssessment
@@ -91,7 +92,7 @@ func advance(deadline_usec: int) -> void:
 			Phase.TARGETS:
 				var branch: Dictionary = branches[branch_index]
 				var data: Dictionary = responses[DefenseAreaAssessment.duty_key(branch)]
-				var connected_required: bool = data["crossing"] and data["arrival_seconds"] <= _watch_window(branch) and _watch_evidence(branch)
+				var connected_required: bool = data["crossing"] and (branch.get("evidence", "inferred") == "inferred" or (data["arrival_seconds"] <= _watch_window(branch) and _watch_evidence(branch)))
 				if cell_index < area.covered_positions.size():
 					var cell: Vector2i = area.covered_positions[cell_index]
 					var combined: Dictionary = established_targets[DefenseAreaAssessment.duty_key(branch)].duplicate()
@@ -188,22 +189,52 @@ func _response_seconds(origin: Vector2i) -> float:
 	return seconds
 
 
-func _watch_branch() -> String:
+func select_watch(assignments: Dictionary[Unit, String], previous_watch: String = "", failed_duties: Dictionary[Unit, String] = {}) -> String:
+	# Planned ownership distributes duties; it cannot supply established fire or safe handoffs.
+	var owned: Dictionary[String, bool] = {}
+	for unit: Unit in assignments:
+		if DefenseSectorAllocator.combat_reserve_capable(unit) and failed_duties.get(unit, "") != assignments[unit]:
+			owned[assignments[unit]] = true
+	return _watch_branch(owned, previous_watch)
+
+
+func response_limits() -> Dictionary[String, float]:
+	var limits: Dictionary[String, float] = {}
+	if reserve == null:
+		return limits
+	for key: String in responses:
+		var data: Dictionary = responses[key]
+		if not data["covered"] and data["seconds"].get(reserve.current_hex, INF) <= data["arrival_seconds"]:
+			limits[key] = data["arrival_seconds"]
+	return limits
+
+
+func _watch_branch(owned: Dictionary[String, bool] = {}, previous_watch: String = "") -> String:
 	if not DefenseSectorAllocator.combat_reserve_capable(reserve):
 		return ""
 	var selected: String = ""
 	var highest: float = -INF
+	var selected_owned: bool = true
+	var quiet_incumbent: String = ""
 	for branch: Dictionary in branches:
 		var key: String = DefenseAreaAssessment.duty_key(branch)
 		var data: Dictionary = responses.get(key, {})
-		if data.is_empty() or not data["crossing"] or data["covered"] or not data["has_intercept"] or data["arrival_seconds"] > _watch_window(branch):
+		if data.is_empty() or not data["crossing"] or data["covered"] or not data["has_intercept"]:
 			continue
-		if not _watch_evidence(branch):
+		var current_response: float = data["seconds"].get(reserve.current_hex, INF)
+		if key == previous_watch and not owned.has(key) and branch.get("evidence", "inferred") == "inferred" and is_finite(current_response):
+			quiet_incumbent = key
+		var quiet_gap: bool = branch.get("evidence", "inferred") == "inferred" and is_finite(current_response) and current_response > minf(QUIET_RESPONSE_SECONDS, data["arrival_seconds"])
+		if not quiet_gap and (not _watch_evidence(branch) or data["arrival_seconds"] > _watch_window(branch)):
 			continue
 		var urgency: float = area.duty_priority(branch) / (1.0 + data["arrival_seconds"])
-		if urgency > highest:
+		var is_owned: bool = owned.has(key)
+		if selected == "" or (selected_owned and not is_owned) or (selected_owned == is_owned and urgency > highest):
 			selected = key
 			highest = urgency
+			selected_owned = is_owned
+	if quiet_incumbent != "" and (selected == "" or selected_owned or area.branch_for_key(selected).get("evidence", "inferred") == "inferred"):
+		return quiet_incumbent
 	return selected
 
 

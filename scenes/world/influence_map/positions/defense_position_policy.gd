@@ -209,6 +209,9 @@ static func allows_route(query: PositionQuery, features: Dictionary) -> bool:
 
 
 static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary, check_handoff: bool = true) -> String:
+	for key: String in query.reserve_response_limits:
+		if features.get("reserve_branch_status", {}).get(key, {}).get("response_seconds", INF) > query.reserve_response_limits[key]:
+			return "reserve_gap"
 	if query.required_crossing_branch != "":
 		if features.get("crossing_coverage", 0.0) < DefenseAreaAssessment.MIN_CROSSING_COVERAGE:
 			return "crossing_gap"

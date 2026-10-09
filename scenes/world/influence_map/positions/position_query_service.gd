@@ -91,6 +91,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 				result.reason = "Holding until relocation can preserve existing approach coverage"
 			if query.required_crossing_branch != "":
 				result.reason = "Holding: no safe connected position can close the threatened open crossing"
+			if result.rejections.has("reserve_gap"):
+				result.reason = "Holding until relocation can preserve timely reserve response to other approaches"
 			if result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
 				result.reason = "Waiting for the relocating defender to establish covering fire"
 		return

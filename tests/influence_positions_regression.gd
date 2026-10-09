@@ -139,6 +139,7 @@ func _run() -> void:
 	_test_loadout_stationary_roles()
 	_test_branch_defense()
 	_test_sector_pressure_and_protected_reserve()
+	_test_flexible_defense()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -2199,6 +2200,186 @@ func _test_branch_defense() -> void:
 	other.current_hex = other_hex
 	other.firepower = other_power
 	_publish()
+
+
+func _test_flexible_defense() -> void:
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		for objective: Vector2i in [Vector2i(3, 3), Vector2i(5, 3)]:
+			for direction: int in range(6):
+				_test_directional_reserve(team, objective, direction)
+	_test_quiet_watch_continuity()
+	_publish()
+
+
+func _test_quiet_watch_continuity() -> void:
+	var area: DefenseAreaAssessment = DefenseAreaAssessment.new()
+	area.geometry = {"cells": []}
+	area.approaches = [{"id": 0, "key": "first", "priority": 0.08, "source": own.current_hex, "evidence": "inferred", "cells": []}, {"id": 3, "key": "second", "priority": 0.08, "source": other.current_hex, "evidence": "inferred", "cells": []}]
+	var readiness: DefenseReadinessJob = DefenseReadinessJob.new()
+	readiness.start(area, controller.snapshot, own.team, [own], own, 3)
+	readiness.responses = {"first": {"covered": false, "crossing": true, "has_intercept": true, "arrival_seconds": 20.0, "seconds": {own.current_hex: 0.0}}, "second": {"covered": false, "crossing": true, "has_intercept": true, "arrival_seconds": 20.0, "seconds": {own.current_hex: 9.0}}}
+	_check(readiness.select_watch({}) == "second", "A slow response can create a quiet terrain watch before a sighting")
+	_check(readiness.select_watch({}, "first") == "first", "Quiet response differences cannot rotate an established watch repeatedly between terrain guesses")
+	area.approaches[1]["evidence"] = "estimated"
+	area.approaches[1]["priority"] = 0.25
+	_check(readiness.select_watch({}, "first") == "second", "New credible pressure can supersede a quiet watch without a fixed direction")
+	_check(readiness.select_watch({other as Unit: "second"}, "first") == "first" and not readiness.responses["second"]["covered"], "A front's planned duty distributes reserve responsibility without claiming established fire")
+	_check(readiness.select_watch({other as Unit: "second"}, "first", {other as Unit: "second"}) == "second", "A failed front position cannot indefinitely keep the reserve away from that uncovered approach")
+	var headquarters: UnitProbe = _unit(own.team, own.current_hex)
+	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	_check(readiness.select_watch({headquarters as Unit: "second"}, "first") == "second", "An HQ assignment cannot substitute for a combat defender on a credible approach")
+	headquarters.free()
+	area.approaches[1]["evidence"] = "inferred"
+	area.approaches[1]["priority"] = 0.08
+	readiness.responses["first"]["seconds"][own.current_hex] = INF
+	_check(readiness.select_watch({}, "first") == "second", "An unsafe or blocked old response route invalidates quiet watch continuity")
+
+
+func _directional_area(snapshot: InfluenceSnapshot, team: int, objective: Vector2i, sources: Array[Vector2i], reversed: bool) -> DefenseAreaAssessment:
+	var job: DefenseAreaJob = DefenseAreaJob.new()
+	job.start(snapshot, team, objective, 2, 8, [])
+	job.advance(-1)
+	var area: DefenseAreaAssessment = job.result
+	area.approaches.clear()
+	for index: int in range(sources.size()):
+		var source: Vector2i = sources[index]
+		var delta: Vector3i = (ground.map_to_cube(source) - ground.map_to_cube(objective)) / 3
+		var entry: Vector2i = ground.cube_to_map(ground.map_to_cube(source) - delta)
+		var edge: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) + delta)
+		var field: DefenseTravelField = DefenseTravelField.new()
+		field.start(area.geometry, source)
+		field.advance(-1)
+		var observed: bool = index == 0
+		if reversed:
+			observed = index == 1
+		var evidence: String = "estimated"
+		var priority: float = 0.25
+		var crossing: float = 2.0
+		var arrival: float = 20.0
+		if observed:
+			evidence = "observed"
+			priority = 4.0
+			crossing = 12.0 / (field.distances[entry] + area.geometry["costs"][edge])
+			arrival = field.distances[objective] * crossing
+		var sector: int = area.sector_at(source)
+		area.approaches.append({"id": sector, "key": str(sector) + ":front", "priority": priority, "source": source, "evidence": evidence, "cells": [entry, source], "weights": {entry: 1.0, source: 1.0}, "distances": field.distances, "arrival_seconds": arrival, "crossing_seconds": crossing, "response_distances": area.geometry["response_fields"][sector]})
+	area.max_priority = 4.0
+	return area
+
+
+func _directional_plan(snapshot: InfluenceSnapshot, team: int, area: DefenseAreaAssessment, defenders: Array[Unit], reserve: Unit) -> PlatoonAI:
+	var readiness: DefenseReadinessJob = DefenseReadinessJob.new()
+	readiness.start(area, snapshot, team, defenders, reserve, 4)
+	readiness.advance(-1)
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = team
+	planner.influence_map_controller = controller
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = area.objective_hex
+	planner.defense_area = area
+	planner.reserve_squad = reserve
+	planner._planning_snapshot = snapshot
+	planner._planning_readiness = readiness
+	for unit: Unit in defenders:
+		planner._planning_reservations[unit] = unit.current_hex
+	planner._build_sector_requests(defenders.duplicate())
+	return planner
+
+
+func _reserve_request(planner: PlatoonAI, reserve: Unit) -> PositionQuery:
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == reserve:
+			return request["query"]
+	return null
+
+
+func _test_directional_reserve(team: Globals.Team, objective: Vector2i, direction: int) -> void:
+	var neighbors: Array[Vector2i] = LOSHelper.get_hex_neighbors(objective)
+	var delta: Vector3i = ground.map_to_cube(neighbors[direction]) - ground.map_to_cube(objective)
+	var main_source: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) + delta * 3)
+	var flank_source: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) - delta * 3)
+	var main_edge: Vector2i = neighbors[direction]
+	var flank_edge: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) - delta)
+	var anchor: UnitProbe = _unit(team, objective)
+	var gun: UnitProbe = _unit(team, neighbors[(direction + 1) % 6])
+	var infantry: UnitProbe = _unit(team, neighbors[(direction + 2) % 6])
+	var reserve: UnitProbe = _unit(team, flank_edge)
+	anchor.squad_type = Globals.SquadType.MG
+	gun.squad_type = Globals.SquadType.MG
+	infantry.squad_type = Globals.SquadType.Rifle
+	reserve.squad_type = Globals.SquadType.Rifle
+	_equip(anchor, [load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec])
+	_equip(gun, [load("res://resources/weapons/mg34.tres") as WeaponSpec])
+	_equip(infantry, [load("res://resources/weapons/kar98.tres") as WeaponSpec])
+	_equip(reserve, [load("res://resources/weapons/kar98.tres") as WeaponSpec])
+	var defenders: Array[Unit] = [anchor, gun, infantry, reserve]
+	_publish()
+	var snapshot: InfluenceSnapshot = controller.snapshot
+	snapshot.positions.clear()
+	snapshot.teams.clear()
+	# This fixture changes captured terrain directly rather than changing authored tiles.
+	snapshot.defense_geometry_cache.clear()
+	snapshot.contacts[team] = []
+	snapshot.defensive_contacts[team] = []
+	snapshot.los = {}
+	var map: InfluenceMap = snapshot.maps[team]
+	for cell: Vector2i in map.playable_cells:
+		var cover: float = 0.0
+		if LOSHelper.get_hex_distance(cell, objective) <= 1:
+			cover = 0.5
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, cover)
+		map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 0.0)
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_MOVE_COST, cell, cover * float(direction % 2))
+		snapshot.los[cell] = {}
+	for unit: Unit in defenders:
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.teams[unit] = team
+	for id: int in snapshot.routes[team].get_point_ids():
+		snapshot.routes[team].set_point_disabled(id, false)
+	var record: Dictionary = {"target_cover": 0.0, "hindrance": 0.0}
+	var main_entry: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) + delta * 2)
+	var flank_entry: Vector2i = ground.cube_to_map(ground.map_to_cube(objective) - delta * 2)
+	snapshot.los[main_edge] = {main_entry: record, main_source: record}
+	snapshot.los[flank_edge] = {flank_entry: record, flank_source: record}
+	var sources: Array[Vector2i] = [main_source, flank_source]
+	var area: DefenseAreaAssessment = _directional_area(snapshot, team, objective, sources, false)
+	var planner: PlatoonAI = _directional_plan(snapshot, team, area, defenders, reserve)
+	var request: PositionQuery = _reserve_request(planner, reserve)
+	var main_key: String = DefenseAreaAssessment.duty_key(area.approaches[0])
+	var flank_key: String = DefenseAreaAssessment.duty_key(area.approaches[1])
+	_check(not planner.reserve_deployed and request.required_crossing_branch == flank_key, "For every direction and objective the reserve watches the remaining approach after combat-front allocation")
+	_check(planner._planning_readiness.coverage[main_key] == 0.0, "A front assignment cannot invent established fire on its approach")
+	var held: PositionResult = PositionQueryService.query_positions(request)
+	_check(held.is_valid() and held.target_hex == flank_edge and not held.should_move, "The reserve retains useful opposite-side coverage instead of joining the strong attack")
+	_check(_planned_role(planner, anchor) == "guard_objective", "Changing attack direction never swaps the tripod anchor into the mobile role")
+	request.required_crossing_branch = main_key
+	request.assigned_branch = main_key
+	request.assigned_sector = area.approaches[0]["id"]
+	var concentrated: PositionResult = PositionQueryService.query_positions(request)
+	_check(not concentrated.is_valid() and concentrated.rejections.has("reserve_gap"), "Even an explicit strong-front duty cannot consume the quiet approach's timely reserve response")
+	planner.free()
+	area = _directional_area(snapshot, team, objective, sources, true)
+	planner = _directional_plan(snapshot, team, area, defenders, reserve)
+	request = _reserve_request(planner, reserve)
+	_check(request.required_crossing_branch == main_key, "Reversing attack pressure reverses the reserve's residual duty without fixed map directions")
+	var waiting: PositionResult = PositionQueryService.query_positions(request)
+	_check(not waiting.is_valid() and (waiting.rejections.has("reserve_gap") or waiting.rejections.has("screen_gap")), "A direction change cannot abandon timely protection before another defender establishes the new front")
+	planner.free()
+	# A real covering position, rather than its future assignment, releases the reserve.
+	var handoff: Vector2i = neighbors[(direction + 4) % 6]
+	snapshot.los[handoff] = {flank_entry: record, flank_source: record}
+	gun.current_hex = handoff
+	snapshot.positions[gun as Unit] = handoff
+	planner = _directional_plan(snapshot, team, area, defenders, reserve)
+	request = _reserve_request(planner, reserve)
+	var repositioned: PositionResult = PositionQueryService.query_positions(request)
+	_check(planner._planning_readiness.coverage[flank_key] >= DefensePositionPolicy.MIN_APPROACH_COVERAGE and repositioned.is_valid() and repositioned.target_hex == main_edge, "Established new-front fire releases the reserve to the opposite approach on translated and rotated terrain")
+	_check(repositioned.features.get("objective_connected_cover", false) and repositioned.features.get("open_crossing_seconds", INF) == 0.0, "Flexible reserve reassignment stays in connected cover and does not force an open crossing")
+	planner.free()
+	for unit: Unit in defenders:
+		unit.squad_fire.free()
+		unit.squad_fire = null
+		unit.free()
 
 
 func _test_sector_pressure_and_protected_reserve() -> void:

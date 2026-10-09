@@ -304,28 +304,40 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 			_clear_reserve()
 	else:
 		_clear_reserve()
-	var reserve_requested: bool = false
-	if _planning_readiness != null and _planning_readiness.watch_branch != "":
-		var watch: Dictionary = defense_area.branch_for_key(_planning_readiness.watch_branch)
-		if reserve != null:
-			# Cover a threatened entrance before optional relocations consume the handoff.
-			_add_sector_request(reserve, "reserve", watch["id"], PositionQuery.Responsibility.AUTO, DefenseAreaAssessment.duty_key(watch))
-			reserve_requested = true
-		elif reserve_deployed and available.has(reserve_squad):
-			available.erase(reserve_squad)
-			_add_sector_request(reserve_squad, "defend_sector", watch["id"], PositionQuery.Responsibility.COVER_APPROACH, DefenseAreaAssessment.duty_key(watch))
 	var previous: Dictionary = {}
 	for unit: Unit in squad_assignments:
 		previous[unit] = {"sector": squad_assignments[unit]["result"].features.get("assigned_sector", -1), "branch": squad_assignments[unit]["result"].features.get("assigned_branch", "")}
 	var coverage: Dictionary[String, float] = {}
+	var previous_watch: String = ""
+	if reserve != null and squad_assignments.has(reserve):
+		previous_watch = squad_assignments[reserve]["result"].features.get("required_crossing_branch", "")
 	if _planning_readiness != null:
 		coverage = _planning_readiness.coverage.duplicate()
-		if reserve != null:
-			for key: String in _planning_readiness.responses:
-				var response: Dictionary = _planning_readiness.responses[key]
-				if response["seconds"].get(reserve.current_hex, INF) <= response["arrival_seconds"]:
-					coverage[key] = maxf(coverage.get(key, 0.0), DefensePositionPolicy.MIN_APPROACH_COVERAGE)
+		var watch_response: Dictionary = _planning_readiness.responses.get(previous_watch, {})
+		if reserve != null and not watch_response.is_empty() and watch_response["seconds"].get(reserve.current_hex, INF) == 0.0:
+			# The retained reserve's established fire reduces demand, unlike a future response promise.
+			coverage[previous_watch] = DefensePositionPolicy.MIN_APPROACH_COVERAGE
 	var assignments: Dictionary[Unit, String] = DefenseSectorAllocator.assign_branches(defense_area, available, previous, coverage)
+	var reserve_requested: bool = false
+	if _planning_readiness != null:
+		if reserve != null and _planning_readiness.emergency == "":
+			var failed_duties: Dictionary[Unit, String] = {}
+			for unit: Unit in available:
+				if squad_assignments.has(unit):
+					var prior_result: DefensePositionResult = squad_assignments[unit]["result"]
+					if not prior_result.is_valid() and not prior_result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
+						failed_duties[unit] = prior_result.features.get("assigned_branch", "")
+			_planning_readiness.watch_branch = _planning_readiness.select_watch(assignments, previous_watch, failed_duties)
+		if _planning_readiness.watch_branch != "":
+			var watch: Dictionary = defense_area.branch_for_key(_planning_readiness.watch_branch)
+			if reserve != null:
+				# Duty selection follows front allocation; urgent execution still precedes optional moves.
+				_add_sector_request(reserve, "reserve", watch["id"], PositionQuery.Responsibility.AUTO, DefenseAreaAssessment.duty_key(watch))
+				reserve_requested = true
+			elif reserve_deployed and available.has(reserve_squad):
+				available.erase(reserve_squad)
+				assignments.erase(reserve_squad)
+				_add_sector_request(reserve_squad, "defend_sector", watch["id"], PositionQuery.Responsibility.COVER_APPROACH, DefenseAreaAssessment.duty_key(watch))
 	for approach: Dictionary in DefenseSectorAllocator.branch_priorities(defense_area):
 		for unit: Unit in available:
 			if assignments.get(unit, "") == DefenseAreaAssessment.duty_key(approach):
@@ -385,6 +397,7 @@ func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: 
 	if query.reserve_position and _planning_readiness != null and _planning_readiness.reserve == unit:
 		query.reserve_responses = _planning_readiness.responses
 		query.reserve_response_context = _planning_readiness.reserve_capability
+		query.reserve_response_limits = _planning_readiness.response_limits()
 	query.relocation_allowed = _can_relocate(unit)
 	if query.reserve_position:
 		query.profile.firing_weight = 0.0
