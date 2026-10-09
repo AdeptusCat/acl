@@ -135,6 +135,7 @@ func _run() -> void:
 	_test_objective_connected_defense()
 	_test_local_interception()
 	_test_complementary_defense()
+	_test_loadout_stationary_roles()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -167,6 +168,8 @@ func _unit(team: Globals.Team, hex: Vector2i) -> UnitProbe:
 	action.movement = unit.movement
 	unit.squad_fire.calc.free()
 	unit.squad_fire = null
+	# These policy probes have no weapon roster; equipment tests attach one explicitly.
+	unit.squad_loadout = null
 	return unit
 
 
@@ -414,6 +417,170 @@ func _test_profiles() -> void:
 	_check(weapon.ammunition == ammunition, "Capability queries never consume ammunition")
 	fire.free()
 	own.squad_fire = null
+
+
+func _equip(unit: Unit, weapons: Array[WeaponSpec]) -> void:
+	var fire: SquadFireController = SquadFireController.new()
+	unit.squad_fire = fire
+	unit.squad_loadout = SquadLoadoutSpec.new()
+	for index: int in range(weapons.size()):
+		var definition: SoldierLoadout = SoldierLoadout.new()
+		definition.weapon = weapons[index]
+		unit.squad_loadout.soldiers.append(definition)
+		fire.soldiers.append(Soldier.new(index, "Equipment probe", RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, weapons[index].create_runtime(), unit, unit.team))
+
+
+func _planned_role(planner: PlatoonAI, unit: Unit) -> String:
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == unit:
+			return request["role"]
+	return ""
+
+
+func _test_loadout_stationary_roles() -> void:
+	var fixture: PositionQuery = _defense_fixture()
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		var tripod_weapon: WeaponSpec = load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec
+		var bipod_weapon: WeaponSpec = load("res://resources/weapons/mg34.tres") as WeaponSpec
+		var rifle_weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+		if team == Globals.Team.ALLIES:
+			tripod_weapon = load("res://resources/weapons/m1919a4.tres") as WeaponSpec
+			bipod_weapon = load("res://resources/weapons/m1918a1_bar.tres") as WeaponSpec
+			rifle_weapon = load("res://resources/weapons/m1_garand.tres") as WeaponSpec
+		var rifle: UnitProbe = _unit(team, Vector2i(4, 2))
+		var bipod: UnitProbe = _unit(team, Vector2i(4, 4))
+		var tripod: UnitProbe = _unit(team, Vector2i(5, 2))
+		var spare: UnitProbe = _unit(team, Vector2i(5, 4))
+		_equip(rifle, [rifle_weapon, rifle_weapon])
+		_equip(bipod, [bipod_weapon, rifle_weapon])
+		_equip(tripod, [tripod_weapon, rifle_weapon])
+		_equip(spare, [tripod_weapon, rifle_weapon])
+		# Misleading squad labels cannot outweigh the weapons actually carried.
+		rifle.squad_type = Globals.SquadType.MG
+		tripod.squad_type = Globals.SquadType.Rifle
+		_check(InfluenceUnitQuery.get_defensive_mount(tripod) == WeaponSpec.Mount.TRIPOD and InfluenceUnitQuery.get_defensive_mount(bipod) == WeaponSpec.Mount.BIPOD and InfluenceUnitQuery.get_defensive_mount(rifle) == WeaponSpec.Mount.NONE, "Runtime loadouts distinguish tripod, bipod and rifle-only squads for either team")
+		_check(tripod.squad_fire.soldiers[0].weapon.mount == tripod_weapon.mount, "Weapon runtime copies retain their authored mount")
+		_check(DefenseSectorAllocator.select_guard([rifle, bipod, tripod]) == tripod and DefenseSectorAllocator.select_guard([tripod, bipod, rifle]) == tripod, "A tripod MG anchors objective defense independently of squad labels or list order")
+		_check(DefenseSectorAllocator.select_guard([rifle, bipod]) == bipod, "A mixed rifle squad carrying a bipod MG is more stationary than rifle-only infantry")
+		tripod.squad_fire.soldiers[0].jammed = true
+		tripod.squad_fire.soldiers[0].rounds_in_mag = 0
+		_check(DefenseSectorAllocator.select_guard([rifle, tripod]) == tripod, "A temporary jam or reload does not exchange the objective guard and flanking squad")
+		tripod.squad_fire.soldiers[0].jammed = false
+		tripod.combat_stats.combat_effectiveness = 0.3
+		_check(DefenseSectorAllocator.select_guard([rifle, tripod]) == rifle, "An ineffective MG does not monopolize the guard role over healthy infantry")
+		tripod.combat_stats.combat_effectiveness = rifle.combat_stats.combat_effectiveness
+		var area: DefenseAreaAssessment = DefenseAreaAssessment.new()
+		area.objective_hex = Vector2i(3, 3)
+		area.max_priority = 1.0
+		var response: Dictionary = {}
+		for unit: Unit in [rifle, bipod, tripod, spare]:
+			response[unit.current_hex] = 0.0
+		area.approaches = [{"id": 0, "priority": 1.0, "response_distances": response}]
+		var planner: PlatoonAI = PlatoonAI.new()
+		planner.team = team
+		planner.influence_map_controller = controller
+		planner.current_order = MissionOrder.new()
+		planner.current_order.objective_hex = area.objective_hex
+		planner.defense_area = area
+		planner._planning_snapshot = fixture.snapshot
+		planner._build_sector_requests([rifle, tripod])
+		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, rifle) == "defend_sector", "One rifle and one tripod MG keep the MG guarding and the rifle covering the approach")
+		_check(planner._planning_requests[0]["query"].defense_responsibility == PositionQuery.Responsibility.GUARD and planner._planning_requests[1]["query"].defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH, "Loadout-based roles become explicit guard and approach responsibilities")
+		planner._planning_requests.clear()
+		planner._build_sector_requests([rifle, tripod, spare])
+		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, spare) == "defend_sector" and _planned_role(planner, rifle) == "reserve", "A spare tripod MG can defend forward after the stationary anchor is retained")
+		planner._planning_requests.clear()
+		planner._build_sector_requests([tripod, rifle, bipod])
+		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, rifle) == "reserve" and _planned_role(planner, bipod) == "defend_sector", "Reserve selection cannot consume the only tripod MG and prefers mobile infantry at equal effectiveness")
+		planner.current_order.reserve_policy = MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE
+		tripod.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+		planner._planning_requests.clear()
+		planner._build_sector_requests([tripod, rifle, bipod])
+		_check(_planned_role(planner, tripod) == "reserve" and _planned_role(planner, bipod) == "guard_objective", "An explicit HQ reserve instruction overrides automatic equipment-based guard selection")
+		tripod.squad_type = Globals.SquadType.Rifle
+		planner.current_order.reserve_policy = MissionOrder.ReservePolicy.KEEP_ONE_SQUAD_IF_POSSIBLE
+		area.approaches.append({"id": 3, "priority": 1.0, "response_distances": response})
+		planner._planning_requests.clear()
+		planner._build_sector_requests([rifle, tripod, spare])
+		_check(_planned_role(planner, tripod) == "guard_objective" and _planned_role(planner, rifle) == "defend_sector" and _planned_role(planner, spare) == "defend_sector", "A second significant front deploys the mobile reserve without moving the MG anchor into that role")
+		area.approaches[1]["priority"] = 1.4
+		var assignments: Dictionary[Unit, int] = DefenseSectorAllocator.assign(area, [spare], {spare: {"sector": 0}})
+		_check(assignments[spare as Unit] == 0, "An established spare tripod team retains its firing sector through a moderate priority fluctuation")
+		area.approaches[1]["priority"] = 2.0
+		assignments = DefenseSectorAllocator.assign(area, [spare], {spare: {"sector": 0}})
+		_check(assignments[spare as Unit] == 3, "A substantially stronger flank can still retask a spare stationary MG")
+		planner.defense_area = null
+		planner.current_order.reserve_policy = MissionOrder.ReservePolicy.NONE
+		planner._planning_requests.clear()
+		planner._build_planning_requests([rifle, tripod])
+		_check(_planned_role(planner, tripod) == "guard_objective", "The defense adapter without an area assessment uses the same loadout guard allocation")
+		var base: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+		var rifle_profile: PositionProfile = PositionProfile.for_unit(base, rifle)
+		var bipod_profile: PositionProfile = PositionProfile.for_unit(base, bipod)
+		var tripod_profile: PositionProfile = PositionProfile.for_unit(base, tripod)
+		_check(rifle_profile.commitment_seconds == 8.0 and bipod_profile.commitment_seconds == 12.0 and tripod_profile.commitment_seconds == 16.0, "Position commitment increases from rifle to bipod to tripod loadouts")
+		_check(rifle_profile.travel_weight < bipod_profile.travel_weight and bipod_profile.travel_weight < tripod_profile.travel_weight and bipod_profile.improvement_absolute < tripod_profile.improvement_absolute, "Stationary weapons require greater relocation benefit and pay a greater travel cost")
+		_check(base.commitment_seconds == 8.0 and base.travel_weight == rifle_profile.travel_weight, "Per-squad defensive profiles do not mutate a shared mission profile")
+		_check(PositionProfile.for_unit(tripod_profile, tripod).commitment_seconds == tripod_profile.commitment_seconds and PositionProfile.for_unit(tripod_profile, rifle).commitment_seconds == rifle_profile.commitment_seconds, "Reusing a calibrated profile neither compounds stationarity nor transfers it to rifle-only infantry")
+		_check(tripod_profile.max_exposure_seconds == base.max_exposure_seconds and tripod_profile.max_open_exposure_seconds == base.max_open_exposure_seconds, "Stationary roles preserve the existing safe crossing budgets")
+		var offense: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.SUPPORT_BY_FIRE)
+		_check(PositionProfile.for_unit(offense, tripod) == offense, "Defensive stationarity does not alter an offensive profile")
+		_test_mount_commitment([rifle, bipod, tripod], fixture.snapshot)
+		var equipment_config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+		var armed_query: PositionQuery = DefensePositionAnalyzer.make_query(equipment_config, tripod, {})
+		tripod.squad_fire.soldiers[0].is_alive = false
+		_check(InfluenceUnitQuery.get_defensive_mount(tripod) == WeaponSpec.Mount.NONE and DefenseSectorAllocator.select_guard([tripod, bipod]) == bipod, "A lost runtime tripod weapon releases its stationary role despite the original loadout")
+		var depleted_query: PositionQuery = DefensePositionAnalyzer.make_query(equipment_config, tripod, {})
+		_check(armed_query.context_key() != depleted_query.context_key(), "Losing a stationary weapon invalidates accepted-position and inspection context")
+		tripod.squad_fire.soldiers[1].weapon = tripod_weapon.create_runtime()
+		_check(InfluenceUnitQuery.get_defensive_mount(tripod) == WeaponSpec.Mount.TRIPOD, "A support weapon transferred to a living soldier retains its stationary role")
+		var runtime: SquadFireController = tripod.squad_fire
+		tripod.squad_fire = null
+		_check(InfluenceUnitQuery.get_defensive_mount(tripod) == WeaponSpec.Mount.TRIPOD, "A squad without a runtime roster can classify its authored loadout")
+		tripod.squad_fire = runtime
+		planner.free()
+		for unit: Unit in [rifle, bipod, tripod, spare]:
+			unit.squad_fire.free()
+			unit.squad_fire = null
+			unit.free()
+
+
+func _test_mount_commitment(units: Array[Unit], snapshot: InfluenceSnapshot) -> void:
+	var map: InfluenceMap = snapshot.maps[units[0].team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 1.0)
+		map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 0.0)
+	snapshot.defensive_contacts[units[0].team] = []
+	var initial_time: float = snapshot.captured_at
+	for unit: Unit in units:
+		var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+		config.unit_team = unit.team
+		config.objective_hex = unit.current_hex
+		config.geography = PositionQuery.Geography.SECTOR_ONLY
+		var better: Vector2i = unit.current_hex + Vector2i(1, 0)
+		config.sector_cells = [unit.current_hex, better]
+		config.profile.cover_weight = 4.0
+		var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, {})
+		query.snapshot = snapshot
+		query.use_defense_area = false
+		query.has_accepted_target = true
+		query.accepted_target = unit.current_hex
+		query.accepted_context = query.context_key()
+		query.accepted_at = initial_time
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, unit.current_hex, 1.0 / 3.0)
+		snapshot.captured_at = initial_time + 9.0
+		var advice: PositionResult = PositionQueryService.query_positions(query)
+		if InfluenceUnitQuery.get_defensive_mount(unit) == WeaponSpec.Mount.NONE:
+			_check(advice.is_valid() and advice.target_hex == better, "A rifle-only squad can redeploy after its shorter commitment")
+		else:
+			_check(advice.is_valid() and advice.target_hex == unit.current_hex, "An MG retains its safe accepted firing position after the rifle commitment expires")
+		snapshot.captured_at = initial_time + query.profile.commitment_seconds + 1.0
+		_check(PositionQueryService.query_positions(query).target_hex == better, "An MG can still relocate for a material improvement after its loadout commitment")
+		snapshot.captured_at = initial_time + 1.0
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, unit.current_hex, 0.0)
+		_check(PositionQueryService.query_positions(query).target_hex == better, "Losing required defensive cover overrides even a stationary weapon's commitment")
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, unit.current_hex, 1.0)
+	snapshot.captured_at = initial_time
 
 
 func _test_mirrored_teams() -> void:
@@ -1241,10 +1408,10 @@ func _test_defense_area() -> void:
 	_check(edge_value > interior_value, "Long open firing lanes outrank concealed woodland interior without those lanes")
 	var guard_role: Globals.SquadType = other.squad_type
 	other.squad_type = Globals.SquadType.Rifle
-	_check(DefenseSectorAllocator.select_guard([own, other]) == other, "Guard assignment preserves the MG for approach interdiction")
+	_check(DefenseSectorAllocator.select_guard([own, other]) == own, "A squad label alone does not exclude it from objective guard duty")
 	var armed_power: int = own.firepower
 	own.firepower = 0
-	_check(DefenseSectorAllocator.select_guard([own, other]) == own, "An MG without usable firing capability does not displace an armed approach defender")
+	_check(DefenseSectorAllocator.select_guard([own, other]) == own, "Temporary firing availability does not rotate the objective guard")
 	own.firepower = armed_power
 	var original_context: String = query.context_key()
 	query.has_accepted_target = true

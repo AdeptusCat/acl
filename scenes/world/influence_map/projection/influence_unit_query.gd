@@ -33,6 +33,34 @@ static func get_unit_firepower(unit: Unit) -> float:
 	return get_firepower_at_range(unit, 0)
 
 
+static func get_defensive_mount(unit: Unit) -> WeaponSpec.Mount:
+	var mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
+	if not is_valid_living_unit(unit):
+		return mount
+	# Runtime equipment is authoritative after casualties and weapon transfers.
+	# A jam or reload must not rotate the platoon's stationary guard.
+	if unit.squad_fire != null:
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if soldier.is_alive:
+				mount = _stronger_mg_mount(mount, soldier.weapon)
+		return mount
+	var loadouts: Array[SoldierLoadout] = unit.loadouts
+	if unit.squad_loadout != null:
+		loadouts = unit.squad_loadout.soldiers
+	for loadout: SoldierLoadout in loadouts:
+		if loadout != null:
+			mount = _stronger_mg_mount(mount, loadout.resolve_weapon())
+	return mount
+
+
+static func _stronger_mg_mount(current: WeaponSpec.Mount, weapon: WeaponSpec) -> WeaponSpec.Mount:
+	if weapon == null or weapon.type != WeaponSpec.WeaponType.MG:
+		return current
+	if weapon.mount > current:
+		return weapon.mount
+	return current
+
+
 static func get_firepower_at_range(unit: Unit, distance: int) -> float:
 	if not is_valid_living_unit(unit) or unit.surrendered:
 		return 0.0

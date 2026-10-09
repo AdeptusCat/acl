@@ -46,7 +46,7 @@ static func make_query(config: InfluenceProjectionConfig, unit: Unit, reservatio
 	query.fallback_hexes = config.fallback_hexes
 	query.defense_radius = config.defense_radius
 	query.geography = config.geography
-	query.profile = config.profile
+	query.profile = PositionProfile.for_unit(config.profile, unit)
 	query.defense_responsibility = config.defense_responsibility
 	query.withdrawal_requested = config.withdrawal_requested
 	query.axis = config.threat_axis

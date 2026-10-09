@@ -164,7 +164,14 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 		for unit: Unit in available:
 			_add_planning_requests(config, [unit], "offense", null)
 		return
-	if current_order.reserve_policy != MissionOrder.ReservePolicy.NONE and available.size() >= 3:
+	var can_reserve: bool = current_order.reserve_policy != MissionOrder.ReservePolicy.NONE and available.size() >= 3
+	if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+		var guard: Unit = _select_guard_squad(available)
+		available.erase(guard)
+		var guard_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+		guard_config.defense_responsibility = PositionQuery.Responsibility.GUARD
+		_add_planning_requests(guard_config, [guard], "guard_objective", null)
+	if can_reserve:
 		var reserve: Unit = _select_reserve_squad(available)
 		available.erase(reserve)
 		var reserve_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
@@ -172,11 +179,6 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 		reserve_config.profile.firing_weight = 0.0
 		reserve_config.defense_responsibility = PositionQuery.Responsibility.GUARD
 		_add_planning_requests(reserve_config, [reserve], "reserve", null)
-	if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
-		var guard: Unit = available.pop_front()
-		var guard_config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
-		guard_config.defense_responsibility = PositionQuery.Responsibility.GUARD
-		_add_planning_requests(guard_config, [guard], "guard_objective", null)
 	var axes: Array[ThreatAxis] = _get_sorted_threat_axes()
 	if axes.is_empty():
 		var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
@@ -208,14 +210,15 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 		return
 	var reserve: Unit = null
 	var has_guard: bool = false
-	if available.size() >= 3 and current_order.reserve_policy != MissionOrder.ReservePolicy.NONE:
-		reserve = _select_reserve_squad(available)
-		available.erase(reserve)
+	var can_reserve: bool = available.size() >= 3 and current_order.reserve_policy != MissionOrder.ReservePolicy.NONE
 	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
-		var guard: Unit = DefenseSectorAllocator.select_guard(available)
+		var guard: Unit = _select_guard_squad(available)
 		available.erase(guard)
 		_add_sector_request(guard, "guard_objective", -1, PositionQuery.Responsibility.GUARD)
 		has_guard = true
+	if can_reserve:
+		reserve = _select_reserve_squad(available)
+		available.erase(reserve)
 	# Deploy the mobile reserve when its absence would leave a significant sector unassigned.
 	if reserve != null and DefenseSectorAllocator.critical_count(defense_area) > available.size() and current_order.reserve_policy != MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
 		available.append(reserve)
@@ -370,6 +373,16 @@ func _cancel_plan() -> void:
 	_planning_snapshot = null
 
 
+func _select_guard_squad(available: Array[Unit]) -> Unit:
+	var candidates: Array[Unit] = available.duplicate()
+	if available.size() >= 3 and current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
+		for unit: Unit in available:
+			if unit.squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]:
+				candidates.erase(unit)
+				break
+	return DefenseSectorAllocator.select_guard(candidates)
+
+
 func _select_reserve_squad(available: Array[Unit]) -> Unit:
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
 		for unit: Unit in available:
@@ -377,7 +390,11 @@ func _select_reserve_squad(available: Array[Unit]) -> Unit:
 				return unit
 	var reserve: Unit = available[-1]
 	for unit: Unit in available:
-		if InfluenceUnitQuery.get_unit_effectiveness(unit) < InfluenceUnitQuery.get_unit_effectiveness(reserve):
+		var effectiveness: float = InfluenceUnitQuery.get_unit_effectiveness(unit)
+		var reserve_effectiveness: float = InfluenceUnitQuery.get_unit_effectiveness(reserve)
+		if effectiveness < reserve_effectiveness:
+			reserve = unit
+		elif is_equal_approx(effectiveness, reserve_effectiveness) and InfluenceUnitQuery.get_defensive_mount(unit) < InfluenceUnitQuery.get_defensive_mount(reserve):
 			reserve = unit
 	return reserve
 

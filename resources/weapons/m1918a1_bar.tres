@@ -15,6 +15,7 @@ range_hexes = 8
 accuracy_base = 0.65
 kind = 1
 type = 1
+mount = 1
 fire_mode = 1
 crew_required = 2
 priority = 10

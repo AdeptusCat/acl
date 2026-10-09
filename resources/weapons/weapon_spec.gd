@@ -13,6 +13,8 @@ enum WeaponType {
 	SMG
 }
 
+enum Mount { NONE, BIPOD, TRIPOD }
+
 var is_setup: bool = false
 var source_resource_path: String = ""
 
@@ -31,6 +33,7 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var accuracy_base: float = 0.6
 @export var kind: WeaponKind = WeaponKind.PERSONAL
 @export var type: WeaponType = WeaponType.Rifle
+@export var mount: Mount = Mount.NONE
 @export var family: Family = Family.SMALL_ARM
 @export var ammo_type: AmmoType = AmmoType.BULLET
 @export var ammunition_start: int = 9223372036854775807

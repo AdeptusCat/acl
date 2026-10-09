@@ -205,4 +205,5 @@ static func get_position_advice(unit: Unit, controller: Node2D) -> PositionResul
 	for friendly: Unit in Globals.get_units_for_team(unit.team):
 		if friendly.movement != null and friendly.movement.is_moving:
 			query.reservations[friendly] = friendly.movement.target_hex
+	query.profile = PositionProfile.for_unit(query.profile, unit)
 	return controller.influence_map_controller.query_inspection_positions(query)

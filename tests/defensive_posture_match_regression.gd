@@ -39,6 +39,16 @@ func _run() -> void:
 		unit.movement.move_speed = 90.0
 	for frame: int in range(600):
 		await get_tree().process_frame
+	var tripod_anchor: Unit = null
+	var tripod_count: int = 0
+	for unit: Unit in planner.squads:
+		if InfluenceUnitQuery.get_defensive_mount(unit) == WeaponSpec.Mount.TRIPOD:
+			tripod_anchor = unit
+			tripod_count += 1
+	if tripod_count == 1 and planner.squads.size() >= 2:
+		_check(planner.squad_assignments.get(tripod_anchor, {}).get("role") == "guard_objective", "The authored platoon's sole tripod MG receives the stationary objective guard duty")
+	else:
+		tripod_anchor = null
 	var player: Unit = null
 	for unit: Unit in Globals.get_units_for_team(player_team):
 		if unit.squad_type == Globals.SquadType.Rifle:
@@ -99,6 +109,8 @@ func _run() -> void:
 			samples.append({"frame": frame + 1, "unit": str(unit.name), "hex": str(unit.current_hex), "target": target_key, "order": unit.action_controller.action_order_id, "reason": advice.reason, "responsibility": advice.features.get("responsibility", ""), "blocking": advice.features.get("blocking", 0.0)})
 		if frame >= 599:
 			_check(_objective_guarded(planner), "A stationary nearby opponent does not leave the objective or its approach unprotected")
+			if tripod_anchor != null:
+				_check(planner.squad_assignments.get(tripod_anchor, {}).get("role") == "guard_objective", "Flank pressure retains the only tripod MG as the objective anchor")
 	_check(valid_positions + no_candidates > 0, "Stationary opposition produces safe position advice or an explicit no-candidate result")
 	_check(not controller.snapshot.get_defensive_contacts(planner.team).is_empty(), "Defense retains confirmed danger after short firing memory expires")
 	for unit: Unit in changes:

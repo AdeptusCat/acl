@@ -3,6 +3,8 @@ extends Resource
 
 enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
 
+var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
+
 @export var mode: Mode = Mode.DEFEND
 @export var max_incoming_risk: float = 0.8
 @export var max_route_exposure: float = 0.8
@@ -75,6 +77,21 @@ static func for_mode(p_mode: Mode) -> PositionProfile:
 		profile.max_route_exposure = 0.9
 		profile.cover_weight = 0.8
 		profile.travel_weight = 0.03
+	return profile
+
+
+static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
+	if base.mode != Mode.DEFEND:
+		return base
+	var profile: PositionProfile = base.duplicate() as PositionProfile
+	profile.defensive_mount = InfluenceUnitQuery.get_defensive_mount(unit)
+	var relocation_cost: float = 1.0 + 0.5 * float(profile.defensive_mount)
+	# Reusing an already calibrated profile must not compound its penalties.
+	relocation_cost /= 1.0 + 0.5 * float(base.defensive_mount)
+	profile.travel_weight *= relocation_cost
+	profile.commitment_seconds *= relocation_cost
+	profile.improvement_absolute *= relocation_cost
+	profile.improvement_relative *= relocation_cost
 	return profile
 
 

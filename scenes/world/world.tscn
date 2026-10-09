@@ -77,22 +77,34 @@
 [ext_resource type="PackedScene" uid="uid://b5mttkcs5k8hq" path="res://ai/platoon/defense/platoon_defense_controller.tscn" id="60_mrxq0"]
 [ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
+[ext_resource type="Script" uid="uid://dreftkmyohaby" path="res://resources/squads/squad_loadout_spec.gd" id="61_pww7v"]
 [ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="61_x77xw"]
 [ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="62_124cm"]
 [ext_resource type="Resource" uid="uid://boephgpg2cfao" path="res://resources/squads/germany/platoon_hq.tres" id="62_bmoad"]
+[ext_resource type="Resource" uid="uid://dghlcxe7d1oeg" path="res://resources/soldiers/germany/squad_leader.tres" id="62_nlt47"]
+[ext_resource type="Resource" uid="uid://sglwlumhj57d" path="res://resources/soldiers/germany/squad_leader_assistant.tres" id="63_6a7tq"]
 [ext_resource type="Resource" uid="uid://1vun3vkkv6cn" path="res://resources/squads/germany/lmg_squad.tres" id="63_mb8w1"]
 [ext_resource type="Resource" uid="uid://jga6pmhrhmus" path="res://resources/weapons/granatwerfer_34.tres" id="63_vl1dq"]
 [ext_resource type="Resource" uid="uid://tpc4fivssvv0" path="res://resources/weapons/m2_60mm_mortar.tres" id="64_vl1dq"]
+[ext_resource type="Resource" uid="uid://c58b0dx1dc5lv" path="res://resources/soldiers/germany/mg_gunner.tres" id="64_wo74w"]
+[ext_resource type="Resource" uid="uid://cmyjkaqf4h1am" path="res://resources/soldiers/germany/loader.tres" id="65_425aq"]
 [ext_resource type="PackedScene" uid="uid://pt85xx5fagwx" path="res://scenes/game/audio/audio_pool.tscn" id="65_hpffo"]
 [ext_resource type="Resource" uid="uid://bsge266xsare4" path="res://resources/squads/united_states/company_hq.tres" id="65_mrxq0"]
 [ext_resource type="Resource" uid="uid://c7l1c33tmr5ab" path="res://resources/squads/united_states/rifle_squad.tres" id="65_oo0aq"]
+[ext_resource type="Resource" uid="uid://cxto06fhfxw1g" path="res://resources/soldiers/germany/rifle_grenadier.tres" id="66_ayaol"]
 [ext_resource type="AudioStream" uid="uid://bp1oqubv3pxu0" path="res://assets/audio/music/litt.mp3" id="66_hnqnj"]
 [ext_resource type="Resource" uid="uid://cgfs6mgrk10ep" path="res://resources/squads/united_states/platoon_hq.tres" id="66_olhon"]
+[ext_resource type="Resource" uid="uid://d861tlfk8agb" path="res://resources/soldiers/germany/rifleman.tres" id="67_ecm30"]
 [ext_resource type="Resource" uid="uid://3udaykaejivr" path="res://resources/squads/united_states/anti_tank_team.tres" id="67_i1y2t"]
 [ext_resource type="Resource" uid="uid://cgl1er7wt4ilg" path="res://resources/squads/united_states/lmg_squad.tres" id="67_mb8w1"]
+[ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="68_l34gv"]
+[ext_resource type="Script" uid="uid://dqc5gsc8nyh6r" path="res://resources/squads/team_squad_loadout_catalog.gd" id="69_2qot8"]
 [ext_resource type="Resource" uid="uid://dibkg1uf8xp1l" path="res://resources/squads/germany/anti_tank_team.tres" id="69_ghkdt"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="69_j3x8u"]
+[ext_resource type="Script" uid="uid://bhetl3cslc2tj" path="res://resources/squads/squad_loadout_catalog.gd" id="70_sfox1"]
+[ext_resource type="Resource" uid="uid://lp0f0dhp86jk" path="res://resources/squads/germany/squad_loadout_catalog.tres" id="71_nmgud"]
 [ext_resource type="Resource" uid="uid://bgercl11nyflu" path="res://resources/squads/germany/medium_mortar_squad.tres" id="71_s64j0"]
+[ext_resource type="Resource" uid="uid://c3126its6x8x4" path="res://resources/squads/united_states/squad_loadout_catalog.tres" id="72_le7yh"]
 [ext_resource type="Resource" uid="uid://b47gq5wbijpgy" path="res://resources/squads/united_states/light_mortar_squad.tres" id="73_jtcuk"]
 [ext_resource type="Script" uid="uid://bbnsjqri366kl" path="res://scenes/world/overlays/command_connectivity_renderer.gd" id="79_x77xw"]
 [ext_resource type="PackedScene" uid="uid://d1onivapwnk0s" path="res://scenes/world/influence_map/debug/influence_map_debug_draw.tscn" id="90_n0in2"]
@@ -1026,6 +1038,31 @@ script = ExtResource("50_hph6x")
 nickname = "Messenger 7"
 weapon = ExtResource("52_dhssw")
 
+[sub_resource type="Resource" id="Resource_dv005"]
+script = ExtResource("61_pww7v")
+soldiers = Array[ExtResource("50_hph6x")]([ExtResource("62_nlt47"), ExtResource("63_6a7tq"), ExtResource("64_wo74w"), ExtResource("65_425aq"), ExtResource("66_ayaol"), ExtResource("67_ecm30"), ExtResource("67_ecm30"), ExtResource("67_ecm30"), ExtResource("67_ecm30"), ExtResource("67_ecm30")])
+metadata/_custom_type_script = "uid://dreftkmyohaby"
+
+[sub_resource type="Resource" id="Resource_sb66d"]
+script = ExtResource("68_l34gv")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_df5du"]
+script = ExtResource("68_l34gv")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_njpnx"]
+script = ExtResource("68_l34gv")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_yxjfx"]
+script = ExtResource("69_2qot8")
+squads_collection = Dictionary[int, ExtResource("70_sfox1")]({
+0: ExtResource("71_nmgud"),
+1: ExtResource("72_le7yh")
+})
+metadata/_custom_type_script = "uid://dqc5gsc8nyh6r"
+
 [sub_resource type="Resource" id="Resource_pghpc"]
 script = ExtResource("61_x77xw")
 metadata/_custom_type_script = "uid://cryk5wbke0nxs"
@@ -1729,23 +1766,38 @@ squad_loadout = ExtResource("62_bmoad")
 formation_id = 1
 squad_type = 4
 
-[node name="CA_P1_S1_Axis_MG" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="1" unique_id=792412617 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S1_Axis_MG" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="1" unique_id=792412617 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(561, 961)
 squad = 1
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
 squad_loadout = ExtResource("63_mb8w1")
+command_squad = NodePath("../CA_P1_S0_Axis_PlatoonHQ")
 formation_id = 1
 squad_type = 1
 
-[node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="2" unique_id=1782881041 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="2" unique_id=1782881041 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(610, 987)
 squad = 2
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
+command_squad = NodePath("../CA_P1_S0_Axis_PlatoonHQ")
 formation_id = 1
 
-[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="3" unique_id=1150342868 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S3_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="3" unique_id=437630089 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
+position = Vector2(560, 1022)
+squad = 3
+platoon = 1
+loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
+squad_loadout = SubResource("Resource_dv005")
+command_squad = NodePath("../CA_P1_S0_Axis_PlatoonHQ")
+default_rifle = SubResource("Resource_sb66d")
+default_smg = SubResource("Resource_df5du")
+default_mg = SubResource("Resource_njpnx")
+formation_id = 1
+squads_collection = SubResource("Resource_yxjfx")
+
+[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="4" unique_id=1150342868 instance=ExtResource("19_sh7a8")]
 position = Vector2(608, 608)
 platoon = 1
 team = 1
@@ -1758,7 +1810,7 @@ squad_type = 4
 squads = [NodePath(".."), NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../../CA_P1_S2_Allies_Rifle")]
 objective_hex = Vector2i(11, 13)
 
-[node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="4" unique_id=679443044 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="5" unique_id=679443044 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(560, 576)
 squad = 1
 platoon = 1
@@ -1768,7 +1820,7 @@ squad_loadout = ExtResource("65_oo0aq")
 command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
 formation_id = 1
 
-[node name="CA_P1_S2_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="5" unique_id=410508575 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S2_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="6" unique_id=410508575 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(656, 640)
 squad = 2
 platoon = 1
@@ -1791,7 +1843,7 @@ scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpos
 player_team = 1
 victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n")])
 
-[node name="CA_P1_S0_Axis_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=437630089 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S0_Axis_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe2/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=1499444621 instance=ExtResource("19_sh7a8")]
 position = Vector2(512, 928)
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_124cm"), SubResource("Resource_6ebim"), SubResource("Resource_oo0aq"), SubResource("Resource_olhon"), SubResource("Resource_m4278"), SubResource("Resource_nyio1"), SubResource("Resource_n0in2")])

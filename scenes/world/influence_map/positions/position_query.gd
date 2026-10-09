@@ -73,4 +73,4 @@ func context_key() -> String:
 	var withdrawing: bool = false
 	if profile.mode == PositionProfile.Mode.DEFEND and is_instance_valid(unit):
 		withdrawing = withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(unit) < profile.withdrawal_effectiveness
-	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, reserve_position, use_defense_area])
+	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, reserve_position, use_defense_area, profile.defensive_mount])
