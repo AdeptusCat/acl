@@ -1,7 +1,7 @@
 class_name PositionProfile
 extends Resource
 
-enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT }
+enum Mode { LEGACY_DEFENSE, DEFEND, SUPPORT_BY_FIRE, ADVANCE, ASSAULT, HQ_SUPPORT }
 
 var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 
@@ -63,6 +63,24 @@ static func for_mode(p_mode: Mode) -> PositionProfile:
 		profile.improvement_absolute = 0.35
 		profile.improvement_relative = 0.2
 		profile.commitment_seconds = 8.0
+	elif p_mode == Mode.HQ_SUPPORT:
+		profile.minimum_cover = 0.1
+		profile.max_incoming_risk = 0.7
+		profile.max_route_exposure = 0.95
+		profile.max_exposure_seconds = 3.0
+		profile.max_open_exposure_seconds = 1.0
+		profile.forecast_route_weight = 0.0
+		profile.cover_weight = 3.0
+		profile.incoming_weight = 7.0
+		profile.support_weight = 8.0
+		profile.travel_weight = 0.12
+		profile.exposure_weight = 1.0
+		profile.open_ground_weight = 1.0
+		profile.firing_weight = 0.0
+		profile.objective_weight = 0.0
+		profile.improvement_absolute = 0.5
+		profile.improvement_relative = 0.05
+		profile.commitment_seconds = 2.0
 	elif p_mode == Mode.SUPPORT_BY_FIRE:
 		profile.firing_weight = 3.0
 		profile.objective_weight = 0.0
@@ -81,6 +99,8 @@ static func for_mode(p_mode: Mode) -> PositionProfile:
 
 
 static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
+	if HqSupportPositionPolicy.is_headquarters(unit) and base.mode != Mode.HQ_SUPPORT:
+		return for_mode(Mode.HQ_SUPPORT)
 	if base.mode != Mode.DEFEND:
 		return base
 	var profile: PositionProfile = base.duplicate() as PositionProfile
@@ -96,6 +116,8 @@ static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
 
 
 func score(features: Dictionary, unit: Unit) -> float:
+	if mode == Mode.HQ_SUPPORT:
+		return features["cover"] * cover_weight + features["support_utility"] * support_weight - features["incoming"] * incoming_weight - features["enemy_visibility"] * 6.0 - features["travel"] * travel_weight - features["exposure_seconds"] * exposure_weight - features["open_ground"] * open_ground_weight
 	if mode == Mode.LEGACY_DEFENSE:
 		return features.get("legacy", 0.0)
 	var role_fire_weight: float = firing_weight

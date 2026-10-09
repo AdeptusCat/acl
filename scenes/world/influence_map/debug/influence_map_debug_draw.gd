@@ -688,6 +688,11 @@ func _debug_report_layer_access(reason: String) -> void:
 				_layer_access_text += "\nCorridors: orange = observed/mission | amber dashes = last seen | gray dashes = terrain/sector estimate"
 			if advice.is_valid():
 				_layer_access_text += "\nGreen: candidate | Gold: recommended | target=%s | score=%.3f" % [advice.target_hex, advice.score]
+				if advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT:
+					var priority: Unit = advice.features.get("support_priority_squad")
+					if is_instance_valid(priority):
+						_layer_access_text += "\nSupport priority: %s | need %.2f" % [priority.name, advice.features["support_priority_need"]]
+					_layer_access_text += "\nSquads within leadership range: %d | radius %d hexes | enemy visibility %.2f" % [advice.features["supported_squads"].size(), advice.features["leadership_radius"], advice.features["enemy_visibility"]]
 				if advice.features.has("assigned_sector"):
 					_layer_access_text += "\nSector=%d | interception=%.0f%% | full corridor=%.0f%% | interdiction=%.2f" % [advice.features["assigned_sector"], advice.features["assigned_coverage"] * 100.0, advice.features.get("assigned_corridor_coverage", advice.features["assigned_coverage"]) * 100.0, advice.features["interdiction"]]
 					var sector: int = advice.features["assigned_sector"]

@@ -11,6 +11,8 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 
 static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	result.unit = query.unit
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.snapshot != null:
+		HqSupportPositionPolicy.prepare(query)
 	result.context = query.context_key()
 	result.objective_hex = query.objective_hex
 	result.profile_mode = query.profile.mode
@@ -85,6 +87,8 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 static func finish(query: PositionQuery, result: PositionResult, candidates: Array[PositionCandidate]) -> void:
 	if candidates.is_empty():
 		result.reason = "No reachable position satisfies geography, capacity and risk limits"
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+			result.reason = "Holding: no covered support position has a safe route near the platoon"
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
@@ -160,6 +164,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = "Mission-constrained withdrawal preserves approach coverage"
 		if result.target_hex == query.unit.current_hex:
 			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.reason = "Supporting nearby squads from cover; priority need %.2f" % best.features["support_priority_need"]
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
 	return
@@ -198,6 +204,12 @@ static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, 
 	if _occupied(query, cell):
 		_reject(diagnostics, "capacity", index)
 		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
+		var rejection: String = HqSupportPositionPolicy.rejection(query, features, false)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			return false
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
 		if features["cover"] < query.profile.minimum_cover:
@@ -229,6 +241,11 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 				if query.include_score_map:
 					diagnostics.score_map[index] = query.profile.score(features, query.unit)
 			return null
+	elif query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		var rejection: String = HqSupportPositionPolicy.rejection(query, features)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			return null
 	elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
 		_reject(diagnostics, "risk", index)
 		return null
@@ -248,6 +265,8 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 
 
 static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		return HqSupportPositionPolicy.in_geography(query, cell)
 	if fallback:
 		return query.fallback_hexes.has(cell)
 	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)

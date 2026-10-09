@@ -122,7 +122,10 @@ func _run() -> void:
 			query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
 			var defense: PositionResult = PositionQueryService.query_positions(query)
 			if defense.is_valid():
-				_check(LOSHelper.get_hex_distance(defense.target_hex, objective) <= query.defense_radius, "Defense stays within mission geography")
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(defense.profile_mode == PositionProfile.Mode.HQ_SUPPORT, "Headquarters follows squad support geography")
+				else:
+					_check(LOSHelper.get_hex_distance(defense.target_hex, objective) <= query.defense_radius, "Defense stays within mission geography")
 				_check(not defense.path.is_empty() and defense.path[-1] == defense.target_hex, "Defense returns a valid route")
 				coverage = coverage or defense.features["objective_coverage"] > 0.0
 				query.has_accepted_target = true
@@ -138,6 +141,9 @@ func _run() -> void:
 				query.objective_hex = enemies[0].current_hex
 				query.profile = PositionProfile.for_mode(mode)
 				var offense: PositionResult = PositionQueryService.query_positions(query)
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(offense.profile_mode == PositionProfile.Mode.HQ_SUPPORT and (not offense.is_valid() or offense.features["firing"] == 0.0), "Offensive advice keeps headquarters outside combat duties")
+					continue
 				if offense.is_valid():
 					valid_offense += 1
 					_check(not offense.path.is_empty(), "Offensive recommendation has a route")

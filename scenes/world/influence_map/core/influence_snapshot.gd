@@ -9,6 +9,7 @@ var defensive_contacts: Dictionary[int, Array] = {}
 var sector_pressure: Dictionary[int, Dictionary] = {}
 var positions: Dictionary[Unit, Vector2i] = {}
 var teams: Dictionary[Unit, int] = {}
+var support_units: Dictionary[Unit, Dictionary] = {}
 var routes: Dictionary[int, AStar2D] = {}
 var point_ids: Dictionary[int, Dictionary] = {}
 var objectives: Dictionary[int, Vector2i] = {}

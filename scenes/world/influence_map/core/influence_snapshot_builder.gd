@@ -14,6 +14,13 @@ static func capture(version: int, objectives: Dictionary[int, Vector2i], knowled
 		if InfluenceUnitQuery.is_valid_living_unit(unit):
 			snapshot.positions[unit] = unit.current_hex
 			snapshot.teams[unit] = unit.team
+			var radius: int = 2
+			if unit.leader_aura != null:
+				radius = unit.leader_aura.aura_radius_hexes
+			snapshot.support_units[unit] = {"headquarters": HqSupportPositionPolicy.is_headquarters(unit),
+				"company": unit.company, "platoon": unit.platoon, "commander": unit.command_squad,
+				"company_hq": unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS,
+				"members": unit.members_alive, "radius": radius, "need": HqSupportNeedLayer.get_squad_support_need(unit)}
 	for team: int in [Globals.Team.ALLIES, Globals.Team.AXIS]:
 		var map: InfluenceMap = InfluenceMap.new()
 		map.configure(ground.get_used_rect())

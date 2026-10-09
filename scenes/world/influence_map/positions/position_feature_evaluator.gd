@@ -12,7 +12,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var features: Dictionary = query.destination_features[cell].duplicate()
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
-	if query.profile.mode == PositionProfile.Mode.DEFEND:
+	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
 	var exposure: float = 0.0
 	var travel: float = 0.0
@@ -27,7 +27,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
-		if query.profile.mode == PositionProfile.Mode.DEFEND:
+		if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
 			if query.route_field != null:
 				step_risk = query.route_field.step_data(step)["risk"]
 			else:
@@ -69,9 +69,13 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
-	if query.profile.mode == PositionProfile.Mode.DEFEND:
+	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
 		incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		var support_features: Dictionary = {"cover": cover, "incoming": incoming, "forecast": 0.0, "firing": 0.0, "objective_coverage": 0.0, "support": 0.0, "progress": 0.0}
+		support_features.merge(HqSupportPositionPolicy.features(query, cell))
+		return support_features
 	var support: float = 0.0
 	for friendly: Unit in query.snapshot.positions:
 		if friendly != query.unit and query.snapshot.teams[friendly] == query.team:

@@ -136,7 +136,7 @@ static func capability_key(unit: Unit) -> String:
 
 
 static func established(unit: Unit, request: PositionQuery) -> bool:
-	if not InfluenceUnitQuery.is_valid_living_unit(unit) or not PositionQueryService.can_follow_intent(unit) or unit.broken or InfluenceUnitQuery.get_unit_effectiveness(unit) < request.profile.hold_effectiveness:
+	if HqSupportPositionPolicy.is_headquarters(unit) or not InfluenceUnitQuery.is_valid_living_unit(unit) or not PositionQueryService.can_follow_intent(unit) or unit.broken or InfluenceUnitQuery.get_unit_effectiveness(unit) < request.profile.hold_effectiveness:
 		return false
 	if request.snapshot.positions.get(unit, Vector2i(-999, -999)) != unit.current_hex or (unit.movement != null and unit.movement.is_moving):
 		return false

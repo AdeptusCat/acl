@@ -84,7 +84,7 @@ func _process(delta: float) -> void:
 
 func _exit_tree() -> void:
 	_cancel_plan()
-	_set_defensive_control(false)
+	_set_mission_control(false)
 	executor.cancel_all()
 
 
@@ -92,9 +92,9 @@ func set_active(is_active: bool) -> void:
 	_cancel_plan()
 	active = is_active
 	if active:
-		_set_defensive_control(current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
+		_set_mission_control(current_order != null)
 		return
-	_set_defensive_control(false)
+	_set_mission_control(false)
 	_clear_reserve()
 	# Release only actions owned by this planner when handing control to the player.
 	executor.cancel_all(true)
@@ -116,7 +116,7 @@ func receive_mission_order(order: MissionOrder) -> void:
 	executor.cancel_all(true)
 	accepted_positions.clear()
 	current_order = order
-	_set_defensive_control(order.position_mode == PositionProfile.Mode.DEFEND)
+	_set_mission_control(true)
 	time_until_reconsider = reconsider_interval
 	_start_plan(is_inside_tree())
 
@@ -128,7 +128,7 @@ func set_squads(new_squads: Array[Unit]) -> void:
 			owned.append(squad)
 	_cancel_plan()
 	_clear_reserve()
-	_set_defensive_control(false)
+	_set_mission_control(false)
 	executor.cancel_all(true)
 	squad_assignments.clear()
 	reserved_hexes_by_squad.clear()
@@ -138,13 +138,18 @@ func set_squads(new_squads: Array[Unit]) -> void:
 	defense_branch_gaps.clear()
 	time_until_reconsider = 0.0
 	squads = owned
-	_set_defensive_control(active and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND)
+	_set_mission_control(active and current_order != null)
 
 
-func _set_defensive_control(enabled: bool) -> void:
+func _set_mission_control(enabled: bool) -> void:
 	for squad: Unit in squads:
-		if is_instance_valid(squad) and squad.squad_ai_controller != null:
-			squad.squad_ai_controller.defensive_mission_controlled = enabled
+		if not is_instance_valid(squad):
+			continue
+		squad.ai_support_only = enabled and HqSupportPositionPolicy.is_headquarters(squad)
+		if squad.ai_support_only and squad.squad_fire != null:
+			squad.squad_fire.clear_target()
+		if squad.squad_ai_controller != null:
+			squad.squad_ai_controller.defensive_mission_controlled = enabled and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND
 
 
 func bind_active_squads(active_units: Array[Unit]) -> void:
@@ -193,14 +198,14 @@ func _start_plan(budgeted: bool) -> void:
 
 
 func _prepare_readiness(budgeted: bool) -> void:
-	var available: Array[Unit] = _planning_available.duplicate()
+	var available: Array[Unit] = _combat_units(_planning_available)
 	var reserve: Unit = null
 	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
 		available.erase(_select_guard_squad(available))
 	if _can_keep_reserve(_planning_available):
 		reserve = _select_reserve_squad(available)
 	_readiness_job = DefenseReadinessJob.new()
-	_readiness_job.start(defense_area, _planning_snapshot, team, _planning_available, reserve, current_order.defense_radius)
+	_readiness_job.start(defense_area, _planning_snapshot, team, _combat_units(_planning_available), reserve, current_order.defense_radius)
 	_readiness_job.query.profile.max_exposure_seconds = current_order.exposure_budget_seconds
 	_readiness_job.query.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 	if not budgeted:
@@ -214,7 +219,7 @@ func _can_keep_reserve(available: Array[Unit]) -> bool:
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.NONE:
 		return false
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
-		return available.size() >= 3
+		return false
 	var combat_count: int = 0
 	for unit: Unit in available:
 		if DefenseSectorAllocator.combat_reserve_capable(unit):
@@ -229,7 +234,29 @@ func _clear_reserve() -> void:
 	_reserve_quiet_since = -INF
 
 
+func _combat_units(available: Array[Unit]) -> Array[Unit]:
+	var result: Array[Unit] = []
+	for unit: Unit in available:
+		if not HqSupportPositionPolicy.is_headquarters(unit):
+			result.append(unit)
+	return result
+
+
+func _add_support_requests(available: Array[Unit]) -> void:
+	for unit: Unit in available:
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			_add_planning_requests(config, [unit], "hq_support", null)
+
+
 func _build_planning_requests(available: Array[Unit]) -> void:
+	_build_combat_planning_requests(_combat_units(available))
+	_add_support_requests(available)
+
+
+func _build_combat_planning_requests(available: Array[Unit]) -> void:
+	if available.is_empty():
+		return
 	if current_order.position_mode == PositionProfile.Mode.DEFEND and defense_area != null:
 		_build_sector_requests(available.duplicate())
 		return
@@ -269,16 +296,26 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 func _reset_relocation(available: Array[Unit]) -> void:
 	_relocation_claimed = false
 	for unit: Unit in available:
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			continue
 		if (unit.movement != null and unit.movement.is_moving) or (unit.action_controller != null and unit.action_controller.action_state in [SquadActionController.SquadActionState.ESTABLISHING_POSITION, SquadActionController.SquadActionState.REGROUPING]):
 			_relocation_claimed = true
 
 
 func _can_relocate(unit: Unit) -> bool:
 	# A moving defender must be able to finish or redirect to cover after its duty changes.
-	return not _relocation_claimed or (unit.movement != null and unit.movement.is_moving)
+	return HqSupportPositionPolicy.is_headquarters(unit) or not _relocation_claimed or (unit.movement != null and unit.movement.is_moving)
 
 
 func _build_sector_requests(available: Array[Unit]) -> void:
+	_build_combat_sector_requests(_combat_units(available))
+	_add_support_requests(available)
+
+
+func _build_combat_sector_requests(available: Array[Unit]) -> void:
+	if available.is_empty():
+		_clear_reserve()
+		return
 	if current_order.defense_responsibility in [PositionQuery.Responsibility.OCCUPY, PositionQuery.Responsibility.GUARD]:
 		for unit: Unit in available:
 			_add_sector_request(unit, "guard_objective", -1, current_order.defense_responsibility)
@@ -446,7 +483,7 @@ func _accept_planning_result(request: Dictionary, advice: PositionResult) -> voi
 	_planning_results.append(result)
 	if result.is_valid():
 		_planning_reservations[result.unit] = result.target_hex
-		if result.should_move:
+		if result.should_move and not HqSupportPositionPolicy.is_headquarters(result.unit):
 			_relocation_claimed = true
 
 
@@ -546,20 +583,15 @@ func _cancel_plan() -> void:
 
 
 func _select_guard_squad(available: Array[Unit]) -> Unit:
-	var candidates: Array[Unit] = available.duplicate()
-	if available.size() >= 3 and current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
-		for unit: Unit in available:
-			if unit.squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]:
-				candidates.erase(unit)
-				break
+	var candidates: Array[Unit] = _combat_units(available)
+	if candidates.is_empty():
+		return null
 	return DefenseSectorAllocator.select_guard(candidates)
 
 
 func _select_reserve_squad(available: Array[Unit]) -> Unit:
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
-		for unit: Unit in available:
-			if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
-				return unit
+		return null
 	if InfluenceUnitQuery.is_valid_living_unit(reserve_squad) and available.has(reserve_squad) and DefenseSectorAllocator.combat_reserve_capable(reserve_squad):
 		return reserve_squad
 	var reserve: Unit = null

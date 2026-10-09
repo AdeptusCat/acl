@@ -193,6 +193,9 @@ func request_defense_area(team: int, objective: Vector2i, radius: int = 8, horiz
 
 
 func _attach_defense_area(query: PositionQuery) -> void:
+	if HqSupportPositionPolicy.is_headquarters(query.unit):
+		HqSupportPositionPolicy.configure(query)
+		return
 	if query.use_defense_area and query.profile.mode == PositionProfile.Mode.DEFEND and query.axis != null and query.assigned_sector < 0 and not query.reserve_position and query.defense_responsibility not in [PositionQuery.Responsibility.OCCUPY, PositionQuery.Responsibility.GUARD] and is_instance_valid(LOSHelper.ground_layer):
 		query.assigned_sector = DefenseAreaAssessment.sector_for(query.objective_hex, query.axis.source_hex)
 	if not query.use_defense_area or query.profile.mode != PositionProfile.Mode.DEFEND or query.snapshot == null or query.defense_area != null or query.area_job != null:

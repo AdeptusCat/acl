@@ -35,7 +35,7 @@ func _physics_process(delta: float) -> void:
 
 func _decision_tick() -> void:
 	# Mission-controlled defense owns repositioning and withdrawal; do not open a gap independently.
-	if defensive_mission_controlled:
+	if defensive_mission_controlled or unit.ai_support_only:
 		return
 	if unit.stress_system.state == STATES.MoraleState.PANIC:
 		#_retreat_to_cover()

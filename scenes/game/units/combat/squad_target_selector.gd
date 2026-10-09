@@ -12,6 +12,8 @@ static func handle_auto_fire(controller: SquadFireController,
 	fire_rate: float,
 	_firepower: float
 ) -> void:
+	if controller.unit.ai_support_only:
+		return
 	controller.fire_timer -= delta
 	if controller.fire_timer > 0.0:
 		return

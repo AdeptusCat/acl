@@ -96,7 +96,7 @@ func advance(deadline_usec: int) -> void:
 			var branch: Dictionary = branches[branch_index]
 			if unit_index < units.size():
 				var unit: Unit = units[unit_index]
-				if InfluenceUnitQuery.is_valid_living_unit(unit) and PositionQueryService.can_follow_intent(unit) and not unit.broken and InfluenceUnitQuery.get_unit_effectiveness(unit) >= queries[0].profile.withdrawal_effectiveness:
+				if not HqSupportPositionPolicy.is_headquarters(unit) and InfluenceUnitQuery.is_valid_living_unit(unit) and PositionQueryService.can_follow_intent(unit) and not unit.broken and InfluenceUnitQuery.get_unit_effectiveness(unit) >= queries[0].profile.withdrawal_effectiveness:
 					visible.merge(area.coverage(queries[0], unit, positions[unit], branch)["visible_targets"])
 				unit_index += 1
 			else:

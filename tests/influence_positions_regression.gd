@@ -140,6 +140,7 @@ func _run() -> void:
 	_test_branch_defense()
 	_test_sector_pressure_and_protected_reserve()
 	_test_flexible_defense()
+	await _test_headquarters_support()
 	controller.free()
 	own.free()
 	enemy.free()
@@ -552,7 +553,7 @@ func _test_loadout_stationary_roles() -> void:
 		tripod.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
 		planner._planning_requests.clear()
 		planner._build_sector_requests([tripod, rifle, bipod])
-		_check(_planned_role(planner, tripod) == "reserve" and _planned_role(planner, bipod) == "guard_objective", "An explicit HQ reserve instruction overrides automatic equipment-based guard selection")
+		_check(_planned_role(planner, tripod) == "hq_support" and _planned_role(planner, bipod) == "guard_objective", "An explicit HQ policy keeps headquarters supporting and combat equipment guarding")
 		tripod.squad_type = Globals.SquadType.Rifle
 		planner.current_order.reserve_policy = MissionOrder.ReservePolicy.KEEP_ONE_SQUAD_IF_POSSIBLE
 		area.approaches.append({"id": 3, "priority": 1.0, "response_distances": response})
@@ -838,6 +839,161 @@ func _test_route_retention() -> void:
 	own.movement.path_hexes.clear()
 
 
+func _test_headquarters_support() -> void:
+	var saved_hex: Vector2i = own.current_hex
+	var saved_other: Vector2i = other.current_hex
+	add_child(controller)
+	var stressed: UnitProbe = _unit(own.team, Vector2i(7, 5))
+	var foreign: UnitProbe = _unit(own.team, Vector2i(3, 4))
+	foreign.platoon = 99
+	foreign.stress_system.S_eff = 100.0
+	foreign.stress_system.state = UnitStates.MoraleState.PANIC
+	own.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	own.current_hex = Vector2i(4, 3)
+	own.position = ground.map_to_local(own.current_hex)
+	other.current_hex = Vector2i(1, 1)
+	other.stress_system.S_eff = 0.0
+	other.stress_system.state = UnitStates.MoraleState.NORMAL
+	stressed.stress_system.S_eff = 90.0
+	stressed.stress_system.state = UnitStates.MoraleState.PANIC
+	for mirrored_team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		own.team = mirrored_team
+		other.team = mirrored_team
+		stressed.team = mirrored_team
+		foreign.team = mirrored_team
+		enemy.team = Globals.get_enemy_team(mirrored_team) as Globals.Team
+		_publish()
+		var snapshot: InfluenceSnapshot = controller.snapshot
+		snapshot.contacts[own.team] = []
+		snapshot.defensive_contacts[own.team] = []
+		var map: InfluenceMap = snapshot.maps[own.team]
+		map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER)
+		map.clear_layer(InfluenceMap.Layer.THREAT)
+		var quiet: Vector2i = Vector2i(2, 1)
+		var urgent: Vector2i = Vector2i(6, 5)
+		var concealed: Vector2i = Vector2i(6, 4)
+		for cell: Vector2i in [quiet, urgent, own.current_hex]:
+			map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.6)
+		var query: PositionQuery = PositionQuery.new()
+		query.unit = own
+		query.team = own.team
+		query.snapshot = snapshot
+		query.objective_hex = Vector2i(0, 6)
+		var result: PositionResult = PositionQueryService.query_positions(query)
+		_check(result.is_valid() and result.target_hex == urgent, "Headquarters chooses cover beside its most stressed squad for either team")
+		_check(result.profile_mode == PositionProfile.Mode.HQ_SUPPORT and result.features.get("firing", -1.0) == 0.0 and result.features.get("objective_coverage", -1.0) == 0.0, "Headquarters earns support utility without firing or capture utility")
+		_check(result.features.get("supported_squads", []).has(stressed) and query.support_radius == own.leader_aura.aura_radius_hexes, "Support uses the actual leadership aura radius")
+		var inspection: PositionQuery = PositionQuery.new()
+		inspection.unit = own
+		inspection.team = own.team
+		controller.query_inspection_positions(inspection)
+		var inspection_job: PositionQueryJob = controller.inspection_jobs[own as Unit]
+		while not inspection_job.completed:
+			controller._process_position_queries()
+		var fresh_inspection: PositionQuery = PositionQuery.new()
+		fresh_inspection.unit = own
+		fresh_inspection.team = own.team
+		_check(controller.query_inspection_positions(fresh_inspection) == inspection_job.result and controller.inspection_jobs[own as Unit] == inspection_job and not inspection_job.canceled, "Refreshing headquarters inspection reuses completed advice instead of canceling and restarting it")
+		controller.clear_inspection_queries()
+		_check(not query.support_targets.has(foreign), "Another platoon's stress cannot lure headquarters away from its own squads")
+		var captured_need: float = query.support_targets[stressed as Unit]["need"]
+		stressed.stress_system.S_eff = 0.0
+		HqSupportPositionPolicy.prepare(query)
+		_check(query.support_targets[stressed as Unit]["need"] == captured_need, "Support need is frozen in the completed snapshot")
+		stressed.stress_system.S_eff = 90.0
+		query.objective_hex = Vector2i(8, 0)
+		query.profile = PositionProfile.for_mode(PositionProfile.Mode.ASSAULT)
+		var changed: PositionResult = PositionQueryService.query_positions(query)
+		_check(changed.target_hex == urgent and changed.context == result.context and changed.profile_mode == PositionProfile.Mode.HQ_SUPPORT, "Offensive objectives cannot redirect headquarters away from support")
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, concealed, 0.6)
+		var old_los: Dictionary = snapshot.los
+		snapshot.los = old_los.duplicate(true)
+		var contact: InfluenceContact = InfluenceContact.new()
+		contact.unit = enemy
+		contact.hex = Vector2i(8, 0)
+		contact.observed = true
+		contact.confidence = 1.0
+		contact.firepower = 0.0
+		contact.weapon_range = 9
+		snapshot.defensive_contacts[own.team] = [contact]
+		snapshot.los[contact.hex] = {urgent: {"target_cover": 0.0, "hindrance": 0.0}}
+		changed = PositionQueryService.query_positions(query)
+		_check(changed.is_valid() and changed.target_hex == concealed and changed.features.get("enemy_visibility", 1.0) == 0.0, "Concealed support beats a slightly closer exposed support position")
+		_check(changed.features.get("exposure_seconds", INF) <= 3.0 and changed.features.get("open_exposure_seconds", INF) <= 1.0, "Support transit obeys stricter cumulative exposure budgets")
+		var job: PositionQueryJob = PositionQueryJob.new()
+		job.query = query
+		while not job.completed:
+			job.advance(Time.get_ticks_usec() + 50)
+		_check(job.result.target_hex == changed.target_hex and job.result.eligibility == changed.eligibility, "Budgeted support advice matches synchronous candidates and selection")
+		query.has_accepted_target = true
+		query.accepted_target = changed.target_hex
+		query.accepted_context = changed.context
+		var retained: PositionResult = PositionQueryService.query_positions(query)
+		_check(retained.target_hex == changed.target_hex and retained.status == PositionResult.Status.RETAINED, "Stable support need retains its accepted covered position")
+		var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+		_check(executor.execute(changed, TacticalPositionExecutor.Intent.ASSAULT) and (own.action_controller as ActionProbe).intent == "defend", "Explicit assault intent cannot turn a support move into an assault")
+		executor.cancel_all(true)
+		query.has_accepted_target = false
+		snapshot.defensive_contacts[own.team] = []
+		snapshot.support_units[other as Unit]["need"] = 1.5
+		snapshot.support_units[stressed as Unit]["need"] = 0.1
+		changed = PositionQueryService.query_positions(query)
+		_check(changed.target_hex == quiet, "Changing squad stress redirects headquarters to the newly stressed squad")
+		map.clear_layer(InfluenceMap.Layer.THREAT, 1.0)
+		for cell: Vector2i in [quiet, urgent, concealed, own.current_hex]:
+			map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 0.0)
+		query.profile.max_open_exposure_seconds = 0.01
+		changed = PositionQueryService.query_positions(query)
+		_check(changed.is_valid() and changed.target_hex == own.current_hex and not changed.should_move, "Urgent support cannot force headquarters across dangerous open transit")
+		_check(changed.eligibility[map.cell_to_index(quiet)] == 0 and changed.rejection_reasons[map.cell_to_index(quiet)] == "route", "Diagnostics distinguish useful support cover with an unsafe route")
+		query.profile.max_open_exposure_seconds = 1.0
+		map.clear_layer(InfluenceMap.Layer.THREAT)
+		for cell: Vector2i in [quiet, urgent, concealed, own.current_hex]:
+			map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.0)
+		changed = PositionQueryService.query_positions(query)
+		_check(not changed.is_valid() and changed.rejections.has("cover"), "No covered support option holds without an open-ground fallback")
+		var planner: PlatoonAI = PlatoonAI.new()
+		planner.team = own.team
+		planner.influence_map_controller = controller
+		planner.current_order = MissionOrder.new()
+		planner.set_squads([own, other, stressed])
+		planner._relocation_claimed = true
+		_check(own.ai_support_only and planner._can_relocate(own), "Support moves do not consume or wait for combat handoffs")
+		_check(not DefenseReadinessJob.established(own, query), "Headquarters cannot promise established combat coverage")
+		planner._planning_snapshot = snapshot
+		planner._build_planning_requests([own])
+		_check(planner._planning_requests.size() == 1 and planner._planning_requests[0]["role"] == "hq_support", "A headquarters-only roster receives support advice without combat duties")
+		var rifle: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+		_equip(own, [rifle])
+		own.squad_fire.unit = own
+		own.squad_fire.stress_controller = own.stress_system
+		Globals.unit_visible_enemies[own] = [enemy]
+		var command_count: int = own.commanded.size()
+		SquadTargetSelector.handle_auto_fire(own.squad_fire, 1.0, own, own.current_hex, own.weapon_range, own.fire_rate, own.firepower)
+		var fired: int = await own.squad_fire._try_fire_soldier(1.0, own.squad_fire.soldiers[0], false, 0, 0, 1, 0)
+		own.squad_fire.has_target_hex = true
+		own.squad_fire._process(1.0)
+		_check(own.commanded.size() == command_count and fired == 0 and not own.squad_fire.has_target_hex, "Support-only headquarters neither acquires visible targets nor fires an existing target")
+		own.squad_fire.free()
+		own.squad_fire = null
+		Globals.unit_visible_enemies.erase(own)
+		planner.set_active(false)
+		_check(not own.ai_support_only, "Player handoff releases the AI-only support restriction")
+		planner.free()
+		snapshot.los = old_los
+	own.team = Globals.Team.AXIS
+	other.team = Globals.Team.AXIS
+	enemy.team = Globals.Team.ALLIES
+	own.squad_type = Globals.SquadType.Rifle
+	own.current_hex = saved_hex
+	own.position = ground.map_to_local(saved_hex)
+	other.current_hex = saved_other
+	stressed.free()
+	foreign.free()
+	remove_child(controller)
+	_publish()
+
+
 func _test_reserve_policy() -> void:
 	var platoon: PlatoonAI = PlatoonAI.new()
 	platoon.current_order = MissionOrder.new()
@@ -850,7 +1006,7 @@ func _test_reserve_policy() -> void:
 	var available: Array[Unit] = [own, other]
 	_check(platoon._select_reserve_squad(available) == null, "An ineffective squad or headquarters cannot substitute for a combat-capable mobile reserve")
 	platoon.current_order.reserve_policy = MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE
-	_check(platoon._select_reserve_squad(available) == other, "Explicit HQ reserve policy keeps the headquarters near the objective")
+	_check(platoon._select_reserve_squad(available) == null, "An explicit HQ policy cannot turn headquarters into a combat reserve")
 	own.combat_stats.combat_effectiveness = own_effectiveness
 	other.combat_stats.combat_effectiveness = other_effectiveness
 	other.squad_type = other_role

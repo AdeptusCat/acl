@@ -222,7 +222,7 @@ func warm_support(query: PositionQuery, approach: Dictionary, friendly: Unit) ->
 		query.support_fire_by_branch[key] = {}
 	if not query.established_screen.has(key):
 		query.established_screen[key] = {}
-	if friendly == query.unit or not InfluenceUnitQuery.is_valid_living_unit(friendly) or not query.snapshot.positions.has(friendly) or query.snapshot.teams[friendly] != query.team:
+	if HqSupportPositionPolicy.is_headquarters(friendly) or friendly == query.unit or not InfluenceUnitQuery.is_valid_living_unit(friendly) or not query.snapshot.positions.has(friendly) or query.snapshot.teams[friendly] != query.team:
 		return
 	if not PositionQueryService.can_follow_intent(friendly) or friendly.broken or InfluenceUnitQuery.get_unit_effectiveness(friendly) < query.profile.withdrawal_effectiveness:
 		return
@@ -256,7 +256,7 @@ func combined_coverage(query: PositionQuery, cell: Vector2i, approach: Dictionar
 func coverage_of_positions(query: PositionQuery, positions: Dictionary[Unit, Vector2i], approach: Dictionary) -> float:
 	var visible: Dictionary = {}
 	for friendly: Unit in positions:
-		if not InfluenceUnitQuery.is_valid_living_unit(friendly) or not PositionQueryService.can_follow_intent(friendly) or friendly.broken or InfluenceUnitQuery.get_unit_effectiveness(friendly) < query.profile.withdrawal_effectiveness:
+		if HqSupportPositionPolicy.is_headquarters(friendly) or not InfluenceUnitQuery.is_valid_living_unit(friendly) or not PositionQueryService.can_follow_intent(friendly) or friendly.broken or InfluenceUnitQuery.get_unit_effectiveness(friendly) < query.profile.withdrawal_effectiveness:
 			continue
 		visible.merge(coverage(query, friendly, positions[friendly], approach)["visible_targets"])
 	return coverage_of_targets(query.defense_radius, visible, approach)
@@ -265,7 +265,7 @@ func coverage_of_positions(query: PositionQuery, positions: Dictionary[Unit, Vec
 func protection_of_positions(query: PositionQuery, positions: Dictionary[Unit, Vector2i], approach: Dictionary) -> float:
 	var visible: Dictionary = {}
 	for friendly: Unit in positions:
-		if InfluenceUnitQuery.is_valid_living_unit(friendly) and PositionQueryService.can_follow_intent(friendly) and not friendly.broken and InfluenceUnitQuery.get_unit_effectiveness(friendly) >= query.profile.withdrawal_effectiveness:
+		if not HqSupportPositionPolicy.is_headquarters(friendly) and InfluenceUnitQuery.is_valid_living_unit(friendly) and PositionQueryService.can_follow_intent(friendly) and not friendly.broken and InfluenceUnitQuery.get_unit_effectiveness(friendly) >= query.profile.withdrawal_effectiveness:
 			visible.merge(coverage(query, friendly, positions[friendly], approach)["visible_targets"])
 	return protection_of_targets(query.defense_radius, visible, approach)
 

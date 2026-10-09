@@ -15,12 +15,17 @@ var candidates: Array[PositionCandidate] = []
 var support_duties: Array[Dictionary] = []
 var support_units: Array[Unit] = []
 var support_cursor: int = 0
+var profile_prepared: bool = false
 
 
 func advance(deadline_usec: int) -> void:
 	while not completed and not canceled and (deadline_usec < 0 or Time.get_ticks_usec() < deadline_usec):
 		match phase:
 			Phase.AREA:
+				if not profile_prepared:
+					if HqSupportPositionPolicy.is_headquarters(query.unit):
+						HqSupportPositionPolicy.configure(query)
+					profile_prepared = true
 				if query.area_job != null and (query.snapshot == null or query.area_job.objective != query.objective_hex or query.area_job.result.snapshot_version != query.snapshot.version):
 					query.area_job = null
 					query.defense_area = null
@@ -70,7 +75,7 @@ func advance(deadline_usec: int) -> void:
 				else:
 					cursor = 0
 					phase = Phase.EVALUATE
-					if query.profile.mode == PositionProfile.Mode.DEFEND and not indices.is_empty():
+					if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] and not indices.is_empty():
 						var targets: Array[Vector2i] = []
 						for index: int in indices:
 							targets.append(query.snapshot.maps[query.team].index_to_cell(index))

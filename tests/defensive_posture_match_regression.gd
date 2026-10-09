@@ -111,7 +111,10 @@ func _run() -> void:
 				target_key = str(advice.target_hex)
 				_check(advice.features["cover"] >= 0.1, "Defensive endpoints have cover on authored terrain")
 				_check(advice.features["exposure_seconds"] <= 6.0 and advice.features["open_exposure_seconds"] <= 2.0 and advice.features["peak_exposure"] <= 0.98, "Routes obey accumulated movement exposure budgets")
-				_check(advice.features["responsibility"] != "" and advice.features["preserves_screen"], "Every defensive position fulfils its objective responsibility without opening a screen gap")
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT and advice.features["responsibility"] == "hq_support" and unit.ai_support_only, "Headquarters holds a covered support duty outside combat allocation")
+				else:
+					_check(advice.features["responsibility"] != "" and advice.features["preserves_screen"], "Every fighting squad fulfils its objective responsibility without opening a screen gap")
 			elif advice.status == PositionResult.Status.NO_CANDIDATE:
 				no_candidates += 1
 				_check(not planner.executor.pending.has(unit) and not unit.movement.is_moving, "No safe candidate leaves the defender holding rather than moving into danger")

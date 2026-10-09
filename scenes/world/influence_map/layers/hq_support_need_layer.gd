@@ -112,6 +112,8 @@ static func get_support_ring_value(distance: int) -> float:
 
 
 static func get_squad_support_need(squad: Unit) -> float:
+	if squad.stress_system == null or squad.original_size <= 0:
+		return 0.1
 	var need: float = 0.0
 
 	if squad.stress_system.state == Unit.MoraleState.NORMAL:

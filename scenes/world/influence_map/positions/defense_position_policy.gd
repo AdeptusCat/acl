@@ -155,7 +155,7 @@ static func _preserves_screen(query: PositionQuery, cell: Vector2i) -> bool:
 			continue
 		var covered_by_other: bool = false
 		for friendly: Unit in query.snapshot.positions:
-			if friendly == query.unit or query.snapshot.teams[friendly] != query.team or not InfluenceUnitQuery.is_valid_living_unit(friendly):
+			if HqSupportPositionPolicy.is_headquarters(friendly) or friendly == query.unit or query.snapshot.teams[friendly] != query.team or not InfluenceUnitQuery.is_valid_living_unit(friendly):
 				continue
 			# A future reservation cannot replace an established defender's covering fire.
 			if friendly.movement != null and friendly.movement.is_moving:

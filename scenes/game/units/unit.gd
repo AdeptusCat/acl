@@ -26,6 +26,7 @@ const COMPANY_NAMES: Dictionary[Company, String] = {
 enum AttackState { AUTO, MANUAL_GROUND, MANUAL_TRACK }
 var attackState: AttackState = AttackState.AUTO
 var attack_ground_rounds_budget: int = 0
+var ai_support_only: bool = false
 var terrain_defense_bonus: int = 0
 
 var close_combat_defense_preparedness: float = 0.0

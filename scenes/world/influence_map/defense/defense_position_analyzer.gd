@@ -65,6 +65,8 @@ static func adapt_result(advice: PositionResult, axis: ThreatAxis, role: String)
 		result.set(property, advice.get(property))
 	result.axis = axis
 	result.role = role
+	if advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.role = "hq_support"
 	return result
 
 

@@ -47,6 +47,8 @@ var relocation_allowed: bool = true
 var sector_features: Dictionary[Unit, Dictionary] = {}
 var support_fire_by_branch: Dictionary[String, Dictionary] = {}
 var established_screen: Dictionary[String, Dictionary] = {}
+var support_targets: Dictionary[Unit, Dictionary] = {}
+var support_radius: int = 2
 
 
 func reset_evaluation() -> void:
@@ -74,6 +76,9 @@ func firepower_at_range(friendly: Unit, distance: int) -> float:
 
 
 func context_key() -> String:
+	if profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		# Stress changes affect utility, without resetting a stable support position every snapshot.
+		return str([team, profile.mode, support_targets.keys(), support_radius, movement_radius])
 	var axis_key: String = ""
 	# Axis observations can change without changing the defensive mission.
 	if axis != null and profile.mode != PositionProfile.Mode.DEFEND:

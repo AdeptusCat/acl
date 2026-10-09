@@ -11,6 +11,9 @@ func execute(result: PositionResult, intent: Intent = Intent.FROM_PROFILE) -> bo
 	if not result.is_valid() or result.unit.action_controller == null or result.unit.action_controller.movement == null:
 		return false
 	var unit: Unit = result.unit
+	if result.profile_mode == PositionProfile.Mode.HQ_SUPPORT:
+		# Combat intent belongs to the fighting squads, even during an offensive mission.
+		intent = Intent.HOLD
 	if intent == Intent.FROM_PROFILE:
 		intent = intent_for_profile(result.profile_mode)
 		if result.decision == PositionResult.Decision.WITHDRAW:

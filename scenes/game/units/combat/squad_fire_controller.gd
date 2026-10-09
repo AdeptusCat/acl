@@ -281,6 +281,11 @@ func _refresh_tracked_target() -> bool:
 func _process(delta: float) -> void:
 	if not unit.alive:
 		return
+	if unit.ai_support_only:
+		if target_unit != null or has_target_hex or has_mortar_target_hex:
+			clear_target()
+		update_fire_recent(delta)
+		return
 	_now_s += delta
 	_accum_window_s += delta
 	
@@ -450,7 +455,7 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
-	if not unit.alive:
+	if not unit.alive or unit.ai_support_only:
 		return 0
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
