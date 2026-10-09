@@ -48,6 +48,7 @@ func describe_cell(index: int) -> String:
 		"terrain": "Impassable terrain", "geography": "Outside the assigned positioning area",
 		"capacity": "Occupied or reserved by another unit", "cover": "Insufficient defensive cover",
 		"responsibility": "Cannot protect the assigned objective or approach branch",
+		"crossing_gap": "Cannot cover the threatened open crossing into objective-side cover",
 		"objective_access": "No terrain route back to objective protection",
 		"screen_gap": "Moving here would leave established approach coverage open",
 		"withdrawal_direction": "Withdrawal would move closer to known enemies",

@@ -207,7 +207,7 @@ func _prepare_sources() -> void:
 		if is_instance_valid(contact.unit):
 			identity = str(contact.unit.get_instance_id())
 		contacts.append({"id": sector, "key": str(sector) + ":" + identity, "source": contact.hex, "priority": priority,
-			"confirmed": contact.observed, "evidence": evidence, "crossing_seconds": contact.crossing_seconds, "source_priority": urgency})
+			"confirmed": contact.observed, "evidence": evidence, "last_seen_at": contact.last_seen_at, "crossing_seconds": contact.crossing_seconds, "source_priority": urgency})
 	contacts.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if a["confirmed"] != b["confirmed"]:
 			return a["confirmed"]

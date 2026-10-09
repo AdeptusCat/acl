@@ -304,6 +304,16 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 			_clear_reserve()
 	else:
 		_clear_reserve()
+	var reserve_requested: bool = false
+	if _planning_readiness != null and _planning_readiness.watch_branch != "":
+		var watch: Dictionary = defense_area.branch_for_key(_planning_readiness.watch_branch)
+		if reserve != null:
+			# Cover a threatened entrance before optional relocations consume the handoff.
+			_add_sector_request(reserve, "reserve", watch["id"], PositionQuery.Responsibility.AUTO, DefenseAreaAssessment.duty_key(watch))
+			reserve_requested = true
+		elif reserve_deployed and available.has(reserve_squad):
+			available.erase(reserve_squad)
+			_add_sector_request(reserve_squad, "defend_sector", watch["id"], PositionQuery.Responsibility.COVER_APPROACH, DefenseAreaAssessment.duty_key(watch))
 	var previous: Dictionary = {}
 	for unit: Unit in squad_assignments:
 		previous[unit] = {"sector": squad_assignments[unit]["result"].features.get("assigned_sector", -1), "branch": squad_assignments[unit]["result"].features.get("assigned_branch", "")}
@@ -326,7 +336,7 @@ func _build_sector_requests(available: Array[Unit]) -> void:
 	if assignments.is_empty():
 		for unit: Unit in available:
 			_add_sector_request(unit, "defend_objective", -1, current_order.defense_responsibility)
-	if reserve != null:
+	if reserve != null and not reserve_requested:
 		_add_sector_request(reserve, "reserve", -1, PositionQuery.Responsibility.AUTO)
 
 
@@ -369,6 +379,9 @@ func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: 
 	query.assigned_branch = branch
 	query.reserve_position = role == "reserve"
 	query.reserve_reason = reserve_reason
+	if unit == reserve_squad and _planning_readiness != null and branch != "" and branch == _planning_readiness.watch_branch:
+		query.required_crossing_branch = branch
+		query.reserve_reason = "cover_threatened_crossing"
 	if query.reserve_position and _planning_readiness != null and _planning_readiness.reserve == unit:
 		query.reserve_responses = _planning_readiness.responses
 		query.reserve_response_context = _planning_readiness.reserve_capability
@@ -471,7 +484,7 @@ func _commit_plan() -> void:
 		var query: PositionQuery = _planning_requests[0]["query"]
 		var highest: float = defense_area.max_duty_priority()
 		for approach: Dictionary in defense_area.duties():
-			var covered: bool = defense_area.coverage_of_positions(query, positions, approach) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
+			var covered: bool = defense_area.protection_of_positions(query, positions, approach) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
 			for result: DefensePositionResult in _planning_results:
 				if result.is_valid() and result.features.get("responsibility") == "reserve" and DefenseSectorAllocator.combat_reserve_capable(result.unit):
 					var status: Dictionary = result.features.get("reserve_branch_status", {}).get(DefenseAreaAssessment.duty_key(approach), {})

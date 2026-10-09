@@ -89,6 +89,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
 				result.reason = "Holding until relocation can preserve existing approach coverage"
+			if query.required_crossing_branch != "":
+				result.reason = "Holding: no safe connected position can close the threatened open crossing"
 			if result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
 				result.reason = "Waiting for the relocating defender to establish covering fire"
 		return
@@ -142,6 +144,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = "Accepted defensive " + str(best.features["responsibility"]) + " position"
 		if query.assigned_sector >= 0:
 			result.reason += " for sector %d (coverage %.0f%%)" % [query.assigned_sector, best.features.get("assigned_coverage", 0.0) * 100.0]
+		if query.required_crossing_branch != "":
+			result.reason += "; covers threatened woodland entrance"
 	if result.status == PositionResult.Status.RETAINED:
 		result.reason = "Retained the feasible position within the improvement margin"
 		if committed:

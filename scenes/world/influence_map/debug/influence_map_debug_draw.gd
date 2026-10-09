@@ -700,6 +700,8 @@ func _debug_report_layer_access(reason: String) -> void:
 					_layer_access_text += "\nAdditional firing value=%.2f | connected cover=%s" % [advice.features.get("additional_interdiction", advice.features["interdiction"]), str(advice.features.get("objective_connected_cover", false))]
 					if advice.features.get("connected_cover_preferred", false):
 						_layer_access_text += " | detached gain below improvement margin"
+					if advice.features.get("required_crossing_branch", "") != "":
+						_layer_access_text += "\nThreatened entrance fire coverage=%.0f%%" % [advice.features["crossing_coverage"] * 100.0]
 					if advice.features.get("responsibility") == "reserve":
 						_layer_access_text += " | readiness=%.2f" % advice.features["reserve_readiness"]
 						for key: String in advice.features.get("reserve_branch_status", {}):
@@ -712,6 +714,8 @@ func _debug_report_layer_access(reason: String) -> void:
 							_layer_access_text += "\nBranch %s: %s" % [key, protection_text]
 							if not protection["covered"]:
 								_layer_access_text += " | response %.1fs / arrival %.1fs" % [protection["response_seconds"], protection["arrival_seconds"]]
+								if protection.get("crossing", false):
+									_layer_access_text += " at cover entrance (objective %.1fs)" % protection["objective_arrival_seconds"]
 		return
 	var layer_id: int = _debug_view_to_layer_id(debug_view)
 

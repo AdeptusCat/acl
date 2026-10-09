@@ -100,7 +100,7 @@ func advance(deadline_usec: int) -> void:
 					visible.merge(area.coverage(queries[0], unit, positions[unit], branch)["visible_targets"])
 				unit_index += 1
 			else:
-				if area.duty_priority(branch) >= highest_priority * 0.4 and area.coverage_of_targets(queries[0].defense_radius, visible, branch) < DefensePositionPolicy.MIN_APPROACH_COVERAGE and not _reserve_can_intercept(DefenseAreaAssessment.duty_key(branch)):
+				if area.duty_priority(branch) >= highest_priority * 0.4 and area.protection_of_targets(queries[0].defense_radius, visible, branch) < DefensePositionPolicy.MIN_APPROACH_COVERAGE and not _reserve_can_intercept(DefenseAreaAssessment.duty_key(branch)):
 					branch_gaps.append(DefenseAreaAssessment.duty_key(branch))
 				visible = {}
 				unit_index = 0

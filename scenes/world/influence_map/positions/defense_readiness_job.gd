@@ -5,6 +5,10 @@ extends RefCounted
 # All work is incremental. Hidden intelligence supplies sector pressure, never transit danger.
 enum Phase { COVERAGE, TARGETS, FIELD, RESPONSES, FINISH }
 
+const WATCH_SECONDS: float = 12.0
+const ESTIMATED_WATCH_SECONDS: float = 20.0
+const WATCH_MEMORY_SECONDS: float = 8.0
+
 var completed: bool = false
 var area: DefenseAreaAssessment
 var query: PositionQuery
@@ -14,11 +18,13 @@ var branches: Array[Dictionary] = []
 var coverage: Dictionary[String, float] = {}
 var responses: Dictionary[String, Dictionary] = {}
 var emergency: String = ""
+var watch_branch: String = ""
 var phase: Phase = Phase.COVERAGE
 var branch_index: int = 0
 var unit_index: int = 0
 var cell_index: int = 0
 var visible: Dictionary = {}
+var established_targets: Dictionary[String, Dictionary] = {}
 var targets: Array[Vector2i] = []
 var response_origins: Array[Vector2i] = []
 var field: DefenseTravelField
@@ -65,14 +71,16 @@ func advance(deadline_usec: int) -> void:
 						visible.merge(area.coverage(query, unit, unit.current_hex, branch)["visible_targets"])
 					unit_index += 1
 				else:
-					coverage[DefenseAreaAssessment.duty_key(branch)] = area.coverage_of_targets(query.defense_radius, visible, branch)
+					var key: String = DefenseAreaAssessment.duty_key(branch)
+					established_targets[key] = visible
+					coverage[key] = area.protection_of_targets(query.defense_radius, visible, branch)
 					visible = {}
 					unit_index = 0
 					if reserve == null or not credible(area, branch):
 						branch_index += 1
 					else:
-						var key: String = DefenseAreaAssessment.duty_key(branch)
-						responses[key] = {"seconds": {}, "arrival_seconds": branch["arrival_seconds"], "weight": maxf(0.15, area.duty_priority(branch)), "covered": coverage[key] >= DefensePositionPolicy.MIN_APPROACH_COVERAGE}
+						var zone: Dictionary = area.crossing_zone(query.defense_radius, branch)
+						responses[key] = {"seconds": {}, "arrival_seconds": zone["arrival_seconds"], "objective_arrival_seconds": branch["arrival_seconds"], "crossing": zone["total"] > 0.0, "has_intercept": false, "weight": maxf(0.15, area.duty_priority(branch)), "covered": coverage[key] >= DefensePositionPolicy.MIN_APPROACH_COVERAGE}
 						if responses[key]["covered"]:
 							# Existing coverage needs no reserve route. It is rechecked at publication.
 							branch_index += 1
@@ -82,12 +90,17 @@ func advance(deadline_usec: int) -> void:
 							phase = Phase.TARGETS
 			Phase.TARGETS:
 				var branch: Dictionary = branches[branch_index]
+				var data: Dictionary = responses[DefenseAreaAssessment.duty_key(branch)]
+				var connected_required: bool = data["crossing"] and data["arrival_seconds"] <= _watch_window(branch) and _watch_evidence(branch)
 				if cell_index < area.covered_positions.size():
 					var cell: Vector2i = area.covered_positions[cell_index]
-					if area.geometry["objective_distances"].has(cell) and area.geometry["return_open_costs"].has(cell) and _free_destination(cell) and area.coverage(query, reserve, cell, branch)["coverage"] >= DefensePositionPolicy.MIN_APPROACH_COVERAGE and _step(cell)["risk"] <= query.profile.max_route_exposure:
+					var combined: Dictionary = established_targets[DefenseAreaAssessment.duty_key(branch)].duplicate()
+					combined.merge(area.coverage(query, reserve, cell, branch)["visible_targets"])
+					if area.geometry["objective_distances"].has(cell) and area.geometry["return_open_costs"].has(cell) and (not connected_required or area.geometry["return_open_costs"].get(cell, INF) <= 0.000001) and _free_destination(cell) and area.coverage(query, reserve, cell, branch)["coverage"] >= DefensePositionPolicy.MIN_APPROACH_COVERAGE and area.crossing_coverage(query.defense_radius, combined, branch) >= DefenseAreaAssessment.MIN_CROSSING_COVERAGE and _step(cell)["risk"] <= query.profile.max_route_exposure:
 						targets.append(cell)
 					cell_index += 1
 				else:
+					responses[DefenseAreaAssessment.duty_key(branch)]["has_intercept"] = not targets.is_empty()
 					field = DefenseTravelField.new()
 					field.start_sources(area.geometry, targets, true)
 					phase = Phase.FIELD
@@ -107,6 +120,7 @@ func advance(deadline_usec: int) -> void:
 					phase = Phase.COVERAGE
 			Phase.FINISH:
 				emergency = _emergency_reason()
+				watch_branch = _watch_branch()
 				query.sector_features.clear()
 				completed = true
 
@@ -153,6 +167,8 @@ func _response_seconds(origin: Vector2i) -> float:
 		return INF
 	var cell: Vector2i = origin
 	var seconds: float = query.profile.establishment_seconds
+	if targets.has(origin) and (origin != reserve.current_hex or established(reserve, query)):
+		seconds = 0.0
 	var exposure: float = 0.0
 	var open_exposure: float = 0.0
 	var ids: Dictionary = query.snapshot.point_ids[query.team]
@@ -170,6 +186,39 @@ func _response_seconds(origin: Vector2i) -> float:
 			return INF
 		cell = next
 	return seconds
+
+
+func _watch_branch() -> String:
+	if not DefenseSectorAllocator.combat_reserve_capable(reserve):
+		return ""
+	var selected: String = ""
+	var highest: float = -INF
+	for branch: Dictionary in branches:
+		var key: String = DefenseAreaAssessment.duty_key(branch)
+		var data: Dictionary = responses.get(key, {})
+		if data.is_empty() or not data["crossing"] or data["covered"] or not data["has_intercept"] or data["arrival_seconds"] > _watch_window(branch):
+			continue
+		if not _watch_evidence(branch):
+			continue
+		var urgency: float = area.duty_priority(branch) / (1.0 + data["arrival_seconds"])
+		if urgency > highest:
+			selected = key
+			highest = urgency
+	return selected
+
+
+func _watch_evidence(branch: Dictionary) -> bool:
+	if branch.get("evidence", "inferred") == "observed":
+		return true
+	if branch.get("evidence", "inferred") == "estimated":
+		return area.duty_priority(branch) >= 0.12
+	return branch.get("evidence", "inferred") == "remembered" and query.snapshot.captured_at - branch.get("last_seen_at", -INF) <= WATCH_MEMORY_SECONDS
+
+
+func _watch_window(branch: Dictionary) -> float:
+	if branch.get("evidence", "inferred") == "estimated":
+		return ESTIMATED_WATCH_SECONDS
+	return WATCH_SECONDS
 
 
 func _emergency_reason() -> String:

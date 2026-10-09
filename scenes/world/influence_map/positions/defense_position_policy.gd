@@ -112,7 +112,18 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		responsibility = ""
 	elif query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and not approach_covered:
 		responsibility = ""
+	var crossing: float = 1.0
+	if query.required_crossing_branch != "" and query.defense_area != null:
+		var branch: Dictionary = query.defense_area.branch_for_key(query.required_crossing_branch)
+		if branch.is_empty():
+			crossing = 0.0
+			responsibility = ""
+		else:
+			crossing = query.defense_area.combined_crossing_coverage(query, cell, branch)
+			if crossing < DefenseAreaAssessment.MIN_CROSSING_COVERAGE or query.defense_area.geometry["return_open_costs"].get(cell, INF) > 0.000001:
+				responsibility = ""
 	return {"responsibility": responsibility, "blocking": blocking, "interposition": interposition,
+		"required_crossing_branch": query.required_crossing_branch, "crossing_coverage": crossing,
 		"covered_approaches": covered_approaches, "approach_count": query.defense_approaches.size(),
 		"important_approaches_covered": important_covered, "important_approach_count": important_count,
 		"preserves_screen": _preserves_screen(query, cell), "withdrawal": needs_withdrawal(query)}
@@ -177,6 +188,8 @@ static func _preserves_branch_screen(query: PositionQuery, cell: Vector2i) -> bo
 			continue
 		if query.defense_area.combined_coverage(query, query.unit.current_hex, branch) >= MIN_APPROACH_COVERAGE and query.defense_area.combined_coverage(query, cell, branch) < MIN_APPROACH_COVERAGE:
 			return false
+		if query.defense_area.crossing_zone(query.defense_radius, branch)["total"] > 0.0 and query.defense_area.combined_crossing_coverage(query, query.unit.current_hex, branch) >= DefenseAreaAssessment.MIN_CROSSING_COVERAGE and query.defense_area.combined_crossing_coverage(query, cell, branch) < DefenseAreaAssessment.MIN_CROSSING_COVERAGE:
+			return false
 	return true
 
 
@@ -196,6 +209,11 @@ static func allows_route(query: PositionQuery, features: Dictionary) -> bool:
 
 
 static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary, check_handoff: bool = true) -> String:
+	if query.required_crossing_branch != "":
+		if features.get("crossing_coverage", 0.0) < DefenseAreaAssessment.MIN_CROSSING_COVERAGE:
+			return "crossing_gap"
+		if not features.get("objective_connected_cover", false):
+			return "objective_access"
 	if features["responsibility"] == "":
 		return "responsibility"
 	if query.defense_area != null and (not is_finite(features["objective_return_seconds"]) or not is_finite(features["return_open_seconds"])):

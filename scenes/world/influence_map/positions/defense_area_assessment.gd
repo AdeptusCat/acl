@@ -1,6 +1,8 @@
 class_name DefenseAreaAssessment
 extends RefCounted
 
+const MIN_CROSSING_COVERAGE: float = 0.75
+
 var objective_hex: Vector2i
 var snapshot_version: int = 0
 var geometry: Dictionary = {}
@@ -10,6 +12,7 @@ var edge_positions: Array[Vector2i] = []
 var max_priority: float = 0.0
 var observed_contacts: Dictionary[Unit, Vector2i] = {}
 var _interception_zones: Dictionary[String, Dictionary] = {}
+var _crossing_zones: Dictionary[String, Dictionary] = {}
 
 
 static func duty_key(approach: Dictionary) -> String:
@@ -101,6 +104,10 @@ func coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictio
 		var ability: float = LosInfluenceProjector.calculate_los_fire_threat(power,
 			InfluenceUnitQuery.get_unit_effectiveness(unit), record.get("target_cover", 0.0), record.get("hindrance", 0.0), distance)
 		var utility: float = PositionFeatureEvaluator.risk(ability)
+		if target == approach.get("source", objective_hex) and utility > 0.0:
+			visible_targets[target] = weight
+		elif target == approach.get("source", objective_hex) and cell != target:
+			visible_targets.erase(target)
 		target_fire[target] = utility
 		fire += weight * utility
 	var result: Dictionary = {"coverage": local_visible / maxf(interception["total"], 0.001),
@@ -131,6 +138,73 @@ func _support_fire(query: PositionQuery, approach: Dictionary) -> Dictionary:
 		for friendly: Unit in query.snapshot.positions:
 			warm_support(query, approach, friendly)
 	return query.support_fire_by_branch[key]
+
+
+func crossing_zone(radius: int, approach: Dictionary) -> Dictionary:
+	var key: String = str([radius, duty_key(approach)])
+	if _crossing_zones.has(key):
+		return _crossing_zones[key]
+	var result: Dictionary = {"weights": {}, "total": 0.0, "arrival_seconds": approach["arrival_seconds"], "active_target": false}
+	_crossing_zones[key] = result
+	if not approach.has("distances") or not geometry.has("cover"):
+		return result
+	var entrances: Array[Dictionary] = []
+	var earliest: float = INF
+	var source_distances: Dictionary = approach["distances"]
+	var best: float = source_distances.get(objective_hex, INF)
+	for cell: Vector2i in approach["cells"]:
+		if LOSHelper.get_hex_distance(cell, objective_hex) > maxi(radius, 1) or geometry["cover"].get(cell, 0.0) >= 0.1:
+			continue
+		for next: Vector2i in geometry["neighbors"].get(cell, []):
+			if geometry["cover"].get(next, 0.0) < 0.1 or geometry["return_open_costs"].get(next, INF) > 0.000001:
+				continue
+			if LOSHelper.get_hex_distance(next, objective_hex) >= LOSHelper.get_hex_distance(cell, objective_hex):
+				continue
+			var entry: float = source_distances.get(cell, INF) + geometry["costs"][next]
+			if not is_finite(entry) or entry + geometry["objective_distances"].get(next, INF) > best + 2.5:
+				continue
+			earliest = minf(earliest, entry)
+			entrances.append({"cell": cell, "cost": entry})
+	# Protect the first credible entrances, rather than averaging them with inner woods.
+	for entrance: Dictionary in entrances:
+		if entrance["cost"] <= earliest + 1.0:
+			var cell: Vector2i = entrance["cell"]
+			result["weights"][cell] = approach["weights"][cell]
+	for weight: float in result["weights"].values():
+		result["total"] += weight
+	if result["total"] > 0.0:
+		result["arrival_seconds"] = earliest * approach.get("crossing_seconds", 2.0)
+		result["active_target"] = approach.get("evidence", "inferred") == "observed" and geometry["cover"].get(approach["source"], 0.0) < 0.1 and LOSHelper.get_hex_distance(approach["source"], objective_hex) <= maxi(radius, 1) + 2
+		if approach.get("evidence", "inferred") == "estimated":
+			# Coarse intelligence stays coarse: scale its delayed bucket by terrain progress.
+			result["arrival_seconds"] = approach["arrival_seconds"] * clampf(earliest / maxf(best, 0.001), 0.0, 1.0)
+	return result
+
+
+func crossing_coverage(radius: int, visible: Dictionary, approach: Dictionary) -> float:
+	var zone: Dictionary = crossing_zone(radius, approach)
+	if zone["total"] <= 0.0:
+		return 1.0
+	# A known attacker already in the nearby open lane must actually be under usable fire.
+	if zone["active_target"] and not visible.has(approach["source"]):
+		return 0.0
+	var protected: float = 0.0
+	for cell: Vector2i in zone["weights"]:
+		if visible.has(cell):
+			protected += zone["weights"][cell]
+	return protected / zone["total"]
+
+
+func protection_of_targets(radius: int, visible: Dictionary, approach: Dictionary) -> float:
+	if crossing_zone(radius, approach)["total"] <= 0.0:
+		return coverage_of_targets(radius, visible, approach)
+	return minf(coverage_of_targets(radius, visible, approach), crossing_coverage(radius, visible, approach) * DefensePositionPolicy.MIN_APPROACH_COVERAGE / MIN_CROSSING_COVERAGE)
+
+
+func combined_crossing_coverage(query: PositionQuery, cell: Vector2i, approach: Dictionary) -> float:
+	var visible: Dictionary = established_targets(query, approach).duplicate()
+	visible.merge(coverage(query, query.unit, cell, approach)["visible_targets"])
+	return crossing_coverage(query.defense_radius, visible, approach)
 
 
 func established_targets(query: PositionQuery, approach: Dictionary) -> Dictionary:
@@ -186,6 +260,14 @@ func coverage_of_positions(query: PositionQuery, positions: Dictionary[Unit, Vec
 			continue
 		visible.merge(coverage(query, friendly, positions[friendly], approach)["visible_targets"])
 	return coverage_of_targets(query.defense_radius, visible, approach)
+
+
+func protection_of_positions(query: PositionQuery, positions: Dictionary[Unit, Vector2i], approach: Dictionary) -> float:
+	var visible: Dictionary = {}
+	for friendly: Unit in positions:
+		if InfluenceUnitQuery.is_valid_living_unit(friendly) and PositionQueryService.can_follow_intent(friendly) and not friendly.broken and InfluenceUnitQuery.get_unit_effectiveness(friendly) >= query.profile.withdrawal_effectiveness:
+			visible.merge(coverage(query, friendly, positions[friendly], approach)["visible_targets"])
+	return protection_of_targets(query.defense_radius, visible, approach)
 
 
 func coverage_of_targets(radius: int, visible: Dictionary, approach: Dictionary) -> float:
@@ -268,7 +350,7 @@ func _reserve_features(query: PositionQuery, cell: Vector2i, mobilization_second
 		var arrival: float = data["arrival_seconds"]
 		var timely: bool = response <= arrival
 		var protected: bool = data["covered"] or timely
-		branches[key] = {"covered": data["covered"], "response_seconds": response, "arrival_seconds": arrival, "protected": protected}
+		branches[key] = {"covered": data["covered"], "response_seconds": response, "arrival_seconds": arrival, "objective_arrival_seconds": data.get("objective_arrival_seconds", arrival), "crossing": data.get("crossing", false), "protected": protected}
 		if data["covered"]:
 			continue
 		var utility: float = 1.0 / (1.0 + response / 8.0)
