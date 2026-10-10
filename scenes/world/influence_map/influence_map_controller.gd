@@ -11,7 +11,8 @@ enum CompositeSource { SELF, ENEMY }
 enum TacticalTask { NONE, DEFEND_OBJECTIVE, ATTACK_OBJECTIVE }
 enum KnowledgePolicy { OBSERVED_AND_MEMORY, OMNISCIENT }
 
-@export var knowledge_policy: KnowledgePolicy = KnowledgePolicy.OBSERVED_AND_MEMORY
+# Tactical danger must include hidden enemy positions before approving exposed movement.
+@export var knowledge_policy: KnowledgePolicy = KnowledgePolicy.OMNISCIENT
 @export var hidden_sector_pressure_enabled: bool = true
 var maps_by_team: Dictionary[int, InfluenceMap] = {}
 var snapshot: InfluenceSnapshot = null

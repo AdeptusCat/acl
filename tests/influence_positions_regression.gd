@@ -103,6 +103,8 @@ func _run() -> void:
 	other.squad = 2
 	Globals.unit_visible_enemies.clear()
 	controller = InfluenceMapController.new()
+	_check(controller.knowledge_policy == InfluenceMapController.KnowledgePolicy.OMNISCIENT, "Default tactical knowledge includes hidden enemy positions")
+	controller.knowledge_policy = InfluenceMapController.KnowledgePolicy.OBSERVED_AND_MEMORY
 	controller.set_objective_for_team(Globals.Team.AXIS, Vector2i(3, 3))
 	controller.set_objective_for_team(Globals.Team.ALLIES, Vector2i(5, 3))
 	_publish()
@@ -233,6 +235,21 @@ func _test_knowledge() -> void:
 	controller.knowledge_policy = InfluenceMapController.KnowledgePolicy.OMNISCIENT
 	_publish()
 	_check(is_equal_approx(observed_threat, controller.snapshot.maps[own.team].get_layer_value(InfluenceMap.Layer.THREAT, own.current_hex)), "Explicit omniscient policy captures unobserved units")
+	var query: PositionQuery = _query()
+	query.snapshot = controller.snapshot
+	var hidden_risk: float = PositionFeatureEvaluator.route_step(query, own.current_hex)["risk"]
+	_check(hidden_risk > 0.0, "Hidden enemy firing lanes contribute defensive flood exposure")
+	query.profile.max_route_exposure = 0.0
+	var field: PositionRouteField = PositionRouteField.new()
+	field.start(query, [enemy.current_hex])
+	field.advance(-1)
+	_check(field.path_to(enemy.current_hex).is_empty(), "The defensive flood rejects crossing hidden enemy fire beyond the route budget")
+	field.release_query()
+	var hidden_hex: Vector2i = enemy.current_hex
+	enemy.current_hex = Vector2i(8, 6)
+	_publish()
+	_check(controller.snapshot.get_defensive_contacts(own.team)[0].hex == enemy.current_hex, "Tactical danger follows the real position of an unseen moving enemy")
+	enemy.current_hex = hidden_hex
 	controller.knowledge_policy = InfluenceMapController.KnowledgePolicy.OBSERVED_AND_MEMORY
 	_publish()
 
