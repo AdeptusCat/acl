@@ -160,6 +160,10 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if retained.features.get("responsibility") == "cover_approach" and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
 			holding_pressure = false
 		committed = committed or holding_pressure
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and best.features.get("support_priority_covered", false) and not retained.features.get("support_priority_covered", false):
+			# New urgent support can interrupt a safe but unhelpful HQ commitment.
+			committed = false
+			margin = 0.0
 		if committed or best.score <= retained.score + margin:
 			best = retained
 			result.status = PositionResult.Status.RETAINED

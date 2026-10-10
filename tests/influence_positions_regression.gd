@@ -876,6 +876,10 @@ func _test_headquarters_support() -> void:
 	other.stress_system.state = UnitStates.MoraleState.NORMAL
 	stressed.stress_system.S_eff = 90.0
 	stressed.stress_system.state = UnitStates.MoraleState.PANIC
+	var original_size: int = stressed.original_size
+	stressed.original_size = 0
+	_check(HqSupportNeedLayer.get_squad_support_need(stressed) > 1.0, "Unknown original roster size does not suppress urgent stress support")
+	stressed.original_size = original_size
 	for mirrored_team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
 		own.team = mirrored_team
 		other.team = mirrored_team
@@ -903,6 +907,13 @@ func _test_headquarters_support() -> void:
 		_check(result.is_valid() and result.target_hex == urgent, "Headquarters chooses cover beside its most stressed squad for either team")
 		_check(result.profile_mode == PositionProfile.Mode.HQ_SUPPORT and result.features.get("firing", -1.0) == 0.0 and result.features.get("objective_coverage", -1.0) == 0.0, "Headquarters earns support utility without firing or capture utility")
 		_check(result.features.get("supported_squads", []).has(stressed) and query.support_radius == own.leader_aura.aura_radius_hexes, "Support uses the actual leadership aura radius")
+		query.has_accepted_target = true
+		query.accepted_target = own.current_hex
+		query.accepted_context = result.context
+		query.accepted_at = snapshot.captured_at
+		var urgent_response: PositionResult = PositionQueryService.query_positions(query)
+		_check(urgent_response.should_move and urgent_response.features.get("support_priority_covered", false), "Urgent aura coverage interrupts an HQ commitment outside leadership range")
+		query.has_accepted_target = false
 		var inspection: PositionQuery = PositionQuery.new()
 		inspection.unit = own
 		inspection.team = own.team

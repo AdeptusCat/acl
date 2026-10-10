@@ -112,7 +112,7 @@ static func get_support_ring_value(distance: int) -> float:
 
 
 static func get_squad_support_need(squad: Unit) -> float:
-	if squad.stress_system == null or squad.original_size <= 0:
+	if squad.stress_system == null:
 		return 0.1
 	var need: float = 0.0
 
@@ -132,7 +132,7 @@ static func get_squad_support_need(squad: Unit) -> float:
 	var stress_need: float = squad.stress_system.S_eff / 100.0
 	need += stress_need * 0.5
 
-	if squad.members_alive < squad.original_size:
+	if squad.original_size > 0 and squad.members_alive < squad.original_size:
 		var casualties_taken: int = squad.original_size - squad.members_alive
 		var casualty_ratio: float = float(casualties_taken) / float(squad.original_size)
 		need += casualty_ratio * 0.5

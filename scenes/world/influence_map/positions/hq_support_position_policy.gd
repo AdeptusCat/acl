@@ -57,6 +57,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var supported: Array[Unit] = []
 	var urgent: Unit = null
 	var highest_need: float = -1.0
+	var priority_distance: int = 999999
 	for friendly: Unit in query.support_targets:
 		var target: Dictionary = query.support_targets[friendly]
 		var distance: int = LOSHelper.get_hex_distance(cell, target["hex"])
@@ -71,15 +72,21 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		if target["need"] > highest_need:
 			highest_need = target["need"]
 			urgent = friendly
+			priority_distance = distance
+	# Actual aura coverage of an urgent squad must outweigh proximity to calm squads.
+	var priority_support: float = 0.0
+	if highest_need >= 0.35 and priority_distance <= query.support_radius:
+		priority_support = highest_need
 	var visibility: float = 0.0
 	var frontline: bool = false
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
 		if query.snapshot.los.get(contact.hex, {}).has(cell):
 			visibility += maxf(0.2, contact.confidence)
 			frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
-	return {"responsibility": "hq_support", "support_utility": utility / maxf(total_weight, 0.001),
+	return {"responsibility": "hq_support", "support_utility": utility / maxf(total_weight, 0.001) + priority_support,
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
+		"support_priority_distance": priority_distance, "support_priority_covered": priority_distance <= query.support_radius,
 		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline}
 
 
