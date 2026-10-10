@@ -1738,30 +1738,14 @@ squad_loadout = ExtResource("63_mb8w1")
 formation_id = 1
 squad_type = 1
 
-[node name="CA_P1_S4_Axis_MG" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="2" unique_id=437630089 instance=ExtResource("19_sh7a8")]
-position = Vector2(561, 961)
-squad = 4
-platoon = 1
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_kngxi"), SubResource("Resource_dhssw"), SubResource("Resource_cf0uk"), SubResource("Resource_j2kh8"), SubResource("Resource_hpffo"), SubResource("Resource_ckeh6"), SubResource("Resource_pww7v")])
-squad_loadout = ExtResource("63_mb8w1")
-formation_id = 1
-squad_type = 1
-
-[node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="3" unique_id=1782881041 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="2" unique_id=1782881041 instance=ExtResource("19_sh7a8")]
 position = Vector2(610, 987)
 squad = 2
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
 formation_id = 1
 
-[node name="CA_P1_S3_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="4" unique_id=962528213 instance=ExtResource("19_sh7a8")]
-position = Vector2(610, 987)
-squad = 3
-platoon = 1
-loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
-formation_id = 1
-
-[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="5" unique_id=1150342868 instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="3" unique_id=1150342868 instance=ExtResource("19_sh7a8")]
 position = Vector2(608, 608)
 platoon = 1
 team = 1
@@ -1774,7 +1758,7 @@ squad_type = 4
 squads = [NodePath(".."), NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../../CA_P1_S2_Allies_Rifle")]
 objective_hex = Vector2i(11, 13)
 
-[node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="6" unique_id=679443044 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="4" unique_id=679443044 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(560, 576)
 squad = 1
 platoon = 1
@@ -1784,7 +1768,7 @@ squad_loadout = ExtResource("65_oo0aq")
 command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
 formation_id = 1
 
-[node name="CA_P1_S2_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="7" unique_id=410508575 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
+[node name="CA_P1_S2_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Units" parent_id_path=PackedInt32Array(322232894, 1365216721) index="5" unique_id=410508575 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
 position = Vector2(656, 640)
 squad = 2
 platoon = 1

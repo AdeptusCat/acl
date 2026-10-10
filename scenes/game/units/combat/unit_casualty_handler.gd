@@ -9,7 +9,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 		if soldier == casualty:
 			var members_alive_before: int = unit.squad_fire.soldiers.size()
 			
-			var leader_down: bool = false
+			var leader_down: bool = casualty.role == RankGrades.Role.SQUAD_LEADER
 			
 			# record which non-rifle roles were lost and what crew-served weapons got orphaned
 			var roles_lost: Array[int] = []
@@ -119,6 +119,8 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 	var c: int = 0
 	while c < casualties.size():
 		var s: Soldier = casualties[c]
+		if s.role == RankGrades.Role.SQUAD_LEADER:
+			leader_down = true
 		if s.role != RankGrades.Role.SOLDIER:
 			if not roles_lost.has(s.role):
 				roles_lost.append(s.role)

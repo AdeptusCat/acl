@@ -89,6 +89,14 @@ var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 @export var S_CAP: float = 100.0                 # hard ceiling on stress
 @export var incoming_stress_scale: float = 1.0   # global multiplier on added stress
 @export var recovery_scale: float = 1.0          # >1 faster decay, <1 slower decay (global)
+@export var hq_recovery_multiplier: float = 2.0
+@export var hq_panic_recovery_floor: float = 1.5 # stress points/second before situational modifiers
+@export var hq_rally_multiplier: float = 2.0
+@export var cohesion_recovery_floor: float = 0.25
+@export var casualty_recovery_window_s: float = 120.0
+@export var casualty_recovery_slowdown: float = 0.25
+@export var casualty_shock_per_loss: float = 0.35
+@export var leader_loss_recovery_shock: float = 0.5
 
 # --- NEW: slower recovery while under fire ---
 @export var under_fire_window_s: float = 2.0     # seconds considered "under fire" after a volley
@@ -128,6 +136,9 @@ signal stress_changed(effective_stress: float)
 signal leadership_changed(_leadership_bonus: float)
 
 var leader_presence_strength: float = 0.0
+var _leadership_cohesion_mult: float = 1.0
+var _casualty_recovery_t: float = 0.0
+var _casualty_recovery_shock: float = 0.0
 
 class LeadershipMod:
 	var bonus: float
@@ -158,7 +169,7 @@ func _recompute_leadership() -> void:
 	for lm: LeadershipMod in _leadership_sources.values():
 		if lm.bonus > max_total_bonus:
 			max_total_bonus = lm.bonus
-		if lm.cohesion_mult > max_total_bonus:
+		if lm.cohesion_mult > max_cohesion_mult:
 			max_cohesion_mult = lm.cohesion_mult
 		#total_bonus += lm.bonus
 		#total_rally += lm.rally
@@ -166,7 +177,7 @@ func _recompute_leadership() -> void:
 	#leadership_bonus = total_bonus
 	leadership_bonus = max_total_bonus
 	#cohesion = clamp(cohesion * total_cohesion_mult, 0.0, 1.5)
-	cohesion = clamp(cohesion * max_cohesion_mult, 0.0, 1.5)
+	_leadership_cohesion_mult = max_cohesion_mult
 	leadership_changed.emit(leadership_bonus)
 
 
@@ -342,8 +353,13 @@ func _process(delta: float) -> void:
 	#if leader_presence_strength == 0.0:
 		#pass
 	#print(squad_bonus, " ",leader_presence_strength, " ",combined)
-	var stress_decay_f_per_second: float = combined# * 5.0
-	var stress_decay_s_per_second: float = combined# * 5.0
+	if _is_headquarters():
+		combined *= maxf(hq_recovery_multiplier, 0.0)
+		if state == STATES.MoraleState.PANIC:
+			combined = maxf(combined, hq_panic_recovery_floor)
+	combined *= maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
+	var stress_decay_f_per_second: float = combined
+	var stress_decay_s_per_second: float = combined
 	#if leader_presence_strength == 0.0:
 		#stress_decay_f_per_second = 0.1
 		#stress_decay_s_per_second = 0.1
@@ -351,6 +367,7 @@ func _process(delta: float) -> void:
 	var stress_decay_s_with_delta: float = stress_decay_s_per_second * delta
 	stress_fast -= stress_decay_f_with_delta
 	stress_slow -= stress_decay_s_with_delta
+	_clamp_bins()
 	#S_eff = stress_fast + stress_slow
 	
 	var raw_effective_stress: float = 0.0
@@ -400,6 +417,9 @@ func _process(delta: float) -> void:
 
 	_since_change += delta
 	_maybe_transition(delta)
+	_casualty_recovery_t = maxf(0.0, _casualty_recovery_t - delta)
+	if _casualty_recovery_t <= 0.0:
+		_casualty_recovery_shock = 0.0
 	stress_changed.emit(S_eff)
 	
 	
@@ -464,6 +484,13 @@ func _get_current_leader_effect() -> float:
 func on_casualty_event(n: int, leader_down: bool = false) -> void:
 	if n < 0:
 		n = 0
+	if n == 0 and not leader_down:
+		return
+	_casualty_recovery_t = maxf(casualty_recovery_window_s, 0.0)
+	_casualty_recovery_shock += float(n) * maxf(casualty_shock_per_loss, 0.0)
+	if leader_down:
+		_casualty_recovery_shock += maxf(leader_loss_recovery_shock, 0.0)
+	_casualty_recovery_shock = clampf(_casualty_recovery_shock, 0.0, 1.0)
 	#stress_fast += 10.0 * float(n) * leader_presence_strength
 	#stress_slow += 4.0 * float(n) * leader_presence_strength
 	#if leader_down:
@@ -650,5 +677,23 @@ func _clamp_bins() -> void:
 
 func _apply_recovery_bias(lambda_per_s: float) -> float:
 	# >1.0 makes recovery faster; =1.0 neutral; <1.0 slower
-	var biased: float = lambda_per_s * recovery_bias
+	var biased: float = lambda_per_s * recovery_bias * _situational_recovery_multiplier()
+	if _is_headquarters():
+		biased *= maxf(hq_rally_multiplier, 0.0)
 	return max(0.0, biased)
+
+
+func _is_headquarters() -> bool:
+	var unit: Unit = get_parent() as Unit
+	return unit != null and HqSupportPositionPolicy.is_headquarters(unit)
+
+
+func _situational_recovery_multiplier() -> float:
+	var multiplier: float = clampf(cohesion * _leadership_cohesion_mult, clampf(cohesion_recovery_floor, 0.0, 1.0), 1.5)
+	if _casualty_recovery_t > 0.0 and casualty_recovery_window_s > 0.0:
+		var shock: float = _casualty_recovery_shock * clampf(_casualty_recovery_t / casualty_recovery_window_s, 0.0, 1.0)
+		multiplier *= lerpf(1.0, clampf(casualty_recovery_slowdown, 0.0, 1.0), shock)
+	if _under_fire_t > 0.0:
+		var pressure: float = clampf(_last_pressure_rps / maxf(pressure_ref_rps, 0.001), 0.0, 1.0)
+		multiplier *= lerpf(clampf(slowdown_light, 0.0, 1.0), clampf(slowdown_heavy, 0.0, 1.0), pressure)
+	return multiplier

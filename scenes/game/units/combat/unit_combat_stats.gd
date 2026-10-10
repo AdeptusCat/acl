@@ -12,7 +12,9 @@ extends Node
 @export var cohesion_recovery_rate: float = 0.03
 @export var cohesion_recovery_rate_leader: float = 0.06
 @export var cohesion_under_fire_rate: float = 0.005
-@export var shock_decay_rate: float = 0.08
+# One casualty adds 0.12 shock: clear it over 20 seconds.
+@export var shock_decay_rate: float = 0.006
+@export var shock_decay_leader_multiplier: float = 2.0
 @export var merge_penalty_decay_rate: float = 0.015
 
 var unit: Unit = null
@@ -48,10 +50,14 @@ func notify_merged_with_remnant() -> void:
 # movement.is_moving
 
 func _update_temporary_penalties(delta: float) -> void:
+	var leadership: float = 0.0
+	if unit.command_connectivity != null:
+		leadership = clampf(unit.command_connectivity.leader_presence_strength, 0.0, 1.0)
+	var shock_recovery_multiplier: float = lerpf(1.0, maxf(shock_decay_leader_multiplier, 1.0), leadership)
 	recent_casualty_shock = move_toward(
 		recent_casualty_shock,
 		0.0,
-		shock_decay_rate * delta
+		shock_decay_rate * shock_recovery_multiplier * delta
 	)
 
 	if unit.stress_system.under_fire:
