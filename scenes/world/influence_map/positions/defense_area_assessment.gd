@@ -86,6 +86,7 @@ func coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictio
 	var target_fire: Dictionary[Vector2i, float] = {}
 	var visible_targets: Dictionary[Vector2i, float] = {}
 	var records: Dictionary = query.snapshot.los.get(cell, {})
+	var effectiveness: float = InfluenceUnitQuery.get_unit_effectiveness(unit)
 	var interception: Dictionary = _interception_zone(query.defense_radius, approach)
 	for target: Vector2i in approach["cells"]:
 		var weight: float = approach["weights"][target]
@@ -102,7 +103,7 @@ func coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictio
 			visible_targets[target] = weight
 		var record: Dictionary = records.get(target, {})
 		var ability: float = LosInfluenceProjector.calculate_los_fire_threat(power,
-			InfluenceUnitQuery.get_unit_effectiveness(unit), record.get("target_cover", 0.0), record.get("hindrance", 0.0), distance)
+			effectiveness, record.get("target_cover", 0.0), record.get("hindrance", 0.0), distance)
 		var utility: float = PositionFeatureEvaluator.risk(ability)
 		if target == approach.get("source", objective_hex) and utility > 0.0:
 			visible_targets[target] = weight
@@ -222,12 +223,18 @@ func warm_support(query: PositionQuery, approach: Dictionary, friendly: Unit) ->
 		query.support_fire_by_branch[key] = {}
 	if not query.established_screen.has(key):
 		query.established_screen[key] = {}
-	if HqSupportPositionPolicy.is_headquarters(friendly) or friendly == query.unit or not InfluenceUnitQuery.is_valid_living_unit(friendly) or not query.snapshot.positions.has(friendly) or query.snapshot.teams[friendly] != query.team:
+	if not query.baseline_screen.has(key):
+		query.baseline_screen[key] = {}
+	if HqSupportPositionPolicy.is_headquarters(friendly) or not InfluenceUnitQuery.is_valid_living_unit(friendly) or not query.snapshot.positions.has(friendly) or query.snapshot.teams[friendly] != query.team:
 		return
 	if not PositionQueryService.can_follow_intent(friendly) or friendly.broken or InfluenceUnitQuery.get_unit_effectiveness(friendly) < query.profile.withdrawal_effectiveness:
 		return
+	if query.has_departure_baseline and query.departure_baseline.has(friendly):
+		# Compare every departure with the same pre-movement protection, even after
+		# earlier members of this group have started moving or establishing.
+		query.baseline_screen[key].merge(coverage(query, friendly, query.departure_baseline[friendly], approach)["visible_targets"])
 	# Future reservations affect complementary firing utility, never established screen protection.
-	if query.reservations.has(friendly):
+	if friendly != query.unit and query.reservations.has(friendly):
 		var data: Dictionary = coverage(query, friendly, query.reservations[friendly], approach)
 		for target: Vector2i in data["target_fire"]:
 			query.support_fire_by_branch[key][target] = maxf(query.support_fire_by_branch[key].get(target, 0.0), data["target_fire"][target])
@@ -235,11 +242,15 @@ func warm_support(query: PositionQuery, approach: Dictionary, friendly: Unit) ->
 		return
 	if friendly.current_hex != query.snapshot.positions[friendly]:
 		return
-	if query.reservations.has(friendly) and query.reservations[friendly] != query.snapshot.positions[friendly]:
-		return
 	if friendly.action_controller != null and friendly.action_controller.action_state in [SquadActionController.SquadActionState.ESTABLISHING_POSITION, SquadActionController.SquadActionState.REGROUPING]:
 		return
-	query.established_screen[key].merge(coverage(query, friendly, query.snapshot.positions[friendly], approach)["visible_targets"])
+	var targets: Dictionary = coverage(query, friendly, query.snapshot.positions[friendly], approach)["visible_targets"]
+	# Capture protection before any proposed departures, including the querying squad.
+	if not query.has_departure_baseline and query.snapshot.maps[query.team].get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, friendly.current_hex) >= query.profile.minimum_cover:
+		query.baseline_screen[key].merge(targets)
+	if friendly == query.unit or (query.reservations.has(friendly) and query.reservations[friendly] != friendly.current_hex):
+		return
+	query.established_screen[key].merge(targets)
 
 
 func combined_coverage(query: PositionQuery, cell: Vector2i, approach: Dictionary) -> float:

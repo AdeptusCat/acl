@@ -1,7 +1,7 @@
 class_name DefensePlanValidationJob
 extends RefCounted
 
-# Recheck live ownership/coverage incrementally, then publish the whole platoon atomically.
+# Recheck live ownership and coverage for a ready order or a completed platoon summary.
 var completed: bool = false
 var valid: bool = true
 var branch_gaps: Array[String] = []
@@ -23,6 +23,8 @@ var support_units: Array[Unit] = []
 var support_index: int = 0
 var support_unit_index: int = 0
 var cleanup_index: int = 0
+var moving_at_start: Dictionary[Unit, bool] = {}
+var report_gaps: bool = true
 
 
 func start(assessment: DefenseAreaAssessment, requests: Array[Dictionary], advice: Array[DefensePositionResult]) -> void:
@@ -35,7 +37,8 @@ func start(assessment: DefenseAreaAssessment, requests: Array[Dictionary], advic
 		return
 	for unit: Unit in queries[0].snapshot.positions:
 		if queries[0].snapshot.teams[unit] == queries[0].team and is_instance_valid(unit):
-			states[unit] = _state(unit)
+			moving_at_start[unit] = unit.movement != null and unit.movement.is_moving
+			states[unit] = _state(unit, moving_at_start[unit])
 			if unit.alive and (unit.movement == null or not unit.movement.is_moving):
 				positions[unit] = unit.current_hex
 	for result_index: int in range(results.size()):
@@ -45,7 +48,7 @@ func start(assessment: DefenseAreaAssessment, requests: Array[Dictionary], advic
 		elif InfluenceUnitQuery.is_valid_living_unit(unit):
 			positions[unit] = unit.current_hex
 	units.assign(positions.keys())
-	if area != null:
+	if area != null and report_gaps:
 		branches = area.duties()
 		highest_priority = area.max_duty_priority()
 
@@ -59,7 +62,7 @@ func advance(deadline_usec: int) -> void:
 		if index < queries.size():
 			var query: PositionQuery = queries[index]
 			var result: DefensePositionResult = results[index]
-			if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.origin_hex != query.unit.current_hex or result.context != query.context_key():
+			if not PositionQueryService.refresh_moving_origin(query, result) or result.context != query.context_key():
 				valid = false
 				completed = true
 				return
@@ -69,6 +72,8 @@ func advance(deadline_usec: int) -> void:
 					query.firepower_by_unit.clear()
 					query.sector_features.clear()
 					query.established_screen.clear()
+					query.baseline_screen.clear()
+					query.handoff_prepared = false
 					query.support_fire_by_branch.clear()
 					support_duties = []
 					if query.defense_area != null:
@@ -87,7 +92,7 @@ func advance(deadline_usec: int) -> void:
 						support_index += 1
 					continue
 				var protection: Dictionary = DefensePositionPolicy.evaluate(query, result.target_hex)
-				if protection["responsibility"] == "" or not protection["preserves_screen"]:
+				if protection["responsibility"] == "" or not protection["preserves_screen"] or not DefensePositionPolicy.handoff_ready(query, result.target_hex, result.features):
 					valid = false
 					completed = true
 					return
@@ -113,6 +118,7 @@ func advance(deadline_usec: int) -> void:
 			query.route_field = null
 			query.support_fire_by_branch.clear()
 			query.established_screen.clear()
+			query.baseline_screen.clear()
 			cleanup_index += 1
 		else:
 			valid = unchanged()
@@ -121,7 +127,7 @@ func advance(deadline_usec: int) -> void:
 
 func unchanged() -> bool:
 	for unit: Unit in states:
-		if not is_instance_valid(unit) or states[unit] != _state(unit):
+		if not is_instance_valid(unit) or states[unit] != _state(unit, moving_at_start[unit]):
 			return false
 	return true
 
@@ -135,13 +141,19 @@ func _reserve_can_intercept(key: String) -> bool:
 	return false
 
 
-static func _state(unit: Unit) -> Array:
-	var state: Array = [unit.alive, unit.current_hex, unit.members_alive, unit.surrendered, unit.broken, unit.in_close_combat,
+static func _state(unit: Unit, ignore_moving_progress: bool = false) -> Array:
+	var state: Array = [unit.alive, unit.members_alive, unit.surrendered, unit.broken, unit.in_close_combat,
 		InfluenceUnitQuery.get_defensive_mount(unit), InfluenceUnitQuery.get_unit_range(unit), InfluenceUnitQuery.get_unit_effectiveness(unit)]
+	if not ignore_moving_progress:
+		state.append(unit.current_hex)
 	if unit.movement != null:
-		state.append_array([unit.movement.is_moving, unit.movement.target_hex])
+		state.append(unit.movement.target_hex)
+		if not ignore_moving_progress:
+			state.append(unit.movement.is_moving)
 	if unit.action_controller != null:
-		state.append_array([unit.action_controller.action_order_id, unit.action_controller.action_state])
+		state.append(unit.action_controller.action_order_id)
+		if not ignore_moving_progress:
+			state.append(unit.action_controller.action_state)
 	# Weapon transfers, jams, exhaustion and casualties can remove an established firing lane.
 	if unit.squad_fire != null:
 		for soldier: Soldier in unit.squad_fire.soldiers:

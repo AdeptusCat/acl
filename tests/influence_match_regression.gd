@@ -128,7 +128,8 @@ func _run() -> void:
 				else:
 					_check(LOSHelper.get_hex_distance(defense.target_hex, objective) <= query.defense_radius, "Defense stays within mission geography")
 				_check(not defense.path.is_empty() and defense.path[-1] == defense.target_hex, "Defense returns a valid route")
-				coverage = coverage or defense.features["objective_coverage"] > 0.0
+				if not HqSupportPositionPolicy.is_headquarters(unit):
+					coverage = coverage or defense.features.get("responsibility", "") in ["occupy", "guard", "cover_approach"]
 				query.has_accepted_target = true
 				query.accepted_target = defense.target_hex
 				query.accepted_context = defense.context
@@ -163,7 +164,7 @@ func _run() -> void:
 				observations.append({"unit": str(unit.name), "team": team, "mode": mode, "valid": offense.is_valid(), "target": str(offense.target_hex), "score": _finite_score(offense.score), "features": offense.features})
 		if coverage:
 			covered_teams += 1
-	_check(covered_teams == 2, "Both teams have positions covering their defensive objective")
+	_check(covered_teams == 2, "Both teams have combat positions occupying, guarding or intercepting approaches to their defensive objective")
 	_check(valid_offense > 0, "Authored map supports offensive position recommendations")
 	executor.cancel_all()
 	# Stress the same authored terrain with explicitly omniscient danger knowledge.

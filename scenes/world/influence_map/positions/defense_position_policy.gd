@@ -3,6 +3,24 @@ extends RefCounted
 
 # Mission responsibility is evaluated separately from travel safety and cover quality.
 const MIN_APPROACH_COVERAGE: float = 0.5
+const HANDOFF_MARGIN_SECONDS: float = 1.0
+
+
+static func capture_departure_baseline(snapshot: InfluenceSnapshot, team: int) -> Dictionary[Unit, Vector2i]:
+	var baseline: Dictionary[Unit, Vector2i] = {}
+	var profile: PositionProfile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	for unit: Unit in snapshot.positions:
+		if HqSupportPositionPolicy.is_headquarters(unit) or snapshot.teams[unit] != team or not InfluenceUnitQuery.is_valid_living_unit(unit):
+			continue
+		if not PositionQueryService.can_follow_intent(unit) or unit.broken or InfluenceUnitQuery.get_unit_effectiveness(unit) < profile.withdrawal_effectiveness:
+			continue
+		if unit.current_hex != snapshot.positions[unit] or (unit.movement != null and unit.movement.is_moving):
+			continue
+		if unit.action_controller != null and unit.action_controller.action_state in [SquadActionController.SquadActionState.ESTABLISHING_POSITION, SquadActionController.SquadActionState.REGROUPING]:
+			continue
+		if snapshot.maps[team].get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, unit.current_hex) >= profile.minimum_cover:
+			baseline[unit] = unit.current_hex
+	return baseline
 
 
 static func prepare(query: PositionQuery) -> void:
@@ -208,6 +226,70 @@ static func allows_route(query: PositionQuery, features: Dictionary) -> bool:
 	return features["peak_exposure"] <= query.profile.max_route_exposure and features["exposure_seconds"] <= query.profile.max_exposure_seconds and features["open_exposure_seconds"] <= query.profile.max_open_exposure_seconds
 
 
+static func handoff_ready(query: PositionQuery, cell: Vector2i, features: Dictionary) -> bool:
+	if query.defense_area == null or cell == query.unit.current_hex or query.snapshot.get_defensive_contacts(query.team).is_empty():
+		return true
+	if not query.handoff_prepared:
+		_prepare_handoff(query)
+	if query.objective_handoff_required:
+		return false
+	var area: DefenseAreaAssessment = query.defense_area
+	var ready_seconds: float = features.get("route_seconds", INF) + query.profile.establishment_seconds + query.coverage_delay_seconds + HANDOFF_MARGIN_SECONDS
+	for requirement: Dictionary in query.handoff_requirements:
+		var branch: Dictionary = requirement["branch"]
+		# A short redeployment may restore protection before attackers arrive. Future
+		# reservations never contribute fire; only this route's verified endpoint does.
+		if ready_seconds >= requirement["arrival_seconds"]:
+			return false
+		if requirement["screen_gap"] and area.combined_coverage(query, cell, branch) < MIN_APPROACH_COVERAGE:
+			return false
+		if requirement["crossing_gap"] and area.combined_crossing_coverage(query, cell, branch) < DefenseAreaAssessment.MIN_CROSSING_COVERAGE:
+			return false
+	return true
+
+
+static func _prepare_handoff(query: PositionQuery) -> void:
+	query.handoff_prepared = true
+	query.handoff_requirements.clear()
+	query.objective_handoff_required = _loses_objective_guard(query)
+	var area: DefenseAreaAssessment = query.defense_area
+	var highest: float = area.max_duty_priority()
+	for branch: Dictionary in area.duties():
+		if branch["evidence"] in ["inferred", "estimated"] or area.duty_priority(branch) < highest * 0.4:
+			continue
+		var remaining: Dictionary = area.established_targets(query, branch)
+		var baseline: Dictionary = query.baseline_screen.get(DefenseAreaAssessment.duty_key(branch), {})
+		var before: float = area.coverage_of_targets(query.defense_radius, baseline, branch)
+		var after: float = area.coverage_of_targets(query.defense_radius, remaining, branch)
+		var crossing: Dictionary = area.crossing_zone(query.defense_radius, branch)
+		var before_crossing: float = area.crossing_coverage(query.defense_radius, baseline, branch)
+		var after_crossing: float = area.crossing_coverage(query.defense_radius, remaining, branch)
+		var screen_gap: bool = before >= MIN_APPROACH_COVERAGE and after < MIN_APPROACH_COVERAGE
+		var crossing_gap: bool = crossing["total"] > 0.0 and before_crossing >= DefenseAreaAssessment.MIN_CROSSING_COVERAGE and after_crossing < DefenseAreaAssessment.MIN_CROSSING_COVERAGE
+		if not screen_gap and not crossing_gap:
+			continue
+		query.handoff_requirements.append({"branch": branch, "screen_gap": screen_gap, "crossing_gap": crossing_gap,
+			"arrival_seconds": crossing.get("arrival_seconds", branch["arrival_seconds"])})
+
+
+static func _loses_objective_guard(query: PositionQuery) -> bool:
+	if not DefenseReadinessJob.established(query.unit, query) or LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex) > 1 or not _can_cover(query, query.unit, query.unit.current_hex, query.objective_hex):
+		return false
+	var imminent: bool = false
+	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		imminent = imminent or LOSHelper.get_hex_distance(contact.hex, query.objective_hex) <= 2
+	if not imminent:
+		return false
+	for friendly: Unit in query.snapshot.positions:
+		if friendly == query.unit or query.snapshot.teams[friendly] != query.team or not DefenseReadinessJob.established(friendly, query):
+			continue
+		if query.reservations.get(friendly, friendly.current_hex) != friendly.current_hex:
+			continue
+		if LOSHelper.get_hex_distance(friendly.current_hex, query.objective_hex) <= 1 and _can_cover(query, friendly, friendly.current_hex, query.objective_hex):
+			return false
+	return true
+
+
 static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary, check_handoff: bool = true) -> String:
 	for key: String in query.reserve_response_limits:
 		if features.get("reserve_branch_status", {}).get(key, {}).get("response_seconds", INF) > query.reserve_response_limits[key]:
@@ -229,6 +311,8 @@ static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary
 		return "exposure_budget"
 	if features["incoming"] > query.profile.max_incoming_risk and not can_hold_under_pressure(query, cell, features):
 		return "risk"
+	if check_handoff and not handoff_ready(query, cell, features):
+		return "handoff_wait"
 	if check_handoff and query.defense_area != null and not query.relocation_allowed and cell != query.unit.current_hex and not (query.has_accepted_target and query.accepted_context == query.context_key() and cell == query.accepted_target):
 		return "handoff_wait"
 	return ""

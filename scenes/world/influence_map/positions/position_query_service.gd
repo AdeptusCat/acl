@@ -32,6 +32,8 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	if query.unit.members_alive <= 0 or query.unit.surrendered or not can_follow_intent(query.unit):
 		result.reason = "Unit cannot execute tactical movement"
 		return false
+	if query.unit.action_controller != null:
+		query.movement_order_id = query.unit.action_controller.action_order_id
 	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
 		result.reason = "Unit is not fit for an assault"
 		return false
@@ -84,6 +86,36 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	return true
 
 
+static func refresh_moving_origin(query: PositionQuery, result: PositionResult) -> bool:
+	var unit: Unit = query.unit
+	if not InfluenceUnitQuery.is_valid_living_unit(unit):
+		return false
+	if query.has_accepted_target and unit.action_controller != null and query.movement_order_id >= 0 and unit.action_controller.action_order_id != query.movement_order_id:
+		return false
+	if unit.current_hex == query.origin_hex and (not result.is_valid() or result.path.is_empty() or result.path[0] == unit.current_hex):
+		return true
+	if not result.is_valid() or not query.has_accepted_target or unit.movement == null or unit.action_controller == null:
+		return false
+	if unit.action_controller.action_order_id != query.movement_order_id or unit.movement.target_hex != query.accepted_target:
+		return false
+	var arrived: bool = not unit.movement.is_moving and unit.current_hex == query.accepted_target and result.target_hex == unit.current_hex
+	if not unit.movement.is_moving and not arrived:
+		return false
+	var offset: int = result.path.find(unit.current_hex)
+	if offset < 0:
+		return false
+	var remaining: Array[Vector2i] = result.path.slice(offset)
+	if not _valid_snapshot_path(query, remaining, result.target_hex):
+		return false
+	# Progress along an owned, checked route removes exposure; it does not authorize
+	# movement from an unrelated new origin or replace a player's intervening order.
+	query.origin_hex = unit.current_hex
+	result.path = remaining
+	if arrived or (unit.movement.target_hex == result.target_hex and _is_following_path(unit, remaining)):
+		result.should_move = false
+	return true
+
+
 static func finish(query: PositionQuery, result: PositionResult, candidates: Array[PositionCandidate]) -> void:
 	if candidates.is_empty():
 		result.reason = "No reachable position satisfies geography, capacity and risk limits"
@@ -98,7 +130,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			if result.rejections.has("reserve_gap"):
 				result.reason = "Holding until relocation can preserve timely reserve response to other approaches"
 			if result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
-				result.reason = "Waiting for the relocating defender to establish covering fire"
+				result.reason = "Waiting until departure preserves objective and approach protection"
 		return
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]

@@ -83,8 +83,9 @@ func _run() -> void:
 		var plan_max_slice: int = 0
 		var plan_max_tick: int = 0
 		var plan_steps: int = 0
+		var first_ready_step: int = -1
 		var slowest_step: Dictionary = {}
-		while (planner._area_job != null or planner._planning_job != null) and plan_steps < 10000:
+		while (planner._area_job != null or planner._readiness_job != null or planner._planning_job != null or planner._validation_job != null) and plan_steps < 10000:
 			var tick_started: int = Time.get_ticks_usec()
 			controller._process_position_queries()
 			plan_max_slice = maxi(plan_max_slice, controller.last_position_slice_usec)
@@ -98,15 +99,18 @@ func _run() -> void:
 			elif planner._planning_job != null:
 				phase = "query:%d" % planner._planning_index
 			planner._process(0.0)
+			if first_ready_step < 0 and planner._planning_index > 0:
+				first_ready_step = plan_steps + 1
 			var tick_usec: int = Time.get_ticks_usec() - tick_started
 			if tick_usec > plan_max_tick:
 				plan_max_tick = tick_usec
 				slowest_step = {"phase": phase, "query_slice_us": controller.last_position_slice_usec, "tick_us": tick_usec}
 			plan_steps += 1
-		_check(planner._area_job == null and planner._planning_job == null, "Expanded sector planning completes through the normal scheduler")
+		_check(planner._area_job == null and planner._readiness_job == null and planner._planning_job == null and planner._validation_job == null, "Expanded sector planning completes through the normal scheduler, including final publication")
 		_check(plan_max_slice < 10000, "Expanded platoon searches keep tactical frame slices below ten milliseconds")
 		_check(plan_max_tick < 10000, "Area allocation and final coverage validation also fit the measured tactical tick limit")
-		print("Defense area plan sample: ", JSON.stringify({"policy": policy, "slices": plan_steps, "max_slice_us": plan_max_slice, "max_tick_us": plan_max_tick, "covered_positions": planner.defense_area.covered_positions.size(), "approaches": planner.defense_area.approaches.size(), "branches": planner.defense_area.duties().size(), "slowest_step": slowest_step}))
+		_check(first_ready_step > 0 and first_ready_step < plan_steps, "A validated squad receives advice before the complete platoon finishes calculating")
+		print("Defense area plan sample: ", JSON.stringify({"policy": policy, "slices": plan_steps, "first_ready_slice": first_ready_step, "max_slice_us": plan_max_slice, "max_tick_us": plan_max_tick, "covered_positions": planner.defense_area.covered_positions.size(), "approaches": planner.defense_area.approaches.size(), "branches": planner.defense_area.duties().size(), "slowest_step": slowest_step}))
 	print("Influence performance report: ", JSON.stringify({"map": str(map.name), "samples": samples}))
 	main.queue_free()
 	await get_tree().process_frame
@@ -156,6 +160,9 @@ func _spread_contacts(snapshot: InfluenceSnapshot) -> void:
 			contact.last_seen_at = snapshot.captured_at
 			contacts.append(contact)
 		snapshot.defensive_contacts[team] = contacts
+		# The live freshness audit and the area builder must see the same captured
+		# observations; mixing synthetic branches with old live contacts restarts work.
+		snapshot.contacts[team] = contacts.duplicate()
 
 
 func _check(condition: bool, message: String) -> void:

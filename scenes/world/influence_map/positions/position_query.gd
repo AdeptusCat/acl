@@ -47,6 +47,14 @@ var relocation_allowed: bool = true
 var sector_features: Dictionary[Unit, Dictionary] = {}
 var support_fire_by_branch: Dictionary[String, Dictionary] = {}
 var established_screen: Dictionary[String, Dictionary] = {}
+var baseline_screen: Dictionary[String, Dictionary] = {}
+var departure_baseline: Dictionary[Unit, Vector2i] = {}
+var has_departure_baseline: bool = false
+var handoff_requirements: Array[Dictionary] = []
+var handoff_prepared: bool = false
+var objective_handoff_required: bool = false
+var coverage_delay_seconds: float = 0.0
+var movement_order_id: int = -1
 var support_targets: Dictionary[Unit, Dictionary] = {}
 var support_radius: int = 2
 
@@ -61,6 +69,9 @@ func reset_evaluation() -> void:
 	sector_features.clear()
 	support_fire_by_branch.clear()
 	established_screen.clear()
+	baseline_screen.clear()
+	handoff_requirements.clear()
+	handoff_prepared = false
 
 
 func defense_crossing_seconds() -> float:

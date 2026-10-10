@@ -140,6 +140,8 @@ func _run() -> void:
 	_test_branch_defense()
 	_test_sector_pressure_and_protected_reserve()
 	_test_flexible_defense()
+	_test_concurrent_relocation()
+	_test_progressive_planning()
 	await _test_headquarters_support()
 	_test_headquarters_stacking()
 	controller.free()
@@ -958,8 +960,7 @@ func _test_headquarters_support() -> void:
 		planner.influence_map_controller = controller
 		planner.current_order = MissionOrder.new()
 		planner.set_squads([own, other, stressed])
-		planner._relocation_claimed = true
-		_check(own.ai_support_only and planner._can_relocate(own), "Support moves do not consume or wait for combat handoffs")
+		_check(own.ai_support_only and PositionQueryService.can_follow_intent(own), "Support moves remain independent of combat handoffs")
 		_check(not DefenseReadinessJob.established(own, query), "Headquarters cannot promise established combat coverage")
 		planner._planning_snapshot = snapshot
 		planner._build_planning_requests([own])
@@ -1765,19 +1766,15 @@ func _test_defense_area() -> void:
 	advice = PositionQueryService.query_positions(query)
 	_check(not advice.is_valid() and advice.rejections.has("handoff_wait"), "A second redeployment waits for established covering fire")
 	query.relocation_allowed = true
-	var handoff: PlatoonAI = PlatoonAI.new()
 	own.movement.is_moving = true
 	other.movement.is_moving = false
-	handoff._reset_relocation([own, other])
-	query.relocation_allowed = handoff._can_relocate(own)
 	query.has_accepted_target = true
 	query.accepted_target = west
 	query.accepted_context = original_context
 	advice = PositionQueryService.query_positions(query)
-	_check(advice.is_valid() and advice.target_hex == east and not handoff._can_relocate(other), "A defender already moving can redirect to cover after an axis change while another relocation waits")
+	_check(advice.is_valid() and advice.target_hex == east and query.relocation_allowed, "A defender already moving can redirect to cover without a global movement lock")
 	own.movement.is_moving = false
 	query.has_accepted_target = false
-	handoff.free()
 	var reverse_query: PositionQuery = PositionQuery.new()
 	reverse_query.unit = enemy
 	reverse_query.team = enemy.team
@@ -2463,6 +2460,271 @@ func _test_branch_defense() -> void:
 	other.firepower = 16
 	other.current_hex = other_hex
 	other.firepower = other_power
+	_publish()
+
+
+func _test_concurrent_relocation() -> void:
+	var own_team: Globals.Team = own.team
+	var other_team: Globals.Team = other.team
+	var enemy_team: Globals.Team = enemy.team
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		own.team = team
+		other.team = team
+		enemy.team = Globals.get_enemy_team(team)
+		own.movement.is_moving = false
+		other.movement.is_moving = false
+		own.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		other.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		var anchor: UnitProbe = _unit(team, Vector2i(1, 2))
+		anchor.squad = 99
+		anchor.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		var query: PositionQuery = _defense_fixture()
+		var target: Vector2i = Vector2i(6, 3)
+		var destination: Vector2i = Vector2i(4, 3)
+		query.sector_cells = [destination]
+		var job: DefenseAreaJob = query.snapshot.defense_area_job(team, query.objective_hex, 4, 7)
+		job.advance(-1)
+		query.defense_area = job.result
+		var branch: Dictionary = job.result.approaches[0].duplicate()
+		branch.erase("branches")
+		branch["key"] = "concurrent_front"
+		branch["source"] = target
+		branch["evidence"] = "observed"
+		branch["priority"] = 1.0
+		branch["cells"] = [target]
+		branch["weights"] = {target: 1.0}
+		branch["arrival_seconds"] = 0.0
+		branch.erase("distances")
+		query.defense_area.approaches = [branch]
+		query.defense_area.max_priority = 1.0
+		var record: Dictionary = {"target_cover": 0.0, "hindrance": 0.0}
+		query.snapshot.los = query.snapshot.los.duplicate(true)
+		for cell: Vector2i in [own.current_hex, other.current_hex, destination, Vector2i(3, 2)]:
+			query.snapshot.los[cell] = {target: record, query.objective_hex: record}
+		query.snapshot.los[anchor.current_hex] = {}
+		query.snapshot.defensive_contacts[team] = [_area_contact(target, query.snapshot.captured_at)]
+		var reservations: Dictionary = {}
+		query.reservations = reservations
+		query.departure_baseline = DefensePositionPolicy.capture_departure_baseline(query.snapshot, team)
+		query.has_departure_baseline = true
+		var first: PositionResult = PositionQueryService.query_positions(query)
+		_check(first.is_valid() and first.should_move, "One defender can depart while an established squad preserves the attacked branch")
+		reservations[own as Unit] = destination
+		own.movement.is_moving = true
+		own.movement.target_hex = destination
+		var second_query: PositionQuery = _query()
+		second_query.unit = other
+		second_query.team = team
+		second_query.snapshot = query.snapshot
+		second_query.defense_area = query.defense_area
+		second_query.geography = PositionQuery.Geography.SECTOR_ONLY
+		second_query.sector_cells = [Vector2i(3, 2)]
+		second_query.reservations = reservations
+		second_query.departure_baseline = query.departure_baseline
+		second_query.has_departure_baseline = true
+		var second: PositionResult = PositionQueryService.query_positions(second_query)
+		var index: int = query.snapshot.maps[team].cell_to_index(second_query.sector_cells[0])
+		_check(not second.is_valid() and second.cell_states[index] == PositionResult.CellState.WAITING_HANDOFF, "The second departure cannot use a moving defender's future firing lane to open an attacked branch")
+		query.snapshot.los[anchor.current_hex] = {target: record}
+		second = PositionQueryService.query_positions(second_query)
+		_check(second.is_valid() and second.should_move, "Independent defenders can move together while a real stationary anchor preserves protection")
+		var flank_target: Vector2i = Vector2i(5, 2)
+		var flank: Dictionary = branch.duplicate()
+		flank["id"] = posmod(branch["id"] + 1, 6)
+		flank["key"] = "independent_flank"
+		flank["source"] = flank_target
+		flank["evidence"] = "inferred"
+		flank["cells"] = [flank_target]
+		flank["weights"] = {flank_target: 1.0}
+		query.defense_area.approaches.append(flank)
+		query.snapshot.los[other.current_hex] = {flank_target: record}
+		query.snapshot.los[second_query.sector_cells[0]] = {flank_target: record}
+		second_query.assigned_branch = "independent_flank"
+		_check(PositionQueryService.query_positions(second_query).is_valid(), "Movement on another branch remains available while the attacked branch has established protection")
+		query.defense_area.approaches.pop_back()
+		query.snapshot.los[other.current_hex] = {target: record, query.objective_hex: record}
+		query.snapshot.los[second_query.sector_cells[0]] = {target: record, query.objective_hex: record}
+		second_query.assigned_branch = ""
+		anchor.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+		_check(not PositionQueryService.query_positions(second_query).is_valid(), "An anchor still establishing cannot release concurrent departures")
+		anchor.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		reservations[anchor as Unit] = Vector2i(2, 2)
+		_check(not PositionQueryService.query_positions(second_query).is_valid(), "A proposed anchor departure cannot count as established covering fire")
+		reservations.erase(anchor as Unit)
+		anchor.in_close_combat = true
+		_check(not PositionQueryService.query_positions(second_query).is_valid(), "An anchor in close combat cannot supply the remaining firing screen")
+		anchor.in_close_combat = false
+		query.snapshot.los[anchor.current_hex] = {}
+		branch["arrival_seconds"] = 100.0
+		query.defense_area._crossing_zones.clear()
+		second = PositionQueryService.query_positions(second_query)
+		_check(second.is_valid(), "A verified short redeployment can restore its lane before distant attackers arrive")
+		second_query.coverage_delay_seconds = 100.0
+		_check(not PositionQueryService.query_positions(second_query).is_valid(), "Time spent calculating consumes the available interception deadline")
+		second_query.coverage_delay_seconds = 0.0
+		branch["evidence"] = "inferred"
+		branch["arrival_seconds"] = 0.0
+		query.defense_area._crossing_zones.clear()
+		_check(PositionQueryService.query_positions(second_query).is_valid(), "A quiet terrain hypothesis does not stagger initial deployment")
+		branch["evidence"] = "observed"
+		var shared_a: Vector2i = Vector2i(5, 2)
+		var shared_b: Vector2i = Vector2i(5, 3)
+		var shared_c: Vector2i = Vector2i(5, 4)
+		branch["cells"] = [shared_a, shared_b, shared_c]
+		branch["weights"] = {shared_a: 1.0, shared_b: 1.0, shared_c: 1.0}
+		query.defense_area._interception_zones.clear()
+		query.defense_area._crossing_zones.clear()
+		own.movement.is_moving = false
+		reservations.clear()
+		query.snapshot.los[own.current_hex] = {shared_a: record, query.objective_hex: record}
+		query.snapshot.los[destination] = {shared_a: record, query.objective_hex: record}
+		query.snapshot.los[other.current_hex] = {shared_b: record}
+		query.snapshot.los[anchor.current_hex] = {}
+		_check(PositionQueryService.query_positions(query).rejections.has("handoff_wait"), "A departure cannot lose collective partial protection even when no individual defender covers half the branch")
+		branch["arrival_seconds"] = 100.0
+		query.defense_area._crossing_zones.clear()
+		_check(PositionQueryService.query_positions(query).is_valid(), "One partial contributor can cross briefly while another stays and the lane is restored before arrival")
+		reservations[own as Unit] = destination
+		own.movement.is_moving = true
+		query.snapshot.los[second_query.sector_cells[0]] = {shared_b: record, query.objective_hex: record}
+		_check(PositionQueryService.query_positions(second_query).rejections.has("handoff_wait"), "A later departure retains the group's original combined coverage requirement after its first contributor starts moving")
+		var continuing: PlatoonAI = PlatoonAI.new()
+		continuing.team = team
+		continuing._planning_snapshot = query.snapshot
+		continuing._departure_origins[own as Unit] = query.departure_baseline[own as Unit]
+		second_query.departure_baseline = continuing._capture_planning_baseline()
+		_check(second_query.departure_baseline.has(own as Unit) and PositionQueryService.query_positions(second_query).rejections.has("handoff_wait"), "Replanning during a relocation cannot forget the original protection still supplied by its stationary partner")
+		continuing.free()
+		branch["arrival_seconds"] = 0.0
+		branch["cells"] = [target]
+		branch["weights"] = {target: 1.0}
+		query.defense_area._interception_zones.clear()
+		query.defense_area._crossing_zones.clear()
+		query.snapshot.los[own.current_hex] = {target: record, query.objective_hex: record}
+		query.snapshot.los[destination] = {target: record, query.objective_hex: record}
+		query.snapshot.los[other.current_hex] = {target: record, query.objective_hex: record}
+		query.snapshot.los[second_query.sector_cells[0]] = {target: record, query.objective_hex: record}
+		reservations[own as Unit] = destination
+		own.movement.is_moving = true
+		query.snapshot.los[anchor.current_hex] = {target: record}
+		other.in_close_combat = true
+		_check(not PositionQueryService.query_positions(second_query).is_valid(), "Concurrent movement never bypasses the close-combat movement rule")
+		other.in_close_combat = false
+		own.movement.is_moving = false
+		query.snapshot.defensive_contacts[team] = [_area_contact(Vector2i(4, 2), query.snapshot.captured_at)]
+		_check(PositionQueryService.query_positions(query).rejections.has("handoff_wait"), "A nearby confirmed attacker keeps the last established objective guard in place")
+		var freshness: PlatoonAI = PlatoonAI.new()
+		freshness.team = team
+		freshness.influence_map_controller = controller
+		freshness.current_order = MissionOrder.new()
+		freshness.current_order.objective_hex = query.objective_hex
+		freshness.defense_area = query.defense_area
+		freshness.defense_area.observed_contacts = {enemy as Unit: target}
+		var advance: InfluenceContact = _area_contact(target, query.snapshot.captured_at)
+		query.snapshot.contacts[team] = [advance]
+		query.snapshot.defensive_contacts[team] = [advance]
+		_check(not freshness._defense_plan_outdated(), "An unchanged observed attacker does not trigger redundant replanning")
+		advance.hex = Vector2i(5, 3)
+		_check(freshness._defense_plan_outdated(), "One hex of observed advance near the objective invalidates the old entrance timing")
+		freshness.time_until_reconsider = 100.0
+		freshness._process(0.0)
+		_check(freshness._area_job != null or freshness._readiness_job != null, "A confirmed nearby advance starts a new plan without waiting for the ordinary reconsideration timer")
+		freshness.free()
+		anchor.free()
+	own.team = own_team
+	other.team = other_team
+	enemy.team = enemy_team
+	own.movement.is_moving = false
+	_publish()
+
+
+func _test_progressive_planning() -> void:
+	own.movement.is_moving = false
+	other.movement.is_moving = false
+	own.movement.attack_in_progress = false
+	other.movement.attack_in_progress = false
+	own.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	other.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	var first_query: PositionQuery = _defense_fixture()
+	first_query.sector_cells = [Vector2i(4, 3)]
+	var second_query: PositionQuery = _query()
+	second_query.unit = other
+	second_query.snapshot = first_query.snapshot
+	second_query.geography = PositionQuery.Geography.SECTOR_ONLY
+	second_query.sector_cells = [Vector2i(3, 2)]
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = first_query.objective_hex
+	planner.squads = [own, other]
+	planner._planning_snapshot = first_query.snapshot
+	planner._planning_reservations = planner._create_current_reserved_hexes([own, other])
+	first_query.reservations = planner._planning_reservations
+	second_query.reservations = planner._planning_reservations
+	planner._planning_requests = [{"query": first_query, "role": "defend_objective", "axis": null}, {"query": second_query, "role": "defend_objective", "axis": null}]
+	planner._submit_planning_query()
+	var slices: int = 0
+	while not own.movement.is_moving and slices < 1000:
+		controller._process_position_queries()
+		planner._process(0.0)
+		slices += 1
+	_check(own.movement.is_moving and not other.movement.is_moving and planner._planning_index == 1 and planner._planning_job != null, "A validated first defender starts moving while the next destination is still calculating")
+	var first_order: int = own.action_controller.action_order_id
+	var first_advice: PositionResult = own.position_advice
+	own.movement.path_hexes = first_advice.path.duplicate()
+	own.movement.path_index = 1
+	var original_hex: Vector2i = own.current_hex
+	var validation: DefensePlanValidationJob = DefensePlanValidationJob.new()
+	validation.start(null, [{"query": first_query}], [DefensePositionAnalyzer.adapt_result(first_advice, null, "defend_objective")])
+	own.current_hex = first_advice.path[1]
+	own.position = ground.map_to_local(own.current_hex)
+	validation.advance(-1)
+	_check(validation.valid and first_query.origin_hex == own.current_hex and validation.results[0].path[0] == own.current_hex, "Progress along an owned checked path can rebase advice without restarting the platoon")
+	var second_order: int = -1
+	while (planner._planning_job != null or planner._validation_job != null) and slices < 2000:
+		controller._process_position_queries()
+		planner._process(0.0)
+		if second_order < 0 and other.movement.is_moving:
+			second_order = other.action_controller.action_order_id
+		slices += 1
+	_check(own.movement.is_moving and other.movement.is_moving and planner._planning_job == null and planner._validation_job == null, "Quiet deployment publishes both moves before the first squad arrives")
+	_check(own.action_controller.action_order_id == first_order, "Completing the platoon summary does not restart an already executing move")
+	_check(second_order >= 0 and other.action_controller.action_order_id == second_order, "A just-issued move is not restarted when final publication occurs before its first hex crossing")
+	_check(planner.accepted_positions.size() == 2 and planner.reserved_hexes_by_squad.size() == 2, "Progressive publication retains accepted ownership and consistent destination reservations")
+	validation = DefensePlanValidationJob.new()
+	validation.start(null, [{"query": first_query}], [DefensePositionAnalyzer.adapt_result(first_advice, null, "defend_objective")])
+	own.current_hex = first_advice.path[-1]
+	own.movement.is_moving = false
+	own.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	validation.advance(-1)
+	_check(validation.valid and validation.unchanged() and first_query.origin_hex == own.current_hex, "Arrival at an owned destination does not discard otherwise valid pending advice")
+	own.action_controller.action_order_id += 1
+	_check(not PositionQueryService.refresh_moving_origin(first_query, first_advice), "A replacement order cannot reuse the old planner's route ownership")
+	_check(not validation.unchanged(), "A changed action invalidates live validation even when ordinary movement progress is tolerated")
+	own.movement.is_moving = false
+	own.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	var guard_query: PositionQuery = _defense_fixture()
+	guard_query.defense_responsibility = PositionQuery.Responsibility.GUARD
+	planner.accepted_positions[own as Unit] = {"hex": own.current_hex, "context": guard_query.context_key()}
+	var guard_request: Dictionary = {"query": guard_query, "role": "guard_objective", "axis": null}
+	var front_request: Dictionary = {"query": second_query, "role": "defend_sector", "axis": null}
+	planner._planning_requests = [guard_request, front_request]
+	planner._prioritize_planning_requests()
+	_check(planner._planning_requests[0]["query"].unit == other, "An established objective anchor does not delay a responding squad's candidate calculation")
+	own.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	planner._planning_requests = [guard_request, front_request]
+	planner._prioritize_planning_requests()
+	_check(planner._planning_requests[0]["query"].unit == own, "An anchor still establishing retains its initial planning priority")
+	planner.set_active(false)
+	_check(planner._departure_origins.is_empty(), "Player handoff clears ongoing group protection together with owned movement")
+	planner.free()
+	own.current_hex = original_hex
+	own.position = ground.map_to_local(original_hex)
+	own.movement.is_moving = false
+	other.movement.is_moving = false
+	own.movement.path_hexes.clear()
+	own.movement.path_index = 0
 	_publish()
 
 
