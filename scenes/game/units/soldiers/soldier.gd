@@ -87,11 +87,9 @@ func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGr
 func is_weapon_setup_done(delta: float) -> bool:
 	if setup_weapon_task.done:
 		return true
-	if setup_weapon_task.remaining_time_s <= 0:
-		setup_weapon_task.done = true
-		return true
-	setup_weapon_task.remaining_time_s -= delta
-	return false
+	setup_weapon_task.remaining_time_s = maxf(0.0, setup_weapon_task.remaining_time_s - delta)
+	setup_weapon_task.done = setup_weapon_task.remaining_time_s <= 0.0
+	return setup_weapon_task.done
 
 
 func is_weapon_reload_done(delta: float) -> bool:

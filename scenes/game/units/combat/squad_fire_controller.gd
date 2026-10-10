@@ -281,6 +281,7 @@ func _refresh_tracked_target() -> bool:
 func _process(delta: float) -> void:
 	if not unit.alive:
 		return
+	_tick_weapon_setup(delta)
 	if unit.ai_support_only:
 		if target_unit != null or has_target_hex or has_mortar_target_hex:
 			clear_target()
@@ -407,6 +408,16 @@ func fire_mortar(map_hex: Vector2i) -> void:
 	
 
 
+func _tick_weapon_setup(delta: float) -> void:
+	# Deployment is stationary work, independent of target visibility and firing.
+	if unit.is_moving or unit.in_close_combat or unit.broken or unit.surrendered:
+		return
+	var delta_mod: float = delta * state_acquire_mults[stress_controller.state]
+	for soldier: Soldier in soldiers:
+		if soldier.is_alive:
+			soldier.is_weapon_setup_done(delta_mod)
+
+
 func _tick_soldiers(delta: float) -> void:
 	var target_cover: int = 0
 	var target_distance: int = 0
@@ -473,7 +484,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		return 0
 	if unit.is_moving:
 		return 0
-	if not s.is_weapon_setup_done(delta_mod):
+	# The stationary update owns this countdown; firing only checks readiness.
+	if not s.is_weapon_setup_done(0.0):
 		return 0
 	if not s.is_weapon_reload_done(delta_mod):
 		return 0
