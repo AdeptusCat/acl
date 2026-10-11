@@ -120,7 +120,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	if candidates.is_empty():
 		result.reason = "No reachable position satisfies geography, capacity and risk limits"
 		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
-			result.reason = "Holding: no covered support position has a safe route near the platoon"
+			result.reason = "Holding: no safe support position has a safe route near the platoon"
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
 			result.reason = "No covered reachable position protects the objective within the exposure budget"
 			if result.rejections.has("screen_gap"):
@@ -201,7 +201,10 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if result.target_hex == query.unit.current_hex:
 			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.features["open_support_position"] = best.features["cover"] < query.profile.minimum_cover
 		result.reason = "Supporting nearby squads from cover; priority need %.2f" % best.features["support_priority_need"]
+		if best.features["cover"] < query.profile.minimum_cover:
+			result.reason = "Supporting nearby squads in open ground outside known good-order enemy LOS; priority need %.2f" % best.features["support_priority_need"]
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
 	return
@@ -268,7 +271,7 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 		_reject(diagnostics, "unsuppressed_defender", index)
 		return null
 	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
-	if features["cover"] < query.profile.minimum_cover:
+	if features["cover"] < query.profile.minimum_cover and query.profile.mode != PositionProfile.Mode.HQ_SUPPORT:
 		_reject(diagnostics, "cover", index)
 		return null
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
@@ -353,8 +356,9 @@ static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 		if other != query.unit and query.snapshot.teams[other] == query.team and query.snapshot.positions[other] == cell:
 			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
 				return true
-	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
-		if contact.hex == cell:
+	# Cleared tactical memory must also release occupied-hex restrictions after a surrender.
+	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		if contact.hex == cell and (not contact.observed or TacticalPositionExecutor.is_active_defender(contact.unit)):
 			return true
 	return false
 

@@ -327,7 +327,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 			_update_attack_roles(available)
-			attack_advance_released = _has_established_attack_support(available) and _are_visible_attack_defenders_suppressed(available)
+			attack_advance_released = _has_established_attack_support(available) and (_are_visible_attack_defenders_suppressed(available) or not _has_known_attack_defenders(available))
 			attack_approach_started = attack_approach_started or attack_advance_released
 		for unit: Unit in available:
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
@@ -339,12 +339,17 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
 					config.profile.commitment_seconds = 8.0
-					if attack_approach_started:
+					if attack_approach_started and TacticalPositionExecutor.select_support_target_for_objective(unit, config.objective_hex) != null:
 						config.profile.commitment_seconds = INF
+					elif attack_approach_started and not unit.movement.is_moving and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
+						config.profile.commitment_seconds = 0.0
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
 					config.profile.minimum_cover = 0.1
+					if not _has_known_attack_defenders(available):
+						# Cover is required for an opposed approach, not occupation of a cleared objective.
+						config.profile.minimum_cover = 0.0
 					config.profile.avoid_unsuppressed_defenders = true
 					# Approach the objective instead of optimizing a stationary firing position.
 					config.profile.progress_weight = 12.0
@@ -535,6 +540,7 @@ func _update_attack_roles(available: Array[Unit]) -> void:
 
 
 func _has_established_attack_support(available: Array[Unit], departing: Unit = null) -> bool:
+	var has_defenders: bool = _has_known_attack_defenders(squads)
 	for unit: Unit in available:
 		if unit == attack_maneuver_squad or unit == departing or not _can_provide_attack_support(unit):
 			continue
@@ -547,7 +553,23 @@ func _has_established_attack_support(available: Array[Unit], departing: Unit = n
 			continue
 		if advice.features.get("cover", 0.0) < 0.1 or advice.features.get("firing", 0.0) <= 0.0:
 			continue
+		if not has_defenders:
+			# A cleared objective still needs stationary overwatch, but nothing to shoot at.
+			return true
 		if unit.squad_fire != null and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null) and TacticalPositionExecutor.select_support_target(unit, current_order.objective_hex) != null:
+			return true
+	return false
+
+
+func _has_known_attack_defenders(available: Array[Unit]) -> bool:
+	for observer: Unit in available:
+		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+			if TacticalPositionExecutor.is_active_defender(enemy) and LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) <= current_order.defense_radius:
+				return true
+	for contact: InfluenceContact in influence_map_controller.snapshot.get_defensive_contacts(team):
+		if LOSHelper.get_hex_distance(contact.hex, current_order.objective_hex) > current_order.defense_radius:
+			continue
+		if not contact.observed or TacticalPositionExecutor.is_active_defender(contact.unit):
 			return true
 	return false
 
@@ -585,6 +607,15 @@ func _attack_support_objective(available: Array[Unit]) -> Vector2i:
 				selected_suppressed = suppressed
 				lowest_stress = enemy.stress_system.S_eff
 				target = enemy.current_hex
+	if selected == null:
+		var best_distance: int = 2147483647
+		for contact: InfluenceContact in influence_map_controller.snapshot.get_defensive_contacts(team):
+			if contact.observed and not TacticalPositionExecutor.is_active_defender(contact.unit):
+				continue
+			var distance: int = LOSHelper.get_hex_distance(contact.hex, current_order.objective_hex)
+			if distance <= current_order.defense_radius and distance < best_distance:
+				target = contact.hex
+				best_distance = distance
 	return target
 
 
@@ -658,6 +689,9 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 		query.snapshot = influence_map_controller.snapshot
 		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads:
 			query.assault_support_squad = attack_maneuver_squad
+		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+			# Establish the initial covered firing lane before requiring post-attack retargeting.
+			query.require_live_support_target = attack_approach_started and _has_known_attack_defenders(squads)
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT and unit == attack_maneuver_squad and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
 			# Wait at the forward position while the covering squad restores its firing lane.
 			query.movement_radius = 0
@@ -911,6 +945,15 @@ func _issue_orders() -> void:
 
 func _issue_order(squad: Unit) -> void:
 	var result: PositionResult = squad_assignments[squad]["result"]
+	if result.is_valid() and result.profile_mode == PositionProfile.Mode.HQ_SUPPORT and result.features.get("open_support_position", false):
+		if HqSupportPositionPolicy.known_good_order_enemy_has_los(influence_map_controller.snapshot, team, result.target_hex):
+			# Suppression can end while a budgeted query or an accepted move is in progress.
+			executor.cancel(squad, true)
+			accepted_positions.erase(squad)
+			reserved_hexes_by_squad[squad] = squad.current_hex
+			_planning_reservations[squad] = squad.current_hex
+			time_until_reconsider = 0.0
+			return
 	if current_order != null and current_order.position_mode == PositionProfile.Mode.ASSAULT:
 		if result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
 			executor.cancel(squad, true)

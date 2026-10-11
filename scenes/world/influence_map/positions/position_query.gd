@@ -58,6 +58,7 @@ var movement_order_id: int = -1
 var support_targets: Dictionary[Unit, Dictionary] = {}
 var support_radius: int = 2
 var assault_support_squad: Unit
+var require_live_support_target: bool = false
 
 
 func reset_evaluation() -> void:

@@ -83,11 +83,15 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		priority_support = highest_need
 	var visibility: float = 0.0
 	var frontline: bool = false
+	var good_order_enemy_los: bool = false
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
 		var multiplier: float = contact_threat_multiplier(query, contact)
 		if multiplier <= 0.0:
 			continue
 		if query.snapshot.los.get(contact.hex, {}).has(cell):
+			# Remembered enemies remain dangerous until their suppression is observed.
+			if not contact.observed or not TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+				good_order_enemy_los = true
 			visibility += multiplier * maxf(0.2, contact.confidence)
 			if multiplier >= 1.0:
 				frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
@@ -95,7 +99,8 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
 		"support_priority_distance": priority_distance, "support_priority_covered": priority_distance <= query.support_radius,
-		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline}
+		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline,
+		"good_order_enemy_los": good_order_enemy_los}
 
 
 static func contact_threat_multiplier(query: PositionQuery, contact: InfluenceContact) -> float:
@@ -108,9 +113,20 @@ static func contact_threat_multiplier(query: PositionQuery, contact: InfluenceCo
 	return 1.0
 
 
+static func known_good_order_enemy_has_los(snapshot: InfluenceSnapshot, team: int, cell: Vector2i) -> bool:
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
+		if not snapshot.los.get(contact.hex, {}).has(cell):
+			continue
+		if not contact.observed:
+			return true
+		if TacticalPositionExecutor.is_active_defender(contact.unit) and not TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			return true
+	return false
+
+
 static func rejection(query: PositionQuery, features: Dictionary, check_route: bool = true) -> String:
-	if features["cover"] < query.profile.minimum_cover:
-		return "cover"
+	if features["cover"] < query.profile.minimum_cover and features["good_order_enemy_los"]:
+		return "hq_open_enemy_los"
 	if features["frontline"]:
 		return "hq_frontline"
 	if features["incoming"] > query.profile.max_incoming_risk:

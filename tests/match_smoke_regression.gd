@@ -75,12 +75,21 @@ func _run() -> void:
 	if attack_rifle != null:
 		simulation_frames = 3600
 	var advance_release_observed: bool = false
+	var support_trace: Array[Dictionary] = []
 	for frame: int in range(simulation_frames):
 		await get_tree().process_frame
+		if attack_mg != null and attack_mg_shots == 0 and frame % 300 == 0:
+			var advice: PositionResult = attack_mg.position_advice
+			support_trace.append({"frame": frame, "hex": str(attack_mg.current_hex), "moving": attack_mg.movement.is_moving,
+				"action": attack_mg.action_controller.action_state, "target": str(attack_mg.movement.target_hex),
+				"visible": Globals.unit_visible_enemies.get(attack_mg, []).size(), "advice": str(advice), "attack_started": attack_controller.attack_approach_started})
+			if advice != null:
+				support_trace[-1]["recommended"] = str(advice.target_hex)
+				support_trace[-1]["objective"] = str(advice.objective_hex)
 		if attack_controller != null and attack_controller.attack_advance_released and not advance_release_observed:
 			advance_release_observed = true
 			_check(attack_controller._has_established_attack_support(attack_controller.squads), "Rifle advance starts after MG fire support is established")
-			_check(attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads), "Rifle advance starts after every visible attack target is suppressed")
+			_check(attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads) or not attack_controller._has_known_attack_defenders(attack_controller.squads), "Rifle advance starts after visible defenders are suppressed or the known objective is cleared")
 			var advancing_rifles: int = 0
 			for unit: Unit in attack_controller.squads:
 				if unit.squad_type == Globals.SquadType.Rifle and attack_controller._attack_mode_for_unit(unit) in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
@@ -95,8 +104,10 @@ func _run() -> void:
 		if attack_mg != null:
 			_check(attack_mg.position_advice != null and attack_mg.position_advice.is_valid() and attack_mg.position_advice.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE, "MG establishes a valid firing position while the rifle attacks")
 			_check(attack_mg_shots > 0, "MG fires in support during the attack")
+			if attack_mg_shots == 0:
+				print("Idle MG trace: ", JSON.stringify(support_trace))
 		if attack_hq != null:
-			_check(attack_hq.position_advice != null and attack_hq.position_advice.is_valid() and attack_hq.position_advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT, "HQ maintains a covered support position during the attack")
+			_check(attack_hq.position_advice != null and attack_hq.position_advice.is_valid() and attack_hq.position_advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT, "HQ maintains a safe support position during the attack")
 	var state: Array[Dictionary] = []
 	for unit: Unit in Globals.get_units():
 		_check(unit.squad_fire.soldiers.size() == unit.members_alive, "Active match retains consistent runtime strength")

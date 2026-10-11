@@ -149,6 +149,13 @@ static func select_support_target(unit: Unit, objective: Vector2i) -> Unit:
 	return selected
 
 
+static func select_support_target_for_objective(unit: Unit, objective: Vector2i) -> Unit:
+	var target: Unit = select_support_target(unit, objective)
+	if target != null and (target.current_hex == objective or not is_sufficiently_suppressed(target)):
+		return target
+	return null
+
+
 func cancel(unit: Unit, stop_execution: bool = false) -> void:
 	_release_support_fire(unit)
 	completed.erase(unit)

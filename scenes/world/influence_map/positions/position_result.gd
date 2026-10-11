@@ -57,6 +57,7 @@ func describe_cell(index: int) -> String:
 		"exposure_budget": "Route exceeds the allowed exposure budget", "risk": "Excessive incoming fire",
 		"route": "No route within the movement risk limits", "route_risk": "Support route exceeds the allowed exposure budget",
 		"hq_frontline": "Headquarters cannot take a frontline position beside a known enemy", "firing": "No useful firing lane",
+		"hq_open_enemy_los": "Open headquarters position is in LOS of a known enemy in good order",
 		"unit_unavailable": "This unit cannot execute the positioning order"
 	}
 	return descriptions.get(rejection_reasons[index], "Assessment pending")

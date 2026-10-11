@@ -19,6 +19,8 @@ func capture_into(snapshot: InfluenceSnapshot) -> void:
 		for contact: InfluenceContact in snapshot.get_contacts(team):
 			if not is_instance_valid(contact.unit):
 				continue
+			if not contact.observed and remembered.get(contact.unit, {}).get("defeated", false):
+				continue
 			var seen_at: float = snapshot.captured_at
 			if not contact.observed:
 				seen_at -= (1.0 - contact.confidence) * Unit.ENEMY_MEMORY_LIFETIME
@@ -32,8 +34,9 @@ func capture_into(snapshot: InfluenceSnapshot) -> void:
 				remembered.erase(key)
 				continue
 			var unit: Unit = key
-			if _reported_destroyed(snapshot, team, unit):
+			if _reported_defeated(snapshot, team, unit):
 				remembered[unit]["cleared"] = true
+				remembered[unit]["defeated"] = true
 				remembered[unit]["seen_at"] = snapshot.captured_at
 			if remembered[unit].get("cleared", false):
 				continue
@@ -59,10 +62,13 @@ static func _friendly_occupies(snapshot: InfluenceSnapshot, team: int, cell: Vec
 	return false
 
 
-static func _reported_destroyed(snapshot: InfluenceSnapshot, team: int, enemy: Unit) -> bool:
+static func _reported_defeated(snapshot: InfluenceSnapshot, team: int, enemy: Unit) -> bool:
+	for contact: InfluenceContact in snapshot.get_contacts(team):
+		if contact.unit == enemy and contact.observed:
+			return not TacticalPositionExecutor.is_active_defender(enemy)
 	for observer: Unit in snapshot.positions:
 		if snapshot.teams[observer] == team and Globals.unit_visible_enemies.get(observer, []).has(enemy):
-			return not enemy.alive
+			return not TacticalPositionExecutor.is_active_defender(enemy)
 	return false
 
 

@@ -98,6 +98,12 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 		firing /= float(targets.size())
 	if query.profile.mode != PositionProfile.Mode.DEFEND and query.profile.mode != PositionProfile.Mode.LEGACY_DEFENSE:
 		firing = outgoing_utility(query, cell, query.objective_hex)
+		if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and query.require_live_support_target and cell == query.origin_hex and not query.unit.movement.is_moving and query.unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
+			# A theoretical lane cannot retain an idle position; any live fresh defender remains useful.
+			var target: Unit = TacticalPositionExecutor.select_support_target_for_objective(query.unit, query.objective_hex)
+			firing = 0.0
+			if target != null:
+				firing = outgoing_utility(query, cell, target.current_hex)
 	var forecast: float = 0.0
 	if query.forecast_data.size() == map.cell_count:
 		forecast = risk(query.forecast_data[map.cell_to_index(cell)])

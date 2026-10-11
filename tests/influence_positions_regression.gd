@@ -119,6 +119,7 @@ func _run() -> void:
 	_test_profiles()
 	_test_suppressed_hex_entry()
 	_test_attack_overwatch()
+	_test_attack_support_recovery()
 	_test_mirrored_teams()
 	_test_axis_diagnostics()
 	_test_execution()
@@ -645,6 +646,137 @@ func _test_attack_overwatch() -> void:
 	planner.free()
 
 
+func _test_attack_support_recovery() -> void:
+	var gun: Unit = _unit(own.team, Vector2i(3, 2))
+	var rifle: Unit = _unit(own.team, Vector2i(3, 3))
+	var observer: Unit = _unit(own.team, Vector2i(4, 4))
+	var pinned: Unit = _unit(enemy.team, Vector2i(6, 3))
+	var fresh: Unit = _unit(enemy.team, Vector2i(7, 4))
+	gun.squad_type = Globals.SquadType.MG
+	pinned.stress_system.state = UnitStates.MoraleState.PINNED
+	var weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	for unit: Unit in [gun, rifle, observer]:
+		_equip(unit, [weapon])
+		unit.combat_stats.combat_effectiveness = 1.0
+		unit.squad_fire.unit = unit
+		unit.squad_fire.target_unit = pinned
+		unit.squad_fire.has_target_hex = true
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		Globals.unit_visible_enemies[unit] = [pinned]
+	Globals.unit_visible_enemies[observer] = [pinned, fresh]
+	var saved_snapshot: InfluenceSnapshot = controller.snapshot
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.version = saved_snapshot.version + 1
+	snapshot.los = LOSHelper.los_lookup
+	snapshot.routes[own.team] = saved_snapshot.routes[own.team]
+	snapshot.point_ids[own.team] = saved_snapshot.point_ids[own.team]
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(saved_snapshot.maps[own.team].bounds)
+	map.playable_cells = saved_snapshot.maps[own.team].playable_cells.duplicate()
+	map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER, 0.5)
+	snapshot.maps[own.team] = map
+	for unit: Unit in [gun, rifle, observer]:
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.teams[unit] = own.team
+	var contacts: Array[InfluenceContact] = []
+	for defender: Unit in [pinned, fresh]:
+		var contact: InfluenceContact = InfluenceContact.new()
+		contact.unit = defender
+		contact.hex = defender.current_hex
+		contact.observed = true
+		contacts.append(contact)
+	snapshot.contacts[own.team] = contacts
+	snapshot.defensive_contacts[own.team] = contacts
+	controller.snapshot = snapshot
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.squads = [gun, rifle, observer]
+	planner.current_order = MissionOrder.new()
+	planner.current_order.position_mode = PositionProfile.Mode.ASSAULT
+	planner.current_order.objective_hex = pinned.current_hex
+	planner.attack_maneuver_squad = rifle
+	planner._build_planning_requests(planner.squads)
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == gun:
+			_check(not request["query"].require_live_support_target and request["query"].profile.commitment_seconds == 8.0, "Initial MG fire support establishes a covered lane before applying post-attack retargeting")
+	planner._planning_requests.clear()
+	planner.attack_approach_started = true
+	planner._build_planning_requests(planner.squads)
+	var support: PositionQuery
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == gun:
+			support = request["query"]
+	_check(support.objective_hex == fresh.current_hex and support.require_live_support_target and support.profile.commitment_seconds == 0.0, "MG releases its old commitment when its pinned target cannot support suppression of the remaining fresh defender")
+	support.has_accepted_target = true
+	support.accepted_target = gun.current_hex
+	support.accepted_context = support.context_key()
+	support.accepted_at = snapshot.captured_at
+	support.profile.commitment_seconds = INF
+	var advice: PositionResult = PositionQueryService.query_positions(support)
+	_check(advice.is_valid() and advice.should_move and advice.rejection_reasons[map.cell_to_index(gun.current_hex)] == "firing", "A theoretical LOS lane without a live priority target cannot retain an idle MG even with an old infinite commitment")
+	gun.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	var establishing: PositionResult = PositionQueryService.query_positions(support)
+	_check(establishing.eligibility[map.cell_to_index(gun.current_hex)] == 1, "MG positioning allows setup and target acquisition before declaring a new firing position idle")
+	planner._planning_requests.clear()
+	planner._build_planning_requests(planner.squads)
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == gun:
+			_check(request["query"].profile.commitment_seconds == 8.0, "An establishing MG keeps its movement commitment instead of restarting before it can fire")
+	gun.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	snapshot.los = snapshot.los.duplicate(true)
+	snapshot.los[gun.current_hex].erase(pinned.current_hex)
+	Globals.unit_visible_enemies[gun] = [fresh]
+	support.objective_hex = pinned.current_hex
+	var active_support: PositionResult = PositionQueryService.query_positions(support)
+	_check(active_support.eligibility[map.cell_to_index(gun.current_hex)] == 1, "MG suppression of another live fresh defender stays useful when the assigned target is outside its firing lane")
+	snapshot.los = LOSHelper.los_lookup
+	Globals.unit_visible_enemies[gun] = [pinned]
+	support.objective_hex = fresh.current_hex
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "support_by_fire")], "support_by_fire", null)
+	planner._issue_order(gun)
+	_check(gun.movement.is_moving and gun.movement.target_hex == advice.target_hex, "The stalled MG starts a new movement order to restore useful suppression")
+	planner.executor.cancel_all(true)
+	gun.current_hex = advice.target_hex
+	gun.position = ground.map_to_local(gun.current_hex)
+	snapshot.positions[gun] = gun.current_hex
+	gun.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	gun.position_advice = advice
+	gun.squad_fire.target_unit = null
+	gun.squad_fire.has_target_hex = false
+	pinned.surrendered = true
+	fresh.surrendered = true
+	for unit: Unit in planner.squads:
+		Globals.unit_visible_enemies[unit] = []
+	_check(not planner._has_known_attack_defenders(planner.squads) and planner._has_established_attack_support(planner.squads), "After observed surrender, stationary MG overwatch remains valid without a fire target")
+	planner._planning_requests.clear()
+	planner._build_planning_requests(planner.squads)
+	var advance: PositionQuery
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == rifle:
+			advance = request["query"]
+	_check(planner.attack_advance_released and advance.movement_radius > 0 and advance.profile.minimum_cover == 0.0, "The rifle resumes occupation of a cleared objective with overwatch instead of waiting for a nonexistent suppression target")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, pinned.current_hex, 0.0)
+	advice = PositionQueryService.query_positions(advance)
+	_check(advice.is_valid() and advice.target_hex == pinned.current_hex, "An open cleared objective and an observed surrendered defender do not prevent rifle occupation")
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "advance")], "advance", null)
+	planner._issue_order(rifle)
+	_check(rifle.movement.is_moving and rifle.movement.target_hex == pinned.current_hex, "A cleared-objective advance starts actual rifle movement while the MG remains on overwatch")
+	planner.executor.cancel_all(true)
+	contacts[1].observed = false
+	fresh.current_hex = Vector2i(8, 6)
+	_check(planner._has_known_attack_defenders(planner.squads) and not planner._has_established_attack_support(planner.squads), "An unobserved surrender cannot clear the attack's remembered defender or release unsupported movement")
+	_check(planner._attack_support_objective(planner.squads) == contacts[1].hex, "Support searches the last known defender position without reading its hidden live location")
+	controller.snapshot = saved_snapshot
+	planner.free()
+	for unit: Unit in [gun, rifle, observer]:
+		Globals.unit_visible_enemies.erase(unit)
+		unit.squad_fire.free()
+		unit.squad_fire = null
+	for unit: Unit in [gun, rifle, observer, pinned, fresh]:
+		unit.free()
+
+
 func _equip(unit: Unit, weapons: Array[WeaponSpec]) -> void:
 	var fire: SquadFireController = SquadFireController.new()
 	unit.squad_fire = fire
@@ -1102,7 +1234,7 @@ func _test_headquarters_support() -> void:
 		snapshot.defensive_contacts[own.team] = [contact]
 		snapshot.los[contact.hex] = {urgent: {"target_cover": 0.0, "hindrance": 0.0}}
 		changed = PositionQueryService.query_positions(query)
-		_check(changed.is_valid() and changed.target_hex == concealed and changed.features.get("enemy_visibility", 1.0) == 0.0, "Concealed support beats a slightly closer exposed support position")
+		_check(changed.is_valid() and changed.target_hex != urgent and changed.features.get("enemy_visibility", 1.0) == 0.0 and changed.features["support_priority_covered"], "Concealed support with aura coverage beats an exposed support position")
 		_check(changed.features.get("exposure_seconds", INF) <= 3.0 and changed.features.get("open_exposure_seconds", INF) <= 1.0, "Support transit obeys stricter cumulative exposure budgets")
 		var job: PositionQueryJob = PositionQueryJob.new()
 		job.query = query
@@ -1135,7 +1267,7 @@ func _test_headquarters_support() -> void:
 		for cell: Vector2i in [quiet, urgent, concealed, own.current_hex]:
 			map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.0)
 		changed = PositionQueryService.query_positions(query)
-		_check(not changed.is_valid() and changed.rejections.has("cover"), "No covered support option holds without an open-ground fallback")
+		_check(changed.is_valid() and changed.features["cover"] == 0.0 and changed.features["support_priority_covered"], "HQ uses open support ground when no known good-order enemy has LOS")
 		var planner: PlatoonAI = PlatoonAI.new()
 		planner.team = own.team
 		planner.influence_map_controller = controller
@@ -1258,6 +1390,29 @@ func _test_attack_headquarters_support() -> void:
 	_check(advice.should_move and advice.features["enemy_visibility"] == 0.0 and advice.features["incoming"] == 0.0, "An observed surrendered defender cannot obstruct HQ support or add enemy visibility")
 	contact.observed = false
 	_check(HqSupportPositionPolicy.contact_threat_multiplier(query, contact) == 1.0, "An unobserved surrender cannot reveal a safe route through remembered threats")
+	query.has_accepted_target = false
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, forward.current_hex, 0.0)
+	contact.observed = true
+	defender.surrendered = false
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.should_move and advice.features["cover"] == 0.0 and advice.features["support_priority_covered"] and not advice.features["good_order_enemy_los"], "HQ can reach its stressed rifle in open ground watched only by an observed pinned defender")
+	var open_support: DefensePositionResult = DefensePositionAnalyzer.adapt_result(advice, null, "hq_support")
+	defender.stress_system.state = UnitStates.MoraleState.NORMAL
+	defender.stress_system.S_eff = 0.0
+	planner._apply_position_results([open_support], "hq_support", null)
+	planner._issue_order(headquarters)
+	_check(not headquarters.movement.is_moving and not planner.accepted_positions.has(headquarters), "A defender recovering after planning blocks cached open-ground HQ movement before execution")
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.rejection_reasons[map.cell_to_index(forward.current_hex)] == "hq_open_enemy_los", "A recovered good-order defender immediately rejects the same open HQ support hex")
+	contact.observed = false
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.rejection_reasons[map.cell_to_index(forward.current_hex)] == "hq_open_enemy_los", "A hidden defender's live pin state cannot authorize an exposed open HQ hex")
+	snapshot.los = snapshot.los.duplicate(true)
+	snapshot.los[contact.hex] = {}
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.eligibility[map.cell_to_index(forward.current_hex)] == 1, "Remembered enemies without LOS do not forbid an open HQ destination")
 	snapshot.support_units[forward]["surrendered"] = true
 	HqSupportPositionPolicy.prepare(query)
 	_check(not query.support_targets.has(forward), "HQ cannot chase a surrendered friendly squad's obsolete support need")
@@ -1340,7 +1495,11 @@ func _test_headquarters_stacking() -> void:
 		contact.hex = enemy.current_hex
 		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, other.current_hex, 0.0)
 		blocked = PositionQueryService.query_positions(query)
-		_check(blocked.rejection_reasons[map.cell_to_index(other.current_hex)] == "cover", "Friendly stacking does not waive headquarters cover requirements")
+		_check(blocked.eligibility[map.cell_to_index(other.current_hex)] == 1, "HQ can stack with a friendly squad in open ground outside known good-order enemy LOS")
+		snapshot.los[contact.hex][other.current_hex] = {"target_cover": 0.0, "hindrance": 0.0}
+		blocked = PositionQueryService.query_positions(query)
+		_check(blocked.rejection_reasons[map.cell_to_index(other.current_hex)] == "hq_open_enemy_los", "Friendly stacking does not waive the HQ open-ground enemy LOS restriction")
+		snapshot.los[contact.hex].erase(other.current_hex)
 		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, other.current_hex, 0.6)
 		map.set_layer_value(InfluenceMap.Layer.THREAT, other.current_hex, 100.0)
 		blocked = PositionQueryService.query_positions(query)
@@ -2505,6 +2664,25 @@ func _test_defensive_memory() -> void:
 	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "A reported visible casualty clears the remembered threat")
 	enemy.alive = was_alive
 	Globals.unit_visible_enemies[own] = []
+	snapshot.contacts[own.team] = [contact]
+	snapshot.captured_at = 17.0
+	memory.capture_into(snapshot)
+	snapshot.contacts[own.team] = []
+	enemy.surrendered = true
+	memory.capture_into(snapshot)
+	_check(not snapshot.get_defensive_contacts(own.team).is_empty(), "An unobserved surrender cannot clear remembered enemy danger")
+	snapshot.contacts[own.team] = [contact]
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "An observed surrender clears the defender from tactical threat memory")
+	snapshot.contacts[own.team] = []
+	snapshot.captured_at = 30.0
+	memory.capture_into(snapshot)
+	_check(snapshot.get_defensive_contacts(own.team).is_empty(), "Losing LOS after observing surrender cannot resurrect a threat and stall the attack")
+	contact.observed = false
+	snapshot.contacts[own.team] = [contact]
+	memory.capture_into(snapshot)
+	_check(not PositionQueryService._occupied(query, contact.hex), "An obsolete firing contact cannot block occupation after its defender's surrender was observed")
+	enemy.surrendered = false
 	controller.reset_for_match()
 	_check(controller.defensive_memory.contacts_by_team.is_empty(), "Starting a new match clears prior tactical danger")
 
