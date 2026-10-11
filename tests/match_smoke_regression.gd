@@ -55,6 +55,9 @@ func _run() -> void:
 					attack_hq = unit
 					_check(attack_ai._attack_mode_for_unit(unit) == PositionProfile.Mode.HQ_SUPPORT, "Attack headquarters retains its support role")
 	if attack_controller != null:
+		attack_controller._update_attack_roles(attack_controller.squads)
+		attack_rifle = attack_controller.attack_maneuver_squad
+		attack_rifle_start_distance = LOSHelper.get_hex_distance(attack_rifle.current_hex, attack_controller.current_order.objective_hex)
 		_test_all_defenders_suppression(attack_controller)
 		_test_close_assault_selection(attack_controller)
 	var players: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
@@ -78,6 +81,11 @@ func _run() -> void:
 			advance_release_observed = true
 			_check(attack_controller._has_established_attack_support(attack_controller.squads), "Rifle advance starts after MG fire support is established")
 			_check(attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads), "Rifle advance starts after every visible attack target is suppressed")
+			var advancing_rifles: int = 0
+			for unit: Unit in attack_controller.squads:
+				if unit.squad_type == Globals.SquadType.Rifle and attack_controller._attack_mode_for_unit(unit) in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
+					advancing_rifles += 1
+			_check(advancing_rifles == 1, "OutpostProbe advances one rifle while the other rifles retain fire support")
 	if attack_rifle != null:
 		var objective: Vector2i = scenario.axis_objectives_tile_map_layer.get_used_cells()[0]
 		if advance_release_observed:
@@ -209,7 +217,7 @@ func _test_close_assault_selection(planner: PlatoonAI) -> void:
 	fresh_defender.stress_system.state = UnitStates.MoraleState.NORMAL
 	fresh_defender.stress_system.S_eff = 0.0
 	fresh_defender.current_hex = defender.current_hex + Vector2i(0, 5)
-	_check(planner._close_combat_target(attack_rifle) == defender and planner._attack_mode_for_unit(attack_rifle) == PositionProfile.Mode.ASSAULT, "A capable adjacent rifle assaults a highly stressed defender when fresh defenders are distant")
+	_check(planner._close_combat_target(attack_rifle) == defender, "A capable adjacent rifle can target a highly stressed defender when fresh defenders are distant")
 	fresh_defender.current_hex = defender.current_hex + Vector2i(0, -1)
 	_check(planner._close_combat_target(attack_rifle) == null, "A fresh adjacent defender prevents a same-hex rifle assault")
 	fresh_defender.stress_system.state = UnitStates.MoraleState.PINNED

@@ -118,6 +118,7 @@ func _run() -> void:
 	_test_legacy_score_parity()
 	_test_profiles()
 	_test_suppressed_hex_entry()
+	_test_attack_overwatch()
 	_test_mirrored_teams()
 	_test_axis_diagnostics()
 	_test_execution()
@@ -535,6 +536,112 @@ func _test_suppressed_hex_entry() -> void:
 		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.0)
 	_check(not PositionQueryService.query_positions(query).is_valid(), "Rifle approach holds when every reachable destination lacks cover")
 	map.set_layer_data_copy(InfluenceMap.Layer.TERRAIN_COVER, old_cover)
+
+
+func _test_attack_overwatch() -> void:
+	var first: UnitProbe = _unit(own.team, Vector2i(3, 3))
+	var second: UnitProbe = _unit(own.team, Vector2i(3, 4))
+	var rifle: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	var saved_state: UnitStates.MoraleState = enemy.stress_system.state
+	var saved_stress: float = enemy.stress_system.S_eff
+	enemy.stress_system.state = UnitStates.MoraleState.PINNED
+	for unit: UnitProbe in [first, second]:
+		_equip(unit, [rifle])
+		unit.squad_type = Globals.SquadType.Rifle
+		unit.combat_stats.combat_effectiveness = 1.0
+		unit.squad_fire.unit = unit
+		unit.squad_fire.target_unit = enemy
+		unit.squad_fire.has_target_hex = true
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		unit.movement.is_moving = false
+		var advice: PositionResult = PositionResult.new()
+		advice.status = PositionResult.Status.ACCEPTED
+		advice.unit = unit
+		advice.target_hex = unit.current_hex
+		advice.target_index = controller.snapshot.maps[own.team].cell_to_index(unit.current_hex)
+		advice.profile_mode = PositionProfile.Mode.SUPPORT_BY_FIRE
+		advice.features = {"cover": 0.5, "firing": 1.0}
+		unit.position_advice = advice
+		Globals.unit_visible_enemies[unit] = [enemy]
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.squads = [first, second]
+	planner.current_order = MissionOrder.new()
+	planner.current_order.position_mode = PositionProfile.Mode.ASSAULT
+	planner.current_order.objective_hex = enemy.current_hex
+	planner._build_combat_planning_requests(planner.squads)
+	var maneuver: Unit = planner.attack_maneuver_squad
+	var overwatch: Unit = second
+	if maneuver == second:
+		overwatch = first
+	_check(maneuver != null and planner.attack_advance_released, "Established rifle fire support can release an attack without an MG")
+	_check(planner._attack_mode_for_unit(maneuver) == PositionProfile.Mode.ADVANCE and planner._attack_mode_for_unit(overwatch) == PositionProfile.Mode.SUPPORT_BY_FIRE, "Two rifles facing a pinned defender assign only one to advance and retain the other on overwatch")
+	for request: Dictionary in planner._planning_requests:
+		var query: PositionQuery = request["query"]
+		if query.unit == overwatch:
+			_check(query.profile.commitment_seconds == INF and query.objective_hex == enemy.current_hex, "Rifle overwatch remains committed to the pinned defender's firing lane")
+	planner._update_attack_roles([second, first])
+	_check(planner.attack_maneuver_squad == maneuver, "Reordered squad evaluation preserves the moving rifle's assignment")
+	maneuver.movement.is_moving = true
+	var relocation: DefensePositionResult = DefensePositionResult.new()
+	relocation.unit = overwatch
+	relocation.status = PositionResult.Status.ACCEPTED
+	relocation.profile_mode = PositionProfile.Mode.SUPPORT_BY_FIRE
+	relocation.should_move = true
+	relocation.target_hex = Vector2i(2, 4)
+	relocation.target_index = controller.snapshot.maps[own.team].cell_to_index(relocation.target_hex)
+	relocation.path = controller.snapshot.get_path(own.team, overwatch.current_hex, relocation.target_hex)
+	planner._apply_position_results([relocation], "support_by_fire", null)
+	var order_id: int = overwatch.action_controller.action_order_id
+	planner._issue_order(overwatch)
+	_check(overwatch.action_controller.action_order_id == order_id and not overwatch.movement.is_moving, "The last overwatch rifle retains its position during the other rifle's bound")
+	_check(planner.reserved_hexes_by_squad[overwatch] == overwatch.current_hex, "Blocked overwatch relocation reserves the actual firing position")
+	maneuver.movement.is_moving = false
+	Globals.unit_visible_enemies[overwatch] = []
+	_check(not planner._has_established_attack_support(planner.squads), "The moving rifle's old firing position cannot count as its own overwatch")
+	var advance: DefensePositionResult = DefensePositionResult.new()
+	advance.unit = maneuver
+	advance.status = PositionResult.Status.ACCEPTED
+	advance.profile_mode = PositionProfile.Mode.ADVANCE
+	advance.target_hex = Vector2i(4, 3)
+	advance.target_index = controller.snapshot.maps[own.team].cell_to_index(advance.target_hex)
+	advance.should_move = true
+	advance.path = controller.snapshot.get_path(own.team, maneuver.current_hex, advance.target_hex)
+	planner._apply_position_results([advance], "advance", null)
+	order_id = maneuver.action_controller.action_order_id
+	planner._issue_order(maneuver)
+	_check(maneuver.action_controller.action_order_id == order_id and not maneuver.movement.is_moving, "Cached advance advice cannot start a bound after overwatch loses the defender")
+	planner._planning_requests.clear()
+	planner._build_combat_planning_requests(planner.squads)
+	for request: Dictionary in planner._planning_requests:
+		var query: PositionQuery = request["query"]
+		if query.unit == maneuver:
+			_check(query.movement_radius == 0, "Loss of the overwatch firing lane holds the rifle at its forward position")
+	Globals.unit_visible_enemies[overwatch] = [enemy]
+	maneuver.current_hex = enemy.current_hex + Vector2i(-1, 0)
+	overwatch.current_hex = enemy.current_hex + Vector2i(0, 1)
+	overwatch.position_advice.target_hex = overwatch.current_hex
+	_check(planner._attack_mode_for_unit(maneuver) == PositionProfile.Mode.ASSAULT and planner._attack_mode_for_unit(overwatch) == PositionProfile.Mode.SUPPORT_BY_FIRE, "Only the selected rifle enters close combat even when both rifles are adjacent to the pinned defender")
+	overwatch.stress_system.state = UnitStates.MoraleState.PINNED
+	planner._update_attack_roles(planner.squads)
+	_check(planner.attack_maneuver_squad == null, "An incapacitated covering rifle blocks a new bound instead of sending the last capable rifle forward")
+	overwatch.stress_system.state = UnitStates.MoraleState.NORMAL
+	overwatch.surrendered = true
+	planner._update_attack_roles(planner.squads)
+	_check(planner.attack_maneuver_squad == null, "A surrendered rifle cannot satisfy the overwatch requirement")
+	overwatch.surrendered = false
+	planner.squads = [maneuver]
+	planner._update_attack_roles(planner.squads)
+	_check(planner.attack_maneuver_squad == null and planner._attack_mode_for_unit(maneuver) == PositionProfile.Mode.SUPPORT_BY_FIRE, "A lone rifle holds fire support rather than advancing without overwatch")
+	enemy.stress_system.state = saved_state
+	enemy.stress_system.S_eff = saved_stress
+	for unit: UnitProbe in [first, second]:
+		Globals.unit_visible_enemies.erase(unit)
+		unit.squad_fire.free()
+		unit.squad_fire = null
+		unit.free()
+	planner.free()
 
 
 func _equip(unit: Unit, weapons: Array[WeaponSpec]) -> void:

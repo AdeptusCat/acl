@@ -34,6 +34,7 @@ var reserve_squad: Unit
 var reserve_deployed: bool = false
 var attack_advance_released: bool = false
 var attack_approach_started: bool = false
+var attack_maneuver_squad: Unit
 var reserve_reason: String = ""
 var _reserve_quiet_since: float = -INF
 var _validating_batch: bool = false
@@ -113,6 +114,7 @@ func set_active(is_active: bool) -> void:
 	executor.cancel_all(true)
 	_departure_origins.clear()
 	current_order = null
+	attack_maneuver_squad = null
 	squad_assignments.clear()
 	reserved_hexes_by_squad.clear()
 	accepted_positions.clear()
@@ -133,6 +135,7 @@ func receive_mission_order(order: MissionOrder) -> void:
 	current_order = order
 	attack_advance_released = false
 	attack_approach_started = false
+	attack_maneuver_squad = null
 	_set_mission_control(true)
 	time_until_reconsider = reconsider_interval
 	_start_plan(is_inside_tree())
@@ -156,6 +159,7 @@ func set_squads(new_squads: Array[Unit]) -> void:
 	defense_branch_gaps.clear()
 	time_until_reconsider = 0.0
 	squads = owned
+	attack_maneuver_squad = null
 	_set_mission_control(active and current_order != null)
 
 
@@ -316,6 +320,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 		return
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT:
+			_update_attack_roles(available)
 			attack_advance_released = _has_established_attack_support(available) and _are_visible_attack_defenders_suppressed(available)
 			attack_approach_started = attack_approach_started or attack_advance_released
 		for unit: Unit in available:
@@ -333,6 +338,8 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
 					config.profile.commitment_seconds = 8.0
+					if attack_approach_started:
+						config.profile.commitment_seconds = INF
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
@@ -495,12 +502,41 @@ func _update_reserve_state() -> void:
 		reserve_reason = "protected_reserve"
 
 
-func _has_established_attack_support(available: Array[Unit]) -> bool:
-	var has_machine_gun: bool = false
+func _can_provide_attack_support(unit: Unit) -> bool:
+	return TacticalPositionExecutor.is_active_defender(unit) and unit.team == team and unit.squad_type in [Globals.SquadType.Rifle, Globals.SquadType.MG] and PositionQueryService.can_follow_intent(unit) and InfluenceUnitQuery.get_unit_firepower(unit) > 0.0
+
+
+func _has_attack_cover_candidate(available: Array[Unit], maneuver: Unit) -> bool:
 	for unit: Unit in available:
-		if unit.squad_type != Globals.SquadType.MG:
+		if unit != maneuver and _can_provide_attack_support(unit):
+			return true
+	return false
+
+
+func _update_attack_roles(available: Array[Unit]) -> void:
+	# Retain the moving squad so small scoring changes cannot send both rifles forward.
+	if available.has(attack_maneuver_squad) and TacticalPositionExecutor.is_active_defender(attack_maneuver_squad):
+		if attack_maneuver_squad.in_close_combat:
+			return
+		if PositionQueryService.can_assault(attack_maneuver_squad) and _has_attack_cover_candidate(available, attack_maneuver_squad):
+			return
+	attack_maneuver_squad = null
+	var best_distance: int = 2147483647
+	for unit: Unit in available:
+		if unit.squad_type != Globals.SquadType.Rifle or not _can_provide_attack_support(unit) or not PositionQueryService.can_assault(unit):
 			continue
-		has_machine_gun = true
+		if not _has_attack_cover_candidate(available, unit):
+			continue
+		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex)
+		if attack_maneuver_squad == null or distance < best_distance or (distance == best_distance and unit.get_instance_id() < attack_maneuver_squad.get_instance_id()):
+			attack_maneuver_squad = unit
+			best_distance = distance
+
+
+func _has_established_attack_support(available: Array[Unit], departing: Unit = null) -> bool:
+	for unit: Unit in available:
+		if unit == attack_maneuver_squad or unit == departing or not _can_provide_attack_support(unit):
+			continue
 		var advice: PositionResult = unit.position_advice
 		if advice == null or not advice.is_valid() or advice.profile_mode != PositionProfile.Mode.SUPPORT_BY_FIRE:
 			continue
@@ -510,9 +546,9 @@ func _has_established_attack_support(available: Array[Unit]) -> bool:
 			continue
 		if advice.features.get("cover", 0.0) < 0.1 or advice.features.get("firing", 0.0) <= 0.0:
 			continue
-		if PositionQueryService.can_follow_intent(unit) and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null):
+		if unit.squad_fire != null and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null) and TacticalPositionExecutor.select_support_target(unit, current_order.objective_hex) != null:
 			return true
-	return not has_machine_gun
+	return false
 
 
 func _are_visible_attack_defenders_suppressed(available: Array[Unit]) -> bool:
@@ -533,14 +569,19 @@ func _are_visible_attack_defenders_suppressed(available: Array[Unit]) -> bool:
 
 func _attack_support_objective(available: Array[Unit]) -> Vector2i:
 	var target: Vector2i = current_order.objective_hex
+	var selected: Unit = null
+	var selected_suppressed: bool = true
 	var lowest_stress: float = INF
 	for observer: Unit in available:
 		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
 			if not TacticalPositionExecutor.is_active_defender(enemy) or enemy.stress_system == null:
 				continue
-			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius or TacticalPositionExecutor.is_sufficiently_suppressed(enemy):
+			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius or not TacticalPositionExecutor.support_hex_is_clear(observer, enemy.current_hex):
 				continue
-			if enemy.stress_system.S_eff < lowest_stress:
+			var suppressed: bool = TacticalPositionExecutor.is_sufficiently_suppressed(enemy)
+			if selected == null or (selected_suppressed and not suppressed) or (selected_suppressed == suppressed and enemy.stress_system.S_eff < lowest_stress):
+				selected = enemy
+				selected_suppressed = suppressed
 				lowest_stress = enemy.stress_system.S_eff
 				target = enemy.current_hex
 	return target
@@ -572,7 +613,9 @@ func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
 	if unit.squad_type == Globals.SquadType.MG:
 		# Search for a firing lane even when the current hex has no objective LOS.
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
-	if _close_combat_target(unit) != null:
+	if unit != attack_maneuver_squad:
+		return PositionProfile.Mode.SUPPORT_BY_FIRE
+	if _close_combat_target(unit) != null and _has_established_attack_support(squads):
 		return PositionProfile.Mode.ASSAULT
 	if not attack_approach_started:
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
@@ -612,6 +655,9 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 	for unit: Unit in units:
 		var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
 		query.snapshot = influence_map_controller.snapshot
+		if current_order.position_mode == PositionProfile.Mode.ASSAULT and unit == attack_maneuver_squad and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
+			# Wait at the forward position while the covering squad restores its firing lane.
+			query.movement_radius = 0
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
 			query.departure_baseline = _planning_baseline
 			query.has_departure_baseline = true
@@ -667,7 +713,8 @@ func _publish_ready_result() -> void:
 	# movement and its reservation, never against its promised future firing lane.
 	_apply_position_results([result], result.role, result.axis)
 	_issue_order(result.unit)
-	if result.is_valid() and accepted_positions.has(result.unit):
+	var accepted: Dictionary = accepted_positions.get(result.unit, {})
+	if result.is_valid() and accepted.get("hex") == result.target_hex and accepted.get("context") == result.context:
 		query.has_accepted_target = true
 		query.accepted_target = result.target_hex
 		query.accepted_context = result.context
@@ -861,6 +908,19 @@ func _issue_orders() -> void:
 
 func _issue_order(squad: Unit) -> void:
 	var result: PositionResult = squad_assignments[squad]["result"]
+	if current_order != null and current_order.position_mode == PositionProfile.Mode.ASSAULT:
+		if result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
+			executor.cancel(squad, true)
+			accepted_positions.erase(squad)
+			reserved_hexes_by_squad[squad] = squad.current_hex
+			_planning_reservations[squad] = squad.current_hex
+			return
+		if result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and is_instance_valid(attack_maneuver_squad):
+			if (attack_maneuver_squad.movement.is_moving or attack_maneuver_squad.in_close_combat) and not _has_established_attack_support(squads, squad):
+				# The last overwatch squad cannot relocate during the rifle's bound.
+				reserved_hexes_by_squad[squad] = squad.current_hex
+				_planning_reservations[squad] = squad.current_hex
+				return
 	var departing: bool = result.should_move and result.target_hex != squad.current_hex and result.profile_mode == PositionProfile.Mode.DEFEND
 	var origin: Vector2i = squad.current_hex
 	squad.position_advice = result
