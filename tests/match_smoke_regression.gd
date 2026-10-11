@@ -3,6 +3,8 @@ extends Node
 # Active scene integration, with --default-map for the other authored map.
 # Use --fixed-fps 60 for deterministic frame progression and isolated user data.
 var failures: int = 0
+var attack_rifle: Unit
+var attack_rifle_start_distance: int = 0
 
 
 func _ready() -> void:
@@ -35,6 +37,15 @@ func _run() -> void:
 			_check(order.execution_intent == TacticalPositionExecutor.Intent.ASSAULT, "OutpostProbe executes assault orders")
 			_check(scenario.axis_objectives_tile_map_layer.get_used_cells().has(order.objective_hex), "OutpostProbe attacks the authored Axis objective hex")
 			_check(order.reserve_policy == MissionOrder.ReservePolicy.NONE, "OutpostProbe commits its fighting squads to the attack")
+			for unit: Unit in attack_ai.squads:
+				if unit.squad_type == Globals.SquadType.Rifle:
+					attack_rifle = unit
+					attack_rifle_start_distance = LOSHelper.get_hex_distance(unit.current_hex, order.objective_hex)
+					_check(attack_ai._attack_mode_for_unit(unit) == PositionProfile.Mode.ADVANCE, "Distant attack rifles advance before assaulting")
+				elif unit.squad_type == Globals.SquadType.MG:
+					_check(attack_ai._attack_mode_for_unit(unit) != PositionProfile.Mode.ASSAULT, "Attack MG supports or advances instead of assaulting")
+				elif HqSupportPositionPolicy.is_headquarters(unit):
+					_check(attack_ai._attack_mode_for_unit(unit) == PositionProfile.Mode.HQ_SUPPORT, "Attack headquarters retains its support role")
 	var players: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
 	_check(not players.is_empty(), "Scenario initializes player units")
 	var selected: Unit = players[0]
@@ -48,6 +59,9 @@ func _run() -> void:
 	controller.influence_map_debug_draw.show()
 	for frame: int in range(600):
 		await get_tree().process_frame
+	if attack_rifle != null:
+		var objective: Vector2i = scenario.axis_objectives_tile_map_layer.get_used_cells()[0]
+		_check(LOSHelper.get_hex_distance(attack_rifle.current_hex, objective) < attack_rifle_start_distance, "Attack rifle makes progress toward the objective")
 	var state: Array[Dictionary] = []
 	for unit: Unit in Globals.get_units():
 		_check(unit.squad_fire.soldiers.size() == unit.members_alive, "Active match retains consistent runtime strength")

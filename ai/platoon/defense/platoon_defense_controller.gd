@@ -309,9 +309,20 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 		_build_sector_requests(available.duplicate())
 		return
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
-		var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 		for unit: Unit in available:
-			_add_planning_requests(config, [unit], "offense", null)
+			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			var role: String = "offense"
+			if current_order.position_mode == PositionProfile.Mode.ASSAULT:
+				var mode: PositionProfile.Mode = _attack_mode_for_unit(unit)
+				config.profile = PositionProfile.for_mode(mode)
+				role = "advance"
+				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+					role = "support_by_fire"
+				elif mode == PositionProfile.Mode.ASSAULT:
+					role = "assault"
+				elif mode == PositionProfile.Mode.HQ_SUPPORT:
+					role = "hq_support"
+			_add_planning_requests(config, [unit], role, null)
 		return
 	var can_reserve: bool = current_order.reserve_policy != MissionOrder.ReservePolicy.NONE and available.size() >= 3
 	if current_order.position_mode == PositionProfile.Mode.DEFEND and current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
@@ -445,6 +456,19 @@ func _update_reserve_state() -> void:
 			reserve_reason = "emergency_settling"
 	else:
 		reserve_reason = "protected_reserve"
+
+
+func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
+	if HqSupportPositionPolicy.is_headquarters(unit):
+		return PositionProfile.Mode.HQ_SUPPORT
+	if unit.squad_type == Globals.SquadType.MG:
+		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex)
+		if distance <= InfluenceUnitQuery.get_unit_range(unit) and influence_map_controller.snapshot != null and influence_map_controller.snapshot.los.get(unit.current_hex, {}).has(current_order.objective_hex):
+			return PositionProfile.Mode.SUPPORT_BY_FIRE
+		return PositionProfile.Mode.ADVANCE
+	if LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex) <= 2 and PositionQueryService.can_assault(unit):
+		return PositionProfile.Mode.ASSAULT
+	return PositionProfile.Mode.ADVANCE
 
 
 func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: PositionQuery.Responsibility, branch: String = "") -> void:
@@ -730,7 +754,10 @@ func _issue_order(squad: Unit) -> void:
 	var origin: Vector2i = squad.current_hex
 	squad.position_advice = result
 	squad.influence_map = result.score_map
-	if result.is_valid() and executor.execute(result, current_order.execution_intent):
+	var intent: TacticalPositionExecutor.Intent = TacticalPositionExecutor.Intent.FROM_PROFILE
+	if current_order != null and current_order.position_mode != PositionProfile.Mode.ASSAULT:
+		intent = current_order.execution_intent
+	if result.is_valid() and executor.execute(result, intent):
 		if departing and not _departure_origins.has(squad):
 			_departure_origins[squad] = _planning_baseline.get(squad, origin)
 		var accepted_at: float = influence_map_controller.snapshot.captured_at
