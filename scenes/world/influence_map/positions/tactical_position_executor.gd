@@ -73,7 +73,9 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 		return
 	var previous: Dictionary = completed.get(unit, {})
 	if previous.get("context") == result.context and previous.get("hex") == result.target_hex and previous.get("order_id") == unit.action_controller.action_order_id and previous.get("intent") == intent:
-		if intent != Intent.SUPPORT_BY_FIRE or unit.squad_fire == null or unit.attackState != Unit.AttackState.AUTO:
+		if intent != Intent.SUPPORT_BY_FIRE or unit.squad_fire == null:
+			return
+		if unit.attackState != Unit.AttackState.AUTO and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null):
 			return
 	_release_support_fire(unit)
 	if intent == Intent.SUPPORT_BY_FIRE:
@@ -83,6 +85,15 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, result.objective_hex)
 		if LOSHelper.los_lookup.get(unit.current_hex, {}).has(result.objective_hex) and InfluenceUnitQuery.get_firepower_at_range(unit, distance) > 0.0:
 			unit.order(Globals.UnitCmd.FIRE_AT_HEX, result.objective_hex)
+		else:
+			# A support position may cover an enemy approach instead of the objective tile.
+			for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+				if not InfluenceUnitQuery.is_valid_living_unit(enemy):
+					continue
+				var enemy_distance: int = LOSHelper.get_hex_distance(unit.current_hex, enemy.current_hex)
+				if LOSHelper.los_lookup.get(unit.current_hex, {}).has(enemy.current_hex) and InfluenceUnitQuery.get_firepower_at_range(unit, enemy_distance) > 0.0:
+					unit.order(Globals.UnitCmd.FIRE_AT_HEX, enemy.current_hex)
+					break
 	elif intent == Intent.HOLD or intent == Intent.ADVANCE or intent == Intent.WITHDRAW:
 		# A move-and-hold action already handles establishment and its preparation timer.
 		var state: int = unit.action_controller.action_state
@@ -91,7 +102,10 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 	var fire_unit: Unit = null
 	if unit.squad_fire != null:
 		fire_unit = unit.squad_fire.target_unit
-	completed[unit] = {"intent": intent, "context": result.context, "hex": result.target_hex, "objective": result.objective_hex, "fire_unit": fire_unit, "order_id": unit.action_controller.action_order_id}
+	var fire_hex: Vector2i = result.objective_hex
+	if unit.squad_fire != null and unit.squad_fire.has_target_hex:
+		fire_hex = unit.squad_fire.target_hex
+	completed[unit] = {"intent": intent, "context": result.context, "hex": result.target_hex, "objective": fire_hex, "fire_unit": fire_unit, "order_id": unit.action_controller.action_order_id}
 
 
 func cancel(unit: Unit, stop_execution: bool = false) -> void:
