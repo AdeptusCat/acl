@@ -94,6 +94,7 @@ var mortar_target_hex: Vector2i:
 		has_mortar_target_hex = true
 #var target_cover: float
 var target_unit: Unit
+var mission_support_fire: bool = false
 #var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
@@ -252,6 +253,8 @@ func clear_target() -> void:
 
 func _can_track_target(enemy: Unit) -> bool:
 	if not is_instance_valid(enemy) or not enemy.alive or enemy.surrendered:
+		return false
+	if mission_support_fire and not TacticalPositionExecutor.support_hex_is_clear(unit, enemy.current_hex):
 		return false
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
 	if not visible_enemies.has(enemy):
@@ -467,6 +470,10 @@ func _tick_soldiers(delta: float) -> void:
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
 	if not unit.alive or unit.ai_support_only:
+		return 0
+	if mission_support_fire and not _has_safe_support_target(target_hex):
+		clear_target()
+		unit.setAttackState(Unit.AttackState.AUTO)
 		return 0
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
@@ -764,14 +771,26 @@ func aim_delay() -> void:
 
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target_hex: Vector2i) -> void:
 	var interval: float = 60.0 / rpm
+	var support_burst: bool = mission_support_fire
 	for shot: int in range(shots):
 		if not unit.alive:
+			return
+		if support_burst and not _has_safe_support_target(shot_target_hex):
 			return
 		fire_shot.emit(s.weapon, shot_target_hex)
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
 	if auto_fire and unit.alive:
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
+
+
+func _has_safe_support_target(cell: Vector2i) -> bool:
+	if not TacticalPositionExecutor.support_hex_is_clear(unit, cell):
+		return false
+	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+		if TacticalPositionExecutor.is_active_defender(enemy) and enemy.team != unit.team and enemy.current_hex == cell:
+			return true
+	return false
 
 
 func fire_riflegrenades(s: Soldier) -> void:

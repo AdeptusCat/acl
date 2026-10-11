@@ -74,32 +74,29 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 	var previous: Dictionary = completed.get(unit, {})
 	var support_target: Unit = null
 	if intent == Intent.SUPPORT_BY_FIRE:
+		if unit.squad_fire != null:
+			unit.squad_fire.mission_support_fire = true
 		support_target = select_support_target(unit, result.objective_hex)
 	if previous.get("context") == result.context and previous.get("hex") == result.target_hex and previous.get("order_id") == unit.action_controller.action_order_id and previous.get("intent") == intent:
 		if intent != Intent.SUPPORT_BY_FIRE or unit.squad_fire == null:
 			return
 		if unit.attackState != Unit.AttackState.AUTO and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null):
-			if support_target == null or unit.squad_fire.target_unit == support_target:
+			if support_target != null and unit.squad_fire.target_unit == support_target:
 				return
 	_release_support_fire(unit)
 	if intent == Intent.SUPPORT_BY_FIRE:
+		if unit.squad_fire != null:
+			unit.squad_fire.mission_support_fire = true
 		var state: int = unit.action_controller.action_state
 		if state != SquadActionController.SquadActionState.ESTABLISHING_POSITION and state != SquadActionController.SquadActionState.HOLDING_POSITION:
 			unit.give_hold_order()
-		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, result.objective_hex)
 		if support_target != null:
+			unit.setAttackState(Unit.AttackState.MANUAL_TRACK)
 			unit.order(Globals.UnitCmd.FIRE_AT_UNIT, support_target)
-		elif LOSHelper.los_lookup.get(unit.current_hex, {}).has(result.objective_hex) and InfluenceUnitQuery.get_firepower_at_range(unit, distance) > 0.0:
-			unit.order(Globals.UnitCmd.FIRE_AT_HEX, result.objective_hex)
 		else:
-			# A support position may cover an enemy approach instead of the objective tile.
-			for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
-				if not InfluenceUnitQuery.is_valid_living_unit(enemy):
-					continue
-				var enemy_distance: int = LOSHelper.get_hex_distance(unit.current_hex, enemy.current_hex)
-				if LOSHelper.los_lookup.get(unit.current_hex, {}).has(enemy.current_hex) and InfluenceUnitQuery.get_firepower_at_range(unit, enemy_distance) > 0.0:
-					unit.order(Globals.UnitCmd.FIRE_AT_HEX, enemy.current_hex)
-					break
+			if unit.squad_fire != null:
+				unit.squad_fire.clear_target()
+			unit.setAttackState(Unit.AttackState.AUTO)
 	elif intent == Intent.HOLD or intent == Intent.ADVANCE or intent == Intent.WITHDRAW:
 		# A move-and-hold action already handles establishment and its preparation timer.
 		var state: int = unit.action_controller.action_state
@@ -115,9 +112,20 @@ func _finish_intent(unit: Unit, result: PositionResult, intent: Intent) -> void:
 
 
 static func is_sufficiently_suppressed(enemy: Unit) -> bool:
-	if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
+	if not is_active_defender(enemy) or enemy.stress_system == null:
 		return false
 	return enemy.stress_system.state in [Unit.MoraleState.PINNED, Unit.MoraleState.PANIC, Unit.MoraleState.COMBAT_INEFFECTIVE] or enemy.stress_system.S_eff >= enemy.stress_system.pin_threshold
+
+
+static func is_active_defender(enemy: Unit) -> bool:
+	return InfluenceUnitQuery.is_valid_living_unit(enemy) and not enemy.surrendered and enemy.members_alive > 0
+
+
+static func support_hex_is_clear(unit: Unit, cell: Vector2i) -> bool:
+	for friendly: Unit in Globals.get_units_for_team(unit.team):
+		if InfluenceUnitQuery.is_valid_living_unit(friendly) and friendly.members_alive > 0 and friendly.current_hex == cell:
+			return false
+	return true
 
 
 static func select_support_target(unit: Unit, objective: Vector2i) -> Unit:
@@ -125,7 +133,7 @@ static func select_support_target(unit: Unit, objective: Vector2i) -> Unit:
 	var lowest_stress: float = INF
 	var selected_suppressed: bool = true
 	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
-		if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
+		if not is_active_defender(enemy) or enemy.team == unit.team or enemy.stress_system == null or not support_hex_is_clear(unit, enemy.current_hex):
 			continue
 		if LOSHelper.get_hex_distance(enemy.current_hex, objective) > 4:
 			continue
@@ -196,6 +204,8 @@ static func intent_for_profile(mode: PositionProfile.Mode) -> Intent:
 
 
 func _release_support_fire(unit: Unit) -> void:
+	if is_instance_valid(unit) and unit.squad_fire != null:
+		unit.squad_fire.mission_support_fire = false
 	if not completed.has(unit) or not is_instance_valid(unit) or unit.squad_fire == null or unit.action_controller == null:
 		return
 	var owned: Dictionary = completed[unit]

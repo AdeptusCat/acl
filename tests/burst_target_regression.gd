@@ -48,7 +48,7 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze(main)
 	shooter = Globals.get_units()[1]
-	enemy = Globals.get_units()[3]
+	enemy = Globals.get_units_for_team(Globals.get_enemy_team(shooter.team))[0]
 	var original_ui: UnitUi = shooter.ui
 	var original_soldiers: Array[Soldier] = shooter.squad_fire.soldiers
 	visual = VisualProbe.new()
@@ -70,6 +70,7 @@ func _run() -> void:
 	await _test_retarget()
 	await _test_origin_target()
 	_test_projectile_families()
+	await _test_support_fire_safety()
 	shooter.ui = original_ui
 	shooter.squad_fire.soldiers = original_soldiers
 	visual.free()
@@ -150,6 +151,38 @@ func _test_projectile_families() -> void:
 		shooter._on_fire_shot(weapon, Vector2i(6, 5))
 		_check_destinations([Vector2i(6, 5)], "Weapon family %d uses the shot signal's destination" % family)
 		_check(visual.families == [family], "The shot reaches the correct weapon-family visual")
+
+
+func _test_support_fire_safety() -> void:
+	var target: Vector2i = Vector2i(20, 10)
+	var original_los: Dictionary = LOSHelper.los_lookup
+	LOSHelper.los_lookup = {shooter.current_hex: {target: {"target_cover": 0}}}
+	shooter.squad_fire.mission_support_fire = true
+	_prepare_target(target, Unit.AttackState.MANUAL_TRACK)
+	enemy.surrendered = true
+	await shooter.squad_fire.fire_shots(gunner, 3, 1200.0, false, target)
+	_check(visual.destinations.is_empty(), "Support fire rejects a surrendered defender even while it remains in the visibility list")
+	enemy.surrendered = false
+	Globals.unit_visible_enemies[shooter] = []
+	await shooter.squad_fire.fire_shots(gunner, 3, 1200.0, false, target)
+	_check(visual.destinations.is_empty(), "Support fire cannot fire at an empty or unobserved objective hex")
+	_prepare_target(target, Unit.AttackState.MANUAL_TRACK)
+	var friend: Unit = null
+	for candidate: Unit in Globals.get_units_for_team(shooter.team):
+		if candidate != shooter:
+			friend = candidate
+			break
+	var friend_hex: Vector2i = friend.current_hex
+	_fire_burst(target)
+	_check(visual.destinations.size() == 1, "Support burst begins while the defender's hex is clear of friendly squads")
+	_set_hex(friend, target)
+	await burst_finished
+	_check(visual.destinations.size() == 1, "A friendly squad entering the target hex stops the remaining support burst")
+	_check(TacticalPositionExecutor.select_support_target(shooter, target) == null, "MG will not select an enemy sharing a hex with a friendly squad")
+	_set_hex(friend, friend_hex)
+	shooter.squad_fire.mission_support_fire = false
+	shooter.squad_fire.clear_target()
+	LOSHelper.los_lookup = original_los
 
 
 func _prepare_target(hex: Vector2i, attack_state: Unit.AttackState) -> void:

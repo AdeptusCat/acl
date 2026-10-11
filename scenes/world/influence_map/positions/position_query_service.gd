@@ -309,6 +309,8 @@ static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -
 	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
 		if not contact.observed or TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
 			continue
+		if not TacticalPositionExecutor.is_active_defender(contact.unit):
+			continue
 		if LOSHelper.get_hex_distance(path[-1], contact.hex) <= 1:
 			return false
 		for step: Vector2i in path:
@@ -334,11 +336,15 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 		return objective_distance > 0 and objective_distance <= InfluenceUnitQuery.get_unit_range(query.unit)
 	if query.profile.mode == PositionProfile.Mode.ASSAULT:
+		if query.profile.enter_suppressed_enemy_hex:
+			return objective_distance == 0
 		return objective_distance <= 1
 	return objective_distance <= LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex)
 
 
 static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
+	if can_enter_suppressed_enemy_hex(query, cell):
+		return false
 	for other: Unit in query.reservations:
 		if other != query.unit and is_instance_valid(other) and other.alive and query.reservations[other] == cell:
 			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
@@ -351,6 +357,19 @@ static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 		if contact.hex == cell:
 			return true
 	return false
+
+
+static func can_enter_suppressed_enemy_hex(query: PositionQuery, cell: Vector2i) -> bool:
+	if query.profile.mode != PositionProfile.Mode.ASSAULT or not query.profile.enter_suppressed_enemy_hex or cell != query.objective_hex:
+		return false
+	var has_defender: bool = false
+	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
+		if contact.hex != cell:
+			continue
+		if not contact.observed or not TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			return false
+		has_defender = true
+	return has_defender
 
 
 static func _prefer_candidate(a: PositionCandidate, b: PositionCandidate) -> bool:

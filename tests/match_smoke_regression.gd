@@ -20,10 +20,10 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	var world: Node = main.world
-	var map_index: int = 1
+	var map_name: String = "OrchardRoad"
 	if OS.get_cmdline_user_args().has("--default-map"):
-		map_index = 0
-	var map: Map = world.maps.get_child(map_index)
+		map_name = "DefaultMap"
+	var map: Map = world.maps.get_node(map_name)
 	var scenario: Scenario = map.get_scenario(0)
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
@@ -56,6 +56,7 @@ func _run() -> void:
 					_check(attack_ai._attack_mode_for_unit(unit) == PositionProfile.Mode.HQ_SUPPORT, "Attack headquarters retains its support role")
 	if attack_controller != null:
 		_test_all_defenders_suppression(attack_controller)
+		_test_close_assault_selection(attack_controller)
 	var players: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
 	_check(not players.is_empty(), "Scenario initializes player units")
 	var selected: Unit = players[0]
@@ -185,6 +186,45 @@ func _test_all_defenders_suppression(planner: PlatoonAI) -> void:
 
 func _on_attack_mg_fired(_weapon: WeaponSpec, _hex: Vector2i) -> void:
 	attack_mg_shots += 1
+
+
+func _test_close_assault_selection(planner: PlatoonAI) -> void:
+	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
+	var defender: Unit = enemies[0]
+	var fresh_defender: Unit = enemies[1]
+	var saved_rifle_hex: Vector2i = attack_rifle.current_hex
+	var saved_fresh_hex: Vector2i = fresh_defender.current_hex
+	var saved_rifle_visible: Array = Globals.unit_visible_enemies.get(attack_rifle, []).duplicate()
+	var saved_mg_visible: Array = Globals.unit_visible_enemies.get(attack_mg, []).duplicate()
+	var saved_defender_state: UnitStates.MoraleState = defender.stress_system.state
+	var saved_defender_stress: float = defender.stress_system.S_eff
+	var saved_fresh_state: UnitStates.MoraleState = fresh_defender.stress_system.state
+	var saved_fresh_stress: float = fresh_defender.stress_system.S_eff
+	var saved_surrendered: bool = defender.surrendered
+	attack_rifle.current_hex = defender.current_hex + Vector2i(0, 1)
+	Globals.unit_visible_enemies[attack_rifle] = [defender]
+	Globals.unit_visible_enemies[attack_mg] = [defender, fresh_defender]
+	defender.stress_system.state = UnitStates.MoraleState.NORMAL
+	defender.stress_system.S_eff = defender.stress_system.pin_threshold
+	fresh_defender.stress_system.state = UnitStates.MoraleState.NORMAL
+	fresh_defender.stress_system.S_eff = 0.0
+	fresh_defender.current_hex = defender.current_hex + Vector2i(0, 5)
+	_check(planner._close_combat_target(attack_rifle) == defender and planner._attack_mode_for_unit(attack_rifle) == PositionProfile.Mode.ASSAULT, "A capable adjacent rifle assaults a highly stressed defender when fresh defenders are distant")
+	fresh_defender.current_hex = defender.current_hex + Vector2i(0, -1)
+	_check(planner._close_combat_target(attack_rifle) == null, "A fresh adjacent defender prevents a same-hex rifle assault")
+	fresh_defender.stress_system.state = UnitStates.MoraleState.PINNED
+	_check(planner._close_combat_target(attack_rifle) == defender, "Suppressing the adjacent defender releases the close assault")
+	defender.surrendered = true
+	_check(planner._close_combat_target(attack_rifle) == null, "Rifles do not assault surrendered squads")
+	attack_rifle.current_hex = saved_rifle_hex
+	fresh_defender.current_hex = saved_fresh_hex
+	defender.stress_system.state = saved_defender_state
+	defender.stress_system.S_eff = saved_defender_stress
+	defender.surrendered = saved_surrendered
+	fresh_defender.stress_system.state = saved_fresh_state
+	fresh_defender.stress_system.S_eff = saved_fresh_stress
+	Globals.unit_visible_enemies[attack_rifle] = saved_rifle_visible
+	Globals.unit_visible_enemies[attack_mg] = saved_mg_visible
 
 
 func _check(condition: bool, message: String) -> void:

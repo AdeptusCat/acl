@@ -336,6 +336,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
+					config.profile.minimum_cover = 0.1
 					config.profile.avoid_unsuppressed_defenders = true
 					# Approach the objective instead of optimizing a stationary firing position.
 					config.profile.progress_weight = 12.0
@@ -345,6 +346,12 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.profile.exposure_weight = 0.5
 					config.profile.max_incoming_risk = 0.9
 					config.profile.max_route_exposure = 0.9
+				if mode == PositionProfile.Mode.ASSAULT:
+					var defender: Unit = _close_combat_target(unit)
+					if defender != null:
+						config.objective_hex = defender.current_hex
+						config.profile.enter_suppressed_enemy_hex = true
+						config.profile.avoid_unsuppressed_defenders = true
 				role = "advance"
 				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 					role = "support_by_fire"
@@ -512,7 +519,7 @@ func _are_visible_attack_defenders_suppressed(available: Array[Unit]) -> bool:
 	var defenders: Array[Unit] = []
 	for observer: Unit in available:
 		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
-			if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
+			if not TacticalPositionExecutor.is_active_defender(enemy) or enemy.stress_system == null:
 				continue
 			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius:
 				continue
@@ -529,7 +536,7 @@ func _attack_support_objective(available: Array[Unit]) -> Vector2i:
 	var lowest_stress: float = INF
 	for observer: Unit in available:
 		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
-			if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
+			if not TacticalPositionExecutor.is_active_defender(enemy) or enemy.stress_system == null:
 				continue
 			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius or TacticalPositionExecutor.is_sufficiently_suppressed(enemy):
 				continue
@@ -539,16 +546,36 @@ func _attack_support_objective(available: Array[Unit]) -> Vector2i:
 	return target
 
 
+func _close_combat_target(unit: Unit) -> Unit:
+	if not PositionQueryService.can_assault(unit):
+		return null
+	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+		if not TacticalPositionExecutor.is_sufficiently_suppressed(enemy) or enemy.team == unit.team:
+			continue
+		if LOSHelper.get_hex_distance(unit.current_hex, enemy.current_hex) != 1:
+			continue
+		if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius:
+			continue
+		var exposed_to_fresh_defender: bool = false
+		for observer: Unit in squads:
+			for other_enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+				if TacticalPositionExecutor.is_active_defender(other_enemy) and not TacticalPositionExecutor.is_sufficiently_suppressed(other_enemy) and LOSHelper.get_hex_distance(enemy.current_hex, other_enemy.current_hex) <= 1:
+					exposed_to_fresh_defender = true
+		if not exposed_to_fresh_defender:
+			return enemy
+	return null
+
+
 func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
 	if HqSupportPositionPolicy.is_headquarters(unit):
 		return PositionProfile.Mode.HQ_SUPPORT
 	if unit.squad_type == Globals.SquadType.MG:
 		# Search for a firing lane even when the current hex has no objective LOS.
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
+	if _close_combat_target(unit) != null:
+		return PositionProfile.Mode.ASSAULT
 	if not attack_approach_started:
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
-	if attack_advance_released and LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex) <= 2 and PositionQueryService.can_assault(unit):
-		return PositionProfile.Mode.ASSAULT
 	return PositionProfile.Mode.ADVANCE
 
 

@@ -117,6 +117,7 @@ func _run() -> void:
 	_test_automatic_registration()
 	_test_legacy_score_parity()
 	_test_profiles()
+	_test_suppressed_hex_entry()
 	_test_mirrored_teams()
 	_test_axis_diagnostics()
 	_test_execution()
@@ -496,6 +497,46 @@ func _test_profiles() -> void:
 	own.squad_fire = null
 
 
+func _test_suppressed_hex_entry() -> void:
+	var query: PositionQuery = _query(PositionProfile.Mode.ASSAULT)
+	query.objective_hex = enemy.current_hex
+	query.profile.enter_suppressed_enemy_hex = true
+	var snapshot: InfluenceSnapshot = controller.snapshot
+	var saved_contacts: Array[InfluenceContact] = snapshot.get_contacts(own.team)
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = enemy.current_hex
+	contact.observed = true
+	contact.weapon_range = 1
+	snapshot.contacts[own.team] = [contact]
+	var saved_state: UnitStates.MoraleState = enemy.stress_system.state
+	var saved_stress: float = enemy.stress_system.S_eff
+	enemy.stress_system.state = UnitStates.MoraleState.PINNED
+	var result: PositionResult = PositionQueryService.query_positions(query)
+	_check(result.is_valid() and result.target_hex == enemy.current_hex and result.path[-1] == enemy.current_hex, "Explicit close assault enters the suppressed defender's occupied hex")
+	query.profile.enter_suppressed_enemy_hex = false
+	_check(not PositionQueryService.can_enter_suppressed_enemy_hex(query, enemy.current_hex), "Ordinary position advice cannot bypass occupied-hex capacity")
+	query.profile.enter_suppressed_enemy_hex = true
+	enemy.surrendered = true
+	_check(not PositionQueryService.can_enter_suppressed_enemy_hex(query, enemy.current_hex), "Surrendered squads cannot become close-combat assault targets")
+	_check(PositionQueryService.approach_path_is_safe(query, [own.current_hex, enemy.current_hex]), "An observed surrendered squad does not block a rifle approach as a fresh defender")
+	enemy.surrendered = false
+	enemy.stress_system.state = UnitStates.MoraleState.NORMAL
+	enemy.stress_system.S_eff = 0.0
+	_check(not PositionQueryService.can_enter_suppressed_enemy_hex(query, enemy.current_hex), "Fresh defenders require suppression before same-hex assault")
+	enemy.stress_system.state = saved_state
+	enemy.stress_system.S_eff = saved_stress
+	snapshot.contacts[own.team] = saved_contacts
+	query = _query(PositionProfile.Mode.ADVANCE)
+	query.profile.minimum_cover = 0.1
+	var map: InfluenceMap = snapshot.maps[own.team]
+	var old_cover: PackedFloat32Array = map.get_layer_data_copy(InfluenceMap.Layer.TERRAIN_COVER)
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.0)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Rifle approach holds when every reachable destination lacks cover")
+	map.set_layer_data_copy(InfluenceMap.Layer.TERRAIN_COVER, old_cover)
+
+
 func _equip(unit: Unit, weapons: Array[WeaponSpec]) -> void:
 	var fire: SquadFireController = SquadFireController.new()
 	unit.squad_fire = fire
@@ -682,6 +723,8 @@ func _test_mirrored_teams() -> void:
 
 
 func _test_execution() -> void:
+	var saved_visible: Array = Globals.unit_visible_enemies.get(own, []).duplicate()
+	Globals.unit_visible_enemies[own] = [enemy]
 	var query: PositionQuery = _query(PositionProfile.Mode.SUPPORT_BY_FIRE)
 	query.objective_hex = Vector2i(6, 3)
 	var result: PositionResult = PositionQueryService.query_positions(query)
@@ -704,7 +747,8 @@ func _test_execution() -> void:
 	own.current_hex = result.target_hex
 	own.movement.is_moving = false
 	own.unit_arrived_at_hex.emit(own.current_hex)
-	_check(own.commanded.has(Globals.UnitCmd.FIRE_AT_HEX), "Support intent begins firing after arrival")
+	_check(own.commanded.has(Globals.UnitCmd.FIRE_AT_UNIT) and not own.commanded.has(Globals.UnitCmd.FIRE_AT_HEX), "Support intent targets a visible active defender after arrival")
+	_check(own.attackState == Unit.AttackState.MANUAL_TRACK, "Support fire retains the selected suppression target between planner updates")
 	result.should_move = false
 	var order_id: int = own.action_controller.action_order_id
 	var commands: int = own.commanded.size()
@@ -731,6 +775,7 @@ func _test_execution() -> void:
 	_check(own.action_controller.action_order_id == order_id, "Retained defense preserves the existing position-establishment timer")
 	executor.cancel_all()
 	own.action_controller.action_state = SquadActionController.SquadActionState.NO_ORDER
+	Globals.unit_visible_enemies[own] = saved_visible
 
 
 func _check(condition: bool, message: String) -> void:
