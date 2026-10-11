@@ -34,7 +34,7 @@ The value of this layer would be cooperation between squads: one element covers 
 
 ## Relationship to active AI
 
-The separate `PlatoonAI` in `ai/platoon/defense/platoon_defense_controller.gd` receives a `MissionOrder` from `DefenseDirector`. Match startup calls both defense directors. This implementation selects defensive positions using influence maps and threat axes, retains a reserve when possible, and periodically issues movement orders. It does not call the phased controller.
+The separate `PlatoonAI` in `ai/platoon/platoon_ai_controller.gd` receives a `MissionOrder` from `DefenseDirector`. Match startup calls both defense directors. This implementation selects defensive positions using influence maps and threat axes, retains a reserve when possible, and periodically issues movement orders. It does not call the phased controller.
 
 `SquadAiController` makes individual squad decisions and executes its own orders. It does not depend on the phased blackboard or task objects. `EnemyTrack`, `SquadTacticalState`, and `PlatoonTypes` are shared with current gameplay, so retiring the phased prototype must preserve those shared types.
 

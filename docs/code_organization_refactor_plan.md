@@ -238,7 +238,7 @@ The current paths below are the destinations after Task 1.
 
 | After Task 1 | Proposed filename(s) | Why |
 | --- | --- | --- |
-| `ai/platoon/defense/platoon_ai.gd`, `platoon_ai.tscn` | `platoon_defense_controller.gd`, `platoon_defense_controller.tscn` | Assigns defensive positions and reserves using influence maps. |
+| `ai/platoon/defense/platoon_ai.gd`, `platoon_ai.tscn` | `ai/platoon/platoon_ai_controller.gd`, `ai/platoon/platoon_ai_controller.tscn` | Plans defense, advance, assault, fire support, and HQ support using influence maps. |
 | `ai/platoon/defense/defense_director.gd`, `defense_director.tscn` | `defense_mission_director.gd`, `defense_mission_director.tscn` | Constructs and delivers the initial defensive mission. |
 | `ai/platoon/phased/platoon_ai_controller.gd`, `platoon_ai_controller.tscn` | `platoon_phase_controller.gd`, `platoon_phase_controller.tscn` | Runs tactical phases, plans, and squad-role assignments. Update the exact checker exclusion again. |
 | `ai/orders/ai_order.gd` | `squad_ai_order.gd` | Order consumed by squad AI; distinct from a platoon mission. |

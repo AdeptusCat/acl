@@ -152,14 +152,14 @@
       "original": "ai/platoon_alternative/platoon_ai.gd",
       "moved": "ai/platoon/defense/platoon_ai.gd",
       "move_batch": 2,
-      "final": "ai/platoon/defense/platoon_defense_controller.gd",
+      "final": "ai/platoon/platoon_ai_controller.gd",
       "rename_batch": 1
     },
     {
       "original": "ai/platoon_alternative/platoon_ai.tscn",
       "moved": "ai/platoon/defense/platoon_ai.tscn",
       "move_batch": 2,
-      "final": "ai/platoon/defense/platoon_defense_controller.tscn",
+      "final": "ai/platoon/platoon_ai_controller.tscn",
       "rename_batch": 1
     },
     {
@@ -1139,7 +1139,7 @@
       "original": "ai/platoon_alternative/platoon_ai.gd.uid",
       "moved": "ai/platoon/defense/platoon_ai.gd.uid",
       "move_batch": 2,
-      "final": "ai/platoon/defense/platoon_defense_controller.gd.uid",
+      "final": "ai/platoon/platoon_ai_controller.gd.uid",
       "rename_batch": 1
     },
     {

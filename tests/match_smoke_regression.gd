@@ -57,11 +57,15 @@ func _run() -> void:
 	controller.influence_map_debug_draw.set_team(Globals.team_player)
 	controller.influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.FIRE_POWER)
 	controller.influence_map_debug_draw.show()
-	for frame: int in range(600):
+	var simulation_frames: int = 600
+	if attack_rifle != null:
+		simulation_frames = 1800
+	for frame: int in range(simulation_frames):
 		await get_tree().process_frame
 	if attack_rifle != null:
 		var objective: Vector2i = scenario.axis_objectives_tile_map_layer.get_used_cells()[0]
 		_check(LOSHelper.get_hex_distance(attack_rifle.current_hex, objective) < attack_rifle_start_distance, "Attack rifle makes progress toward the objective")
+		_check(LOSHelper.get_hex_distance(attack_rifle.current_hex, objective) <= 2, "Attack rifle reaches assault range instead of settling behind the MG")
 	var state: Array[Dictionary] = []
 	for unit: Unit in Globals.get_units():
 		_check(unit.squad_fire.soldiers.size() == unit.members_alive, "Active match retains consistent runtime strength")

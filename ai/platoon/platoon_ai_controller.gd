@@ -315,6 +315,17 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 			if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 				var mode: PositionProfile.Mode = _attack_mode_for_unit(unit)
 				config.profile = PositionProfile.for_mode(mode)
+				if mode == PositionProfile.Mode.HQ_SUPPORT:
+					config.profile.support_assault_squads = true
+				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
+					# Approach the objective instead of optimizing a stationary firing position.
+					config.profile.progress_weight = 12.0
+					config.profile.cover_weight = 0.8
+					config.profile.incoming_weight = 2.0
+					config.profile.forecast_weight = 0.25
+					config.profile.exposure_weight = 0.5
+					config.profile.max_incoming_risk = 0.9
+					config.profile.max_route_exposure = 0.9
 				role = "advance"
 				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 					role = "support_by_fire"

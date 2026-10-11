@@ -36,7 +36,11 @@ static func prepare(query: PositionQuery) -> void:
 		if not headquarters.is_empty():
 			belongs = belongs or (captured["company"] == headquarters["company"] and (headquarters.get("company_hq", false) or captured["platoon"] == headquarters["platoon"]))
 		if belongs:
-			query.support_targets[friendly] = {"hex": query.snapshot.positions[friendly], "need": captured["need"]}
+			var need: float = captured["need"]
+			if query.profile.support_assault_squads and friendly.squad_type == Globals.SquadType.Rifle:
+				# Advancing rifles need leadership before stress forces a support response.
+				need = maxf(need, 0.35)
+			query.support_targets[friendly] = {"hex": query.snapshot.positions[friendly], "need": need}
 
 
 static func in_geography(query: PositionQuery, cell: Vector2i) -> bool:

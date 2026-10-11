@@ -74,7 +74,7 @@
 [ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://scenes/scenarios/victory_conditions/exit_units_condition.gd" id="59_jhdiv"]
 [ext_resource type="Resource" uid="uid://0yrwtv2ux2fi" path="res://resources/squads/germany/company_hq.tres" id="59_mdkuk"]
 [ext_resource type="PackedScene" uid="uid://chkbs6ulxllvt" path="res://ai/platoon/phased/platoon_phase_controller.tscn" id="59_mrxq0"]
-[ext_resource type="PackedScene" uid="uid://b5mttkcs5k8hq" path="res://ai/platoon/defense/platoon_defense_controller.tscn" id="60_mrxq0"]
+[ext_resource type="PackedScene" uid="uid://b5mttkcs5k8hq" path="res://ai/platoon/platoon_ai_controller.tscn" id="60_mrxq0"]
 [ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
 [ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="61_x77xw"]
