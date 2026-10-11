@@ -54,6 +54,8 @@ func _run() -> void:
 				elif HqSupportPositionPolicy.is_headquarters(unit):
 					attack_hq = unit
 					_check(attack_ai._attack_mode_for_unit(unit) == PositionProfile.Mode.HQ_SUPPORT, "Attack headquarters retains its support role")
+	if attack_controller != null:
+		_test_all_defenders_suppression(attack_controller)
 	var players: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
 	_check(not players.is_empty(), "Scenario initializes player units")
 	var selected: Unit = players[0]
@@ -74,10 +76,9 @@ func _run() -> void:
 		if attack_controller != null and attack_controller.attack_advance_released and not advance_release_observed:
 			advance_release_observed = true
 			_check(attack_controller._has_established_attack_support(attack_controller.squads), "Rifle advance starts after MG fire support is established")
-			_check(attack_controller._has_suppressed_attack_target(attack_controller.squads), "Rifle advance starts after a visible attack target is suppressed")
+			_check(attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads), "Rifle advance starts after every visible attack target is suppressed")
 	if attack_rifle != null:
 		var objective: Vector2i = scenario.axis_objectives_tile_map_layer.get_used_cells()[0]
-		_check(advance_release_observed, "Joint fire support suppresses a target and releases rifle advance")
 		if advance_release_observed:
 			_check(LOSHelper.get_hex_distance(attack_rifle.current_hex, objective) < attack_rifle_start_distance, "Released attack rifle makes progress toward the objective")
 		else:
@@ -103,6 +104,61 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("Match smoke regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_all_defenders_suppression(planner: PlatoonAI) -> void:
+	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
+	var observer: Unit = attack_mg
+	var saved_visible: Array = Globals.unit_visible_enemies.get(observer, []).duplicate()
+	var saved_los: Dictionary = LOSHelper.los_lookup.get(observer.current_hex, {}).duplicate()
+	var saved_states: Array[UnitStates.MoraleState] = []
+	var saved_stress: Array[float] = []
+	Globals.unit_visible_enemies[observer] = enemies
+	var visible_lanes: Dictionary = saved_los.duplicate()
+	for enemy: Unit in enemies:
+		saved_states.append(enemy.stress_system.state)
+		saved_stress.append(enemy.stress_system.S_eff)
+		enemy.stress_system.state = UnitStates.MoraleState.NORMAL
+		enemy.stress_system.S_eff = 0.0
+		visible_lanes[enemy.current_hex] = {}
+	LOSHelper.los_lookup[observer.current_hex] = visible_lanes
+	_check(not planner._are_visible_attack_defenders_suppressed(planner.squads), "Unsuppressed defenders block rifle advance")
+	enemies[0].stress_system.state = UnitStates.MoraleState.PINNED
+	_check(not planner._are_visible_attack_defenders_suppressed(planner.squads), "One pinned defender cannot release an attack against its unpinned neighbours")
+	var target: Unit = TacticalPositionExecutor.select_support_target(observer, planner.current_order.objective_hex)
+	_check(target != null and target != enemies[0], "Support fire shifts from the pinned squad to an unsuppressed defender")
+	for enemy: Unit in enemies:
+		enemy.stress_system.state = UnitStates.MoraleState.PINNED
+	_check(planner._are_visible_attack_defenders_suppressed(planner.squads), "Every visible defender suppressed permits rifle advance")
+	var support_query: PositionQuery = PositionQuery.new()
+	support_query.unit = attack_hq
+	support_query.team = observer.team
+	support_query.profile = PositionProfile.for_mode(PositionProfile.Mode.HQ_SUPPORT)
+	support_query.profile.support_assault_squads = true
+	support_query.snapshot = InfluenceSnapshot.new()
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemies[0]
+	contact.hex = enemies[0].current_hex
+	contact.observed = true
+	var support_hex: Vector2i = contact.hex + Vector2i(0, 1)
+	support_query.snapshot.defensive_contacts[observer.team] = [contact]
+	support_query.snapshot.los[contact.hex] = {support_hex: {}}
+	var pinned_features: Dictionary = HqSupportPositionPolicy.features(support_query, support_hex)
+	_check(not pinned_features["frontline"], "Observed suppressed defender does not forbid nearby HQ support")
+	contact.observed = false
+	_check(HqSupportPositionPolicy.features(support_query, support_hex)["frontline"], "HQ cannot infer suppression from a hidden defender's live state")
+	contact.observed = true
+	enemies[0].stress_system.state = UnitStates.MoraleState.NORMAL
+	var normal_features: Dictionary = HqSupportPositionPolicy.features(support_query, support_hex)
+	_check(normal_features["frontline"] and normal_features["enemy_visibility"] > pinned_features["enemy_visibility"], "Recovered defender restores HQ exposure restrictions")
+	enemies[0].stress_system.state = UnitStates.MoraleState.PINNED
+	enemies[-1].stress_system.state = UnitStates.MoraleState.NORMAL
+	_check(not planner._are_visible_attack_defenders_suppressed(planner.squads), "A recovered defender closes the advance opportunity")
+	for index: int in range(enemies.size()):
+		enemies[index].stress_system.state = saved_states[index]
+		enemies[index].stress_system.S_eff = saved_stress[index]
+	Globals.unit_visible_enemies[observer] = saved_visible
+	LOSHelper.los_lookup[observer.current_hex] = saved_los
 
 
 func _on_attack_mg_fired(_weapon: WeaponSpec, _hex: Vector2i) -> void:

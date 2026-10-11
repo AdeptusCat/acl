@@ -64,7 +64,7 @@ func _process(delta: float) -> void:
 
 func stop() -> void:
 	_clear_path_state()
-	if unit.in_close_combat:
+	if unit.in_close_combat or _is_pinned():
 		# Combat locks the occupied hex immediately, without recentering or arrival callbacks.
 		var was_moving: bool = is_moving or unit.is_moving
 		is_moving = false
@@ -88,7 +88,7 @@ func move_to_hex(new_hex: Vector2i) -> void:
 
 
 func _start_move_to_hex(new_hex: Vector2i) -> void:
-	if unit.in_close_combat:
+	if unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	_get_terrain_multiplier()
@@ -100,6 +100,9 @@ func _start_move_to_hex(new_hex: Vector2i) -> void:
 
 
 func follow_cube_path(cube_path: Array[Vector3i]) -> void:
+	if _is_pinned():
+		stop()
+		return
 	_clear_path_state()
 	var i: int = 0
 	while i < cube_path.size():
@@ -137,7 +140,7 @@ func _clear_path_state() -> void:
 # covered_path: cubes from A* (safe route)
 # exposed_segment: cubes for the final open-ground leg
 func set_attack_paths(covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
-	if unit.in_close_combat:
+	if unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	_clear_path_state()
@@ -176,7 +179,7 @@ func start_covered_phase() -> void:
 
 # Internal: once covered path finished, switch into exposed segment
 func _start_exposed_phase() -> void:
-	if unit.in_close_combat:
+	if unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	if not attack_in_progress:
@@ -209,7 +212,7 @@ func _start_exposed_phase() -> void:
 # ----------------------------------------------------------------------
 
 func _process_movement(delta: float) -> void:
-	if unit.in_close_combat:
+	if unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	var dir: Vector2 = (target_position - unit.position).normalized()
@@ -298,6 +301,12 @@ func _get_terrain_multiplier() -> void:
 func state_changed(next: int) -> void:
 	var move_mult: float = float(STATES.STATE_MOD[next]["move"])
 	_apply_speed(base_speed * move_mult)
+	if next == STATES.MoraleState.PINNED:
+		stop()
+
+
+func _is_pinned() -> bool:
+	return unit.stress_system != null and unit.stress_system.state == STATES.MoraleState.PINNED
 
 
 func _apply_speed(v: float) -> void:

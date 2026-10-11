@@ -99,6 +99,7 @@ func _run() -> void:
 	_test_stop(unit, ground, movement)
 	_test_replacement_moves(unit, ground, movement)
 	_test_action_orders(unit, ground, movement)
+	_test_pinned_movement(unit, ground, movement)
 
 	unit.stress_system.free()
 	unit.free()
@@ -107,6 +108,34 @@ func _run() -> void:
 	ground.free()
 	print("Movement regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_pinned_movement(unit: Unit, ground: HexagonTileMapLayer, movement: UnitMovement) -> void:
+	var start: Vector2i = Vector2i(2, 2)
+	var destination: Vector2i = start + Vector2i(0, 2)
+	_reset(unit, ground, start)
+	movement.move_to_hex(destination)
+	movement._process_movement(0.1)
+	var pinned_position: Vector2 = unit.position
+	unit.stress_system.state = UnitStates.MoraleState.PINNED
+	movement.state_changed(UnitStates.MoraleState.PINNED)
+	_check(not movement.is_moving and movement.move_speed == 0.0, "Pinning immediately stops movement")
+	var path: Array[Vector3i] = [ground.map_to_cube(start), ground.map_to_cube(destination)]
+	movement.move_to_hex(destination)
+	movement.follow_cube_path(path)
+	movement.set_attack_paths(path, [ground.map_to_cube(destination)])
+	movement.start_covered_phase()
+	movement._process_movement(100.0)
+	_check(unit.position == pinned_position and not movement.is_moving, "Pinned units reject direct, path and assault movement without recentering")
+	_check(movement.path_hexes.is_empty() and not movement.attack_in_progress, "Pinning clears pending movement and assault paths")
+	_check(arrived_hexes.is_empty(), "Pinning does not emit a false arrival")
+	_check(not PositionQueryService.can_follow_intent(unit), "Tactical planner cannot move a pinned unit")
+	unit.stress_system.state = UnitStates.MoraleState.NORMAL
+	movement.state_changed(UnitStates.MoraleState.NORMAL)
+	_check(not movement.is_moving, "Recovery does not resume a canceled path")
+	movement.move_to_hex(destination)
+	movement._process_movement(100.0)
+	_check(unit.current_hex == destination, "Recovered unit can follow a new movement order")
 
 
 func _test_stop(unit: Unit, ground: HexagonTileMapLayer, movement: UnitMovement) -> void:

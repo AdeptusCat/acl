@@ -311,8 +311,8 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 		_build_sector_requests(available.duplicate())
 		return
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
-		if current_order.position_mode == PositionProfile.Mode.ASSAULT and not attack_advance_released:
-			attack_advance_released = _has_established_attack_support(available) and _has_suppressed_attack_target(available)
+		if current_order.position_mode == PositionProfile.Mode.ASSAULT:
+			attack_advance_released = _has_established_attack_support(available) and _are_visible_attack_defenders_suppressed(available)
 		for unit: Unit in available:
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 			var role: String = "offense"
@@ -321,6 +321,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 				config.profile = PositionProfile.for_mode(mode)
 				if mode == PositionProfile.Mode.HQ_SUPPORT:
 					config.profile.support_assault_squads = true
+					config.profile.commitment_seconds = 8.0
 					config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
 					config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
@@ -500,16 +501,20 @@ func _has_established_attack_support(available: Array[Unit]) -> bool:
 	return not has_machine_gun
 
 
-func _has_suppressed_attack_target(available: Array[Unit]) -> bool:
+func _are_visible_attack_defenders_suppressed(available: Array[Unit]) -> bool:
+	var defenders: Array[Unit] = []
 	for observer: Unit in available:
 		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
 			if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
 				continue
 			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius:
 				continue
-			if enemy.stress_system.state in [Unit.MoraleState.PINNED, Unit.MoraleState.PANIC, Unit.MoraleState.COMBAT_INEFFECTIVE] or enemy.stress_system.S_eff >= enemy.stress_system.pin_threshold:
-				return true
-	return false
+			if not defenders.has(enemy):
+				defenders.append(enemy)
+	for enemy: Unit in defenders:
+		if not TacticalPositionExecutor.is_sufficiently_suppressed(enemy):
+			return false
+	return not defenders.is_empty()
 
 
 func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:

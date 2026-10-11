@@ -419,4 +419,4 @@ static func can_follow_intent(unit: Unit) -> bool:
 		return false
 	if unit.stress_system == null:
 		return true
-	return unit.stress_system.state != Unit.MoraleState.PANIC and unit.stress_system.state != Unit.MoraleState.COMBAT_INEFFECTIVE
+	return unit.stress_system.state not in [Unit.MoraleState.PINNED, Unit.MoraleState.PANIC, Unit.MoraleState.COMBAT_INEFFECTIVE]

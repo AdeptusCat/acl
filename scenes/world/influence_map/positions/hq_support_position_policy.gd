@@ -85,8 +85,14 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var frontline: bool = false
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
 		if query.snapshot.los.get(contact.hex, {}).has(cell):
-			visibility += maxf(0.2, contact.confidence)
-			frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
+			var suppressed: bool = false
+			if query.profile.support_assault_squads and contact.observed:
+				suppressed = TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit)
+			if suppressed:
+				visibility += 0.1 * maxf(0.2, contact.confidence)
+			else:
+				visibility += maxf(0.2, contact.confidence)
+				frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
 	return {"responsibility": "hq_support", "support_utility": utility / maxf(total_weight, 0.001) + priority_support,
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
