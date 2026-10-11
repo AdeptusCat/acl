@@ -476,6 +476,24 @@ func _configure_platoon_ai() -> void:
 	for director: DefenseDirector in directors:
 		director.platoon_ai.set_active(director.platoon_ai.team == Globals.team_enemy)
 		director.configure_for_match(active_units)
+		if director.platoon_ai.active and Globals.scenario_chosen.ai_attacks_axis_objective:
+			var objective_layer: HexagonTileMapLayer = Globals.scenario_chosen.axis_objectives_tile_map_layer
+			for cell: Vector2i in objective_layer.get_used_cells():
+				var tile_data: TileData = objective_layer.get_cell_tile_data(cell)
+				if tile_data == null or not tile_data.has_custom_data("objective_id"):
+					continue
+				if int(tile_data.get_custom_data("objective_id")) == 4:
+					continue
+				var attack_order: MissionOrder = director.create_initial_order()
+				attack_order.objective_hex = cell
+				attack_order.position_mode = PositionProfile.Mode.ASSAULT
+				attack_order.execution_intent = TacticalPositionExecutor.Intent.ASSAULT
+				attack_order.reserve_policy = MissionOrder.ReservePolicy.NONE
+				attack_order.sector_cells = []
+				director.platoon_ai.influence_map_controller.set_objective_for_team(director.platoon_ai.team, cell)
+				director.platoon_ai.receive_mission_order(attack_order)
+				break
+			continue
 		director.assign_order_to_platoon()
 
 

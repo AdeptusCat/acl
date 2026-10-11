@@ -24,6 +24,17 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	var controller: Node = world.game_controller
+	if scenario.ai_attacks_axis_objective:
+		var attack_ai: PlatoonAI = controller.get_node("PlatoonAi")
+		if Globals.team_enemy == Globals.Team.ALLIES:
+			attack_ai = controller.get_node("PlatoonAi2")
+		var order: MissionOrder = attack_ai.current_order
+		_check(order != null, "OutpostProbe assigns an enemy attack mission")
+		if order != null:
+			_check(order.position_mode == PositionProfile.Mode.ASSAULT, "OutpostProbe uses assault position planning")
+			_check(order.execution_intent == TacticalPositionExecutor.Intent.ASSAULT, "OutpostProbe executes assault orders")
+			_check(scenario.axis_objectives_tile_map_layer.get_used_cells().has(order.objective_hex), "OutpostProbe attacks the authored Axis objective hex")
+			_check(order.reserve_policy == MissionOrder.ReservePolicy.NONE, "OutpostProbe commits its fighting squads to the attack")
 	var players: Array[Unit] = Globals.get_units_for_team(Globals.team_player)
 	_check(not players.is_empty(), "Scenario initializes player units")
 	var selected: Unit = players[0]

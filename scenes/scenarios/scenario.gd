@@ -15,6 +15,7 @@ class_name Scenario
 #@export var defender_team: Globals.Team = Globals.Team.AXIS
 
 @export var player_team: Globals.Team = Globals.Team.AXIS
+@export var ai_attacks_axis_objective: bool = false
 
 @export var victory_conditions: Array[VictoryCondition] = []
 

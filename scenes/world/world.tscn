@@ -1715,6 +1715,7 @@ script = ExtResource("15_sygq6")
 metadata/_edit_lock_ = true
 
 [node name="OutpostProbe" parent="Maps/DefaultMap/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="0" unique_id=322232894 instance=ExtResource("44_jhdiv")]
+ai_attacks_axis_objective = true
 scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
@@ -1779,7 +1780,7 @@ command_squad = NodePath("../CA_P1_S0_Allies_PlatoonHQ")
 formation_id = 2
 
 [node name="AxisObjectivesTileMapLayer" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="0" unique_id=1637617708]
-tile_map_data = PackedByteArray()
+tile_map_data = PackedByteArray("AAAMAAkAAwAAAAAAAAA=")
 
 [node name="AlliedObjectivesTileMapLayer" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="1" unique_id=952938266]
 tile_map_data = PackedByteArray("AAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAHABQAAAAAAAAAAAAMAAkAAgAAAAAAAAALAA0ABgAAAAAAAAA=")
