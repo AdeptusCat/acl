@@ -71,7 +71,10 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
 	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
-		incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads:
+			incoming = _contact_fire_risk(query, contacts, cell, false)
+		else:
+			incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 		var support_features: Dictionary = {"cover": cover, "incoming": incoming, "forecast": 0.0, "firing": 0.0, "objective_coverage": 0.0, "support": 0.0, "progress": 0.0}
 		support_features.merge(HqSupportPositionPolicy.features(query, cell))
@@ -161,7 +164,10 @@ static func _contact_fire_risk(query: PositionQuery, contacts: Array[InfluenceCo
 		if moving:
 			cover = 0.0
 		# Uncertainty about location does not make the last confirmed firing lane safe.
-		incoming += LosInfluenceProjector.calculate_los_fire_threat(contact.firepower,
+		var firepower: float = contact.firepower
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+			firepower *= HqSupportPositionPolicy.contact_threat_multiplier(query, contact)
+		incoming += LosInfluenceProjector.calculate_los_fire_threat(firepower,
 			contact.effectiveness, cover, record.get("hindrance", 0.0), distance)
 	return risk(incoming)
 
@@ -169,7 +175,10 @@ static func _contact_fire_risk(query: PositionQuery, contacts: Array[InfluenceCo
 static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
-	var danger: float = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), _contact_fire_risk(query, contacts, cell, true))
+	# Attack headquarters use observed contact capability rather than stale unsuppressed map risk.
+	var danger: float = _contact_fire_risk(query, contacts, cell, true)
+	if query.profile.mode != PositionProfile.Mode.HQ_SUPPORT or not query.profile.support_assault_squads:
+		danger = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), danger)
 	if query.forecast_data.size() == map.cell_count:
 		danger = maxf(danger, query.profile.forecast_route_weight * risk(query.forecast_data[map.cell_to_index(cell)]))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)

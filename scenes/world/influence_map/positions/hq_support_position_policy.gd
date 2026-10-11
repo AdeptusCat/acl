@@ -30,14 +30,14 @@ static func prepare(query: PositionQuery) -> void:
 		if friendly == query.unit or query.snapshot.teams[friendly] != query.team:
 			continue
 		var captured: Dictionary = query.snapshot.support_units.get(friendly, {})
-		if captured.is_empty() or captured["headquarters"] or captured["members"] <= 0:
+		if captured.is_empty() or captured["headquarters"] or captured["members"] <= 0 or captured.get("surrendered", false):
 			continue
 		var belongs: bool = captured["commander"] == query.unit
 		if not headquarters.is_empty():
 			belongs = belongs or (captured["company"] == headquarters["company"] and (headquarters.get("company_hq", false) or captured["platoon"] == headquarters["platoon"]))
 		if belongs:
 			var need: float = captured["need"]
-			if query.profile.support_assault_squads and friendly.squad_type == Globals.SquadType.Rifle:
+			if query.profile.support_assault_squads and friendly.squad_type == Globals.SquadType.Rifle and (query.assault_support_squad == null or friendly == query.assault_support_squad):
 				# Advancing rifles need leadership before stress forces a support response.
 				need = maxf(need, 0.35)
 			query.support_targets[friendly] = {"hex": query.snapshot.positions[friendly], "need": need}
@@ -73,7 +73,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		utility += proximity * weight
 		total_weight += weight
 		nearest = mini(nearest, distance)
-		if target["need"] > highest_need:
+		if target["need"] > highest_need or (is_equal_approx(target["need"], highest_need) and friendly == query.assault_support_squad):
 			highest_need = target["need"]
 			urgent = friendly
 			priority_distance = distance
@@ -84,20 +84,28 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var visibility: float = 0.0
 	var frontline: bool = false
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		var multiplier: float = contact_threat_multiplier(query, contact)
+		if multiplier <= 0.0:
+			continue
 		if query.snapshot.los.get(contact.hex, {}).has(cell):
-			var suppressed: bool = false
-			if query.profile.support_assault_squads and contact.observed:
-				suppressed = TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit)
-			if suppressed:
-				visibility += 0.1 * maxf(0.2, contact.confidence)
-			else:
-				visibility += maxf(0.2, contact.confidence)
+			visibility += multiplier * maxf(0.2, contact.confidence)
+			if multiplier >= 1.0:
 				frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
 	return {"responsibility": "hq_support", "support_utility": utility / maxf(total_weight, 0.001) + priority_support,
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
 		"support_priority_distance": priority_distance, "support_priority_covered": priority_distance <= query.support_radius,
 		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline}
+
+
+static func contact_threat_multiplier(query: PositionQuery, contact: InfluenceContact) -> float:
+	# Hidden contacts retain their captured threat; only observations reveal suppression or surrender.
+	if contact.observed:
+		if not TacticalPositionExecutor.is_active_defender(contact.unit):
+			return 0.0
+		if query.profile.support_assault_squads and TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			return 0.1
+	return 1.0
 
 
 static func rejection(query: PositionQuery, features: Dictionary, check_route: bool = true) -> String:

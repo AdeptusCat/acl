@@ -20,7 +20,7 @@ static func capture(version: int, objectives: Dictionary[int, Vector2i], knowled
 			snapshot.support_units[unit] = {"headquarters": HqSupportPositionPolicy.is_headquarters(unit),
 				"company": unit.company, "platoon": unit.platoon, "commander": unit.command_squad,
 				"company_hq": unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS,
-				"members": unit.members_alive, "radius": radius, "need": HqSupportNeedLayer.get_squad_support_need(unit)}
+				"members": unit.members_alive, "radius": radius, "need": HqSupportNeedLayer.get_squad_support_need(unit), "surrendered": unit.surrendered}
 	for team: int in [Globals.Team.ALLIES, Globals.Team.AXIS]:
 		var map: InfluenceMap = InfluenceMap.new()
 		map.configure(ground.get_used_rect())

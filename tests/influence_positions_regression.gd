@@ -147,6 +147,7 @@ func _run() -> void:
 	_test_concurrent_relocation()
 	_test_progressive_planning()
 	await _test_headquarters_support()
+	_test_attack_headquarters_support()
 	_test_headquarters_stacking()
 	controller.free()
 	own.free()
@@ -1174,6 +1175,96 @@ func _test_headquarters_support() -> void:
 	foreign.free()
 	remove_child(controller)
 	_publish()
+
+
+func _test_attack_headquarters_support() -> void:
+	var headquarters: Unit = _unit(own.team, Vector2i(1, 5))
+	var forward: Unit = _unit(own.team, Vector2i(6, 3))
+	var rear: Unit = _unit(own.team, Vector2i(1, 4))
+	var defender: Unit = _unit(enemy.team, Vector2i(7, 3))
+	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	headquarters.leader_aura.aura_radius_hexes = 1
+	var saved_snapshot: InfluenceSnapshot = controller.snapshot
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.version = saved_snapshot.version + 1
+	snapshot.los = LOSHelper.los_lookup
+	snapshot.routes[own.team] = saved_snapshot.routes[own.team]
+	snapshot.point_ids[own.team] = saved_snapshot.point_ids[own.team]
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(saved_snapshot.maps[own.team].bounds)
+	map.playable_cells = saved_snapshot.maps[own.team].playable_cells.duplicate()
+	map.clear_layer(InfluenceMap.Layer.THREAT, 4.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, headquarters.current_hex, 0.9)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, forward.current_hex, 0.6)
+	snapshot.maps[own.team] = map
+	for friendly: Unit in [headquarters, forward, rear]:
+		snapshot.positions[friendly] = friendly.current_hex
+		snapshot.teams[friendly] = own.team
+		snapshot.support_units[friendly] = {"headquarters": friendly == headquarters, "company": friendly.company,
+			"platoon": friendly.platoon, "commander": headquarters, "company_hq": false,
+			"members": friendly.members_alive, "radius": friendly.leader_aura.aura_radius_hexes, "need": 0.1, "surrendered": false}
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = defender
+	contact.hex = defender.current_hex
+	contact.observed = true
+	contact.confidence = 1.0
+	contact.firepower = 1.0
+	contact.effectiveness = 0.4
+	contact.weapon_range = 8
+	snapshot.contacts[own.team] = [contact]
+	snapshot.defensive_contacts[own.team] = [contact]
+	controller.snapshot = snapshot
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.squads = [headquarters, forward, rear]
+	planner.current_order = MissionOrder.new()
+	planner.current_order.position_mode = PositionProfile.Mode.ASSAULT
+	planner.current_order.objective_hex = defender.current_hex
+	planner.attack_maneuver_squad = forward
+	planner._build_planning_requests(planner.squads)
+	var query: PositionQuery
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == headquarters:
+			query = request["query"]
+	_check(query != null and query.profile.support_assault_squads and query.assault_support_squad == forward, "The actual attack planner supplies HQ escort settings and the selected advancing rifle")
+	_check(query.profile.commitment_seconds == 8.0 and query.profile.max_exposure_seconds == planner.current_order.exposure_budget_seconds and query.profile.max_open_exposure_seconds == planner.current_order.open_crossing_budget_seconds, "HQ escort requests retain the attack mission's movement budgets")
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == headquarters.current_hex, "A fresh adjacent defender blocks exposed forward HQ support")
+	var fresh_risk: float = PositionFeatureEvaluator.route_step(query, forward.current_hex)["risk"]
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.should_move and advice.target_hex == forward.current_hex, "HQ follows its advancing rifle into leadership range while the defender is pinned, before surrender")
+	_check(query.support_targets[forward]["need"] >= 0.35 and query.support_targets[rear]["need"] == 0.1, "Escort priority follows the advancing rifle rather than calm rear overwatch rifles")
+	_check(advice.features["leadership_radius"] == 1 and advice.features["supported_squads"].has(forward), "HQ position selection respects a one-hex leadership aura")
+	_check(advice.features["exposure_seconds"] <= query.profile.max_exposure_seconds and advice.features["open_exposure_seconds"] <= query.profile.max_open_exposure_seconds, "Suppression-aware HQ movement remains within its exposure budgets")
+	_check(PositionFeatureEvaluator.route_step(query, forward.current_hex)["risk"] < fresh_risk, "Observed suppression lowers HQ route risk as well as its visibility penalty")
+	var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+	_check(executor.execute(advice) and headquarters.movement.is_moving and headquarters.movement.target_hex == forward.current_hex, "HQ escort advice starts an actual support movement order")
+	executor.cancel_all(true)
+	query.has_accepted_target = true
+	query.accepted_target = headquarters.current_hex
+	query.accepted_context = query.context_key()
+	query.accepted_at = snapshot.captured_at
+	snapshot.support_units[forward]["need"] = 1.0
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.should_move and advice.features["support_priority_covered"], "A stressed forward rifle interrupts a rear HQ position commitment")
+	contact.observed = false
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == headquarters.current_hex, "A remembered defender retains its threat even if its hidden live state is pinned")
+	contact.observed = true
+	defender.surrendered = true
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.should_move and advice.features["enemy_visibility"] == 0.0 and advice.features["incoming"] == 0.0, "An observed surrendered defender cannot obstruct HQ support or add enemy visibility")
+	contact.observed = false
+	_check(HqSupportPositionPolicy.contact_threat_multiplier(query, contact) == 1.0, "An unobserved surrender cannot reveal a safe route through remembered threats")
+	snapshot.support_units[forward]["surrendered"] = true
+	HqSupportPositionPolicy.prepare(query)
+	_check(not query.support_targets.has(forward), "HQ cannot chase a surrendered friendly squad's obsolete support need")
+	controller.snapshot = saved_snapshot
+	planner.free()
+	for unit: Unit in [headquarters, forward, rear, defender]:
+		unit.free()
 
 
 func _test_headquarters_stacking() -> void:

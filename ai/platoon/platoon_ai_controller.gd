@@ -284,6 +284,12 @@ func _add_support_requests(available: Array[Unit]) -> void:
 	for unit: Unit in available:
 		if HqSupportPositionPolicy.is_headquarters(unit):
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
+			config.profile = PositionProfile.for_mode(PositionProfile.Mode.HQ_SUPPORT)
+			if current_order.position_mode == PositionProfile.Mode.ASSAULT:
+				config.profile.support_assault_squads = true
+				config.profile.commitment_seconds = 8.0
+				config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
+				config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 			_add_planning_requests(config, [unit], "hq_support", null)
 
 
@@ -329,11 +335,6 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 			if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 				var mode: PositionProfile.Mode = _attack_mode_for_unit(unit)
 				config.profile = PositionProfile.for_mode(mode)
-				if mode == PositionProfile.Mode.HQ_SUPPORT:
-					config.profile.support_assault_squads = true
-					config.profile.commitment_seconds = 8.0
-					config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
-					config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
@@ -655,6 +656,8 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 	for unit: Unit in units:
 		var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
 		query.snapshot = influence_map_controller.snapshot
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads:
+			query.assault_support_squad = attack_maneuver_squad
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT and unit == attack_maneuver_squad and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
 			# Wait at the forward position while the covering squad restores its firing lane.
 			query.movement_radius = 0
