@@ -26,12 +26,14 @@ var defense_branch_gaps: Array[String] = []
 var _area_job: DefenseAreaJob
 var _planning_available: Array[Unit] = []
 var _planning_snapshot: InfluenceSnapshot
+var _planning_objective_hex: Vector2i
 var _validation_job: DefensePlanValidationJob
 var _readiness_job: DefenseReadinessJob
 var _planning_readiness: DefenseReadinessJob
 var reserve_squad: Unit
 var reserve_deployed: bool = false
 var attack_advance_released: bool = false
+var attack_approach_started: bool = false
 var reserve_reason: String = ""
 var _reserve_quiet_since: float = -INF
 var _validating_batch: bool = false
@@ -130,6 +132,7 @@ func receive_mission_order(order: MissionOrder) -> void:
 	accepted_positions.clear()
 	current_order = order
 	attack_advance_released = false
+	attack_approach_started = false
 	_set_mission_control(true)
 	time_until_reconsider = reconsider_interval
 	_start_plan(is_inside_tree())
@@ -180,6 +183,7 @@ func _start_plan(budgeted: bool) -> void:
 	_cancel_plan()
 	if not active or current_order == null or influence_map_controller == null:
 		return
+	_planning_objective_hex = current_order.objective_hex
 	influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
 	if influence_map_controller.snapshot == null:
 		return
@@ -313,6 +317,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 			attack_advance_released = _has_established_attack_support(available) and _are_visible_attack_defenders_suppressed(available)
+			attack_approach_started = attack_approach_started or attack_advance_released
 		for unit: Unit in available:
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 			var role: String = "offense"
@@ -325,11 +330,13 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
 					config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 				if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
 					config.profile.commitment_seconds = 8.0
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
+					config.profile.avoid_unsuppressed_defenders = true
 					# Approach the objective instead of optimizing a stationary firing position.
 					config.profile.progress_weight = 12.0
 					config.profile.cover_weight = 0.8
@@ -517,15 +524,30 @@ func _are_visible_attack_defenders_suppressed(available: Array[Unit]) -> bool:
 	return not defenders.is_empty()
 
 
+func _attack_support_objective(available: Array[Unit]) -> Vector2i:
+	var target: Vector2i = current_order.objective_hex
+	var lowest_stress: float = INF
+	for observer: Unit in available:
+		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+			if not InfluenceUnitQuery.is_valid_living_unit(enemy) or enemy.stress_system == null:
+				continue
+			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius or TacticalPositionExecutor.is_sufficiently_suppressed(enemy):
+				continue
+			if enemy.stress_system.S_eff < lowest_stress:
+				lowest_stress = enemy.stress_system.S_eff
+				target = enemy.current_hex
+	return target
+
+
 func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
 	if HqSupportPositionPolicy.is_headquarters(unit):
 		return PositionProfile.Mode.HQ_SUPPORT
 	if unit.squad_type == Globals.SquadType.MG:
 		# Search for a firing lane even when the current hex has no objective LOS.
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
-	if not attack_advance_released:
+	if not attack_approach_started:
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
-	if LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex) <= 2 and PositionQueryService.can_assault(unit):
+	if attack_advance_released and LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex) <= 2 and PositionQueryService.can_assault(unit):
 		return PositionProfile.Mode.ASSAULT
 	return PositionProfile.Mode.ADVANCE
 
@@ -577,7 +599,10 @@ func _submit_planning_query() -> void:
 func _continue_budgeted_plan() -> void:
 	if _planning_job == null:
 		return
-	if _planning_job.canceled or _planning_job.query.objective_hex != current_order.objective_hex:
+	var mission_objective: Vector2i = _planning_job.query.objective_hex
+	if current_order.position_mode == PositionProfile.Mode.ASSAULT:
+		mission_objective = _planning_objective_hex
+	if _planning_job.canceled or current_order.objective_hex != mission_objective:
 		_cancel_plan()
 		time_until_reconsider = 0.0
 		return

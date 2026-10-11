@@ -264,6 +264,9 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 	if path.is_empty():
 		_reject(diagnostics, "route", index)
 		return null
+	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
+		_reject(diagnostics, "unsuppressed_defender", index)
+		return null
 	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
 	if features["cover"] < query.profile.minimum_cover:
 		_reject(diagnostics, "cover", index)
@@ -298,6 +301,20 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 	candidate.path = path
 	candidate.score = query.profile.score(features, query.unit)
 	return candidate
+
+
+static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -> bool:
+	if path.is_empty():
+		return false
+	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
+		if not contact.observed or TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			continue
+		if LOSHelper.get_hex_distance(path[-1], contact.hex) <= 1:
+			return false
+		for step: Vector2i in path:
+			if step != query.origin_hex and LOSHelper.get_hex_distance(step, contact.hex) <= 1:
+				return false
+	return true
 
 
 static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:

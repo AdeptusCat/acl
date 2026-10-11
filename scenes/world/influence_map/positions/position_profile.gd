@@ -15,6 +15,7 @@ var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 @export var objective_weight: float = 2.0
 @export var support_weight: float = 0.3
 @export var support_assault_squads: bool = false
+@export var avoid_unsuppressed_defenders: bool = false
 @export var travel_weight: float = 0.08
 @export var exposure_weight: float = 2.0
 @export var progress_weight: float = 0.0

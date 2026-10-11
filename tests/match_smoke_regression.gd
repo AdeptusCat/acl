@@ -154,6 +154,28 @@ func _test_all_defenders_suppression(planner: PlatoonAI) -> void:
 	enemies[0].stress_system.state = UnitStates.MoraleState.PINNED
 	enemies[-1].stress_system.state = UnitStates.MoraleState.NORMAL
 	_check(not planner._are_visible_attack_defenders_suppressed(planner.squads), "A recovered defender closes the advance opportunity")
+	_check(planner._attack_support_objective(planner.squads) == enemies[-1].current_hex, "MG position planning follows the remaining fresh defender")
+	var saved_approach: bool = planner.attack_approach_started
+	var saved_release: bool = planner.attack_advance_released
+	planner.attack_approach_started = true
+	planner.attack_advance_released = false
+	_check(planner._attack_mode_for_unit(attack_rifle) == PositionProfile.Mode.ADVANCE, "Discovery of a fresh defender preserves the rifle's forward approach instead of returning to rear fire support")
+	var approach_query: PositionQuery = PositionQuery.new()
+	approach_query.team = observer.team
+	approach_query.origin_hex = attack_rifle.current_hex
+	approach_query.snapshot = InfluenceSnapshot.new()
+	var fresh_contact: InfluenceContact = InfluenceContact.new()
+	fresh_contact.unit = enemies[-1]
+	fresh_contact.hex = enemies[-1].current_hex
+	fresh_contact.observed = true
+	approach_query.snapshot.contacts[observer.team] = [fresh_contact]
+	var unsafe_hex: Vector2i = fresh_contact.hex + Vector2i(0, 1)
+	_check(not PositionQueryService.approach_path_is_safe(approach_query, [approach_query.origin_hex, unsafe_hex]), "Rifle cannot approach beside the fresh defender")
+	var safe_hex: Vector2i = approach_query.origin_hex + Vector2i(0, 1)
+	_check(PositionQueryService.approach_path_is_safe(approach_query, [approach_query.origin_hex, safe_hex]), "Fresh defender does not prohibit a separate safe approach")
+	_check(not PositionQueryService.approach_path_is_safe(approach_query, [approach_query.origin_hex, unsafe_hex, safe_hex]), "A safe destination cannot justify crossing beside the fresh defender")
+	planner.attack_approach_started = saved_approach
+	planner.attack_advance_released = saved_release
 	for index: int in range(enemies.size()):
 		enemies[index].stress_system.state = saved_states[index]
 		enemies[index].stress_system.S_eff = saved_stress[index]

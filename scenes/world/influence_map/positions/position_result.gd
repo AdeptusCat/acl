@@ -45,6 +45,7 @@ func describe_cell(index: int) -> String:
 	if cell_states[index] == CellState.WAITING_HANDOFF:
 		return "Useful position; waiting for protection during movement"
 	var descriptions: Dictionary[String, String] = {
+		"unsuppressed_defender": "Destination or route passes next to an unsuppressed defender",
 		"terrain": "Impassable terrain", "geography": "Outside the assigned positioning area",
 		"capacity": "Occupied or reserved by another unit", "cover": "Insufficient defensive cover",
 		"responsibility": "Cannot protect the assigned objective or approach branch",
