@@ -24,6 +24,13 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_LEFT:
 		mouse_button_left_pressed.emit(event.position)
+	# HUD controls consume wheel events before they can zoom the map.
+	if event.is_action_pressed("zoom_in"):
+		zoom_in.emit()
+	if event.is_action_pressed("zoom_out"):
+		zoom_out.emit()
+
+
 func _input(event: InputEvent) -> void:
 	#if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.MOUSE_BUTTON_RIGHT:
 		#print("released")
@@ -32,9 +39,3 @@ func _input(event: InputEvent) -> void:
 		mouse_event_position_changed.emit(event.position)
 	#if event is InputEventKey and event.pressed and event.scancode==KEY_SPACE:
 		#key_space_pressed.emit(event.position)
-
-#func _unhandled_input(event):
-	if event.is_action_pressed("zoom_in"):
-		zoom_in.emit()
-	if event.is_action_pressed("zoom_out"):
-		zoom_out.emit()

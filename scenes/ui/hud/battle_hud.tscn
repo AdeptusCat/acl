@@ -13,17 +13,10 @@
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
 [ext_resource type="Script" uid="uid://dk7d80ay1lo81" path="res://scenes/ui/panels/settings_panel.gd" id="8_4w2x3"]
 [ext_resource type="Script" uid="uid://l767yhx40ual" path="res://scenes/ui/tiles/tile_texture_preview.gd" id="8_qmss2"]
-[ext_resource type="Script" uid="uid://oximlus24eji" path="res://scenes/ui/units/unit_details_panel.gd" id="8_y220t"]
 [ext_resource type="Script" uid="uid://dprnou6rxrwlp" path="res://scenes/ui/tiles/tile_cover_overlay.gd" id="9_26a3v"]
-[ext_resource type="PackedScene" uid="uid://8nx12bvlbyki" path="res://scenes/ui/units/soldier_detail_label.tscn" id="10_4kltc"]
-[ext_resource type="PackedScene" uid="uid://b0skff6y3jfq5" path="res://scenes/ui/units/soldier_detail_progress_bar.tscn" id="11_hl07w"]
-[ext_resource type="Script" uid="uid://lfjc6omesxuh" path="res://scenes/ui/units/unit_type_label.gd" id="12_hc5d0"]
 [ext_resource type="Script" uid="uid://duwe3tkqjv0bw" path="res://scenes/ui/tooltips/tooltip.gd" id="12_hl07w"]
-[ext_resource type="Script" uid="uid://425mt35guwkb" path="res://scenes/ui/units/unit_status_label.gd" id="13_0i47d"]
 [ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="13_swkix"]
-[ext_resource type="Script" uid="uid://btiijdapor3eh" path="res://scenes/ui/units/leadership_bonus_label.gd" id="14_mgwkc"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="15_mgwkc"]
-[ext_resource type="Script" uid="uid://c4dsr705wte8a" path="res://scenes/ui/orders/rout_button.gd" id="22_7ygsn"]
 [ext_resource type="Script" uid="uid://ovp1t711br88" path="res://scenes/ui/panels/debug_panel.gd" id="24_fv78h"]
 [ext_resource type="PackedScene" uid="uid://0euyuvdqduxs" path="res://scenes/ui/orders/unit_command_wheel.tscn" id="25_fqqne"]
 [ext_resource type="PackedScene" uid="uid://c6xxmjtgtwwtj" path="res://scenes/ui/orders/move_fire_command_wheel.tscn" id="25_o71gb"]
@@ -32,6 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="28_272wc"]
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="29_knhlc"]
 [ext_resource type="Script" uid="uid://csetsm3mvbeux" path="res://scenes/ui/hud/mission_objectives_panel.gd" id="30_mission"]
+[ext_resource type="PackedScene" path="res://scenes/ui/units/unit_details_panel.tscn" id="31_squad"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mission"]
 content_margin_left = 12.0
@@ -491,169 +485,8 @@ custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="UnitDetails" type="PanelContainer" parent="Control" unique_id=1487157420]
-visible = false
+[node name="UnitDetails" parent="Control" instance=ExtResource("31_squad")]
 layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -303.0
-offset_top = -183.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 1
-theme_override_styles/panel = ExtResource("15_mgwkc")
-script = ExtResource("8_y220t")
-soldier_detail_label_scene = ExtResource("10_4kltc")
-soldier_detail_progress_bar_scene = ExtResource("11_hl07w")
-
-[node name="MarginContainer" type="MarginContainer" parent="Control/UnitDetails" unique_id=189767881]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="SoldiersContainer" type="VBoxContainer" parent="Control/UnitDetails/MarginContainer" unique_id=1630736296]
-layout_mode = 2
-alignment = 2
-
-[node name="UnitGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer" unique_id=1008426924]
-layout_mode = 2
-
-[node name="TypeHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=524235969]
-visible = false
-layout_mode = 2
-mouse_filter = 1
-text = "Type:"
-
-[node name="UnitType" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=287085267]
-layout_mode = 2
-mouse_filter = 1
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Type"
-script = ExtResource("12_hc5d0")
-
-[node name="StatusHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=935126612]
-visible = false
-layout_mode = 2
-mouse_filter = 1
-text = "Status:"
-
-[node name="UnitStatus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=666228423]
-layout_mode = 2
-mouse_filter = 1
-text = "Status"
-script = ExtResource("13_0i47d")
-
-[node name="LeadershipHeader" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=845361490]
-visible = false
-layout_mode = 2
-mouse_filter = 1
-text = "Leadership Bonus:"
-
-[node name="LeadershipBonus" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=323951193]
-visible = false
-layout_mode = 2
-mouse_filter = 1
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Leadership Bonus"
-script = ExtResource("14_mgwkc")
-
-[node name="CCDefensePreparedness" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=1010918412]
-visible = false
-layout_mode = 2
-text = "CC Readyness"
-
-[node name="GridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=60816207]
-layout_mode = 2
-columns = 2
-
-[node name="Label" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=141615363]
-layout_mode = 2
-text = "Cohesion:"
-horizontal_alignment = 2
-
-[node name="Cohesion" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=555005812]
-layout_mode = 2
-
-[node name="Label3" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=751922686]
-layout_mode = 2
-text = "Effectiveness:"
-horizontal_alignment = 2
-
-[node name="Effectiveness" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=1342035796]
-layout_mode = 2
-
-[node name="Label5" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=952243017]
-layout_mode = 2
-text = "Casualty Shock:"
-horizontal_alignment = 2
-
-[node name="CasualtyShock" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/GridContainer" unique_id=237694910]
-layout_mode = 2
-
-[node name="Kill" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=306415407]
-visible = false
-layout_mode = 2
-text = "Kill Unit"
-
-[node name="KillSoldier" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=1157347782]
-visible = false
-layout_mode = 2
-text = "Kill Soldier"
-
-[node name="Surrender" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=212640069]
-visible = false
-layout_mode = 2
-text = "Surrender"
-
-[node name="Rout" type="Button" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer" unique_id=574178570]
-layout_mode = 2
-text = "Voluntary Rout"
-script = ExtResource("22_7ygsn")
-
-[node name="FoldableContainer" type="FoldableContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer" unique_id=1064376729]
-layout_mode = 2
-mouse_filter = 1
-title = "Soldier Details"
-
-[node name="SoldiersGridContainer" type="GridContainer" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer" unique_id=1527755368]
-layout_mode = 2
-columns = 6
-
-[node name="Name" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1600495833]
-layout_mode = 2
-mouse_filter = 1
-text = "Name"
-
-[node name="Role" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=874649583]
-layout_mode = 2
-mouse_filter = 1
-text = "Role"
-
-[node name="Rank" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1517727341]
-visible = false
-layout_mode = 2
-mouse_filter = 1
-text = "Rank"
-
-[node name="Weapon" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1943715512]
-layout_mode = 2
-mouse_filter = 1
-text = "Weapon"
-
-[node name="Task" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1996109464]
-layout_mode = 2
-mouse_filter = 1
-text = "Task"
-
-[node name="Progress" type="Label" parent="Control/UnitDetails/MarginContainer/SoldiersContainer/FoldableContainer/SoldiersGridContainer" unique_id=1475222940]
-layout_mode = 2
-mouse_filter = 1
-text = "Progress"
 
 [node name="Tooltip" type="PanelContainer" parent="Control" unique_id=784359479]
 layout_mode = 0
@@ -846,16 +679,6 @@ layout_mode = 1
 [connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
 [connection signal="toggled" from="Control/Settings/FoldableContainer/VBoxContainer/ShowCmdConnectivity" to="Control/Settings" method="_on_check_box_toggled"]
 [connection signal="pressed" from="Control/TryAgain/TryAgainButton" to="." method="_on_try_again_button_pressed"]
-[connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitType" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/UnitStatus" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" to="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/LeadershipBonus" method="_on_mouse_exited"]
-[connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Kill" to="Control/UnitDetails" method="_on_kill_pressed"]
-[connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/KillSoldier" to="Control/UnitDetails" method="_on_kill_soldier_pressed"]
-[connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Surrender" to="Control/UnitDetails" method="_on_surrender_pressed"]
-[connection signal="pressed" from="Control/UnitDetails/MarginContainer/SoldiersContainer/UnitGridContainer/Rout" to="Control/UnitDetails" method="_on_rout_pressed"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/EnemySelectable" to="Control/Debug" method="_on_enemy_selectable_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
 [connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]

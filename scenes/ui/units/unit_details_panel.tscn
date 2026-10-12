@@ -1,0 +1,243 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/units/unit_details_panel.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/units/selected_soldier_row.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/ui/orders/rout_button.gd" id="3"]
+[ext_resource type="FontFile" path="res://assets/fonts/courier_prime/Courier Prime.ttf" id="4"]
+[ext_resource type="Script" path="res://scenes/ui/units/unit_type_label.gd" id="5"]
+[ext_resource type="Script" path="res://scenes/ui/units/unit_status_label.gd" id="6"]
+[ext_resource type="Script" path="res://scenes/ui/units/leadership_bonus_label.gd" id="7"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.08, 0.08, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.63, 0.46, 0.27, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="BarBackground"]
+bg_color = Color(0.2, 0.2, 0.17, 1)
+
+[sub_resource type="StyleBoxFlat" id="CohesionFill"]
+bg_color = Color(0.49, 0.67, 0.4, 1)
+
+[sub_resource type="StyleBoxFlat" id="EffectivenessFill"]
+bg_color = Color(0.74, 0.6, 0.35, 1)
+
+[sub_resource type="Theme" id="SquadTheme"]
+default_font = ExtResource("4")
+default_font_size = 12
+Label/colors/font_color = Color(0.9, 0.87, 0.77, 1)
+FoldableContainer/font_sizes/font_size = 11
+Button/font_sizes/font_size = 11
+
+[node name="UnitDetails" type="PanelContainer"]
+visible = false
+custom_minimum_size = Vector2(300, 0)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -312.0
+offset_top = -192.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_force_pass_scroll_events = false
+theme = SubResource("SquadTheme")
+theme_override_styles/panel = SubResource("PanelStyle")
+script = ExtResource("1")
+soldier_detail_row_scene = ExtResource("2")
+
+[node name="Summary" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Identity" type="Label" parent="Summary"]
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "A · Rifle Squad"
+text_overrun_behavior = 3
+clip_text = true
+script = ExtResource("5")
+
+[node name="Formation" type="Label" parent="Summary"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.67, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "Company A · Platoon 1 · Squad 1"
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="Status" type="HBoxContainer" parent="Summary"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Strength" type="Label" parent="Summary/Status"]
+custom_minimum_size = Vector2(116, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_font_sizes/font_size = 11
+text = "Soldiers: 12/12"
+clip_text = true
+
+[node name="Morale" type="Label" parent="Summary/Status"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_font_sizes/font_size = 11
+text = "Morale: Ok"
+horizontal_alignment = 2
+text_overrun_behavior = 3
+clip_text = true
+script = ExtResource("6")
+
+[node name="Order" type="Label" parent="Summary"]
+layout_mode = 2
+mouse_filter = 1
+text = "Order: Hold position"
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="Stats" type="GridContainer" parent="Summary"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 3
+columns = 3
+
+[node name="CohesionLabel" type="Label" parent="Summary/Stats"]
+custom_minimum_size = Vector2(88, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Cohesion"
+
+[node name="CohesionBar" type="ProgressBar" parent="Summary/Stats"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("CohesionFill")
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="Cohesion" type="Label" parent="Summary/Stats"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="EffectivenessLabel" type="Label" parent="Summary/Stats"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Effectiveness"
+
+[node name="EffectivenessBar" type="ProgressBar" parent="Summary/Stats"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("EffectivenessFill")
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="Effectiveness" type="Label" parent="Summary/Stats"]
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="Rout" type="Button" parent="Summary"]
+visible = false
+layout_mode = 2
+disabled = true
+text = "Rout"
+script = ExtResource("3")
+
+[node name="Details" type="FoldableContainer" parent="Summary"]
+layout_mode = 2
+folded = true
+title = "Details"
+
+[node name="Content" type="VBoxContainer" parent="Summary/Details"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Stats" type="GridContainer" parent="Summary/Details/Content"]
+layout_mode = 2
+columns = 2
+
+[node name="CasualtyShockLabel" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+text = "Casualty shock:"
+
+[node name="CasualtyShock" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+text = "0%"
+
+[node name="LeadershipLabel" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+text = "Leadership:"
+
+[node name="LeadershipBonus" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+mouse_filter = 1
+text = "None"
+script = ExtResource("7")
+
+[node name="DebugActions" type="HBoxContainer" parent="Summary/Details/Content"]
+visible = false
+layout_mode = 2
+
+[node name="Kill" type="Button" parent="Summary/Details/Content/DebugActions"]
+layout_mode = 2
+text = "Kill unit"
+
+[node name="KillSoldier" type="Button" parent="Summary/Details/Content/DebugActions"]
+layout_mode = 2
+text = "Kill soldier"
+
+[node name="Surrender" type="Button" parent="Summary/Details/Content/DebugActions"]
+layout_mode = 2
+text = "Surrender"
+
+[node name="Roster" type="FoldableContainer" parent="Summary"]
+layout_mode = 2
+folded = true
+title = "Soldier roster"
+
+[node name="Scroll" type="ScrollContainer" parent="Summary/Roster"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Summary/Roster/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[connection signal="mouse_entered" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="Summary/Status/Morale" to="Summary/Status/Morale" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Summary/Status/Morale" to="Summary/Status/Morale" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_exited"]
+[connection signal="pressed" from="Summary/Details/Content/DebugActions/Kill" to="." method="_on_kill_pressed"]
+[connection signal="pressed" from="Summary/Details/Content/DebugActions/KillSoldier" to="." method="_on_kill_soldier_pressed"]
+[connection signal="pressed" from="Summary/Details/Content/DebugActions/Surrender" to="." method="_on_surrender_pressed"]
+[connection signal="pressed" from="Summary/Rout" to="." method="_on_rout_pressed"]

@@ -2401,6 +2401,7 @@ metadata/_custom_type_script = "uid://buj6ft1vvdf2f"
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=441975905]
 modulate = Color(1, 1, 1, 0.172549)
+mouse_filter = 2
 material = SubResource("ShaderMaterial_7rtjl")
 anchors_preset = 15
 anchor_right = 1.0
