@@ -211,6 +211,10 @@ func update_visible_hexes() -> void:
 
 
 func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i) -> void:
+	if Globals.game_started and not end_game_handled:
+		for owner: Globals.Team in Globals.victory_conditions:
+			for condition: VictoryCondition in Globals.victory_conditions[owner].victory_conditions:
+				condition.record_unit_entry(unit_entering_hex, hex_entered)
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()

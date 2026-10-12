@@ -126,7 +126,10 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float) -> void:
 		for state: VictoryConditionProgress in progress:
 			if state.team == team or state.outcome != level or not state.valid:
 				continue
-			if state.complete and state.kind != VictoryConditionProgress.Kind.OCCUPY:
+			if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
+				if not state.complete:
+					continue
+			elif state.complete and state.kind != VictoryConditionProgress.Kind.OCCUPY:
 				continue
 			var cost: float = _denial_cost(state, planner)
 			if cost < best_cost:
@@ -149,6 +152,8 @@ func _choose_own_outcome(progress: Array[VictoryConditionProgress], planner: Pla
 			if not state.valid:
 				feasible = false
 				continue
+			if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT and not state.complete:
+				feasible = false
 			if state.kind == VictoryConditionProgress.Kind.OCCUPY:
 				for hex: Vector2i in state.hexes:
 					garrisons[hex] = maxi(garrisons.get(hex, 0), state.required_units)
@@ -196,6 +201,15 @@ func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void
 		task.priority = 85.0
 		task.reason = "Reach an exit: %d more distinct squads required" % state.remaining_units
 		tasks.append(task)
+	elif state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
+		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.BLOCK_EXIT, _exit_hex(state, planner))
+		task.priority = 95.0
+		task.reason = "Prevent enemy exit: %d more enemy exits would fail the condition" % state.remaining_units
+		for contact: InfluenceContact in _contacts(planner):
+			if contact.observed and TacticalPositionExecutor.is_active_defender(contact.unit) and LOSHelper.get_hex_distance(contact.hex, task.hex) <= 2:
+				task.urgent = true
+				task.priority = 120.0
+		tasks.append(task)
 	elif state.kind == VictoryConditionProgress.Kind.DESTROY and not state.complete:
 		var target: InfluenceContact = _hunt_contact(planner)
 		if target != null:
@@ -217,6 +231,17 @@ func _denial_cost(state: VictoryConditionProgress, planner: PlatoonAI) -> float:
 
 
 func _add_denial_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void:
+	if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
+		# The opponent needs to stop our units exiting. Enough of our distinct
+		# squads reaching our own markers permanently denies that requirement.
+		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, _exit_hex(state, planner))
+		task.required_units = state.remaining_units
+		task.priority = 75.0
+		if state.outcome == VictoryCondition.OutcomeLevel.MAJOR:
+			task.priority = 90.0
+		task.reason = "Exit %d more squads to deny the opponent's exit-prevention condition" % state.remaining_units
+		tasks.append(task)
+		return
 	if state.kind == VictoryConditionProgress.Kind.DESTROY:
 		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.PRESERVE, Vector2i.ZERO)
 		task.priority = 100.0
@@ -335,25 +360,31 @@ func _exit_hex(state: VictoryConditionProgress, planner: PlatoonAI) -> Vector2i:
 	var best: Vector2i = state.hexes[0]
 	var score: float = INF
 	for hex: Vector2i in state.hexes:
-		var cost: float = _friendly_distance(planner, hex)
-		if state.team != team:
-			for contact: InfluenceContact in _contacts(planner):
-				if contact.observed and TacticalPositionExecutor.is_active_defender(contact.unit):
-					cost = minf(cost, float(LOSHelper.get_hex_distance(contact.hex, hex)) - 20.0)
+		var cost: float = _exit_cost(state, planner, hex)
 		if cost < score:
 			best = hex
 			score = cost
 	# A small change in the nearest exit must not reverse accepted routes.
 	for previous: ScenarioGoalTask in assignments.values():
-		if previous.condition == state.condition and state.hexes.has(previous.hex) and _friendly_distance(planner, previous.hex) <= _friendly_distance(planner, best) + 1.0:
+		if previous.condition == state.condition and state.hexes.has(previous.hex) and _exit_cost(state, planner, previous.hex) <= score + 1.0:
 			return previous.hex
 	return best
 
 
-func _available_exit_units(planner: PlatoonAI, condition: ExitUnitsCondition) -> Array[Unit]:
+func _exit_cost(state: VictoryConditionProgress, planner: PlatoonAI, hex: Vector2i) -> float:
+	var cost: float = _friendly_distance(planner, hex)
+	if state.objective_team != team:
+		for contact: InfluenceContact in _contacts(planner):
+			if contact.observed and TacticalPositionExecutor.is_active_defender(contact.unit):
+				cost = minf(cost, float(LOSHelper.get_hex_distance(contact.hex, hex)) - 20.0)
+	return cost
+
+
+func _available_exit_units(planner: PlatoonAI, condition: VictoryCondition) -> Array[Unit]:
 	var result: Array[Unit] = []
+	var state: ExitUnitsState = ScenarioGoalTask.exit_state_for(condition)
 	for unit: Unit in planner.squads:
-		if TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order() and not HqSupportPositionPolicy.is_headquarters(unit) and PositionQueryService.can_follow_intent(unit) and not condition.state.units_exited.has(unit):
+		if TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order() and not HqSupportPositionPolicy.is_headquarters(unit) and PositionQueryService.can_follow_intent(unit) and not state.units_exited.has(unit):
 			result.append(unit)
 	return result
 
@@ -378,7 +409,7 @@ func _allocate(planner: PlatoonAI) -> void:
 		var demand: int = task.required_units
 		for unit: Unit in next:
 			if next[unit].key == task.key:
-				if task.kind == ScenarioGoalTask.Kind.EXIT and (task.condition as ExitUnitsCondition).state.units_exited.has(unit):
+				if task.kind == ScenarioGoalTask.Kind.EXIT and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 					continue
 				demand -= 1
 		while demand > 0:
@@ -405,7 +436,7 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 	var selected: Unit
 	var score: float = -INF
 	for unit: Unit in available:
-		if task.kind == ScenarioGoalTask.Kind.EXIT and (task.condition as ExitUnitsCondition).state.units_exited.has(unit):
+		if task.kind == ScenarioGoalTask.Kind.EXIT and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 			continue
 		if not unit.is_good_order() or (unit.current_hex != task.hex and not PositionQueryService.can_follow_intent(unit)):
 			continue

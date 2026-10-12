@@ -454,7 +454,7 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	elif task.kind == ScenarioGoalTask.Kind.EXIT:
 		# Exited squads remain on the board; later squads must still be able to
 		# register at the same marker without waiting for a counted squad to leave.
-		query.goal_capacity = (task.condition as ExitUnitsCondition).required_unit_count
+		query.goal_capacity = task.exit_capacity()
 	query.press_attack = _can_attack_without_overwatch(unit, task.hex)
 	if query.press_attack:
 		query.profile.forecast_weight = 0.0

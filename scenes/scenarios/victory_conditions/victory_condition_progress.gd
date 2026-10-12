@@ -1,11 +1,12 @@
 class_name VictoryConditionProgress
 extends RefCounted
 
-enum Kind { UNSUPPORTED, OCCUPY, EXIT, DESTROY }
+enum Kind { UNSUPPORTED, OCCUPY, EXIT, DESTROY, PREVENT_EXIT }
 
 var condition: VictoryCondition
 var kind: Kind = Kind.UNSUPPORTED
 var team: Globals.Team
+var objective_team: Globals.Team
 var outcome: VictoryCondition.OutcomeLevel
 var hexes: Array[Vector2i] = []
 var required_units: int = 0
@@ -21,6 +22,7 @@ static func read(source: VictoryCondition) -> VictoryConditionProgress:
 	var progress: VictoryConditionProgress = VictoryConditionProgress.new()
 	progress.condition = source
 	progress.team = source.team
+	progress.objective_team = source.team
 	progress.outcome = source.outcome_level
 	if source is OccupyObjectiveCondition:
 		var occupy: OccupyObjectiveCondition = source as OccupyObjectiveCondition
@@ -40,6 +42,17 @@ static func read(source: VictoryCondition) -> VictoryConditionProgress:
 			progress.hexes = exit.state.exit_hexes.duplicate()
 			progress.remaining_units = maxi(0, exit.required_unit_count - exit.state.units_exited.size())
 		progress.valid = not progress.hexes.is_empty() and progress.required_units > 0
+	elif source is PreventEnemyExitCondition:
+		var prevention: PreventEnemyExitCondition = source as PreventEnemyExitCondition
+		progress.kind = Kind.PREVENT_EXIT
+		progress.objective_team = Globals.get_enemy_team(source.team)
+		# This threshold is the number of exits that would invalidate prevention.
+		progress.required_units = prevention.max_allowed_enemy_exits + 1
+		progress.remaining_units = progress.required_units
+		if prevention.state != null:
+			progress.hexes = prevention.state.exit_hexes.duplicate()
+			progress.remaining_units = maxi(0, progress.required_units - prevention.state.units_exited.size())
+		progress.valid = not progress.hexes.is_empty() and prevention.max_allowed_enemy_exits >= 0
 	elif source is DestroyUnitsCondition:
 		var destroy: DestroyUnitsCondition = source as DestroyUnitsCondition
 		progress.kind = Kind.DESTROY

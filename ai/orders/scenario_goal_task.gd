@@ -15,3 +15,19 @@ var reason: String = ""
 
 func is_destination_goal() -> bool:
 	return kind in [Kind.OCCUPY, Kind.EXIT]
+
+
+static func exit_state_for(source: VictoryCondition) -> ExitUnitsState:
+	if source is ExitUnitsCondition:
+		return (source as ExitUnitsCondition).state
+	if source is PreventEnemyExitCondition:
+		return (source as PreventEnemyExitCondition).state
+	return null
+
+
+func exit_capacity() -> int:
+	if condition is ExitUnitsCondition:
+		return (condition as ExitUnitsCondition).required_unit_count
+	if condition is PreventEnemyExitCondition:
+		return (condition as PreventEnemyExitCondition).max_allowed_enemy_exits + 1
+	return 1

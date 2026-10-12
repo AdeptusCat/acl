@@ -18,6 +18,19 @@ func _run() -> void:
 	var world: Node = main.world
 	var map: Map = world.maps.get_node("DefaultMap")
 	var scenario: Scenario = map.get_scenario(0)
+	# Keep this denial fixture independent of authored scenario victory edits.
+	var occupation: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+	occupation.team = Globals.Team.ALLIES
+	var exit: ExitUnitsCondition = ExitUnitsCondition.new()
+	exit.team = Globals.Team.ALLIES
+	exit.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	var destroy: DestroyUnitsCondition = DestroyUnitsCondition.new()
+	destroy.team = Globals.Team.ALLIES
+	destroy.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	scenario.victory_conditions = [exit, destroy, occupation]
+	scenario.player_team = Globals.Team.ALLIES
+	scenario.axis_ai_status = Scenario.AIStatus.ON
+	scenario.allies_ai_status = Scenario.AIStatus.OFF
 	scenario.axis_ai_mode = Scenario.AIMode.ATTACK
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario

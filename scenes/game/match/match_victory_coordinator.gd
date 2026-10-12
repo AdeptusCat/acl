@@ -102,6 +102,14 @@ static func set_victory_conditions(controller: Node2D) -> void:
 					for objective: ObjectiveDefinition in objectives.objectives:
 						if objective.objective_id == victory_condition.objective_id:
 							victory_condition.state.exit_hexes.append(objective.hex)
+				var condition when condition is PreventEnemyExitCondition:
+					var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
+					prevention.state = ExitUnitsState.new()
+					var enemy_team: Globals.Team = Globals.get_enemy_team(prevention.team)
+					var objectives: ObjectivesCollection = Globals.objectives[enemy_team]
+					for objective: ObjectiveDefinition in objectives.objectives:
+						if objective.objective_id == prevention.objective_id:
+							prevention.state.exit_hexes.append(objective.hex)
 				var condition when condition is DestroyUnitsCondition:
 					victory_condition = victory_condition as DestroyUnitsCondition
 					victory_condition.state = DestroyUnitsState.new()

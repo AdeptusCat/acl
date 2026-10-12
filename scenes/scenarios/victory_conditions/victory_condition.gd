@@ -8,7 +8,8 @@ enum ConditionType {
 	DESTROY_UNITS,
 	PRESERVE_FORCE,
 	BREAK_ENEMY,
-	DELAY_UNTIL_TIME
+	DELAY_UNTIL_TIME,
+	PREVENT_ENEMY_EXIT,
 }
 
 enum OutcomeLevel {
@@ -46,6 +47,11 @@ func is_condition_met() -> bool:
 
 # The active match clock advances state; evaluation only reads it.
 func advance_time(_delta: float) -> void:
+	pass
+
+
+# Entry events preserve a completed exit even if the unit is lost before the next clock tick.
+func record_unit_entry(_unit: Unit, _hex: Vector2i) -> void:
 	pass
 
 
