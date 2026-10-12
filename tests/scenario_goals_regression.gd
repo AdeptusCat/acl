@@ -28,6 +28,10 @@ func _run() -> void:
 	destroy.team = Globals.Team.ALLIES
 	destroy.outcome_level = VictoryCondition.OutcomeLevel.MINOR
 	scenario.victory_conditions = [exit, destroy, occupation]
+	var authored_fallback: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	authored_fallback.hold_condition = occupation
+	authored_fallback.exit_condition = exit
+	scenario.ai_fallback_policies = [authored_fallback]
 	scenario.player_team = Globals.Team.ALLIES
 	scenario.axis_ai_status = Scenario.AIStatus.ON
 	scenario.allies_ai_status = Scenario.AIStatus.OFF
@@ -44,6 +48,7 @@ func _run() -> void:
 			player_objective = (condition as OccupyObjectiveCondition).state.hexes[0]
 	_check(planner.current_order.objective_hex == player_objective, "OutpostProbe AI protects the player's actual occupation objective")
 	_check(planner.goal_director != null and planner.goal_director.primary.kind == ScenarioGoalTask.Kind.DENY_OCCUPATION, "A side without victory conditions gets a denial mission")
+	_check(controller._ai_goal_directors[Globals.Team.ALLIES].fallback_policies == [authored_fallback] and planner.goal_director.fallback_policies.is_empty(), "Match setup loads explicit policies for their owning side only")
 	for frame: int in range(900):
 		await get_tree().process_frame
 		if not planner.squad_assignments.is_empty():
@@ -69,6 +74,8 @@ func _run() -> void:
 	_test_recovered_defender()
 	_test_enemy_knowledge()
 	_test_denial_switch()
+	_test_fallback_authoring()
+	_test_hold_to_exit_fallback()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -343,6 +350,181 @@ func _test_denial_switch() -> void:
 	destroy.required_unit_count = 0
 	goals.initial_order(planner, MissionOrder.new(), 300.0)
 	_check(goals.primary != null and goals.primary.kind == ScenarioGoalTask.Kind.BLOCK_EXIT, "Once destruction is complete, denial switches to the still-unfinished exit condition")
+
+
+func _fallback_exit(hex: Vector2i) -> ExitUnitsCondition:
+	var exit: ExitUnitsCondition = ExitUnitsCondition.new()
+	exit.team = planner.team
+	exit.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	exit.test_at_scenario_end = true
+	exit.state = ExitUnitsState.new()
+	exit.state.exit_hexes = [hex]
+	return exit
+
+
+func _test_fallback_authoring() -> void:
+	var hold: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	var exit: ExitUnitsCondition = _fallback_exit(rifles[1].current_hex)
+	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	policy.hold_condition = hold
+	policy.exit_condition = exit
+	var source: Scenario = load("res://scenes/scenarios/scenario.tscn").instantiate()
+	source.victory_conditions = [hold, exit]
+	source.ai_fallback_policies = [policy]
+	var packed: PackedScene = PackedScene.new()
+	_check(packed.pack(source) == OK and ResourceSaver.save(packed, "user://hold_to_exit_fixture.tscn") == OK, "A Scenario can save an explicit hold-to-exit link")
+	var reloaded: PackedScene = ResourceLoader.load("user://hold_to_exit_fixture.tscn", "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene
+	var restored: Scenario = reloaded.instantiate()
+	var copy: HoldToExitFallbackPolicy = restored.ai_fallback_policies[0]
+	_check(copy.hold_condition == restored.victory_conditions[0] and copy.exit_condition == restored.victory_conditions[1], "Scene reload preserves links to the actual victory conditions, not independent copies")
+	_check(copy.configuration_error(restored.victory_conditions) == "" and copy.withdraw_entire_force, "Restored policy validates and defaults to withdrawing the entire force")
+	restored.free()
+	source.free()
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(planner.team, [hold], PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(goals.fallback_policies.is_empty() and not goals.diagnostics.is_empty(), "A link to an exit outside the Scenario's conditions is rejected with a diagnostic")
+	exit.team = Globals.get_enemy_team(planner.team)
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	_check(goals.fallback_policies.is_empty(), "A fallback cannot use the opponent's exit victory condition")
+	exit.team = planner.team
+	exit.outcome_level = VictoryCondition.OutcomeLevel.MAJOR
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	_check(goals.fallback_policies.is_empty(), "Hold and exit cannot be alternatives inside the same AND victory package")
+	exit.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	policy.enabled = false
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	_check(goals.fallback_policies.is_empty(), "An explicitly disabled policy leaves ordinary goal selection intact")
+
+
+func _test_hold_to_exit_fallback() -> void:
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	snapshot.contacts[planner.team] = []
+	snapshot.defensive_contacts[planner.team] = []
+	planner.executor.cancel_all(true)
+	planner.position_stability.clear()
+	for unit: Unit in planner.squads:
+		unit.give_hold_order()
+		_set_hex(unit, unit.current_hex)
+		unit.stress_system.state = UnitStates.MoraleState.NORMAL
+		unit.broken = false
+		unit.in_close_combat = false
+	var target: Vector2i = _adjacent_empty(snapshot, rifles[2])
+	var hold: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	var exit: ExitUnitsCondition = _fallback_exit(target)
+	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	policy.hold_condition = hold
+	policy.exit_condition = exit
+	var conditions: Array[VictoryCondition] = [hold, exit]
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	goals.update(planner, 10000.0, 100.0)
+	_check(goals.active_fallback == null and goals.primary.kind == ScenarioGoalTask.Kind.OCCUPY, "A feasible hold stays primary even though a secondary exit is available")
+	hold.required_unit_count = 99
+	goals.update(planner, 10000.0, 101.0)
+	goals.update(planner, 10000.0, 105.0)
+	_check(goals.active_fallback == null and goals.primary.kind == ScenarioGoalTask.Kind.OCCUPY, "Temporary hold infeasibility does not immediately release an exit mission")
+	hold.required_unit_count = 1
+	goals.update(planner, 10000.0, 106.0)
+	hold.required_unit_count = 99
+	goals.update(planner, 10000.0, 107.0)
+	goals.update(planner, 10000.0, 110.0)
+	_check(goals.active_fallback == null, "Recovery resets the continuous fallback confirmation timer")
+	var bound_unit: Unit = rifles[0]
+	var bound_hex: Vector2i = _adjacent_empty(snapshot, bound_unit)
+	var bound_query: PositionQuery = PositionQuery.new()
+	bound_query.unit = bound_unit
+	bound_query.team = planner.team
+	bound_query.snapshot = snapshot
+	bound_query.profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
+	bound_query.objective_hex = bound_hex
+	bound_query.goal_destination_required = true
+	var bound: PositionResult = PositionQueryService.query_positions(bound_query)
+	_check(bound.is_valid() and planner.executor.execute(bound), "A hold squad starts a real accepted bound before fallback confirmation")
+	planner.position_stability.accepted(bound, 110.0)
+	var previous_task: ScenarioGoalTask = goals.assignments[bound_unit]
+	var previous_order: int = bound_unit.action_controller.action_order_id
+	goals.update(planner, 10000.0, 112.0)
+	_check(goals.active_fallback == policy and goals.primary.kind == ScenarioGoalTask.Kind.EXIT and planner.current_order.objective_hex == target, "Confirmed inability to hold commits the platoon to the linked exit")
+	_check(goals.assignments[bound_unit] == previous_task and planner.executor.pending.has(bound_unit) and bound_unit.action_controller.action_order_id == previous_order and bound_unit.movement.target_hex == bound_hex, "Withdrawal leaves a squad's accepted safe bound intact")
+	# Establish the bound's endpoint without advancing the frozen combat fixture.
+	planner.executor.cancel(bound_unit, true)
+	bound_unit.give_hold_order()
+	_set_hex(bound_unit, bound_hex)
+	snapshot.positions[bound_unit] = bound_hex
+	goals.update(planner, 10000.0, 112.5)
+	_check(goals.assignments.has(bound_unit) and goals.assignments[bound_unit].kind == ScenarioGoalTask.Kind.EXIT, "An established squad replaces its obsolete hold duty with withdrawal")
+	var all_withdrawing: bool = goals.assignments.size() == planner.squads.size()
+	for unit: Unit in planner.squads:
+		all_withdrawing = all_withdrawing and goals.assignments.has(unit) and goals.assignments[unit].withdrawal
+	_check(all_withdrawing and goals.primary.exit_capacity() >= planner.squads.size(), "Whole-force withdrawal assigns rifles, MG, and HQ sufficient exit capacity")
+	planner._planning_snapshot = snapshot
+	planner._planning_reservations = {}
+	planner._planning_requests.clear()
+	planner._build_planning_requests(planner.squads)
+	var hq_exits: int = 0
+	for request: Dictionary in planner._planning_requests:
+		var query: PositionQuery = request["query"]
+		if HqSupportPositionPolicy.is_headquarters(query.unit):
+			if query.goal_key == goals.primary.key and query.goal_destination_required and query.profile.mode == PositionProfile.Mode.ADVANCE:
+				hq_exits += 1
+				var advice: PositionResult = PositionQueryService.query_positions(query)
+				_check(advice.is_valid() and advice.target_hex == target and advice.profile_mode == PositionProfile.Mode.ADVANCE, "HQ's exact exit duty survives the actual position-query job")
+				_check(advice.is_valid() and planner.executor.execute(advice), "HQ can begin a real withdrawal move to the exit")
+				planner.executor.cancel(query.unit, true)
+				query.unit.give_hold_order()
+				_set_hex(query.unit, query.unit.current_hex)
+	_check(hq_exits == 1 and planner._planning_requests.size() == planner.squads.size(), "The real planner gives HQ one exact exit request instead of a competing support request")
+	planner._cancel_plan()
+	_check(goals.primary.reason.contains("Too few combat squads"), "Withdrawal advice explains why the linked hold was abandoned")
+	hold.required_unit_count = 1
+	hold.state.victory_conditions_met[hold.state.hexes[0]] = true
+	goals.update(planner, 10000.0, 113.0)
+	_check(goals.active_fallback == policy and goals.primary.kind == ScenarioGoalTask.Kind.EXIT, "A recovered objective cannot reverse an accepted withdrawal")
+	var pinned: Unit = rifles[1]
+	pinned.stress_system.state = UnitStates.MoraleState.PINNED
+	goals.update(planner, 10000.0, 114.0)
+	_check(not goals.assignments.has(pinned), "A pinned withdrawing squad receives no impossible movement assignment")
+	pinned.stress_system.state = UnitStates.MoraleState.NORMAL
+	goals.update(planner, 10000.0, 115.0)
+	_check(goals.assignments.has(pinned) and goals.assignments[pinned].kind == ScenarioGoalTask.Kind.EXIT, "A recovered squad joins the already committed withdrawal")
+	exit.state.units_exited.assign(planner.squads)
+	goals.update(planner, 10000.0, 116.0)
+	_check(goals.assignments.size() == planner.squads.size() and goals.primary.kind == ScenarioGoalTask.Kind.EXIT, "Counted exit squads retain withdrawal duties until the scenario ends")
+	var original_director: ScenarioGoalDirector = controller._ai_goal_directors[planner.team]
+	controller._ai_goal_directors[planner.team] = goals
+	planner.goal_director = goals
+	controller.set_team_ai_mode(planner.team, PositionProfile.Mode.ASSAULT)
+	_check(goals.active_fallback == policy and planner.current_order.objective_hex == target, "Changing ATTACK/DEFEND does not clear the accepted strategic fallback")
+	controller.set_team_ai_enabled(planner.team, false)
+	controller.set_team_ai_enabled(planner.team, true)
+	_check(goals.active_fallback == policy and planner.current_order.objective_hex == target, "Turning AI OFF and ON preserves the withdrawal commitment")
+	controller._ai_goal_directors[planner.team] = original_director
+	planner.goal_director = original_director
+	planner.executor.cancel_all(true)
+	planner.position_stability.clear()
+	exit.state.units_exited.clear()
+	hold.state.victory_conditions_met[hold.state.hexes[0]] = false
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10.0))
+	_check(goals.active_fallback == policy and goals.primary.kind == ScenarioGoalTask.Kind.EXIT, "An unsecured hold releases withdrawal immediately when only the reserved exit window remains")
+	hold.state.victory_conditions_met[hold.state.hexes[0]] = true
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10.0))
+	_check(goals.active_fallback == null and goals.primary.kind == ScenarioGoalTask.Kind.OCCUPY, "A secured hold is not abandoned simply because the deadline approaches")
+	hold.state.victory_conditions_met[hold.state.hexes[0]] = false
+	goals.update(planner, 10000.0, 200.0)
+	goals.update(planner, 10000.0, 205.0)
+	_check(goals.active_fallback == policy and goals.fallback_reason.contains("lost"), "Sustained loss of a previously secured objective activates the explicit fallback")
+	policy.withdraw_entire_force = false
+	exit.state.units_exited.clear()
+	goals.update(planner, 10000.0, 206.0)
+	_check(goals.assignments.size() == exit.required_unit_count and not goals.primary.withdrawal, "Quota-only fallback assigns only the remaining distinct exit requirement")
+	hold.state = null
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(goals.active_fallback == null and not goals.diagnostics.is_empty(), "Missing hold markers disable explicit fallback activation and report the configuration problem")
 
 
 func _adjacent_empty(snapshot: InfluenceSnapshot, unit: Unit) -> Vector2i:

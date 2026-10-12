@@ -13,6 +13,12 @@ var assignments: Dictionary[Unit, ScenarioGoalTask] = {}
 var diagnostics: PackedStringArray = []
 var primary: ScenarioGoalTask
 var manual_override: bool = false
+var fallback_policies: Array[HoldToExitFallbackPolicy] = []
+var active_fallback: HoldToExitFallbackPolicy
+var fallback_reason: String = ""
+var _fallback_pending_since: Dictionary[HoldToExitFallbackPolicy, float] = {}
+var _secured_holds: Dictionary[OccupyObjectiveCondition, bool] = {}
+var _policy_diagnostics: PackedStringArray = []
 var _next_update: float = -INF
 var _primary_since: float = -INF
 var _contender: String = ""
@@ -21,9 +27,30 @@ var _last_objective: Vector2i
 var _initialized: bool = false
 
 
-func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode) -> void:
+func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode, policies: Array[HoldToExitFallbackPolicy] = []) -> void:
 	team = owner
 	conditions = scenario_conditions.duplicate()
+	fallback_policies.clear()
+	_policy_diagnostics.clear()
+	active_fallback = null
+	fallback_reason = ""
+	_fallback_pending_since.clear()
+	_secured_holds.clear()
+	for policy: HoldToExitFallbackPolicy in policies:
+		if policy == null or not policy.enabled:
+			continue
+		if policy.hold_condition != null and policy.hold_condition.team != team:
+			continue
+		var error: String = policy.configuration_error(conditions)
+		if error != "":
+			_policy_diagnostics.append(error)
+		elif not fallback_policies.has(policy):
+			fallback_policies.append(policy)
+	change_posture(mode)
+
+
+func change_posture(mode: PositionProfile.Mode) -> void:
+	# Debug posture changes reset tactical planning, not an accepted withdrawal.
 	posture = mode
 	tasks.clear()
 	assignments.clear()
@@ -63,7 +90,7 @@ func update(planner: PlatoonAI, seconds_left: float, now: float) -> void:
 		manual_override = true
 	if manual_override:
 		return
-	_build_tasks(planner, seconds_left)
+	_build_tasks(planner, seconds_left, now)
 	var preferred: ScenarioGoalTask = _preferred_primary()
 	if primary == null or not _contains_task(primary.key):
 		primary = preferred
@@ -105,19 +132,25 @@ func _initialize_primary_time(now: float) -> void:
 		_primary_since = now
 
 
-func _build_tasks(planner: PlatoonAI, seconds_left: float) -> void:
+func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) -> void:
 	tasks.clear()
-	diagnostics.clear()
+	diagnostics = _policy_diagnostics.duplicate()
 	var progress: Array[VictoryConditionProgress] = []
 	for condition: VictoryCondition in conditions:
 		var state: VictoryConditionProgress = VictoryConditionProgress.read(condition)
 		progress.append(state)
 		if not state.valid:
 			diagnostics.append(state.diagnostic)
+	_evaluate_fallbacks(progress, planner, seconds_left, now)
 	var own_level: int = _choose_own_outcome(progress, planner, seconds_left)
 	for state: VictoryConditionProgress in progress:
 		if state.team == team and state.outcome == own_level and state.valid:
 			_add_own_tasks(state, planner)
+	if active_fallback != null:
+		# Withdrawal is an explicit mission change. Enemy denial must not send
+		# retreating squads back to the abandoned objective.
+		tasks.sort_custom(_prefer_task)
+		return
 	# Deny one necessary condition in each opposing victory package. Cumulative
 	# conditions already completed cannot be undone; occupation remains reversible.
 	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
@@ -140,7 +173,116 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float) -> void:
 	tasks.sort_custom(_prefer_task)
 
 
+func _progress_for(condition: VictoryCondition, progress: Array[VictoryConditionProgress]) -> VictoryConditionProgress:
+	for state: VictoryConditionProgress in progress:
+		if state.condition == condition:
+			return state
+	return null
+
+
+func _policy_has_markers(policy: HoldToExitFallbackPolicy, progress: Array[VictoryConditionProgress]) -> bool:
+	var hold: VictoryConditionProgress = _progress_for(policy.hold_condition, progress)
+	var exit: VictoryConditionProgress = _progress_for(policy.exit_condition, progress)
+	return hold != null and hold.valid and exit != null and exit.valid
+
+
+func _evaluate_fallbacks(progress: Array[VictoryConditionProgress], planner: PlatoonAI, seconds_left: float, now: float) -> void:
+	if active_fallback != null:
+		diagnostics.append("Committed hold-to-exit fallback: " + fallback_reason)
+		return
+	for policy: HoldToExitFallbackPolicy in fallback_policies:
+		if not _policy_has_markers(policy, progress):
+			_fallback_pending_since.erase(policy)
+			diagnostics.append("Hold-to-exit fallback awaits valid hold and exit markers")
+			continue
+		var hold: VictoryConditionProgress = _progress_for(policy.hold_condition, progress)
+		var exit: VictoryConditionProgress = _progress_for(policy.exit_condition, progress)
+		if hold.complete:
+			_secured_holds[policy.hold_condition] = true
+		var reason: String = _hold_failure_reason(hold, planner, seconds_left)
+		var travel: float = _estimate_exit_seconds(exit, planner, policy.withdraw_entire_force)
+		# Reserve the exit window only while the linked hold is unsecured. A
+		# successfully held objective remains the higher victory priority.
+		if not hold.complete and is_finite(travel) and seconds_left <= travel + policy.withdrawal_margin_seconds:
+			_activate_fallback(policy, "Unsecured objective: %.1f seconds left; %.1f seconds reserved for exit" % [seconds_left, travel + policy.withdrawal_margin_seconds])
+			return
+		if reason == "":
+			_fallback_pending_since.erase(policy)
+			continue
+		if policy.confirmation_seconds <= 0.0:
+			_activate_fallback(policy, reason)
+			return
+		if not is_finite(now):
+			continue
+		if not _fallback_pending_since.has(policy):
+			_fallback_pending_since[policy] = now
+		var elapsed: float = now - _fallback_pending_since[policy]
+		if elapsed >= policy.confirmation_seconds:
+			_activate_fallback(policy, reason)
+			return
+		diagnostics.append("Hold-to-exit pending: %s (%.1f/%.1f seconds)" % [reason, elapsed, policy.confirmation_seconds])
+
+
+func _activate_fallback(policy: HoldToExitFallbackPolicy, reason: String) -> void:
+	active_fallback = policy
+	fallback_reason = reason
+	_fallback_pending_since.clear()
+	diagnostics.append("Committed hold-to-exit fallback: " + reason)
+
+
+func _hold_failure_reason(hold: VictoryConditionProgress, planner: PlatoonAI, seconds_left: float) -> String:
+	if hold.complete:
+		return ""
+	if _secured_holds.has(hold.condition):
+		return "Previously secured objective was lost"
+	var fighters: int = 0
+	for unit: Unit in planner.squads:
+		if TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order() and not HqSupportPositionPolicy.is_headquarters(unit):
+			fighters += 1
+	if fighters < hold.required_units * hold.hexes.size():
+		return "Too few combat squads remain to hold all linked markers"
+	for hex: Vector2i in hold.hexes:
+		var travel: float = _travel_seconds(planner, hex)
+		if not is_finite(travel):
+			return "No eligible squad can currently reach the hold objective"
+		if travel + maxf(0.0, hold.required_seconds - hold.held_seconds.get(hex, 0.0)) > seconds_left:
+			return "Insufficient time to reach and secure the hold objective"
+	return ""
+
+
+func _estimate_exit_seconds(exit: VictoryConditionProgress, planner: PlatoonAI, entire_force: bool) -> float:
+	var arrivals: Array[float] = []
+	var ledger: ExitUnitsState = ScenarioGoalTask.exit_state_for(exit.condition)
+	for unit: Unit in planner.squads:
+		if not TacticalPositionExecutor.is_active_defender(unit):
+			continue
+		if not entire_force and (HqSupportPositionPolicy.is_headquarters(unit) or ledger.units_exited.has(unit)):
+			continue
+		var travel: float = INF
+		for hex: Vector2i in exit.hexes:
+			travel = minf(travel, _unit_travel_seconds(planner, unit, hex))
+		if is_finite(travel):
+			arrivals.append(travel)
+	if entire_force:
+		if arrivals.is_empty():
+			return INF
+		return arrivals.max()
+	if exit.remaining_units <= 0:
+		return 0.0
+	if arrivals.size() < exit.remaining_units:
+		return INF
+	arrivals.sort()
+	return arrivals[exit.remaining_units - 1]
+
+
 func _choose_own_outcome(progress: Array[VictoryConditionProgress], planner: PlatoonAI, seconds_left: float) -> int:
+	if active_fallback != null:
+		return active_fallback.exit_condition.outcome_level
+	# A linked secondary exit is not an independent reason to abandon the hold.
+	# Its explicit confirmation and exit-window rules govern that transition.
+	for policy: HoldToExitFallbackPolicy in fallback_policies:
+		if _policy_has_markers(policy, progress):
+			return policy.hold_condition.outcome_level
 	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
 		var found: bool = false
 		var feasible: bool = true
@@ -178,6 +320,22 @@ func _choose_own_outcome(progress: Array[VictoryConditionProgress], planner: Pla
 
 
 func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void:
+	if active_fallback != null and state.condition == active_fallback.exit_condition:
+		var demand: int = state.remaining_units
+		if active_fallback.withdraw_entire_force:
+			demand = 0
+			for unit: Unit in planner.squads:
+				if TacticalPositionExecutor.is_active_defender(unit):
+					demand += 1
+		if demand > 0:
+			var withdrawal: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, _exit_hex(state, planner))
+			withdrawal.required_units = demand
+			withdrawal.priority = 200.0
+			withdrawal.urgent = true
+			withdrawal.withdrawal = active_fallback.withdraw_entire_force
+			withdrawal.reason = "Withdraw to exit: " + fallback_reason
+			tasks.append(withdrawal)
+		return
 	if state.kind == VictoryConditionProgress.Kind.OCCUPY:
 		for hex: Vector2i in state.hexes:
 			var existing: ScenarioGoalTask
@@ -327,19 +485,26 @@ func _friendly_distance(planner: PlatoonAI, hex: Vector2i) -> float:
 func _travel_seconds(planner: PlatoonAI, hex: Vector2i) -> float:
 	var seconds: float = INF
 	for unit: Unit in planner.squads:
-		if not TacticalPositionExecutor.is_active_defender(unit) or not unit.is_good_order() or HqSupportPositionPolicy.is_headquarters(unit):
+		if HqSupportPositionPolicy.is_headquarters(unit):
 			continue
-		if unit.current_hex == hex:
-			seconds = 0.0
-		elif PositionQueryService.can_follow_intent(unit):
-			var steps: int = LOSHelper.get_hex_distance(unit.current_hex, hex)
-			if planner.influence_map_controller != null and planner.influence_map_controller.snapshot != null:
-				var path: Array[Vector2i] = planner.influence_map_controller.snapshot.get_path(team, unit.current_hex, hex)
-				if path.is_empty():
-					continue
-				steps = path.size() - 1
-			seconds = minf(seconds, float(steps) * InfluenceUnitQuery.captured_crossing_seconds(unit) + 3.0)
+		seconds = minf(seconds, _unit_travel_seconds(planner, unit, hex))
 	return seconds
+
+
+func _unit_travel_seconds(planner: PlatoonAI, unit: Unit, hex: Vector2i) -> float:
+	if not TacticalPositionExecutor.is_active_defender(unit) or not unit.is_good_order():
+		return INF
+	if unit.current_hex == hex:
+		return 0.0
+	if not PositionQueryService.can_follow_intent(unit):
+		return INF
+	var steps: int = LOSHelper.get_hex_distance(unit.current_hex, hex)
+	if planner.influence_map_controller != null and planner.influence_map_controller.snapshot != null:
+		var path: Array[Vector2i] = planner.influence_map_controller.snapshot.get_path(team, unit.current_hex, hex)
+		if path.is_empty():
+			return INF
+		steps = path.size() - 1
+	return float(steps) * InfluenceUnitQuery.captured_crossing_seconds(unit) + 3.0
 
 
 func _denial_hex(state: VictoryConditionProgress, planner: PlatoonAI) -> Vector2i:
@@ -393,7 +558,8 @@ func _allocate(planner: PlatoonAI) -> void:
 	var next: Dictionary[Unit, ScenarioGoalTask] = {}
 	var available: Array[Unit] = []
 	for unit: Unit in planner.squads:
-		if TacticalPositionExecutor.is_active_defender(unit) and not HqSupportPositionPolicy.is_headquarters(unit):
+		var withdraw_hq: bool = active_fallback != null and active_fallback.withdraw_entire_force
+		if TacticalPositionExecutor.is_active_defender(unit) and (withdraw_hq or not HqSupportPositionPolicy.is_headquarters(unit)):
 			available.append(unit)
 	for unit: Unit in assignments:
 		var previous: ScenarioGoalTask = assignments[unit]
@@ -409,7 +575,7 @@ func _allocate(planner: PlatoonAI) -> void:
 		var demand: int = task.required_units
 		for unit: Unit in next:
 			if next[unit].key == task.key:
-				if task.kind == ScenarioGoalTask.Kind.EXIT and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
+				if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 					continue
 				demand -= 1
 		while demand > 0:
@@ -436,7 +602,7 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 	var selected: Unit
 	var score: float = -INF
 	for unit: Unit in available:
-		if task.kind == ScenarioGoalTask.Kind.EXIT and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
+		if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 			continue
 		if not unit.is_good_order() or (unit.current_hex != task.hex and not PositionQueryService.can_follow_intent(unit)):
 			continue

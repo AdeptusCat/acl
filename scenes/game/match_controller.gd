@@ -492,7 +492,7 @@ func _configure_platoon_ai() -> void:
 		if order.position_mode == PositionProfile.Mode.ASSAULT:
 			order = _create_attack_ai_order(director, planner.team)
 		var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
-		goals.configure(planner.team, Globals.scenario_chosen.victory_conditions, order.position_mode)
+		goals.configure(planner.team, Globals.scenario_chosen.victory_conditions, order.position_mode, Globals.scenario_chosen.ai_fallback_policies)
 		order = goals.initial_order(planner, order, time_left_seconds)
 		director.objective_hex = order.objective_hex
 		influence_map_controller.set_objective_for_team(planner.team, order.objective_hex)
@@ -533,7 +533,7 @@ func set_team_ai_mode(team: Globals.Team, mode: PositionProfile.Mode) -> void:
 	if mode == PositionProfile.Mode.ASSAULT:
 		order = _create_attack_ai_order(director, team)
 	var goals: ScenarioGoalDirector = _ai_goal_directors[team]
-	goals.configure(team, Globals.scenario_chosen.victory_conditions, mode)
+	goals.change_posture(mode)
 	order = goals.initial_order(director.platoon_ai, order, time_left_seconds)
 	_ai_orders_by_team[team] = order
 	if director.platoon_ai.active:

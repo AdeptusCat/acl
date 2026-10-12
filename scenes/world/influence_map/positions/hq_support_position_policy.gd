@@ -13,6 +13,9 @@ static func can_share_position(first: Unit, second: Unit) -> bool:
 
 
 static func configure(query: PositionQuery) -> void:
+	if query.goal_destination_required:
+		# Explicit exit orders keep their movement profile through query execution.
+		return
 	query.profile = PositionProfile.for_unit(query.profile, query.unit)
 	query.use_defense_area = false
 	query.defense_area = null

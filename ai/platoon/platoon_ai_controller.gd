@@ -368,6 +368,8 @@ func _combat_units(available: Array[Unit]) -> Array[Unit]:
 
 func _add_support_requests(available: Array[Unit]) -> void:
 	for unit: Unit in available:
+		if goal_assignments.has(unit):
+			continue
 		if HqSupportPositionPolicy.is_headquarters(unit):
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
 			config.profile = PositionProfile.for_mode(PositionProfile.Mode.HQ_SUPPORT)
@@ -382,7 +384,7 @@ func _add_support_requests(available: Array[Unit]) -> void:
 
 func _build_planning_requests(available: Array[Unit]) -> void:
 	var combat: Array[Unit] = _combat_units(available)
-	for unit: Unit in combat.duplicate():
+	for unit: Unit in available:
 		if goal_assignments.has(unit):
 			_add_goal_request(unit, goal_assignments[unit])
 			combat.erase(unit)
@@ -444,6 +446,9 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 					config.profile.enter_suppressed_enemy_hex = true
 					config.profile.avoid_unsuppressed_defenders = true
 	var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
+	if task.withdrawal and HqSupportPositionPolicy.is_headquarters(unit):
+		# A deliberate exit duty overrides the default HQ support profile.
+		query.profile = config.profile
 	query.snapshot = _planning_snapshot
 	query.use_defense_area = not advancing and task.kind != ScenarioGoalTask.Kind.PRESERVE
 	query.goal_key = task.key

@@ -10,6 +10,7 @@ var hex: Vector2i
 var required_units: int = 1
 var priority: float = 0.0
 var urgent: bool = false
+var withdrawal: bool = false
 var reason: String = ""
 
 
@@ -26,6 +27,8 @@ static func exit_state_for(source: VictoryCondition) -> ExitUnitsState:
 
 
 func exit_capacity() -> int:
+	if withdrawal:
+		return maxi(required_units, (condition as ExitUnitsCondition).required_unit_count)
 	if condition is ExitUnitsCondition:
 		return (condition as ExitUnitsCondition).required_unit_count
 	if condition is PreventEnemyExitCondition:
