@@ -478,11 +478,13 @@ func _configure_platoon_ai() -> void:
 	_ai_orders_by_team.clear()
 	for director: DefenseDirector in directors:
 		var planner: PlatoonAI = director.platoon_ai
-		planner.set_active(planner.team == Globals.team_enemy)
+		planner.set_active(Globals.scenario_chosen.is_ai_enabled(planner.team))
 		director.configure_for_match(active_units)
 		var order: MissionOrder = director.create_initial_order()
-		if planner.active and Globals.scenario_chosen.ai_attacks_axis_objective:
-			order = _create_attack_ai_order(director, Globals.Team.AXIS)
+		order.position_mode = Globals.scenario_chosen.get_ai_mode(planner.team)
+		order.execution_intent = TacticalPositionExecutor.Intent.FROM_PROFILE
+		if order.position_mode == PositionProfile.Mode.ASSAULT:
+			order = _create_attack_ai_order(director, planner.team)
 		_ai_orders_by_team[planner.team] = order
 		if planner.active:
 			planner.receive_mission_order(order)

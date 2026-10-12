@@ -24,6 +24,8 @@ func _run() -> void:
 	var player_team: Globals.Team = scenario.player_team
 	if OS.get_cmdline_user_args().has("--axis"):
 		player_team = Globals.Team.AXIS
+		scenario.axis_ai_status = Scenario.AIStatus.OFF
+		scenario.allies_ai_status = Scenario.AIStatus.ON
 	var extra: Unit = null
 	if OS.get_cmdline_user_args().has("--extra-squad"):
 		extra = _add_scenario_squad(map, scenario, Globals.get_enemy_team(player_team))

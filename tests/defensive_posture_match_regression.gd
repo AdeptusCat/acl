@@ -18,10 +18,13 @@ func _run() -> void:
 		map_name = "DefaultMap"
 	var map: Map = world.maps.get_node(map_name)
 	var scenario: Scenario = map.get_scenario(0)
-	scenario.ai_attacks_axis_objective = false
+	scenario.axis_ai_mode = Scenario.AIMode.DEFEND
+	scenario.allies_ai_mode = Scenario.AIMode.DEFEND
 	var player_team: Globals.Team = scenario.player_team
 	if OS.get_cmdline_user_args().has("--axis"):
 		player_team = Globals.Team.AXIS
+		scenario.axis_ai_status = Scenario.AIStatus.OFF
+		scenario.allies_ai_status = Scenario.AIStatus.ON
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
 	world.start_screen.hide()

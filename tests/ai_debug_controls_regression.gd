@@ -9,6 +9,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	_test_scenario_exports()
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	var world: Node = main.world
@@ -19,6 +20,22 @@ func _run() -> void:
 		map_name = "OrchardRoad"
 	var map: Map = world.maps.get_node(map_name)
 	var scenario: Scenario = map.get_scenario(0)
+	var arguments: PackedStringArray = OS.get_cmdline_user_args()
+	if arguments.has("--both-ai"):
+		scenario.axis_ai_status = Scenario.AIStatus.ON
+		scenario.allies_ai_status = Scenario.AIStatus.ON
+		scenario.axis_ai_mode = Scenario.AIMode.DEFEND
+		scenario.allies_ai_mode = Scenario.AIMode.ATTACK
+	elif arguments.has("--both-off"):
+		scenario.axis_ai_status = Scenario.AIStatus.OFF
+		scenario.allies_ai_status = Scenario.AIStatus.OFF
+		scenario.axis_ai_mode = Scenario.AIMode.ATTACK
+		scenario.allies_ai_mode = Scenario.AIMode.DEFEND
+	elif arguments.has("--allies-ai"):
+		scenario.axis_ai_status = Scenario.AIStatus.OFF
+		scenario.allies_ai_status = Scenario.AIStatus.ON
+		scenario.axis_ai_mode = Scenario.AIMode.ATTACK
+		scenario.allies_ai_mode = Scenario.AIMode.ATTACK
 	# Both sides need distinct capture markers to verify attack objective selection.
 	scenario.axis_objectives_tile_map_layer.set_cell(Vector2i(10, 12), 3, Vector2i.ZERO)
 	scenario.allied_objectives_tile_map_layer.set_cell(Vector2i(17, 11), 6, Vector2i.ZERO)
@@ -39,9 +56,14 @@ func _run() -> void:
 			mode_selector = panel.allies_ai_mode
 		_check(not status_selector.disabled and not mode_selector.disabled, "Match setup enables both AI selectors")
 		_check((status_selector.get_selected_id() == 1) == planner.active, "Initial ON/OFF matches the actual controller")
-		_check(planner.active == (planner.team == Globals.team_enemy), "Startup retains human and enemy ownership")
+		_check(planner.active == scenario.is_ai_enabled(planner.team), "Scenario AI status controls startup independently of the player side")
+		_check(controller.get_team_ai_mode(planner.team) == scenario.get_ai_mode(planner.team) and mode_selector.get_selected_id() == scenario.get_ai_mode(planner.team), "Scenario AI mode initializes the controller and debug selector, including while OFF")
 		if planner.current_order != null:
 			_check(mode_selector.get_selected_id() == planner.current_order.position_mode, "Initial mode reflects the scenario mission")
+			if planner.current_order.position_mode == PositionProfile.Mode.ASSAULT:
+				_check(planner.current_order.objective_hex == _capture_hex(planner.team), "Scenario ATTACK selects its own side's authored objective")
+			else:
+				_check(planner.current_order.objective_hex == _capture_hex(Globals.get_enemy_team(planner.team)), "Scenario DEFEND protects the opponent's capture marker")
 		_test_side(controller, planner, status_selector, mode_selector)
 	_test_disabled_mode(controller, panel, allies)
 	main.queue_free()
@@ -49,6 +71,36 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("AI debug controls checks: ", checks, "; failures: ", failures, "; map: ", map_name)
 	get_tree().quit(failures)
+
+
+func _test_scenario_exports() -> void:
+	var scenario: Scenario = load("res://scenes/scenarios/scenario.tscn").instantiate()
+	var fields: Dictionary[String, bool] = {}
+	for property: Dictionary in scenario.get_property_list():
+		var name: String = property["name"]
+		if name not in ["axis_ai_status", "axis_ai_mode", "allies_ai_status", "allies_ai_mode"]:
+			continue
+		fields[name] = true
+		_check(property["hint"] == PROPERTY_HINT_ENUM and (property["usage"] & PROPERTY_USAGE_EDITOR) != 0 and (property["usage"] & PROPERTY_USAGE_STORAGE) != 0, "Scenario AI setting is editable and stored in the scene: " + name)
+		var hint: String = property["hint_string"]
+		if name.ends_with("status"):
+			_check(hint.contains("OFF") and hint.contains("ON"), "Scenario status offers OFF and ON")
+		else:
+			_check(hint.contains("ATTACK") and hint.contains("DEFEND"), "Scenario mode offers ATTACK and DEFEND")
+	_check(fields.size() == 4, "The base Scenario exposes status and mode for both sides")
+	_check(not scenario.is_ai_enabled(Globals.Team.AXIS) and scenario.is_ai_enabled(Globals.Team.ALLIES), "Base scenario defaults preserve Axis player control and Allied AI")
+	scenario.axis_ai_status = Scenario.AIStatus.ON
+	scenario.axis_ai_mode = Scenario.AIMode.ATTACK
+	scenario.allies_ai_status = Scenario.AIStatus.OFF
+	scenario.allies_ai_mode = Scenario.AIMode.ATTACK
+	var packed: PackedScene = PackedScene.new()
+	var packed_error: Error = packed.pack(scenario)
+	_check(packed_error == OK, "Scenario AI configuration can be packed into a scene")
+	if packed_error == OK:
+		var restored: Scenario = packed.instantiate()
+		_check(restored.axis_ai_status == Scenario.AIStatus.ON and restored.allies_ai_status == Scenario.AIStatus.OFF and restored.axis_ai_mode == Scenario.AIMode.ATTACK and restored.allies_ai_mode == Scenario.AIMode.ATTACK, "Scene serialization preserves both sides' status and mode")
+		restored.free()
+	scenario.free()
 
 
 func _test_side(controller: Node2D, planner: PlatoonAI, status_selector: OptionButton, mode_selector: OptionButton) -> void:

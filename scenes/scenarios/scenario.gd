@@ -1,6 +1,9 @@
 extends Node2D
 class_name Scenario
 
+enum AIStatus { OFF, ON }
+enum AIMode { ATTACK, DEFEND }
+
 @onready var units: Node2D = $Units
 @onready var axis_objectives_tile_map_layer: HexagonTileMapLayer = $Objectives/AxisObjectivesTileMapLayer
 @onready var allied_objectives_tile_map_layer: HexagonTileMapLayer = $Objectives/AlliedObjectivesTileMapLayer
@@ -15,14 +18,41 @@ class_name Scenario
 #@export var defender_team: Globals.Team = Globals.Team.AXIS
 
 @export var player_team: Globals.Team = Globals.Team.AXIS
-@export var ai_attacks_axis_objective: bool = false
 
 @export var victory_conditions: Array[VictoryCondition] = []
+
+@export_group("AI")
+@export_subgroup("Axis", "axis_ai_")
+## Controls automatic Axis orders independently of the selected player side.
+@export_enum("OFF", "ON") var axis_ai_status: int = AIStatus.OFF
+## ATTACK targets the Axis objective; DEFEND protects the opponent's capture objective.
+@export_enum("ATTACK", "DEFEND") var axis_ai_mode: int = AIMode.DEFEND
+@export_subgroup("Allies", "allies_ai_")
+## Controls automatic Allied orders independently of the selected player side.
+@export_enum("OFF", "ON") var allies_ai_status: int = AIStatus.ON
+## ATTACK targets the Allied objective; DEFEND protects the opponent's capture objective.
+@export_enum("ATTACK", "DEFEND") var allies_ai_mode: int = AIMode.DEFEND
+@export_group("")
 
 var start_hex: Dictionary[Globals.Team, Vector2i] = {
 	Globals.Team.AXIS: Vector2i.ZERO,
 	Globals.Team.ALLIES: Vector2i.ZERO
 	}
+
+
+func is_ai_enabled(team: Globals.Team) -> bool:
+	if team == Globals.Team.AXIS:
+		return axis_ai_status == AIStatus.ON
+	return allies_ai_status == AIStatus.ON
+
+
+func get_ai_mode(team: Globals.Team) -> PositionProfile.Mode:
+	var mode: int = axis_ai_mode
+	if team == Globals.Team.ALLIES:
+		mode = allies_ai_mode
+	if mode == AIMode.ATTACK:
+		return PositionProfile.Mode.ASSAULT
+	return PositionProfile.Mode.DEFEND
 
 
 #func get_objectives(team: Globals.Team) -> Array[Node]:

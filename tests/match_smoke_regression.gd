@@ -30,7 +30,7 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	var controller: Node = world.game_controller
-	if scenario.ai_attacks_axis_objective:
+	if scenario.is_ai_enabled(Globals.team_enemy) and scenario.get_ai_mode(Globals.team_enemy) == PositionProfile.Mode.ASSAULT:
 		var attack_ai: PlatoonAI = controller.get_node("PlatoonAi")
 		if Globals.team_enemy == Globals.Team.ALLIES:
 			attack_ai = controller.get_node("PlatoonAi2")
