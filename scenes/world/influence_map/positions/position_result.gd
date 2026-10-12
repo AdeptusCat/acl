@@ -24,6 +24,7 @@ var path: Array[Vector2i] = []
 var snapshot_version: int = 0
 var context: String = ""
 var profile_mode: PositionProfile.Mode = PositionProfile.Mode.DEFEND
+var position_profile: PositionProfile
 var objective_hex: Vector2i = Vector2i.ZERO
 var reason: String = ""
 var decision: Decision = Decision.POSITION

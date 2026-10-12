@@ -23,6 +23,8 @@ func advance(deadline_usec: int) -> void:
 		match phase:
 			Phase.AREA:
 				if not profile_prepared:
+					if query.stability != null:
+						query.stability.prepare(query)
 					if HqSupportPositionPolicy.is_headquarters(query.unit):
 						HqSupportPositionPolicy.configure(query)
 					profile_prepared = true
@@ -47,6 +49,8 @@ func advance(deadline_usec: int) -> void:
 				phase = Phase.INITIALIZE
 			Phase.INITIALIZE:
 				if not PositionQueryService.initialize(query, result):
+					completed = true
+				elif PositionQueryService.finish_accepted_order(query, result):
 					completed = true
 				else:
 					phase = Phase.FILTER

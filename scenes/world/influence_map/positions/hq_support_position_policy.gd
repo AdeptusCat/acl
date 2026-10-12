@@ -41,6 +41,15 @@ static func prepare(query: PositionQuery) -> void:
 				# Advancing rifles need leadership before stress forces a support response.
 				need = maxf(need, 0.35)
 			query.support_targets[friendly] = {"hex": query.snapshot.positions[friendly], "need": need}
+	query.support_priority_squad = null
+	var highest_need: float = -1.0
+	for friendly: Unit in query.support_targets:
+		var need: float = query.support_targets[friendly]["need"]
+		if need > highest_need or (is_equal_approx(need, highest_need) and friendly == query.assault_support_squad):
+			highest_need = need
+			query.support_priority_squad = friendly
+	if query.stability != null:
+		query.support_priority_squad = query.stability.headquarters_priority(query, query.support_priority_squad)
 
 
 static func in_geography(query: PositionQuery, cell: Vector2i) -> bool:
@@ -77,7 +86,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		utility += proximity * weight
 		total_weight += weight
 		nearest = mini(nearest, distance)
-		if target["need"] > highest_need or (is_equal_approx(target["need"], highest_need) and friendly == query.assault_support_squad):
+		if friendly == query.support_priority_squad or (query.support_priority_squad == null and target["need"] > highest_need):
 			highest_need = target["need"]
 			urgent = friendly
 			priority_distance = distance

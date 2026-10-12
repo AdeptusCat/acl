@@ -64,6 +64,7 @@ static func adapt_result(advice: PositionResult, axis: ThreatAxis, role: String)
 	for property: String in ["unit", "status", "target_hex", "target_index", "proposed_hex", "score", "previous_score", "should_move", "score_map", "eligibility", "cell_states", "rejection_reasons", "rejections", "features", "alternatives", "path", "snapshot_version", "context", "profile_mode", "objective_hex", "reason", "decision", "approach_cells", "remembered_approach_cells", "inferred_approach_cells", "sector_priorities", "approach_evidence", "approach_sources", "branch_sources", "branch_evidence"]:
 		result.set(property, advice.get(property))
 	result.axis = axis
+	result.position_profile = advice.position_profile
 	result.role = role
 	if advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT:
 		result.role = "hq_support"

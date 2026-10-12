@@ -63,6 +63,16 @@ var press_attack: bool = false
 var has_support_anchor: bool = false
 var support_anchor_hex: Vector2i = Vector2i.ZERO
 var support_anchor_radius: int = 3
+var support_anchor_squad: Unit
+var stability: PlatoonPositionStability
+var stability_time: float = 0.0
+var mission_objective_hex: Vector2i = Vector2i.ZERO
+var stable_order: PositionResult
+var finish_accepted_order: bool = false
+var deliberate_movement: bool = false
+var movement_kind: String = ""
+var stability_reason: String = ""
+var support_priority_squad: Unit
 
 
 func reset_evaluation() -> void:
@@ -106,4 +116,7 @@ func context_key() -> String:
 	var response_capability: String = ""
 	if reserve_position and not reserve_responses.is_empty():
 		response_capability = DefenseReadinessJob.capability_key(unit)
-	return str([team, objective_hex, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount, response_capability, required_crossing_branch])
+	var position_objective: Vector2i = objective_hex
+	if stability != null and profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+		position_objective = mission_objective_hex
+	return str([team, position_objective, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount, response_capability, required_crossing_branch])

@@ -121,6 +121,7 @@ func _run() -> void:
 	_test_attack_overwatch()
 	_test_attack_support_recovery()
 	_test_attack_pressure_and_following()
+	_test_position_stability()
 	_test_mirrored_teams()
 	_test_axis_diagnostics()
 	_test_execution()
@@ -583,7 +584,7 @@ func _test_attack_overwatch() -> void:
 	for request: Dictionary in planner._planning_requests:
 		var query: PositionQuery = request["query"]
 		if query.unit == overwatch:
-			_check(query.profile.commitment_seconds == INF and query.objective_hex == enemy.current_hex, "Rifle overwatch remains committed to the pinned defender's firing lane")
+			_check(query.stability == planner.position_stability and query.profile.commitment_seconds == 8.0 and query.objective_hex == enemy.current_hex, "Rifle overwatch retains a stable position policy while targeting the pinned defender")
 	planner._update_attack_roles([second, first])
 	_check(planner.attack_maneuver_squad == maneuver, "Reordered squad evaluation preserves the moving rifle's assignment")
 	maneuver.movement.is_moving = true
@@ -700,7 +701,7 @@ func _test_attack_support_recovery() -> void:
 	planner._build_planning_requests(planner.squads)
 	for request: Dictionary in planner._planning_requests:
 		if request["query"].unit == gun:
-			_check(not request["query"].require_live_support_target and request["query"].profile.commitment_seconds == 8.0, "Initial MG fire support establishes a covered lane before applying post-attack retargeting")
+			_check(not request["query"].require_live_support_target and request["query"].profile.commitment_seconds == 16.0, "Initial MG fire support establishes a covered lane with a stationary weapon commitment")
 	planner._planning_requests.clear()
 	planner.attack_approach_started = true
 	planner._build_planning_requests(planner.squads)
@@ -708,7 +709,7 @@ func _test_attack_support_recovery() -> void:
 	for request: Dictionary in planner._planning_requests:
 		if request["query"].unit == gun:
 			support = request["query"]
-	_check(support.objective_hex == fresh.current_hex and support.require_live_support_target and support.profile.commitment_seconds == 0.0, "MG releases its old commitment when its pinned target cannot support suppression of the remaining fresh defender")
+	_check(support.objective_hex == fresh.current_hex and support.require_live_support_target and support.stability == planner.position_stability, "MG reassesses a lost priority firing lane without globally discarding movement commitments")
 	support.has_accepted_target = true
 	support.accepted_target = gun.current_hex
 	support.accepted_context = support.context_key()
@@ -723,7 +724,7 @@ func _test_attack_support_recovery() -> void:
 	planner._build_planning_requests(planner.squads)
 	for request: Dictionary in planner._planning_requests:
 		if request["query"].unit == gun:
-			_check(request["query"].profile.commitment_seconds == 8.0, "An establishing MG keeps its movement commitment instead of restarting before it can fire")
+			_check(request["query"].profile.commitment_seconds == 16.0, "An establishing MG keeps its stationary weapon commitment instead of restarting before it can fire")
 	gun.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
 	snapshot.los = snapshot.los.duplicate(true)
 	snapshot.los[gun.current_hex].erase(pinned.current_hex)
@@ -898,13 +899,13 @@ func _test_attack_pressure_and_following() -> void:
 	snapshot.defensive_contacts[own.team].erase(fresh_contact)
 	defender.stress_system.S_eff = 55.0
 	map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
-	_check(support.has_support_anchor and support.support_anchor_hex == pinned.current_hex and support.profile.commitment_seconds == 0.0, "A lagging MG releases its old firing commitment and follows the actual forward rifle, including a pinned attacker")
+	_check(support.has_support_anchor and support.support_anchor_hex == pinned.current_hex and support.profile.commitment_seconds == 16.0, "A lagging MG follows the forward rifle through a stable support policy rather than disabling its commitment")
 	gun.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
 	planner._planning_requests.clear()
 	planner._build_planning_requests(planner.squads)
 	for request: Dictionary in planner._planning_requests:
 		if request["query"].unit == gun:
-			_check(request["query"].profile.commitment_seconds == 8.0, "A lagging MG still finishes its bound and setup before reconsidering the next forward support position")
+			_check(request["query"].profile.commitment_seconds == 16.0, "A lagging MG still finishes its bound and setup before reconsidering the next forward support position")
 	gun.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
 	support.has_accepted_target = true
 	support.accepted_target = gun.current_hex
@@ -942,6 +943,224 @@ func _test_attack_pressure_and_following() -> void:
 		unit.squad_fire.free()
 		unit.squad_fire = null
 	for unit: UnitProbe in [gun, headquarters, pinned, first, second, defender, fresh]:
+		unit.free()
+
+
+func _stability_query(unit: Unit, snapshot: InfluenceSnapshot, stability: PlatoonPositionStability, now: float, mode: PositionProfile.Mode = PositionProfile.Mode.SUPPORT_BY_FIRE) -> PositionQuery:
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = unit.team
+	query.snapshot = snapshot
+	query.use_defense_area = false
+	query.objective_hex = Vector2i(6, 3)
+	query.mission_objective_hex = query.objective_hex
+	query.profile = PositionProfile.for_mode(mode)
+	query.profile.minimum_cover = 0.1
+	query.profile.cover_weight = 10.0
+	query.profile.firing_weight = 0.0
+	query.movement_radius = 2
+	query.stability = stability
+	query.stability_time = now
+	return query
+
+
+func _test_position_stability() -> void:
+	var first: UnitProbe = _unit(own.team, Vector2i(2, 3))
+	var second: UnitProbe = _unit(own.team, Vector2i(2, 5))
+	var headquarters: UnitProbe = _unit(own.team, Vector2i(1, 4))
+	second.squad_type = Globals.SquadType.MG
+	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	headquarters.leader_aura.aura_radius_hexes = 1
+	var weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	for unit: Unit in [first, second]:
+		_equip(unit, [weapon])
+		unit.squad_fire.unit = unit
+		unit.combat_stats.combat_effectiveness = 1.0
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	headquarters.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.los = LOSHelper.los_lookup
+	snapshot.routes[own.team] = controller.snapshot.routes[own.team]
+	snapshot.point_ids[own.team] = controller.snapshot.point_ids[own.team]
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(controller.snapshot.maps[own.team].bounds)
+	map.playable_cells = controller.snapshot.maps[own.team].playable_cells.duplicate()
+	map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER, 0.5)
+	snapshot.maps[own.team] = map
+	for unit: Unit in [first, second, headquarters]:
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.teams[unit] = own.team
+		snapshot.support_units[unit] = {"headquarters": unit == headquarters, "company": unit.company,
+			"platoon": unit.platoon, "commander": headquarters, "company_hq": false,
+			"members": unit.members_alive, "radius": unit.leader_aura.aura_radius_hexes, "need": 0.1, "surrendered": false}
+	var stability: PlatoonPositionStability = PlatoonPositionStability.new()
+	var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+	for unit: Unit in [first, second]:
+		var initial: PositionQuery = _stability_query(unit, snapshot, stability, 0.0)
+		initial.movement_radius = 0
+		var result: PositionResult = PositionQueryService.query_positions(initial)
+		if not result.is_valid():
+			print("Initial stability support: ", unit.squad_type, " at ", unit.current_hex, " ", result.reason, " ", result.rejections)
+		_check(result.is_valid() and not result.should_move, "Stable support begins with a useful accepted position")
+		_check(executor.execute(result), "Stable support owns its initial holding order")
+		stability.accepted(result, 0.0)
+	_check(not stability.support_lane_failed(second, Vector2i(6, 3), 0.5), "A newly established support squad gets time to acquire an actual target")
+	_check(stability.support_lane_failed(second, Vector2i(6, 3), 2.5), "An idle settled support position becomes a failed task before the first rifle advance")
+	Globals.unit_visible_enemies[second] = [enemy]
+	_check(not stability.support_lane_failed(second, Vector2i(6, 3), 3.0), "Acquiring a useful live defender restores the support position's task")
+	Globals.unit_visible_enemies.erase(second)
+	var initial_headquarters: PositionQuery = _stability_query(headquarters, snapshot, stability, 0.0, PositionProfile.Mode.HQ_SUPPORT)
+	initial_headquarters.movement_radius = 0
+	var headquarters_position: PositionResult = PositionQueryService.query_positions(initial_headquarters)
+	_check(headquarters_position.is_valid() and executor.execute(headquarters_position), "Headquarters initially owns a useful safe position")
+	stability.accepted(headquarters_position, 0.0)
+	var query: PositionQuery = _stability_query(first, snapshot, stability, 1.0)
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(not advice.should_move, "Equal support positions do not initiate optional relocation")
+	Globals.unit_visible_enemies[first] = [enemy]
+	var retargeted: PositionQuery = _stability_query(first, snapshot, stability, 2.0)
+	retargeted.objective_hex = Vector2i(8, 0)
+	retargeted.require_live_support_target = true
+	var useful_lane: PositionResult = PositionQueryService.query_positions(retargeted)
+	_check(useful_lane.is_valid() and not useful_lane.should_move and useful_lane.target_hex == first.current_hex and useful_lane.features["firing"] > 0.0, "A shifted distant fire priority cannot dislodge support that still suppresses another useful live defender")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(4, 3), 0.95)
+	query.stability_time = 20.0
+	advice = PositionQueryService.query_positions(query)
+	_check(not advice.should_move and advice.proposed_hex != first.current_hex, "A substantial new improvement must persist before leaving a useful firing position")
+	query.stability_time = 22.0
+	_check(not PositionQueryService.query_positions(query).should_move, "Two seconds of optional improvement cannot start a relocation")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(4, 3), 0.5)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(3, 3), 0.95)
+	query.stability_time = 23.0
+	_check(not PositionQueryService.query_positions(query).should_move, "Changing the preferred optional destination restarts its persistence requirement")
+	var optional_hq: PositionQuery = _stability_query(headquarters, snapshot, stability, 23.0, PositionProfile.Mode.HQ_SUPPORT)
+	optional_hq.profile.cover_weight = 30.0
+	PositionQueryService.query_positions(optional_hq)
+	query.stability_time = 25.0
+	_check(not PositionQueryService.query_positions(query).should_move, "Alternating improvements cannot bypass the persistence requirement")
+	query.stability_time = 26.0
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.should_move and advice.features["movement_kind"] == "optional", "A stable substantial improvement can relocate a settled support squad")
+	_check(executor.execute(advice), "The authorized optional relocation starts a real order")
+	first.movement.path_hexes = advice.path.duplicate()
+	first.movement.path_index = 0
+	stability.accepted(advice, 26.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, Vector2i(4, 5), 0.95)
+	var peer: PositionQuery = _stability_query(second, snapshot, stability, 20.0)
+	peer.reservations[first] = advice.target_hex
+	PositionQueryService.query_positions(peer)
+	peer.stability_time = 27.0
+	var peer_advice: PositionResult = PositionQueryService.query_positions(peer)
+	_check(not peer_advice.should_move and peer_advice.reason.contains("another combat squad"), "Only one combat squad can perform optional repositioning at a time")
+	optional_hq.stability_time = 27.0
+	var hq_relocation: PositionResult = PositionQueryService.query_positions(optional_hq)
+	_check(hq_relocation.should_move and hq_relocation.features["movement_kind"] == "optional" and executor.execute(hq_relocation), "Independent HQ repositioning can accompany a combat squad's optional move")
+	stability.accepted(hq_relocation, 27.0)
+	_check(stability.optional_mover == first, "Independent HQ movement cannot steal the combat relocation slot")
+	executor.cancel(headquarters, true)
+	stability.forget(headquarters)
+	var alternate: PositionQuery = _stability_query(first, snapshot, stability, 28.0, PositionProfile.Mode.ADVANCE)
+	alternate.objective_hex = Vector2i(8, 0)
+	alternate.deliberate_movement = true
+	var continuing: PositionResult = PositionQueryService.query_positions(alternate)
+	_check(continuing.target_hex == advice.target_hex and continuing.path == advice.path and not continuing.should_move and continuing.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE, "A changed tactical role cannot replace a safe accepted destination or route during movement")
+	var order_id: int = first.action_controller.action_order_id
+	_check(executor.execute(continuing) and first.action_controller.action_order_id == order_id, "Refreshing accepted movement preserves the order instead of restarting it")
+	stability.accepted(continuing, 28.0)
+	var shifted_fire: PositionQuery = _stability_query(first, snapshot, stability, 29.0)
+	shifted_fire.objective_hex = Vector2i(7, 2)
+	var original_context: String = shifted_fire.context_key()
+	shifted_fire.objective_hex = Vector2i(8, 2)
+	_check(shifted_fire.context_key() == original_context, "Changing support fire targets does not reset the position commitment context")
+	first.current_hex = advice.target_hex
+	first.position = ground.map_to_local(first.current_hex)
+	snapshot.positions[first as Unit] = first.current_hex
+	first.movement.is_moving = false
+	first.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	stability.observe([first, second, headquarters], 29.0)
+	alternate.stability_time = 30.0
+	continuing = PositionQueryService.query_positions(alternate)
+	_check(continuing.target_hex == first.current_hex and continuing.features.get("finishing_accepted_order", false), "Accepted positioning remains locked throughout setup")
+	peer.stability_time = 30.0
+	_check(not PositionQueryService.query_positions(peer).should_move, "The next optional squad waits for establishment, not just arrival")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, first.current_hex, 100.0)
+	var unsafe: PositionQuery = _stability_query(first, snapshot, stability, 31.0)
+	var escape: PositionResult = PositionQueryService.query_positions(unsafe)
+	_check(escape.is_valid() and escape.should_move and escape.target_hex != first.current_hex and escape.features["movement_kind"] == "necessary", "Actual danger can interrupt setup and authorize an immediate necessary relocation")
+	map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
+	first.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	stability.observe([first, second, headquarters], 32.0)
+	_check(stability.optional_mover == null, "Completion of setup releases the optional relocation slot")
+	peer.stability_time = 32.0
+	_check(PositionQueryService.query_positions(peer).should_move, "The next squad can reconsider its persistent improvement after the first establishes")
+	stability.release_unstarted_optional()
+	query.stability_time = 39.0
+	_check(stability.minimum_hold_active(query), "The minimum holding period begins after setup, not when movement was ordered")
+	query.stability_time = 40.0
+	_check(not stability.minimum_hold_active(query), "A rifle completes its minimum holding period eight seconds after establishment")
+	second.squad_type = Globals.SquadType.Rifle
+	for unit: Unit in [first, second]:
+		var attack: PositionQuery = _stability_query(unit, snapshot, stability, 33.0, PositionProfile.Mode.ADVANCE)
+		attack.objective_hex = Vector2i(7, 0)
+		attack.movement_radius = 4
+		attack.profile.progress_weight = 12.0
+		attack.profile.cover_weight = 0.8
+		attack.deliberate_movement = true
+		var advancing: PositionResult = PositionQueryService.query_positions(attack)
+		if not advancing.should_move:
+			print("Stable deliberate move: ", unit.squad_type, " ", advancing.reason, " target ", advancing.target_hex, " ", advancing.rejections)
+		_check(advancing.should_move and advancing.features["movement_kind"] == "attack", "Deliberate attack movement bypasses optional relocation serialization and holding periods")
+	var hq_stability: PlatoonPositionStability = PlatoonPositionStability.new()
+	var escort: PositionQuery = _stability_query(headquarters, snapshot, hq_stability, 0.0, PositionProfile.Mode.HQ_SUPPORT)
+	escort.profile.support_assault_squads = true
+	escort.profile.progress_weight = 12.0
+	snapshot.support_units[first as Unit]["need"] = 0.9
+	snapshot.support_units[second as Unit]["need"] = 0.8
+	HqSupportPositionPolicy.prepare(escort)
+	_check(escort.support_priority_squad == first, "HQ initially chooses the squad with the strongest support need")
+	escort.movement_radius = 0
+	var initial_hq: PositionResult = PositionQueryService.query_positions(escort)
+	_check(initial_hq.is_valid() and executor.execute(initial_hq), "HQ accepts its current safe support position before following")
+	hq_stability.accepted(initial_hq, 0.0)
+	escort.movement_radius = 2
+	escort.stability_time = 1.0
+	_check(not PositionQueryService.query_positions(escort).should_move, "HQ does not follow the first transient loss of leadership coverage")
+	escort.stability_time = 2.0
+	_check(not PositionQueryService.query_positions(escort).should_move, "HQ waits for persistent loss of leadership coverage")
+	escort.stability_time = 3.0
+	var following_hq: PositionResult = PositionQueryService.query_positions(escort)
+	_check(following_hq.should_move and following_hq.features["movement_kind"] == "follow" and following_hq.features["support_priority_covered"], "Persistent loss of leadership coverage releases useful HQ following during its holding period")
+	snapshot.support_units[first as Unit]["need"] = 0.8
+	snapshot.support_units[second as Unit]["need"] = 0.9
+	escort.stability_time = 4.0
+	HqSupportPositionPolicy.prepare(escort)
+	_check(escort.support_priority_squad == first, "Small stress changes cannot toggle the HQ support assignment")
+	snapshot.support_units[second as Unit]["need"] = 1.4
+	escort.stability_time = 5.0
+	HqSupportPositionPolicy.prepare(escort)
+	_check(escort.support_priority_squad == first, "A new HQ priority must persist before replacing its support assignment")
+	escort.stability_time = 7.0
+	HqSupportPositionPolicy.prepare(escort)
+	_check(escort.support_priority_squad == second, "A substantial persistent support need can change the HQ assignment")
+	headquarters.movement.is_moving = true
+	snapshot.support_units[first as Unit]["need"] = 2.0
+	escort.stability_time = 9.0
+	HqSupportPositionPolicy.prepare(escort)
+	_check(escort.support_priority_squad == second, "HQ retains its supported squad through an accepted bound")
+	headquarters.movement.is_moving = false
+	var anchor: Unit = stability.choose_support_anchor(first, [first, second], Vector2i(7, 3), 40.0)
+	second.current_hex = Vector2i(7, 2)
+	second.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	_check(stability.choose_support_anchor(second, [first, second], Vector2i(7, 3), 41.0) == anchor, "MG and HQ retain the support anchor while another rifle finishes its bound")
+	second.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	stability.choose_support_anchor(second, [first, second], Vector2i(7, 3), 42.0)
+	_check(stability.choose_support_anchor(second, [first, second], Vector2i(7, 3), 44.0) == second, "A clearly more forward established rifle can become the support anchor after persistence")
+	executor.cancel_all()
+	for unit: Unit in [first, second]:
+		Globals.unit_visible_enemies.erase(unit)
+		unit.squad_fire.free()
+		unit.squad_fire = null
+	for unit: Unit in [first, second, headquarters]:
 		unit.free()
 
 

@@ -13,6 +13,7 @@ var reserved_hexes_by_squad: Dictionary = {}
 var accepted_positions: Dictionary = {}
 var time_until_reconsider: float = 0.0
 var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+var position_stability: PlatoonPositionStability = PlatoonPositionStability.new()
 var _planning_requests: Array[Dictionary] = []
 var _planning_results: Array[DefensePositionResult] = []
 var _planning_reservations: Dictionary = {}
@@ -38,6 +39,7 @@ var attack_maneuver_squad: Unit
 var reserve_reason: String = ""
 var _reserve_quiet_since: float = -INF
 var _validating_batch: bool = false
+var _position_mission_context: String = ""
 
 const RESERVE_RECOVERY_SECONDS: float = 8.0
 
@@ -45,6 +47,7 @@ const RESERVE_RECOVERY_SECONDS: float = 8.0
 func _process(delta: float) -> void:
 	if not active or current_order == null:
 		return
+	position_stability.observe(squads, _position_time())
 	time_until_reconsider -= delta
 	if (not _planning_requests.is_empty() or _readiness_job != null) and _defense_plan_outdated():
 		_cancel_plan()
@@ -99,6 +102,7 @@ func _exit_tree() -> void:
 	_cancel_plan()
 	_set_mission_control(false)
 	executor.cancel_all()
+	position_stability.clear()
 	_departure_origins.clear()
 
 
@@ -112,6 +116,7 @@ func set_active(is_active: bool) -> void:
 	_clear_reserve()
 	# Release only actions owned by this planner when handing control to the player.
 	executor.cancel_all(true)
+	position_stability.clear()
 	_departure_origins.clear()
 	current_order = null
 	attack_maneuver_squad = null
@@ -130,6 +135,7 @@ func receive_mission_order(order: MissionOrder) -> void:
 	_cancel_plan()
 	_clear_reserve()
 	executor.cancel_all(true)
+	position_stability.clear()
 	_departure_origins.clear()
 	accepted_positions.clear()
 	current_order = order
@@ -150,6 +156,7 @@ func set_squads(new_squads: Array[Unit]) -> void:
 	_clear_reserve()
 	_set_mission_control(false)
 	executor.cancel_all(true)
+	position_stability.clear()
 	_departure_origins.clear()
 	squad_assignments.clear()
 	reserved_hexes_by_squad.clear()
@@ -187,14 +194,17 @@ func _start_plan(budgeted: bool) -> void:
 	_cancel_plan()
 	if not active or current_order == null or influence_map_controller == null:
 		return
+	_sync_position_mission()
 	_planning_objective_hex = current_order.objective_hex
 	influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
 	if influence_map_controller.snapshot == null:
 		return
 	var available: Array[Unit] = _get_effective_squads()
+	position_stability.observe(available, _position_time())
 	for unit: Unit in accepted_positions.keys():
 		if not available.has(unit):
 			accepted_positions.erase(unit)
+			position_stability.forget(unit)
 			executor.cancel(unit)
 	_planning_reservations = _create_current_reserved_hexes(available)
 	_planning_available = available
@@ -340,18 +350,13 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
 					config.profile.commitment_seconds = 8.0
+					if unit.squad_type == Globals.SquadType.MG:
+						config.profile.commitment_seconds = 16.0
 					var front: Unit = _attack_front_squad(available)
 					var follows_front: bool = attack_approach_started and front != null
 					if follows_front:
 						config.profile.support_advance_weight = 12.0
 						config.profile.avoid_unsuppressed_defenders = true
-					if follows_front and LOSHelper.get_hex_distance(unit.current_hex, front.current_hex) > 3:
-						if not unit.movement.is_moving and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
-							config.profile.commitment_seconds = 0.0
-					elif attack_approach_started and TacticalPositionExecutor.select_support_target_for_objective(unit, config.objective_hex) != null:
-						config.profile.commitment_seconds = INF
-					elif attack_approach_started and not unit.movement.is_moving and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
-						config.profile.commitment_seconds = 0.0
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
@@ -546,7 +551,7 @@ func _attack_front_squad(available: Array[Unit]) -> Unit:
 		if distance < best_distance or (distance == best_distance and unit == attack_maneuver_squad):
 			front = unit
 			best_distance = distance
-	return front
+	return position_stability.choose_support_anchor(front, available, current_order.objective_hex, _position_time())
 
 
 func _attack_pressure_target(unit: Unit) -> Unit:
@@ -771,6 +776,7 @@ func _add_sector_request(unit: Unit, role: String, sector: int, responsibility: 
 		query.reserve_response_limits = _planning_readiness.response_limits()
 	if query.reserve_position:
 		query.profile.firing_weight = 0.0
+	_configure_position_stability(query)
 	_planning_requests.append({"query": query, "role": role, "axis": null})
 
 
@@ -784,11 +790,13 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 				query.assault_support_squad = _attack_front_squad(squads)
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 			# Establish the initial covered firing lane before requiring post-attack retargeting.
-			query.require_live_support_target = attack_approach_started and _has_known_attack_defenders(squads)
+			var idle_lane: bool = position_stability.support_lane_failed(unit, query.objective_hex, _position_time())
+			query.require_live_support_target = (attack_approach_started or idle_lane) and _has_known_attack_defenders(squads)
 			var front: Unit = _attack_front_squad(squads)
 			if attack_approach_started and front != null:
 				query.has_support_anchor = true
 				query.support_anchor_hex = front.current_hex
+				query.support_anchor_squad = front
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
 			query.press_attack = _can_attack_without_overwatch(unit, query.objective_hex)
 			if query.press_attack:
@@ -801,12 +809,36 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
 			query.departure_baseline = _planning_baseline
 			query.has_departure_baseline = true
+		_configure_position_stability(query)
 		_planning_requests.append({"query": query, "role": role, "axis": axis})
 
 
 func _submit_planning_query() -> void:
 	var query: PositionQuery = _planning_requests[_planning_index]["query"]
+	query.stability_time = _position_time()
 	_planning_job = influence_map_controller.enqueue_position_query(query)
+
+
+func _position_time() -> float:
+	var now: float = float(Engine.get_physics_frames()) / float(Engine.physics_ticks_per_second)
+	if influence_map_controller != null and influence_map_controller.snapshot != null:
+		now = maxf(now, influence_map_controller.snapshot.captured_at)
+	return now
+
+
+func _configure_position_stability(query: PositionQuery) -> void:
+	_sync_position_mission()
+	query.stability = position_stability
+	query.stability_time = _position_time()
+	query.mission_objective_hex = current_order.objective_hex
+	query.deliberate_movement = current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]
+
+
+func _sync_position_mission() -> void:
+	var context: String = str([current_order.objective_hex, current_order.position_mode, current_order.geography, current_order.sector_cells, current_order.defense_responsibility])
+	if context != _position_mission_context:
+		position_stability.clear()
+		_position_mission_context = context
 
 
 func _continue_budgeted_plan() -> void:
@@ -969,6 +1001,7 @@ func _defense_plan_outdated() -> bool:
 
 
 func _cancel_plan() -> void:
+	position_stability.release_unstarted_optional()
 	_readiness_job = null
 	_planning_readiness = null
 	_validation_job = null
@@ -1052,6 +1085,7 @@ func _issue_order(squad: Unit) -> void:
 		if HqSupportPositionPolicy.known_good_order_enemy_has_los(influence_map_controller.snapshot, team, result.target_hex):
 			# Suppression can end while a budgeted query or an accepted move is in progress.
 			executor.cancel(squad, true)
+			position_stability.forget(squad)
 			accepted_positions.erase(squad)
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
@@ -1063,15 +1097,18 @@ func _issue_order(squad: Unit) -> void:
 			press_attack = PositionQueryService.press_attack_path_is_safe(influence_map_controller.snapshot, team, squad.current_hex, result.path)
 		if result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not press_attack and (result.features.get("press_attack", false) or not _has_established_attack_support(squads)):
 			executor.cancel(squad, true)
+			position_stability.forget(squad)
 			accepted_positions.erase(squad)
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
 			return
 		if result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and not _has_pressing_attack(squads):
-			if _has_attack_bound(squads) and not _has_established_attack_support(squads, squad):
-				# The last overwatch squad cannot relocate during the rifle's bound.
+			var protects_attack: bool = _has_attack_bound(squads) or (_has_known_attack_defenders(squads) and _has_established_attack_support(squads))
+			if protects_attack and not _has_established_attack_support(squads, squad):
+				# Keep actual suppression while other squads restore or improve their positions.
 				reserved_hexes_by_squad[squad] = squad.current_hex
 				_planning_reservations[squad] = squad.current_hex
+				position_stability.declined(squad)
 				return
 	var departing: bool = result.should_move and result.target_hex != squad.current_hex and result.profile_mode == PositionProfile.Mode.DEFEND
 	var origin: Vector2i = squad.current_hex
@@ -1081,6 +1118,7 @@ func _issue_order(squad: Unit) -> void:
 	if current_order != null and current_order.position_mode != PositionProfile.Mode.ASSAULT:
 		intent = current_order.execution_intent
 	if result.is_valid() and executor.execute(result, intent):
+		position_stability.accepted(result, _position_time())
 		if departing and not _departure_origins.has(squad):
 			_departure_origins[squad] = _planning_baseline.get(squad, origin)
 		var accepted_at: float = influence_map_controller.snapshot.captured_at
@@ -1091,6 +1129,7 @@ func _issue_order(squad: Unit) -> void:
 		squad.best_index = result.target_index
 	else:
 		executor.cancel(squad, true)
+		position_stability.forget(squad)
 		accepted_positions.erase(squad)
 		reserved_hexes_by_squad[squad] = squad.current_hex
 		_planning_reservations[squad] = squad.current_hex

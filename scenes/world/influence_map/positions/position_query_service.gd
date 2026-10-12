@@ -16,6 +16,7 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	result.context = query.context_key()
 	result.objective_hex = query.objective_hex
 	result.profile_mode = query.profile.mode
+	result.position_profile = query.profile
 	if query.snapshot == null or not query.snapshot.maps.has(query.team):
 		result.reason = "No completed influence snapshot"
 		return false
@@ -83,6 +84,46 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 		result.approach_cells.assign(cells.keys())
 		result.remembered_approach_cells.assign(remembered.keys())
 		result.inferred_approach_cells.assign(inferred.keys())
+	return true
+
+
+static func finish_accepted_order(query: PositionQuery, result: PositionResult) -> bool:
+	if not query.finish_accepted_order or query.stable_order == null:
+		return false
+	var path: Array[Vector2i] = [query.unit.current_hex]
+	if query.unit.movement.is_moving:
+		path = _remaining_path(query.unit)
+	var target: Vector2i = query.stable_order.target_hex
+	if not _valid_snapshot_path(query, path, target):
+		return false
+	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
+		return false
+	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, target, path)
+	if features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
+		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and HqSupportPositionPolicy.rejection(query, features) != "":
+		return false
+	if query.profile.mode == PositionProfile.Mode.DEFEND and not DefensePositionPolicy.allows_route(query, features):
+		return false
+	if query.stable_order.features.get("press_attack", false) and not query.press_attack:
+		return false
+	result.status = PositionResult.Status.RETAINED
+	result.target_hex = target
+	result.proposed_hex = target
+	result.target_index = query.snapshot.maps[query.team].cell_to_index(target)
+	result.path = path
+	result.features = features
+	result.features["movement_kind"] = query.stable_order.features.get("movement_kind", "necessary")
+	result.features["finishing_accepted_order"] = true
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.features["open_support_position"] = features["cover"] < query.profile.minimum_cover
+	result.score = query.profile.score(features, query.unit)
+	result.previous_score = result.score
+	result.should_move = false
+	result.eligibility[result.target_index] = 1
+	result.cell_states[result.target_index] = PositionResult.CellState.AVAILABLE
+	result.rejection_reasons[result.target_index] = ""
+	result.reason = "Finishing the accepted movement and setup before reconsidering positions"
 	return true
 
 
@@ -160,17 +201,24 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if retained.features.get("responsibility") == "cover_approach" and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
 			holding_pressure = false
 		committed = committed or holding_pressure
-		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and not retained.features.get("support_priority_covered", false) and (best.features.get("support_priority_covered", false) or best.features.get("support_priority_progress", 0.0) > retained.features.get("support_priority_progress", 0.0)):
+		if query.stability == null and query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and not retained.features.get("support_priority_covered", false) and (best.features.get("support_priority_covered", false) or best.features.get("support_priority_progress", 0.0) > retained.features.get("support_priority_progress", 0.0)):
 			# New urgent support can interrupt a safe but unhelpful HQ commitment.
 			committed = false
 			margin = 0.0
-		if committed or best.score <= retained.score + margin:
+		var retain_position: bool = committed or best.score <= retained.score + margin
+		if query.stability != null:
+			retain_position = not query.stability.authorize(query, best, retained)
+			committed = query.stability.minimum_hold_active(query)
+		if retain_position:
 			best = retained
 			result.status = PositionResult.Status.RETAINED
+	elif query.stability != null:
+		query.stability.authorize(query, best, null)
 	result.target_hex = best.hex
 	result.target_index = best.index
 	result.score = best.score
 	result.features = best.features
+	result.features["movement_kind"] = query.movement_kind
 	result.features["connected_cover_preferred"] = protected_preference and best == protected_choice
 	result.path = best.path
 	if best.features.get("withdrawal", false):
@@ -209,6 +257,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			result.reason = "Moving closer to the forward support squad; leadership range not yet reached"
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
+	if query.stability_reason != "" and result.status == PositionResult.Status.RETAINED:
+		result.reason = query.stability_reason
 	return
 
 
@@ -353,6 +403,9 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 	if LOSHelper.get_hex_distance(query.unit.current_hex, cell) > query.movement_radius:
 		return false
 	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+		if query.stability != null and query.stable_order != null and cell == query.unit.current_hex:
+			# Judge the held position by its useful live firing lane, even after fire priority shifts.
+			return true
 		if query.has_support_anchor and LOSHelper.get_hex_distance(cell, query.support_anchor_hex) < LOSHelper.get_hex_distance(query.origin_hex, query.support_anchor_hex):
 			return true
 		return objective_distance > 0 and objective_distance <= InfluenceUnitQuery.get_unit_range(query.unit)
@@ -435,6 +488,8 @@ static func _remaining_path(unit: Unit) -> Array[Vector2i]:
 
 
 static func _maintains_commitment(query: PositionQuery, cell: Vector2i, context: String) -> bool:
+	if query.stability != null:
+		return query.stability.minimum_hold_active(query)
 	if query.profile.commitment_seconds <= 0.0 or not query.has_accepted_target or query.accepted_context != context or query.accepted_target != cell:
 		return false
 	return query.snapshot.captured_at - query.accepted_at < query.profile.commitment_seconds or _moving_to(query.unit, cell)
