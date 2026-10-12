@@ -360,6 +360,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	game_controller.allies_objective_tilemap = scenario.get_objectives_layer(Globals.Team.ALLIES)
 	
 	game_controller.start_game(team, start_screen.time)
+	ui.show_mission_objectives(scenario.victory_conditions, team, game_controller.time_left_seconds)
 	input_manager.set_process(true)
 	
 	game_controller.move_camera(scenario.start_hex[scenario.player_team])

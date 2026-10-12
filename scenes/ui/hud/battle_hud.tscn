@@ -31,6 +31,23 @@
 [ext_resource type="Texture2D" uid="uid://de0tm7x6agxul" path="res://assets/ui/option_wheel/moving_ger.png" id="27_7ygsn"]
 [ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="28_272wc"]
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="29_knhlc"]
+[ext_resource type="Script" uid="uid://csetsm3mvbeux" path="res://scenes/ui/hud/mission_objectives_panel.gd" id="30_mission"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mission"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.1, 0.1, 0.1, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.63, 0.46, 0.27, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_26a3v"]
 outline_size = 10
@@ -118,6 +135,31 @@ text = "Minutes"
 [node name="Timer" type="Timer" parent="Control/Countdown" unique_id=1589187607]
 one_shot = true
 autostart = true
+
+[node name="MissionObjectives" type="PanelContainer" parent="Control" unique_id=1608121920]
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mission")
+script = ExtResource("30_mission")
+
+[node name="Objectives" type="VBoxContainer" parent="Control/MissionObjectives" unique_id=1217781514]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Heading" type="Label" parent="Control/MissionObjectives/Objectives" unique_id=1503336149]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.65, 0.45, 1)
+theme_override_font_sizes/font_size = 14
+text = "MISSION · PRIMARY OBJECTIVES"
+autowrap_mode = 3
+
+[node name="Rows" type="VBoxContainer" parent="Control/MissionObjectives/Objectives" unique_id=665202199]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
 
 [node name="TileDetails" type="PanelContainer" parent="Control" unique_id=200690569]
 visible = false
@@ -657,6 +699,7 @@ fit_content = true
 autowrap_mode = 2
 
 [node name="Debug" type="PanelContainer" parent="Control" unique_id=367192536]
+visible = false
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -679,61 +722,61 @@ text = "Enemy Selectable"
 layout_mode = 2
 text = "No Damage"
 
-[node name="AxisAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer"]
+[node name="AxisAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=807987063]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AxisAI"]
+[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1322665241]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "Axis AI"
 
-[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI"]
+[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1965840446]
 layout_mode = 2
-disabled = true
 tooltip_text = "Enable or disable automatic Axis orders."
-item_count = 2
+disabled = true
 selected = 0
+item_count = 2
 popup/item_0/text = "OFF"
 popup/item_0/id = 0
 popup/item_1/text = "ON"
 popup/item_1/id = 1
 
-[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI"]
+[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1904751932]
 layout_mode = 2
-disabled = true
 tooltip_text = "ATTACK the Axis objective or DEFEND the opponent's capture objective."
-item_count = 2
+disabled = true
 selected = 0
+item_count = 2
 popup/item_0/text = "DEFEND"
 popup/item_0/id = 1
 popup/item_1/text = "ATTACK"
 popup/item_1/id = 4
 
-[node name="AlliesAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer"]
+[node name="AlliesAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=1248816649]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AlliesAI"]
+[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=450887293]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "Allies AI"
 
-[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI"]
+[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=1922700129]
 layout_mode = 2
-disabled = true
 tooltip_text = "Enable or disable automatic Allied orders."
-item_count = 2
+disabled = true
 selected = 0
+item_count = 2
 popup/item_0/text = "OFF"
 popup/item_0/id = 0
 popup/item_1/text = "ON"
 popup/item_1/id = 1
 
-[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI"]
+[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=998108012]
 layout_mode = 2
-disabled = true
 tooltip_text = "ATTACK the Allied objective or DEFEND the opponent's capture objective."
-item_count = 2
+disabled = true
 selected = 0
+item_count = 2
 popup/item_0/text = "DEFEND"
 popup/item_0/id = 1
 popup/item_1/text = "ATTACK"

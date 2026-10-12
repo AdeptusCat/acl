@@ -4,6 +4,7 @@ extends CanvasLayer
 @export var ground_layer : HexagonTileMapLayer
 
 @onready var countdown_panel_container: PanelContainer = $Control/Countdown
+@onready var mission_objectives: MissionObjectivesPanel = $Control/MissionObjectives
 
 
 @onready var cover_icon_scene: PackedScene = preload("res://scenes/ui/effects/cover_icon.tscn")
@@ -33,6 +34,35 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 	#elif Input.is_action_just_released("RIGHT"):
 		#var option: WheelOption.Option = selection_wheel.close()
 		#print(option)
+
+func _ready() -> void:
+	$Control.resized.connect(_layout_mission_objectives)
+	countdown_panel_container.item_rect_changed.connect(_layout_mission_objectives)
+	get_window().size_changed.connect(_layout_mission_objectives)
+
+
+func show_mission_objectives(conditions: Array[VictoryCondition], player_team: Globals.Team, time_left_seconds: float) -> void:
+	mission_objectives.setup(conditions, player_team, time_left_seconds)
+	_layout_mission_objectives()
+
+
+func _layout_mission_objectives() -> void:
+	var viewport_width: float = $Control.size.x
+	var panel_width: float = minf(320.0, maxf(0.0, viewport_width - 24.0))
+	var timer_rect: Rect2 = countdown_panel_container.get_rect()
+	var available_width: float = minf(viewport_width, float(get_window().size.x))
+	var retry_panel: Control = $Control/TryAgain
+	var space_beside_timer: float = timer_rect.position.x - retry_panel.get_rect().end.x - 24.0
+	var beside_timer: bool = space_beside_timer >= 280.0 and (available_width - timer_rect.size.x) * 0.5 >= panel_width + 24.0
+	if beside_timer:
+		panel_width = minf(panel_width, space_beside_timer)
+	mission_objectives.custom_minimum_size.x = panel_width
+	mission_objectives.size.x = panel_width
+	if beside_timer:
+		mission_objectives.position = Vector2(timer_rect.position.x - panel_width - 12.0, timer_rect.position.y)
+	else:
+		mission_objectives.position = Vector2(maxf(12.0, (viewport_width - panel_width) * 0.5), timer_rect.end.y + 12.0)
+
 
 func setup() -> void:
 	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
@@ -72,6 +102,7 @@ func _on_game_started_through_moving_unit() -> void:
 
 func _on_update_timer_label(time_left_seconds : float) -> void:
 	countdown_panel_container.update_timer_label(time_left_seconds)
+	mission_objectives.update_time(time_left_seconds)
 
 
 func mouse_event_position_changed(_event_pos: Vector2) -> void:

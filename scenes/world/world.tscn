@@ -1000,6 +1000,22 @@ outcome_level = 0
 test_at_scenario_end = true
 metadata/_custom_type_script = "uid://dboih1fudyph4"
 
+[sub_resource type="Resource" id="Resource_06lug"]
+script = ExtResource("60_yr5cl")
+team = 1
+metadata/_custom_type_script = "uid://dwewyipec6v2u"
+
+[sub_resource type="Resource" id="Resource_oulc8"]
+script = ExtResource("59_jhdiv")
+team = 1
+metadata/_custom_type_script = "uid://dboih1fudyph4"
+
+[sub_resource type="Resource" id="Resource_5nlln"]
+script = ExtResource("60_ghkdt")
+team = 1
+test_at_scenario_end = true
+metadata/_custom_type_script = "uid://duw4oudp0kojx"
+
 [sub_resource type="Resource" id="Resource_yxjfx"]
 script = ExtResource("61_s64j0")
 hold_condition = SubResource("Resource_njpnx")
@@ -1754,7 +1770,7 @@ scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_tul8n"), SubResource("Resource_ghkdt"), SubResource("Resource_njpnx"), SubResource("Resource_aql7m")])
+victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_tul8n"), SubResource("Resource_ghkdt"), SubResource("Resource_njpnx"), SubResource("Resource_aql7m"), SubResource("Resource_06lug"), SubResource("Resource_oulc8"), SubResource("Resource_5nlln")])
 ai_fallback_policies = Array[ExtResource("61_s64j0")]([SubResource("Resource_yxjfx")])
 axis_ai_status = 1
 allies_ai_status = 0
