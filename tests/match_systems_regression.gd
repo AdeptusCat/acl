@@ -93,7 +93,7 @@ func _test_link_history() -> void:
 
 func _test_link_visibility(world: Node) -> void:
 	var renderer: Node2D = world.game_controller.get_node("CommandConnectivityRenderer")
-	var checkbox: CheckBox = world.ui.get_node("Control/Settings/FoldableContainer/VBoxContainer/ShowCmdConnectivity")
+	var checkbox: CheckBox = world.ui.get_node("Control/Settings/Menu/Content/ShowCmdConnectivity")
 	var show_links: bool = SessionSettings.showCmdConnectivity
 	var show_enemy: bool = Debug.showEnemyCmdConnectivity
 	var checkbox_pressed: bool = checkbox.button_pressed

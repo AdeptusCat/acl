@@ -26,6 +26,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var leadership_bonus_label: Label = $Summary/Details/Content/Stats/LeadershipBonus
 @onready var debug_actions: HBoxContainer = $Summary/Details/Content/DebugActions
 @onready var rout_button: RoutButton = $Summary/Rout
+@onready var rout_explanation: Label = $Summary/RoutExplanation
 @onready var hud_control: Control = get_parent() as Control
 
 var unit: Unit
@@ -310,6 +311,10 @@ func _on_state_changed(state: int) -> void:
 	var rout_available: bool = state == STATES.MoraleState.PINNED and not unit.in_close_combat and not unit.surrendered
 	if rout_button.disabled == rout_available:
 		rout_button.set_rout_available(rout_available)
+	rout_explanation.visible = state == STATES.MoraleState.PINNED and not unit.surrendered
+	rout_explanation.text = RoutButton.ROUT_EXPLANATION
+	if unit.in_close_combat:
+		rout_explanation.text = "Pinned in close combat.\nRout is unavailable during this fight."
 
 
 func _on_leadership_changed(bonus: float) -> void:

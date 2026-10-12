@@ -11,7 +11,6 @@
 [ext_resource type="Script" uid="uid://mw6wyu2oieck" path="res://scenes/ui/tiles/tile_details_panel.gd" id="6_ygedu"]
 [ext_resource type="Texture2D" uid="uid://7vvsl5cw0hib" path="res://assets/status/cover_outline.png" id="7_26a3v"]
 [ext_resource type="Texture2D" uid="uid://4pgej42no2ye" path="res://assets/status/range.png" id="7_jcn1r"]
-[ext_resource type="Script" uid="uid://dk7d80ay1lo81" path="res://scenes/ui/panels/settings_panel.gd" id="8_4w2x3"]
 [ext_resource type="Script" uid="uid://l767yhx40ual" path="res://scenes/ui/tiles/tile_texture_preview.gd" id="8_qmss2"]
 [ext_resource type="Script" uid="uid://dprnou6rxrwlp" path="res://scenes/ui/tiles/tile_cover_overlay.gd" id="9_26a3v"]
 [ext_resource type="Script" uid="uid://duwe3tkqjv0bw" path="res://scenes/ui/tooltips/tooltip.gd" id="12_hl07w"]
@@ -27,6 +26,13 @@
 [ext_resource type="Script" uid="uid://csetsm3mvbeux" path="res://scenes/ui/hud/mission_objectives_panel.gd" id="30_mission"]
 [ext_resource type="PackedScene" path="res://scenes/ui/units/unit_details_panel.tscn" id="31_squad"]
 [ext_resource type="PackedScene" path="res://scenes/ui/units/squad_roster_panel.tscn" id="32_roster"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/battle_settings_panel.tscn" id="33_settings"]
+[ext_resource type="FontFile" path="res://assets/fonts/courier_prime/Courier Prime.ttf" id="34_font"]
+
+[sub_resource type="Theme" id="DebugTheme"]
+default_font = ExtResource("34_font")
+default_font_size = 12
+FoldableContainer/font_sizes/font_size = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mission"]
 content_margin_left = 12.0
@@ -126,10 +132,6 @@ vertical_alignment = 1
 visible = false
 layout_mode = 2
 text = "Minutes"
-
-[node name="Timer" type="Timer" parent="Control/Countdown" unique_id=1589187607]
-one_shot = true
-autostart = true
 
 [node name="MissionObjectives" type="PanelContainer" parent="Control" unique_id=1608121920]
 visible = false
@@ -354,66 +356,8 @@ offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("4_pfayw")
 
-[node name="Settings" type="PanelContainer" parent="Control" unique_id=1578816844]
+[node name="Settings" parent="Control" unique_id=1578816844 instance=ExtResource("33_settings")]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -189.0
-offset_bottom = 165.0
-grow_horizontal = 0
-theme_override_styles/panel = ExtResource("15_mgwkc")
-script = ExtResource("8_4w2x3")
-
-[node name="FoldableContainer" type="FoldableContainer" parent="Control/Settings" unique_id=417972358]
-layout_mode = 2
-title = "Settings"
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/Settings/FoldableContainer" unique_id=1254553002]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=732099031]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Controls:
-left click - select/unselect unit
-right click - move/attack unit
-WASD move camera
-mouse wheel - zoom"
-
-[node name="Label3" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1797015844]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=249884744]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Master Volume:"
-
-[node name="VolumeSlider" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1374941297]
-layout_mode = 2
-max_value = 1.0
-step = 0.01
-value = 1.0
-
-[node name="Label4" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=406234290]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Music Volume:"
-
-[node name="VolumeSlider2" type="HSlider" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=839974223]
-layout_mode = 2
-max_value = 1.0
-step = 0.01
-value = 1.0
-
-[node name="Label5" type="Label" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=1101185111]
-layout_mode = 2
-text = "Overlsays:"
-
-[node name="ShowCmdConnectivity" type="CheckBox" parent="Control/Settings/FoldableContainer/VBoxContainer" unique_id=15019783]
-layout_mode = 2
-button_pressed = true
-text = "Cmd Connectivity"
 
 [node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
 layout_mode = 0
@@ -536,37 +480,53 @@ fit_content = true
 autowrap_mode = 2
 
 [node name="Debug" type="PanelContainer" parent="Control" unique_id=367192536]
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -22.0
-offset_right = 208.0
-offset_bottom = 22.0
-grow_vertical = 2
-theme_override_styles/panel = ExtResource("15_mgwkc")
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -54.0
+offset_right = 292.0
+offset_bottom = -12.0
+grow_vertical = 0
+mouse_force_pass_scroll_events = false
+theme = SubResource("DebugTheme")
+theme_override_styles/panel = SubResource("StyleBoxFlat_mission")
 script = ExtResource("24_fv78h")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/Debug" unique_id=593117933]
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/Debug"]
 layout_mode = 2
+folded = true
+title = "Debug controls"
 
-[node name="EnemySelectable" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=139947713]
+[node name="Scroll" type="ScrollContainer" parent="Control/Debug/FoldableContainer"]
+custom_minimum_size = Vector2(0, 270)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Debug/FoldableContainer/Scroll" unique_id=593117933]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EnemySelectable" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=139947713]
 layout_mode = 2
 text = "Enemy Selectable"
 
-[node name="NoDamage" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=252701230]
+[node name="NoDamage" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=252701230]
 layout_mode = 2
 text = "No Damage"
 
-[node name="AxisAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=807987063]
+[node name="AxisAI" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=807987063]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1322665241]
+[node name="Label" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1322665241]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "Axis AI"
 
-[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1965840446]
+[node name="Status" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1965840446]
 layout_mode = 2
 tooltip_text = "Enable or disable automatic Axis orders."
 disabled = true
@@ -577,7 +537,7 @@ popup/item_0/id = 0
 popup/item_1/text = "ON"
 popup/item_1/id = 1
 
-[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AxisAI" unique_id=1904751932]
+[node name="Mode" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1904751932]
 layout_mode = 2
 tooltip_text = "ATTACK the Axis objective or DEFEND the opponent's capture objective."
 disabled = true
@@ -588,15 +548,15 @@ popup/item_0/id = 1
 popup/item_1/text = "ATTACK"
 popup/item_1/id = 4
 
-[node name="AlliesAI" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=1248816649]
+[node name="AlliesAI" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=1248816649]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=450887293]
+[node name="Label" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=450887293]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "Allies AI"
 
-[node name="Status" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=1922700129]
+[node name="Status" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=1922700129]
 layout_mode = 2
 tooltip_text = "Enable or disable automatic Allied orders."
 disabled = true
@@ -607,7 +567,7 @@ popup/item_0/id = 0
 popup/item_1/text = "ON"
 popup/item_1/id = 1
 
-[node name="Mode" type="OptionButton" parent="Control/Debug/VBoxContainer/AlliesAI" unique_id=998108012]
+[node name="Mode" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=998108012]
 layout_mode = 2
 tooltip_text = "ATTACK the Allied objective or DEFEND the opponent's capture objective."
 disabled = true
@@ -618,52 +578,52 @@ popup/item_0/id = 1
 popup/item_1/text = "ATTACK"
 popup/item_1/id = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=1448464392]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=1448464392]
 layout_mode = 2
 
-[node name="ThreadMap" type="CheckBox" parent="Control/Debug/VBoxContainer/HBoxContainer" unique_id=1700656099]
+[node name="ThreadMap" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer" unique_id=1700656099]
 layout_mode = 2
 text = "Thread Map"
 
-[node name="EnemyTeam" type="CheckButton" parent="Control/Debug/VBoxContainer/HBoxContainer" unique_id=258743114]
+[node name="EnemyTeam" type="CheckButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer" unique_id=258743114]
 layout_mode = 2
 text = "Enemy"
 
-[node name="ShowEnemyCmdConnectivity" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=911341287]
+[node name="ShowEnemyCmdConnectivity" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=911341287]
 layout_mode = 2
 text = "Enemy CMD Conn."
 
-[node name="DontFireWeapons" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=776047202]
+[node name="DontFireWeapons" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=776047202]
 layout_mode = 2
 text = "Dont Fire Weapons"
 
-[node name="ShowLosLines" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=2004144681]
+[node name="ShowLosLines" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=2004144681]
 layout_mode = 2
 text = "Show LOS Lines"
 
-[node name="ShowMovementLines" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=480014847]
+[node name="ShowMovementLines" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=480014847]
 layout_mode = 2
 text = "Show Movement Lines"
 
-[node name="HideFogOfWar" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=409354570]
+[node name="HideFogOfWar" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=409354570]
 layout_mode = 2
 text = "Hide Fog Of War"
 
-[node name="ShowEnemies" type="CheckBox" parent="Control/Debug/VBoxContainer" unique_id=106533866]
+[node name="ShowEnemies" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=106533866]
 layout_mode = 2
 text = "Show Enemies"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Control/Debug/VBoxContainer" unique_id=905440762]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=905440762]
 layout_mode = 2
 
-[node name="InfluenceMapTeamName" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=1159297784]
+[node name="InfluenceMapTeamName" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer2" unique_id=1159297784]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=1605024239]
+[node name="Label" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer2" unique_id=1605024239]
 layout_mode = 2
 text = ":"
 
-[node name="InfluenceMapName" type="Label" parent="Control/Debug/VBoxContainer/HBoxContainer2" unique_id=692635582]
+[node name="InfluenceMapName" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer2" unique_id=692635582]
 layout_mode = 2
 
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
@@ -675,20 +635,15 @@ options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), Sub
 visible = false
 layout_mode = 1
 
-[connection signal="timeout" from="Control/Countdown/Timer" to="Control/Countdown" method="_on_timer_timeout"]
 [connection signal="folding_changed" from="Control/TileDetails/FoldableContainer" to="Control/TileDetails" method="_on_foldable_container_folding_changed"]
-[connection signal="folding_changed" from="Control/Settings/FoldableContainer" to="Control/Settings" method="_on_foldable_container_folding_changed"]
-[connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider" to="Control/Settings" method="_on_volume_slider_value_changed"]
-[connection signal="value_changed" from="Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2" to="Control/Settings" method="_on_volume_slider_2_value_changed"]
-[connection signal="toggled" from="Control/Settings/FoldableContainer/VBoxContainer/ShowCmdConnectivity" to="Control/Settings" method="_on_check_box_toggled"]
 [connection signal="pressed" from="Control/TryAgain/TryAgainButton" to="." method="_on_try_again_button_pressed"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/EnemySelectable" to="Control/Debug" method="_on_enemy_selectable_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowLosLines" to="Control/Debug" method="_on_show_los_lines_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowMovementLines" to="Control/Debug" method="_on_show_movement_lines_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/HideFogOfWar" to="Control/Debug" method="_on_hide_fog_of_war_toggled"]
-[connection signal="toggled" from="Control/Debug/VBoxContainer/ShowEnemies" to="Control/Debug" method="_on_show_enemies_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/EnemySelectable" to="Control/Debug" method="_on_enemy_selectable_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowLosLines" to="Control/Debug" method="_on_show_los_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowMovementLines" to="Control/Debug" method="_on_show_movement_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HideFogOfWar" to="Control/Debug" method="_on_hide_fog_of_war_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowEnemies" to="Control/Debug" method="_on_show_enemies_toggled"]

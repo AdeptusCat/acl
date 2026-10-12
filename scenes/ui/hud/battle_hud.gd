@@ -106,11 +106,6 @@ func _layout_mission_objectives() -> void:
 
 
 func setup() -> void:
-	#var db = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))
-	##var db = -2
-	#var ratio = pow(10.0, db / 20.0)
-	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider.value = ratio
-	#$Control/Settings/FoldableContainer/VBoxContainer/VolumeSlider2.value = ratio
 	tile_details.set_ground_layer(ground_layer)
 	unit_details.hide()
 

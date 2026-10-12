@@ -1,64 +1,47 @@
 extends PanelContainer
 
-
 @onready var timer_label: Label = $HBoxContainer/TimerLabel
-@onready var timer: Timer = $Timer
-
-var opacity_tween: Tween = null
-var scale_tween: Tween = null
 
 var started: bool = false
 var alert_threshold_s: int = 30
+var _time_left_seconds: float = 600.0
+var _alert_active: bool = false
+var _alert_tween: Tween
 
 
-func set_countdown(_started: bool) -> void:
-	started = _started
-	if started:
-		timer.stop()
-		if opacity_tween:
-			opacity_tween.kill()
-		timer_label.modulate.a = 1.0
+func set_countdown(is_started: bool) -> void:
+	started = is_started
+	_update_alert()
 
 
 func update_timer_label(time_left_seconds: float) -> void:
-	var minutes: int = int(time_left_seconds / 60.0)
-	var seconds: int = int(time_left_seconds) % 60
+	_time_left_seconds = maxf(0.0, time_left_seconds)
+	var minutes: int = int(_time_left_seconds / 60.0)
+	var seconds: int = int(_time_left_seconds) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
-	if time_left_seconds < alert_threshold_s:
-		timer_label.modulate = Color(0.947, 0.0, 0.0, 1.0)
-		if timer.is_stopped():
-			timer.start(1.0)
-	if time_left_seconds == 0.0:
-		timer.stop()
+	_update_alert()
 
 
-func _on_timer_timeout() -> void:
-	if not started:
-		if timer_label.modulate.a < 1.0:
-			tween_opacity(1.0)
-			timer.start(0.5)
-		else:
-			tween_opacity(0.1)
-			timer.start(1.0)
-	if started:
-		timer.start(1.0)
-		tween_scale()
-	#await tween_opacity(0.0).finished
+func _update_alert() -> void:
+	var time_low: bool = started and _time_left_seconds <= float(alert_threshold_s)
+	if time_low:
+		timer_label.modulate = Color(0.96, 0.48, 0.32)
+	else:
+		timer_label.modulate = Color.WHITE
+	if time_low and not _alert_active and _time_left_seconds > 0.0:
+		# One brief cue when the countdown enters its final thirty seconds.
+		_stop_alert_tween()
+		timer_label.pivot_offset = timer_label.size * 0.5
+		_alert_tween = create_tween()
+		_alert_tween.tween_property(timer_label, "scale", Vector2(1.1, 1.1), 0.12)
+		_alert_tween.tween_property(timer_label, "scale", Vector2.ONE, 0.18)
+	if not time_low or _time_left_seconds <= 0.0:
+		_stop_alert_tween()
+	_alert_active = time_low
 
 
-func tween_scale() -> Tween:
-	if scale_tween: 
-		scale_tween.kill()
-	scale_tween = get_tree().create_tween()
-	scale_tween.tween_property(timer_label, 'scale', Vector2(1.5, 1.5), 0.2)
-	scale_tween.tween_property(timer_label, 'scale', Vector2(1.0, 1.0), 0.2)
-	return scale_tween
-
-
-
-func tween_opacity(to: float) -> Tween:
-	if opacity_tween: 
-		opacity_tween.kill()
-	opacity_tween = get_tree().create_tween()
-	opacity_tween.tween_property(timer_label, 'modulate:a', to, 0.3)
-	return opacity_tween
+func _stop_alert_tween() -> void:
+	if _alert_tween != null and _alert_tween.is_valid():
+		_alert_tween.kill()
+	_alert_tween = null
+	timer_label.scale = Vector2.ONE

@@ -1,28 +1,42 @@
 extends PanelContainer
 
 
-@onready var enemy_selectable: CheckBox = $VBoxContainer/EnemySelectable
-@onready var no_damage: CheckBox = $VBoxContainer/NoDamage
-@onready var axis_ai_status: OptionButton = $VBoxContainer/AxisAI/Status
-@onready var axis_ai_mode: OptionButton = $VBoxContainer/AxisAI/Mode
-@onready var allies_ai_status: OptionButton = $VBoxContainer/AlliesAI/Status
-@onready var allies_ai_mode: OptionButton = $VBoxContainer/AlliesAI/Mode
-@onready var thread_map: CheckBox = $VBoxContainer/HBoxContainer/ThreadMap
-@onready var enemy_team: CheckButton = $VBoxContainer/HBoxContainer/EnemyTeam
-@onready var show_enemy_cmd_connectivity: CheckBox = $VBoxContainer/ShowEnemyCmdConnectivity
-@onready var dont_fire_weapons: CheckBox = $VBoxContainer/DontFireWeapons
-@onready var show_los_lines: CheckBox = $VBoxContainer/ShowLosLines
-@onready var show_movement_lines: CheckBox = $VBoxContainer/ShowMovementLines
-@onready var hide_fog_of_war: CheckBox = $VBoxContainer/HideFogOfWar
-@onready var show_enemies: CheckBox = $VBoxContainer/ShowEnemies
-@onready var influence_map_name: Label = $VBoxContainer/HBoxContainer2/InfluenceMapName
-@onready var influence_map_team_name: Label = $VBoxContainer/HBoxContainer2/InfluenceMapTeamName
+@onready var enemy_selectable: CheckBox = $FoldableContainer/Scroll/VBoxContainer/EnemySelectable
+@onready var no_damage: CheckBox = $FoldableContainer/Scroll/VBoxContainer/NoDamage
+@onready var axis_ai_status: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AxisAI/Status
+@onready var axis_ai_mode: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AxisAI/Mode
+@onready var allies_ai_status: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AlliesAI/Status
+@onready var allies_ai_mode: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AlliesAI/Mode
+@onready var thread_map: CheckBox = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer/ThreadMap
+@onready var enemy_team: CheckButton = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer/EnemyTeam
+@onready var show_enemy_cmd_connectivity: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowEnemyCmdConnectivity
+@onready var dont_fire_weapons: CheckBox = $FoldableContainer/Scroll/VBoxContainer/DontFireWeapons
+@onready var show_los_lines: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowLosLines
+@onready var show_movement_lines: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowMovementLines
+@onready var hide_fog_of_war: CheckBox = $FoldableContainer/Scroll/VBoxContainer/HideFogOfWar
+@onready var show_enemies: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowEnemies
+@onready var influence_map_name: Label = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer2/InfluenceMapName
+@onready var influence_map_team_name: Label = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer2/InfluenceMapTeamName
 
 var _ai_controller: Node2D
+@onready var section: FoldableContainer = $FoldableContainer
+@onready var scroll: ScrollContainer = $FoldableContainer/Scroll
+@onready var hud_control: Control = get_parent() as Control
+@onready var tile_details: Control = hud_control.get_node("TileDetails") as Control
+@onready var mission_objectives: Control = hud_control.get_node("MissionObjectives") as Control
 
 func _ready() -> void:
 	if not OS.is_debug_build():
 		hide()
+	section.fold()
+	section.folding_changed.connect(_on_folding_changed)
+	minimum_size_changed.connect(_queue_fit)
+	hud_control.resized.connect(_queue_fit)
+	tile_details.item_rect_changed.connect(_queue_fit)
+	tile_details.visibility_changed.connect(_queue_fit)
+	mission_objectives.item_rect_changed.connect(_queue_fit)
+	mission_objectives.visibility_changed.connect(_queue_fit)
+	_queue_fit()
 	enemy_selectable.button_pressed = Debug.enemy_selectable
 	no_damage.button_pressed = Debug.no_damage
 	thread_map.button_pressed = Debug.draw_thread_map
@@ -34,6 +48,30 @@ func _ready() -> void:
 	hide_fog_of_war.button_pressed = Debug.hide_fog_of_war
 	show_enemies.button_pressed = Debug.show_enemies
 	
+
+
+func _on_folding_changed(_folded: bool) -> void:
+	_queue_fit()
+
+
+func _queue_fit() -> void:
+	_fit_panel.call_deferred()
+
+
+func _fit_panel() -> void:
+	if not is_node_ready() or is_queued_for_deletion():
+		return
+	var bottom: float = hud_control.size.y - 12.0
+	if tile_details.visible:
+		bottom = minf(bottom, tile_details.position.y - 12.0)
+	var top: float = hud_control.get_node("TryAgain").get_rect().end.y + 12.0
+	var column: Rect2 = Rect2(12.0, 0.0, 280.0, hud_control.size.y)
+	if mission_objectives.visible and column.intersects(mission_objectives.get_rect()):
+		top = maxf(top, mission_objectives.get_rect().end.y + 12.0)
+	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
+	scroll.custom_minimum_size.y = minf(270.0, maxf(80.0, bottom - top - overhead))
+	size = Vector2(280.0, get_combined_minimum_size().y)
+	position = Vector2(12.0, bottom - size.y)
 
 
 func _process(delta: float) -> void:
