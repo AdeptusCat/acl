@@ -18,6 +18,9 @@ The AI keeps the hold as its primary own objective until one of these occurs:
 - Too few eligible combat squads remain, no eligible squad can reach the hold,
   or reaching and securing it cannot finish before the deadline, continuously
   for the confirmation period.
+- The remaining eligible combat squads fall below **Minimum Combat Squads**
+  for the confirmation period, even if the objective is still held. HQ does
+  not count toward this threshold. Zero disables this optional trigger.
 - The hold is unsecured and only estimated exit travel plus the withdrawal
   margin remains. This transition is immediate.
 
@@ -25,10 +28,20 @@ The AI keeps the hold as its primary own objective until one of these occurs:
 **Withdrawal Margin Seconds** defaults to 10. Travel estimates use known routes
 and squad movement times. A secured objective is kept near the deadline.
 
+OutpostProbe uses **Minimum Combat Squads = 2**, so one surviving combat squad
+withdraws after confirmation. This does not change how many units its occupation
+victory condition requires. A surviving HQ also withdraws when the combat squads
+are gone. Pinned units still wait until movement is possible.
+
 Withdrawal remains committed until a new match begins. Changing ATTACK/DEFEND
 or switching AI OFF/ON preserves it. Enemy denial duties do not pull withdrawing
 squads back to the abandoned hold. Safe accepted moves finish before their
 squad changes duty; movement and route safety checks continue to apply.
+
+Before fallback activates, an opponent's **Prevent Enemy Exit** condition cannot
+create an early exit duty for the linked marker group. Once withdrawal is
+authorized, reaching those markers also denies the opponent's prevention goal.
+Denial duties for other marker groups or other conditions remain available.
 
 **Withdraw Entire Force** defaults to ON and includes rifles, MG, and HQ.
 Squads stay assigned to the exit after they have been counted. Pinned squads

@@ -76,6 +76,8 @@ func _run() -> void:
 	_test_denial_switch()
 	_test_fallback_authoring()
 	_test_hold_to_exit_fallback()
+	_test_counter_exit_fallback_gate()
+	_test_fallback_minimum_force()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -368,6 +370,7 @@ func _test_fallback_authoring() -> void:
 	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
 	policy.hold_condition = hold
 	policy.exit_condition = exit
+	policy.minimum_combat_squads = 2
 	var source: Scenario = load("res://scenes/scenarios/scenario.tscn").instantiate()
 	source.victory_conditions = [hold, exit]
 	source.ai_fallback_policies = [policy]
@@ -377,7 +380,7 @@ func _test_fallback_authoring() -> void:
 	var restored: Scenario = reloaded.instantiate()
 	var copy: HoldToExitFallbackPolicy = restored.ai_fallback_policies[0]
 	_check(copy.hold_condition == restored.victory_conditions[0] and copy.exit_condition == restored.victory_conditions[1], "Scene reload preserves links to the actual victory conditions, not independent copies")
-	_check(copy.configuration_error(restored.victory_conditions) == "" and copy.withdraw_entire_force, "Restored policy validates and defaults to withdrawing the entire force")
+	_check(copy.configuration_error(restored.victory_conditions) == "" and copy.withdraw_entire_force and copy.minimum_combat_squads == 2, "Restored policy preserves its operational force threshold and whole-force withdrawal")
 	restored.free()
 	source.free()
 	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
@@ -525,6 +528,161 @@ func _test_hold_to_exit_fallback() -> void:
 	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
 	goals.initial_order(planner, MissionOrder.new(), 10000.0)
 	_check(goals.active_fallback == null and not goals.diagnostics.is_empty(), "Missing hold markers disable explicit fallback activation and report the configuration problem")
+
+
+func _has_goal_task(goals: ScenarioGoalDirector, kind: ScenarioGoalTask.Kind, condition: VictoryCondition) -> bool:
+	for task: ScenarioGoalTask in goals.tasks:
+		if task.kind == kind and task.condition == condition:
+			return true
+	return false
+
+
+func _test_counter_exit_fallback_gate() -> void:
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	planner.executor.cancel_all(true)
+	planner.position_stability.clear()
+	for unit: Unit in planner.squads:
+		unit.give_hold_order()
+		_set_hex(unit, unit.current_hex)
+	var hold: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	var exit: ExitUnitsCondition = _fallback_exit(_adjacent_empty(snapshot, rifles[2]))
+	var prevention: PreventEnemyExitCondition = PreventEnemyExitCondition.new()
+	prevention.team = Globals.get_enemy_team(planner.team)
+	prevention.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	prevention.state = ExitUnitsState.new()
+	prevention.state.exit_hexes = exit.state.exit_hexes.duplicate()
+	var conditions: Array[VictoryCondition] = [hold, exit, prevention]
+	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	policy.hold_condition = hold
+	policy.exit_condition = exit
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND)
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	goals.update(planner, 10000.0, 300.0)
+	var early_exit: bool = false
+	for task: ScenarioGoalTask in goals.assignments.values():
+		early_exit = early_exit or (task.kind == ScenarioGoalTask.Kind.EXIT and task.condition == prevention)
+	_check(early_exit, "Without a fallback policy, a spare squad still receives the ordinary counter-exit duty")
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	goals.update(planner, 10000.0, 301.0)
+	_check(goals.active_fallback == null and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "A valid hold-to-exit policy suppresses early counter-exit tasks while holding")
+	var premature_assignment: bool = false
+	for task: ScenarioGoalTask in goals.assignments.values():
+		premature_assignment = premature_assignment or task.kind == ScenarioGoalTask.Kind.EXIT
+	_check(not premature_assignment and not goals.diagnostics.is_empty(), "Spare squads receive no exit assignment while the fallback is deferred")
+	hold.required_unit_count = 99
+	goals.update(planner, 10000.0, 302.0)
+	goals.update(planner, 10000.0, 306.0)
+	_check(goals.active_fallback == null and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Counter-exit duties cannot bypass the fallback confirmation period")
+	goals.update(planner, 10000.0, 307.0)
+	_check(goals.active_fallback == policy and _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, exit) and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Confirmed fallback releases the linked exit without a duplicate counter-exit mission")
+	exit.record_unit_entry(rifles[0], exit.state.exit_hexes[0])
+	prevention.record_unit_entry(rifles[0], exit.state.exit_hexes[0])
+	_check(exit.is_condition_met() and not prevention.is_condition_met(), "The authorized escape satisfies the owning side's exit and denies enemy prevention together")
+	hold.required_unit_count = 1
+	exit.state.units_exited.clear()
+	prevention.state.units_exited.clear()
+	policy.enabled = false
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "A disabled policy does not suppress ordinary counter-exit behavior")
+	policy.enabled = true
+	goals.configure(planner.team, [hold, prevention], PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "An invalid policy link cannot silently forbid an otherwise valid exit duty")
+	var other_prevention: PreventEnemyExitCondition = PreventEnemyExitCondition.new()
+	other_prevention.team = prevention.team
+	other_prevention.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	other_prevention.objective_id = PreventEnemyExitCondition.ObjectiveId.A
+	other_prevention.state = ExitUnitsState.new()
+	other_prevention.state.exit_hexes = hold.state.hexes.duplicate()
+	goals.configure(planner.team, [hold, exit, other_prevention], PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, other_prevention), "The fallback gate applies to its linked marker group rather than unrelated objectives")
+	var enemy_exit: ExitUnitsCondition = _fallback_exit(rifles[1].current_hex)
+	enemy_exit.team = prevention.team
+	goals.configure(planner.team, [hold, exit, prevention, enemy_exit], PositionProfile.Mode.DEFEND, [policy])
+	goals.initial_order(planner, MissionOrder.new(), 10000.0)
+	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.BLOCK_EXIT, enemy_exit) and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Deferred counter-exit leaves another necessary enemy condition available for denial")
+
+
+func _test_fallback_minimum_force() -> void:
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	var alive_before: Dictionary[Unit, bool] = {}
+	var headquarters: Unit
+	planner.executor.cancel_all(true)
+	planner.position_stability.clear()
+	for unit: Unit in planner.squads:
+		alive_before[unit] = unit.alive
+		unit.give_hold_order()
+		_set_hex(unit, unit.current_hex)
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			headquarters = unit
+	var hold: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	hold.state.victory_conditions_met[hold.state.hexes[0]] = true
+	var exit: ExitUnitsCondition = _fallback_exit(_adjacent_empty(snapshot, rifles[2]))
+	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	policy.hold_condition = hold
+	policy.exit_condition = exit
+	policy.minimum_combat_squads = 2
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	for unit: Unit in planner.squads:
+		if not HqSupportPositionPolicy.is_headquarters(unit) and unit != rifles[0] and unit != rifles[1]:
+			unit.alive = false
+	goals.update(planner, 10000.0, 400.0)
+	goals.update(planner, 10000.0, 406.0)
+	_check(goals.active_fallback == null, "Exactly the configured minimum of combat squads continues holding")
+	rifles[1].alive = false
+	goals.update(planner, 10000.0, 407.0)
+	goals.update(planner, 10000.0, 411.0)
+	_check(goals.active_fallback == null, "A force-strength deficit obeys the continuous confirmation period")
+	goals.update(planner, 10000.0, 412.0)
+	_check(goals.active_fallback == policy and goals.fallback_reason.contains("remaining: 1"), "One combat squad plus HQ activates the minimum-force fallback even while the objective is secured")
+	_check(hold.is_condition_met() and hold.required_unit_count == 1, "Operational withdrawal does not alter the one-unit occupation victory requirement")
+	_check(goals.assignments.has(rifles[0]) and goals.assignments.has(headquarters) and goals.assignments[rifles[0]].kind == ScenarioGoalTask.Kind.EXIT and goals.assignments[headquarters].kind == ScenarioGoalTask.Kind.EXIT, "The surviving rifle and HQ both receive withdrawal duties")
+	rifles[0].stress_system.state = UnitStates.MoraleState.PINNED
+	goals.update(planner, 10000.0, 413.0)
+	_check(not goals.assignments.has(rifles[0]), "A depletion-triggered withdrawal still cannot move a pinned survivor")
+	rifles[0].stress_system.state = UnitStates.MoraleState.NORMAL
+	goals.update(planner, 10000.0, 414.0)
+	_check(goals.assignments.has(rifles[0]) and goals.assignments[rifles[0]].kind == ScenarioGoalTask.Kind.EXIT, "The recovered survivor joins the committed withdrawal")
+	rifles[0].alive = false
+	var hq_hex: Vector2i = headquarters.current_hex
+	_set_hex(headquarters, hold.state.hexes[0])
+	snapshot.positions[headquarters] = headquarters.current_hex
+	hold.advance_time(hold.required_time_s)
+	_check(hold.is_condition_met(), "HQ alone can still meet the authored occupation rule in the fixture")
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	goals.update(planner, 10000.0, 420.0)
+	goals.update(planner, 10000.0, 425.0)
+	_check(goals.active_fallback == policy and goals.fallback_reason.contains("remaining: 0") and goals.assignments.size() == 1 and goals.assignments.has(headquarters), "HQ is excluded from the combat threshold and withdraws when it is the only survivor")
+	planner._planning_snapshot = snapshot
+	planner._planning_reservations = {}
+	planner._planning_requests.clear()
+	planner._add_goal_request(headquarters, goals.assignments[headquarters])
+	var query: PositionQuery = planner._planning_requests[0]["query"]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == exit.state.exit_hexes[0] and planner.executor.execute(advice), "The lone HQ can execute a real exit move after the force-strength fallback")
+	planner.executor.cancel(headquarters, true)
+	headquarters.give_hold_order()
+	_set_hex(headquarters, hq_hex)
+	snapshot.positions[headquarters] = hq_hex
+	planner._cancel_plan()
+	rifles[0].alive = true
+	policy.minimum_combat_squads = 0
+	goals.configure(planner.team, [hold, exit], PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	goals.update(planner, 10000.0, 430.0)
+	goals.update(planner, 10000.0, 436.0)
+	_check(goals.active_fallback == null, "Zero disables the optional strength trigger and retains existing hold behavior")
+	policy.minimum_combat_squads = -1
+	_check(policy.configuration_error([hold, exit]) != "", "A negative minimum-force threshold is rejected")
+	for unit: Unit in alive_before:
+		unit.alive = alive_before[unit]
 
 
 func _adjacent_empty(snapshot: InfluenceSnapshot, unit: Unit) -> Vector2i:

@@ -162,6 +162,9 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 			if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
 				if not state.complete:
 					continue
+				if _counter_exit_deferred(state, progress):
+					diagnostics.append("Exit to deny enemy victory deferred until the linked hold-to-exit fallback activates")
+					continue
 			elif state.complete and state.kind != VictoryConditionProgress.Kind.OCCUPY:
 				continue
 			var cost: float = _denial_cost(state, planner)
@@ -171,6 +174,18 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 		if blocked != null:
 			_add_denial_tasks(blocked, planner)
 	tasks.sort_custom(_prefer_task)
+
+
+func _counter_exit_deferred(state: VictoryConditionProgress, progress: Array[VictoryConditionProgress]) -> bool:
+	if state.objective_team != team:
+		return false
+	var prevention: PreventEnemyExitCondition = state.condition as PreventEnemyExitCondition
+	for policy: HoldToExitFallbackPolicy in fallback_policies:
+		# Opponent denial must obey the same authorization as our own linked exit.
+		# Other marker groups and scenarios without a valid policy retain their duties.
+		if int(policy.exit_condition.objective_id) == int(prevention.objective_id) and _policy_has_markers(policy, progress):
+			return true
+	return false
 
 
 func _progress_for(condition: VictoryCondition, progress: Array[VictoryConditionProgress]) -> VictoryConditionProgress:
@@ -199,7 +214,7 @@ func _evaluate_fallbacks(progress: Array[VictoryConditionProgress], planner: Pla
 		var exit: VictoryConditionProgress = _progress_for(policy.exit_condition, progress)
 		if hold.complete:
 			_secured_holds[policy.hold_condition] = true
-		var reason: String = _hold_failure_reason(hold, planner, seconds_left)
+		var reason: String = _hold_failure_reason(hold, planner, seconds_left, policy.minimum_combat_squads)
 		var travel: float = _estimate_exit_seconds(exit, planner, policy.withdraw_entire_force)
 		# Reserve the exit window only while the linked hold is unsecured. A
 		# successfully held objective remains the higher victory priority.
@@ -230,15 +245,19 @@ func _activate_fallback(policy: HoldToExitFallbackPolicy, reason: String) -> voi
 	diagnostics.append("Committed hold-to-exit fallback: " + reason)
 
 
-func _hold_failure_reason(hold: VictoryConditionProgress, planner: PlatoonAI, seconds_left: float) -> String:
-	if hold.complete:
-		return ""
-	if _secured_holds.has(hold.condition):
-		return "Previously secured objective was lost"
+func _hold_failure_reason(hold: VictoryConditionProgress, planner: PlatoonAI, seconds_left: float, minimum_combat_squads: int = 0) -> String:
 	var fighters: int = 0
 	for unit: Unit in planner.squads:
 		if TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order() and not HqSupportPositionPolicy.is_headquarters(unit):
 			fighters += 1
+	# Operational strength is separate from the occupation victory threshold.
+	# A depleted force can withdraw even while its last squad still holds the hex.
+	if minimum_combat_squads > 0 and fighters < minimum_combat_squads:
+		return "Combat squads remaining: %d; minimum required to hold: %d" % [fighters, minimum_combat_squads]
+	if hold.complete:
+		return ""
+	if _secured_holds.has(hold.condition):
+		return "Previously secured objective was lost"
 	if fighters < hold.required_units * hold.hexes.size():
 		return "Too few combat squads remain to hold all linked markers"
 	for hex: Vector2i in hold.hexes:

@@ -74,9 +74,11 @@
 [ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://scenes/scenarios/victory_conditions/exit_units_condition.gd" id="59_jhdiv"]
 [ext_resource type="Resource" uid="uid://0yrwtv2ux2fi" path="res://resources/squads/germany/company_hq.tres" id="59_mdkuk"]
 [ext_resource type="PackedScene" uid="uid://chkbs6ulxllvt" path="res://ai/platoon/phased/platoon_phase_controller.tscn" id="59_mrxq0"]
+[ext_resource type="Script" uid="uid://duw4oudp0kojx" path="res://scenes/scenarios/victory_conditions/prevent_enemy_exit_condition.gd" id="60_ghkdt"]
 [ext_resource type="PackedScene" uid="uid://b5mttkcs5k8hq" path="res://ai/platoon/platoon_ai_controller.tscn" id="60_mrxq0"]
 [ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
+[ext_resource type="Script" uid="uid://6ei51j2ska6y" path="res://scenes/scenarios/hold_to_exit_fallback_policy.gd" id="61_s64j0"]
 [ext_resource type="Script" uid="uid://cryk5wbke0nxs" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="61_x77xw"]
 [ext_resource type="Resource" uid="uid://bvfu54bdgx837" path="res://resources/weapons/rpzb_54_panzerschreck.tres" id="62_124cm"]
 [ext_resource type="Resource" uid="uid://boephgpg2cfao" path="res://resources/squads/germany/platoon_hq.tres" id="62_bmoad"]
@@ -980,27 +982,30 @@ script = ExtResource("50_hph6x")
 nickname = "Rifle 12"
 weapon = ExtResource("58_7lp0r")
 
-[sub_resource type="Resource" id="Resource_i1y2t"]
-script = ExtResource("61_x77xw")
-objective_id = 2
+[sub_resource type="Resource" id="Resource_ghkdt"]
+script = ExtResource("60_ghkdt")
 team = 1
-metadata/_custom_type_script = "uid://cryk5wbke0nxs"
+outcome_level = 0
+test_at_scenario_end = true
+metadata/_custom_type_script = "uid://duw4oudp0kojx"
 
 [sub_resource type="Resource" id="Resource_njpnx"]
 script = ExtResource("61_x77xw")
 test_at_scenario_end = true
 metadata/_custom_type_script = "uid://cryk5wbke0nxs"
 
-[sub_resource type="Resource" id="Resource_ghkdt"]
-script = ExtResource("61_x77xw")
-objective_id = 2
-test_at_scenario_end = true
-metadata/_custom_type_script = "uid://cryk5wbke0nxs"
-
 [sub_resource type="Resource" id="Resource_aql7m"]
 script = ExtResource("59_jhdiv")
 outcome_level = 0
+test_at_scenario_end = true
 metadata/_custom_type_script = "uid://dboih1fudyph4"
+
+[sub_resource type="Resource" id="Resource_yxjfx"]
+script = ExtResource("61_s64j0")
+hold_condition = SubResource("Resource_njpnx")
+exit_condition = SubResource("Resource_aql7m")
+minimum_combat_squads = 2
+metadata/_custom_type_script = "uid://6ei51j2ska6y"
 
 [sub_resource type="Resource" id="Resource_124cm"]
 script = ExtResource("50_hph6x")
@@ -1749,7 +1754,8 @@ scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n"), SubResource("Resource_i1y2t"), SubResource("Resource_njpnx"), SubResource("Resource_ghkdt"), SubResource("Resource_aql7m")])
+victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_tul8n"), SubResource("Resource_ghkdt"), SubResource("Resource_njpnx"), SubResource("Resource_aql7m")])
+ai_fallback_policies = Array[ExtResource("61_s64j0")]([SubResource("Resource_yxjfx")])
 axis_ai_status = 1
 allies_ai_status = 0
 
@@ -1828,7 +1834,7 @@ formation_id = 2
 tile_map_data = PackedByteArray("AAALAA0AAwAAAAAAAAADAA8ABAAAAAAAAAAIABMAAQAAAAAAAAA=")
 
 [node name="AlliedObjectivesTileMapLayer" parent="Maps/DefaultMap/Scenarios/OutpostProbe/Objectives" parent_id_path=PackedInt32Array(322232894, 1566573026) index="1" unique_id=952938266]
-tile_map_data = PackedByteArray("AAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAHABQAAAAAAAAAAAAMAAkAAgAAAAAAAAAKAAkABgAAAAAAAAAJAAgABwAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAHABQAAAAAAAAAAAAMAAkAAgAAAAAAAAALAA0ABgAAAAAAAAADAA8ABwAAAAAAAAA=")
 
 [node name="OutpostProbe3" parent="Maps/DefaultMap/Scenarios" parent_id_path=PackedInt32Array(1128763383, 976409343) index="1" unique_id=43599254 instance=ExtResource("44_jhdiv")]
 scenario_name = "Probe The Outpost Test 1"
