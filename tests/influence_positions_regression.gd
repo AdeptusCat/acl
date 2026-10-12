@@ -119,6 +119,7 @@ func _run() -> void:
 	_test_profiles()
 	_test_suppressed_hex_entry()
 	_test_attack_overwatch()
+	_test_supported_close_assault()
 	_test_attack_support_recovery()
 	_test_attack_pressure_and_following()
 	_test_position_stability()
@@ -646,6 +647,112 @@ func _test_attack_overwatch() -> void:
 		unit.squad_fire = null
 		unit.free()
 	planner.free()
+
+
+func _test_supported_close_assault() -> void:
+	var attacker: Unit = _unit(own.team, Vector2i(5, 3))
+	var gun: Unit = _unit(own.team, Vector2i(3, 3))
+	var defender: Unit = _unit(enemy.team, Vector2i(6, 3))
+	var rear: Unit = _unit(enemy.team, Vector2i(7, 3))
+	gun.squad_type = Globals.SquadType.MG
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	defender.stress_system.S_eff = 40.0
+	var weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	for unit: Unit in [attacker, gun]:
+		_equip(unit, [weapon])
+		unit.squad_fire.unit = unit
+		unit.combat_stats.combat_effectiveness = 1.0
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	Globals.unit_visible_enemies[attacker] = [defender]
+	Globals.unit_visible_enemies[gun] = [defender, rear]
+	gun.squad_fire.target_unit = rear
+	gun.squad_fire.has_target_hex = true
+	var saved_snapshot: InfluenceSnapshot = controller.snapshot
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.los = LOSHelper.los_lookup
+	snapshot.routes[own.team] = saved_snapshot.routes[own.team]
+	snapshot.point_ids[own.team] = saved_snapshot.point_ids[own.team]
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(saved_snapshot.maps[own.team].bounds)
+	map.playable_cells = saved_snapshot.maps[own.team].playable_cells.duplicate()
+	map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER, 0.5)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, rear.current_hex, 0.9)
+	map.set_layer_value(InfluenceMap.Layer.THREAT, defender.current_hex, 1.0)
+	snapshot.maps[own.team] = map
+	for unit: Unit in [attacker, gun]:
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.teams[unit] = own.team
+	var contacts: Array[InfluenceContact] = []
+	for unit: Unit in [defender, rear]:
+		var contact: InfluenceContact = InfluenceContact.new()
+		contact.unit = unit
+		contact.hex = unit.current_hex
+		contact.observed = true
+		contact.firepower = 2.0
+		contact.weapon_range = 5
+		contacts.append(contact)
+	snapshot.contacts[own.team] = contacts
+	snapshot.defensive_contacts[own.team] = contacts
+	controller.snapshot = snapshot
+	var cover: PositionResult = PositionResult.new()
+	cover.unit = gun
+	cover.status = PositionResult.Status.ACCEPTED
+	cover.profile_mode = PositionProfile.Mode.SUPPORT_BY_FIRE
+	cover.target_hex = gun.current_hex
+	cover.target_index = map.cell_to_index(gun.current_hex)
+	cover.features = {"cover": 0.5, "firing": 1.0}
+	gun.position_advice = cover
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.squads = [attacker, gun]
+	planner.influence_map_controller = controller
+	planner.current_order = MissionOrder.new()
+	planner.current_order.position_mode = PositionProfile.Mode.ASSAULT
+	planner.current_order.objective_hex = defender.current_hex
+	planner._build_planning_requests(planner.squads)
+	_check(not planner._are_visible_attack_defenders_suppressed(planner.squads) and planner._attack_mode_for_unit(attacker) == PositionProfile.Mode.ASSAULT, "Established fire support releases the adjacent close assault even while the covered rear defender remains fresh")
+	var query: PositionQuery
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == attacker:
+			query = request["query"]
+	_check(query != null and query.profile.enter_suppressed_enemy_hex and not query.press_attack, "The rear defender keeps overwatch mandatory without vetoing a supported close assault")
+	query.origin_hex = attacker.current_hex
+	var path: Array[Vector2i] = [attacker.current_hex, defender.current_hex]
+	_check(PositionQueryService.approach_path_is_safe(query, path), "The direct final step can enter a suppressed defender beside a fresh covered enemy")
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == defender.current_hex and advice.path == path, "The assault planner accepts the suppressed defender's hex instead of holding beside it")
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "assault")], "assault", null)
+	planner._issue_order(attacker)
+	_check(attacker.movement.is_moving and attacker.movement.target_hex == defender.current_hex and (attacker.action_controller as ActionProbe).intent == "assault", "The selected rifle executes close combat against the suppressed squad with the fresh defender behind it")
+	planner.executor.cancel_all(true)
+	query.profile.mode = PositionProfile.Mode.ADVANCE
+	_check(not PositionQueryService.approach_path_is_safe(query, path), "Ordinary approach movement still avoids adjacency to fresh defenders")
+	query.profile.mode = PositionProfile.Mode.ASSAULT
+	_check(not PositionQueryService.approach_path_is_safe(query, [attacker.current_hex, rear.current_hex, defender.current_hex]), "The close-combat exception does not authorize longer routes through another defender")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, defender.current_hex, 100.0)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Supported close combat still respects the incoming fire risk limit")
+	map.set_layer_value(InfluenceMap.Layer.THREAT, defender.current_hex, 1.0)
+	contacts[1].hex = defender.current_hex
+	_check(not PositionQueryService.approach_path_is_safe(query, path), "A fresh defender in the same target hex still prevents the suppressed-only entry exception")
+	contacts[1].hex = rear.current_hex
+	defender.stress_system.state = UnitStates.MoraleState.NORMAL
+	defender.stress_system.S_eff = 0.0
+	_check(not PositionQueryService.approach_path_is_safe(query, path), "A recovered assault target no longer qualifies for suppressed close-combat entry")
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	defender.stress_system.S_eff = 40.0
+	gun.stress_system.state = UnitStates.MoraleState.PINNED
+	planner._issue_order(attacker)
+	_check(not attacker.movement.is_moving, "Loss of covering fire blocks cached assault advice when the fresh rear defender remains")
+	attacker.stress_system.state = UnitStates.MoraleState.PINNED
+	_check(not planner.executor.execute(advice) and not attacker.movement.is_moving, "Pinned attackers cannot use the supported close-combat exception to move")
+	controller.snapshot = saved_snapshot
+	planner.free()
+	for unit: Unit in [attacker, gun]:
+		Globals.unit_visible_enemies.erase(unit)
+		unit.squad_fire.free()
+		unit.squad_fire = null
+	for unit: Unit in [attacker, gun, defender, rear]:
+		unit.free()
 
 
 func _test_attack_support_recovery() -> void:

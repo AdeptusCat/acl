@@ -103,6 +103,11 @@ func _run() -> void:
 		else:
 			_check(attack_controller._attack_mode_for_unit(attack_rifle) == PositionProfile.Mode.SUPPORT_BY_FIRE, "Rifle continues fire support while enemies remain unsuppressed")
 		if attack_mg != null:
+			if attack_mg.position_advice == null or not attack_mg.position_advice.is_valid():
+				print("MG final position: ", {"morale": attack_mg.stress_system.state, "stress": attack_mg.stress_system.S_eff,
+					"moving": attack_mg.movement.is_moving, "close_combat": attack_mg.in_close_combat, "advice": str(attack_mg.position_advice)})
+				if attack_mg.position_advice != null:
+					print("MG position reason: ", attack_mg.position_advice.reason, " ", attack_mg.position_advice.rejections)
 			_check(attack_mg.position_advice != null and attack_mg.position_advice.is_valid() and attack_mg.position_advice.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE, "MG establishes a valid firing position while the rifle attacks")
 			_check(attack_mg_shots > 0, "MG fires in support during the attack")
 			if attack_mg_shots == 0:
@@ -231,7 +236,7 @@ func _test_close_assault_selection(planner: PlatoonAI) -> void:
 	fresh_defender.current_hex = defender.current_hex + Vector2i(0, 5)
 	_check(planner._close_combat_target(attack_rifle) == defender, "A capable adjacent rifle can target a highly stressed defender when fresh defenders are distant")
 	fresh_defender.current_hex = defender.current_hex + Vector2i(0, -1)
-	_check(planner._close_combat_target(attack_rifle) == null, "A fresh adjacent defender prevents a same-hex rifle assault")
+	_check(planner._close_combat_target(attack_rifle) == defender, "A fresh adjacent defender does not veto the selected suppressed close-combat target")
 	fresh_defender.stress_system.state = UnitStates.MoraleState.PINNED
 	_check(planner._close_combat_target(attack_rifle) == defender, "Suppressing the adjacent defender releases the close assault")
 	defender.surrendered = true

@@ -363,6 +363,9 @@ static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -
 		return false
 	if query.press_attack and not press_attack_path_is_safe(query.snapshot, query.team, query.origin_hex, path):
 		return false
+	if path.size() == 2 and path[0] == query.origin_hex and LOSHelper.get_hex_distance(path[0], path[1]) == 1 and can_enter_suppressed_enemy_hex(query, path[1]):
+		# The supported final step enters close combat; ordinary approaches keep their separation.
+		return true
 	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
 		if not contact.observed or TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
 			continue

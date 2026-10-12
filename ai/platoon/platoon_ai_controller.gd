@@ -720,13 +720,8 @@ func _close_combat_target(unit: Unit) -> Unit:
 			continue
 		if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius:
 			continue
-		var exposed_to_fresh_defender: bool = false
-		for observer: Unit in squads:
-			for other_enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
-				if TacticalPositionExecutor.is_active_defender(other_enemy) and not TacticalPositionExecutor.is_sufficiently_suppressed(other_enemy) and LOSHelper.get_hex_distance(enemy.current_hex, other_enemy.current_hex) <= 1:
-					exposed_to_fresh_defender = true
-		if not exposed_to_fresh_defender:
-			return enemy
+		# Established covering fire can support the final assault despite nearby fresh defenders.
+		return enemy
 	return null
 
 
