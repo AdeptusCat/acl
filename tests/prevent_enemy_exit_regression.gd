@@ -74,6 +74,8 @@ func _set_conditions(conditions: Array[VictoryCondition]) -> void:
 func _test_authoring() -> void:
 	var condition: PreventEnemyExitCondition = PreventEnemyExitCondition.new()
 	_check(condition.test_at_scenario_end and condition.max_allowed_enemy_exits == 0 and condition.objective_id == PreventEnemyExitCondition.ObjectiveId.EXIT, "New prevention conditions default to zero allowed exits and deadline evaluation")
+	_check(condition.property_can_revert(&"test_at_scenario_end") and condition.property_get_revert(&"test_at_scenario_end") == true, "The Inspector can restore the prevention-specific ON default")
+	_check(not ExitUnitsCondition.new().test_at_scenario_end, "Other victory conditions retain their OFF default")
 	_check(condition.get_description().contains("Prevent any enemy unit"), "Zero-exit description explains the denial objective")
 	condition.max_allowed_enemy_exits = 2
 	_check(condition.get_description().contains("no more than 2"), "Description includes a nonzero allowed-exit count")
@@ -89,14 +91,26 @@ func _test_authoring() -> void:
 	source.victory_conditions = [condition]
 	var packed: PackedScene = PackedScene.new()
 	_check(packed.pack(source) == OK, "A Scenario can store the new condition in its victory-condition array")
-	var restored: Scenario = packed.instantiate()
+	_check(ResourceSaver.save(packed, "user://prevent_enemy_exit_scene_fixture.tscn") == OK, "The Scenario can be saved with the prevention-specific default")
+	var saved_scene: PackedScene = ResourceLoader.load("user://prevent_enemy_exit_scene_fixture.tscn", "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene
+	var restored: Scenario = saved_scene.instantiate()
 	var copy: PreventEnemyExitCondition = restored.victory_conditions[0] as PreventEnemyExitCondition
 	_check(copy != null and copy.team == Globals.Team.ALLIES and copy.max_allowed_enemy_exits == 2 and copy.outcome_level == VictoryCondition.OutcomeLevel.MINOR and copy.test_at_scenario_end, "Scene serialization preserves ownership, threshold, outcome, and deadline evaluation")
 	restored.free()
-	source.free()
 	_check(ResourceSaver.save(condition, "user://prevent_enemy_exit_fixture.tres") == OK, "Prevention condition can be saved as a standalone Resource")
 	var loaded: PreventEnemyExitCondition = ResourceLoader.load("user://prevent_enemy_exit_fixture.tres", "", ResourceLoader.CACHE_MODE_IGNORE) as PreventEnemyExitCondition
 	_check(loaded != null and loaded.test_at_scenario_end and loaded.max_allowed_enemy_exits == 2 and loaded.objective_id == PreventEnemyExitCondition.ObjectiveId.A, "Resource reload preserves inherited and specialized settings")
+	condition.test_at_scenario_end = false
+	_check(ResourceSaver.save(condition, "user://prevent_enemy_exit_fixture.tres") == OK, "An explicitly disabled deadline setting can be saved")
+	loaded = ResourceLoader.load("user://prevent_enemy_exit_fixture.tres", "", ResourceLoader.CACHE_MODE_IGNORE) as PreventEnemyExitCondition
+	_check(loaded != null and not loaded.test_at_scenario_end, "Resource reload preserves an explicit OFF instead of restoring ON")
+	_check(packed.pack(source) == OK and ResourceSaver.save(packed, "user://prevent_enemy_exit_scene_fixture.tscn") == OK, "The Scenario can be saved with deadline evaluation explicitly disabled")
+	saved_scene = ResourceLoader.load("user://prevent_enemy_exit_scene_fixture.tscn", "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene
+	restored = saved_scene.instantiate()
+	copy = restored.victory_conditions[0] as PreventEnemyExitCondition
+	_check(copy != null and not copy.test_at_scenario_end, "Scene reload preserves an explicit OFF")
+	restored.free()
+	source.free()
 
 
 func _test_tracking() -> void:

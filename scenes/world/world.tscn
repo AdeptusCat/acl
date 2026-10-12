@@ -74,6 +74,7 @@
 [ext_resource type="Script" uid="uid://dboih1fudyph4" path="res://scenes/scenarios/victory_conditions/exit_units_condition.gd" id="59_jhdiv"]
 [ext_resource type="Resource" uid="uid://0yrwtv2ux2fi" path="res://resources/squads/germany/company_hq.tres" id="59_mdkuk"]
 [ext_resource type="PackedScene" uid="uid://chkbs6ulxllvt" path="res://ai/platoon/phased/platoon_phase_controller.tscn" id="59_mrxq0"]
+[ext_resource type="Script" uid="uid://duw4oudp0kojx" path="res://scenes/scenarios/victory_conditions/prevent_enemy_exit_condition.gd" id="60_ghkdt"]
 [ext_resource type="PackedScene" uid="uid://b5mttkcs5k8hq" path="res://ai/platoon/platoon_ai_controller.tscn" id="60_mrxq0"]
 [ext_resource type="Script" uid="uid://dwewyipec6v2u" path="res://scenes/scenarios/victory_conditions/destroy_units_condition.gd" id="60_yr5cl"]
 [ext_resource type="Resource" uid="uid://dqnegkv72tu3g" path="res://resources/weapons/m1a1_bazooka.tres" id="61_6eles"]
@@ -997,6 +998,10 @@ objective_id = 2
 test_at_scenario_end = true
 metadata/_custom_type_script = "uid://cryk5wbke0nxs"
 
+[sub_resource type="Resource" id="Resource_yxjfx"]
+script = ExtResource("60_ghkdt")
+metadata/_custom_type_script = "uid://duw4oudp0kojx"
+
 [sub_resource type="Resource" id="Resource_124cm"]
 script = ExtResource("50_hph6x")
 nickname = "Zugführer"
@@ -1744,7 +1749,7 @@ scenario_name = "Probe The Outpost"
 scenario_description = "Lead a Platton sized Detachment to clear an enemy Outpost"
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n"), SubResource("Resource_i1y2t"), SubResource("Resource_njpnx"), SubResource("Resource_ghkdt")])
+victory_conditions = Array[ExtResource("42_bmoad")]([SubResource("Resource_js2o5"), SubResource("Resource_pv8d0"), SubResource("Resource_tul8n"), SubResource("Resource_i1y2t"), SubResource("Resource_njpnx"), SubResource("Resource_ghkdt"), SubResource("Resource_yxjfx")])
 axis_ai_status = 1
 allies_ai_status = 0
 

@@ -1,3 +1,4 @@
+@tool
 extends VictoryCondition
 class_name PreventEnemyExitCondition
 
@@ -7,6 +8,14 @@ enum ObjectiveId { EXIT, A, B, C }
 @export var objective_id: ObjectiveId = ObjectiveId.EXIT
 ## Zero means no enemy squad may exit. Recorded exits cannot be undone.
 @export_range(0, 128, 1, "or_greater") var max_allowed_enemy_exits: int = 0
+
+# The inherited export's static default is false. Preserve an explicit OFF
+# through a hidden override, since ResourceSaver otherwise omits that value.
+@export_storage var _test_at_scenario_end_override: bool = true:
+	get:
+		return test_at_scenario_end
+	set(value):
+		test_at_scenario_end = value
 
 var state: ExitUnitsState
 
@@ -20,8 +29,19 @@ const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 
 func _init() -> void:
 	# Preventing escape is an ongoing duty, so an initially empty exit ledger
-	# must not award victory at the beginning of the scenario.
+	# must not award victory at the beginning of the scenario. Tool mode also
+	# applies this inherited-property default to resources made in the Inspector.
 	test_at_scenario_end = true
+
+
+func _property_can_revert(property: StringName) -> bool:
+	return property == &"test_at_scenario_end"
+
+
+func _property_get_revert(property: StringName) -> Variant:
+	if property == &"test_at_scenario_end":
+		return true
+	return null
 
 
 func is_condition_met() -> bool:
