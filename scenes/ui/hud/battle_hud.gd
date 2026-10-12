@@ -5,6 +5,7 @@ extends CanvasLayer
 
 @onready var countdown_panel_container: PanelContainer = $Control/Countdown
 @onready var mission_objectives: MissionObjectivesPanel = $Control/MissionObjectives
+@onready var squad_roster: SquadRosterPanel = $Control/SquadRoster
 
 
 @onready var cover_icon_scene: PackedScene = preload("res://scenes/ui/effects/cover_icon.tscn")
@@ -39,6 +40,46 @@ func _ready() -> void:
 	$Control.resized.connect(_layout_mission_objectives)
 	countdown_panel_container.item_rect_changed.connect(_layout_mission_objectives)
 	get_window().size_changed.connect(_layout_mission_objectives)
+	$Control.resized.connect(_queue_roster_layout)
+	squad_roster.layout_requested.connect(_queue_roster_layout)
+	for panel: Control in [mission_objectives, tile_details, $Control/Debug, $Control/TryAgain]:
+		panel.item_rect_changed.connect(_queue_roster_layout)
+		panel.visibility_changed.connect(_queue_roster_layout)
+
+
+func show_squad_roster(player_team: Globals.Team) -> void:
+	squad_roster.setup(player_team)
+	_queue_roster_layout()
+
+
+func _queue_roster_layout() -> void:
+	_layout_squad_roster.call_deferred()
+
+
+func _layout_squad_roster() -> void:
+	if not is_node_ready() or is_queued_for_deletion():
+		return
+	var hud_size: Vector2 = $Control.size
+	var area: Rect2 = _squad_roster_area(12.0, hud_size)
+	var debug_panel: Control = $Control/Debug
+	# Visible development controls may fill the left edge; use the next column.
+	if area.size.y < 160.0 and debug_panel.visible:
+		var alternate_left: float = debug_panel.get_rect().end.x + 12.0
+		if alternate_left + SquadRosterPanel.PANEL_WIDTH <= hud_size.x - 12.0:
+			area = _squad_roster_area(alternate_left, hud_size)
+	squad_roster.fit_panel(area.position, area.size.y)
+
+
+func _squad_roster_area(left: float, hud_size: Vector2) -> Rect2:
+	var top: float = $Control/TryAgain.get_rect().end.y + 12.0
+	var bottom: float = hud_size.y - 12.0
+	var column: Rect2 = Rect2(left, 0.0, SquadRosterPanel.PANEL_WIDTH, hud_size.y)
+	if mission_objectives.visible and column.intersects(mission_objectives.get_rect()):
+		top = maxf(top, mission_objectives.get_rect().end.y + 12.0)
+	for panel: Control in [$Control/Debug, tile_details]:
+		if panel.visible and column.intersects(panel.get_rect()):
+			bottom = minf(bottom, panel.position.y - 12.0)
+	return Rect2(left, top, SquadRosterPanel.PANEL_WIDTH, maxf(88.0, bottom - top))
 
 
 func show_mission_objectives(conditions: Array[VictoryCondition], player_team: Globals.Team, time_left_seconds: float) -> void:

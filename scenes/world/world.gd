@@ -70,6 +70,7 @@ func _ready() -> void:
 	game_controller.game_started_through_moving_unit.connect(ui._on_game_started_through_moving_unit)
 	game_controller.show_unit_details_in_ui.connect(ui._on_show_unit_details)
 	game_controller.hide_unit_details_in_ui.connect(ui._on_hide_unit_details)
+	ui.squad_roster.unit_selected.connect(game_controller.select_and_center_unit)
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
 	game_controller.hex_selected.connect(_on_hex_selected)
@@ -361,6 +362,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	game_controller.start_game(team, start_screen.time)
 	ui.show_mission_objectives(scenario.victory_conditions, team, game_controller.time_left_seconds)
+	ui.show_squad_roster(team)
 	input_manager.set_process(true)
 	
 	game_controller.move_camera(scenario.start_hex[scenario.player_team])

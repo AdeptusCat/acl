@@ -379,6 +379,15 @@ func _select_unit(unit: Unit) -> void:
 	MatchInteractionHandler.select_unit(self, unit)
 
 
+func select_and_center_unit(unit: Unit) -> void:
+	if not is_instance_valid(unit) or not unit.is_active() or unit.is_queued_for_deletion() or unit.team != Globals.team_player:
+		return
+	_select_unit(unit)
+	show_unit_details_in_ui.emit(unit)
+	LOSHelper.clear_los()
+	move_camera(unit.current_hex)
+
+
 func _deselect_unit(unit: Unit) -> void:
 	MatchInteractionHandler.deselect_unit(self, unit)
 
