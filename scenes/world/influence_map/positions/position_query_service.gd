@@ -281,6 +281,36 @@ static func _prefer_connected_cover(query: PositionQuery, best: PositionCandidat
 	return best
 
 
+static func rapid_candidate_score(query: PositionQuery, index: int) -> float:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var cell: Vector2i = map.index_to_cell(index)
+	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0 or not _in_geography(query, cell, false):
+		return -INF
+	var cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and cover < query.profile.minimum_cover:
+		return -INF
+	var target: Vector2i = query.objective_hex
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.support_targets.has(query.support_priority_squad):
+		target = query.support_targets[query.support_priority_squad]["hex"]
+	var destination_distance: int = LOSHelper.get_hex_distance(cell, target)
+	var travel: int = LOSHelper.get_hex_distance(query.origin_hex, cell)
+	var score: float = cover * 2.0 - float(travel) * 0.35 - float(destination_distance)
+	score -= PositionFeatureEvaluator.risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)) * 4.0
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null and query.defense_area.geometry["return_open_costs"].get(cell, INF) <= 0.000001:
+		score += 2.0
+	return score
+
+
+static func rapid_position_fulfils_role(query: PositionQuery, candidate: PositionCandidate) -> bool:
+	if candidate == null or candidate.features.get("withdrawal", false):
+		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		return query.support_targets.is_empty() or candidate.features.get("support_priority_covered", false)
+	if DefensePositionPolicy.needs_interception(query, candidate.features):
+		return false
+	return candidate.features.get("responsibility", "") != ""
+
+
 static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, diagnostics: PositionResult) -> bool:
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var cell: Vector2i = map.index_to_cell(index)

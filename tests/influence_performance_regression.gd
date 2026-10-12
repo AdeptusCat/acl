@@ -13,11 +13,12 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	var world: Node = main.world
-	var index: int = 1
+	var map_name: String = "OrchardRoad"
 	if OS.get_cmdline_user_args().has("--default-map"):
-		index = 0
-	var map: Map = world.maps.get_child(index)
+		map_name = "DefaultMap"
+	var map: Map = world.maps.get_node(map_name)
 	var scenario: Scenario = map.get_scenario(0)
+	scenario.ai_attacks_axis_objective = false
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
 	world.start_screen.hide()
@@ -87,6 +88,9 @@ func _run() -> void:
 		var slowest_step: Dictionary = {}
 		while (planner._area_job != null or planner._readiness_job != null or planner._planning_job != null or planner._validation_job != null) and plan_steps < 10000:
 			var tick_started: int = Time.get_ticks_usec()
+			var query_phase: int = -1
+			if planner._planning_job != null:
+				query_phase = planner._planning_job.phase
 			controller._process_position_queries()
 			plan_max_slice = maxi(plan_max_slice, controller.last_position_slice_usec)
 			var phase: String = "start"
@@ -104,7 +108,7 @@ func _run() -> void:
 			var tick_usec: int = Time.get_ticks_usec() - tick_started
 			if tick_usec > plan_max_tick:
 				plan_max_tick = tick_usec
-				slowest_step = {"phase": phase, "query_slice_us": controller.last_position_slice_usec, "tick_us": tick_usec}
+				slowest_step = {"phase": phase, "query_phase": query_phase, "query_slice_us": controller.last_position_slice_usec, "tick_us": tick_usec}
 			plan_steps += 1
 		_check(planner._area_job == null and planner._readiness_job == null and planner._planning_job == null and planner._validation_job == null, "Expanded sector planning completes through the normal scheduler, including final publication")
 		_check(plan_max_slice < 10000, "Expanded platoon searches keep tactical frame slices below ten milliseconds")

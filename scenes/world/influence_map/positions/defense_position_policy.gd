@@ -215,6 +215,19 @@ static func needs_withdrawal(query: PositionQuery) -> bool:
 	return query.withdrawal_requested or InfluenceUnitQuery.get_unit_effectiveness(query.unit) < query.profile.withdrawal_effectiveness
 
 
+static func needs_interception(query: PositionQuery, features: Dictionary) -> bool:
+	if features.get("responsibility", "") != "cover_approach" or features.get("interposition", 0.0) > 0.0:
+		return false
+	var distance: int = LOSHelper.get_hex_distance(query.origin_hex, query.objective_hex)
+	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		if not contact.observed or not TacticalPositionExecutor.is_active_defender(contact.unit):
+			continue
+		var enemy_distance: int = LOSHelper.get_hex_distance(contact.hex, query.objective_hex)
+		if enemy_distance <= query.defense_radius and enemy_distance < distance:
+			return true
+	return false
+
+
 static func can_hold_under_pressure(query: PositionQuery, cell: Vector2i, features: Dictionary) -> bool:
 	var capture_guard: bool = features["responsibility"] in ["occupy", "guard"] and query.defense_responsibility != PositionQuery.Responsibility.COVER_APPROACH
 	if query.assigned_sector >= 0 and features.get("assigned_coverage", 0.0) < MIN_APPROACH_COVERAGE and not capture_guard:

@@ -6,6 +6,7 @@ signal influence_maps_updated()
 const REBUILD_CELLS_PER_FRAME: int = 400
 const LOS_SOURCES_PER_FRAME: int = 2
 const POSITION_QUERY_BUDGET_USEC: int = 2000
+const DEFENSE_RESPONSE_BUDGET_USEC: int = 4000
 
 enum CompositeSource { SELF, ENEMY }
 enum TacticalTask { NONE, DEFEND_OBJECTIVE, ATTACK_OBJECTIVE }
@@ -36,12 +37,14 @@ var inspection_results: Dictionary[Unit, PositionResult] = {}
 var last_position_slice_usec: int = 0
 var defense_geometry_cache: Dictionary = {}
 var defense_area_jobs: Array[DefenseAreaJob] = []
+var defense_refresh_requested: bool = false
 
 
 func _process(delta: float) -> void:
 	update_counter += delta
-	if update_counter >= update_threshold:
+	if not rebuild_pending and (defense_refresh_requested or update_counter >= update_threshold):
 		update_counter = 0.0
+		defense_refresh_requested = false
 		create_maps(delta)
 	_process_los_rebuild()
 	_process_budgeted_rebuild()
@@ -54,6 +57,7 @@ func reset_for_match() -> void:
 	position_jobs.clear()
 	defense_area_jobs.clear()
 	defense_geometry_cache.clear()
+	defense_refresh_requested = false
 	inspection_jobs.clear()
 	inspection_results.clear()
 	defensive_memory.clear()
@@ -73,6 +77,16 @@ func set_objective_for_team(team: int, cell: Vector2i) -> void:
 	if objectives_by_team.get(team) != cell:
 		objectives_by_team[team] = cell
 		update_counter = update_threshold
+
+
+func request_defense_refresh() -> int:
+	defense_refresh_requested = true
+	if pending_snapshot != null:
+		# A capture already in progress predates this event and cannot satisfy it.
+		return pending_snapshot.version + 1
+	if snapshot != null:
+		return snapshot.version + 1
+	return 1
 
 
 func create_maps(_delta: float) -> void:
@@ -183,13 +197,27 @@ func enqueue_position_query(query: PositionQuery) -> PositionQueryJob:
 	var job: PositionQueryJob = PositionQueryJob.new()
 	job.query = query
 	position_jobs.append(job)
+	var index: int = position_jobs.size() - 1
+	while index > 0 and position_jobs[index].query.response_priority > position_jobs[index - 1].query.response_priority:
+		var previous: PositionQueryJob = position_jobs[index - 1]
+		position_jobs[index - 1] = position_jobs[index]
+		position_jobs[index] = previous
+		index -= 1
 	return job
 
 
-func request_defense_area(team: int, objective: Vector2i, radius: int = 8, horizon: int = 12, axes: Array[ThreatAxis] = []) -> DefenseAreaJob:
+func request_defense_area(team: int, objective: Vector2i, radius: int = 8, horizon: int = 12, axes: Array[ThreatAxis] = [], priority: int = 0) -> DefenseAreaJob:
 	var job: DefenseAreaJob = snapshot.defense_area_job(team, objective, radius, horizon, axes)
+	job.response_priority = maxi(job.response_priority, priority)
 	if not job.completed and not defense_area_jobs.has(job):
 		defense_area_jobs.append(job)
+	for index: int in range(1, defense_area_jobs.size()):
+		var response: DefenseAreaJob = defense_area_jobs[index]
+		var cursor: int = index
+		while cursor > 0 and response.response_priority > defense_area_jobs[cursor - 1].response_priority:
+			defense_area_jobs[cursor] = defense_area_jobs[cursor - 1]
+			cursor -= 1
+		defense_area_jobs[cursor] = response
 	return job
 
 
@@ -217,24 +245,31 @@ func cancel_position_query(job: PositionQueryJob) -> void:
 
 func _process_position_queries() -> void:
 	var started: int = Time.get_ticks_usec()
-	var deadline: int = started + POSITION_QUERY_BUDGET_USEC
-	while not defense_area_jobs.is_empty() and Time.get_ticks_usec() < deadline:
-		var area_job: DefenseAreaJob = defense_area_jobs[0]
-		area_job.advance(deadline)
-		if area_job.completed:
-			defense_area_jobs.pop_front()
+	var budget: int = POSITION_QUERY_BUDGET_USEC
+	if (not defense_area_jobs.is_empty() and defense_area_jobs[0].response_priority > 0) or (not position_jobs.is_empty() and position_jobs[0].query.response_priority > 0):
+		budget = DEFENSE_RESPONSE_BUDGET_USEC
+	var deadline: int = started + budget
+	while (not defense_area_jobs.is_empty() or not position_jobs.is_empty()) and Time.get_ticks_usec() < deadline:
+		var choose_area: bool = not defense_area_jobs.is_empty()
+		if not position_jobs.is_empty() and choose_area:
+			choose_area = defense_area_jobs[0].response_priority >= position_jobs[0].query.response_priority
+		if choose_area:
+			var area_job: DefenseAreaJob = defense_area_jobs[0]
+			area_job.advance(deadline)
+			if area_job.completed:
+				defense_area_jobs.pop_front()
+			else:
+				break
 		else:
-			break
-	while not position_jobs.is_empty() and Time.get_ticks_usec() < deadline:
-		var job: PositionQueryJob = position_jobs[0]
-		if not InfluenceUnitQuery.is_valid_living_unit(job.query.unit):
-			job.cancel()
-		if not job.canceled:
-			job.advance(deadline)
-		if job.completed or job.canceled:
-			position_jobs.pop_front()
-		else:
-			break
+			var job: PositionQueryJob = position_jobs[0]
+			if not InfluenceUnitQuery.is_valid_living_unit(job.query.unit):
+				job.cancel()
+			if not job.canceled:
+				job.advance(deadline)
+			if job.completed or job.canceled:
+				position_jobs.pop_front()
+			else:
+				break
 	last_position_slice_usec = Time.get_ticks_usec() - started
 
 

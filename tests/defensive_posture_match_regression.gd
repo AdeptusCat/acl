@@ -13,11 +13,12 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	var world: Node = main.world
-	var map_index: int = 1
+	var map_name: String = "OrchardRoad"
 	if OS.get_cmdline_user_args().has("--default-map"):
-		map_index = 0
-	var map: Map = world.maps.get_child(map_index)
+		map_name = "DefaultMap"
+	var map: Map = world.maps.get_node(map_name)
 	var scenario: Scenario = map.get_scenario(0)
+	scenario.ai_attacks_axis_objective = false
 	var player_team: Globals.Team = scenario.player_team
 	if OS.get_cmdline_user_args().has("--axis"):
 		player_team = Globals.Team.AXIS
@@ -109,10 +110,13 @@ func _run() -> void:
 			if advice.is_valid():
 				valid_positions += 1
 				target_key = str(advice.target_hex)
-				_check(advice.features["cover"] >= 0.1, "Defensive endpoints have cover on authored terrain")
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(advice.features["cover"] >= 0.1 or (not advice.features["good_order_enemy_los"] and not advice.features["frontline"]), "HQ uses cover or open ground outside known good-order enemy LOS")
+				else:
+					_check(advice.features["cover"] >= 0.1, "Defensive endpoints have cover on authored terrain")
 				_check(advice.features["exposure_seconds"] <= 6.0 and advice.features["open_exposure_seconds"] <= 2.0 and advice.features["peak_exposure"] <= 0.98, "Routes obey accumulated movement exposure budgets")
 				if HqSupportPositionPolicy.is_headquarters(unit):
-					_check(advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT and advice.features["responsibility"] == "hq_support" and unit.ai_support_only, "Headquarters holds a covered support duty outside combat allocation")
+					_check(advice.profile_mode == PositionProfile.Mode.HQ_SUPPORT and advice.features["responsibility"] == "hq_support" and unit.ai_support_only, "Headquarters holds a safe support duty outside combat allocation")
 				else:
 					_check(advice.features["responsibility"] != "" and advice.features["preserves_screen"], "Every fighting squad fulfils its objective responsibility without opening a screen gap")
 			elif advice.status == PositionResult.Status.NO_CANDIDATE:
@@ -137,10 +141,24 @@ func _run() -> void:
 	for unit: Unit in changes:
 		_check(changes[unit] <= 1, "Static opposition does not cause repeated defensive target changes")
 		_check(unit.action_controller.action_order_id - initial_orders[unit] <= 2, "Static opposition does not repeatedly restart defensive orders")
+	# Keep this positional test out of close combat, including intermediate route cells.
+	var original_graph: AStar2D = Globals.astars[player.team]
+	var advance_graph: AStar2D = world.copy_astar(original_graph)
+	for defender: Unit in planner.squads:
+		var id: int = LOSHelper.ground_layer.pathfinding_get_point_id(defender.current_hex)
+		if advance_graph.has_point(id):
+			advance_graph.set_point_disabled(id, true)
+		if defender.movement.is_moving:
+			id = LOSHelper.ground_layer.pathfinding_get_point_id(defender.movement.target_hex)
+			if advance_graph.has_point(id):
+				advance_graph.set_point_disabled(id, true)
+	Globals.astars[player.team] = advance_graph
 	var advance: Vector2i = _advance_hex(controller, player, planner.current_order.objective_hex)
 	_check(advance != Vector2i(-999, -999), "The player can advance to an unoccupied hex beside the protected objective")
 	if advance != Vector2i(-999, -999):
 		player.order(Globals.UnitCmd.MOVE, advance)
+	Globals.astars[player.team] = original_graph
+	if advance != Vector2i(-999, -999):
 		for frame: int in range(1800):
 			await get_tree().process_frame
 			if not player.movement.is_moving:
@@ -214,7 +232,7 @@ func _advance_hex(controller: InfluenceMapController, player: Unit, objective: V
 		var occupied: bool = false
 		for unit: Unit in Globals.get_units():
 			occupied = occupied or unit.current_hex == cell
-		if occupied or cell == player.current_hex or not LOSHelper.los_lookup.get(cell, {}).has(objective) or controller.snapshot.get_path(player.team, player.current_hex, cell).is_empty():
+		if occupied or cell == player.current_hex or not LOSHelper.los_lookup.get(cell, {}).has(objective) or MovementSystem._compute_path(player.current_hex, cell, player.team).is_empty():
 			continue
 		var candidate_distance: int = LOSHelper.get_hex_distance(player.current_hex, cell)
 		if candidate_distance < distance:

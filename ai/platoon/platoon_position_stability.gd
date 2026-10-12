@@ -146,6 +146,11 @@ func authorize(query: PositionQuery, best: PositionCandidate, retained: Position
 		query.movement_kind = "attack"
 		_proposals.erase(query.unit)
 		return true
+	if query.profile.mode == PositionProfile.Mode.DEFEND and DefensePositionPolicy.needs_interception(query, retained.features) and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
+		# Intercepting a confirmed enemy past the screen is a necessary defensive action.
+		query.movement_kind = "necessary"
+		_proposals.erase(query.unit)
+		return true
 	if requires_follow:
 		query.movement_kind = "follow"
 		_proposals.erase(query.unit)

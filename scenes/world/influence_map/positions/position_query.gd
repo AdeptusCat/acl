@@ -73,6 +73,9 @@ var deliberate_movement: bool = false
 var movement_kind: String = ""
 var stability_reason: String = ""
 var support_priority_squad: Unit
+var rapid_response: bool = false
+var optimize_position: bool = true
+var response_priority: int = 0
 
 
 func reset_evaluation() -> void:

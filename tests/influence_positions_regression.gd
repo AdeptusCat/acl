@@ -135,6 +135,7 @@ func _run() -> void:
 	_test_defensive_commitment()
 	_test_defensive_responsibility()
 	_test_crossing_budget()
+	_test_rapid_defense_response()
 	_test_defensive_withdrawal()
 	_test_defense_mission_context()
 	_test_defensive_memory()
@@ -2275,6 +2276,86 @@ func _defense_fixture() -> PositionQuery:
 	return query
 
 
+func _test_rapid_defense_response() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.rapid_response = true
+	query.optimize_position = false
+	query.sector_cells = [own.current_hex, Vector2i(4, 3)]
+	var result: PositionResult = PositionQueryService.query_positions(query)
+	_check(result.is_valid() and result.target_hex == own.current_hex and result.features.get("rapid_role_check", false), "A rapid defense check retains a covered position fulfilling its responsibility")
+	_check(query.route_field == null and result.eligibility.count(1) == 1, "A useful current position avoids candidate-field and route-flood optimization")
+	query.sector_cells = [Vector2i(4, 3)]
+	result = PositionQueryService.query_positions(query)
+	_check(result.is_valid() and result.should_move and result.features.get("rapid_deployment", false) and query.route_field == null, "Rapid deployment finds a responsible covered position without a full route flood")
+	var shortest: Array[Vector2i] = query.snapshot.get_path(query.team, own.current_hex, result.target_hex)
+	var dangerous: Vector2i = shortest[1]
+	query.snapshot.maps[own.team].set_layer_value(InfluenceMap.Layer.THREAT, dangerous, 500.0)
+	query.profile.max_route_exposure = 0.2
+	result = PositionQueryService.query_positions(query)
+	_check(result.is_valid() and not result.path.has(dangerous) and query.route_field != null, "An unsafe shortest route falls back to a full search for a safe detour")
+	_check(result.features["peak_exposure"] <= query.profile.max_route_exposure and result.features["exposure_seconds"] <= query.profile.max_exposure_seconds, "Rapid-response fallback preserves destination and accumulated route danger limits")
+	query.reservations[other as Unit] = Vector2i(4, 3)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Rapid deployment cannot take another squad's reserved position")
+	var regular: PositionQuery = _defense_fixture()
+	regular.sector_cells = [own.current_hex, Vector2i(4, 3)]
+	var response: PositionQuery = _defense_fixture()
+	response.rapid_response = true
+	response.optimize_position = false
+	response.response_priority = 3
+	response.sector_cells = [own.current_hex]
+	var regular_job: PositionQueryJob = controller.enqueue_position_query(regular)
+	var response_job: PositionQueryJob = controller.enqueue_position_query(response)
+	_check(controller.position_jobs[0] == response_job and controller.position_jobs[1] == regular_job, "An urgent defense response precedes an unfinished optional query without canceling it")
+	controller._process_position_queries()
+	_check(response_job.completed and not regular_job.canceled, "Urgent advice publishes while unrelated scheduled work remains resumable")
+	controller.cancel_position_query(regular_job)
+	controller.cancel_position_query(response_job)
+	var version: int = controller.snapshot.version
+	_check(controller.request_defense_refresh() == version + 1 and controller.defense_refresh_requested, "A defense event requests a fresh capture without waiting for the periodic update")
+	controller.pending_snapshot = InfluenceSnapshot.new()
+	controller.pending_snapshot.version = version + 1
+	_check(controller.request_defense_refresh() == version + 2, "A capture predating an event cannot satisfy the requested tactical refresh")
+	controller.pending_snapshot = null
+	controller.defense_refresh_requested = false
+	var visible: Dictionary = Globals.unit_visible_enemies.duplicate()
+	Globals.unit_visible_enemies[own] = []
+	Globals.unit_visible_enemies[other] = []
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.set_squads([own, other])
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = Vector2i(3, 3)
+	planner.accepted_positions[other as Unit] = {"hex": other.current_hex, "context": "unaffected"}
+	var previous_morale: UnitStates.MoraleState = own.stress_system.state
+	own.stress_system.state = UnitStates.MoraleState.NORMAL
+	planner._check_defense_events()
+	_check(planner._defense_refresh_version == -1, "Initial defense observations do not restart the mission")
+	Globals.unit_visible_enemies[own] = [enemy]
+	planner._check_defense_events()
+	_check(planner._defense_refresh_version == version + 1 and planner._defense_urgent_units.has(own), "A newly observed enemy triggers an immediate prioritized defense response")
+	_check(not planner._defense_urgent_units.has(other) and planner.accepted_positions.has(other), "A new threat preserves an unrelated squad's accepted position")
+	var timer: float = planner.time_until_reconsider
+	planner._check_defense_events()
+	_check(planner.time_until_reconsider == timer and planner._defense_refresh_version == version + 1, "An unchanged sighting does not repeatedly interrupt planning")
+	own.stress_system.state = UnitStates.MoraleState.PINNED
+	planner._check_defense_events()
+	_check(planner._defense_urgent_units.has(other), "Losing a pinned defender prioritizes a mobile replacement")
+	var enemy_hex: Vector2i = enemy.current_hex
+	Globals.unit_visible_enemies[own] = []
+	enemy.current_hex = Vector2i(0, 0)
+	planner._check_defense_events()
+	_check(planner._defense_observed_hexes[enemy as Unit] == enemy_hex, "Hidden live movement cannot trigger an observed-knowledge defense reaction")
+	enemy.current_hex = enemy_hex
+	own.stress_system.state = previous_morale
+	Globals.unit_visible_enemies = visible
+	planner.set_active(false)
+	_check(planner._defense_refresh_version == -1 and planner._defense_observed_hexes.is_empty(), "Disabling AI releases pending event reactions")
+	planner.free()
+	controller.defense_refresh_requested = false
+	_publish()
+
+
 func _add_defense_contact(query: PositionQuery) -> void:
 	var contact: InfluenceContact = InfluenceContact.new()
 	contact.unit = enemy
@@ -2330,6 +2411,24 @@ func _test_defensive_responsibility() -> void:
 	query.accepted_context = query.context_key()
 	var intercept: PositionResult = PositionQueryService.query_positions(query)
 	_check(intercept.is_valid() and intercept.target_hex == query.objective_hex, "A passed screen can reposition to intercept between the enemy and objective despite pressure")
+	query.rapid_response = true
+	query.optimize_position = false
+	query.stability = PlatoonPositionStability.new()
+	query.stability_time = 1.1
+	var action_state: int = own.action_controller.action_state
+	own.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	var held: PositionResult = PositionResult.new()
+	held.unit = own
+	held.status = PositionResult.Status.ACCEPTED
+	held.target_hex = front
+	held.target_index = query.snapshot.maps[own.team].cell_to_index(front)
+	held.profile_mode = PositionProfile.Mode.DEFEND
+	held.position_profile = query.profile
+	query.stability.accepted(held, 1.0)
+	var rapid_intercept: PositionResult = PositionQueryService.query_positions(query)
+	_check(rapid_intercept.is_valid() and rapid_intercept.should_move and rapid_intercept.target_hex == query.objective_hex, "Rapid role checks cannot retain a covered screen after a confirmed enemy has passed it")
+	_check(rapid_intercept.features.get("movement_kind", "") == "necessary" and query.stability.optional_mover == null, "An urgent interception bypasses optional holding periods and the single optional mover slot")
+	own.action_controller.action_state = action_state
 	own.current_hex = origin
 	own.position = ground.map_to_local(origin)
 	query.snapshot.positions[own as Unit] = origin
@@ -3423,6 +3522,8 @@ func _test_concurrent_relocation() -> void:
 		anchor.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
 		var query: PositionQuery = _defense_fixture()
 		var target: Vector2i = Vector2i(6, 3)
+		query.rapid_response = true
+		query.optimize_position = false
 		var destination: Vector2i = Vector2i(4, 3)
 		query.sector_cells = [destination]
 		var job: DefenseAreaJob = query.snapshot.defense_area_job(team, query.objective_hex, 4, 7)
@@ -3456,6 +3557,8 @@ func _test_concurrent_relocation() -> void:
 		own.movement.is_moving = true
 		own.movement.target_hex = destination
 		var second_query: PositionQuery = _query()
+		second_query.rapid_response = true
+		second_query.optimize_position = false
 		second_query.unit = other
 		second_query.team = team
 		second_query.snapshot = query.snapshot

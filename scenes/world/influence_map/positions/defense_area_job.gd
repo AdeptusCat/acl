@@ -19,6 +19,7 @@ var analysis_radius: int = 12
 var manual_axes: Array[ThreatAxis] = []
 var result: DefenseAreaAssessment
 var completed: bool = false
+var response_priority: int = 0
 var phase: Phase = Phase.GEOMETRY
 var geometry: Dictionary = {"cells": [], "neighbors": {}, "costs": {}, "open_costs": {}, "cover": {}, "covered": [], "edges": [], "boundary": {}, "objective_distances": {}, "return_open_costs": {}, "response_fields": {}}
 var field: DefenseTravelField
