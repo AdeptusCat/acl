@@ -38,8 +38,10 @@ signal hide_unit_details_in_ui
 signal game_started_through_moving_unit
 signal hex_selected(map_hex: Vector2i, event_pos: Vector2)
 signal start_match
+signal ai_status_changed(team: Globals.Team, enabled: bool, mode: PositionProfile.Mode)
 
 var end_game_handled: bool = false
+var _ai_orders_by_team: Dictionary[Globals.Team, MissionOrder] = {}
 
 var point_array: Array[Vector2]
 var threat_weights: Dictionary = {}
@@ -473,28 +475,86 @@ func _configure_platoon_ai() -> void:
 		if InfluenceUnitQuery.is_valid_living_unit(unit) and unit.is_in_group("units"):
 			active_units.append(unit)
 	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
+	_ai_orders_by_team.clear()
 	for director: DefenseDirector in directors:
-		director.platoon_ai.set_active(director.platoon_ai.team == Globals.team_enemy)
+		var planner: PlatoonAI = director.platoon_ai
+		planner.set_active(planner.team == Globals.team_enemy)
 		director.configure_for_match(active_units)
-		if director.platoon_ai.active and Globals.scenario_chosen.ai_attacks_axis_objective:
-			var objective_layer: HexagonTileMapLayer = Globals.scenario_chosen.axis_objectives_tile_map_layer
-			for cell: Vector2i in objective_layer.get_used_cells():
-				var tile_data: TileData = objective_layer.get_cell_tile_data(cell)
-				if tile_data == null or not tile_data.has_custom_data("objective_id"):
-					continue
-				if int(tile_data.get_custom_data("objective_id")) == 4:
-					continue
-				var attack_order: MissionOrder = director.create_initial_order()
-				attack_order.objective_hex = cell
-				attack_order.position_mode = PositionProfile.Mode.ASSAULT
-				attack_order.execution_intent = TacticalPositionExecutor.Intent.ASSAULT
-				attack_order.reserve_policy = MissionOrder.ReservePolicy.NONE
-				attack_order.sector_cells = []
-				director.platoon_ai.influence_map_controller.set_objective_for_team(director.platoon_ai.team, cell)
-				director.platoon_ai.receive_mission_order(attack_order)
+		var order: MissionOrder = director.create_initial_order()
+		if planner.active and Globals.scenario_chosen.ai_attacks_axis_objective:
+			order = _create_attack_ai_order(director, Globals.Team.AXIS)
+		_ai_orders_by_team[planner.team] = order
+		if planner.active:
+			planner.receive_mission_order(order)
+		ai_status_changed.emit(planner.team, planner.active, order.position_mode)
+
+
+func set_team_ai_enabled(team: Globals.Team, enabled: bool) -> void:
+	var director: DefenseDirector = _ai_director_for_team(team)
+	if director == null or not _ai_orders_by_team.has(team):
+		return
+	var planner: PlatoonAI = director.platoon_ai
+	if planner.active == enabled:
+		return
+	if planner.current_order != null:
+		# Preserve the mission, including any edited objective, across OFF/ON.
+		_ai_orders_by_team[team] = planner.current_order
+	var order: MissionOrder = _ai_orders_by_team[team]
+	planner.set_active(enabled)
+	if enabled:
+		planner.receive_mission_order(order)
+	ai_status_changed.emit(team, enabled, order.position_mode)
+
+
+func set_team_ai_mode(team: Globals.Team, mode: PositionProfile.Mode) -> void:
+	if mode not in [PositionProfile.Mode.ASSAULT, PositionProfile.Mode.DEFEND]:
+		return
+	var director: DefenseDirector = _ai_director_for_team(team)
+	if director == null or not _ai_orders_by_team.has(team) or get_team_ai_mode(team) == mode:
+		return
+	var order: MissionOrder = director.create_initial_order()
+	order.position_mode = PositionProfile.Mode.DEFEND
+	order.execution_intent = TacticalPositionExecutor.Intent.FROM_PROFILE
+	if mode == PositionProfile.Mode.ASSAULT:
+		order = _create_attack_ai_order(director, team)
+	_ai_orders_by_team[team] = order
+	if director.platoon_ai.active:
+		director.platoon_ai.receive_mission_order(order)
+	ai_status_changed.emit(team, director.platoon_ai.active, mode)
+
+
+func get_team_ai_mode(team: Globals.Team) -> PositionProfile.Mode:
+	var director: DefenseDirector = _ai_director_for_team(team)
+	if director != null and director.platoon_ai.current_order != null:
+		return director.platoon_ai.current_order.position_mode
+	var order: MissionOrder = _ai_orders_by_team.get(team)
+	if order != null:
+		return order.position_mode
+	return PositionProfile.Mode.DEFEND
+
+
+func _ai_director_for_team(team: Globals.Team) -> DefenseDirector:
+	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
+	for director: DefenseDirector in directors:
+		if director.platoon_ai != null and director.platoon_ai.team == team:
+			return director
+	return null
+
+
+func _create_attack_ai_order(director: DefenseDirector, objective_team: Globals.Team) -> MissionOrder:
+	var order: MissionOrder = director.create_initial_order()
+	var targets: ObjectivesCollection = Globals.objectives.get(objective_team)
+	if targets != null and not targets.objectives.is_empty():
+		order.objective_hex = targets.objectives[0].hex
+		for target: ObjectiveDefinition in targets.objectives:
+			if target.objective_id == director.capture_objective_id:
+				order.objective_hex = target.hex
 				break
-			continue
-		director.assign_order_to_platoon()
+	order.position_mode = PositionProfile.Mode.ASSAULT
+	order.execution_intent = TacticalPositionExecutor.Intent.ASSAULT
+	order.reserve_policy = MissionOrder.ReservePolicy.NONE
+	order.sector_cells = []
+	return order
 
 
 func create_test_axes() -> Array[ThreatAxis]:

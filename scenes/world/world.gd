@@ -73,6 +73,7 @@ func _ready() -> void:
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
 	game_controller.hex_selected.connect(_on_hex_selected)
+	ui.get_node("Control/Debug").bind_ai_controls(game_controller)
 	
 	
 	
