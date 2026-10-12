@@ -27,7 +27,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
-		if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
+		if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 			if query.route_field != null:
 				step_risk = query.route_field.step_data(step)["risk"]
 			else:
@@ -69,9 +69,9 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
-	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]:
+	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
-		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads:
+		if (query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads) or query.press_attack:
 			incoming = _contact_fire_risk(query, contacts, cell, false)
 		else:
 			incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
@@ -117,6 +117,12 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 		"support": minf(support, 1.0),
 		"contact_distance": nearest_contact_distance(contacts, cell),
 		"progress": float(start_distance - objective_distance) / float(maxi(start_distance, 1)), "legacy": legacy}
+	features["press_attack"] = query.press_attack
+	if query.has_support_anchor:
+		var origin_gap: int = maxi(0, LOSHelper.get_hex_distance(query.origin_hex, query.support_anchor_hex) - query.support_anchor_radius)
+		var destination_gap: int = maxi(0, LOSHelper.get_hex_distance(cell, query.support_anchor_hex) - query.support_anchor_radius)
+		features["support_advance"] = float(origin_gap - destination_gap) / float(maxi(1, query.movement_radius))
+		features["support_anchor_distance"] = LOSHelper.get_hex_distance(cell, query.support_anchor_hex)
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		if query.defense_area != null:
 			features.merge(query.defense_area.features(query, cell))
@@ -173,6 +179,11 @@ static func _contact_fire_risk(query: PositionQuery, contacts: Array[InfluenceCo
 		var firepower: float = contact.firepower
 		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 			firepower *= HqSupportPositionPolicy.contact_threat_multiplier(query, contact)
+		elif query.press_attack and contact.observed:
+			if not TacticalPositionExecutor.is_active_defender(contact.unit):
+				firepower = 0.0
+			elif TacticalPositionExecutor.is_overwhelmed(contact.unit):
+				firepower *= 0.1
 		incoming += LosInfluenceProjector.calculate_los_fire_threat(firepower,
 			contact.effectiveness, cover, record.get("hindrance", 0.0), distance)
 	return risk(incoming)
@@ -183,7 +194,7 @@ static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
 	# Attack headquarters use observed contact capability rather than stale unsuppressed map risk.
 	var danger: float = _contact_fire_risk(query, contacts, cell, true)
-	if query.profile.mode != PositionProfile.Mode.HQ_SUPPORT or not query.profile.support_assault_squads:
+	if not query.press_attack and (query.profile.mode != PositionProfile.Mode.HQ_SUPPORT or not query.profile.support_assault_squads):
 		danger = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), danger)
 	if query.forecast_data.size() == map.cell_count:
 		danger = maxf(danger, query.profile.forecast_route_weight * risk(query.forecast_data[map.cell_to_index(cell)]))

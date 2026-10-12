@@ -160,7 +160,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if retained.features.get("responsibility") == "cover_approach" and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
 			holding_pressure = false
 		committed = committed or holding_pressure
-		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and best.features.get("support_priority_covered", false) and not retained.features.get("support_priority_covered", false):
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and not retained.features.get("support_priority_covered", false) and (best.features.get("support_priority_covered", false) or best.features.get("support_priority_progress", 0.0) > retained.features.get("support_priority_progress", 0.0)):
 			# New urgent support can interrupt a safe but unhelpful HQ commitment.
 			committed = false
 			margin = 0.0
@@ -205,6 +205,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = "Supporting nearby squads from cover; priority need %.2f" % best.features["support_priority_need"]
 		if best.features["cover"] < query.profile.minimum_cover:
 			result.reason = "Supporting nearby squads in open ground outside known good-order enemy LOS; priority need %.2f" % best.features["support_priority_need"]
+		if not best.features["support_priority_covered"] and best.features.get("support_priority_progress", 0.0) > 0.0:
+			result.reason = "Moving closer to the forward support squad; leadership range not yet reached"
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
 	return
@@ -291,7 +293,7 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 	elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
 		_reject(diagnostics, "risk", index)
 		return null
-	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0:
+	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0 and features.get("support_advance", 0.0) <= 0.0:
 		_reject(diagnostics, "firing", index)
 		return null
 	diagnostics.eligibility[index] = 1
@@ -309,6 +311,8 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -> bool:
 	if path.is_empty():
 		return false
+	if query.press_attack and not press_attack_path_is_safe(query.snapshot, query.team, query.origin_hex, path):
+		return false
 	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
 		if not contact.observed or TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
 			continue
@@ -318,6 +322,18 @@ static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -
 			return false
 		for step: Vector2i in path:
 			if step != query.origin_hex and LOSHelper.get_hex_distance(step, contact.hex) <= 1:
+				return false
+	return true
+
+
+static func press_attack_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i]) -> bool:
+	if path.is_empty():
+		return false
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
+		if contact.observed and (not TacticalPositionExecutor.is_active_defender(contact.unit) or TacticalPositionExecutor.is_overwhelmed(contact.unit)):
+			continue
+		for step: Vector2i in path:
+			if step != origin and (LOSHelper.get_hex_distance(step, contact.hex) <= 1 or snapshot.los.get(contact.hex, {}).has(step)):
 				return false
 	return true
 
@@ -337,6 +353,8 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 	if LOSHelper.get_hex_distance(query.unit.current_hex, cell) > query.movement_radius:
 		return false
 	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+		if query.has_support_anchor and LOSHelper.get_hex_distance(cell, query.support_anchor_hex) < LOSHelper.get_hex_distance(query.origin_hex, query.support_anchor_hex):
+			return true
 		return objective_distance > 0 and objective_distance <= InfluenceUnitQuery.get_unit_range(query.unit)
 	if query.profile.mode == PositionProfile.Mode.ASSAULT:
 		if query.profile.enter_suppressed_enemy_hex:

@@ -88,13 +88,14 @@ func _run() -> void:
 				support_trace[-1]["objective"] = str(advice.objective_hex)
 		if attack_controller != null and attack_controller.attack_advance_released and not advance_release_observed:
 			advance_release_observed = true
-			_check(attack_controller._has_established_attack_support(attack_controller.squads), "Rifle advance starts after MG fire support is established")
-			_check(attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads) or not attack_controller._has_known_attack_defenders(attack_controller.squads), "Rifle advance starts after visible defenders are suppressed or the known objective is cleared")
+			var presses_attack: bool = attack_controller._has_pressing_attack(attack_controller.squads)
+			_check(presses_attack or attack_controller._has_established_attack_support(attack_controller.squads), "Rifle advance starts with established support or an overwhelmed defender to exploit")
+			_check(presses_attack or attack_controller._are_visible_attack_defenders_suppressed(attack_controller.squads) or not attack_controller._has_known_attack_defenders(attack_controller.squads), "Rifle advance starts after suppression, clearance, or a safe opportunity to press an overwhelmed defender")
 			var advancing_rifles: int = 0
 			for unit: Unit in attack_controller.squads:
 				if unit.squad_type == Globals.SquadType.Rifle and attack_controller._attack_mode_for_unit(unit) in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
 					advancing_rifles += 1
-			_check(advancing_rifles == 1, "OutpostProbe advances one rifle while the other rifles retain fire support")
+			_check(advancing_rifles == 1 or (presses_attack and advancing_rifles > 0), "Ordinary attacks keep one maneuver rifle; overwhelmed defenders can release additional attackers")
 	if attack_rifle != null:
 		var objective: Vector2i = scenario.axis_objectives_tile_map_layer.get_used_cells()[0]
 		if advance_release_observed:

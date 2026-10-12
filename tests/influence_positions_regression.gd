@@ -120,6 +120,7 @@ func _run() -> void:
 	_test_suppressed_hex_entry()
 	_test_attack_overwatch()
 	_test_attack_support_recovery()
+	_test_attack_pressure_and_following()
 	_test_mirrored_teams()
 	_test_axis_diagnostics()
 	_test_execution()
@@ -774,6 +775,173 @@ func _test_attack_support_recovery() -> void:
 		unit.squad_fire.free()
 		unit.squad_fire = null
 	for unit: Unit in [gun, rifle, observer, pinned, fresh]:
+		unit.free()
+
+
+func _test_attack_pressure_and_following() -> void:
+	var gun: UnitProbe = _unit(own.team, Vector2i(1, 5))
+	var headquarters: UnitProbe = _unit(own.team, Vector2i(0, 6))
+	var pinned: UnitProbe = _unit(own.team, Vector2i(6, 3))
+	var first: UnitProbe = _unit(own.team, Vector2i(5, 3))
+	var second: UnitProbe = _unit(own.team, Vector2i(6, 4))
+	var defender: UnitProbe = _unit(enemy.team, pinned.current_hex)
+	var fresh: UnitProbe = _unit(enemy.team, Vector2i(8, 6))
+	gun.squad_type = Globals.SquadType.MG
+	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+	headquarters.leader_aura.aura_radius_hexes = 1
+	pinned.stress_system.state = UnitStates.MoraleState.PINNED
+	pinned.in_close_combat = true
+	defender.stress_system.state = UnitStates.MoraleState.PINNED
+	defender.stress_system.S_eff = 80.0
+	var weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	for unit: UnitProbe in [gun, pinned, first, second]:
+		unit.combat_stats.combat_effectiveness = 1.0
+		_equip(unit, [weapon])
+		unit.squad_fire.unit = unit
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		Globals.unit_visible_enemies[unit] = [defender]
+	var saved_snapshot: InfluenceSnapshot = controller.snapshot
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	snapshot.version = saved_snapshot.version + 1
+	snapshot.los = LOSHelper.los_lookup.duplicate(true)
+	snapshot.routes[own.team] = saved_snapshot.routes[own.team]
+	snapshot.point_ids[own.team] = saved_snapshot.point_ids[own.team]
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(saved_snapshot.maps[own.team].bounds)
+	map.playable_cells = saved_snapshot.maps[own.team].playable_cells.duplicate()
+	map.clear_layer(InfluenceMap.Layer.TERRAIN_COVER, 0.5)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, gun.current_hex, 0.95)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, headquarters.current_hex, 0.95)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, defender.current_hex, 0.0)
+	snapshot.maps[own.team] = map
+	for unit: Unit in [gun, headquarters, pinned, first, second]:
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.teams[unit] = own.team
+		snapshot.support_units[unit] = {"headquarters": unit == headquarters, "company": unit.company,
+			"platoon": unit.platoon, "commander": headquarters, "company_hq": false,
+			"members": unit.members_alive, "radius": unit.leader_aura.aura_radius_hexes, "need": 0.1, "surrendered": false}
+	snapshot.support_units[pinned as Unit]["need"] = 1.5
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = defender
+	contact.hex = defender.current_hex
+	contact.observed = true
+	contact.confidence = 1.0
+	contact.firepower = 1.0
+	contact.effectiveness = 0.35
+	contact.weapon_range = 8
+	snapshot.contacts[own.team] = [contact]
+	snapshot.defensive_contacts[own.team] = [contact]
+	controller.snapshot = snapshot
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.squads = [gun, headquarters, pinned, first, second]
+	planner.current_order = MissionOrder.new()
+	planner.current_order.position_mode = PositionProfile.Mode.ASSAULT
+	planner.current_order.objective_hex = defender.current_hex
+	planner.attack_maneuver_squad = pinned
+	planner.attack_approach_started = true
+	_check(not planner._has_established_attack_support(planner.squads) and not planner._has_pressing_attack(planner.squads), "Exactly 80 percent defender stress still requires established overwatch")
+	defender.stress_system.S_eff = 81.0
+	planner._build_planning_requests(planner.squads)
+	_check(planner.attack_advance_released and not planner._has_established_attack_support(planner.squads), "Stress above 80 percent releases a fresh rifle attack even without established overwatch")
+	_check(planner._attack_mode_for_unit(first) == PositionProfile.Mode.ASSAULT and planner._attack_mode_for_unit(second) == PositionProfile.Mode.ASSAULT, "Both eligible adjacent rifles press an overwhelmed defender while the original attacker is pinned")
+	var assault: PositionQuery
+	var support: PositionQuery
+	var escort: PositionQuery
+	for request: Dictionary in planner._planning_requests:
+		var query: PositionQuery = request["query"]
+		if query.unit == first:
+			assault = query
+		elif query.unit == gun:
+			support = query
+		elif query.unit == headquarters:
+			escort = query
+	_check(assault.press_attack and assault.movement_radius > 0 and assault.profile.enter_suppressed_enemy_hex, "The pressure exception preserves a real same-hex assault instead of freezing movement for missing overwatch")
+	map.clear_layer(InfluenceMap.Layer.THREAT, 100.0)
+	var advice: PositionResult = PositionQueryService.query_positions(assault)
+	_check(advice.is_valid() and advice.target_hex == defender.current_hex, "An eligible rifle can join the overwhelmed defender's hex despite a pinned friendly already there")
+	_check(advice.features.get("incoming", 1.0) < 0.9 and advice.features.get("peak_exposure", 1.0) < 0.9, "Observed overwhelming stress overrides an older unsuppressed threat field for both the route and assault destination")
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "assault")], "assault", null)
+	planner._issue_order(first)
+	_check(first.movement.is_moving and first.movement.target_hex == defender.current_hex, "The fresh rifle executes its assault without an overwatch unit")
+	var pinned_advice: PositionResult = PositionResult.new()
+	pinned_advice.status = PositionResult.Status.ACCEPTED
+	pinned_advice.unit = pinned
+	pinned_advice.profile_mode = PositionProfile.Mode.ADVANCE
+	pinned_advice.target_hex = first.current_hex
+	pinned_advice.target_index = map.cell_to_index(first.current_hex)
+	pinned_advice.should_move = true
+	pinned_advice.path = snapshot.get_path(own.team, pinned.current_hex, first.current_hex)
+	_check(not planner.executor.execute(pinned_advice) and not pinned.movement.is_moving, "The overwhelmed-defender exception never releases movement of the pinned attacker")
+	defender.stress_system.S_eff = 80.0
+	planner._issue_order(first)
+	_check(not first.movement.is_moving and not planner.accepted_positions.has(first), "Defender recovery invalidates a cached unsupported assault before execution")
+	defender.stress_system.S_CAP = 200.0
+	defender.stress_system.S_eff = 81.0
+	_check(not TacticalPositionExecutor.is_overwhelmed(defender), "Pressure uses the defender's stress percentage rather than a fixed 80-point threshold")
+	defender.stress_system.S_CAP = 100.0
+	defender.stress_system.S_eff = 90.0
+	var fresh_contact: InfluenceContact = InfluenceContact.new()
+	fresh_contact.unit = fresh
+	fresh_contact.hex = fresh.current_hex
+	fresh_contact.observed = true
+	snapshot.defensive_contacts[own.team].append(fresh_contact)
+	_check(not planner._has_pressing_attack(planner.squads), "A second defender covering the overwhelmed squad prevents abandoning overwatch")
+	fresh_contact.observed = false
+	fresh.stress_system.S_eff = 100.0
+	_check(not planner._has_pressing_attack(planner.squads), "A remembered defender's hidden stress cannot authorize an unsupported assault")
+	snapshot.los[fresh.current_hex] = {}
+	_check(planner._has_pressing_attack(planner.squads), "A separate remembered defender without LOS to the assault does not block exploitation of the overwhelmed squad")
+	snapshot.los[fresh.current_hex][Vector2i(3, 4)] = {}
+	_check(not PositionQueryService.press_attack_path_is_safe(snapshot, own.team, gun.current_hex, [gun.current_hex, Vector2i(3, 4), first.current_hex]), "An unsupported assault cannot cross another known defender's firing lane")
+	snapshot.defensive_contacts[own.team].erase(fresh_contact)
+	defender.stress_system.S_eff = 55.0
+	map.clear_layer(InfluenceMap.Layer.THREAT, 0.0)
+	_check(support.has_support_anchor and support.support_anchor_hex == pinned.current_hex and support.profile.commitment_seconds == 0.0, "A lagging MG releases its old firing commitment and follows the actual forward rifle, including a pinned attacker")
+	gun.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	planner._planning_requests.clear()
+	planner._build_planning_requests(planner.squads)
+	for request: Dictionary in planner._planning_requests:
+		if request["query"].unit == gun:
+			_check(request["query"].profile.commitment_seconds == 8.0, "A lagging MG still finishes its bound and setup before reconsidering the next forward support position")
+	gun.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	support.has_accepted_target = true
+	support.accepted_target = gun.current_hex
+	support.accepted_context = support.context_key()
+	support.accepted_at = snapshot.captured_at
+	advice = PositionQueryService.query_positions(support)
+	_check(advice.is_valid() and advice.should_move and LOSHelper.get_hex_distance(advice.target_hex, pinned.current_hex) < LOSHelper.get_hex_distance(gun.current_hex, pinned.current_hex), "A useful rear firing lane does not prevent the MG moving into a closer covered support position")
+	defender.stress_system.S_eff = 90.0
+	planner._apply_position_results([DefensePositionAnalyzer.adapt_result(advice, null, "support_by_fire")], "support_by_fire", null)
+	planner._issue_order(gun)
+	_check(gun.movement.is_moving and gun.movement.target_hex == advice.target_hex, "The last MG can close the support gap during an attack on an overwhelmed defender")
+	planner.executor.cancel_all(true)
+	defender.stress_system.S_eff = 55.0
+	support.movement_radius = 2
+	for cell: Vector2i in snapshot.los:
+		snapshot.los[cell].erase(defender.current_hex)
+	advice = PositionQueryService.query_positions(support)
+	_check(advice.is_valid() and advice.should_move and advice.features["firing"] == 0.0 and advice.features["support_advance"] > 0.0 and advice.features["cover"] >= 0.1, "MG can make a covered intermediate bound when the next useful firing lane lies beyond its planning radius")
+	_check(escort.assault_support_squad == pinned, "HQ continues rally support of the pinned forward attacker when other rifles take over the assault")
+	escort.movement_radius = 2
+	escort.has_accepted_target = true
+	escort.accepted_target = headquarters.current_hex
+	HqSupportPositionPolicy.prepare(escort)
+	escort.accepted_context = escort.context_key()
+	escort.accepted_at = snapshot.captured_at
+	advice = PositionQueryService.query_positions(escort)
+	_check(advice.is_valid() and advice.should_move and not advice.features["support_priority_covered"] and advice.features["support_priority_progress"] > 0.0, "HQ leaves rear cover and takes an intermediate step toward a stressed squad beyond one planning radius")
+	_check(LOSHelper.get_hex_distance(advice.target_hex, pinned.current_hex) < LOSHelper.get_hex_distance(headquarters.current_hex, pinned.current_hex), "Intermediate HQ movement closes the leadership gap to the forward squad")
+	_check(planner.executor.execute(advice) and headquarters.movement.is_moving, "Intermediate HQ support advice starts actual movement")
+	planner.executor.cancel_all(true)
+	controller.snapshot = saved_snapshot
+	planner.free()
+	for unit: UnitProbe in [gun, pinned, first, second]:
+		Globals.unit_visible_enemies.erase(unit)
+		unit.squad_fire.free()
+		unit.squad_fire = null
+	for unit: UnitProbe in [gun, headquarters, pinned, first, second, defender, fresh]:
 		unit.free()
 
 

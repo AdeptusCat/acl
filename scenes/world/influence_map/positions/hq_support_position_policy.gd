@@ -51,6 +51,9 @@ static func in_geography(query: PositionQuery, cell: Vector2i) -> bool:
 	for target: Dictionary in query.support_targets.values():
 		if LOSHelper.get_hex_distance(cell, target["hex"]) <= query.support_radius + 2:
 			return true
+		if query.profile.support_assault_squads and target["need"] >= 0.35 and LOSHelper.get_hex_distance(cell, target["hex"]) < LOSHelper.get_hex_distance(query.origin_hex, target["hex"]):
+			# The next bound can close a gap larger than one planning radius.
+			return true
 	return false
 
 
@@ -62,6 +65,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var urgent: Unit = null
 	var highest_need: float = -1.0
 	var priority_distance: int = 999999
+	var priority_origin_distance: int = 999999
 	for friendly: Unit in query.support_targets:
 		var target: Dictionary = query.support_targets[friendly]
 		var distance: int = LOSHelper.get_hex_distance(cell, target["hex"])
@@ -77,10 +81,14 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 			highest_need = target["need"]
 			urgent = friendly
 			priority_distance = distance
+			priority_origin_distance = LOSHelper.get_hex_distance(query.origin_hex, target["hex"])
 	# Actual aura coverage of an urgent squad must outweigh proximity to calm squads.
 	var priority_support: float = 0.0
 	if highest_need >= 0.35 and priority_distance <= query.support_radius:
 		priority_support = highest_need
+	var priority_progress: float = 0.0
+	if query.profile.support_assault_squads and highest_need >= 0.35:
+		priority_progress = float(maxi(0, priority_origin_distance - query.support_radius) - maxi(0, priority_distance - query.support_radius)) / float(maxi(1, query.movement_radius))
 	var visibility: float = 0.0
 	var frontline: bool = false
 	var good_order_enemy_los: bool = false
@@ -99,6 +107,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
 		"support_priority_distance": priority_distance, "support_priority_covered": priority_distance <= query.support_radius,
+		"support_priority_progress": priority_progress,
 		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline,
 		"good_order_enemy_los": good_order_enemy_los}
 

@@ -288,6 +288,7 @@ func _add_support_requests(available: Array[Unit]) -> void:
 			if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 				config.profile.support_assault_squads = true
 				config.profile.commitment_seconds = 8.0
+				config.profile.progress_weight = 12.0
 				config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
 				config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
 			_add_planning_requests(config, [unit], "hq_support", null)
@@ -327,7 +328,7 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 	if current_order.position_mode != PositionProfile.Mode.DEFEND and current_order.position_mode != PositionProfile.Mode.LEGACY_DEFENSE:
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT:
 			_update_attack_roles(available)
-			attack_advance_released = _has_established_attack_support(available) and (_are_visible_attack_defenders_suppressed(available) or not _has_known_attack_defenders(available))
+			attack_advance_released = _has_pressing_attack(available) or (_has_established_attack_support(available) and (_are_visible_attack_defenders_suppressed(available) or not _has_known_attack_defenders(available)))
 			attack_approach_started = attack_approach_started or attack_advance_released
 		for unit: Unit in available:
 			var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, current_order.objective_hex, current_order, accepted_positions)
@@ -339,16 +340,27 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.objective_hex = _attack_support_objective(available)
 					config.profile.minimum_cover = 0.1
 					config.profile.commitment_seconds = 8.0
-					if attack_approach_started and TacticalPositionExecutor.select_support_target_for_objective(unit, config.objective_hex) != null:
+					var front: Unit = _attack_front_squad(available)
+					var follows_front: bool = attack_approach_started and front != null
+					if follows_front:
+						config.profile.support_advance_weight = 12.0
+						config.profile.avoid_unsuppressed_defenders = true
+					if follows_front and LOSHelper.get_hex_distance(unit.current_hex, front.current_hex) > 3:
+						if not unit.movement.is_moving and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
+							config.profile.commitment_seconds = 0.0
+					elif attack_approach_started and TacticalPositionExecutor.select_support_target_for_objective(unit, config.objective_hex) != null:
 						config.profile.commitment_seconds = INF
 					elif attack_approach_started and not unit.movement.is_moving and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
 						config.profile.commitment_seconds = 0.0
 					config.profile.improvement_absolute = 0.35
 					config.profile.improvement_relative = 0.2
 				if mode == PositionProfile.Mode.ADVANCE and unit.squad_type == Globals.SquadType.Rifle:
+					var pressure_target: Unit = _attack_pressure_target(unit)
+					if pressure_target != null:
+						config.objective_hex = pressure_target.current_hex
 					config.profile.minimum_cover = 0.1
-					if not _has_known_attack_defenders(available):
-						# Cover is required for an opposed approach, not occupation of a cleared objective.
+					if pressure_target != null or not _has_known_attack_defenders(available):
+						# An overwhelmed defender or a cleared objective permits an open approach.
 						config.profile.minimum_cover = 0.0
 					config.profile.avoid_unsuppressed_defenders = true
 					# Approach the objective instead of optimizing a stationary firing position.
@@ -361,6 +373,9 @@ func _build_combat_planning_requests(available: Array[Unit]) -> void:
 					config.profile.max_route_exposure = 0.9
 				if mode == PositionProfile.Mode.ASSAULT:
 					var defender: Unit = _close_combat_target(unit)
+					var pressure_target: Unit = _attack_pressure_target(unit)
+					if pressure_target != null and LOSHelper.get_hex_distance(unit.current_hex, pressure_target.current_hex) == 1:
+						defender = pressure_target
 					if defender != null:
 						config.objective_hex = defender.current_hex
 						config.profile.enter_suppressed_enemy_hex = true
@@ -513,8 +528,79 @@ func _can_provide_attack_support(unit: Unit) -> bool:
 
 
 func _has_attack_cover_candidate(available: Array[Unit], maneuver: Unit) -> bool:
+	if _attack_pressure_target(maneuver) != null:
+		return true
 	for unit: Unit in available:
 		if unit != maneuver and _can_provide_attack_support(unit):
+			return true
+	return false
+
+
+func _attack_front_squad(available: Array[Unit]) -> Unit:
+	var front: Unit = null
+	var best_distance: int = 2147483647
+	for unit: Unit in available:
+		if unit.squad_type != Globals.SquadType.Rifle or not TacticalPositionExecutor.is_active_defender(unit):
+			continue
+		var distance: int = LOSHelper.get_hex_distance(unit.current_hex, current_order.objective_hex)
+		if distance < best_distance or (distance == best_distance and unit == attack_maneuver_squad):
+			front = unit
+			best_distance = distance
+	return front
+
+
+func _attack_pressure_target(unit: Unit) -> Unit:
+	if current_order == null or influence_map_controller == null or influence_map_controller.snapshot == null:
+		return null
+	if not TacticalPositionExecutor.is_active_defender(unit) or unit.squad_type != Globals.SquadType.Rifle or not PositionQueryService.can_assault(unit) or not PositionQueryService.can_follow_intent(unit):
+		return null
+	var target: Unit = null
+	var best_distance: int = 2147483647
+	for observer: Unit in squads:
+		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+			if not TacticalPositionExecutor.is_overwhelmed(enemy) or enemy.team == team:
+				continue
+			if LOSHelper.get_hex_distance(enemy.current_hex, current_order.objective_hex) > current_order.defense_radius:
+				continue
+			if not _overwhelmed_target_is_safe(enemy):
+				continue
+			var distance: int = LOSHelper.get_hex_distance(unit.current_hex, enemy.current_hex)
+			if distance < best_distance:
+				target = enemy
+				best_distance = distance
+	return target
+
+
+func _overwhelmed_target_is_safe(target: Unit) -> bool:
+	for observer: Unit in squads:
+		for enemy: Unit in Globals.unit_visible_enemies.get(observer, []):
+			if not TacticalPositionExecutor.is_active_defender(enemy) or TacticalPositionExecutor.is_overwhelmed(enemy):
+				continue
+			if LOSHelper.get_hex_distance(enemy.current_hex, target.current_hex) <= 1 or influence_map_controller.snapshot.los.get(enemy.current_hex, {}).has(target.current_hex):
+				return false
+	for contact: InfluenceContact in influence_map_controller.snapshot.get_defensive_contacts(team):
+		if contact.observed and (not TacticalPositionExecutor.is_active_defender(contact.unit) or TacticalPositionExecutor.is_overwhelmed(contact.unit)):
+			continue
+		if LOSHelper.get_hex_distance(contact.hex, target.current_hex) <= 1 or influence_map_controller.snapshot.los.get(contact.hex, {}).has(target.current_hex):
+			return false
+	return true
+
+
+func _can_attack_without_overwatch(unit: Unit, objective: Vector2i) -> bool:
+	var target: Unit = _attack_pressure_target(unit)
+	return target != null and target.current_hex == objective
+
+
+func _has_pressing_attack(available: Array[Unit]) -> bool:
+	for unit: Unit in available:
+		if _attack_pressure_target(unit) != null:
+			return true
+	return false
+
+
+func _has_attack_bound(available: Array[Unit]) -> bool:
+	for unit: Unit in available:
+		if unit.squad_type == Globals.SquadType.Rifle and (unit.movement.is_moving or unit.in_close_combat):
 			return true
 	return false
 
@@ -645,6 +731,11 @@ func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
 	if unit.squad_type == Globals.SquadType.MG:
 		# Search for a firing lane even when the current hex has no objective LOS.
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
+	var pressure_target: Unit = _attack_pressure_target(unit)
+	if pressure_target != null:
+		if LOSHelper.get_hex_distance(unit.current_hex, pressure_target.current_hex) == 1:
+			return PositionProfile.Mode.ASSAULT
+		return PositionProfile.Mode.ADVANCE
 	if unit != attack_maneuver_squad:
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
 	if _close_combat_target(unit) != null and _has_established_attack_support(squads):
@@ -689,10 +780,22 @@ func _add_planning_requests(config: InfluenceProjectionConfig, units: Array[Unit
 		query.snapshot = influence_map_controller.snapshot
 		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads:
 			query.assault_support_squad = attack_maneuver_squad
+			if attack_approach_started:
+				query.assault_support_squad = _attack_front_squad(squads)
 		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 			# Establish the initial covered firing lane before requiring post-attack retargeting.
 			query.require_live_support_target = attack_approach_started and _has_known_attack_defenders(squads)
-		if current_order.position_mode == PositionProfile.Mode.ASSAULT and unit == attack_maneuver_squad and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
+			var front: Unit = _attack_front_squad(squads)
+			if attack_approach_started and front != null:
+				query.has_support_anchor = true
+				query.support_anchor_hex = front.current_hex
+		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
+			query.press_attack = _can_attack_without_overwatch(unit, query.objective_hex)
+			if query.press_attack:
+				# Known contact capability controls this opportunity, not an older generic forecast.
+				query.profile.forecast_weight = 0.0
+				query.profile.forecast_route_weight = 0.0
+		if current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not query.press_attack and not _has_established_attack_support(squads):
 			# Wait at the forward position while the covering squad restores its firing lane.
 			query.movement_radius = 0
 		if query.profile.mode == PositionProfile.Mode.DEFEND:
@@ -955,14 +1058,17 @@ func _issue_order(squad: Unit) -> void:
 			time_until_reconsider = 0.0
 			return
 	if current_order != null and current_order.position_mode == PositionProfile.Mode.ASSAULT:
-		if result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_established_attack_support(squads):
+		var press_attack: bool = _can_attack_without_overwatch(squad, result.objective_hex)
+		if press_attack and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
+			press_attack = PositionQueryService.press_attack_path_is_safe(influence_map_controller.snapshot, team, squad.current_hex, result.path)
+		if result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not press_attack and (result.features.get("press_attack", false) or not _has_established_attack_support(squads)):
 			executor.cancel(squad, true)
 			accepted_positions.erase(squad)
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
 			return
-		if result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and is_instance_valid(attack_maneuver_squad):
-			if (attack_maneuver_squad.movement.is_moving or attack_maneuver_squad.in_close_combat) and not _has_established_attack_support(squads, squad):
+		if result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and not _has_pressing_attack(squads):
+			if _has_attack_bound(squads) and not _has_established_attack_support(squads, squad):
 				# The last overwatch squad cannot relocate during the rifle's bound.
 				reserved_hexes_by_squad[squad] = squad.current_hex
 				_planning_reservations[squad] = squad.current_hex

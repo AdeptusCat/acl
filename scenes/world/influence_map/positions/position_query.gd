@@ -59,6 +59,10 @@ var support_targets: Dictionary[Unit, Dictionary] = {}
 var support_radius: int = 2
 var assault_support_squad: Unit
 var require_live_support_target: bool = false
+var press_attack: bool = false
+var has_support_anchor: bool = false
+var support_anchor_hex: Vector2i = Vector2i.ZERO
+var support_anchor_radius: int = 3
 
 
 func reset_evaluation() -> void:

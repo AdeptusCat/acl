@@ -117,6 +117,10 @@ static func is_sufficiently_suppressed(enemy: Unit) -> bool:
 	return enemy.stress_system.state in [Unit.MoraleState.PINNED, Unit.MoraleState.PANIC, Unit.MoraleState.COMBAT_INEFFECTIVE] or enemy.stress_system.S_eff >= enemy.stress_system.pin_threshold
 
 
+static func is_overwhelmed(enemy: Unit) -> bool:
+	return is_active_defender(enemy) and enemy.stress_system != null and enemy.stress_system.S_CAP > 0.0 and enemy.stress_system.S_eff / enemy.stress_system.S_CAP > 0.8
+
+
 static func is_active_defender(enemy: Unit) -> bool:
 	return InfluenceUnitQuery.is_valid_living_unit(enemy) and not enemy.surrendered and enemy.members_alive > 0
 

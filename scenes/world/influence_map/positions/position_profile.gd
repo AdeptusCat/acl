@@ -20,6 +20,7 @@ var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 @export var travel_weight: float = 0.08
 @export var exposure_weight: float = 2.0
 @export var progress_weight: float = 0.0
+@export var support_advance_weight: float = 0.0
 @export var improvement_absolute: float = 0.15
 @export var improvement_relative: float = 0.1
 @export var minimum_cover: float = 0.0
@@ -120,7 +121,7 @@ static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
 
 func score(features: Dictionary, unit: Unit) -> float:
 	if mode == Mode.HQ_SUPPORT:
-		return features["cover"] * cover_weight + features["support_utility"] * support_weight - features["incoming"] * incoming_weight - features["enemy_visibility"] * 6.0 - features["travel"] * travel_weight - features["exposure_seconds"] * exposure_weight - features["open_ground"] * open_ground_weight
+		return features["cover"] * cover_weight + features["support_utility"] * support_weight + features.get("support_priority_progress", 0.0) * progress_weight - features["incoming"] * incoming_weight - features["enemy_visibility"] * 6.0 - features["travel"] * travel_weight - features["exposure_seconds"] * exposure_weight - features["open_ground"] * open_ground_weight
 	if mode == Mode.LEGACY_DEFENSE:
 		return features.get("legacy", 0.0)
 	var role_fire_weight: float = firing_weight
@@ -176,4 +177,4 @@ func score(features: Dictionary, unit: Unit) -> float:
 		- features.get("open_ground", 0.0) * open_ground_weight
 		+ features.get("interposition", 0.0) * position_weight + features.get("blocking", 0.0) * coverage_weight + area_bonus
 		- features.get("contact_pressure", 0.0) * proximity_weight
-		+ features["progress"] * progress_weight)
+		+ features["progress"] * progress_weight + features.get("support_advance", 0.0) * support_advance_weight)
