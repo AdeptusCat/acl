@@ -64,7 +64,7 @@ func _process(delta: float) -> void:
 
 func stop() -> void:
 	_clear_path_state()
-	if unit.in_close_combat or _is_pinned():
+	if not unit.is_active() or unit.in_close_combat or _is_pinned():
 		# Combat locks the occupied hex immediately, without recentering or arrival callbacks.
 		var was_moving: bool = is_moving or unit.is_moving
 		is_moving = false
@@ -88,7 +88,7 @@ func move_to_hex(new_hex: Vector2i) -> void:
 
 
 func _start_move_to_hex(new_hex: Vector2i) -> void:
-	if unit.in_close_combat or _is_pinned():
+	if not unit.is_active() or unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	_get_terrain_multiplier()
@@ -212,7 +212,7 @@ func _start_exposed_phase() -> void:
 # ----------------------------------------------------------------------
 
 func _process_movement(delta: float) -> void:
-	if unit.in_close_combat or _is_pinned():
+	if not unit.is_active() or unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	var dir: Vector2 = (target_position - unit.position).normalized()
@@ -224,6 +224,8 @@ func _process_movement(delta: float) -> void:
 		# arrive at hex
 		unit.position = target_position
 		_update_current_hex(unit.goal_hex)
+		if not unit.is_active():
+			return
 		# Hex-entry signals can synchronously admit this unit to close combat.
 		if unit.in_close_combat:
 			stop()

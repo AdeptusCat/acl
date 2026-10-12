@@ -20,7 +20,10 @@ func _process(_delta: float) -> void:
 		if not is_instance_valid(line.unit):
 			line.hide()
 			continue
-		if is_instance_valid(line.unit.command_squad):
+		if not line.unit.is_active():
+			line.hide()
+			continue
+		if is_instance_valid(line.unit.command_squad) and line.unit.command_squad.is_active():
 			line.set_line(
 				line.unit.position,
 				line.unit.command_squad.position

@@ -138,7 +138,7 @@ func _enter_action_state(_prev: int, state: int) -> void:
 # ----------------------------------------------------------------------
 
 func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
-	if unit.in_close_combat:
+	if not unit.is_active() or unit.in_close_combat:
 		return
 	action_order_id += 1
 	
@@ -155,7 +155,7 @@ func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void
 
 
 func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
-	if unit.in_close_combat:
+	if not unit.is_active() or unit.in_close_combat:
 		return
 	action_order_id += 1
 	
@@ -172,7 +172,7 @@ func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_an
 
 
 func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
-	if unit.in_close_combat:
+	if not unit.is_active() or unit.in_close_combat:
 		return
 	action_order_id += 1
 	
@@ -189,7 +189,7 @@ func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], 
 
 
 func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
-	if unit.in_close_combat:
+	if not unit.is_active() or unit.in_close_combat:
 		return
 	action_order_id += 1
 	
@@ -206,6 +206,8 @@ func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> 
 
 
 func give_hold_order() -> void:
+	if not unit.is_active():
+		return
 	action_order_id += 1
 	
 	objective_hex = unit.current_hex
@@ -281,6 +283,8 @@ func on_started_moving() -> void:
 
 
 func on_stopped_moving() -> void:
+	if not unit.is_active():
+		return
 	match action_state:
 		SquadActionState.MOVING_TO_POSITION, SquadActionState.CROSSING_EXPOSED:
 			if unit.current_hex == objective_hex:
@@ -299,7 +303,7 @@ func on_stopped_moving() -> void:
 
 
 func on_reached_hex(hex: Vector2i) -> void:
-	if not unit.alive or unit.surrendered or unit.in_close_combat or movement.is_moving:
+	if not unit.is_active() or unit.surrendered or unit.in_close_combat or movement.is_moving:
 		return
 	if hex != unit.current_hex:
 		return
@@ -308,6 +312,8 @@ func on_reached_hex(hex: Vector2i) -> void:
 
 
 func on_retreat_complete(_retreat_hex: Vector2i) -> void:
+	if not unit.is_active():
+		return
 	if action_state == SquadActionState.ROUTING:
 		_set_action_state(SquadActionState.REGROUPING)
 

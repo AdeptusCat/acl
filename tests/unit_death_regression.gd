@@ -34,12 +34,13 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze_simulation(main)
-	var units: Array[Unit] = Globals.get_units()
-	var hq: Unit = units[0]
-	var recipient: Unit = units[1]
+	var own_units: Array[Unit] = _hq_first(Globals.get_units_for_team(Globals.Team.AXIS))
+	var enemy_units: Array[Unit] = _hq_first(Globals.get_units_for_team(Globals.Team.ALLIES))
+	var hq: Unit = own_units[0]
+	var recipient: Unit = own_units[1]
 	var hq_soldiers: Array[Soldier] = hq.squad_fire.soldiers.duplicate()
-	var enemy_hq: Unit = units[3]
-	var enemy_recipient: Unit = units[4]
+	var enemy_hq: Unit = enemy_units[0]
+	var enemy_recipient: Unit = enemy_units[1]
 	_check(hq.team == recipient.team and enemy_hq.team == enemy_recipient.team, "Fixture pairs are on the same team")
 	hq.current_cube = recipient.current_cube
 	hq.current_hex = recipient.current_hex
@@ -53,6 +54,8 @@ func _run() -> void:
 	recipient._on_command_connectivity_timeout()
 	_check(recipient.command_connectivity.leader_presence_strength > 0.0, "Living HQ supplies command presence")
 	# Reparenting during scenario setup must leave living controllers active.
+	# Exercise projectile lifetime independently of the scenario's HQ support role.
+	hq.ai_support_only = false
 	var impact_probe: ImpactProbe = ImpactProbe.new()
 	impact_probe.unit = hq
 	impact_probe.stress_controller = hq.stress_system
@@ -153,7 +156,7 @@ func _run() -> void:
 	_check(not enemy_recipient.stress_system._leadership_sources.has(enemy_source_id), "Freeing a living HQ removes its leadership source")
 	enemy_recipient._on_command_connectivity_timeout()
 	_check(is_zero_approx(enemy_recipient.command_connectivity.leader_presence_strength) and is_zero_approx(enemy_recipient.stress_system.leader_presence_strength), "Freed command units cannot retain a presence bonus")
-	var ranged_victim: Unit = units[2]
+	var ranged_victim: Unit = own_units[2]
 	var ranged_original_size: int = ranged_victim.original_size
 	var casualty: Soldier = ranged_victim.squad_fire.soldiers.back()
 	ranged_victim.apply_specific_casualty(casualty)
@@ -199,6 +202,16 @@ func _run() -> void:
 	Globals.casualty_history = original_history
 	print("Unit death regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _hq_first(units: Array[Unit]) -> Array[Unit]:
+	var result: Array[Unit] = []
+	for unit: Unit in units:
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			result.push_front(unit)
+		else:
+			result.append(unit)
+	return result
 
 
 func _freeze_simulation(node: Node) -> void:

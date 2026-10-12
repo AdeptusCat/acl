@@ -22,6 +22,9 @@ var casualty_history: CasualtyHistory = CasualtyHistory.new()
 var battle_casualties: Array[CasualtyRecord] = []
 var battle_id: String = ""
 var _casualty_save_queued: bool = false
+var session_log: SessionLog = SessionLog.new()
+var battle_exits: Array[UnitExitRecord] = []
+var _session_log_save_queued: bool = false
 
 enum Team {
 	AXIS,
@@ -107,6 +110,12 @@ func get_units() -> Array[Unit]:
 	return _units
 
 
+func get_exited_units() -> Array[Unit]:
+	var result: Array[Unit] = []
+	result.assign(get_tree().get_nodes_in_group("exited_units"))
+	return result
+
+
 func get_units_for_team(team: Team) -> Array[Unit]:
 	var result: Array[Unit] = []
 	
@@ -128,16 +137,46 @@ func get_units_for_team(team: Team) -> Array[Unit]:
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		casualty_history = CasualtyHistory.load_history()
+		session_log = SessionLog.load_log()
 
 
 func _exit_tree() -> void:
 	if _casualty_save_queued:
 		_save_casualty_history()
+	if _session_log_save_queued:
+		_save_session_log()
 
 
 func begin_battle() -> void:
 	battle_id = Crypto.new().generate_random_bytes(16).hex_encode()
 	battle_casualties.clear()
+	battle_exits.clear()
+
+
+func record_unit_exit(unit: Unit) -> UnitExitRecord:
+	if unit.exit_record != null:
+		return unit.exit_record
+	if battle_id.is_empty():
+		begin_battle()
+	var record: UnitExitRecord = UnitExitRecord.capture(unit, battle_id)
+	import_exit_records([record])
+	battle_exits.append(record)
+	print("%s unit %s exited at %s (%s soldiers)" % [TEAM_NAMES[unit.team], unit.name, unit.current_hex, unit.members_alive])
+	return record
+
+
+func import_exit_records(records: Array[UnitExitRecord]) -> void:
+	for record: UnitExitRecord in records:
+		if session_log.add_exit(record) and not _session_log_save_queued:
+			_session_log_save_queued = true
+			_save_session_log.call_deferred()
+
+
+func _save_session_log() -> void:
+	_session_log_save_queued = false
+	var save_error: Error = session_log.save_log()
+	if save_error != OK:
+		push_error("Could not save session log: %s" % save_error)
 
 
 func record_casualty(unit: Unit, soldier: Soldier) -> CasualtyRecord:
@@ -179,6 +218,7 @@ func _save_casualty_history() -> void:
 func reset() -> void:
 	battle_id = ""
 	battle_casualties.clear()
+	battle_exits.clear()
 	unit_visible_enemies.clear()
 	unit_enemies_in_los.clear()
 	unit_enemy_tracks.clear()
@@ -197,6 +237,7 @@ func reset() -> void:
 
 func save_match_data(match_save: MatchSaveData) -> void:
 	import_casualty_records(match_save.casualty_records)
+	import_exit_records(match_save.exit_records)
 	var save_path: String = "user://matches/%s.tres" % match_save.match_id
 	print("Saved match as: " + save_path)
 	var dir_path: String = save_path.get_base_dir()
@@ -235,6 +276,7 @@ func load_match_data(match_id: String) -> MatchSaveData:
 		return null
 
 	import_casualty_records(match_save.casualty_records)
+	import_exit_records(match_save.exit_records)
 	return match_save
 
 

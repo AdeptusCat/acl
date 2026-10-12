@@ -31,6 +31,7 @@ static func spawn_unit(controller: Node2D, team: Globals.Team, location: Vector2
 	unit.set_team(team)
 	
 	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_exited.connect(controller._on_unit_exited)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
@@ -56,7 +57,14 @@ static func spawn_unit(controller: Node2D, team: Globals.Team, location: Vector2
 
 
 static func spawn_units_from_match_save(controller: Node2D, match_save: MatchSaveData) -> void:
+	Globals.import_exit_records(match_save.exit_records)
+	Globals.battle_exits.assign(match_save.exit_records)
+	var exited_data: Array[UnitSaveData] = match_save.exited_units.duplicate()
 	for data: UnitSaveData in match_save.player_units:
+		if data.exited:
+			if not exited_data.has(data):
+				exited_data.append(data)
+			continue
 		var packed_scene: PackedScene = ResourceLoader.load(data.unit_scene_path) as PackedScene
 
 		if packed_scene == null:
@@ -71,6 +79,22 @@ static func spawn_units_from_match_save(controller: Node2D, match_save: MatchSav
 #
 		#add_child(unit)
 		#unit.apply_save_data(unit_save_data)
+	var restored_exits: Dictionary[String, bool] = {}
+	for data: UnitSaveData in exited_data:
+		if data.exit_record != null:
+			if restored_exits.has(data.exit_record.record_id):
+				continue
+			restored_exits[data.exit_record.record_id] = true
+		var unit: Unit = controller.unit_scene.instantiate()
+		unit.ground_map = controller.ground_layer
+		unit.team = data.team
+		controller.get_node("UnitContainer").add_child(unit)
+		unit.setup()
+		unit.unit_exited.connect(controller._on_unit_exited)
+		unit.apply_save_data(data)
+		for owner: Globals.Team in Globals.victory_conditions:
+			for condition: VictoryCondition in Globals.victory_conditions[owner].victory_conditions:
+				condition.record_unit_entry(unit, unit.current_hex)
 
 
 static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int) -> void:
@@ -105,6 +129,7 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 	unit.set_team(team)
 	
 	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_exited.connect(controller._on_unit_exited)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)

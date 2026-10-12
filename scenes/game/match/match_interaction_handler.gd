@@ -155,6 +155,8 @@ static func hex_glow(controller: Node2D, pos: Vector2) -> void:
 
 
 static func select_unit(controller: Node2D, unit: Unit) -> void:
+	if not unit.is_active():
+		return
 	controller.influence_map_controller.clear_inspection_queries()
 	if controller.selected_unit:
 		controller.selected_unit.deselect()

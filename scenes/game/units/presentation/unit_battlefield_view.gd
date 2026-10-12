@@ -48,6 +48,7 @@ var detail_ui: UnitUi = null
 @export var soldier_detail_scene: PackedScene
 
 var _surrendered: bool = false
+var _exited: bool = false
 
 signal debug_kill_soldier
 
@@ -371,6 +372,8 @@ func _spawn_flash(type: String) -> void:
 		detail_ui._spawn_flash(type)
 
 func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	if _exited:
+		return
 	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
@@ -379,6 +382,8 @@ func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpe
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
+	if _exited:
+		return
 	$Timer.start()
 	if detail_ui:
 		for child: Control in detail_ui.unit_status_control.get_children():
@@ -387,6 +392,8 @@ func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpe
 
 
 func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	if _exited:
+		return
 	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
@@ -395,6 +402,8 @@ func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> voi
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
+	if _exited:
+		return
 	$Timer.start()
 	if detail_ui:
 		for child: Control in detail_ui.unit_status_control.get_children():
@@ -404,6 +413,8 @@ func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> voi
 
 
 func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	if _exited:
+		return
 	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.projectile_speed
 	tracer.tracer_texture = tracer_texture
@@ -412,6 +423,8 @@ func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos, weapon)
+	if _exited:
+		return
 	$Timer.start()
 	if detail_ui:
 		for child: Control in detail_ui.unit_status_control.get_children():
@@ -420,6 +433,8 @@ func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
 
 
 func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	if _exited:
+		return
 	var tracer: Node2D = tracer_scene.instantiate() as Node2D
 	tracer.speed = weapon.riflegrenade_projectile_speed
 	tracer.tracer_texture = tracer_texture
@@ -428,6 +443,8 @@ func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) 
 		child.visible = false
 	shooting_texture_rect.visible = true
 	await tracer.shoot(from_pos, to_pos, weapon, true)
+	if _exited:
+		return
 	$Timer.start()
 	if detail_ui:
 		for child: Control in detail_ui.unit_status_control.get_children():
@@ -448,6 +465,25 @@ func surrender() -> void:
 		for child: Control in detail_ui.unit_status_control.get_children():
 			child.visible = false
 		detail_ui.surrendered_texture_rect.visible = true
+
+
+func mark_exited() -> void:
+	_exited = true
+	for child: Control in unit_status_control.get_children():
+		child.hide()
+	morale_bar.hide()
+	$MoraleBarDefault.hide()
+	$StressLevel.hide()
+	$LeadershipBonus.hide()
+	$ColorRect.hide()
+	unit_selected_sprite.hide()
+	cover_container.hide()
+	rank_texture_rect.hide()
+	sprite_node.modulate = Color(0.6, 0.6, 0.6, 0.7)
+	broken_label.text = "Exited"
+	broken_label.show()
+	if detail_ui != null:
+		detail_ui.mark_exited()
 
 
 func die() -> void:

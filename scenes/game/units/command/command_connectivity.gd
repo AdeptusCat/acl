@@ -129,7 +129,7 @@ func clear_connectivity() -> void:
 
 
 func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
-	if not is_instance_valid(command_squad) or not command_squad.alive:
+	if not is_instance_valid(command_squad) or not command_squad.is_active():
 		clear_connectivity()
 		return
 	if is_instance_valid(command_squad):

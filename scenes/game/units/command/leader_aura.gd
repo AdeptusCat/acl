@@ -15,7 +15,7 @@ var _active: bool = true
 
 func _enter_tree() -> void:
 	_owner_unit = get_parent() as Unit
-	_active = is_instance_valid(_owner_unit) and _owner_unit.alive
+	_active = is_instance_valid(_owner_unit) and _owner_unit.is_active()
 	set_process(_active)
 	if _active:
 		add_to_group("leader_aura")
@@ -42,7 +42,7 @@ func _process(delta: float) -> void:
 func _update_aura() -> void:
 	if not _active:
 		return
-	if not is_instance_valid(_owner_unit) or not _owner_unit.alive:
+	if not is_instance_valid(_owner_unit) or not _owner_unit.is_active():
 		shutdown()
 		return
 	if LOSHelper.ground_layer == null:
@@ -82,7 +82,7 @@ func _update_aura() -> void:
 	#cohesion_mult = _cohesion_mult
 
 func _apply_to(unit: Node2D) -> void:
-	if not _active or not is_instance_valid(_owner_unit) or not _owner_unit.alive:
+	if not _active or not is_instance_valid(_owner_unit) or not _owner_unit.is_active():
 		return
 	if _affected.has(unit):
 		return

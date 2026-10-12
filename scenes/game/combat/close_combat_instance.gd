@@ -77,7 +77,7 @@ func setup_close_combat() -> void:
 func can_unit_participate(unit: Unit) -> bool:
 	if not is_instance_valid(unit) or unit.is_queued_for_deletion():
 		return false
-	if not unit.alive or unit.surrendered or unit.current_hex != hex:
+	if not unit.is_active() or unit.surrendered or unit.current_hex != hex:
 		return false
 	if not is_instance_valid(unit.squad_fire):
 		return false
@@ -120,6 +120,7 @@ func add_unit(unit: Unit) -> void:
 	unit.in_close_combat = true
 	participants.append(participant)
 	unit.unit_died.connect(remove_unit)
+	unit.unit_exited.connect(remove_unit)
 	unit.unit_surrendered.connect(remove_unit)
 	unit.unit_entered_hex.connect(_on_unit_entered_hex)
 	unit.soldiers_changed.connect(refresh_participants)
@@ -146,6 +147,8 @@ func _on_unit_entered_hex(unit: Unit, hex_entered: Vector2i) -> void:
 func _disconnect_unit(unit: Unit) -> void:
 	if unit.unit_died.is_connected(remove_unit):
 		unit.unit_died.disconnect(remove_unit)
+	if unit.unit_exited.is_connected(remove_unit):
+		unit.unit_exited.disconnect(remove_unit)
 	if unit.unit_surrendered.is_connected(remove_unit):
 		unit.unit_surrendered.disconnect(remove_unit)
 	if unit.unit_entered_hex.is_connected(_on_unit_entered_hex):

@@ -252,7 +252,7 @@ func clear_target() -> void:
 
 
 func _can_track_target(enemy: Unit) -> bool:
-	if not is_instance_valid(enemy) or not enemy.alive or enemy.surrendered:
+	if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered:
 		return false
 	if mission_support_fire and not TacticalPositionExecutor.support_hex_is_clear(unit, enemy.current_hex):
 		return false
@@ -282,7 +282,7 @@ func _refresh_tracked_target() -> bool:
 
 
 func _process(delta: float) -> void:
-	if not unit.alive:
+	if not unit.is_active():
 		return
 	_tick_weapon_setup(delta)
 	if unit.ai_support_only:
@@ -295,7 +295,7 @@ func _process(delta: float) -> void:
 	
 	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 	if not visible_enemies1.is_empty(): # and target_hex == Vector2i.ZERO
-		if unit.is_moving or not unit.alive or unit.broken or unit.surrendered:
+		if unit.is_moving or not unit.is_active() or unit.broken or unit.surrendered:
 			return
 		else:
 			#if unit.team == Globals.team_player:
@@ -443,7 +443,7 @@ func _tick_soldiers(delta: float) -> void:
 	# handle gunners first (crew-served)
 	var j: int = 0
 	while j < gunners.size():
-		if not unit.alive:
+		if not unit.is_active():
 			return
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
@@ -458,7 +458,7 @@ func _tick_soldiers(delta: float) -> void:
 	# then everyone else
 	var i: int = 0
 	while i < soldiers.size():
-		if not unit.alive:
+		if not unit.is_active():
 			return
 		var s2: Soldier = soldiers[i]
 		if s2.is_alive:
@@ -469,7 +469,7 @@ func _tick_soldiers(delta: float) -> void:
 		i += 1
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
-	if not unit.alive or unit.ai_support_only:
+	if not unit.is_active() or unit.ai_support_only:
 		return 0
 	if mission_support_fire and not _has_safe_support_target(target_hex):
 		clear_target()
@@ -530,7 +530,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		for u: Unit in visible_enemies:
 			if u.current_hex == _target_hex:
 				if is_instance_valid(u):
-					if u.alive:
+					if u.is_active():
 						if not u.surrendered:
 							#if u.current_hex == _target_hex:
 							batch_targets.append(u)
@@ -685,7 +685,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		life = dist / s.weapon.riflegrenade_projectile_speed
 	await get_tree().create_timer(life).timeout
 	
-	if unit.alive:
+	if unit.is_active():
 		shooting.emit(unit)
 	# handle result on enemy unit
 	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
@@ -773,14 +773,14 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target
 	var interval: float = 60.0 / rpm
 	var support_burst: bool = mission_support_fire
 	for shot: int in range(shots):
-		if not unit.alive:
+		if not unit.is_active():
 			return
 		if support_burst and not _has_safe_support_target(shot_target_hex):
 			return
 		fire_shot.emit(s.weapon, shot_target_hex)
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
-	if auto_fire and unit.alive:
+	if auto_fire and unit.is_active():
 		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
 
 

@@ -36,9 +36,10 @@ func _run() -> void:
 	}
 	_test_authoring()
 	_test_tracking()
-	_test_entry_event()
 	_test_evaluation()
 	_test_goals()
+	# Real exit entry now retires the squad; exercise it after the reusable fixtures.
+	_test_entry_event()
 	Globals.objectives = original_objectives
 	Globals.victory_conditions = original_conditions
 	main.queue_free()

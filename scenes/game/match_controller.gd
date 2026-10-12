@@ -91,6 +91,7 @@ func setup() -> void:
 	for unit: Unit in get_tree().get_nodes_in_group("units"):
 		if unit is Unit:
 			unit.unit_died.connect(_on_unit_died)
+			unit.unit_exited.connect(_on_unit_exited)
 			unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 			unit.unit_entered_hex.connect(_on_unit_entered_hex)
 			unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
@@ -211,10 +212,15 @@ func update_visible_hexes() -> void:
 
 
 func _on_unit_entered_hex(unit_entering_hex: Unit, hex_entered: Vector2i) -> void:
+	if not unit_entering_hex.is_active():
+		return
 	if Globals.game_started and not end_game_handled:
 		for owner: Globals.Team in Globals.victory_conditions:
 			for condition: VictoryCondition in Globals.victory_conditions[owner].victory_conditions:
 				condition.record_unit_entry(unit_entering_hex, hex_entered)
+		if not unit_entering_hex.surrendered and _is_exit_hex(unit_entering_hex.team, hex_entered):
+			unit_entering_hex.exit_map()
+			return
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
@@ -375,6 +381,49 @@ func _select_unit(unit: Unit) -> void:
 
 func _deselect_unit(unit: Unit) -> void:
 	MatchInteractionHandler.deselect_unit(self, unit)
+
+
+func _is_exit_hex(team: Globals.Team, hex: Vector2i) -> bool:
+	var objectives: ObjectivesCollection = Globals.objectives.get(team)
+	if objectives != null:
+		for objective: ObjectiveDefinition in objectives.objectives:
+			if objective.objective_id == ExitUnitsCondition.ObjectiveId.EXIT and objective.hex == hex:
+				return true
+	# Conditions can explicitly designate a different marker as an exit.
+	for owner: Globals.Team in Globals.victory_conditions:
+		for condition: VictoryCondition in Globals.victory_conditions[owner].victory_conditions:
+			if condition is ExitUnitsCondition and condition.team == team:
+				var exit_condition: ExitUnitsCondition = condition as ExitUnitsCondition
+				if exit_condition.state != null and exit_condition.state.exit_hexes.has(hex):
+					return true
+			if condition is PreventEnemyExitCondition and Globals.get_enemy_team(condition.team) == team:
+				var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
+				if prevention.state != null and prevention.state.exit_hexes.has(hex):
+					return true
+	return false
+
+
+func _on_unit_exited(unit: Unit) -> void:
+	if selected_unit == unit:
+		_deselect_unit(unit)
+		hide_unit_details_in_ui.emit()
+	Globals.unit_visible_enemies.erase(unit)
+	Globals.unit_enemies_in_los.erase(unit)
+	Globals.unit_enemy_tracks.erase(unit)
+	for observer: Unit in Globals.get_units():
+		Globals.unit_visible_enemies.get(observer, []).erase(unit)
+		Globals.unit_enemies_in_los.get(observer, []).erase(unit)
+		var tracks: Dictionary = Globals.unit_enemy_tracks.get(observer, {})
+		tracks.erase(unit)
+		observer.enemy_memory.erase(unit)
+		observer.enemies_reported.erase(unit)
+		observer.enemies_reported_from_formation.erase(unit)
+		if observer.squad_fire.target_unit == unit:
+			observer.squad_fire.clear_target()
+	set_close_combat_hexes_and_units()
+	update_visible_hexes()
+	show_visible_units()
+	draw_fog()
 
 
 func _on_unit_surrendered(_unit: Unit) -> void:
@@ -628,6 +677,10 @@ var time_left_seconds_test: int = 2
 func _process(delta: float) -> void:
 	if timer_running:
 		var elapsed: float = minf(delta, maxf(time_left_seconds, 0.0))
+		if elapsed > 0.0 and not end_game_handled:
+			for unit: Unit in Globals.get_units():
+				if unit.is_active() and not unit.surrendered and _is_exit_hex(unit.team, unit.current_hex):
+					_on_unit_entered_hex(unit, unit.current_hex)
 		for team: Globals.Team in Globals.victory_conditions:
 			for condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
 				condition.advance_time(elapsed)

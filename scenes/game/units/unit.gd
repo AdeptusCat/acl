@@ -105,6 +105,8 @@ var morale_meter_current: int = 0
 var path_hexes: Array[Vector2i] = []
 var path_index: int = 0
 var alive: bool = true
+var exited: bool = false
+var exit_record: UnitExitRecord
 var surrendered: bool = false
 var broken: bool = false
 var recovery_timer_current: float = 0.0
@@ -132,6 +134,7 @@ var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 signal unit_entered_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit: Unit)
+signal unit_exited(unit: Unit)
 signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
 signal deselect_unit(unit: Unit)
@@ -247,7 +250,7 @@ func setAttackState(_attackState: AttackState) -> void:
 			attack_ground_rounds_budget = 50
 
 func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
-	if not alive or in_close_combat:
+	if not is_active() or in_close_combat:
 		return
 	match cmd:
 		Globals.UnitCmd.FIRE_AT_HEX:
@@ -336,7 +339,7 @@ func fire_mortar(map_hex: Vector2i) -> void:
 
 
 func is_good_order() -> bool:
-	if surrendered or not alive or broken:
+	if surrendered or not is_active() or broken:
 		return false
 	else:
 		return true 
@@ -547,6 +550,8 @@ func _make_medium_mortar_squad(v: bool) -> void:
 
 
 func _on_started_moving() -> void:
+	if not is_active():
+		return
 	setAttackState(Unit.AttackState.AUTO)
 	is_moving = true
 	ui.started_moving(broken, surrendered)
@@ -557,6 +562,8 @@ func _on_started_moving() -> void:
 
 func _on_stopped_moving() -> void:
 	is_moving = false
+	if not is_active():
+		return
 	ui.stopped_moving(broken, surrendered)
 	#action_controller.on_stopped_moving()
 
@@ -722,12 +729,14 @@ func update_team_sprite(_team: Globals.Team, _squad_type: Globals.SquadType) -> 
 
 #func receive_fire(incoming_firepower: int, terrain_defense_bonus: float, unit_visible_enemies: Dictionary):
 func receive_fire(terrain_defense_bonus: float) -> void:
+	if not is_active():
+		return
 	cover_updated.emit(int(terrain_defense_bonus))
 	#if is_moving and not broken and not surrendered:
 		#movement.recalc_path()
 
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) -> void:
-	if not alive or Debug.no_damage:
+	if not is_active() or Debug.no_damage:
 		return
 	if casualties > 0:
 		_apply_casualties(casualties)
@@ -771,6 +780,8 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 
 
 func apply_specific_casualty(casualty: Soldier) -> bool:
+	if not is_active():
+		return false
 	return UnitCasualtyHandler.apply_specific_casualty(self, casualty)
 
 
@@ -844,6 +855,8 @@ func get_squad_type_name(type: Globals.SquadType) -> String:
 		
 
 func surrender() -> void:
+	if not is_active() or surrendered:
+		return
 	#return
 	#movement.move_to_hex(current_hex)
 	#if not team == Globals.team_player:
@@ -861,8 +874,41 @@ func surrender() -> void:
 	ui.surrender()
 
 
+func exit_map(record_event: bool = true) -> void:
+	if not is_active() or surrendered:
+		return
+	exited = true
+	position = LOSHelper.ground_layer.map_to_local(current_hex)
+	is_moving = false
+	movement.is_moving = false
+	movement._clear_path_state()
+	goal_hex = current_hex
+	action_controller.clear_orders()
+	squad_fire.clear_target()
+	leader_aura.shutdown()
+	weapon_audio.shutdown()
+	remove_from_group("units")
+	add_to_group("exited_units")
+	if Globals.get_unit(team, company, platoon, squad) == self:
+		Globals.unregister_unit(team, company, platoon, squad)
+	for candidate: Unit in Globals.get_units():
+		if candidate.command_squad == self:
+			candidate._on_command_connectivity_timeout()
+	set_process(false)
+	for child: Node in get_children():
+		_shutdown_controller(child)
+	if record_event:
+		exit_record = Globals.record_unit_exit(self)
+	ui.mark_exited()
+	unit_exited.emit(self)
+
+
+func is_active() -> bool:
+	return alive and not exited
+
+
 func die() -> void:
-	if not alive:
+	if not is_active():
 		return
 	alive = false
 	# Direct elimination must retain the remaining men and equipment as casualties.
@@ -913,10 +959,14 @@ func _record_casualty(soldier: Soldier) -> void:
 
 
 func _on_retreat_complete(retreat_hex: Vector2i) -> void:
+	if not is_active():
+		return
 	movement.is_moving = false
 	current_hex = retreat_hex
 	current_cube = LOSHelper.ground_layer.map_to_cube(retreat_hex)
 	unit_entered_hex.emit(self, current_hex)
+	if not is_active():
+		return
 	#emit_signal("moved_to_hex", self, current_hex)
 	action_controller.on_retreat_complete(retreat_hex)
 

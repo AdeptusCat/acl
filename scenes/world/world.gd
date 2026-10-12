@@ -412,6 +412,7 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	match_save.scenario_id = Globals.scenario_chosen.scenario_name
 	match_save.battle_id = Globals.battle_id
 	match_save.casualty_records.assign(Globals.battle_casualties)
+	match_save.exit_records.assign(Globals.battle_exits)
 	
 	match_save.player_team = Globals.team_player
 	match_save.winner_team = winner_team
@@ -421,5 +422,10 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	for unit: Unit in Globals.get_units():
 		if unit.team == Globals.team_player:
 			var unit_save_data: UnitSaveData = unit.create_save_data()
+			match_save.player_units.append(unit_save_data)
+	for unit: Unit in Globals.get_exited_units():
+		var unit_save_data: UnitSaveData = unit.create_save_data()
+		match_save.exited_units.append(unit_save_data)
+		if unit.team == Globals.team_player:
 			match_save.player_units.append(unit_save_data)
 	Globals.save_match_data(match_save)

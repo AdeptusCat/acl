@@ -9,6 +9,8 @@ class_name UnitSaveData
 @export var soldiers: Array[SoldierLoadout] = []
 @export var squad_loadout: SquadLoadoutSpec
 @export var casualty_records: Array[CasualtyRecord] = []
+@export var exited: bool = false
+@export var exit_record: UnitExitRecord
 
 @export var stress_fast: float = 0.0
 @export var stress_slow: float = 0.0

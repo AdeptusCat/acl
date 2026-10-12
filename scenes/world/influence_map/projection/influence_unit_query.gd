@@ -23,7 +23,7 @@ static func is_valid_living_unit(unit: Unit) -> bool:
 	if not is_instance_valid(unit):
 		return false
 
-	if not unit.alive:
+	if not unit.is_active():
 		return false
 
 	return true
@@ -109,6 +109,8 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 	for observer: Unit in get_config_units(team, ""):
 		for enemy: Unit in observer.enemy_memory:
 			if not is_instance_valid(enemy):
+				continue
+			if enemy.exited:
 				continue
 			var memory: Dictionary = observer.enemy_memory[enemy]
 			var age: float = now - float(memory.get("last_seen_time", -INF))

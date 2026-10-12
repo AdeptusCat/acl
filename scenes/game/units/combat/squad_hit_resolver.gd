@@ -49,6 +49,10 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		if _unit.current_hex == _target_hex:
 			if not batch_targets.has(_unit):
 				batch_targets.append(_unit)
+	# Projectiles retain their original target list while flying.
+	for target: Unit in batch_targets.duplicate():
+		if not is_instance_valid(target) or not target.is_active():
+			batch_targets.erase(target)
 	
 	if batch_targets.is_empty():
 		# no enemys to be hit

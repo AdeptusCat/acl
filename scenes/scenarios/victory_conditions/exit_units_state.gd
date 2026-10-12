@@ -8,6 +8,9 @@ var units_exited: Array[Unit] = []
 func record_units(team: Globals.Team) -> void:
 	for unit: Unit in Globals.get_units():
 		record_unit_entry(unit, team, unit.current_hex)
+	for unit: Unit in Globals.get_exited_units():
+		if unit.exit_record != null:
+			record_unit_entry(unit, team, unit.exit_record.hex)
 
 
 func record_unit_entry(unit: Unit, team: Globals.Team, hex: Vector2i) -> void:

@@ -10,6 +10,8 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 	data.unit_scene_path = unit.scene_file_path
 	data.team = unit.team
 	data.casualty_records.assign(unit.casualty_records)
+	data.exited = unit.exited
+	data.exit_record = unit.exit_record
 
 	data.soldiers.clear()
 	
@@ -42,6 +44,17 @@ static func apply_save_data(unit: Unit, data: UnitSaveData) -> void:
 	unit._setup_runtime_soldiers(data.squad_loadout)
 	unit.casualty_records.assign(data.casualty_records)
 	Globals.import_casualty_records(unit.casualty_records)
+	if data.exited:
+		unit.exit_record = data.exit_record
+		if data.exit_record != null:
+			unit.current_hex = data.exit_record.hex
+			unit.current_cube = LOSHelper.ground_layer.map_to_cube(unit.current_hex)
+			unit.name = data.exit_record.unit_name
+			unit.company = data.exit_record.company
+			unit.platoon = data.exit_record.platoon
+			unit.squad = data.exit_record.squad
+			Globals.import_exit_records([data.exit_record])
+		unit.exit_map(false)
 	
 		#if soldier != null:
 			#squad_fire.soldiers.append(soldier)
