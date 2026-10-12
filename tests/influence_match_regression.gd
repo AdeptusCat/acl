@@ -238,6 +238,21 @@ func _test_support_fire(controller: InfluenceMapController) -> void:
 				occupied = occupied or friendly.current_hex == cell
 			if occupied:
 				continue
+			var enemy: Unit = null
+			for candidate: Unit in Globals.get_units_for_team(Globals.get_enemy_team(unit.team)):
+				if TacticalPositionExecutor.is_active_defender(candidate):
+					enemy = candidate
+					break
+			if enemy == null:
+				continue
+			# Support fire requires an active observed unit, not an empty objective.
+			var enemy_hex: Vector2i = enemy.current_hex
+			var enemy_position: Vector2 = enemy.position
+			var visible: Array = Globals.unit_visible_enemies.get(unit, [])
+			enemy.current_hex = cell
+			enemy.current_cube = LOSHelper.ground_layer.map_to_cube(cell)
+			enemy.position = LOSHelper.ground_layer.map_to_local(cell)
+			Globals.unit_visible_enemies[unit] = [enemy]
 			var query: PositionQuery = PositionQuery.new()
 			query.unit = unit
 			query.team = unit.team
@@ -247,16 +262,24 @@ func _test_support_fire(controller: InfluenceMapController) -> void:
 			query.snapshot = controller.snapshot
 			var advice: PositionResult = PositionQueryService.query_positions(query)
 			if not advice.is_valid():
+				enemy.current_hex = enemy_hex
+				enemy.current_cube = LOSHelper.ground_layer.map_to_cube(enemy_hex)
+				enemy.position = enemy_position
+				Globals.unit_visible_enemies[unit] = visible
 				continue
 			var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
 			_check(executor.execute(advice), "Support intent executes at an existing firing position")
-			_check(unit.attackState != Unit.AttackState.AUTO and unit.squad_fire.has_target_hex, "Real fire controller receives the support target")
+			_check(unit.attackState == Unit.AttackState.MANUAL_TRACK and unit.squad_fire.target_unit == enemy, "Real fire controller tracks the observed support target")
 			unit.setAttackState(Unit.AttackState.AUTO)
 			unit.squad_fire.clear_target()
 			_check(executor.execute(advice), "Completed support advice can resume its fire intent")
-			_check(unit.attackState != Unit.AttackState.AUTO and unit.squad_fire.has_target_hex, "Support fire resumes after an existing ground-fire budget finishes")
+			_check(unit.attackState == Unit.AttackState.MANUAL_TRACK and unit.squad_fire.target_unit == enemy, "Support fire resumes against the active observed target")
 			executor.cancel_all()
 			_check(unit.attackState == Unit.AttackState.AUTO and not unit.squad_fire.has_target_hex, "Canceling support intent releases its fire target")
+			enemy.current_hex = enemy_hex
+			enemy.current_cube = LOSHelper.ground_layer.map_to_cube(enemy_hex)
+			enemy.position = enemy_position
+			Globals.unit_visible_enemies[unit] = visible
 			exercised = true
 			break
 		if exercised:

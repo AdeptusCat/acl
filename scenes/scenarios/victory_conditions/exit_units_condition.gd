@@ -14,18 +14,21 @@ enum ObjectiveId {
 var state: ExitUnitsState
 
 func is_condition_met() -> bool:
-	var is_met: bool = false
-	
+	return state != null and not state.exit_hexes.is_empty() and required_unit_count > 0 and state.units_exited.size() >= required_unit_count
+
+
+func advance_time(delta: float) -> void:
+	if state == null or delta <= 0.0:
+		return
 	for unit: Unit in Globals.get_units():
+		if not unit.alive or unit.surrendered:
+			continue
 		for hex: Vector2i in state.exit_hexes:
 			if hex == unit.current_hex:
 				if unit.team == team:
 					if not state.units_exited.has(unit):
 						state.units_exited.append(unit)
 	
-	if state.units_exited.size() >= required_unit_count:
-		is_met = true
-	return is_met
 
 func get_description() -> String:
 	var plural_suffix: String = ""

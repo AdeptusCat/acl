@@ -197,7 +197,14 @@ func _relocation_hex(controller: InfluenceMapController, player: Unit, defender:
 			# The positional fixture must not send the player into an AI destination/close combat.
 			occupied = occupied or (unit.movement.is_moving and unit.movement.target_hex == cell)
 			occupied = occupied or (unit.position_advice != null and unit.position_advice.is_valid() and unit.position_advice.target_hex == cell)
-		if occupied or controller.snapshot.get_path(player.team, player.current_hex, cell).is_empty():
+		var path: Array[Vector2i] = controller.snapshot.get_path(player.team, player.current_hex, cell)
+		# The entire relocation must avoid a defended hex; crossing one starts
+		# close combat and invalidates this stationary-opponent positioning fixture.
+		for step: Vector2i in path.slice(1):
+			for unit: Unit in Globals.get_units_for_team(Globals.get_enemy_team(player.team)):
+				occupied = occupied or step == unit.current_hex
+				occupied = occupied or (unit.position_advice != null and unit.position_advice.is_valid() and unit.position_advice.target_hex == step)
+		if occupied or path.is_empty():
 			continue
 		var distance: int = LOSHelper.get_hex_distance(player.current_hex, cell)
 		if distance < best_distance:

@@ -17,6 +17,8 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 	result.objective_hex = query.objective_hex
 	result.profile_mode = query.profile.mode
 	result.position_profile = query.profile
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
 	if query.snapshot == null or not query.snapshot.maps.has(query.team):
 		result.reason = "No completed influence snapshot"
 		return false
@@ -113,6 +115,8 @@ static func finish_accepted_order(query: PositionQuery, result: PositionResult) 
 	result.target_index = query.snapshot.maps[query.team].cell_to_index(target)
 	result.path = path
 	result.features = features
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
 	result.features["movement_kind"] = query.stable_order.features.get("movement_kind", "necessary")
 	result.features["finishing_accepted_order"] = true
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
@@ -124,6 +128,8 @@ static func finish_accepted_order(query: PositionQuery, result: PositionResult) 
 	result.cell_states[result.target_index] = PositionResult.CellState.AVAILABLE
 	result.rejection_reasons[result.target_index] = ""
 	result.reason = "Finishing the accepted movement and setup before reconsidering positions"
+	if query.goal_reason != "":
+		result.reason = query.goal_reason + " | " + result.reason
 	return true
 
 
@@ -175,6 +181,14 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		return
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
+	var required_destination: bool = false
+	if query.goal_destination_required:
+		for candidate: PositionCandidate in candidates:
+			if candidate.hex == query.objective_hex:
+				# Only feasible, checked candidates can fulfil a geographic victory goal.
+				best = candidate
+				required_destination = true
+				break
 	result.proposed_hex = best.hex
 	var protected_choice: PositionCandidate = _prefer_connected_cover(query, best, candidates)
 	var protected_preference: bool = protected_choice != best
@@ -209,6 +223,9 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if query.stability != null:
 			retain_position = not query.stability.authorize(query, best, retained)
 			committed = query.stability.minimum_hold_active(query)
+		if required_destination and retained.hex != query.objective_hex:
+			retain_position = false
+			query.movement_kind = "goal"
 		if retain_position:
 			best = retained
 			result.status = PositionResult.Status.RETAINED
@@ -218,6 +235,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	result.target_index = best.index
 	result.score = best.score
 	result.features = best.features
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
 	result.features["movement_kind"] = query.movement_kind
 	result.features["connected_cover_preferred"] = protected_preference and best == protected_choice
 	result.path = best.path
@@ -259,6 +278,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
 	if query.stability_reason != "" and result.status == PositionResult.Status.RETAINED:
 		result.reason = query.stability_reason
+	if query.goal_reason != "":
+		result.reason = query.goal_reason + " | " + result.reason
 	return
 
 
@@ -435,6 +456,8 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 		return objective_distance <= query.defense_radius or query.sector_cells.has(cell)
 	if LOSHelper.get_hex_distance(query.unit.current_hex, cell) > query.movement_radius:
 		return false
+	if query.goal_destination_required and query.unit.current_hex == query.objective_hex:
+		return cell == query.objective_hex
 	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 		if query.stability != null and query.stable_order != null and cell == query.unit.current_hex:
 			# Judge the held position by its useful live firing lane, even after fire priority shifts.
@@ -452,14 +475,22 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 	if can_enter_suppressed_enemy_hex(query, cell):
 		return false
+	var shared_goal: bool = query.goal_capacity > 1 and cell == query.objective_hex
+	var occupants: Dictionary[Unit, bool] = {}
 	for other: Unit in query.reservations:
 		if other != query.unit and is_instance_valid(other) and other.alive and query.reservations[other] == cell:
-			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
+			if shared_goal:
+				occupants[other] = true
+			elif not HqSupportPositionPolicy.can_share_position(query.unit, other):
 				return true
 	for other: Unit in query.snapshot.positions:
 		if other != query.unit and query.snapshot.teams[other] == query.team and query.snapshot.positions[other] == cell:
-			if not HqSupportPositionPolicy.can_share_position(query.unit, other):
+			if shared_goal:
+				occupants[other] = true
+			elif not HqSupportPositionPolicy.can_share_position(query.unit, other):
 				return true
+	if shared_goal and occupants.size() >= query.goal_capacity:
+		return true
 	# Cleared tactical memory must also release occupied-hex restrictions after a surrender.
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
 		if contact.hex == cell and (not contact.observed or TacticalPositionExecutor.is_active_defender(contact.unit)):

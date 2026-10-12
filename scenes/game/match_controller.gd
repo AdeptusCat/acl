@@ -42,6 +42,7 @@ signal ai_status_changed(team: Globals.Team, enabled: bool, mode: PositionProfil
 
 var end_game_handled: bool = false
 var _ai_orders_by_team: Dictionary[Globals.Team, MissionOrder] = {}
+var _ai_goal_directors: Dictionary[Globals.Team, ScenarioGoalDirector] = {}
 
 var point_array: Array[Vector2]
 var threat_weights: Dictionary = {}
@@ -476,6 +477,7 @@ func _configure_platoon_ai() -> void:
 			active_units.append(unit)
 	var directors: Array[DefenseDirector] = [defense_director, $DefenseDirector2]
 	_ai_orders_by_team.clear()
+	_ai_goal_directors.clear()
 	for director: DefenseDirector in directors:
 		var planner: PlatoonAI = director.platoon_ai
 		planner.set_active(Globals.scenario_chosen.is_ai_enabled(planner.team))
@@ -485,6 +487,13 @@ func _configure_platoon_ai() -> void:
 		order.execution_intent = TacticalPositionExecutor.Intent.FROM_PROFILE
 		if order.position_mode == PositionProfile.Mode.ASSAULT:
 			order = _create_attack_ai_order(director, planner.team)
+		var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+		goals.configure(planner.team, Globals.scenario_chosen.victory_conditions, order.position_mode)
+		order = goals.initial_order(planner, order, time_left_seconds)
+		director.objective_hex = order.objective_hex
+		influence_map_controller.set_objective_for_team(planner.team, order.objective_hex)
+		_ai_goal_directors[planner.team] = goals
+		planner.goal_director = goals
 		_ai_orders_by_team[planner.team] = order
 		if planner.active:
 			planner.receive_mission_order(order)
@@ -519,6 +528,9 @@ func set_team_ai_mode(team: Globals.Team, mode: PositionProfile.Mode) -> void:
 	order.execution_intent = TacticalPositionExecutor.Intent.FROM_PROFILE
 	if mode == PositionProfile.Mode.ASSAULT:
 		order = _create_attack_ai_order(director, team)
+	var goals: ScenarioGoalDirector = _ai_goal_directors[team]
+	goals.configure(team, Globals.scenario_chosen.victory_conditions, mode)
+	order = goals.initial_order(director.platoon_ai, order, time_left_seconds)
 	_ai_orders_by_team[team] = order
 	if director.platoon_ai.active:
 		director.platoon_ai.receive_mission_order(order)
@@ -621,6 +633,11 @@ func _process(delta: float) -> void:
 			timer_running = false
 			_on_win_condition_timer_timeout()
 		update_timer_label.emit(time_left_seconds)
+	if not end_game_handled:
+		var now: float = float(Engine.get_physics_frames()) / float(Engine.physics_ticks_per_second)
+		for owner: Globals.Team in _ai_goal_directors:
+			var director: DefenseDirector = _ai_director_for_team(owner)
+			_ai_goal_directors[owner].update(director.platoon_ai, time_left_seconds, now)
 	
 	var mouse_or_unit_position_changed: bool = false
 	var pos: Vector2 = get_local_mouse_position()

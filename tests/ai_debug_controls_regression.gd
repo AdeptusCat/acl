@@ -60,10 +60,7 @@ func _run() -> void:
 		_check(controller.get_team_ai_mode(planner.team) == scenario.get_ai_mode(planner.team) and mode_selector.get_selected_id() == scenario.get_ai_mode(planner.team), "Scenario AI mode initializes the controller and debug selector, including while OFF")
 		if planner.current_order != null:
 			_check(mode_selector.get_selected_id() == planner.current_order.position_mode, "Initial mode reflects the scenario mission")
-			if planner.current_order.position_mode == PositionProfile.Mode.ASSAULT:
-				_check(planner.current_order.objective_hex == _capture_hex(planner.team), "Scenario ATTACK selects its own side's authored objective")
-			else:
-				_check(planner.current_order.objective_hex == _capture_hex(Globals.get_enemy_team(planner.team)), "Scenario DEFEND protects the opponent's capture marker")
+			_check(_is_victory_goal(planner.team, planner.current_order.objective_hex), "Scenario posture uses an actual own or opposing victory objective")
 		_test_side(controller, planner, status_selector, mode_selector)
 	_test_disabled_mode(controller, panel, allies)
 	main.queue_free()
@@ -114,7 +111,7 @@ func _test_side(controller: Node2D, planner: PlatoonAI, status_selector: OptionB
 	_select(mode_selector, PositionProfile.Mode.ASSAULT)
 	var attack: MissionOrder = planner.current_order
 	_check(attack.position_mode == PositionProfile.Mode.ASSAULT and attack.execution_intent == TacticalPositionExecutor.Intent.ASSAULT, "ATTACK enables coordinated assault planning and execution")
-	_check(attack.objective_hex == _capture_hex(planner.team), "ATTACK targets this side's capture marker")
+	_check(_is_victory_goal(planner.team, attack.objective_hex), "ATTACK pursues or denies a configured victory objective")
 	_check(attack.reserve_policy == MissionOrder.ReservePolicy.NONE and attack.sector_cells.is_empty(), "ATTACK releases fighting squads from defensive reserves and sectors")
 	var rifle: Unit
 	var hq: Unit
@@ -129,7 +126,7 @@ func _test_side(controller: Node2D, planner: PlatoonAI, status_selector: OptionB
 	_check(move != null and planner.executor.execute(move), "The selected AI owns an actual move before switching mode")
 	_select(mode_selector, PositionProfile.Mode.DEFEND)
 	_check(rifle.movement.path_hexes.is_empty() and rifle.movement.target_hex == rifle.current_hex and planner.executor.pending.is_empty(), "Changing mode cancels the previous AI route and pending execution")
-	_check(planner.current_order.position_mode == PositionProfile.Mode.DEFEND and planner.current_order.objective_hex == _capture_hex(Globals.get_enemy_team(planner.team)), "DEFEND protects the opponent's capture marker")
+	_check(planner.current_order.position_mode == PositionProfile.Mode.DEFEND and _is_victory_goal(planner.team, planner.current_order.objective_hex), "DEFEND protects a configured victory objective")
 	_check(rifle.squad_ai_controller.defensive_mission_controlled, "DEFEND assigns positioning to the platoon planner")
 	move = _movement_result(rifle)
 	_check(move != null and planner.executor.execute(move), "The selected AI owns an actual move before OFF")
@@ -161,7 +158,7 @@ func _test_disabled_mode(controller: Node2D, panel: PanelContainer, planner: Pla
 	_check(not planner.active and planner.current_order == null, "Selecting ATTACK while OFF does not activate or issue orders")
 	_check(controller.get_team_ai_mode(planner.team) == PositionProfile.Mode.ASSAULT, "Disabled AI remembers its chosen mode")
 	_select(panel.allies_ai_status, 1)
-	_check(planner.active and planner.current_order.position_mode == PositionProfile.Mode.ASSAULT and planner.current_order.objective_hex == _capture_hex(planner.team), "ON uses the mode selected while OFF")
+	_check(planner.active and planner.current_order.position_mode == PositionProfile.Mode.ASSAULT and _is_victory_goal(planner.team, planner.current_order.objective_hex), "ON uses the posture selected while OFF and a configured victory objective")
 	var retained: MissionOrder = planner.current_order
 	_select(panel.allies_ai_mode, PositionProfile.Mode.ASSAULT)
 	_check(planner.current_order == retained, "Selecting the current mode does not restart the mission")
@@ -199,6 +196,26 @@ func _capture_hex(team: Globals.Team) -> Vector2i:
 		if objective.objective_id == 1:
 			return objective.hex
 	return Vector2i.ZERO
+
+
+func _is_victory_goal(team: Globals.Team, hex: Vector2i) -> bool:
+	var own: Array[Vector2i] = []
+	var opposing: Array[Vector2i] = []
+	for condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
+		if condition is OccupyObjectiveCondition:
+			var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
+			if condition.team == team:
+				own.append_array(occupy.state.hexes)
+			else:
+				opposing.append_array(occupy.state.hexes)
+	if not own.is_empty():
+		return own.has(hex)
+	for condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
+		if condition is DestroyUnitsCondition and condition.team != team:
+			for unit: Unit in Globals.get_units_for_team(team):
+				if unit.current_hex == hex:
+					return true
+	return opposing.has(hex)
 
 
 func _select(selector: OptionButton, id: int) -> void:

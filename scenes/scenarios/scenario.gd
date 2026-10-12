@@ -25,12 +25,12 @@ enum AIMode { ATTACK, DEFEND }
 @export_subgroup("Axis", "axis_ai_")
 ## Controls automatic Axis orders independently of the selected player side.
 @export_enum("OFF", "ON") var axis_ai_status: int = AIStatus.OFF
-## ATTACK targets the Axis objective; DEFEND protects the opponent's capture objective.
+## Tactical posture. Strategic destinations come from both sides' victory conditions.
 @export_enum("ATTACK", "DEFEND") var axis_ai_mode: int = AIMode.DEFEND
 @export_subgroup("Allies", "allies_ai_")
 ## Controls automatic Allied orders independently of the selected player side.
 @export_enum("OFF", "ON") var allies_ai_status: int = AIStatus.ON
-## ATTACK targets the Allied objective; DEFEND protects the opponent's capture objective.
+## Tactical posture. Strategic destinations come from both sides' victory conditions.
 @export_enum("ATTACK", "DEFEND") var allies_ai_mode: int = AIMode.DEFEND
 @export_group("")
 

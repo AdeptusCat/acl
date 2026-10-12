@@ -127,6 +127,9 @@ func _test_link_visibility(world: Node) -> void:
 
 func _test_origin_targets() -> void:
 	var unit: Unit = Globals.get_units()[0]
+	# This fixture tests weapon coordinates, independently of an AI HQ's support role.
+	var support_only: bool = unit.ai_support_only
+	unit.ai_support_only = false
 	var original_fire: SquadFireController = unit.squad_fire
 	var probe: FireProbe = FireProbe.new()
 	unit.add_child(probe)
@@ -209,6 +212,7 @@ func _test_origin_targets() -> void:
 	action.attack_hex = original_hex
 	action.squad_fire = original_action_fire
 	unit.squad_fire = original_fire
+	unit.ai_support_only = support_only
 	probe.calc.free()
 	probe.queue_free()
 

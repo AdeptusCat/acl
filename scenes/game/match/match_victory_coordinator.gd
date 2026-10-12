@@ -122,24 +122,13 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 		Globals.Team.ALLIES: false,
 	}
 	
-	var is_met: bool = false
+	var conditions: Array[VictoryCondition] = []
 	for team: int in Globals.victory_conditions:
 		for victory_condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.outcome_level:
-				VictoryCondition.OutcomeLevel.MAJOR:
-					is_met = victory_condition.is_condition_met()
-					major_victory_conditions_met[team] = is_met
-					if not is_met:
-						break
-	
-	for team: int in Globals.victory_conditions:
-		for victory_condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
-			match victory_condition.outcome_level:
-				VictoryCondition.OutcomeLevel.MINOR:
-					is_met = victory_condition.is_condition_met()
-					minor_victory_conditions_met[team] = is_met
-					if not is_met:
-						break
+			conditions.append(victory_condition)
+	for team: Globals.Team in major_victory_conditions_met:
+		major_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MAJOR, controller.time_left_seconds <= 0.0)
+		minor_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MINOR, controller.time_left_seconds <= 0.0)
 	
 	if major_victory_conditions_met[Globals.Team.AXIS] and major_victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw

@@ -49,10 +49,10 @@ func get_description() -> String:
 
 
 func is_condition_met() -> bool:
-	if state == null:
+	if state == null or state.hexes.is_empty() or required_unit_count <= 0 or required_time_s < 0.0:
 		return false
-	for hex: Vector2i in state.victory_conditions_met:
-		if not state.victory_conditions_met[hex]:
+	for hex: Vector2i in state.hexes:
+		if not state.victory_conditions_met.get(hex, false):
 			return false
 	return true
 
@@ -85,7 +85,7 @@ func advance_time(delta: float) -> void:
 		var enemy_units: Array[Unit] = state.units_in_objectives[hex].units_collection[enemy_team].units
 
 		var objective_held: bool = false
-		if not friendly_units.is_empty() and enemy_units.is_empty():
+		if not friendly_units.is_empty() and (not contested_by_enemy_presence or enemy_units.is_empty()):
 			if friendly_units.size() >= required_unit_count:
 				objective_held = true
 
@@ -95,7 +95,7 @@ func advance_time(delta: float) -> void:
 		else:
 			state.required_times_reached_s[hex] = 0
 
-		if state.required_times_reached_s[hex] >= required_time_s:
+		if objective_held and state.required_times_reached_s[hex] >= required_time_s:
 			state.victory_conditions_met[hex] = true
 		else:
 			state.victory_conditions_met[hex] = false
