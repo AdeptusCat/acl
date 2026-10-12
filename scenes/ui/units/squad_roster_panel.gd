@@ -6,7 +6,7 @@ signal layout_requested
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/units/squad_roster_row.tscn")
 const PANEL_WIDTH: float = 252.0
-const SCROLL_HEIGHT: float = 176.0
+const SCROLL_HEIGHT: float = 168.0
 const REFRESH_INTERVAL_S: float = 0.25
 
 @onready var section: FoldableContainer = $Roster
@@ -106,7 +106,7 @@ func _rebuild_groups(units: Array[Unit]) -> void:
 			var heading: Label = Label.new()
 			heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			heading.add_theme_color_override("font_color", Color(0.8, 0.65, 0.45))
-			heading.add_theme_font_size_override("font_size", 11)
+			heading.theme_type_variation = &"HudSecondary"
 			heading.text = "Company %s · Platoon %d" % [Unit.COMPANY_NAMES[unit.company], group.y]
 			if group.y == 0:
 				heading.text = "Company %s · Headquarters" % Unit.COMPANY_NAMES[unit.company]

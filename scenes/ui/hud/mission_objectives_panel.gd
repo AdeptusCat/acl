@@ -41,7 +41,6 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 		heading.text = "MISSION · OBJECTIVES"
 	for condition: VictoryCondition in conditions:
 		var label: Label = Label.new()
-		label.add_theme_font_size_override("font_size", 12)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		rows.add_child(label)

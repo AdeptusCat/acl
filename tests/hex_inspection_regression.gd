@@ -37,7 +37,7 @@ func _run() -> void:
 	overlay.set_process(false)
 	await _settle()
 	_check(card.visible and world.has_inspected_hex and card.inspected_hex == hex, "Selecting a hex opens its own terrain data rather than the mouse's previous hex")
-	_check(is_equal_approx(card.size.x, 240.0) and card.size.y >= 70.0 and card.size.y <= 95.0, "The terrain summary fits a compact fixed-width card: %s" % card.size)
+	_check(is_equal_approx(card.size.x, 240.0) and card.size.y >= 70.0 and card.size.y <= 110.0, "The terrain summary fits a compact fixed-width card with readable type: %s" % card.size)
 	_check(card.details.folded and not card.has_node("FoldableContainer/VBoxContainer/Tile"), "Detailed information starts collapsed and the duplicate tile preview is removed")
 	var style: StyleBoxFlat = card.get_theme_stylebox("panel") as StyleBoxFlat
 	_check(is_equal_approx(style.bg_color.a, 1.0), "The card has an opaque readable background")
@@ -58,7 +58,7 @@ func _run() -> void:
 	await _settle()
 	_check(card.features.text.contains("Blocks sight: Yes") and card.features.text.contains("Obscures sight: Yes"), "Expanded details retain both blocking and obscuring effects")
 	_check(card.edge_values[0].text == "Cover 1" and card.edge_values[1].text == "Cover 2" and card.edge_values[2].text == "None", "The full breakdown labels protected and unprotected sides")
-	_check(card.size.y < 330.0 and _inside(card, world), "The expanded breakdown remains bounded inside the viewport")
+	_check(card.size.y <= 350.0 and _inside(card, world), "The expanded breakdown remains bounded inside the viewport: %s" % card.size)
 	var first: Dictionary = overlay.segments[0]
 	var midpoint: Vector2 = (first["start"] + first["end"]) * 0.5
 	var screen_point: Vector2 = overlay.get_global_transform_with_canvas() * midpoint

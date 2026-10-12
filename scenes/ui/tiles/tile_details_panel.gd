@@ -4,7 +4,7 @@ signal inspection_closed
 signal layout_requested
 
 const PANEL_WIDTH: float = 240.0
-const SCROLL_HEIGHT: float = 240.0
+const SCROLL_HEIGHT: float = 216.0
 const EDGE_KEYS: Array[String] = ["cover_n", "cover_ne", "cover_se", "cover_s", "cover_sw", "cover_nw"]
 const EDGE_NAMES: Array[String] = ["North", "Northeast", "Southeast", "South", "Southwest", "Northwest"]
 

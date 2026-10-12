@@ -90,7 +90,7 @@ func _build_controls() -> void:
 		row.add_theme_constant_override("separation", 12)
 		control_rows.add_child(row)
 		var key: Label = Label.new()
-		key.custom_minimum_size.x = 154.0
+		key.custom_minimum_size.x = 164.0
 		key.text = binding
 		key.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		key.add_theme_color_override("font_color", Color(0.86, 0.73, 0.5))
@@ -113,7 +113,7 @@ func _fit_panels() -> void:
 	for panel: PanelContainer in [menu, controls_panel]:
 		var width: float = 260.0
 		if panel == controls_panel:
-			width = 388.0
+			width = 452.0
 		panel.custom_minimum_size.x = minf(width, hud_control.size.x - 24.0)
 		panel.size = Vector2(panel.custom_minimum_size.x, panel.get_combined_minimum_size().y)
 		panel.position = Vector2(size.x - panel.size.x, size.y + 8.0)

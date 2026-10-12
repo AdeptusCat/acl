@@ -9,7 +9,8 @@ bg_color = Color(0.2, 0.2, 0.17, 1)
 bg_color = Color(0.49, 0.67, 0.4, 1)
 
 [node name="SquadRow" type="Button"]
-custom_minimum_size = Vector2(0, 38)
+theme_type_variation = &"HudSquadRow"
+custom_minimum_size = Vector2(0, 44)
 mouse_force_pass_scroll_events = true
 toggle_mode = true
 script = ExtResource("1")
@@ -75,6 +76,7 @@ mouse_filter = 2
 text = "Ok"
 text_overrun_behavior = 3
 clip_text = true
+theme_type_variation = &"HudSecondary"
 
 [node name="Isolation" type="Label" parent="Content/Status"]
 visible = false
@@ -82,3 +84,4 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.9, 0.73, 0.45, 1)
 text = "Isolated"
+theme_type_variation = &"HudSecondary"

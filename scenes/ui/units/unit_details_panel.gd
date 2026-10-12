@@ -24,7 +24,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var roster_container: VBoxContainer = $Summary/Roster/Scroll/Rows
 @onready var casualty_shock: Label = $Summary/Details/Content/Stats/CasualtyShock
 @onready var leadership_bonus_label: Label = $Summary/Details/Content/Stats/LeadershipBonus
-@onready var debug_actions: HBoxContainer = $Summary/Details/Content/DebugActions
+@onready var debug_actions: HFlowContainer = $Summary/Details/Content/DebugActions
 @onready var rout_button: RoutButton = $Summary/Rout
 @onready var rout_explanation: Label = $Summary/RoutExplanation
 @onready var hud_control: Control = get_parent() as Control

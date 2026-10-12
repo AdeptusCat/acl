@@ -17,7 +17,6 @@ theme_override_constants/separation = 6
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
-theme_override_font_sizes/font_size = 11
 text_overrun_behavior = 3
 clip_text = true
 
@@ -25,10 +24,10 @@ clip_text = true
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
-theme_override_font_sizes/font_size = 10
 horizontal_alignment = 2
 text_overrun_behavior = 3
 clip_text = true
+theme_type_variation = &"HudSecondary"
 
 [node name="Activity" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -38,10 +37,9 @@ theme_override_constants/separation = 6
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
-theme_override_colors/font_color = Color(0.7, 0.67, 0.6, 1)
-theme_override_font_sizes/font_size = 10
 text_overrun_behavior = 3
 clip_text = true
+theme_type_variation = &"HudSecondary"
 
 [node name="Task" type="VBoxContainer" parent="Activity"]
 custom_minimum_size = Vector2(96, 0)
@@ -51,10 +49,10 @@ theme_override_constants/separation = 1
 [node name="Label" type="Label" parent="Activity/Task"]
 layout_mode = 2
 mouse_filter = 1
-theme_override_font_sizes/font_size = 10
 horizontal_alignment = 2
 text_overrun_behavior = 3
 clip_text = true
+theme_type_variation = &"HudSecondary"
 
 [node name="Progress" type="ProgressBar" parent="Activity/Task"]
 custom_minimum_size = Vector2(0, 4)

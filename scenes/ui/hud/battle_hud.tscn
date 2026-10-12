@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://jdf7ewo2axfy"]
 
 [ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/hud/battle_hud.gd" id="1_u7n8c"]
-[ext_resource type="Theme" uid="uid://b8li83v66k5mk" path="res://resources/theme/ui_theme.tres" id="3_mgwkc"]
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="3_mgwkc"]
 [ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/units/unit_stats_summary.tscn" id="5_0dwhk"]
 [ext_resource type="Script" uid="uid://cug54uuykli2b" path="res://scenes/ui/hud/match_countdown_panel.gd" id="5_svq4k"]
 [ext_resource type="Script" uid="uid://duwe3tkqjv0bw" path="res://scenes/ui/tooltips/tooltip.gd" id="12_hl07w"]
@@ -18,35 +18,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/units/unit_details_panel.tscn" id="31_squad"]
 [ext_resource type="PackedScene" uid="uid://hfmqv1l4ns6q" path="res://scenes/ui/units/squad_roster_panel.tscn" id="32_roster"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/battle_settings_panel.tscn" id="33_settings"]
-[ext_resource type="FontFile" uid="uid://cx2ft8so378yw" path="res://assets/fonts/courier_prime/Courier Prime.ttf" id="34_font"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/terrain_card.tscn" id="35_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/hex_hint_panel.tscn" id="36_hint"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mission"]
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
-bg_color = Color(0.1, 0.1, 0.1, 0.94)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.63, 0.46, 0.27, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="LabelSettings" id="LabelSettings_hl07w"]
-font_size = 24
-outline_size = 16
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="Theme" id="DebugTheme"]
-default_font = ExtResource("34_font")
-default_font_size = 12
-FoldableContainer/font_sizes/font_size = 12
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
 atlas = ExtResource("27_7ygsn")
@@ -110,12 +83,14 @@ alignment = 1
 [node name="Label2" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=208135704]
 layout_mode = 2
 text = "Time left: "
+theme_type_variation = &"HudTimer"
 
 [node name="TimerLabel" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=898658969]
 layout_mode = 2
 text = "10:00"
 horizontal_alignment = 1
 vertical_alignment = 1
+theme_type_variation = &"HudTimer"
 
 [node name="Label" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=1821792669]
 visible = false
@@ -127,7 +102,6 @@ visible = false
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_mission")
 script = ExtResource("30_mission")
 
 [node name="Objectives" type="VBoxContainer" parent="Control/MissionObjectives" unique_id=1217781514]
@@ -137,10 +111,9 @@ theme_override_constants/separation = 8
 
 [node name="Heading" type="Label" parent="Control/MissionObjectives/Objectives" unique_id=1503336149]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.65, 0.45, 1)
-theme_override_font_sizes/font_size = 11
 text = "MISSION · PRIMARY OBJECTIVES"
 autowrap_mode = 3
+theme_type_variation = &"HudHeading"
 
 [node name="Rows" type="VBoxContainer" parent="Control/MissionObjectives/Objectives" unique_id=665202199]
 layout_mode = 2
@@ -204,7 +177,7 @@ script = ExtResource("12_hl07w")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/Tooltip" unique_id=115991343]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 8
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Control/Tooltip/VBoxContainer" unique_id=882565347]
 layout_mode = 2
@@ -218,7 +191,7 @@ stretch_mode = 4
 [node name="TooltipHeader" type="Label" parent="Control/Tooltip/VBoxContainer/HBoxContainer" unique_id=1847268092]
 layout_mode = 2
 text = "Squad Status"
-label_settings = SubResource("LabelSettings_hl07w")
+theme_type_variation = &"HudHeading"
 
 [node name="TooltipText" type="Label" parent="Control/Tooltip/VBoxContainer" unique_id=1776387298]
 layout_mode = 2
@@ -247,8 +220,6 @@ offset_right = 292.0
 offset_bottom = -12.0
 grow_vertical = 0
 mouse_force_pass_scroll_events = false
-theme = SubResource("DebugTheme")
-theme_override_styles/panel = SubResource("StyleBoxFlat_mission")
 script = ExtResource("24_fv78h")
 
 [node name="FoldableContainer" type="FoldableContainer" parent="Control/Debug" unique_id=2132168822]
