@@ -8,12 +8,8 @@ extends CanvasLayer
 @onready var squad_roster: SquadRosterPanel = $Control/SquadRoster
 
 
-@onready var cover_icon_scene: PackedScene = preload("res://scenes/ui/effects/cover_icon.tscn")
-
 @onready var target_cover_distance: Control = $Control/TargetCoverDistance
-@onready var cover_container: HBoxContainer = $Control/TargetCoverDistance/VBoxContainer/Cover
-@onready var firepower_label: Label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer/FirepowerLabel
-@onready var distance_label: Label = $Control/TargetCoverDistance/VBoxContainer/HBoxContainer2/DistanceLabel
+@onready var hex_edge_hint: Control = $Control/HexEdgeHint
 @onready var selection_wheel: Control = $Control/SelectionWheel
 @onready var selection_wheel_alt: Control = $Control/SelectionWheelAlt
 
@@ -113,19 +109,33 @@ func show_tile_data(result: Dictionary) -> void:
 	tile_details.show_tile_data(result)
 
 
-func show_target_hex_cover_distance(local_event_pos: Vector2, targetCover: int, distance: int, firepower: float) -> void:
-	target_cover_distance.show()
-	target_cover_distance.position = local_event_pos
-	for child: Control in cover_container.get_children():
-		child.queue_free()
-	for cover: int in targetCover:
-		var cover_icon: TextureRect = cover_icon_scene.instantiate()
-		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
-		cover_container.add_child(cover_icon)
-	firepower_label.text = str(firepower)
-	distance_label.text = str(distance)
-	#if detail_ui:
-		#detail_ui.set_cover(targetCover)
+func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance: int, firepower: float, sight_clear: bool = true, indirect: bool = false) -> void:
+	var sight: String = "Sight: clear"
+	var cover: String = "Target cover: %d" % target_cover
+	var color: Color = Color(0.65, 0.85, 0.55)
+	if not sight_clear:
+		sight = "Sight: blocked"
+		cover = "Target cover: unavailable"
+		color = Color(0.96, 0.55, 0.4)
+		if indirect:
+			sight = "Sight: blocked · Indirect fire"
+			color = Color(0.86, 0.73, 0.5)
+	target_cover_distance.show_hint(point, sight, cover, "Distance: %d · Firepower: %s" % [distance, String.num(firepower, 1)], color)
+
+
+func show_hex_edge_hint(direction: int, cover: int, point: Vector2) -> void:
+	var names: Array[String] = ["North", "Northeast", "Southeast", "South", "Southwest", "Northwest"]
+	hex_edge_hint.show_hint(point, "%s edge · Cover %d" % [names[direction], cover], "Protection applies from this side.")
+	target_cover_distance.hide()
+
+
+func hide_hex_edge_hint() -> void:
+	hex_edge_hint.hide()
+
+
+func hide_tile_data() -> void:
+	tile_details.hide_inspection()
+	hide_hex_edge_hint()
 
 
 func hide_target_hex_cover_distance() -> void:
@@ -172,10 +182,12 @@ func mouse_event_position_changed(_event_pos: Vector2) -> void:
 
 func _on_show_unit_details(unit: Unit) -> void:
 	unit_details.show_unit_detail(unit)
+	hide_target_hex_cover_distance()
 
 
 func _on_hide_unit_details() -> void:
 	unit_details.hide_unit_detail()
+	hide_target_hex_cover_distance()
 
 
 func _on_try_again_button_pressed() -> void:

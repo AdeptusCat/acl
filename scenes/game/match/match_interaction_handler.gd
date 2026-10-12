@@ -67,7 +67,7 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 
 
 static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2) -> void:
-	event_pos = controller.get_local_mouse_position()
+	event_pos = controller.get_global_transform_with_canvas().affine_inverse() * event_pos
 	var map_hex: Vector2i = controller.ground_layer.local_to_map(event_pos)
 	controller.hex_selected.emit(map_hex, event_pos)
 	if controller.previous_selected_hex == map_hex:
@@ -101,43 +101,44 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 
 static func handle_mouse_event_position_changed(controller: Node2D, event_pos: Vector2) -> void:
 	controller.mouse_event_position_changed.emit(event_pos)
-	if controller.selected_unit:
-		var unit_pos: Vector2 = controller.selected_unit.position
-		var local_event_pos: Vector2 = controller.get_local_mouse_position()
-		LOSHelper.draw_los(unit_pos, local_event_pos)
-		
-		var screen_pos: Vector2 = controller.get_viewport().get_mouse_position()
-		if (controller.target_hex == LOSHelper.ground_layer.local_to_map(local_event_pos) and controller.origin_hex == controller.selected_unit.current_hex):
-			controller.get_parent().ui.show_target_hex_cover_distance(screen_pos, controller.targetCover, controller.distance, controller.firepower)
+	refresh_target_preview(controller, controller.get_local_mouse_position(), controller.get_viewport().get_mouse_position())
+
+
+static func refresh_target_preview(controller: Node2D, local_point: Vector2, screen_point: Vector2) -> void:
+	var world: Node2D = controller.get_parent() as Node2D
+	if controller.end_game_handled or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
+		world.ui.hide_target_hex_cover_distance()
+		LOSHelper.clear_los()
+		return
+	if controller.get_viewport().gui_get_hovered_control() != null or world.hex_inspection.hovered_direction >= 0:
+		world.ui.hide_target_hex_cover_distance()
+		LOSHelper.clear_los()
+		return
+	var target: Vector2i = controller.ground_layer.local_to_map(local_point)
+	if controller.ground_layer.get_cell_source_id(target) == -1 or target == controller.selected_unit.current_hex:
+		world.ui.hide_target_hex_cover_distance()
+		LOSHelper.clear_los()
+		return
+	controller.origin_hex = controller.selected_unit.current_hex
+	controller.target_hex = target
+	controller.distance = controller.ground_layer.cube_distance(controller.selected_unit.current_cube, controller.ground_layer.map_to_cube(target))
+	var cover_map: Dictionary = LOSHelper.los_lookup.get(controller.origin_hex, {})
+	var sight_clear: bool = cover_map.has(target)
+	controller.targetCover = 0
+	if sight_clear:
+		var data: Dictionary = cover_map[target]
+		controller.targetCover = int(data["target_cover"])
+	var indirect: bool = controller.selected_unit.squad_type == Globals.SquadType.MORTAR
+	controller.firepower = float(controller.selected_unit.firepower)
+	if controller.distance > controller.selected_unit.weapon_range:
+		if controller.distance <= controller.selected_unit.weapon_range * 2:
+			controller.firepower *= 0.5
 		else:
-			controller.origin_hex = controller.selected_unit.current_hex
-			controller.target_hex = LOSHelper.ground_layer.local_to_map(local_event_pos)
-			var origin_cube: Vector3i = controller.selected_unit.current_cube
-			var target_cube: Vector3i = LOSHelper.ground_layer.local_to_cube(local_event_pos)
-			controller.distance = LOSHelper.ground_layer.cube_distance(origin_cube, target_cube)
-			# safely grab the inner dict for this shooter-hex
-			var cover_map: Dictionary = LOSHelper.los_lookup.get(controller.origin_hex, {})
-			if cover_map and cover_map.has(controller.target_hex):
-				var data: Dictionary = cover_map[controller.target_hex]
-				controller.targetCover 	= data["target_cover"]
-			else:
-				controller.targetCover = 0  # no LOS or no cover entry
-				controller.get_parent().ui.hide_target_hex_cover_distance()
-				controller.target_hex = null
-				controller.origin_hex = null
-				return
-			# now display it
-			controller.firepower = controller.selected_unit.firepower
-			if controller.distance > controller.selected_unit.weapon_range:
-				if controller.distance <= controller.selected_unit.weapon_range * 2:
-					controller.firepower = controller.firepower / 2
-				else:
-					controller.firepower = 0
-			
-			controller.get_parent().ui.show_target_hex_cover_distance(screen_pos, controller.targetCover, controller.distance, controller.firepower)
-			#selected_unit.set_cover(targetCover)
-	else:
-		controller.get_parent().ui.hide_target_hex_cover_distance()
+			controller.firepower = 0.0
+	if not sight_clear and not indirect:
+		controller.firepower = 0.0
+	LOSHelper.draw_los(controller.selected_unit.position, local_point)
+	world.ui.show_target_hex_cover_distance(screen_point, controller.targetCover, controller.distance, controller.firepower, sight_clear, indirect)
 
 
 #var last_mouse_position: Vector2

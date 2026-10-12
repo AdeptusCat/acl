@@ -101,6 +101,8 @@
 [ext_resource type="PackedScene" uid="uid://b2l16lejahl5o" path="res://scenes/world/influence_map/influence_map_controller.tscn" id="91_mdkuk"]
 [ext_resource type="PackedScene" uid="uid://bded2il2i85hf" path="res://ai/platoon/defense/defense_mission_director.tscn" id="92_i1y2t"]
 
+[ext_resource type="Script" path="res://scenes/world/overlays/hex_inspection_overlay.gd" id="71_inspection"]
+
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
 nickname = "Squad Leader"
@@ -1640,6 +1642,10 @@ glow_intensity = 1.0
 
 [node name="World" type="Node2D" unique_id=154406966]
 script = ExtResource("1_6hctx")
+
+[node name="HexInspection" type="Node2D" parent="."]
+z_index = 110
+script = ExtResource("71_inspection")
 
 [node name="InputManager" parent="." unique_id=2029001427 instance=ExtResource("24_x0nq1")]
 

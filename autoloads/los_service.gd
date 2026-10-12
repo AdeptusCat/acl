@@ -1121,13 +1121,14 @@ func generate_los_lines_for_debug() -> void:
 var _target_hex: Variant
 var _origin_hex: Variant
 func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
-	los_lines.clear()
 	var target_hex: Vector2i = ground_layer.local_to_map(target_pos)
 	origin_hex = ground_layer.local_to_map(origin_pos)
 	if origin_hex == target_hex:
+		clear_los()
 		return
 	if target_hex == _target_hex and origin_hex == _origin_hex:
 		return
+	los_lines.clear()
 	_target_hex = target_hex
 	_origin_hex = origin_hex
 	
@@ -1148,6 +1149,8 @@ func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 
 func clear_los() -> void:
 	los_lines.clear()
+	_target_hex = null
+	_origin_hex = null
 	queue_redraw()
 
 

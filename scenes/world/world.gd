@@ -17,6 +17,7 @@ extends Node2D
 @onready var target_area: Node2D = $TargetArea
 @onready var input_manager: Node = $InputManager
 @onready var maps: Node2D = $Maps
+@onready var hex_inspection: HexInspectionOverlay = $HexInspection
 
 
 
@@ -74,6 +75,10 @@ func _ready() -> void:
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
 	game_controller.hex_selected.connect(_on_hex_selected)
+	ui.tile_details.inspection_closed.connect(clear_hex_inspection)
+	hex_inspection.edge_hovered.connect(ui.show_hex_edge_hint)
+	hex_inspection.edge_left.connect(ui.hide_hex_edge_hint)
+	ui.squad_roster.unit_selected.connect(_on_roster_selection)
 	ui.get_node("Control/Debug").bind_ai_controls(game_controller)
 	
 	
@@ -109,15 +114,39 @@ func _ready() -> void:
 	#game_controller.spawn_units_from_match_save(match_data)
 	
 
-var selected_hex: Vector2i 
+var selected_hex: Vector2i
+var has_inspected_hex: bool = false
 
-func _on_hex_selected(map_hex: Vector2i, event_pos: Vector2) -> void:
-	if map_hex == selected_hex:
+func _on_hex_selected(map_hex: Vector2i, _event_pos: Vector2) -> void:
+	if not is_setup or ground_layer == null:
 		return
-	selected_tile_map_layer.set_cell(selected_hex, -1, Vector2i(0, 0))  # Clear selected cell
+	if ground_layer.get_cell_source_id(map_hex) == -1 or (has_inspected_hex and map_hex == selected_hex):
+		clear_hex_inspection()
+		return
+	clear_hex_inspection()
 	selected_hex = map_hex
+	has_inspected_hex = true
 	selected_tile_map_layer.set_cell(selected_hex, 0, Vector2i(0, 0))  # Set selected tile with ID 1
-	calc_unit_data_for_ui(event_pos)
+	calc_unit_data_for_ui(ground_layer.map_to_local(map_hex))
+
+
+func clear_hex_inspection() -> void:
+	if has_inspected_hex:
+		selected_tile_map_layer.erase_cell(selected_hex)
+	has_inspected_hex = false
+	hex_inspection.clear_inspection()
+	ui.hide_tile_data()
+
+
+func _on_roster_selection(_unit: Unit) -> void:
+	clear_hex_inspection()
+	ui.hide_target_hex_cover_distance()
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and has_inspected_hex:
+		clear_hex_inspection()
+		get_viewport().set_input_as_handled()
 
 
 func copy_astar(source: AStar2D) -> AStar2D:
@@ -151,103 +180,30 @@ func _on_mouse_event_position_changed(_event_pos: Vector2) -> void:
 
 
 func calc_unit_data_for_ui(event_pos: Vector2) -> void:
-	event_pos = get_local_mouse_position()
-	var result: Dictionary = {
-		"blocking" : false,
-		"hindrance": false,
-		"cover_in_hex" : 0,
-		"cover_n" : 0,
-		"cover_ne" : 0,
-		"cover_se" : 0,
-		"cover_s" : 0,
-		"cover_sw" : 0,
-		"cover_nw" : 0,
-		"ground_texture": null,
-		"wall_texture": null,
-		"building_texture": null,
-		"terrain_texture": null,
-		"ground_texture_transform": null,
-		"wall_texture_transform": null,
-		"building_texture_transform": null,
-		"terrain_texture_transform": null,
-		"wall_n_texture": null,
-		"wall_n_texture_transform": null,
-		"wall_ne_texture": null,
-		"wall_ne_texture_transform": null,
-		"wall_se_texture": null,
-		"wall_se_texture_transform": null,
-		"wall_s_texture": null,
-		"wall_s_texture_transform": null,
-		"wall_sw_texture": null,
-		"wall_sw_texture_transform": null,
-		"wall_nw_texture": null,
-		"wall_nw_texture_transform": null,
-		"tile_name": "",
-		"hex_wall_name": "",
-	}
-	result.cover_in_hex = LOSHelper.is_sample_point_in_building(event_pos)
-	result.tile_name = LOSHelper.get_tile_name(event_pos)
-	if result.cover_in_hex > 0:
-		result.blocking = true
-	result.cover_n = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_SIDE)
-	result.cover_ne = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_RIGHT_SIDE)
-	result.cover_se = get_wall_cover(event_pos, TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE)
-	result.cover_s = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_SIDE)
-	result.cover_sw = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE)
-	result.cover_nw = get_wall_cover(event_pos, TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_LEFT_SIDE)
-	
 	var map_hex: Vector2i = ground_layer.local_to_map(event_pos)
-	
-	var tile_data_hindrance: TileData = terrain_layer.get_cell_tile_data(map_hex)
-	if tile_data_hindrance and tile_data_hindrance.has_custom_data("hindrance") \
-	   and tile_data_hindrance.get_custom_data("hindrance"):
-		result["hindrance"] = true
-	
-	
-	
-	result.ground_texture = get_tilemaplayer_texture(map_hex, ground_layer)
-	result.ground_texture_transform = get_tilemaplayer_texture_transform(map_hex, ground_layer)
-	result.wall_texture = get_tilemaplayer_texture(map_hex, wall_layer)
-	result.wall_texture_transform = get_tilemaplayer_texture_transform(map_hex, wall_layer)
-	
-	var map_cube : Vector3i = ground_layer.map_to_cube(map_hex)
-	var map_n_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_SIDE)
-	var map_n_hex : Vector2i = ground_layer.cube_to_map(map_n_cube)
-	result.wall_n_texture = get_tilemaplayer_texture(map_n_hex, wall_layer)
-	result.wall_n_texture_transform = get_tilemaplayer_texture_transform(map_n_hex, wall_layer)
-	var map_ne_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_RIGHT_SIDE)
-	var map_ne_hex : Vector2i = ground_layer.cube_to_map(map_ne_cube)
-	result.wall_ne_texture = get_tilemaplayer_texture(map_ne_hex, wall_layer)
-	result.wall_ne_texture_transform = get_tilemaplayer_texture_transform(map_ne_hex, wall_layer)
-	var map_se_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_RIGHT_SIDE)
-	var map_se_hex : Vector2i = ground_layer.cube_to_map(map_se_cube)
-	result.wall_se_texture = get_tilemaplayer_texture(map_se_hex, wall_layer)
-	result.wall_se_texture_transform = get_tilemaplayer_texture_transform(map_se_hex, wall_layer)
-	var map_s_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_SIDE)
-	var map_s_hex : Vector2i = ground_layer.cube_to_map(map_s_cube)
-	result.wall_s_texture = get_tilemaplayer_texture(map_s_hex, wall_layer)
-	result.wall_s_texture_transform = get_tilemaplayer_texture_transform(map_s_hex, wall_layer)
-	var map_sw_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_BOTTOM_LEFT_SIDE)
-	var map_sw_hex : Vector2i = ground_layer.cube_to_map(map_sw_cube)
-	result.wall_sw_texture = get_tilemaplayer_texture(map_sw_hex, wall_layer)
-	result.wall_sw_texture_transform = get_tilemaplayer_texture_transform(map_sw_hex, wall_layer)
-	var map_nw_cube : Vector3i = map_cube + ground_layer.cube_direction(TileSet.CellNeighbor.CELL_NEIGHBOR_TOP_LEFT_SIDE)
-	var map_nw_hex : Vector2i = ground_layer.cube_to_map(map_nw_cube)
-	result.wall_nw_texture = get_tilemaplayer_texture(map_nw_hex, wall_layer)
-	result.wall_nw_texture_transform = get_tilemaplayer_texture_transform(map_nw_hex, wall_layer)
-	
-	result.building_texture = get_tilemaplayer_texture(map_hex, building_layer)
-	result.building_texture_transform = get_tilemaplayer_texture_transform(map_hex, building_layer)
-	result.terrain_texture = get_tilemaplayer_texture(map_hex, terrain_layer)
-	result.terrain_texture_transform = get_tilemaplayer_texture_transform(map_hex, terrain_layer)
+	var result: Dictionary = get_hex_inspection_data(map_hex)
 	ui.show_tile_data(result)
-	
-	# legacy code that shows unit details
-	#var units: Array
-	#for unit in game_controller.units:
-		#if unit.current_hex == map_hex: 
-			#units.append(unit)
-	#ui.show_unit_data(map_hex, units)
+	hex_inspection.inspect(ground_layer, result)
+
+
+func get_hex_inspection_data(map_hex: Vector2i) -> Dictionary:
+	var point: Vector2 = ground_layer.map_to_local(map_hex)
+	var cover: int = LOSHelper.is_sample_point_in_building(point)
+	var result: Dictionary = {
+		"hex": map_hex,
+		"tile_name": LOSHelper.get_tile_name(point),
+		"cover_in_hex": cover,
+		"blocking": cover > 0,
+		"hindrance": LOSHelper.is_hex_hindrance(map_hex),
+	}
+	var terrain: TileData = terrain_layer.get_cell_tile_data(map_hex)
+	if terrain != null and terrain.has_custom_data("blocking") and bool(terrain.get_custom_data("blocking")):
+		result["blocking"] = true
+	var keys: Array[String] = ["cover_n", "cover_ne", "cover_se", "cover_s", "cover_sw", "cover_nw"]
+	for index: int in range(HexInspectionOverlay.DIRECTIONS.size()):
+		result[keys[index]] = get_wall_cover(point, HexInspectionOverlay.DIRECTIONS[index])
+	return result
+
 
 func get_tilemaplayer_texture_transform(map_hex: Vector2i, tilemaplayer: TileMapLayer) -> Transform2D:
 	var tile_data: TileData = tilemaplayer.get_cell_tile_data(map_hex)
@@ -409,6 +365,8 @@ func _on_input_manager_right_button_released() -> void:
 
 
 func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool) -> void:
+	clear_hex_inspection()
+	ui.hide_target_hex_cover_distance()
 	var match_save: MatchSaveData = MatchSaveData.new()
 	
 	match_save.match_id = Globals.scenario_chosen.scenario_name.to_lower().replace(" ", "_")
