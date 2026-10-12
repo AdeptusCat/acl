@@ -80,27 +80,35 @@ layout_mode = 2
 folded = true
 title = "Terrain details"
 
-[node name="Breakdown" type="VBoxContainer" parent="Content/Details"]
+[node name="Scroll" type="ScrollContainer" parent="Content/Details"]
+visible = false
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="Breakdown" type="VBoxContainer" parent="Content/Details/Scroll"]
+size_flags_horizontal = 3
 layout_mode = 2
 theme_override_constants/separation = 5
 
-[node name="Coordinates" type="Label" parent="Content/Details/Breakdown"]
+[node name="Coordinates" type="Label" parent="Content/Details/Scroll/Breakdown"]
 layout_mode = 2
 
-[node name="Features" type="Label" parent="Content/Details/Breakdown"]
+[node name="Features" type="Label" parent="Content/Details/Scroll/Breakdown"]
 layout_mode = 2
 
-[node name="Heading" type="Label" parent="Content/Details/Breakdown"]
+[node name="Heading" type="Label" parent="Content/Details/Scroll/Breakdown"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.65, 0.45, 1)
 text = "Protection from each side"
 
-[node name="Edges" type="GridContainer" parent="Content/Details/Breakdown"]
+[node name="Edges" type="GridContainer" parent="Content/Details/Scroll/Breakdown"]
 layout_mode = 2
 theme_override_constants/v_separation = 2
 columns = 2
 
-[node name="Explanation" type="Label" parent="Content/Details/Breakdown"]
+[node name="Explanation" type="Label" parent="Content/Details/Scroll/Breakdown"]
 layout_mode = 2
 text = "Marked edges protect from that side.\nTarget cover also depends on the firing direction."
 autowrap_mode = 2

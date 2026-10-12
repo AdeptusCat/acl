@@ -15,6 +15,9 @@ extends CanvasLayer
 
 @onready var unit_details: PanelContainer = $Control/UnitDetails
 @onready var tile_details: PanelContainer = $Control/TileDetails
+@onready var debug_panel: PanelContainer = $Control/Debug
+
+var _left_layout_queued: bool = false
 
 signal try_again
 
@@ -35,47 +38,80 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 func _ready() -> void:
 	$Control.resized.connect(_layout_mission_objectives)
 	countdown_panel_container.item_rect_changed.connect(_layout_mission_objectives)
+	$Control/Settings.item_rect_changed.connect(_layout_mission_objectives)
 	get_window().size_changed.connect(_layout_mission_objectives)
-	$Control.resized.connect(_queue_roster_layout)
-	squad_roster.layout_requested.connect(_queue_roster_layout)
-	for panel: Control in [mission_objectives, tile_details, $Control/Debug, $Control/TryAgain]:
-		panel.item_rect_changed.connect(_queue_roster_layout)
-		panel.visibility_changed.connect(_queue_roster_layout)
+	$Control.resized.connect(_queue_left_layout)
+	for panel: PanelContainer in [squad_roster, tile_details, debug_panel]:
+		panel.layout_requested.connect(_queue_left_layout)
+		panel.visibility_changed.connect(_queue_left_layout)
+	$Control/TryAgain.item_rect_changed.connect(_queue_left_layout)
+	tile_details.details.folding_changed.connect(_on_terrain_folding_changed)
+	debug_panel.section.folding_changed.connect(_on_debug_folding_changed)
+	_queue_left_layout()
 
 
 func show_squad_roster(player_team: Globals.Team) -> void:
 	squad_roster.setup(player_team)
-	_queue_roster_layout()
+	_queue_left_layout()
 
 
-func _queue_roster_layout() -> void:
-	_layout_squad_roster.call_deferred()
+func _queue_left_layout() -> void:
+	if _left_layout_queued:
+		return
+	_left_layout_queued = true
+	_layout_left_panels.call_deferred()
 
 
-func _layout_squad_roster() -> void:
+func _layout_left_panels() -> void:
+	_left_layout_queued = false
 	if not is_node_ready() or is_queued_for_deletion():
 		return
-	var hud_size: Vector2 = $Control.size
-	var area: Rect2 = _squad_roster_area(12.0, hud_size)
-	var debug_panel: Control = $Control/Debug
-	# Visible development controls may fill the left edge; use the next column.
-	if area.size.y < 160.0 and debug_panel.visible:
-		var alternate_left: float = debug_panel.get_rect().end.x + 12.0
-		if alternate_left + SquadRosterPanel.PANEL_WIDTH <= hud_size.x - 12.0:
-			area = _squad_roster_area(alternate_left, hud_size)
-	squad_roster.fit_panel(area.position, area.size.y)
-
-
-func _squad_roster_area(left: float, hud_size: Vector2) -> Rect2:
 	var top: float = $Control/TryAgain.get_rect().end.y + 12.0
-	var bottom: float = hud_size.y - 12.0
-	var column: Rect2 = Rect2(left, 0.0, SquadRosterPanel.PANEL_WIDTH, hud_size.y)
-	if mission_objectives.visible and column.intersects(mission_objectives.get_rect()):
-		top = maxf(top, mission_objectives.get_rect().end.y + 12.0)
-	for panel: Control in [$Control/Debug, tile_details]:
-		if panel.visible and column.intersects(panel.get_rect()):
-			bottom = minf(bottom, panel.position.y - 12.0)
-	return Rect2(left, top, SquadRosterPanel.PANEL_WIDTH, maxf(88.0, bottom - top))
+	var bottom: float = $Control.size.y - 12.0
+	var terrain_height: float = 0.0
+	var debug_height: float = 0.0
+	var support_minimum: float = 0.0
+	var panel_count: int = int(squad_roster.visible)
+	if tile_details.visible:
+		terrain_height = tile_details.get_preferred_height()
+		support_minimum += tile_details.get_minimum_height()
+		panel_count += 1
+	if debug_panel.visible:
+		debug_height = debug_panel.get_preferred_height()
+		support_minimum += debug_panel.get_minimum_height()
+		panel_count += 1
+	var gaps: float = maxf(0.0, float(panel_count - 1) * 12.0)
+	var available_height: float = maxf(0.0, bottom - top - gaps)
+	var roster_height: float = 0.0
+	if squad_roster.visible:
+		roster_height = minf(squad_roster.get_preferred_height(), maxf(squad_roster.get_minimum_height(), available_height - support_minimum))
+	var support_height: float = maxf(0.0, available_height - roster_height)
+	# Keep the roster in its column; only the expanded support content shrinks.
+	if tile_details.visible and not tile_details.details.folded:
+		terrain_height = minf(terrain_height, maxf(tile_details.get_minimum_height(), support_height - debug_height))
+	if debug_panel.visible and not debug_panel.section.folded:
+		debug_height = minf(debug_height, maxf(debug_panel.get_minimum_height(), support_height - terrain_height))
+	if tile_details.visible:
+		tile_details.fit_panel(Vector2(12.0, 0.0), terrain_height)
+		tile_details.position.y = bottom - tile_details.size.y
+		bottom = tile_details.position.y - 12.0
+	if debug_panel.visible:
+		debug_panel.fit_panel(Vector2(12.0, 0.0), debug_height)
+		debug_panel.position.y = bottom - debug_panel.size.y
+	if squad_roster.visible:
+		squad_roster.fit_panel(Vector2(12.0, top), roster_height)
+
+
+func _on_terrain_folding_changed(folded: bool) -> void:
+	if not folded:
+		debug_panel.section.fold()
+	_queue_left_layout()
+
+
+func _on_debug_folding_changed(folded: bool) -> void:
+	if not folded:
+		tile_details.details.fold()
+	_queue_left_layout()
 
 
 func show_mission_objectives(conditions: Array[VictoryCondition], player_team: Globals.Team, time_left_seconds: float) -> void:
@@ -85,20 +121,11 @@ func show_mission_objectives(conditions: Array[VictoryCondition], player_team: G
 
 func _layout_mission_objectives() -> void:
 	var viewport_width: float = $Control.size.x
-	var panel_width: float = minf(320.0, maxf(0.0, viewport_width - 24.0))
-	var timer_rect: Rect2 = countdown_panel_container.get_rect()
-	var available_width: float = minf(viewport_width, float(get_window().size.x))
-	var retry_panel: Control = $Control/TryAgain
-	var space_beside_timer: float = timer_rect.position.x - retry_panel.get_rect().end.x - 24.0
-	var beside_timer: bool = space_beside_timer >= 280.0 and (available_width - timer_rect.size.x) * 0.5 >= panel_width + 24.0
-	if beside_timer:
-		panel_width = minf(panel_width, space_beside_timer)
+	var panel_width: float = minf(320.0, maxf(0.0, viewport_width - 280.0 - 36.0))
 	mission_objectives.custom_minimum_size.x = panel_width
 	mission_objectives.size.x = panel_width
-	if beside_timer:
-		mission_objectives.position = Vector2(timer_rect.position.x - panel_width - 12.0, timer_rect.position.y)
-	else:
-		mission_objectives.position = Vector2(maxf(12.0, (viewport_width - panel_width) * 0.5), timer_rect.end.y + 12.0)
+	var toolbar: Control = $Control/Settings
+	mission_objectives.position = Vector2(viewport_width - panel_width - 12.0, toolbar.get_rect().end.y + 12.0)
 
 
 func setup() -> void:

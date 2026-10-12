@@ -184,6 +184,8 @@ func _run() -> void:
 	_check(_clear_of_hud(world), "The roster avoids other HUD panels with tile details visible on a smaller window")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("compact")
+	for window_size: Vector2i in [Vector2i(1440, 900), Vector2i(1152, 648), Vector2i(708, 639)]:
+		await _check_support_layout(world, window_size)
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
 		unit.exit_map(false)
 	panel.refresh()
@@ -195,6 +197,55 @@ func _run() -> void:
 	await _settle()
 	print("Squad roster HUD checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _check_support_layout(world: Node, window_size: Vector2i) -> void:
+	get_tree().root.size = window_size
+	var hud: CanvasLayer = world.ui
+	var roster: SquadRosterPanel = hud.squad_roster
+	var terrain: PanelContainer = hud.tile_details
+	var debug_panel: PanelContainer = hud.get_node("Control/Debug")
+	debug_panel.section.fold()
+	terrain.show_tile_data({"hex": Vector2i(9, 11), "tile_name": "Open ground", "cover_ne": 2})
+	await _settle()
+	var roster_position: Vector2 = roster.position
+	_check(is_equal_approx(roster_position.x, 12.0) and is_equal_approx(roster_position.y, hud.get_node("Control/TryAgain").get_rect().end.y + 12.0), "The roster stays below Try Again in its left column at %s" % window_size)
+	terrain.details.expand()
+	await _settle()
+	_check(debug_panel.section.folded and not terrain.details.folded, "Expanding terrain keeps development controls folded")
+	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded terrain fits below the stationary roster at %s" % window_size)
+	_check(terrain.scroll.size.y <= terrain.SCROLL_HEIGHT and roster.scroll.size.y >= 32.0, "Terrain overflow preserves a usable squad list")
+	if window_size.x == 1152:
+		var scrollbar: VScrollBar = terrain.scroll.get_v_scroll_bar()
+		_check(scrollbar.max_value > scrollbar.page, "Terrain details scroll when the left column runs out of space")
+		_pointer_event(terrain.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+		_check(terrain.scroll.scroll_vertical > 0 and zoom_events == 0, "Scrolling terrain details does not zoom the battlefield")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("terrain-%d" % window_size.x)
+	debug_panel.section.expand()
+	await _settle()
+	_check(terrain.details.folded and not debug_panel.section.folded, "Opening development controls folds terrain details")
+	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded development controls fit below the stationary roster at %s" % window_size)
+	_check(debug_panel.axis_ai_status.is_visible_in_tree() and not debug_panel.axis_ai_status.disabled, "The compact development panel preserves usable AI controls")
+	debug_panel.scroll.scroll_vertical = 0
+	_pointer_event(debug_panel.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+	_check(debug_panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Development controls scroll without zooming the battlefield")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("debug-%d" % window_size.x)
+	terrain.details.expand()
+	await _settle()
+	_check(debug_panel.section.folded and roster.position.is_equal_approx(roster_position), "Reopening terrain folds development controls without moving the roster")
+	terrain.hide_inspection()
+	await _settle()
+	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world), "Closing inspection keeps the roster anchored")
+	debug_panel.section.fold()
+
+
+func _support_panels_fit(hud: CanvasLayer) -> bool:
+	var bounds: Rect2 = Rect2(Vector2.ZERO, hud.get_node("Control").size)
+	var terrain: Control = hud.tile_details
+	var debug_panel: Control = hud.get_node("Control/Debug")
+	return bounds.encloses(terrain.get_rect()) and bounds.encloses(debug_panel.get_rect()) and not terrain.get_rect().intersects(debug_panel.get_rect())
 
 
 func _clear_of_hud(world: Node) -> bool:

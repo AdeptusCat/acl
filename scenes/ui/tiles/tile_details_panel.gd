@@ -1,8 +1,10 @@
 extends PanelContainer
 
 signal inspection_closed
+signal layout_requested
 
 const PANEL_WIDTH: float = 240.0
+const SCROLL_HEIGHT: float = 240.0
 const EDGE_KEYS: Array[String] = ["cover_n", "cover_ne", "cover_se", "cover_s", "cover_sw", "cover_nw"]
 const EDGE_NAMES: Array[String] = ["North", "Northeast", "Southeast", "South", "Southwest", "Northwest"]
 
@@ -10,10 +12,11 @@ const EDGE_NAMES: Array[String] = ["North", "Northeast", "Southeast", "South", "
 @onready var cover_label: Label = $Content/Cover
 @onready var sight_label: Label = $Content/Sight
 @onready var details: FoldableContainer = $Content/Details
-@onready var coordinates: Label = $Content/Details/Breakdown/Coordinates
-@onready var features: Label = $Content/Details/Breakdown/Features
-@onready var edge_rows: GridContainer = $Content/Details/Breakdown/Edges
-@onready var hud_control: Control = get_parent() as Control
+@onready var scroll: ScrollContainer = $Content/Details/Scroll
+@onready var breakdown: VBoxContainer = $Content/Details/Scroll/Breakdown
+@onready var coordinates: Label = $Content/Details/Scroll/Breakdown/Coordinates
+@onready var features: Label = $Content/Details/Scroll/Breakdown/Features
+@onready var edge_rows: GridContainer = $Content/Details/Scroll/Breakdown/Edges
 
 var ground_layer: HexagonTileMapLayer
 var inspected_hex: Vector2i
@@ -32,9 +35,8 @@ func _ready() -> void:
 		edge_values.append(value)
 	$Content/Heading/Close.pressed.connect(_on_close_pressed)
 	details.folding_changed.connect(_on_folding_changed)
-	minimum_size_changed.connect(_queue_fit)
-	hud_control.resized.connect(_queue_fit)
-	_queue_fit()
+	minimum_size_changed.connect(_request_layout)
+	_request_layout()
 
 
 func set_ground_layer(layer: HexagonTileMapLayer) -> void:
@@ -76,7 +78,7 @@ func show_tile_data(result: Dictionary) -> void:
 		if value > 0:
 			edge_values[index].text = "Cover %d" % value
 	show()
-	_queue_fit()
+	_request_layout()
 
 
 func hide_inspection() -> void:
@@ -89,16 +91,28 @@ func _on_close_pressed() -> void:
 
 
 func _on_folding_changed(_folded: bool) -> void:
-	_queue_fit()
+	_request_layout()
 
 
-func _queue_fit() -> void:
-	_fit_panel.call_deferred()
+func _request_layout() -> void:
+	layout_requested.emit()
 
 
-func _fit_panel() -> void:
-	if not is_node_ready() or is_queued_for_deletion():
-		return
-	custom_minimum_size.x = minf(PANEL_WIDTH, maxf(0.0, hud_control.size.x - 24.0))
-	size = Vector2(custom_minimum_size.x, get_combined_minimum_size().y)
-	position = Vector2(12.0, hud_control.size.y - size.y - 12.0)
+func get_minimum_height() -> float:
+	if details.folded:
+		return get_combined_minimum_size().y
+	return maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
+
+
+func get_preferred_height() -> float:
+	if details.folded:
+		return get_minimum_height()
+	return get_minimum_height() + minf(SCROLL_HEIGHT, breakdown.get_combined_minimum_size().y)
+
+
+func fit_panel(panel_position: Vector2, max_height: float) -> void:
+	if not details.folded:
+		scroll.custom_minimum_size.y = minf(SCROLL_HEIGHT, maxf(0.0, max_height - get_minimum_height()))
+	custom_minimum_size.x = PANEL_WIDTH
+	size = Vector2(PANEL_WIDTH, get_combined_minimum_size().y)
+	position = panel_position

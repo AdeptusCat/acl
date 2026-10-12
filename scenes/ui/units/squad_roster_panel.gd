@@ -61,12 +61,27 @@ func refresh() -> void:
 		rows[unit].refresh()
 
 
-func fit_panel(panel_position: Vector2, max_height: float) -> void:
-	var content_height: float = groups.get_combined_minimum_size().y
-	# Reserve the actual title, column labels and margins; only the rows scroll.
+func get_minimum_height() -> float:
+	if section.folded:
+		return get_combined_minimum_size().y
 	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
-	var scroll_height: float = minf(SCROLL_HEIGHT, maxf(32.0, max_height - overhead))
-	scroll.custom_minimum_size.y = minf(scroll_height, content_height)
+	return overhead + minf(32.0, groups.get_combined_minimum_size().y)
+
+
+func get_preferred_height() -> float:
+	if section.folded:
+		return get_combined_minimum_size().y
+	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
+	return overhead + minf(SCROLL_HEIGHT, groups.get_combined_minimum_size().y)
+
+
+func fit_panel(panel_position: Vector2, max_height: float) -> void:
+	if not section.folded:
+		var content_height: float = groups.get_combined_minimum_size().y
+		# Reserve the actual title, column labels and margins; only the rows scroll.
+		var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
+		var scroll_height: float = minf(SCROLL_HEIGHT, maxf(32.0, max_height - overhead))
+		scroll.custom_minimum_size.y = minf(scroll_height, content_height)
 	custom_minimum_size.x = PANEL_WIDTH
 	size = Vector2(PANEL_WIDTH, get_combined_minimum_size().y)
 	position = panel_position

@@ -91,8 +91,8 @@ func _run() -> void:
 	panel.refresh()
 	_check(_row(panel, 2).contains("Enemy squads destroyed: 1/2"), "Enemy losses display their live count")
 	_check(_row(panel, 3).contains("On track") and not _row(panel, 3).contains("Complete"), "Preventing exits is provisional while time remains")
-	await _check_layout(hud, panel, Vector2i(1440, 900), true)
-	await _check_layout(hud, panel, Vector2i(800, 600), false)
+	await _check_layout(hud, panel, Vector2i(1440, 900))
+	await _check_layout(hud, panel, Vector2i(800, 600))
 	for index: int in range(2, 3):
 		exit.record_unit_entry(friends[index], exit.state.exit_hexes[0])
 	panel.refresh()
@@ -126,10 +126,10 @@ func _run() -> void:
 	get_tree().quit(failures)
 
 
-func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size: Vector2i, beside: bool) -> void:
+func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size: Vector2i) -> void:
 	get_tree().root.size = window_size
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for frame: int in range(6):
+		await get_tree().process_frame
 	var timer_rect: Rect2 = hud.countdown_panel_container.get_rect()
 	var panel_rect: Rect2 = panel.get_rect()
 	var canvas_size: Vector2 = hud.get_node("Control").size
@@ -137,10 +137,9 @@ func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size:
 	_check(not panel_rect.intersects(timer_rect), "Mission panel never overlaps the timer")
 	var retry_panel: Control = hud.get_node("Control/TryAgain")
 	_check(not panel_rect.intersects(retry_panel.get_rect()), "Mission panel never overlaps the restart control")
-	if beside:
-		_check(panel_rect.end.x < timer_rect.position.x and panel_rect.position.y == timer_rect.position.y, "Wide windows place objectives beside the timer")
-	else:
-		_check(panel_rect.position.y > timer_rect.end.y, "Narrow windows place objectives below the timer")
+	var toolbar: Control = hud.get_node("Control/Settings")
+	_check(is_equal_approx(panel_rect.end.x, canvas_size.x - 12.0) and is_equal_approx(panel_rect.position.y, toolbar.get_rect().end.y + 12.0), "Objectives stay on the right below Settings and Controls")
+	_check(not panel_rect.intersects(hud.squad_roster.get_rect()), "Objectives leave the roster column clear")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/acl-mission-panel-%d.png" % window_size.x)
