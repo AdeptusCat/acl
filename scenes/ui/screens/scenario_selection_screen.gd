@@ -1,156 +1,192 @@
 extends CanvasLayer
 
-
-signal game_started(map: Map, scenario: Scenario, team : int, game_mode: Globals.GameMode)
+signal game_started(map: Map, scenario: Scenario, team: int, game_mode: Globals.GameMode)
 signal hover_start_button(team: int)
-signal time_changed(_time: float)
+signal time_changed(time_minutes: float)
 
+@onready var time_spinbox: SpinBox = $Control/Center/Panel/Content/Header/Time/Minutes
+@onready var maps_v_box_container: VBoxContainer = $Control/Center/Panel/Content/Body/ScenarioScroll/Maps
+@onready var scenario_description: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Description
+@onready var scenario_title: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Title
+@onready var lock_label: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Availability
+@onready var team: TextureRect = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Faction/Flag
+@onready var player_label: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Faction/Player
+@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/MajorObjectives
+@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/MinorObjectives
+@onready var minor_objectives_label: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/MinorHeading
+@onready var start_button: Button = $Control/Center/Panel/Content/Footer/StartMission
+@onready var scenario_scroll: ScrollContainer = $Control/Center/Panel/Content/Body/ScenarioScroll
+@onready var briefing_scroll: ScrollContainer = $Control/Center/Panel/Content/Body/BriefingScroll
+@onready var panel: PanelContainer = $Control/Center/Panel
 
-
-#@onready var start_as_axis_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAxisButton
-#@onready var start_as_allies_button = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer2/HBoxContainer/StartAsAlliesButton
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var time_spinbox: SpinBox = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer/SpinBox
-#@onready var game_mode_attack = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeAttack
-#@onready var game_mode_defend = $Control/CenterContainer/PanelContainer/VBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/GameModeDefend
-@onready var team: TextureRect = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/Team
-
-@onready var maps_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/MapsVBoxContainer
-@onready var objective_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VBoxContainer/ObjectiveLabel
-
-@onready var scenario_description: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer/ScenarioDescription
-@onready var major_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer2/MajorVictoryConditionsVBoxContainer
-@onready var minor_objectives_label: Label = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3/MinorObjectivesLabel
-@onready var minor_victory_conditions_v_box_container: VBoxContainer = $Control/CenterContainer/PanelContainer/VBoxContainer/HBoxContainer2/VictoryConditionsVBoxContainer/VBoxContainer3/MinorVictoryConditionsVBoxContainer
-
-
-var team_texture: Dictionary[Globals.Team, Texture] = {
+var team_texture: Dictionary[Globals.Team, Texture2D] = {
 	Globals.Team.AXIS: preload("res://assets/ui/axis_flag.png"),
-	Globals.Team.ALLIES: preload("res://assets/ui/us_flag.png")
+	Globals.Team.ALLIES: preload("res://assets/ui/us_flag.png"),
 }
+var selected_map: Map
+var selected_scenario: Scenario
+var scenario_buttons: Dictionary[Scenario, Button] = {}
+var time: float = 3.0
+var _starting: bool = false
+var _fit_queued: bool = false
 
-var time: float
 
 func _ready() -> void:
-	if not SessionSettings.mission_time == 0:
+	start_button.pressed.connect(_on_start_mission_pressed)
+	time_spinbox.value_changed.connect(_on_spin_box_value_changed)
+	$Control.resized.connect(_queue_fit)
+	panel.minimum_size_changed.connect(_queue_fit)
+	if SessionSettings.mission_time > 0.0:
 		time_spinbox.value = SessionSettings.mission_time
-	#if Globals.game_mode == Globals.GameMode.DEFEND:
-		#game_mode_defend.text = "DEFEND"
-		#game_mode_attack.text = ""
-	#if Globals.game_mode == Globals.GameMode.ATTACK:
-		#game_mode_attack.text = "ATTACK"
-		#game_mode_defend.text = ""
-	#visible = true
-	#start_as_axis_button.pressed.connect(_on_start_as_axis_pressed)
-	#start_as_allies_button.pressed.connect(_on_start_as_allies_pressed)
-	animation_player.play("fade_in")  # Play when screen appears
 	time = time_spinbox.value
 	time_changed.emit.call_deferred(time)
+	_queue_fit()
+
 
 func setup_map_options(maps: Array[Map]) -> void:
+	for child: Node in maps_v_box_container.get_children():
+		maps_v_box_container.remove_child(child)
+		child.queue_free()
+	scenario_buttons.clear()
+	var group: ButtonGroup = ButtonGroup.new()
+	group.allow_unpress = false
 	for map: Map in maps:
-		var scenarios: Array[Scenario] = map.get_scenarios()
-		var map_label: Label = Label.new()
-		map_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		map_label.text = map.map_name
-		maps_v_box_container.add_child(map_label)
-		for scenario: Scenario in scenarios:
-			if not OS.is_debug_build() and not scenario.released:
-				continue
-			
-			var scenario_button: Button = Button.new()
-			scenario_button.text = scenario.scenario_name
-			maps_v_box_container.add_child(scenario_button)
-			scenario_button.pressed.connect(_on_scenario_button_pressed.bind(map, scenario))
-			scenario_button.mouse_entered.connect(_on_scenario_button_mouse_entered.bind(map, scenario))
-			scenario_button.mouse_exited.connect(_on_scenario_button_mouse_exited)
-			if scenario.previous_scenario:
-				var match_data: MatchSaveData = Globals.load_match_data(scenario.previous_scenario.scenario_name.to_lower().replace(" ", "_"))
-				if not match_data:
-					scenario_button.disabled = true
-				else:
-					if not match_data.winner_team == match_data.player_team:
-						scenario_button.disabled = true
-			
-func _on_scenario_button_mouse_entered(map: Map, scenario: Scenario) -> void:
-	scenario_description.text = scenario.scenario_description
-	team.texture = team_texture[scenario.player_team]
-	for victory_condition: VictoryCondition in scenario.victory_conditions:
-		var label: Label = Label.new()
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.text = victory_condition.get_description()
-		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
-			major_victory_conditions_v_box_container.add_child(label)
-		if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MINOR:
-			minor_victory_conditions_v_box_container.add_child(label)
-			minor_objectives_label.show()
-			
+		var heading: Label = Label.new()
+		heading.theme_type_variation = &"HudHeading"
+		heading.text = map.map_name
+		maps_v_box_container.add_child(heading)
+		for scenario: Scenario in map.get_scenarios():
+			var button: Button = Button.new()
+			button.toggle_mode = true
+			button.button_group = group
+			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			button.clip_text = true
+			button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			button.text = scenario.scenario_name
+			var reason: String = get_lock_reason(scenario)
+			button.tooltip_text = scenario.scenario_name
+			if not reason.is_empty():
+				button.text = "Locked · " + scenario.scenario_name
+				button.tooltip_text += "\n" + reason
+				button.add_theme_color_override("font_color", Color(0.78, 0.79, 0.7))
+			maps_v_box_container.add_child(button)
+			scenario_buttons[scenario] = button
+			button.pressed.connect(_on_scenario_button_pressed.bind(map, scenario))
+	if is_instance_valid(selected_scenario) and scenario_buttons.has(selected_scenario):
+		_on_scenario_button_pressed(selected_map, selected_scenario)
+	else:
+		selected_map = null
+		selected_scenario = null
+		start_button.disabled = true
+		scenario_title.text = "Mission briefing"
+		scenario_description.text = "Select a scenario to read its briefing, then press Start mission."
+		lock_label.text = ""
+		team.hide()
+		player_label.text = ""
+		_clear_objectives()
+	_queue_fit()
 
-func _on_scenario_button_mouse_exited() -> void:
-	scenario_description.text = ""
-	minor_objectives_label.hide()
-	for label: Control in major_victory_conditions_v_box_container.get_children():
-		label.queue_free()
-	for label: Control in minor_victory_conditions_v_box_container.get_children():
-		label.queue_free()
+
+func get_lock_reason(scenario: Scenario) -> String:
+	if not OS.is_debug_build() and not scenario.released:
+		return "This mission is not available in this build."
+	if scenario.previous_scenario == null:
+		return ""
+	var previous: Scenario = scenario.previous_scenario
+	var match_id: String = previous.scenario_name.to_lower().replace(" ", "_")
+	var save_path: String = "user://matches/%s.tres" % match_id
+	if ResourceLoader.exists(save_path):
+		# Inspect progression without importing a previous battle's casualty records.
+		var saved: MatchSaveData = ResourceLoader.load(save_path, "", ResourceLoader.CACHE_MODE_IGNORE) as MatchSaveData
+		if saved != null and saved.winner_team == saved.player_team:
+			return ""
+	return "Win \"%s\" to unlock this mission." % previous.scenario_name
+
 
 func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
-	Globals.map_chosen = map
-	Globals.scenario_chosen = scenario
-	animation_player.play("fade_out")
-	await animation_player.animation_finished
-	visible = false
-	game_started.emit(map, scenario, scenario.player_team, Globals.game_mode)
+	if _starting:
+		return
+	selected_map = map
+	selected_scenario = scenario
+	scenario_buttons[scenario].set_pressed_no_signal(true)
+	scenario_title.text = scenario.scenario_name
+	scenario_description.text = scenario.scenario_description
+	lock_label.text = get_lock_reason(scenario)
+	lock_label.visible = not lock_label.text.is_empty()
+	start_button.disabled = not lock_label.text.is_empty()
+	team.texture = team_texture[scenario.player_team]
+	team.show()
+	player_label.text = "Player: Axis"
+	if scenario.player_team == Globals.Team.ALLIES:
+		player_label.text = "Player: Allies"
+	_clear_objectives()
+	for condition: VictoryCondition in scenario.victory_conditions:
+		if condition.team != scenario.player_team:
+			continue
+		var label: Label = Label.new()
+		label.text = condition.get_description()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
+			major_victory_conditions_v_box_container.add_child(label)
+		else:
+			minor_victory_conditions_v_box_container.add_child(label)
+	minor_objectives_label.visible = minor_victory_conditions_v_box_container.get_child_count() > 0
+	briefing_scroll.scroll_vertical = 0
+	_queue_fit()
 
 
-func _on_set_objective_text(_hex: String) -> void:
-	objective_label.text = "Hold objective (red circle) with an unbroken unit when the time runs out!"
+func _clear_objectives() -> void:
+	for container: VBoxContainer in [major_victory_conditions_v_box_container, minor_victory_conditions_v_box_container]:
+		for child: Node in container.get_children():
+			container.remove_child(child)
+			child.queue_free()
+	minor_objectives_label.hide()
 
 
-func _on_start_as_axis_pressed() -> void:
-	animation_player.play("fade_out")
-	await animation_player.animation_finished
-	visible = false
-	game_started.emit(Globals.Team.AXIS, Globals.game_mode)
+func _on_start_mission_pressed() -> void:
+	if _starting or not is_instance_valid(selected_scenario) or not is_instance_valid(selected_map):
+		return
+	var reason: String = get_lock_reason(selected_scenario)
+	if not reason.is_empty():
+		lock_label.text = reason
+		lock_label.show()
+		start_button.disabled = true
+		return
+	_starting = true
+	start_button.disabled = true
+	for button: Button in scenario_buttons.values():
+		button.disabled = true
+	Globals.map_chosen = selected_map
+	Globals.scenario_chosen = selected_scenario
+	var fade: Tween = create_tween()
+	fade.tween_property($Control, "modulate:a", 0.0, 0.2)
+	await fade.finished
+	hide()
+	game_started.emit(selected_map, selected_scenario, selected_scenario.player_team, Globals.game_mode)
 
 
-func _on_start_as_allies_pressed() -> void:
-	animation_player.play("fade_out")
-	await animation_player.animation_finished
-	visible = false
-	game_started.emit(Globals.Team.ALLIES, Globals.game_mode)
+func _queue_fit() -> void:
+	if _fit_queued:
+		return
+	_fit_queued = true
+	_fit_panel.call_deferred()
+
+
+func _fit_panel() -> void:
+	_fit_queued = false
+	if not is_node_ready() or is_queued_for_deletion():
+		return
+	var bounds: Vector2 = $Control.size
+	panel.custom_minimum_size.x = minf(960.0, maxf(0.0, bounds.x - 48.0))
+	var body: HBoxContainer = $Control/Center/Panel/Content/Body
+	var overhead: float = maxf(0.0, panel.get_combined_minimum_size().y - body.get_combined_minimum_size().y)
+	var content_height: float = minf(420.0, maxf(120.0, bounds.y - 48.0 - overhead))
+	scenario_scroll.custom_minimum_size.y = content_height
+	briefing_scroll.custom_minimum_size.y = content_height
+	panel.size = Vector2(panel.custom_minimum_size.x, panel.get_combined_minimum_size().y)
 
 
 func _on_spin_box_value_changed(value: float) -> void:
 	time = value
 	SessionSettings.mission_time = value
 	time_changed.emit(time)
-
-
-func _on_start_as_axis_button_mouse_entered() -> void:
-	hover_start_button.emit(0)
-
-
-func _on_start_as_axis_button_mouse_exited() -> void:
-	hover_start_button.emit(-1)
-
-
-func _on_start_as_allies_button_mouse_entered() -> void:
-	hover_start_button.emit(1)
-
-
-func _on_start_as_allies_button_mouse_exited() -> void:
-	hover_start_button.emit(-1)
-
-
-func _on_attack_pressed() -> void:
-	Globals.game_mode = Globals.GameMode.ATTACK
-	#game_mode_attack.text = "ATTACK"
-	#game_mode_defend.text = ""
-
-
-func _on_defend_pressed() -> void:
-	Globals.game_mode = Globals.GameMode.DEFEND
-	#game_mode_defend.text = "DEFEND"
-	#game_mode_attack.text = ""

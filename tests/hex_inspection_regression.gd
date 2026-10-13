@@ -111,19 +111,19 @@ func _run() -> void:
 	var visible_targets: Dictionary = LOSHelper.los_lookup.get(squad.current_hex, {})
 	var clear_target: Vector2i
 	for candidate: Vector2i in visible_targets:
-		if ground.get_cell_source_id(candidate) != -1 and candidate != squad.current_hex:
+		if ground.get_cell_source_id(candidate) != -1 and candidate != squad.current_hex and ground.cube_distance(squad.current_cube, ground.map_to_cube(candidate)) <= InfluenceUnitQuery.get_unit_range(squad):
 			clear_target = candidate
 			break
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(clear_target), Vector2(800, 300))
 	await _settle()
 	var aim: Control = world.ui.target_cover_distance
-	_check(aim.visible and aim.heading.text == "Sight: clear", "A clear aiming line has explicit sight feedback")
+	_check(aim.visible and aim.heading.text == "Line of sight clear", "A clear aiming line has explicit sight feedback")
 	_check(not LOSHelper.los_lines.is_empty(), "Aiming displays its line of sight on the battlefield")
 	LOSHelper.clear_los()
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(clear_target), Vector2(800, 300))
 	_check(not LOSHelper.los_lines.is_empty(), "Returning to the same target after closing inspection restores its sight line")
-	_check(aim.detail.text == "Target cover: %d" % int(visible_targets[clear_target]["target_cover"]), "Aiming uses cover from the actual firing direction")
-	_check(aim.extra.text.contains("Distance:") and aim.extra.text.contains("Firepower:"), "Distance and firepower remain readable in the target hint")
+	_check(aim.detail.text.contains("Cover: %d" % int(visible_targets[clear_target]["target_cover"])), "Aiming uses cover from the actual firing direction")
+	_check(aim.detail.text.contains("Distance:") and aim.extra.text.contains("Effective firepower:"), "Distance and effective firepower remain readable in the target hint")
 	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_UP)
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(clear_target), Vector2(800, 300))
 	_check(not aim.visible and LOSHelper.los_lines.is_empty(), "Hovering HUD controls clears aiming feedback and its battlefield line")
@@ -135,7 +135,7 @@ func _run() -> void:
 			break
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(blocked_target), Vector2(1138, 705))
 	await _settle()
-	_check(aim.visible and aim.heading.text == "Sight: blocked" and aim.detail.text.contains("unavailable") and controller.firepower == 0.0, "Blocked targets explain missing sight without claiming zero cover")
+	_check(aim.visible and (aim.heading.text == "Line of sight blocked" or aim.heading.text == "Out of range") and aim.detail.text.contains("unknown (blocked sight)") and controller.firepower == 0.0, "Blocked targets explain missing sight without claiming zero cover")
 	_check(_inside(aim, world), "The target hint flips inward at viewport edges")
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(squad.current_hex), Vector2(800, 300))
 	_check(not aim.visible, "Aiming at the selected squad's own hex hides the target hint")

@@ -39,6 +39,7 @@ signal game_started_through_moving_unit
 signal hex_selected(map_hex: Vector2i, event_pos: Vector2)
 signal start_match
 signal ai_status_changed(team: Globals.Team, enabled: bool, mode: PositionProfile.Mode)
+signal order_feedback(accepted: bool, command: String, explanation: String)
 
 var end_game_handled: bool = false
 var _ai_orders_by_team: Dictionary[Globals.Team, MissionOrder] = {}
@@ -303,8 +304,8 @@ func set_objective_cells(player_team: Globals.Team) -> void:
 	MatchVictoryCoordinator.set_objective_cells(self, player_team)
 
 
-func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option) -> void:
-	MatchInteractionHandler.order_via_option_wheel(self, map_hex, option)
+func order_via_option_wheel(map_hex: Vector2i, option: WheelOption.Option) -> bool:
+	return MatchInteractionHandler.order_via_option_wheel(self, map_hex, option)
 
 
 var previous_selected_hex: Vector2i = Vector2i(-1, -1)
@@ -682,6 +683,7 @@ func _on_started_moving() -> void:
 
 var last_unit_hex: Vector2i
 var last_mouse_position: Vector2
+var _target_preview_elapsed_s: float = 0.0
 var time_left_seconds_test: int = 2
 func _process(delta: float) -> void:
 	if timer_running:
@@ -705,7 +707,8 @@ func _process(delta: float) -> void:
 			var director: DefenseDirector = _ai_director_for_team(owner)
 			_ai_goal_directors[owner].update(director.platoon_ai, time_left_seconds, now)
 	
-	var mouse_or_unit_position_changed: bool = false
+	_target_preview_elapsed_s += delta
+	var mouse_or_unit_position_changed: bool = selected_unit != null and _target_preview_elapsed_s >= 0.1
 	var pos: Vector2 = get_local_mouse_position()
 	if abs(pos.x - last_mouse_position.x) > 1 or abs(pos.y - last_mouse_position.y) > 1:
 		mouse_or_unit_position_changed = true
@@ -715,6 +718,7 @@ func _process(delta: float) -> void:
 			mouse_or_unit_position_changed = true
 			last_unit_hex = selected_unit.current_hex
 	if mouse_or_unit_position_changed:
+		_target_preview_elapsed_s = 0.0
 		handle_mouse_event_position_changed(pos)
 		
 	if not Debug.draw_thread_map:

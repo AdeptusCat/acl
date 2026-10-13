@@ -71,9 +71,10 @@ func _ready() -> void:
 	game_controller.game_started_through_moving_unit.connect(ui._on_game_started_through_moving_unit)
 	game_controller.show_unit_details_in_ui.connect(ui._on_show_unit_details)
 	game_controller.hide_unit_details_in_ui.connect(ui._on_hide_unit_details)
+	game_controller.order_feedback.connect(ui.show_order_feedback)
+	ui.selection_wheel_alt.cancelled.connect(_on_wheel_cancelled)
 	ui.squad_roster.unit_selected.connect(game_controller.select_and_center_unit)
 	game_controller.show_winner.connect(result_screen._on_show_winner)
-	game_controller.set_objective_text.connect(start_screen._on_set_objective_text)
 	game_controller.hex_selected.connect(_on_hex_selected)
 	ui.tile_details.inspection_closed.connect(clear_hex_inspection)
 	hex_inspection.edge_hovered.connect(ui.show_hex_edge_hint)
@@ -319,7 +320,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	game_controller.start_game(team, start_screen.time)
 	ui.show_mission_objectives(scenario.victory_conditions, team, game_controller.time_left_seconds)
 	ui.show_squad_roster(team)
-	input_manager.set_process(true)
+	input_manager.set_battle_input_enabled(true)
 	
 	game_controller.move_camera(scenario.start_hex[scenario.player_team])
 	
@@ -348,23 +349,53 @@ func _on_result_screen_try_again() -> void:
 	try_again.emit()
 
 var selected_map_hex: Vector2i
+var _command_unit: Unit
 
 func _on_input_manager_right_button_pressed() -> void:
-	var mouse_screen_pos: Vector2 = get_viewport().get_mouse_position()
-	var event_pos: Vector2 = get_local_mouse_position()
+	if not is_setup or game_controller.end_game_handled or not is_instance_valid(game_controller.selected_unit):
+		return
+	if get_viewport().gui_get_hovered_control() != null:
+		return
+	var mouse_screen_pos: Vector2 = input_manager.pointer_position
+	var event_pos: Vector2 = game_controller.get_global_transform_with_canvas().affine_inverse() * mouse_screen_pos
 	selected_map_hex = ground_layer.local_to_map(event_pos)
-	if selected_map_hex and game_controller.selected_unit:
-		#ui.selection_wheel.open(mouse_screen_pos)
-		ui.selection_wheel_alt.open(mouse_screen_pos)
+	if ground_layer.get_cell_source_id(selected_map_hex) == -1:
+		return
+	_command_unit = game_controller.selected_unit
+	ui.hide_target_hex_cover_distance()
+	ui.hide_order_feedback()
+	LOSHelper.clear_los()
+	ui.selection_wheel_alt.open(mouse_screen_pos, _wheel_restriction)
+
+
+func _wheel_restriction(option: WheelOption.Option) -> String:
+	if not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit:
+		return "Squad selection changed. Open the wheel again."
+	return MatchInteractionHandler.command_restriction(game_controller, selected_map_hex, option)
 
 
 func _on_input_manager_right_button_released() -> void:
-	#var option: WheelOption.Option = ui.selection_wheel.close()
+	if not ui.selection_wheel_alt.is_open():
+		return
+	ui.selection_wheel_alt.select_at(input_manager.pointer_position)
 	var option: WheelOption.Option = ui.selection_wheel_alt.close()
-	game_controller.order_via_option_wheel(selected_map_hex, option)
+	if option == WheelOption.Option.NONE:
+		ui.show_order_cancelled()
+	elif not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit:
+		game_controller.order_feedback.emit(false, MatchInteractionHandler.command_name(option), "Squad selection changed. Open the wheel again.")
+	else:
+		game_controller.order_via_option_wheel(selected_map_hex, option)
+	_command_unit = null
+
+
+func _on_wheel_cancelled() -> void:
+	_command_unit = null
+	ui.show_order_cancelled()
 
 
 func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool) -> void:
+	ui.selection_wheel_alt.cancel()
+	input_manager.set_battle_input_enabled(false)
 	clear_hex_inspection()
 	ui.hide_target_hex_cover_distance()
 	var match_save: MatchSaveData = MatchSaveData.new()

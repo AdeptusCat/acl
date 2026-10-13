@@ -39,6 +39,10 @@ func _ready() -> void:
 	$Control.resized.connect(_layout_mission_objectives)
 	countdown_panel_container.item_rect_changed.connect(_layout_mission_objectives)
 	$Control/Settings.item_rect_changed.connect(_layout_mission_objectives)
+	$Control.resized.connect(_layout_order_feedback)
+	countdown_panel_container.item_rect_changed.connect(_layout_order_feedback)
+	$Control/OrderFeedback.minimum_size_changed.connect(_layout_order_feedback)
+	$Control/OrderFeedback/HideTimer.timeout.connect($Control/OrderFeedback.hide)
 	get_window().size_changed.connect(_layout_mission_objectives)
 	$Control.resized.connect(_queue_left_layout)
 	for panel: PanelContainer in [squad_roster, tile_details, debug_panel]:
@@ -136,18 +140,59 @@ func show_tile_data(result: Dictionary) -> void:
 	tile_details.show_tile_data(result)
 
 
-func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance: int, firepower: float, sight_clear: bool = true, indirect: bool = false) -> void:
-	var sight: String = "Sight: clear"
-	var cover: String = "Target cover: %d" % target_cover
+func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance: int, firepower: float, sight_clear: bool = true, indirect: bool = false, in_range: bool = true) -> void:
+	var sight: String = "Line of sight clear"
+	var cover: String = "Cover: %d" % target_cover
 	var color: Color = Color(0.65, 0.85, 0.55)
 	if not sight_clear:
-		sight = "Sight: blocked"
-		cover = "Target cover: unavailable"
+		sight = "Line of sight blocked"
+		cover = "Cover: unknown (blocked sight)"
 		color = Color(0.96, 0.55, 0.4)
 		if indirect:
-			sight = "Sight: blocked · Indirect fire"
+			sight = "Indirect fire"
 			color = Color(0.86, 0.73, 0.5)
-	target_cover_distance.show_hint(point, sight, cover, "Distance: %d · Firepower: %s" % [distance, String.num(firepower, 1)], color)
+	if not in_range:
+		sight = "Out of range"
+		color = Color(0.96, 0.55, 0.4)
+	var distance_text: String = "%d hexes" % distance
+	if distance == 1:
+		distance_text = "1 hex"
+	target_cover_distance.show_hint(point, sight, "Distance: %s\n%s" % [distance_text, cover], "Effective firepower: %s" % String.num(firepower, 2), color)
+
+
+func show_order_feedback(accepted: bool, command: String, explanation: String) -> void:
+	var title: String = "Order rejected · " + command
+	var color: Color = Color(0.96, 0.62, 0.43)
+	if accepted:
+		title = "Order accepted · " + command
+		color = Color(0.65, 0.85, 0.55)
+	_show_order_message(title, explanation, color)
+
+
+func show_order_cancelled() -> void:
+	_show_order_message("Order cancelled", "", Color(0.78, 0.79, 0.7))
+
+
+func hide_order_feedback() -> void:
+	$Control/OrderFeedback.hide()
+	$Control/OrderFeedback/HideTimer.stop()
+
+
+func _show_order_message(title: String, explanation: String, color: Color) -> void:
+	$Control/OrderFeedback/Content/Title.text = title
+	$Control/OrderFeedback/Content/Title.add_theme_color_override("font_color", color)
+	$Control/OrderFeedback/Content/Explanation.text = explanation
+	$Control/OrderFeedback/Content/Explanation.visible = not explanation.is_empty()
+	$Control/OrderFeedback.show()
+	$Control/OrderFeedback/HideTimer.start()
+	_layout_order_feedback()
+
+
+func _layout_order_feedback() -> void:
+	var panel: PanelContainer = $Control/OrderFeedback
+	panel.custom_minimum_size.x = 320.0
+	panel.size = Vector2(320.0, panel.get_combined_minimum_size().y)
+	panel.position = Vector2(($Control.size.x - panel.size.x) * 0.5, countdown_panel_container.get_rect().end.y + 12.0)
 
 
 func show_hex_edge_hint(direction: int, cover: int, point: Vector2) -> void:

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/scenario_selection_regression.gd" id="1"]
+
+[node name="ScenarioSelectionRegression" type="Node"]
+script = ExtResource("1")

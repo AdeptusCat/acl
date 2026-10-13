@@ -104,6 +104,32 @@ layout_mode = 0
 mouse_filter = 2
 script = ExtResource("30_mission")
 
+[node name="OrderFeedback" type="PanelContainer" parent="Control"]
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="Control/OrderFeedback"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Control/OrderFeedback/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HudHeading"
+horizontal_alignment = 1
+
+[node name="Explanation" type="Label" parent="Control/OrderFeedback/Content"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HideTimer" type="Timer" parent="Control/OrderFeedback"]
+wait_time = 3.0
+one_shot = true
+
 [node name="Objectives" type="VBoxContainer" parent="Control/MissionObjectives" unique_id=1217781514]
 layout_mode = 2
 mouse_filter = 2
@@ -357,7 +383,7 @@ layout_mode = 2
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1
-options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol")])
+options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_yy7ol"), SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md")])
 
 [node name="SelectionWheel" parent="Control" unique_id=266719107 instance=ExtResource("25_o71gb")]
 visible = false

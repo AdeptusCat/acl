@@ -4,42 +4,96 @@ class_name MatchInteractionHandler
 # Synchronous MatchInteractionHandler operations; state and scene identity stay on the caller.
 
 
-static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> void:
-	if not controller.selected_unit:
-		return
-	
-	if controller.selected_unit.in_close_combat:
-		return
-	
+static func command_name(option: WheelOption.Option) -> String:
+	return str(WheelOption.COMMAND_NAMES.get(option, "Cancel"))
+
+
+static func command_restriction(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> String:
+	if option == WheelOption.Option.NONE:
+		return ""
+	if controller.end_game_handled:
+		return "The mission has ended."
+	var unit: Unit = controller.selected_unit
+	if not is_instance_valid(unit) or not unit.is_active():
+		return "Select an active squad."
+	if unit.surrendered:
+		return "This squad has surrendered."
+	if unit.broken:
+		return "This squad is routed."
+	if unit.in_close_combat:
+		return "Cannot issue orders during close combat."
+	if option == WheelOption.Option.STOP:
+		return ""
+	if controller.ground_layer.get_cell_source_id(map_hex) == -1:
+		return "Choose a hex on the battlefield."
 	match option:
-		WheelOption.Option.NONE:
-			pass
 		WheelOption.Option.MOVE_NORMAL:
-			if controller.selected_unit.broken or controller.selected_unit.surrendered:
-				controller.selected_unit.ui.show_broken()
-				return
-			if controller.selected_unit.stress_system.state == STATES.MoraleState.PINNED:
-				controller.selected_unit.ui.show_pinned()
-				return
-			controller.selected_unit.order(Globals.UnitCmd.MOVE, map_hex)
+			if unit.stress_system.state == STATES.MoraleState.PINNED:
+				return "Cannot move while pinned."
+			if map_hex == unit.current_hex:
+				return "The squad is already at this hex."
+			var pathfinder: AStar2D = Globals.astars.get(unit.team)
+			var from_id: int = controller.ground_layer.pathfinding_get_point_id(unit.current_hex)
+			var to_id: int = controller.ground_layer.pathfinding_get_point_id(map_hex)
+			if pathfinder == null or not pathfinder.has_point(from_id) or not pathfinder.has_point(to_id):
+				return "No route to this hex."
+			if pathfinder.is_point_disabled(to_id) or pathfinder.get_id_path(from_id, to_id).is_empty():
+				return "No route to this hex."
 		WheelOption.Option.FIRE_AT:
-			var can_shoot: bool = false
-			if not controller.selected_unit.squad_type == Globals.SquadType.MORTAR:
-				var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(controller.selected_unit.current_hex, [])
-				if unit_visible_hexes.has(map_hex):
-					can_shoot = true
-			else:
-				can_shoot = true
-			if can_shoot:
-				controller.selected_unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
-				controller.selected_unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
-		WheelOption.Option.ASSAULT:
-			pass
+			if unit.ai_support_only:
+				return "This squad cannot fire."
+			if InfluenceUnitQuery.get_unit_firepower(unit) <= 0.0:
+				return "No usable weapons or ammunition."
+			var data: Dictionary = target_feedback(controller, map_hex)
+			if not bool(data["in_range"]):
+				return "Out of range."
+			if not bool(data["sight_clear"]) and not bool(data["indirect"]):
+				return "Line of sight blocked."
+		_:
+			return "This command is unavailable."
+	return ""
+
+
+static func target_feedback(controller: Node2D, target: Vector2i) -> Dictionary:
+	var unit: Unit = controller.selected_unit
+	var distance: int = controller.ground_layer.cube_distance(unit.current_cube, controller.ground_layer.map_to_cube(target))
+	var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
+	var sight_clear: bool = cover_map.has(target)
+	var cover: int = 0
+	if sight_clear:
+		cover = int(cover_map[target].get("target_cover", 0))
+	var indirect: bool = unit.squad_type == Globals.SquadType.MORTAR
+	var in_range: bool = distance <= InfluenceUnitQuery.get_unit_range(unit)
+	var power: float = InfluenceUnitQuery.get_firepower_at_range(unit, distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
+	if not sight_clear and not indirect:
+		power = 0.0
+	return {"distance": distance, "cover": cover, "sight_clear": sight_clear, "indirect": indirect, "in_range": in_range, "firepower": power}
+
+
+static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> bool:
+	if option == WheelOption.Option.NONE:
+		return false
+	var reason: String = command_restriction(controller, map_hex, option)
+	var command: String = command_name(option)
+	if not reason.is_empty():
+		controller.order_feedback.emit(false, command, reason)
+		return false
+	var unit: Unit = controller.selected_unit
+	var glow_hex: Vector2i = map_hex
+	match option:
+		WheelOption.Option.MOVE_NORMAL:
+			unit.order(Globals.UnitCmd.MOVE, map_hex)
+		WheelOption.Option.FIRE_AT:
+			unit.setAttackState(Unit.AttackState.MANUAL_GROUND)
+			unit.order(Globals.UnitCmd.FIRE_AT_HEX, map_hex)
 		WheelOption.Option.STOP:
-			controller.selected_unit.order(Globals.UnitCmd.STOP, map_hex)
-	
-	var local_pos: Vector2 = controller.ground_layer.map_to_local(map_hex)
-	controller.hex_glow(local_pos)
+			unit.clear_orders()
+			unit.squad_fire.clear_target()
+			unit.setAttackState(Unit.AttackState.AUTO)
+			glow_hex = unit.current_hex
+	controller.hex_glow(controller.ground_layer.map_to_local(glow_hex))
+	controller.order_feedback.emit(true, command, "")
+	return true
 
 #func _on_mouse_button_right_pressed(event_pos: Vector2):
 	#event_pos = get_local_mouse_position()
@@ -110,7 +164,7 @@ static func refresh_target_preview(controller: Node2D, local_point: Vector2, scr
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return
-	if controller.get_viewport().gui_get_hovered_control() != null or world.hex_inspection.hovered_direction >= 0:
+	if world.ui.selection_wheel_alt.is_open() or controller.get_viewport().gui_get_hovered_control() != null or world.hex_inspection.hovered_direction >= 0:
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return
@@ -119,26 +173,14 @@ static func refresh_target_preview(controller: Node2D, local_point: Vector2, scr
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return
+	var data: Dictionary = target_feedback(controller, target)
 	controller.origin_hex = controller.selected_unit.current_hex
 	controller.target_hex = target
-	controller.distance = controller.ground_layer.cube_distance(controller.selected_unit.current_cube, controller.ground_layer.map_to_cube(target))
-	var cover_map: Dictionary = LOSHelper.los_lookup.get(controller.origin_hex, {})
-	var sight_clear: bool = cover_map.has(target)
-	controller.targetCover = 0
-	if sight_clear:
-		var data: Dictionary = cover_map[target]
-		controller.targetCover = int(data["target_cover"])
-	var indirect: bool = controller.selected_unit.squad_type == Globals.SquadType.MORTAR
-	controller.firepower = float(controller.selected_unit.firepower)
-	if controller.distance > controller.selected_unit.weapon_range:
-		if controller.distance <= controller.selected_unit.weapon_range * 2:
-			controller.firepower *= 0.5
-		else:
-			controller.firepower = 0.0
-	if not sight_clear and not indirect:
-		controller.firepower = 0.0
+	controller.distance = int(data["distance"])
+	controller.targetCover = int(data["cover"])
+	controller.firepower = float(data["firepower"])
 	LOSHelper.draw_los(controller.selected_unit.position, local_point)
-	world.ui.show_target_hex_cover_distance(screen_point, controller.targetCover, controller.distance, controller.firepower, sight_clear, indirect)
+	world.ui.show_target_hex_cover_distance(screen_point, controller.targetCover, controller.distance, controller.firepower, bool(data["sight_clear"]), bool(data["indirect"]), bool(data["in_range"]))
 
 
 #var last_mouse_position: Vector2

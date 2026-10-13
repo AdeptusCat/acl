@@ -7,7 +7,7 @@ extends PanelContainer
 
 var anchor_point: Vector2
 
-const HUD_PANELS: Array[String] = ["UnitDetails", "TileDetails", "SquadRoster", "Debug", "MissionObjectives", "Countdown", "TryAgain", "Settings", "Settings/Menu", "Settings/Controls"]
+const HUD_PANELS: Array[String] = ["UnitDetails", "TileDetails", "SquadRoster", "Debug", "MissionObjectives", "OrderFeedback", "Countdown", "TryAgain", "Settings", "Settings/Menu", "Settings/Controls"]
 
 
 func _ready() -> void:

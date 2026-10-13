@@ -12,6 +12,7 @@ shader_parameter/border_thickness = 0.025
 shader_parameter/glow_alpha = 1.0
 
 [node name="GlowMarker" type="ColorRect"]
+mouse_filter = 2
 material = SubResource("ShaderMaterial_ofnus")
 custom_minimum_size = Vector2(64, 64)
 offset_right = 64.0
