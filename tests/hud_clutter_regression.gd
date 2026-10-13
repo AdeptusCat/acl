@@ -190,6 +190,7 @@ func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
 	_check(not Debug.show_ai_placement and not draw.visible and not draw.debug_enabled and not draw.is_processing() and not panel.placement_options.visible, "AI placement overlays start hidden and inactive")
 	_check(not Debug.show_debug_text and not draw.draw_cell_values and not draw.draw_layer_access_text and not squad.ui.get_node("AmmunitionLeft").visible, "Numeric counters, map values and diagnostic text start hidden")
 	squad.stress_system.stress_changed.emit(60.0)
+	squad.stress_system.stress_balance_changed.emit(3.0, 2.0, 1.0)
 	squad.stress_system.leadership_changed.emit(RankGrades.GRADE_PARAMS[RankGrades.Grade.PLATOON_LEADER].lead)
 	_check_morale_markers(squad, "Normal play with all debug toggles off")
 	world.game_controller._select_unit(squad)
@@ -269,7 +270,7 @@ func _finish_placement_inspection(influence: InfluenceMapController, draw: Influ
 func _check_morale_markers(squad: Unit, context: String) -> void:
 	var stress: Label = squad.ui.get_node("StressLevel")
 	var leadership: Label = squad.ui.get_node("LeadershipBonus")
-	_check(stress.visible and stress.text == "<<<" and leadership.visible and leadership.text == ">>", "%s preserves working stress and leadership arrows" % context)
+	_check(stress.visible and stress.text == "<<<" and leadership.visible and leadership.text == ">>", "%s preserves working stress and recovery arrows" % context)
 	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.scale.x, 0.6) and squad.ui.rank_texture_rect.visible and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
 
 

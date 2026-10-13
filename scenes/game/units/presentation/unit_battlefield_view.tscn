@@ -162,7 +162,7 @@ offset_left = 19.0
 offset_top = 46.0
 offset_right = 59.0
 offset_bottom = 69.0
-text = "<<"
+text = ""
 label_settings = SubResource("LabelSettings_2yq7w")
 horizontal_alignment = 2
 
@@ -173,7 +173,7 @@ offset_left = 6.0
 offset_top = 46.0
 offset_right = 53.0
 offset_bottom = 69.0
-text = ">"
+text = ""
 label_settings = SubResource("LabelSettings_k7h5o")
 
 [node name="CoverLabel" type="Label" parent="." unique_id=883554322]

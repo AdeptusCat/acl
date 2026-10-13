@@ -201,11 +201,7 @@ func setup() -> void:
 	
 	stress_system.state_changed.connect(_on_state_changed)
 	stress_system.stress_changed.connect(_on_stress_changed)
-	stress_system.stress_changed.connect(ui._on_stress_changed)
-	
-	
-	
-	stress_system.leadership_changed.connect(ui._on_leadership_changed)
+	stress_system.stress_balance_changed.connect(ui._on_stress_balance_changed)
 	
 	squad_fire.set_mg(machine_guns)
 	

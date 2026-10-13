@@ -26,6 +26,8 @@ var detail_ui: UnitUi = null
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
 @onready var morale_bar: ColorRect = $MoraleBar
+@onready var stress_arrows: Label = $StressLevel
+@onready var recovery_arrows: Label = $LeadershipBonus
 @onready var cover_label: Label = $CoverLabel
 @onready var cover_container: HBoxContainer = $Cover
 @onready var broken_label: Label = $BrokenLabel
@@ -57,10 +59,11 @@ func _ready() -> void:
 		return
 	Debug.debug_text_visibility_changed.connect(_set_debug_text_visible)
 	_set_debug_text_visible(Debug.show_debug_text)
+	_on_stress_balance_changed(0.0, 0.0, 0.0)
 
 
 func _set_debug_text_visible(enabled: bool) -> void:
-	# Morale and leadership arrows are gameplay indicators, independent of debug text.
+	# Stress balance arrows are gameplay indicators, independent of debug text.
 	$AmmunitionLeft.visible = enabled and OS.is_debug_build() and not _exited and not dead.visible
 
 
@@ -85,63 +88,33 @@ func _set_loadout(soldiers: Array[Soldier]) -> void:
 		soldier_detail.set_soldier_detail(soldier)
 		soldiers_detail_container.add_child(soldier_detail)
 
-func _on_leadership_changed(leadership_bonus: float) -> void:
-	var txt: String = ""# = "%0.2f" % leadership_bonus
-	txt += leadership_to_plus_string(leadership_bonus)
-	$LeadershipBonus.text = txt
-
-func _on_stress_changed(stress: float) -> void:
-	var txt: String = ""# = "%0.2f" % leadership_bonus
-	txt += stress_to_plus_string(stress)
-	$StressLevel.text = txt
-
-
-func stress_to_plus_string(value: float) -> String:
-	#Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
-	#Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
-	#Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
-	#Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 0, "coh_mult": 1.04 },
-	#Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
-	#Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
-	var result: String = ""
-	if value >= 60.0:
-		result = "<<<"
-	elif value >= 30.0:
-		result = "<<"
-	elif value > 5.0:
-		result = "<"
-	#var result: String = ""
-	#if value > 0.0:
-		#var count: int = int(floor(value / 0.09))
-		#var i: int = 0
-		#while i < count:
-			#result += "+"
-			#i += 1
-	return result
+func _on_stress_balance_changed(incoming_rate: float, recovery_rate: float, net_rate: float) -> void:
+	var counts: Vector2i = stress_balance_arrow_counts(incoming_rate, recovery_rate)
+	stress_arrows.text = "<".repeat(counts.x)
+	recovery_arrows.text = ">".repeat(counts.y)
+	var explanation: String = "Recent stress balance\nIncoming stress: +%.2f/s\nRecovery: -%.2f/s\nNet stress: %+.2f/s\nMore arrows show the stronger influence." % [incoming_rate, recovery_rate, net_rate]
+	stress_arrows.tooltip_text = explanation
+	recovery_arrows.tooltip_text = explanation
+	if detail_ui != null:
+		detail_ui._on_stress_balance_changed(incoming_rate, recovery_rate, net_rate)
 
 
-func leadership_to_plus_string(value: float) -> String:
-	#Grade.SOLDIER:      			{ "lead": 0.00, "rally": 0.00, "radius": 0, "coh_mult": 1.00 },
-	#Grade.ASSISTANT_TEAM_LEADER: 	{ "lead": 0.03, "rally": 0.015, "radius": 0, "coh_mult": 1.01 },
-	#Grade.TEAM_LEADER:   			{ "lead": 0.05, "rally": 0.03, "radius": 0, "coh_mult": 1.02 },
-	#Grade.SQUAD_LEADER:  			{ "lead": 0.10, "rally": 0.05, "radius": 0, "coh_mult": 1.04 },
-	#Grade.PLATOON_LEADER:			{ "lead": 0.18, "rally": 0.08, "radius": 1, "coh_mult": 1.06 },
-	#Grade.COMPANY_LEADER:			{ "lead": 0.22, "rally": 0.10, "radius": 2, "coh_mult": 1.08 },
-	var result: String = ""
-	if value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.COMPANY_LEADER].lead:
-		result = ">>>"
-	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.PLATOON_LEADER].lead:
-		result = ">>"
-	elif value >= RankGrades.GRADE_PARAMS[RankGrades.Grade.SQUAD_LEADER].lead:
-		result = ">"
-	#var result: String = ""
-	#if value > 0.0:
-		#var count: int = int(floor(value / 0.09))
-		#var i: int = 0
-		#while i < count:
-			#result += "+"
-			#i += 1
-	return result
+static func stress_balance_arrow_counts(incoming_rate: float, recovery_rate: float) -> Vector2i:
+	var incoming: float = maxf(0.0, incoming_rate)
+	var recovery: float = maxf(0.0, recovery_rate)
+	if incoming == 0.0 and recovery == 0.0:
+		return Vector2i.ZERO
+	if is_equal_approx(incoming, recovery):
+		return Vector2i(2, 2)
+	if incoming > recovery:
+		var green_count: int = 0
+		if recovery > 0.0:
+			green_count = clampi(roundi(3.0 * recovery / incoming), 1, 2)
+		return Vector2i(3, green_count)
+	var red_count: int = 0
+	if incoming > 0.0:
+		red_count = clampi(roundi(3.0 * incoming / recovery), 1, 2)
+	return Vector2i(red_count, 3)
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]

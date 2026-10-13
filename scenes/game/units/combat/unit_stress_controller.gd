@@ -1,6 +1,8 @@
 class_name StressController
 extends Node
 
+const BALANCE_SAMPLE_SECONDS: float = 0.5
+
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
 		STATES.MoraleState.CAUTIOUS : 0.8,
@@ -124,15 +126,19 @@ var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
 var under_fire: bool = false
 
-var stress_window_duration: float = 10.0
-var stress_time_accumulator: float = 0.0
-
-var stress_buckets: Array[float] = []
-var bucket_times: Array[float] = []
+# Both rates use the actual change in effective stress after modifiers and caps.
+var incoming_stress_rate: float = 0.0
+var stress_recovery_rate: float = 0.0
+var net_stress_rate: float = 0.0
+var balance_sample_duration_s: float = 0.0
+var _balance_elapsed_s: float = 0.0
+var _balance_stress_added: float = 0.0
+var _balance_stress_recovered: float = 0.0
 
 # --- SIGNALS ---
 signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
+signal stress_balance_changed(incoming_rate: float, recovery_rate: float, net_rate: float)
 signal leadership_changed(_leadership_bonus: float)
 
 var leader_presence_strength: float = 0.0
@@ -191,14 +197,26 @@ func get_rally_bonus() -> float:
 
 
 func get_average_stress_rate() -> float:
-	var total: float = 0.0
-	var i: int = 0
-	while i < stress_buckets.size():
-		total += stress_buckets[i]
-		i += 1
-	if total > 0.0:
-		pass
-	return total / stress_window_duration
+	return incoming_stress_rate
+
+
+func _update_effective_stress() -> void:
+	# The gameplay meter gives the fast and slow bins equal weight.
+	S_eff = clampf((stress_fast + stress_slow) * 0.5, 0.0, S_CAP)
+
+
+func _sample_stress_balance(delta: float) -> void:
+	_balance_elapsed_s += delta
+	if _balance_elapsed_s < BALANCE_SAMPLE_SECONDS:
+		return
+	balance_sample_duration_s = _balance_elapsed_s
+	incoming_stress_rate = _balance_stress_added / balance_sample_duration_s
+	stress_recovery_rate = _balance_stress_recovered / balance_sample_duration_s
+	net_stress_rate = incoming_stress_rate - stress_recovery_rate
+	_balance_elapsed_s = 0.0
+	_balance_stress_added = 0.0
+	_balance_stress_recovered = 0.0
+	stress_balance_changed.emit(incoming_stress_rate, stress_recovery_rate, net_stress_rate)
 
 
 func _process(delta: float) -> void:
@@ -326,24 +344,9 @@ func _process(delta: float) -> void:
 	#stress_fast *= kf
 	#stress_slow *= ks
 	
-	var i: int = 0
-	while i < bucket_times.size():
-		bucket_times[i] += delta
-		i += 1
-
-	# remove entries older than window
-	i = 0
-	while i < bucket_times.size():
-		if bucket_times[i] > stress_window_duration:
-			stress_buckets.remove_at(i)
-			bucket_times.remove_at(i)
-		else:
-			i += 1
-	
-	
-	
-	
 	_clamp_bins()
+	_update_effective_stress()
+	var stress_before_recovery: float = S_eff
 	
 	# - 1.0 stress per seconds
 	# FIXME leader bonus needs adjusting. factor 5 was too much
@@ -368,32 +371,9 @@ func _process(delta: float) -> void:
 	stress_fast -= stress_decay_f_with_delta
 	stress_slow -= stress_decay_s_with_delta
 	_clamp_bins()
-	#S_eff = stress_fast + stress_slow
-	
-	var raw_effective_stress: float = 0.0
-
-	raw_effective_stress += stress_fast * 0.5
-	raw_effective_stress += stress_slow * 0.5
-
-	if raw_effective_stress < 0.0:
-		S_eff = 0.0
-	elif raw_effective_stress > S_CAP:
-		S_eff = S_CAP
-	else:
-		S_eff = raw_effective_stress
-	#if S_eff > 0.0:
-		#print(S_eff, " ", stress_fast, " ", stress_slow)
-		
-	if S_eff < 0.0:
-		S_eff = 0.0
-	if S_eff > S_CAP:
-		S_eff = S_CAP
-	
-	#if S_eff > 0.0:
-		#print(S_eff)
-	var average_stress_rate: float = get_average_stress_rate()
-	#if average_stress_rate > 0.0:
-		#print(average_stress_rate)
+	_update_effective_stress()
+	_balance_stress_recovered += maxf(0.0, stress_before_recovery - S_eff)
+	_sample_stress_balance(delta)
 	
 	## --- smooth leader effect so it never steps the meter ---
 	#var target_leader: float = clamp(leadership_bonus, 0.0, 1.0)
@@ -445,17 +425,18 @@ func apply_stress(df: float, ds: float) -> void:
 		leader_mult = 1.0
 
 	var eff_scale: float = base_scale * leader_mult
-	var stress_fast_added: float = df_in * eff_scale
-	var stress_slow_added: float = ds_in * eff_scale
-	var stress_mod: float = remap(S_eff, 0.0, 100.0, 1.0, 0.5)
+	_clamp_bins()
+	_update_effective_stress()
+	var stress_before_gain: float = S_eff
+	var stress_mod: float = remap(S_eff, 0.0, maxf(S_CAP, 0.001), 1.0, 0.5)
 	# FIXME cmd stress modifier needs adjustment
 	#print(S_eff, " ", stress_mod)
 	stress_fast += df_in * eff_scale * stress_mod
 	stress_slow += ds_in * eff_scale * stress_mod
 	_clamp_bins()
-	
-	stress_buckets.append(stress_fast_added + stress_slow_added)
-	bucket_times.append(0.0)
+	_update_effective_stress()
+	_balance_stress_added += maxf(0.0, S_eff - stress_before_gain)
+	stress_changed.emit(S_eff)
 
 
 func _get_current_leader_effect() -> float:

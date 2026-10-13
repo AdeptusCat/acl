@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/units/selected_soldier_row.tscn" id="2"]
 [ext_resource type="Script" path="res://scenes/ui/orders/rout_button.gd" id="3"]
 [ext_resource type="Script" path="res://scenes/ui/units/unit_type_label.gd" id="5"]
-[ext_resource type="Script" path="res://scenes/ui/units/unit_status_label.gd" id="6"]
 [ext_resource type="Script" path="res://scenes/ui/units/leadership_bonus_label.gd" id="7"]
 
 [sub_resource type="StyleBoxFlat" id="BarBackground"]
@@ -74,7 +73,6 @@ mouse_filter = 1
 text = "Morale: Ok"
 text_overrun_behavior = 3
 clip_text = true
-script = ExtResource("6")
 
 [node name="Order" type="Label" parent="Summary"]
 layout_mode = 2
@@ -212,8 +210,6 @@ theme_override_constants/separation = 6
 
 [connection signal="mouse_entered" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="Summary/Status/Morale" to="Summary/Status/Morale" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Summary/Status/Morale" to="Summary/Status/Morale" method="_on_mouse_exited"]
 [connection signal="mouse_entered" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_exited"]
 [connection signal="pressed" from="Summary/Details/Content/DebugActions/Kill" to="." method="_on_kill_pressed"]
