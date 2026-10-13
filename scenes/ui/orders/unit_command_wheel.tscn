@@ -51,4 +51,4 @@ highlight_color = Color(0.29, 0.28, 0.19, 1)
 outer_radius = 140
 inner_radius = 40
 line_width = 1
-options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_fkrsx"), SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md")])
+options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_fkrsx")])

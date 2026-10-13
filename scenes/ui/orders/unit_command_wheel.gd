@@ -123,8 +123,13 @@ func _process(delta: float) -> void:
 
 func _update_selection(point: Vector2) -> void:
 	var next: int = 0
-	if options.size() > 1 and point.length() >= inner_radius and point.length() <= outer_radius:
-		var angle: float = fposmod(point.angle() + PI * 7.0 / 6.0, TAU)
+	if point.length() > outer_radius:
+		for index: int in range(options.size()):
+			if options[index].option == WheelOption.Option.NONE:
+				next = index
+				break
+	elif options.size() > 1 and point.length() >= inner_radius:
+		var angle: float = fposmod(_sector_start_angle() - point.angle(), TAU)
 		next = 1 + mini(options.size() - 2, floori(angle / TAU * float(options.size() - 1)))
 	if selection != next:
 		selection = next
@@ -182,11 +187,15 @@ func get_wheel_rect() -> Rect2:
 	return Rect2(position - Vector2(outer_radius, outer_radius), Vector2(float(outer_radius * 2), height))
 
 
+func _sector_start_angle() -> float:
+	return -(PI - TAU / float(options.size() - 1)) * 0.5
+
+
 func get_option_point(index: int) -> Vector2:
 	if index == 0 or options.size() < 2:
 		return Vector2.ZERO
 	var arc: float = TAU / float(options.size() - 1)
-	var angle: float = -PI * 7.0 / 6.0 + (float(index) - 0.5) * arc
+	var angle: float = _sector_start_angle() - (float(index) - 0.5) * arc
 	return Vector2.from_angle(angle) * float(inner_radius + outer_radius) * 0.5
 
 
@@ -195,17 +204,16 @@ func _draw() -> void:
 		return
 	var font: Font = get_theme_font("font", "Label")
 	var body_size: int = get_theme_font_size("font_size", "Label")
-	var secondary_size: int = get_theme_font_size("font_size", "HudSecondary")
 	draw_circle(Vector2.ZERO, outer_radius, bkg_color)
 	var arc: float = TAU / float(options.size() - 1)
 	for index: int in range(1, options.size()):
-		var start: float = -PI * 7.0 / 6.0 + float(index - 1) * arc
+		var start: float = _sector_start_angle() - float(index - 1) * arc
 		if selection == index:
 			var points: PackedVector2Array = PackedVector2Array()
 			for step: int in range(33):
-				points.append(Vector2.from_angle(start + arc * float(step) / 32.0) * inner_radius)
+				points.append(Vector2.from_angle(start - arc * float(step) / 32.0) * inner_radius)
 			for step: int in range(32, -1, -1):
-				points.append(Vector2.from_angle(start + arc * float(step) / 32.0) * outer_radius)
+				points.append(Vector2.from_angle(start - arc * float(step) / 32.0) * outer_radius)
 			draw_colored_polygon(points, highlight_color)
 		var edge: Vector2 = Vector2.from_angle(start)
 		draw_line(edge * inner_radius, edge * outer_radius, line_color, float(line_width), true)
@@ -213,11 +221,23 @@ func _draw() -> void:
 		var color: Color = Color(0.93, 0.91, 0.82)
 		if not str(_restrictions.get(options[index].option, "")).is_empty():
 			color = Color(0.62, 0.63, 0.57)
-		draw_texture_rect_region(options[index].atlas, Rect2(point + Vector2(-42.0, -16.0), ICON_SIZE), options[index].region, color)
-		draw_string(font, point + Vector2(-4.0, 5.0), str(WheelOption.COMMAND_NAMES.get(options[index].option, "Cancel")), HORIZONTAL_ALIGNMENT_LEFT, -1.0, body_size, color)
+		var label: String = str(WheelOption.COMMAND_NAMES.get(options[index].option, "Cancel"))
+		var label_point: Vector2 = point + Vector2(-4.0, 5.0)
+		if options[index].option == WheelOption.Option.NONE:
+			label_point.x = point.x - font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, body_size).x * 0.5
+		else:
+			draw_texture_rect_region(options[index].atlas, Rect2(point + Vector2(-42.0, -16.0), ICON_SIZE), options[index].region, color)
+		draw_string(font, label_point, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, body_size, color)
 	if selection == 0:
 		draw_circle(Vector2.ZERO, inner_radius, highlight_color)
 	draw_arc(Vector2.ZERO, outer_radius, 0.0, TAU, 96, line_color, float(line_width), true)
 	draw_arc(Vector2.ZERO, inner_radius, 0.0, TAU, 64, line_color, float(line_width), true)
-	var cancel_width: float = font.get_string_size("Cancel", HORIZONTAL_ALIGNMENT_LEFT, -1.0, secondary_size).x
-	draw_string(font, Vector2(-cancel_width * 0.5, 4.0), "Cancel", HORIZONTAL_ALIGNMENT_LEFT, -1.0, secondary_size, Color(0.93, 0.91, 0.82))
+	var center_label: String = str(WheelOption.COMMAND_NAMES.get(options[0].option, "Cancel"))
+	var center_color: Color = Color(0.93, 0.91, 0.82)
+	if not str(_restrictions.get(options[0].option, "")).is_empty():
+		center_color = Color(0.62, 0.63, 0.57)
+	var center_label_point: Vector2 = Vector2(-font.get_string_size(center_label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, body_size).x * 0.5, 5.0)
+	if options[0].option != WheelOption.Option.NONE:
+		draw_texture_rect_region(options[0].atlas, Rect2(Vector2(-16.0, -28.0), ICON_SIZE), options[0].region, center_color)
+		center_label_point.y = 25.0
+	draw_string(font, center_label_point, center_label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, body_size, center_color)
