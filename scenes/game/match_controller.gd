@@ -557,6 +557,19 @@ func _configure_platoon_ai() -> void:
 		ai_status_changed.emit(planner.team, planner.active, order.position_mode)
 
 
+func register_ai_unit(unit: Unit) -> void:
+	var director: DefenseDirector = _ai_director_for_team(unit.team)
+	if director == null or director.platoon_ai.company_command == null:
+		return
+	var planner: PlatoonAI = director.platoon_ai
+	if planner.squads.has(unit) or not InfluenceUnitQuery.is_valid_living_unit(unit):
+		return
+	var roster: Array[Unit] = planner.squads.duplicate()
+	roster.append(unit)
+	planner.set_squads(roster)
+	planner._start_plan(is_inside_tree())
+
+
 func set_team_ai_enabled(team: Globals.Team, enabled: bool) -> void:
 	var director: DefenseDirector = _ai_director_for_team(team)
 	if director == null or not _ai_orders_by_team.has(team):

@@ -54,6 +54,7 @@ static func spawn_unit(controller: Node2D, team: Globals.Team, location: Vector2
 	# assign company headquarter to platoon headquarter 
 	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
+	controller.register_ai_unit(unit)
 
 
 static func spawn_units_from_match_save(controller: Node2D, match_save: MatchSaveData) -> void:
@@ -152,3 +153,4 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 	# assign company headquarter to platoon headquarter 
 	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
+	controller.register_ai_unit(unit)

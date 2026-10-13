@@ -574,6 +574,10 @@ func _available_exit_units(planner: PlatoonAI, condition: VictoryCondition) -> A
 
 
 func _allocate(planner: PlatoonAI) -> void:
+	if planner.company_command != null and planner.company_command.uses_hierarchy():
+		assignments = planner.company_command.allocate(tasks, assignments)
+		diagnostics.append_array(planner.company_command.diagnostics)
+		return
 	var next: Dictionary[Unit, ScenarioGoalTask] = {}
 	var available: Array[Unit] = []
 	for unit: Unit in planner.squads:

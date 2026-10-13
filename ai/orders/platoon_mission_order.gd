@@ -35,3 +35,24 @@ var movement_radius: int = 6
 var defense_responsibility: PositionQuery.Responsibility = PositionQuery.Responsibility.AUTO
 var exposure_budget_seconds: float = 6.0
 var open_crossing_budget_seconds: float = 2.0
+
+
+func copy() -> MissionOrder:
+	var result: MissionOrder = MissionOrder.new()
+	result.mission_type = mission_type
+	result.objective_hex = objective_hex
+	result.sector_cells = sector_cells.duplicate()
+	result.fallback_hexes = fallback_hexes.duplicate()
+	result.threat_axes = threat_axes.duplicate()
+	result.reserve_policy = reserve_policy
+	result.execution_intent = execution_intent
+	result.position_mode = position_mode
+	result.geography = geography
+	result.defense_radius = defense_radius
+	result.defense_area_radius = defense_area_radius
+	result.approach_analysis_radius = approach_analysis_radius
+	result.movement_radius = movement_radius
+	result.defense_responsibility = defense_responsibility
+	result.exposure_budget_seconds = exposure_budget_seconds
+	result.open_crossing_budget_seconds = open_crossing_budget_seconds
+	return result

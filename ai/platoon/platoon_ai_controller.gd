@@ -8,6 +8,13 @@ extends Node
 var squads: Array[Unit] = []
 var active: bool = true
 var goal_director: ScenarioGoalDirector
+var company_command: CompanyAI
+var publish_team_objective: bool = true
+var company_reservations: Dictionary[Unit, Vector2i] = {}
+var company_support_squads: Array[Unit] = []
+var company_maneuver_squads: Array[Unit] = []
+var company_requires_support: bool = false
+var company_defensive_posture: bool = false
 var goal_assignments: Dictionary[Unit, ScenarioGoalTask] = {}
 var current_order: MissionOrder = null
 var squad_assignments: Dictionary = {}
@@ -57,6 +64,11 @@ const POSITION_OPTIMIZATION_SECONDS: float = 3.0
 func _process(delta: float) -> void:
 	if not active or current_order == null:
 		return
+	if company_command != null:
+		company_command.update(delta)
+		if company_command.uses_hierarchy():
+			return
+	_check_company_cover()
 	position_stability.observe(squads, _position_time())
 	if current_order.position_mode == PositionProfile.Mode.DEFEND:
 		_defense_event_timer -= delta
@@ -121,6 +133,8 @@ func _process(delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	if company_command != null:
+		company_command.stop()
 	_cancel_plan()
 	_set_mission_control(false)
 	executor.cancel_all()
@@ -136,6 +150,8 @@ func set_active(is_active: bool) -> void:
 	if active:
 		_set_mission_control(current_order != null)
 		return
+	if company_command != null:
+		company_command.stop()
 	_set_mission_control(false)
 	_clear_reserve()
 	# Release only actions owned by this planner when handing control to the player.
@@ -159,6 +175,8 @@ func set_active(is_active: bool) -> void:
 func receive_mission_order(order: MissionOrder) -> void:
 	if not active:
 		return
+	if company_command != null:
+		company_command.reset_mission()
 	_cancel_plan()
 	_clear_reserve()
 	executor.cancel_all(true)
@@ -214,6 +232,8 @@ func set_scenario_goal_assignments(assignments: Dictionary[Unit, ScenarioGoalTas
 	if changed:
 		_cancel_plan()
 		time_until_reconsider = 0.0
+		if company_command != null and company_command.uses_hierarchy():
+			company_command.reconsider(true)
 
 
 func set_squads(new_squads: Array[Unit]) -> void:
@@ -239,6 +259,8 @@ func set_squads(new_squads: Array[Unit]) -> void:
 	squads = owned
 	attack_maneuver_squad = null
 	_set_mission_control(active and current_order != null)
+	if company_command != null:
+		company_command.sync_roster()
 
 
 func _set_mission_control(enabled: bool) -> void:
@@ -249,11 +271,14 @@ func _set_mission_control(enabled: bool) -> void:
 		if squad.ai_support_only and squad.squad_fire != null:
 			squad.squad_fire.clear_target()
 		if squad.squad_ai_controller != null:
-			squad.squad_ai_controller.defensive_mission_controlled = enabled and current_order != null and current_order.position_mode == PositionProfile.Mode.DEFEND
+			squad.squad_ai_controller.defensive_mission_controlled = enabled and current_order != null and (current_order.position_mode == PositionProfile.Mode.DEFEND or company_defensive_posture)
 
 
 func bind_active_squads(active_units: Array[Unit]) -> void:
 	# Each match supplies its complete runtime roster; squad numbers do not gate ownership.
+	if company_command == null:
+		company_command = CompanyAI.new()
+		company_command.configure(self)
 	set_squads(active_units)
 
 
@@ -265,9 +290,13 @@ func _start_plan(budgeted: bool) -> void:
 	_cancel_plan()
 	if not active or current_order == null or influence_map_controller == null:
 		return
+	if company_command != null and company_command.uses_hierarchy():
+		company_command.reconsider(budgeted)
+		return
 	_sync_position_mission()
 	_planning_objective_hex = current_order.objective_hex
-	influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
+	if publish_team_objective:
+		influence_map_controller.set_objective_for_team(team, current_order.objective_hex)
 	if influence_map_controller.snapshot == null:
 		return
 	var available: Array[Unit] = _get_effective_squads()
@@ -436,6 +465,8 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 			ready = false
 		if task.kind == ScenarioGoalTask.Kind.OCCUPY and unit.current_hex == task.hex:
 			ready = true
+		if company_requires_support and not task.withdrawal and unit.current_hex != task.hex and not _has_company_support():
+			ready = false
 		if not ready:
 			config.profile = PositionProfile.for_mode(PositionProfile.Mode.SUPPORT_BY_FIRE)
 			config.profile.minimum_cover = 0.1
@@ -474,6 +505,8 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 
 
 func _goal_support_ready(attacker: Unit, hex: Vector2i) -> bool:
+	if company_requires_support:
+		return _has_company_support()
 	for friendly: Unit in squads:
 		if friendly == attacker or HqSupportPositionPolicy.is_headquarters(friendly) or not TacticalPositionExecutor.is_active_defender(friendly) or not PositionQueryService.can_follow_intent(friendly) or PlatoonPositionStability.is_busy(friendly):
 			continue
@@ -740,6 +773,9 @@ func _has_attack_cover_candidate(available: Array[Unit], maneuver: Unit) -> bool
 	for unit: Unit in available:
 		if unit != maneuver and _can_provide_attack_support(unit):
 			return true
+	for unit: Unit in company_support_squads:
+		if _can_provide_attack_support(unit):
+			return true
 	return false
 
 
@@ -837,6 +873,8 @@ func _update_attack_roles(available: Array[Unit]) -> void:
 
 
 func _has_established_attack_support(available: Array[Unit], departing: Unit = null) -> bool:
+	if company_requires_support:
+		return _has_company_support(departing)
 	var has_defenders: bool = _has_known_attack_defenders(squads)
 	for unit: Unit in available:
 		if unit == attack_maneuver_squad or unit == departing or not _can_provide_attack_support(unit):
@@ -856,6 +894,41 @@ func _has_established_attack_support(available: Array[Unit], departing: Unit = n
 		if unit.squad_fire != null and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null) and TacticalPositionExecutor.select_support_target(unit, current_order.objective_hex) != null:
 			return true
 	return false
+
+
+func _has_company_support(departing: Unit = null) -> bool:
+	if current_order == null or influence_map_controller == null or influence_map_controller.snapshot == null:
+		return false
+	var has_defenders: bool = _has_known_attack_defenders(squads)
+	for unit: Unit in company_support_squads:
+		if unit == departing or not _can_provide_attack_support(unit):
+			continue
+		var advice: PositionResult = unit.position_advice
+		if advice == null or not advice.is_valid() or advice.profile_mode != PositionProfile.Mode.SUPPORT_BY_FIRE or advice.objective_hex != current_order.objective_hex:
+			continue
+		if unit.movement.is_moving or unit.current_hex != advice.target_hex or unit.action_controller.action_state != SquadActionController.SquadActionState.HOLDING_POSITION:
+			continue
+		if advice.features.get("cover", 0.0) < 0.1 or advice.features.get("firing", 0.0) <= 0.0:
+			continue
+		if not has_defenders:
+			return true
+		if unit.squad_fire != null and (unit.squad_fire.has_target_hex or unit.squad_fire.target_unit != null) and TacticalPositionExecutor.select_support_target(unit, current_order.objective_hex) != null:
+			return true
+	return false
+
+
+func _check_company_cover() -> void:
+	if not company_requires_support or _has_company_support():
+		return
+	for unit: Unit in executor.pending.keys():
+		var result: PositionResult = executor.pending[unit]["result"]
+		if result.profile_mode not in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
+			continue
+		executor.cancel(unit, true)
+		position_stability.forget(unit)
+		accepted_positions.erase(unit)
+		company_reservations[unit] = unit.current_hex
+		time_until_reconsider = 0.0
 
 
 func _has_known_attack_defenders(available: Array[Unit]) -> bool:
@@ -936,6 +1009,8 @@ func _attack_mode_for_unit(unit: Unit) -> PositionProfile.Mode:
 		return PositionProfile.Mode.HQ_SUPPORT
 	if unit.squad_type == Globals.SquadType.MG:
 		# Search for a firing lane even when the current hex has no objective LOS.
+		return PositionProfile.Mode.SUPPORT_BY_FIRE
+	if company_requires_support and not _has_company_support():
 		return PositionProfile.Mode.SUPPORT_BY_FIRE
 	var pressure_target: Unit = _attack_pressure_target(unit)
 	if pressure_target != null:
@@ -1391,6 +1466,39 @@ func _issue_orders() -> void:
 
 func _issue_order(squad: Unit) -> void:
 	var result: PositionResult = squad_assignments[squad]["result"]
+	if result.is_valid() and result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and not company_maneuver_squads.is_empty():
+		var bound: bool = false
+		for maneuver: Unit in company_maneuver_squads:
+			if InfluenceUnitQuery.is_valid_living_unit(maneuver) and (maneuver.movement.is_moving or maneuver.in_close_combat):
+				bound = true
+		if bound and _has_established_attack_support(squads) and not _has_established_attack_support(squads, squad):
+			position_stability.declined(squad)
+			return
+	if result.is_valid() and not company_reservations.is_empty():
+		var capacity: int = 1
+		if goal_assignments.has(squad) and goal_assignments[squad].is_destination_goal():
+			capacity = goal_assignments[squad].required_units
+			if goal_assignments[squad].kind == ScenarioGoalTask.Kind.EXIT:
+				capacity = goal_assignments[squad].exit_capacity()
+		var occupants: Dictionary[Unit, bool] = {}
+		for other: Unit in company_reservations:
+			if other == squad or not TacticalPositionExecutor.is_active_defender(other) or HqSupportPositionPolicy.can_share_position(squad, other):
+				continue
+			if company_reservations[other] == result.target_hex or other.current_hex == result.target_hex:
+				occupants[other] = true
+		if occupants.size() >= capacity:
+			result.status = PositionResult.Status.NO_CANDIDATE
+			result.should_move = false
+			result.reason = "Position occupied or claimed by another platoon"
+			time_until_reconsider = 0.0
+			return
+	if result.is_valid() and company_requires_support and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_company_support():
+		executor.cancel(squad, true)
+		position_stability.forget(squad)
+		accepted_positions.erase(squad)
+		company_reservations[squad] = squad.current_hex
+		time_until_reconsider = 0.0
+		return
 	if result.is_valid() and result.features.has("scenario_goal") and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
 		var check: PositionQuery = PositionQuery.new()
 		check.unit = squad
@@ -1458,6 +1566,8 @@ func _issue_order(squad: Unit) -> void:
 	if current_order != null and current_order.position_mode != PositionProfile.Mode.ASSAULT and not result.features.has("scenario_goal"):
 		intent = current_order.execution_intent
 	if result.is_valid() and executor.execute(result, intent):
+		if not company_reservations.is_empty():
+			company_reservations[squad] = result.target_hex
 		position_stability.accepted(result, _position_time())
 		_defense_urgent_units.erase(squad)
 		if departing and not _departure_origins.has(squad):
@@ -1486,7 +1596,7 @@ func _get_effective_squads() -> Array[Unit]:
 
 
 func _create_current_reserved_hexes(units: Array[Unit]) -> Dictionary:
-	var result: Dictionary = {}
+	var result: Dictionary = company_reservations.duplicate()
 	for unit: Unit in units:
 		var cell: Vector2i = unit.current_hex
 		if unit.movement != null and unit.movement.is_moving:
