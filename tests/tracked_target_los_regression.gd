@@ -32,10 +32,12 @@ var alternate_enemy: Unit
 
 
 func _test_sight_loss(attack_state: Unit.AttackState) -> void:
+	var isolated_units: Array[Unit] = []
 	for unit: Unit in Globals.get_units():
 		if alternate_enemy == null and unit != enemy and unit.team == enemy.team:
 			alternate_enemy = unit
 		if unit != shooter and unit != enemy:
+			isolated_units.append(unit)
 			unit.remove_from_group("units")
 	var original_fire: SquadFireController = shooter.squad_fire
 	var probe: FireProbe = FireProbe.new()
@@ -57,6 +59,8 @@ func _test_sight_loss(attack_state: Unit.AttackState) -> void:
 	probe.calc.free()
 	probe.queue_free()
 	await get_tree().process_frame
+	for unit: Unit in isolated_units:
+		unit.add_to_group("units")
 
 
 func _test_los_transition(probe: FireProbe, attack_state: Unit.AttackState, path: String) -> void:

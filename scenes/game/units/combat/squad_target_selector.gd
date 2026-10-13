@@ -25,6 +25,8 @@ static func handle_auto_fire(controller: SquadFireController,
 	var best_enemy: Node = null
 	var best_score: float = -INF
 	var best_cover: int = 0
+	var best_suppressed: bool = true
+	var defensive_fire: bool = controller.unit.squad_ai_controller != null and controller.unit.squad_ai_controller.defensive_mission_controlled
 
 	for enemy: Unit in visible_enemies:
 		if not controller._can_track_target(enemy):
@@ -41,11 +43,16 @@ static func handle_auto_fire(controller: SquadFireController,
 		
 		var score_pack: Dictionary = controller._score_enemy_for_target(controller.unit, enemy, current_hex)
 		var score: float = float(score_pack["score"])
+		if not is_finite(score):
+			continue
+		var suppressed: bool = defensive_fire and TacticalPositionExecutor.is_sufficiently_suppressed(enemy)
 		
-		if score > best_score:
+		# Defenders distribute pressure to fresh threats before comparing firing opportunities.
+		if best_enemy == null or (best_suppressed and not suppressed) or (best_suppressed == suppressed and score > best_score):
 			best_score = score
 			best_enemy = enemy
 			best_cover = int(score_pack["cover"])
+			best_suppressed = suppressed
 
 	if best_enemy == null:
 		if not controller.unit.squad_fire.target_unit == null:
