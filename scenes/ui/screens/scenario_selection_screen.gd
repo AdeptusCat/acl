@@ -4,6 +4,8 @@ signal game_started(map: Map, scenario: Scenario, team: int, game_mode: Globals.
 signal hover_start_button(team: int)
 signal time_changed(time_minutes: float)
 
+const FORCE_ROW: Script = preload("res://scenes/ui/units/mission_force_row.gd")
+
 @onready var time_spinbox: SpinBox = $Control/Center/Panel/Content/Header/Time/Minutes
 @onready var maps_v_box_container: VBoxContainer = $Control/Center/Panel/Content/Body/ScenarioScroll/Maps
 @onready var scenario_description: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Description
@@ -166,27 +168,9 @@ func _update_force_briefing(scenario: Scenario) -> void:
 			heading.text = formation
 			heading.theme_type_variation = &"HudSecondary"
 			player_roster.add_child(heading)
-		var row: HBoxContainer = HBoxContainer.new()
-		row.add_theme_constant_override("separation", 12)
+		var row: HBoxContainer = FORCE_ROW.new()
 		player_roster.add_child(row)
-		var identity: Label = Label.new()
-		identity.name = "Identity"
-		identity.text = unit.get_hud_name()
-		identity.tooltip_text = identity.text
-		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		identity.clip_text = true
-		identity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.add_child(identity)
-		var strength: Label = Label.new()
-		strength.name = "Strength"
-		strength.theme_type_variation = &"HudSecondary"
-		strength.text = "Strength unknown"
-		if unit.squad_loadout != null:
-			var soldiers: int = unit.squad_loadout.soldiers.size()
-			strength.text = "%d soldiers" % soldiers
-			if soldiers == 1:
-				strength.text = "1 soldier"
-		row.add_child(strength)
+		row.setup(unit)
 		player_roster_rows[unit] = row
 	if friendly_units.is_empty():
 		var empty: Label = Label.new()

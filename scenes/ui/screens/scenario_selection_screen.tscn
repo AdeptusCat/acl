@@ -133,10 +133,20 @@ visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PlayerHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
+[node name="PlayerHeading" type="HBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
 layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerHeading"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_type_variation = &"HudHeading"
 text = "Your force"
+
+[node name="Hint" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerHeading"]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "Hover a squad for details"
 
 [node name="PlayerRoster" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
 layout_mode = 2

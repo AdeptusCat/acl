@@ -31,6 +31,7 @@ func _run() -> void:
 	_check(screen.scenario_description.text == available.scenario_description and not screen.start_button.disabled, "Selection populates a persistent briefing and enables Start mission")
 	_check_force_preview(screen, available)
 	await _check_enemy_privacy(screen, available, button)
+	await _check_force_hover(screen, available)
 	var objectives: int = screen.major_victory_conditions_v_box_container.get_child_count()
 	_motion(Vector2(20.0, 20.0))
 	await _settle()
@@ -44,6 +45,7 @@ func _run() -> void:
 	_check(screen.selected_scenario == available and button.button_pressed, "Hovering another mission does not replace the selected briefing")
 	await _select(screen, other_button)
 	_check(screen.selected_scenario == other and other_button.button_pressed and not button.button_pressed, "Selecting another mission transfers the persistent highlight")
+	_check(_find_hover_card(get_tree().root) == null, "Changing missions closes the previous squad's hover card")
 	_check_force_preview(screen, other)
 	var other_objectives: int = screen.major_victory_conditions_v_box_container.get_child_count()
 	var other_roster_children: int = screen.player_roster.get_child_count()
@@ -121,6 +123,13 @@ func _check_force_preview(screen: CanvasLayer, scenario: Scenario) -> void:
 		var row: HBoxContainer = screen.player_roster_rows.get(unit)
 		_check(row != null and row.get_node("Identity").text == unit.get_hud_name(), "The preview uses ordinal squad names and the selected scenario's player side")
 		_check(row != null and row.get_node("Strength").text == "%d soldiers" % unit.squad_loadout.soldiers.size(), "Friendly strength comes from the actual deployment loadout")
+		var picture: TextureRect = row.get_node("Picture/Image") as TextureRect
+		_check(picture.texture != null and is_equal_approx(row.size.y, 40.0), "Each assigned squad has a picture in a compact row with stable height")
+		var path: String = picture.texture.resource_path
+		var correct_faction: bool = path.contains("germany") or path.contains("_ger")
+		if unit.team == Globals.Team.ALLIES:
+			correct_faction = path.contains("united_states") or path.contains("_us")
+		_check(correct_faction, "Squad pictures use the selected side's artwork")
 	_check(screen.force_briefing.visible and screen.player_roster_rows.size() == friendly_count, "The selected mission shows its complete friendly roster")
 	var has_number: bool = false
 	for index: int in range(screen.enemy_assessment.text.length()):
@@ -150,6 +159,56 @@ func _check_enemy_privacy(screen: CanvasLayer, scenario: Scenario, button: Butto
 	scenario.units.remove_child(additional_enemy)
 	additional_enemy.queue_free()
 	await _select(screen, button)
+
+
+func _check_force_hover(screen: CanvasLayer, scenario: Scenario) -> void:
+	var unit: Unit = screen.player_roster_rows.keys()[1]
+	var row: HBoxContainer = screen.player_roster_rows[unit]
+	screen.briefing_scroll.ensure_control_visible(row)
+	await _settle()
+	var picture: TextureRect = row.get_node("Picture/Image") as TextureRect
+	_motion(picture.get_global_rect().get_center())
+	await get_tree().create_timer(0.8).timeout
+	await _settle()
+	var card: PanelContainer = _find_hover_card(get_tree().root)
+	_check(card != null and card.is_visible_in_tree(), "Hovering the squad picture opens its information card")
+	if card != null:
+		_check(card.size.y <= 260.0 and card.size.x <= 340.0, "The information card stays compact instead of expanding across the menu")
+		var text: String = _hover_text(card)
+		_check(text.contains(unit.get_hud_name()) and text.contains(unit.get_formation_name()) and text.contains(unit.get_squad_type_name(unit.squad_type)) and text.contains("Strength: 12 soldiers"), "The card shows the squad's identity, formation, role and assigned strength")
+		var weapon: WeaponSpec = unit.squad_loadout.soldiers[0].resolve_weapon()
+		_check(weapon != null and text.contains(weapon.name) and text.contains("Equipment:"), "The card's equipment summary comes from the assigned loadout")
+		var style: StyleBoxFlat = card.get_theme_stylebox("panel", "TooltipPanel") as StyleBoxFlat
+		_check(style != null and is_equal_approx(style.bg_color.a, 1.0), "The hover card has a fully opaque, readable background")
+	_motion(row.get_node("Identity").get_global_rect().get_center())
+	await get_tree().create_timer(0.8).timeout
+	await _settle()
+	_check(_find_hover_card(get_tree().root) != null and get_viewport().gui_get_hovered_control() == row, "The whole squad row supports hover inspection")
+	_check(screen.selected_scenario == scenario and screen.scenario_buttons[scenario].button_pressed and starts == 0, "Hover inspection preserves the mission selection and does not deploy squads")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("squad-card")
+	_click(row.get_global_rect().get_center())
+	_check(screen.selected_scenario == scenario and starts == 0, "Clicking a squad image or row does not start the mission")
+	screen.briefing_scroll.scroll_vertical = 0
+
+
+func _find_hover_card(node: Node) -> PanelContainer:
+	if node.name == &"SquadHoverCard" and node is PanelContainer:
+		return node as PanelContainer
+	for child: Node in node.get_children(true):
+		var card: PanelContainer = _find_hover_card(child)
+		if card != null:
+			return card
+	return null
+
+
+func _hover_text(node: Node) -> String:
+	var text: String = ""
+	if node is Label:
+		text = (node as Label).text + "\n"
+	for child: Node in node.get_children():
+		text += _hover_text(child)
+	return text
 
 
 func _select(screen: CanvasLayer, button: Button) -> void:
