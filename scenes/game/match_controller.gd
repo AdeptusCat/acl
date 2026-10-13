@@ -136,10 +136,11 @@ func setup() -> void:
 	influence_map_debug_draw.tile_map_layer = LOSHelper.ground_layer
 	influence_map_debug_draw.influence_controller = influence_map_controller
 	influence_map_debug_draw.position_advice_provider = MatchInteractionHandler.get_position_advice.bind(self)
-	influence_map_debug_draw.set_team(Globals.Team.ALLIES)
-	influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.FIRE_POWER)
+	influence_map_debug_draw.set_team(Globals.team_player)
+	influence_map_debug_draw.set_debug_view(InfluenceMapDebugDraw.DebugView.NONE)
 	
 	influence_map_debug_draw.setup()
+	influence_map_debug_draw.set_debug_enabled(Debug.show_ai_placement)
 
 func spawn_formation() -> void:
 	if Globals.game_mode == Globals.GameMode.ATTACK:

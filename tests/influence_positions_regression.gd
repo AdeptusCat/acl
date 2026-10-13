@@ -2109,10 +2109,11 @@ func _test_position_overlay() -> void:
 	draw.position_advice_provider = func(_unit: Unit) -> PositionResult:
 		return responses[0]
 	draw.refresh_cells()
+	draw.set_debug_enabled(true)
 	var order_id: int = own.action_controller.action_order_id
 	var tactical_advice: PositionResult = own.position_advice
 	draw.set_selected_unit(own)
-	_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and draw.team == own.team and draw.position_advice == advice, "Selection automatically displays the unit's team and read-only position advice")
+	_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and draw.team == own.team and draw.position_advice == advice, "Selection displays read-only position advice when placement debugging is enabled")
 	_check(own.action_controller.action_order_id == order_id and own.position_advice == tactical_advice, "Inspection preserves tactical orders and planner-owned advice")
 	_check(draw._should_draw_cell(map, zero_cell) and draw._should_draw_cell(map, negative_cell), "Eligible zero and negative scores remain visible candidates")
 	_check(not draw._should_draw_cell(map, excluded_cell), "Excluded cells cannot appear as candidates even with positive scores")

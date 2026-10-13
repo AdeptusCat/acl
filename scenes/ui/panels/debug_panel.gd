@@ -7,6 +7,11 @@ const SCROLL_HEIGHT: float = 270.0
 
 @onready var enemy_selectable: CheckBox = $FoldableContainer/Scroll/VBoxContainer/EnemySelectable
 @onready var no_damage: CheckBox = $FoldableContainer/Scroll/VBoxContainer/NoDamage
+@onready var ai_placement: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowAIPlacement
+@onready var debug_text: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowDebugText
+@onready var placement_options: VBoxContainer = $FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions
+@onready var placement_layer: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions/Layer
+@onready var placement_team: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions/Team
 @onready var axis_ai_status: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AxisAI/Status
 @onready var axis_ai_mode: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AxisAI/Mode
 @onready var allies_ai_status: OptionButton = $FoldableContainer/Scroll/VBoxContainer/AlliesAI/Status
@@ -19,10 +24,8 @@ const SCROLL_HEIGHT: float = 270.0
 @onready var show_movement_lines: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowMovementLines
 @onready var hide_fog_of_war: CheckBox = $FoldableContainer/Scroll/VBoxContainer/HideFogOfWar
 @onready var show_enemies: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowEnemies
-@onready var influence_map_name: Label = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer2/InfluenceMapName
-@onready var influence_map_team_name: Label = $FoldableContainer/Scroll/VBoxContainer/HBoxContainer2/InfluenceMapTeamName
-
 var _ai_controller: Node2D
+var _placement_overlay: InfluenceMapDebugDraw
 @onready var section: FoldableContainer = $FoldableContainer
 @onready var scroll: ScrollContainer = $FoldableContainer/Scroll
 @onready var content: VBoxContainer = $FoldableContainer/Scroll/VBoxContainer
@@ -34,6 +37,23 @@ func _ready() -> void:
 	section.folding_changed.connect(_on_folding_changed)
 	minimum_size_changed.connect(_request_layout)
 	_request_layout()
+	for view: InfluenceMapDebugDraw.DebugView in InfluenceMapDebugDraw.DebugViewNames:
+		if view == InfluenceMapDebugDraw.DebugView.NONE:
+			continue
+		var title: String = InfluenceMapDebugDraw.DebugViewNames[view].replace("_", " ").capitalize()
+		if view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE:
+			title = "Selected squad placement"
+		placement_layer.add_item(title, view)
+	placement_team.add_item("Axis", Globals.Team.AXIS)
+	placement_team.add_item("Allies", Globals.Team.ALLIES)
+	ai_placement.toggled.connect(_on_ai_placement_toggled)
+	debug_text.toggled.connect(_on_debug_text_toggled)
+	placement_layer.item_selected.connect(_on_placement_layer_selected)
+	placement_team.item_selected.connect(_on_placement_team_selected)
+	Debug.ai_placement_visibility_changed.connect(_sync_placement_visibility)
+	Debug.debug_text_visibility_changed.connect(_sync_debug_text)
+	_sync_placement_visibility(Debug.show_ai_placement)
+	_sync_debug_text(Debug.show_debug_text)
 	enemy_selectable.button_pressed = Debug.enemy_selectable
 	no_damage.button_pressed = Debug.no_damage
 	thread_map.button_pressed = Debug.draw_thread_map
@@ -74,12 +94,38 @@ func fit_panel(panel_position: Vector2, max_height: float) -> void:
 	position = panel_position
 
 
-func _process(delta: float) -> void:
-	if not OS.is_debug_build():
-		return
-	influence_map_name.text = Debug.influence_map_name
-	influence_map_team_name.text = Debug.influence_map_team_name
+func _on_ai_placement_toggled(enabled: bool) -> void:
+	Debug.show_ai_placement = enabled
 
+
+func _on_debug_text_toggled(enabled: bool) -> void:
+	Debug.show_debug_text = enabled
+
+
+func _sync_placement_visibility(enabled: bool) -> void:
+	ai_placement.set_pressed_no_signal(enabled)
+	placement_options.visible = enabled
+	_request_layout()
+
+
+func _sync_debug_text(enabled: bool) -> void:
+	debug_text.set_pressed_no_signal(enabled)
+
+
+func _on_placement_layer_selected(index: int) -> void:
+	if _placement_overlay != null:
+		_placement_overlay.set_debug_view(placement_layer.get_item_id(index))
+
+
+func _on_placement_team_selected(index: int) -> void:
+	if _placement_overlay != null:
+		_placement_overlay.set_team(placement_team.get_item_id(index))
+
+
+func _sync_placement_view() -> void:
+	placement_layer.select(placement_layer.get_item_index(_placement_overlay.debug_view))
+	placement_team.select(placement_team.get_item_index(_placement_overlay.team))
+	placement_team.disabled = _placement_overlay.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and is_instance_valid(_placement_overlay.selected_unit)
 
 
 func _on_enemy_selectable_toggled(toggled_on: bool) -> void:
@@ -92,6 +138,9 @@ func _on_no_damage_toggled(toggled_on: bool) -> void:
 
 func bind_ai_controls(controller: Node2D) -> void:
 	_ai_controller = controller
+	_placement_overlay = controller.influence_map_debug_draw
+	_placement_overlay.view_changed.connect(_sync_placement_view)
+	_sync_placement_view()
 	controller.ai_status_changed.connect(_on_ai_status_changed)
 	axis_ai_status.item_selected.connect(_on_ai_status_selected.bind(Globals.Team.AXIS))
 	axis_ai_mode.item_selected.connect(_on_ai_mode_selected.bind(Globals.Team.AXIS))

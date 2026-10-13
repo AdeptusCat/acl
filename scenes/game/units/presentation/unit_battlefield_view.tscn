@@ -449,6 +449,7 @@ modulate = Color(3.1229057, 3.1229057, 3.1229057, 1)
 texture = ExtResource("46_wb6dq")
 
 [node name="AmmunitionLeft" type="Label" parent="." unique_id=2132178079]
+visible = false
 layout_mode = 0
 offset_left = 34.0
 offset_top = 28.0

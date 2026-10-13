@@ -1,6 +1,8 @@
 class_name InfluenceMapDebugDraw
 extends Node2D
 
+signal view_changed
+
 enum DebugView {
 	NONE,
 	COMPOSITE,
@@ -70,6 +72,7 @@ const DebugViewNames: Dictionary[DebugView, String] = {
 @export var value_text_min_zoom: float = 0.75
 
 var selected_unit: Unit
+var debug_enabled: bool = false
 var position_advice: PositionResult
 var position_advice_provider: Callable
 var _view_before_selection: DebugView = DebugView.NONE
@@ -108,6 +111,44 @@ var _cache_valid: bool = false
 				#influence_controller.connect("influence_maps_updated", callable)
 
 
+func _ready() -> void:
+	Debug.ai_placement_visibility_changed.connect(set_debug_enabled)
+	Debug.debug_text_visibility_changed.connect(set_debug_text_enabled)
+	set_debug_text_enabled(Debug.show_debug_text)
+	set_debug_enabled(Debug.show_ai_placement)
+
+
+func set_debug_enabled(enabled: bool) -> void:
+	debug_enabled = enabled and OS.is_debug_build()
+	set_process(debug_enabled)
+	set_process_input(debug_enabled)
+	if not debug_enabled:
+		position_advice = null
+		_layer_access_text = ""
+		if debug_view == DebugView.POSITION_SCORE:
+			set_team(_team_before_selection)
+			set_debug_view(_view_before_selection)
+		if influence_controller != null:
+			influence_controller.clear_inspection_queries()
+		hide()
+		queue_redraw()
+		return
+	if debug_view == DebugView.NONE:
+		set_debug_view(DebugView.COMPOSITE)
+	if is_instance_valid(selected_unit):
+		_view_before_selection = debug_view
+		_team_before_selection = team
+		set_selected_unit(selected_unit)
+	else:
+		set_debug_view(debug_view)
+
+
+func set_debug_text_enabled(enabled: bool) -> void:
+	draw_cell_values = enabled and OS.is_debug_build()
+	draw_layer_access_text = draw_cell_values
+	queue_redraw()
+
+
 func setup() -> void:
 	refresh_cells()
 
@@ -120,7 +161,7 @@ func setup() -> void:
 
 
 func _process(delta: float) -> void:
-	if debug_view == DebugView.NONE:
+	if not debug_enabled or debug_view == DebugView.NONE:
 		return
 
 	if debug_view == DebugView.POSITION_SCORE:
@@ -136,6 +177,8 @@ func set_selected_unit(unit: Unit) -> void:
 		_team_before_selection = team
 	selected_unit = unit
 	position_advice = null
+	if not debug_enabled:
+		return
 	if unit == null:
 		if debug_view == DebugView.POSITION_SCORE:
 			set_team(_team_before_selection)
@@ -149,6 +192,8 @@ func set_selected_unit(unit: Unit) -> void:
 func _refresh_position_advice() -> void:
 	position_advice = null
 	_advice_refresh_time = 0.0
+	if not debug_enabled:
+		return
 	if is_instance_valid(selected_unit):
 		_advice_origin = selected_unit.current_hex
 		if position_advice_provider.is_valid():
@@ -171,10 +216,14 @@ func _get_position_advice() -> PositionResult:
 
 func set_debug_view(p_debug_view: int) -> void:
 	debug_view = p_debug_view as DebugView
+	if debug_enabled and debug_view == DebugView.POSITION_SCORE and is_instance_valid(selected_unit) and team != selected_unit.team:
+		set_team(selected_unit.team)
 	_cache_valid = false
 	Debug.influence_map_name = DebugViewNames[p_debug_view]
 	_debug_report_layer_access("View changed")
+	visible = debug_enabled and debug_view != DebugView.NONE
 	queue_redraw()
+	view_changed.emit()
 
 
 func set_team(p_team: int) -> void:
@@ -183,6 +232,7 @@ func set_team(p_team: int) -> void:
 	_cache_valid = false
 	_debug_report_layer_access("View changed")
 	queue_redraw()
+	view_changed.emit()
 
 
 func refresh_cells() -> void:
@@ -202,13 +252,15 @@ func refresh_cells() -> void:
 
 func _on_influence_maps_updated() -> void:
 	_cache_valid = false
+	if not debug_enabled:
+		return
 	if is_instance_valid(selected_unit):
 		_refresh_position_advice()
 	queue_redraw()
 
 
 func _draw() -> void:
-	if debug_view == DebugView.NONE:
+	if not debug_enabled or debug_view == DebugView.NONE:
 		return
 
 	if tile_map_layer == null:
@@ -529,6 +581,8 @@ func _draw_value_text(center: Vector2, value: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if not debug_enabled:
+		return
 	if not event is InputEventKey:
 		return
 
@@ -605,6 +659,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _cycle_team() -> void:
+	if debug_view == DebugView.POSITION_SCORE and is_instance_valid(selected_unit):
+		return
 	if team == Globals.Team.ALLIES:
 		set_team(Globals.Team.AXIS)
 		return
@@ -622,28 +678,28 @@ func _cycle_team() -> void:
 # DEBUG ###############
 
 @export var debug_probe_cell: Vector2i
-@export var draw_layer_access_text: bool = true
+@export var draw_layer_access_text: bool = false
 
 var _layer_access_text: String = ""
 
 func _debug_report_layer_access(reason: String) -> void:
+	if not debug_enabled:
+		_layer_access_text = ""
+		return
 	if influence_controller == null:
 		_layer_access_text = "Influence controller missing"
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	var influence_map_variant: Variant = influence_controller.get_map_for_team(team)
 
 	if influence_map_variant == null:
 		_layer_access_text = "Map missing for team %d" % team
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	var influence_map: InfluenceMap = influence_map_variant as InfluenceMap
 
 	if influence_map == null:
 		_layer_access_text = "Selected map is not an InfluenceMap"
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	var probe_cell: Vector2i = debug_probe_cell
@@ -669,7 +725,6 @@ func _debug_report_layer_access(reason: String) -> void:
 			]
 		)
 
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	if debug_view == DebugView.POSITION_SCORE:
@@ -726,12 +781,10 @@ func _debug_report_layer_access(reason: String) -> void:
 
 	if layer_id < 0:
 		_layer_access_text = "Debug view has no layer mapping"
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	if layer_id >= influence_map._layers.size():
 		_layer_access_text = "Layer ID outside _layers array: %d" % layer_id
-		print("[InfluenceMapDebug] ", _layer_access_text)
 		return
 
 	var index: int = influence_map.cell_to_index(probe_cell)
@@ -781,5 +834,3 @@ func _debug_report_layer_access(reason: String) -> void:
 			non_zero_count
 		]
 	)
-
-	print("[InfluenceMapDebug] ", _layer_access_text)

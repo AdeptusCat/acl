@@ -112,6 +112,7 @@ func _run() -> void:
 	_check(debug.axis_ai_status.is_visible_in_tree() and not debug.axis_ai_status.disabled, "Expanding debug reveals the existing functional AI controls")
 	_check(not debug.get_rect().intersects(world.ui.squad_roster.get_rect()), "Expanded debug does not cover the squad roster")
 	_check(not debug.get_rect().intersects(world.ui.mission_objectives.get_rect()) and not debug.get_rect().intersects(world.ui.tile_details.get_rect()), "Expanded debug avoids mission objectives and tile details")
+	await _test_debug_overlays(world, debug)
 	debug.section.fold()
 	await _settle()
 	_check(not debug.axis_ai_status.is_visible_in_tree() and debug.size.y <= 48.0, "Folding debug restores the compact title bar")
@@ -175,6 +176,101 @@ func _run() -> void:
 	await _settle()
 	print("HUD clutter checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
+	var draw: InfluenceMapDebugDraw = world.game_controller.influence_map_debug_draw
+	var influence: InfluenceMapController = world.game_controller.influence_map_controller
+	var squad: Unit = Globals.get_units_for_team(Globals.team_player)[1]
+	var stress_arrow: Label = squad.ui.get_node("StressLevel")
+	var leadership_arrow: Label = squad.ui.get_node("LeadershipBonus")
+	var stress_text_before: String = stress_arrow.text
+	var leadership_text_before: String = leadership_arrow.text
+	var morale_scale_before: Vector2 = squad.ui.morale_bar.scale
+	_check(not Debug.show_ai_placement and not draw.visible and not draw.debug_enabled and not draw.is_processing() and not panel.placement_options.visible, "AI placement overlays start hidden and inactive")
+	_check(not Debug.show_debug_text and not draw.draw_cell_values and not draw.draw_layer_access_text and not squad.ui.get_node("AmmunitionLeft").visible, "Numeric counters, map values and diagnostic text start hidden")
+	squad.stress_system.stress_changed.emit(60.0)
+	squad.stress_system.leadership_changed.emit(RankGrades.GRADE_PARAMS[RankGrades.Grade.PLATOON_LEADER].lead)
+	_check_morale_markers(squad, "Normal play with all debug toggles off")
+	world.game_controller._select_unit(squad)
+	draw._on_influence_maps_updated()
+	draw._process(1.0)
+	_check(draw.selected_unit == squad and draw.position_advice == null and influence.inspection_jobs.is_empty() and influence.inspection_results.is_empty() and draw._layer_access_text.is_empty(), "Selecting a squad with debugging off performs no placement inspection")
+	var shortcut: InputEventKey = InputEventKey.new()
+	shortcut.keycode = KEY_F1
+	shortcut.pressed = true
+	get_viewport().push_input(shortcut, true)
+	_check(not draw.visible and draw.debug_view == InfluenceMapDebugDraw.DebugView.NONE, "A debug keyboard shortcut cannot enable overlays while the menu toggle is off")
+	for frame: int in range(1000):
+		influence._process_los_rebuild()
+		influence._process_budgeted_rebuild()
+		if influence.snapshot != null:
+			break
+	var order_id: int = squad.action_controller.action_order_id
+	var assigned: PositionResult = squad.position_advice
+	_pointer_event(panel.ai_placement.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_finish_placement_inspection(influence, draw)
+	_check(Debug.show_ai_placement and draw.visible and draw.debug_enabled and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and draw.position_advice != null and panel.placement_options.visible, "The debug-menu checkbox enables placement inspection for the already selected squad")
+	_check(not draw.draw_cell_values and not draw.draw_layer_access_text and not squad.ui.get_node("AmmunitionLeft").visible, "Enabling AI placement alone leaves numeric and text diagnostics hidden")
+	_check_morale_markers(squad, "AI placement enabled")
+	_check(squad.action_controller.action_order_id == order_id and squad.position_advice == assigned, "Inspecting placement preserves the squad's orders and tactical assignment")
+	var layer_index: int = panel.placement_layer.get_item_index(InfluenceMapDebugDraw.DebugView.THREAT)
+	panel.placement_layer.select(layer_index)
+	panel.placement_layer.item_selected.emit(layer_index)
+	var team_index: int = panel.placement_team.get_item_index(Globals.team_enemy)
+	panel.placement_team.select(team_index)
+	panel.placement_team.item_selected.emit(team_index)
+	_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.THREAT and draw.team == Globals.team_enemy and not panel.placement_team.disabled, "Debug-menu selectors change the influence layer and team")
+	world.game_controller._deselect_unit(squad)
+	world.game_controller._select_unit(squad)
+	_check(draw.team == squad.team and panel.placement_team.disabled and panel.placement_layer.get_selected_id() == InfluenceMapDebugDraw.DebugView.POSITION_SCORE, "Selecting a squad updates placement diagnostics and synchronizes the menu")
+	_finish_placement_inspection(influence, draw)
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("placement-debug")
+	_pointer_event(panel.ai_placement.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_check(not draw.visible and not draw.debug_enabled and not draw.is_processing() and draw.position_advice == null and influence.inspection_jobs.is_empty() and influence.inspection_results.is_empty(), "Disabling the checkbox hides every AI overlay and cancels inspection work immediately")
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
+	world.game_controller._select_unit(squad)
+	_check(not draw.visible and draw.position_advice == null, "Layer changes and later selections cannot bypass the disabled debug toggle")
+	_pointer_event(panel.debug_text.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_check(Debug.show_debug_text and draw.draw_cell_values and draw.draw_layer_access_text and squad.ui.get_node("AmmunitionLeft").visible and not draw.visible, "Debug text has a separate explicit toggle and does not enable influence overlays")
+	_check_morale_markers(squad, "Debug text enabled")
+	_pointer_event(panel.debug_text.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_check(not Debug.show_debug_text and not squad.ui.get_node("AmmunitionLeft").visible, "Turning debug text off hides numeric counters")
+	_check_morale_markers(squad, "Both debug toggles disabled again")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("morale-markers")
+	var exited: UnitUi = load("res://scenes/game/units/presentation/unit_battlefield_view.tscn").instantiate()
+	world.ui.get_node("Control").add_child(exited)
+	exited.mark_exited()
+	Debug.show_debug_text = true
+	_check(not exited.get_node("AmmunitionLeft").visible and not exited.get_node("StressLevel").visible, "Debug text cannot restore annotations for an exited squad")
+	Debug.show_debug_text = false
+	exited.queue_free()
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.NONE)
+	world.game_controller._deselect_unit(squad)
+	stress_arrow.text = stress_text_before
+	leadership_arrow.text = leadership_text_before
+	squad.ui.morale_bar.scale = morale_scale_before
+	await _settle()
+
+
+func _finish_placement_inspection(influence: InfluenceMapController, draw: InfluenceMapDebugDraw) -> void:
+	for frame: int in range(1000):
+		influence._process_position_queries()
+		draw._refresh_position_advice()
+		if draw.position_advice != null:
+			return
+	_check(false, "Placement inspection completes")
+
+
+func _check_morale_markers(squad: Unit, context: String) -> void:
+	var stress: Label = squad.ui.get_node("StressLevel")
+	var leadership: Label = squad.ui.get_node("LeadershipBonus")
+	_check(stress.visible and stress.text == "<<<" and leadership.visible and leadership.text == ">>", "%s preserves working stress and leadership arrows" % context)
+	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.scale.x, 0.6) and squad.ui.rank_texture_rect.visible and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
 
 
 func _check_top_layout(world: Node, settings: Control) -> void:

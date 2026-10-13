@@ -52,6 +52,18 @@ var _exited: bool = false
 
 signal debug_kill_soldier
 
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+	Debug.debug_text_visibility_changed.connect(_set_debug_text_visible)
+	_set_debug_text_visible(Debug.show_debug_text)
+
+
+func _set_debug_text_visible(enabled: bool) -> void:
+	# Morale and leadership arrows are gameplay indicators, independent of debug text.
+	$AmmunitionLeft.visible = enabled and OS.is_debug_build() and not _exited and not dead.visible
+
+
 func set_ammunition_left(ammo: int) -> void:
 	$AmmunitionLeft.text = str(ammo)
 
@@ -469,6 +481,7 @@ func surrender() -> void:
 
 func mark_exited() -> void:
 	_exited = true
+	_set_debug_text_visible(false)
 	for child: Control in unit_status_control.get_children():
 		child.hide()
 	morale_bar.hide()
@@ -488,6 +501,7 @@ func mark_exited() -> void:
 
 func die() -> void:
 	dead.show()
+	_set_debug_text_visible(false)
 	$StressLevel.hide()
 	$MoraleBar.hide()
 	$MoraleBarDefault.hide()

@@ -321,13 +321,15 @@ func _add_scenario_squad(map: Map, scenario: Scenario, team: Globals.Team) -> Un
 func _test_position_inspection(world: Node, player_team: Globals.Team) -> void:
 	var draw: InfluenceMapDebugDraw = world.game_controller.influence_map_debug_draw
 	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	var panel: PanelContainer = world.ui.get_node("Control/Debug")
+	panel.ai_placement.button_pressed = true
 	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
 	var valid_previews: int = 0
 	for unit: Unit in Globals.get_units_for_team(player_team):
 		var order_id: int = unit.action_controller.action_order_id
 		var tactical_advice: PositionResult = unit.position_advice
 		world.game_controller._select_unit(unit)
-		_check(draw.selected_unit == unit and draw.team == player_team and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE, "Click selection opens the player's position overlay without a keyboard shortcut")
+		_check(draw.selected_unit == unit and draw.team == player_team and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE, "Click selection inspects player positions only after enabling the debug overlay")
 		var advice: PositionResult = draw.position_advice
 		_check(advice != null and advice.unit == unit and advice.snapshot_version == controller.snapshot.version, "Player inspection queries the completed snapshot without an AI mission")
 		_check(unit.action_controller.action_order_id == order_id and unit.position_advice == tactical_advice, "Player inspection neither issues orders nor replaces tactical advice")
@@ -346,3 +348,4 @@ func _test_position_inspection(world: Node, player_team: Globals.Team) -> void:
 				world.game_controller._select_unit(unit)
 				_check(draw.position_advice == planner.squad_assignments[unit]["result"], "AI inspection preserves the exact assigned query and reservation diagnostics")
 				world.game_controller._deselect_unit(unit)
+	panel.ai_placement.button_pressed = false
