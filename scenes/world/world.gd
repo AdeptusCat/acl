@@ -38,6 +38,7 @@ var is_setup: bool = false
 
 
 func _exit_tree() -> void:
+	LOSHelper.unload_map()
 	fully_freed.emit()
 
 

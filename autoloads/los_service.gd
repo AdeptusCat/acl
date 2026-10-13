@@ -42,6 +42,7 @@ func _ready() -> void:
 	
 
 func load_prebaked_los(map: Map) -> void:
+	clear_los()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	if not map.los_resource_path.is_empty():
 		file_path = map.los_resource_path
@@ -58,7 +59,25 @@ func load_prebaked_los(map: Map) -> void:
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 
+
+func unload_map() -> void:
+	clear_los()
+	ground_layer = null
+	building_layer = null
+	wall_layer = null
+	terrain_layer = null
+	grid_size = Vector2i.ZERO
+	los_lookup = {}
+	visible_hexes = {Globals.Team.AXIS: [], Globals.Team.ALLIES: []}
+	initialized = false
+
+
+func _has_map_layers() -> bool:
+	return is_instance_valid(ground_layer) and is_instance_valid(building_layer) and is_instance_valid(wall_layer) and is_instance_valid(terrain_layer)
+
+
 func bake_and_save_los_data(map: Map) -> void:
+	clear_los()
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
@@ -1062,7 +1081,7 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 
 
 func _draw() -> void:
-	if not debug_draw_enabled:
+	if not debug_draw_enabled or not is_instance_valid(ground_layer) or los_lines.is_empty():
 		return
 	
 	if origin_hex == Vector2i(-1, -1):
@@ -1094,6 +1113,9 @@ func _draw() -> void:
 
 func generate_los_lines_for_debug() -> void:
 	if not debug_draw_enabled:
+		return
+	if not _has_map_layers() or origin_hex == Vector2i(-1, -1):
+		clear_los()
 		return
 
 	los_lines.clear()
@@ -1127,6 +1149,9 @@ func generate_los_lines_for_debug() -> void:
 var _target_hex: Variant
 var _origin_hex: Variant
 func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
+	if not _has_map_layers():
+		clear_los()
+		return
 	var target_hex: Vector2i = ground_layer.local_to_map(target_pos)
 	origin_hex = ground_layer.local_to_map(origin_pos)
 	if origin_hex == target_hex:
@@ -1155,6 +1180,7 @@ func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 
 func clear_los() -> void:
 	los_lines.clear()
+	origin_hex = Vector2i(-1, -1)
 	_target_hex = null
 	_origin_hex = null
 	queue_redraw()
