@@ -733,7 +733,7 @@ func _debug_report_layer_access(reason: String) -> void:
 		if advice != null:
 			var candidate_count: int = advice.eligibility.count(1)
 			var waiting_count: int = advice.cell_states.count(PositionResult.CellState.WAITING_HANDOFF)
-			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.name, candidate_count, advice.reason]
+			_layer_access_text = "Snapshot %d | %s | %d candidates\n%s" % [advice.snapshot_version, selected_unit.get_hud_name(), candidate_count, advice.reason]
 			_layer_access_text += "\nGreen = available | amber = useful, waiting for covering fire | hover a hex for its reason"
 			_layer_access_text += "\nWaiting positions: %d" % waiting_count
 			var reserve_reason: String = advice.features.get("reserve_reason", "")

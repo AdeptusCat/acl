@@ -183,6 +183,7 @@ func setup() -> void:
 	if Engine.is_editor_hint():
 		return
 	
+	ui.set_unit_designation(get_squad_name())
 	action_controller.init(self, movement, squad_fire, stress_system, ui)
 	retreat_complete.connect(_on_retreat_complete)
 	cover_updated.connect(ui._on_cover_updated)
@@ -851,6 +852,51 @@ func get_squad_type_name(type: Globals.SquadType) -> String:
 		Globals.SquadType.COMPANY_HEADQUARTERS: return "Company Headquarters"
 		_: return "Unknown"
 		
+
+func get_squad_name() -> String:
+	match squad_type:
+		Globals.SquadType.PLATOON_HEADQUARTERS:
+			return "Platoon HQ"
+		Globals.SquadType.COMPANY_HEADQUARTERS:
+			return "Company HQ"
+	return format_squad_name(squad)
+
+
+static func format_squad_name(number: int) -> String:
+	if number <= 0:
+		return "Squad"
+	var suffix: String = "th"
+	var last_two_digits: int = number % 100
+	if last_two_digits < 11 or last_two_digits > 13:
+		match number % 10:
+			1:
+				suffix = "st"
+			2:
+				suffix = "nd"
+			3:
+				suffix = "rd"
+	return "%d%s Squad" % [number, suffix]
+
+
+func get_hud_name() -> String:
+	var designation: String = get_squad_name()
+	match squad_type:
+		Globals.SquadType.Rifle:
+			return designation + " · Rifle"
+		Globals.SquadType.MG:
+			return designation + " · MG"
+		Globals.SquadType.ANTITANK:
+			return designation + " · Antitank"
+		Globals.SquadType.MORTAR:
+			return designation + " · Mortar"
+	return designation
+
+
+func get_formation_name() -> String:
+	if squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+		return "Company %s · Headquarters" % COMPANY_NAMES[company]
+	return "Company %s · Platoon %d" % [COMPANY_NAMES[company], platoon]
+
 
 func surrender() -> void:
 	if not is_active() or surrendered:

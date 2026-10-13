@@ -23,10 +23,7 @@ func _on_morale_state_changed(_previous: int, _next: int) -> void:
 func refresh() -> void:
 	if not is_instance_valid(unit):
 		return
-	var designation: String = unit.ui.unit_designation_label.text.strip_edges()
-	if designation.is_empty():
-		designation = str(unit.squad)
-	identity.text = "%s · %s" % [designation, _short_type(unit.squad_type)]
+	identity.text = unit.get_hud_name()
 	var remaining: int = unit.squad_fire.soldiers.size()
 	strength.text = "%d/%d" % [remaining, unit.original_size]
 	strength_bar.value = float(remaining) / float(maxi(1, unit.original_size))
@@ -49,7 +46,7 @@ func refresh() -> void:
 	rout_available.visible = unit.can_rout()
 	isolation.visible = _is_isolated()
 	set_pressed_no_signal(unit.selected)
-	tooltip_text = "%s · %s\nCompany %s · Platoon %d · Squad %d\nStrength: %d/%d · Morale: %s\nClick to select and center" % [designation, unit.get_squad_type_name(unit.squad_type), Unit.COMPANY_NAMES[unit.company], unit.platoon, unit.squad, remaining, unit.original_size, morale.text]
+	tooltip_text = "%s\n%s\nStrength: %d/%d · Morale: %s\nClick to select and center" % [identity.text, unit.get_formation_name(), remaining, unit.original_size, morale.text]
 	if rout_available.visible:
 		tooltip_text += "\nRout available: select this squad, then right click for Rout.\nAn uncontrolled retreat; no escape route means surrender."
 	if isolation.visible:
@@ -66,20 +63,3 @@ func _is_isolated() -> bool:
 		return true
 	var link: CommandConnectivity = unit.command_connectivity
 	return not (link.los_to_leader or link.voice_range_to_leader or link.runner_chain_to_leader or link.radio_link_to_leader)
-
-
-func _short_type(type: Globals.SquadType) -> String:
-	match type:
-		Globals.SquadType.Rifle:
-			return "Rifle"
-		Globals.SquadType.MG:
-			return "MG"
-		Globals.SquadType.ANTITANK:
-			return "Antitank"
-		Globals.SquadType.MORTAR:
-			return "Mortar"
-		Globals.SquadType.PLATOON_HEADQUARTERS:
-			return "Platoon HQ"
-		Globals.SquadType.COMPANY_HEADQUARTERS:
-			return "Company HQ"
-	return "Squad"

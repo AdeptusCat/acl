@@ -489,17 +489,10 @@ func start_game(team: Globals.Team, time: float) -> void:
 	
 	start_match.emit()
 	
-	var i_team_0: int = 0
-	var i_team_1: int = 0
 	for unit: Unit in Globals.get_units():
 		if unit.team == Globals.team_player:
 			unit.visible = true
-		if unit.team == Globals.team_player:
-			unit.ui.set_unit_designation(index_to_char(i_team_0))
-			i_team_0 += 1
-		else:
-			unit.ui.set_unit_designation(index_to_char(i_team_1))
-			i_team_1 += 1
+		unit.ui.set_unit_designation(unit.get_squad_name())
 			
 	update_visible_hexes()
 	draw_fog()
@@ -669,11 +662,6 @@ func create_test_axes() -> Array[ThreatAxis]:
 	axes.append(east_axis)
 
 	return axes
-
-
-func index_to_char(i: int) -> String:
-	var char_code: int = ord("A") + i
-	return String.chr(char_code)
 
 
 func _on_started_moving() -> void:

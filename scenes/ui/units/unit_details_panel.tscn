@@ -43,7 +43,7 @@ theme_override_constants/separation = 4
 [node name="Identity" type="Label" parent="Summary"]
 layout_mode = 2
 mouse_filter = 1
-text = "A · Rifle Squad"
+text = "1st Squad · Rifle"
 text_overrun_behavior = 3
 clip_text = true
 script = ExtResource("5")
@@ -51,7 +51,7 @@ theme_type_variation = &"HudHeading"
 
 [node name="Formation" type="Label" parent="Summary"]
 layout_mode = 2
-text = "Company A · Platoon 1 · Squad 1"
+text = "Company A · Platoon 1"
 text_overrun_behavior = 3
 clip_text = true
 theme_type_variation = &"HudSecondary"

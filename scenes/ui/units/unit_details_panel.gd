@@ -184,12 +184,10 @@ func _set_roster_row(index: int, soldier: Soldier) -> void:
 
 
 func _refresh_summary() -> void:
-	var designation: String = unit.ui.unit_designation_label.text
-	unit_type_label.text = unit.get_squad_type_name(unit.squad_type)
-	if not designation.is_empty():
-		unit_type_label.text = designation + " · " + unit_type_label.text
+	unit_type_label.text = unit.get_hud_name()
 	unit_type_label.tooltip_text = unit_type_label.text
-	formation_label.text = "Company %s · Platoon %d · Squad %d" % [Unit.COMPANY_NAMES[unit.company], unit.platoon, unit.squad]
+	formation_label.text = unit.get_formation_name()
+	formation_label.tooltip_text = formation_label.text
 	strength_label.text = "Soldiers: %d/%d" % [unit.squad_fire.soldiers.size(), unit.original_size]
 	strength_label.tooltip_text = strength_label.text
 	_on_state_changed(unit.stress_system.state)

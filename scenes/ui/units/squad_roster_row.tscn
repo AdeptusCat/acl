@@ -39,7 +39,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
-text = "A · Rifle"
+text = "1st Squad · Rifle"
 text_overrun_behavior = 3
 clip_text = true
 

@@ -107,9 +107,7 @@ func _rebuild_groups(units: Array[Unit]) -> void:
 			heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			heading.add_theme_color_override("font_color", Color(0.8, 0.65, 0.45))
 			heading.theme_type_variation = &"HudSecondary"
-			heading.text = "Company %s · Platoon %d" % [Unit.COMPANY_NAMES[unit.company], group.y]
-			if group.y == 0:
-				heading.text = "Company %s · Headquarters" % Unit.COMPANY_NAMES[unit.company]
+			heading.text = unit.get_formation_name()
 			platoon_rows.add_child(heading)
 		var row: SquadRosterRow = ROW_SCENE.instantiate() as SquadRosterRow
 		row.unit = unit
