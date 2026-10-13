@@ -6495,7 +6495,7 @@
 						224.0,
 						160.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6508,7 +6508,7 @@
 						224.0,
 						224.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6534,7 +6534,7 @@
 						224.0,
 						992.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6547,7 +6547,7 @@
 						224.0,
 						1056.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6586,7 +6586,7 @@
 						272.0,
 						448.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6612,7 +6612,7 @@
 						272.0,
 						832.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6625,7 +6625,7 @@
 						272.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6690,7 +6690,7 @@
 						320.0,
 						224.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6716,7 +6716,7 @@
 						320.0,
 						672.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6781,7 +6781,7 @@
 						368.0,
 						448.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6794,7 +6794,7 @@
 						368.0,
 						512.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6820,7 +6820,7 @@
 						368.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6859,7 +6859,7 @@
 						416.0,
 						224.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6898,7 +6898,7 @@
 						416.0,
 						672.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6911,7 +6911,7 @@
 						416.0,
 						1056.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6924,7 +6924,7 @@
 						416.0,
 						1120.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6963,7 +6963,7 @@
 						464.0,
 						512.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -6989,7 +6989,7 @@
 						464.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7067,7 +7067,7 @@
 						560.0,
 						512.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7080,7 +7080,7 @@
 						560.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7158,7 +7158,7 @@
 						608.0,
 						352.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7184,7 +7184,7 @@
 						608.0,
 						736.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7197,7 +7197,7 @@
 						608.0,
 						1120.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7236,7 +7236,7 @@
 						656.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7249,7 +7249,7 @@
 						656.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7288,7 +7288,7 @@
 						656.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7353,7 +7353,7 @@
 						704.0,
 						352.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7379,7 +7379,7 @@
 						704.0,
 						736.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7392,7 +7392,7 @@
 						704.0,
 						800.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7457,7 +7457,7 @@
 						752.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7470,7 +7470,7 @@
 						752.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7496,7 +7496,7 @@
 						752.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7535,7 +7535,7 @@
 						800.0,
 						352.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7548,7 +7548,7 @@
 						800.0,
 						416.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7574,7 +7574,7 @@
 						800.0,
 						800.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7613,7 +7613,7 @@
 						848.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7626,7 +7626,7 @@
 						848.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7652,7 +7652,7 @@
 						848.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7717,7 +7717,7 @@
 						896.0,
 						416.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7743,7 +7743,7 @@
 						896.0,
 						800.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7756,7 +7756,7 @@
 						896.0,
 						864.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7821,7 +7821,7 @@
 						944.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7873,7 +7873,7 @@
 						992.0,
 						32.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7886,7 +7886,7 @@
 						992.0,
 						416.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7925,7 +7925,7 @@
 						1040.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,
@@ -7964,7 +7964,7 @@
 						1040.0,
 						704.0
 					],
-					"texture": "res://assets/tiles/terrain/field.png"
+					"texture": "res://assets/tiles/fields/field_stubble.png"
 				},
 				{
 					"flip_h": false,

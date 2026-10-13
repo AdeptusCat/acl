@@ -542,7 +542,9 @@ scenario_description = "Road to Alderbrook - mission 5 of 5.
 
 The full company attacks across three bridge approaches into the village. You have three rifle platoons, their machine-gun teams, company headquarters, and a light mortar. Give each platoon a district, establish covering fire, and keep a reserve until the defense shows a weakness. Enemy survivors may try to escape east after their command post falls; secure the exit routes before the final assault.
 
-Major: hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline. Minor: hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient."
+[b]Major Victory:[/b] hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline.
+
+[b]Minor Victory:[/b] hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient."
 duration_s = 900.0
 use_authored_duration = true
 released = true

@@ -3,38 +3,48 @@ extends Node
 const MAP_DIRECTORY: String = "res://scenes/campaigns/alderbrook/"
 const RESOURCE_DIRECTORY: String = "res://resources/campaigns/"
 const IMAGE_DIRECTORY: String = "res://docs/campaigns/road_to_alderbrook/maps/"
+const FIELD_IMAGES: Dictionary[String, String] = {
+	"field_nw_sw_alt.png": "res://assets/tiles/fields/field_wheat.png",
+	"field_sw_so.png": "res://assets/tiles/fields/field_green_rows.png",
+	"field_n_s.png": "res://assets/tiles/fields/field_ploughed.png",
+	"field.png": "res://assets/tiles/fields/field_stubble.png",
+	"field_nw_no.png": "res://assets/tiles/fields/field_wheat.png",
+	"field_nw_sw.png": "res://assets/tiles/fields/field_green_rows.png",
+	"field_no_sw.png": "res://assets/tiles/fields/field_ploughed.png",
+	"field_sw_s.png": "res://assets/tiles/fields/field_stubble.png",
+}
 const MISSIONS: Array[Dictionary] = [
 	{
 		"id": "01_quiet_approach", "title": "1. Quiet Approach", "map": "Alderbrook Approach", "size": Vector2i(16, 10), "seconds": 600.0,
-		"briefing": "Road to Alderbrook - mission 1 of 5.\n\nA small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.\n\nMajor: occupy the farm at A for 15 seconds. Minor: hold the rally point at B when time expires. A minor or major victory opens the next mission.",
+		"briefing": "Road to Alderbrook - mission 1 of 5.\n\nA small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.\n\n[b]Major Victory:[/b] occupy the farm at A for 15 seconds.\n\n[b]Minor Victory:[/b] hold the rally point at B when time expires. A minor or major victory opens the next mission.",
 		"player": [[1, "hq", 2, 6], [1, "rifle", 2, 5], [1, "rifle", 2, 7]],
 		"enemy": [[1, "hq", 14, 5], [1, "rifle", 12, 5]],
 		"allied_markers": [[1, 12, 5], [2, 7, 6], [4, 2, 6]], "axis_markers": [[1, 12, 5], [4, 14, 5]],
 	},
 	{
 		"id": "02_orchard_outpost", "title": "2. Orchard Outpost", "map": "Alderbrook Orchard", "size": Vector2i(18, 12), "seconds": 600.0,
-		"briefing": "Road to Alderbrook - mission 2 of 5.\n\nYour full platoon now has a machine-gun team. Clear the orchard outpost before the company moves up. The central lane is quick but exposed; the orchard and northern woodland give covered alternatives. Set up the gun before sending rifle squads forward.\n\nMajor: destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met. Minor: hold the orchard barn at B when time expires.",
+		"briefing": "Road to Alderbrook - mission 2 of 5.\n\nYour full platoon now has a machine-gun team. Clear the orchard outpost before the company moves up. The central lane is quick but exposed; the orchard and northern woodland give covered alternatives. Set up the gun before sending rifle squads forward.\n\n[b]Major Victory:[/b] destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met.\n\n[b]Minor Victory:[/b] hold the orchard barn at B when time expires.",
 		"player": [[1, "hq", 2, 6], [1, "rifle", 3, 5], [1, "rifle", 3, 6], [1, "rifle", 3, 7], [1, "mg", 2, 8]],
 		"enemy": [[1, "hq", 15, 7], [1, "rifle", 13, 6], [1, "rifle", 14, 5], [1, "mg", 12, 4]],
 		"allied_markers": [[1, 13, 6], [2, 9, 8], [4, 2, 6]], "axis_markers": [[1, 13, 6], [4, 15, 7]],
 	},
 	{
 		"id": "03_the_roadblock", "title": "3. The Roadblock", "map": "Alderbrook Roadblock", "size": Vector2i(20, 14), "seconds": 540.0,
-		"briefing": "Road to Alderbrook - mission 3 of 5.\n\nAn enemy column is trying to pass the roadblock and escape to the west. Your platoon has two machine-gun teams but no reinforcements. Cover the road and its woodland bypass, keep a rifle squad in reserve, and protect the western exits. The enemy starts beyond the wooded bend.\n\nMajor: destroy two enemy units and allow no enemy exits before the deadline. Minor: hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory.",
+		"briefing": "Road to Alderbrook - mission 3 of 5.\n\nAn enemy column is trying to pass the roadblock and escape to the west. Your platoon has two machine-gun teams but no reinforcements. Cover the road and its woodland bypass, keep a rifle squad in reserve, and protect the western exits. The enemy starts beyond the wooded bend.\n\n[b]Major Victory:[/b] destroy two enemy units and allow no enemy exits before the deadline.\n\n[b]Minor Victory:[/b] hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory.",
 		"player": [[1, "hq", 5, 9], [1, "rifle", 6, 6], [1, "rifle", 7, 6], [1, "rifle", 6, 8], [1, "mg", 7, 7], [1, "mg", 8, 8]],
 		"enemy": [[1, "hq", 18, 5], [1, "rifle", 17, 5], [1, "rifle", 17, 6], [2, "hq", 18, 9], [2, "rifle", 17, 8], [2, "rifle", 17, 9], [0, "company_hq", 19, 7]],
 		"allied_markers": [[1, 7, 7], [4, 5, 9]], "axis_markers": [[0, 0, 6], [0, 0, 7], [4, 18, 7]],
 	},
 	{
 		"id": "04_two_crossings", "title": "4. Two Crossings", "map": "Alderbrook Crossings", "size": Vector2i(24, 16), "seconds": 720.0,
-		"briefing": "Road to Alderbrook - mission 4 of 5.\n\nTwo reinforced platoons must open the river crossings and move a force into the village approaches. The river is impassable away from the two bridges. Assign a platoon to each crossing; leave a garrison on each eastern bank while the remaining squads pass through.\n\nMajor: hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together. Minor: exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches.",
+		"briefing": "Road to Alderbrook - mission 4 of 5.\n\nTwo reinforced platoons must open the river crossings and move a force into the village approaches. The river is impassable away from the two bridges. Assign a platoon to each crossing; leave a garrison on each eastern bank while the remaining squads pass through.\n\n[b]Major Victory:[/b] hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together.\n\n[b]Minor Victory:[/b] exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches.",
 		"player": [[1, "hq", 2, 4], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "rifle", 3, 5], [1, "mg", 2, 6], [2, "hq", 2, 10], [2, "rifle", 3, 9], [2, "rifle", 3, 10], [2, "rifle", 3, 11], [2, "mg", 2, 12], [0, "company_hq", 1, 7]],
 		"enemy": [[1, "hq", 17, 4], [1, "rifle", 14, 3], [1, "rifle", 14, 5], [1, "mg", 16, 4], [2, "hq", 17, 10], [2, "rifle", 14, 9], [2, "rifle", 14, 11], [2, "mg", 16, 10], [0, "company_hq", 20, 7]],
 		"allied_markers": [[1, 13, 4], [2, 13, 10], [0, 22, 4], [0, 22, 10], [4, 2, 7]], "axis_markers": [[1, 13, 4], [4, 17, 7]],
 	},
 	{
 		"id": "05_battle_for_alderbrook", "title": "5. Battle for Alderbrook", "map": "Alderbrook Village", "size": Vector2i(26, 18), "seconds": 900.0,
-		"briefing": "Road to Alderbrook - mission 5 of 5.\n\nThe full company attacks across three bridge approaches into the village. You have three rifle platoons, their machine-gun teams, company headquarters, and a light mortar. Give each platoon a district, establish covering fire, and keep a reserve until the defense shows a weakness. Enemy survivors may try to escape east after their command post falls; secure the exit routes before the final assault.\n\nMajor: hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline. Minor: hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient.",
+		"briefing": "Road to Alderbrook - mission 5 of 5.\n\nThe full company attacks across three bridge approaches into the village. You have three rifle platoons, their machine-gun teams, company headquarters, and a light mortar. Give each platoon a district, establish covering fire, and keep a reserve until the defense shows a weakness. Enemy survivors may try to escape east after their command post falls; secure the exit routes before the final assault.\n\n[b]Major Victory:[/b] hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline.\n\n[b]Minor Victory:[/b] hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient.",
 		"player": [[1, "hq", 2, 3], [1, "rifle", 3, 2], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "mg", 2, 5], [2, "hq", 2, 8], [2, "rifle", 3, 7], [2, "rifle", 3, 8], [2, "rifle", 3, 9], [2, "mg", 2, 10], [3, "hq", 2, 13], [3, "rifle", 3, 12], [3, "rifle", 3, 13], [3, "rifle", 3, 14], [3, "mg", 2, 15], [0, "company_hq", 1, 8], [0, "light_mortar", 1, 10]],
 		"enemy": [[1, "hq", 21, 4], [1, "rifle", 18, 3], [1, "rifle", 18, 5], [1, "mg", 17, 4], [2, "hq", 23, 9], [2, "rifle", 20, 8], [2, "rifle", 20, 10], [2, "mg", 20, 9], [3, "hq", 22, 14], [3, "rifle", 19, 13], [3, "rifle", 19, 15], [3, "mg", 18, 14], [0, "company_hq", 24, 11], [0, "medium_mortar", 24, 7]],
 		"allied_markers": [[1, 17, 4], [2, 20, 9], [3, 18, 14], [4, 2, 8]], "axis_markers": [[1, 20, 9], [2, 17, 4], [3, 18, 14], [0, 25, 8], [0, 25, 10], [4, 23, 9]],
@@ -61,6 +71,7 @@ func _run() -> void:
 	var template: Node = main.world
 	var base: Map = template.get_node("Maps/DefaultMap") as Map
 	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
+	_update_field_art()
 	_wall_set = base.get_wall_layer().tile_set.duplicate(true) as TileSet
 	_building_set = base.get_building_layer().tile_set.duplicate(true) as TileSet
 	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
@@ -131,6 +142,20 @@ func _run() -> void:
 	main.queue_free()
 	print("Built five Alderbrook campaign missions and baked all line of sight data.")
 	get_tree().quit()
+
+
+func _update_field_art() -> void:
+	for index: int in range(_terrain_set.get_source_count()):
+		var source: TileSetAtlasSource = _terrain_set.get_source(_terrain_set.get_source_id(index)) as TileSetAtlasSource
+		if source == null or not source.has_tile(Vector2i.ZERO):
+			continue
+		if str(source.get_tile_data(Vector2i.ZERO, 0).get_custom_data("name")) != "Field":
+			continue
+		var path: String = FIELD_IMAGES.get(source.texture.resource_path.get_file(), "")
+		if path.is_empty():
+			continue
+		source.texture = load(path) as Texture2D
+		source.resource_name = "Field - " + path.get_file().get_basename().trim_prefix("field_").capitalize()
 
 
 func _source_for(tiles: TileSet, label: String) -> int:

@@ -370,7 +370,9 @@ scenario_description = "Road to Alderbrook - mission 2 of 5.
 
 Your full platoon now has a machine-gun team. Clear the orchard outpost before the company moves up. The central lane is quick but exposed; the orchard and northern woodland give covered alternatives. Set up the gun before sending rifle squads forward.
 
-Major: destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met. Minor: hold the orchard barn at B when time expires."
+[b]Major Victory:[/b] destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met.
+
+[b]Minor Victory:[/b] hold the orchard barn at B when time expires."
 duration_s = 600.0
 use_authored_duration = true
 released = true

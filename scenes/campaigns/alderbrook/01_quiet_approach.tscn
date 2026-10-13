@@ -344,7 +344,9 @@ scenario_description = "Road to Alderbrook - mission 1 of 5.
 
 A small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.
 
-Major: occupy the farm at A for 15 seconds. Minor: hold the rally point at B when time expires. A minor or major victory opens the next mission."
+[b]Major Victory:[/b] occupy the farm at A for 15 seconds.
+
+[b]Minor Victory:[/b] hold the rally point at B when time expires. A minor or major victory opens the next mission."
 duration_s = 600.0
 use_authored_duration = true
 released = true

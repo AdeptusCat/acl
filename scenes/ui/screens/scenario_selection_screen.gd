@@ -8,7 +8,7 @@ const FORCE_ROW: Script = preload("res://scenes/ui/units/mission_force_row.gd")
 
 @onready var time_spinbox: SpinBox = $Control/Center/Panel/Content/Header/Time/Minutes
 @onready var maps_v_box_container: VBoxContainer = $Control/Center/Panel/Content/Body/ScenarioScroll/Maps
-@onready var scenario_description: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Description
+@onready var scenario_description: RichTextLabel = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Description
 @onready var scenario_title: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Title
 @onready var lock_label: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Availability
 @onready var team: TextureRect = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Faction/Flag

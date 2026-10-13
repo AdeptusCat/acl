@@ -464,7 +464,9 @@ scenario_description = "Road to Alderbrook - mission 4 of 5.
 
 Two reinforced platoons must open the river crossings and move a force into the village approaches. The river is impassable away from the two bridges. Assign a platoon to each crossing; leave a garrison on each eastern bank while the remaining squads pass through.
 
-Major: hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together. Minor: exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches."
+[b]Major Victory:[/b] hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together.
+
+[b]Minor Victory:[/b] exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches."
 duration_s = 720.0
 use_authored_duration = true
 released = true

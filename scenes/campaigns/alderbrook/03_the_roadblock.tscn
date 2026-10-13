@@ -403,7 +403,9 @@ scenario_description = "Road to Alderbrook - mission 3 of 5.
 
 An enemy column is trying to pass the roadblock and escape to the west. Your platoon has two machine-gun teams but no reinforcements. Cover the road and its woodland bypass, keep a rifle squad in reserve, and protect the western exits. The enemy starts beyond the wooded bend.
 
-Major: destroy two enemy units and allow no enemy exits before the deadline. Minor: hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory."
+[b]Major Victory:[/b] destroy two enemy units and allow no enemy exits before the deadline.
+
+[b]Minor Victory:[/b] hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory."
 duration_s = 540.0
 use_authored_duration = true
 released = true
