@@ -3,18 +3,55 @@ extends Node
 const MAP_DIRECTORY: String = "res://scenes/campaigns/alderbrook/"
 const RESOURCE_DIRECTORY: String = "res://resources/campaigns/"
 const IMAGE_DIRECTORY: String = "res://docs/campaigns/road_to_alderbrook/maps/"
-const OPEN_GROUND_IMAGE: String = "res://assets/tiles/vegetation/open_ground_green.png"
-const WOODS_IMAGE: String = "res://assets/tiles/vegetation/woods_green.png"
+const OPEN_GROUND_IMAGES: Array[String] = [
+	"res://assets/tiles/vegetation/open_ground_green_01.png",
+	"res://assets/tiles/vegetation/open_ground_green_02.png",
+	"res://assets/tiles/vegetation/open_ground_green_03.png",
+]
+const WOODS_IMAGES: Array[String] = [
+	"res://assets/tiles/vegetation/woods_green_01.png",
+	"res://assets/tiles/vegetation/woods_green_02.png",
+	"res://assets/tiles/vegetation/woods_green_03.png",
+]
+const WHEAT_IMAGES: Array[String] = [
+	"res://assets/tiles/fields/field_wheat_01.png",
+	"res://assets/tiles/fields/field_wheat_02.png",
+	"res://assets/tiles/fields/field_wheat_03.png",
+]
+const CROP_IMAGES: Array[String] = [
+	"res://assets/tiles/fields/field_green_rows_01.png",
+	"res://assets/tiles/fields/field_green_rows_02.png",
+	"res://assets/tiles/fields/field_green_rows_03.png",
+]
+const ORCHARD_IMAGES: Array[String] = [
+	"res://assets/tiles/orchard/orchard_green_01.png",
+	"res://assets/tiles/orchard/orchard_green_02.png",
+	"res://assets/tiles/orchard/orchard_green_03.png",
+]
 const FIELD_IMAGES: Dictionary[String, String] = {
-	"field_nw_sw_alt.png": "res://assets/tiles/fields/field_wheat.png",
-	"field_sw_so.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field_n_s.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field.png": "res://assets/tiles/fields/field_wheat.png",
-	"field_nw_no.png": "res://assets/tiles/fields/field_wheat.png",
-	"field_nw_sw.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field_no_sw.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field_sw_s.png": "res://assets/tiles/fields/field_wheat.png",
+	"field_nw_sw_alt.png": WHEAT_IMAGES[0],
+	"field_sw_so.png": CROP_IMAGES[2],
+	"field_n_s.png": CROP_IMAGES[0],
+	"field.png": WHEAT_IMAGES[0],
+	"field_nw_no.png": WHEAT_IMAGES[1],
+	"field_nw_sw.png": CROP_IMAGES[0],
+	"field_no_sw.png": CROP_IMAGES[1],
+	"field_sw_s.png": WHEAT_IMAGES[2],
 }
+const FIELD_PLOTS: Array[Array] = [
+	[Rect2i(4, 2, 2, 2), Rect2i(10, 2, 3, 2), Rect2i(4, 6, 2, 2), Rect2i(9, 6, 3, 2)],
+	[Rect2i(3, 2, 2, 2), Rect2i(12, 2, 3, 3), Rect2i(3, 8, 2, 2), Rect2i(12, 8, 3, 2)],
+	[Rect2i(4, 3, 3, 3), Rect2i(11, 3, 4, 3), Rect2i(3, 9, 3, 3), Rect2i(11, 9, 4, 3)],
+	[Rect2i(5, 2, 4, 2), Rect2i(15, 2, 4, 2), Rect2i(5, 6, 4, 2), Rect2i(15, 6, 4, 2), Rect2i(5, 12, 4, 2), Rect2i(15, 12, 4, 2)],
+	[Rect2i(4, 2, 4, 2), Rect2i(12, 2, 4, 2), Rect2i(4, 6, 4, 2), Rect2i(12, 6, 4, 2), Rect2i(4, 11, 4, 2), Rect2i(12, 11, 4, 2), Rect2i(4, 15, 4, 1), Rect2i(23, 13, 2, 3)],
+]
+const ORCHARD_PLOTS: Array[Array] = [
+	[Rect2i(10, 3, 2, 2)],
+	[Rect2i(5, 3, 6, 7)],
+	[Rect2i(9, 10, 3, 2)],
+	[Rect2i(17, 6, 3, 2)],
+	[Rect2i(15, 5, 2, 2), Rect2i(21, 11, 3, 2)],
+]
 const MISSIONS: Array[Dictionary] = [
 	{
 		"id": "01_quiet_approach", "title": "1. Quiet Approach", "map": "Alderbrook Approach", "size": Vector2i(16, 10), "seconds": 600.0,
@@ -59,6 +96,12 @@ var _building_set: TileSet
 var _water_set: TileSet
 var _terrain_sources: Dictionary[String, int] = {}
 var _building_sources: Dictionary[String, int] = {}
+var _woods_sources: Array[int] = []
+var _wood_building_sources: Array[int] = []
+var _orchard_sources: Array[int] = []
+var _wheat_sources: Array[int] = []
+var _crop_sources: Array[int] = []
+var _grass_noise: FastNoiseLite = FastNoiseLite.new()
 
 
 func _ready() -> void:
@@ -79,15 +122,20 @@ func _run() -> void:
 	_update_woods_art(_terrain_set)
 	_update_woods_art(_building_set)
 	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
-	woods.texture = load(WOODS_IMAGE) as Texture2D
+	woods.texture = load(WOODS_IMAGES[0]) as Texture2D
 	woods.texture_region_size = Vector2i(64, 64)
 	woods.create_tile(Vector2i.ZERO)
-	_terrain_set.add_source(woods)
+	var woods_source: int = _terrain_set.add_source(woods)
 	var woods_data: TileData = woods.get_tile_data(Vector2i.ZERO, 0)
 	woods_data.set_custom_data("woods", true)
 	woods_data.set_custom_data("hindrance", true)
 	woods_data.set_custom_data("blocking", true)
 	woods_data.set_custom_data("name", "Woods")
+	_woods_sources = _visual_sources(_terrain_set, woods_source, WOODS_IMAGES, "Woods")
+	_wood_building_sources = _visual_sources(_building_set, _source_for(_building_set, "Woods"), WOODS_IMAGES, "Woods")
+	_orchard_sources = _visual_sources(_terrain_set, _source_for(_terrain_set, "Orchard"), ORCHARD_IMAGES, "Orchard")
+	_wheat_sources = _sources_for_images(_terrain_set, WHEAT_IMAGES)
+	_crop_sources = _sources_for_images(_terrain_set, CROP_IMAGES)
 	var road: TileSetAtlasSource = TileSetAtlasSource.new()
 	road.texture = load("res://assets/tiles/campaign/road.svg") as Texture2D
 	road.texture_region_size = Vector2i(64, 64)
@@ -152,7 +200,7 @@ func _update_woods_art(tiles: TileSet) -> void:
 	for index: int in range(tiles.get_source_count()):
 		var source: TileSetAtlasSource = tiles.get_source(tiles.get_source_id(index)) as TileSetAtlasSource
 		if source != null and source.texture != null and source.texture.resource_path.get_file() == "woods.png":
-			source.texture = load(WOODS_IMAGE) as Texture2D
+			source.texture = load(WOODS_IMAGES[0]) as Texture2D
 			source.resource_name = "Woods - Spring Summer"
 
 
@@ -168,6 +216,32 @@ func _update_field_art() -> void:
 			continue
 		source.texture = load(path) as Texture2D
 		source.resource_name = "Field - " + path.get_file().get_basename().trim_prefix("field_").capitalize()
+
+
+func _visual_sources(tiles: TileSet, prototype_id: int, images: Array[String], label: String) -> Array[int]:
+	var prototype: TileSetAtlasSource = tiles.get_source(prototype_id) as TileSetAtlasSource
+	prototype.texture = load(images[0]) as Texture2D
+	prototype.resource_name = label + " 1"
+	var sources: Array[int] = [prototype_id]
+	for index: int in range(1, images.size()):
+		var source: TileSetAtlasSource = prototype.duplicate(true) as TileSetAtlasSource
+		source.texture = load(images[index]) as Texture2D
+		source.resource_name = label + " " + str(index + 1)
+		sources.append(tiles.add_source(source))
+	return sources
+
+
+func _sources_for_images(tiles: TileSet, images: Array[String]) -> Array[int]:
+	var sources: Array[int] = []
+	for path: String in images:
+		for index: int in range(tiles.get_source_count()):
+			var id: int = tiles.get_source_id(index)
+			var source: TileSetAtlasSource = tiles.get_source(id) as TileSetAtlasSource
+			if source != null and source.texture.resource_path == path:
+				sources.append(id)
+				break
+	assert(sources.size() == images.size(), "Every visual variant needs a matching atlas source")
+	return sources
 
 
 func _source_for(tiles: TileSet, label: String) -> int:
@@ -202,9 +276,9 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	var layers: Node2D = map.get_node("TileMapLayers") as Node2D
 	var ground: HexagonTileMapLayer = load("res://scenes/world/maps/layers/ground_tile_map_layer.tscn").instantiate() as HexagonTileMapLayer
 	ground.tile_set = ground.tile_set.duplicate(true) as TileSet
-	var open_ground: TileSetAtlasSource = ground.tile_set.get_source(1) as TileSetAtlasSource
-	open_ground.texture = load(OPEN_GROUND_IMAGE) as Texture2D
-	open_ground.resource_name = "Open Ground - Spring Summer"
+	var ground_sources: Array[int] = _visual_sources(ground.tile_set, 1, OPEN_GROUND_IMAGES, "Open Ground")
+	_grass_noise.seed = 9413 + index * 239
+	_grass_noise.frequency = 0.12
 	ground.clear()
 	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
 	var walls: HexagonTileMapLayer = _layer("WallTileMapLayer", _wall_set, "res://scenes/world/maps/layers/wall_tile_map_layer.gd")
@@ -221,23 +295,16 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	for x: int in range(map.grid_size.x):
 		for y: int in range(map.grid_size.y):
 			var cell: Vector2i = Vector2i(x, y)
-			ground.set_cell(cell, 1, Vector2i.ZERO)
+			ground.set_cell(cell, ground_sources[_ground_variation(cell, map.grid_size, index)], Vector2i.ZERO)
 			if y == middle:
 				_road(terrain, cell)
-			elif (x * 7 + y * 11 + index) % 13 < 3 and x > 3 and x < map.grid_size.x - 3:
-				terrain.set_cell(cell, _terrain_sources["Field"], Vector2i.ZERO)
 			if y <= 1 or y >= map.grid_size.y - 2:
 				if x % 4 != 0:
-					_woods(terrain, buildings, cell)
+					_woods(terrain, buildings, cell, index)
 	var belt: int = 6 + index
 	for y: int in range(2, map.grid_size.y - 2):
 		if absi(y - middle) > 1:
-			_woods(terrain, buildings, Vector2i(belt, y))
-	if index == 1:
-		for x: int in range(5, 11):
-			for y: int in range(3, 10):
-				if y != middle and terrain.get_cell_source_id(Vector2i(x, y)) != _terrain_sources["Woods"]:
-					terrain.set_cell(Vector2i(x, y), _terrain_sources["Orchard"], Vector2i.ZERO)
+			_woods(terrain, buildings, Vector2i(belt, y), index)
 	if index == 0:
 		_house(buildings, terrain, Vector2i(12, 5), false)
 	elif index == 1:
@@ -282,6 +349,8 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 						_house(buildings, terrain, Vector2i(x, y), true)
 			for cell: Vector2i in [Vector2i(17, 4), Vector2i(20, 9), Vector2i(18, 14)]:
 				_house(buildings, terrain, cell, true)
+	_place_orchards(ground, terrain, buildings, index)
+	_place_fields(ground, terrain, buildings, index)
 	var scenario: Scenario = Scenario.new()
 	scenario.name = "Mission"
 	map.get_node("Scenarios").add_child(scenario)
@@ -323,9 +392,67 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	return map
 
 
-func _woods(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i) -> void:
-	terrain.set_cell(cell, _terrain_sources["Woods"], Vector2i.ZERO)
-	buildings.set_cell(cell, _building_sources["Woods"], Vector2i.ZERO)
+func _ground_variation(cell: Vector2i, size: Vector2i, index: int) -> int:
+	if index >= 3:
+		var river: int = 11
+		if index == 4:
+			river = 10
+		if absi(cell.x - river) <= 2:
+			return 1
+	var roads: Array[int] = [floori(float(size.y) * 0.5)]
+	if index == 3:
+		roads.append_array([4, 10])
+	elif index == 4:
+		roads.append_array([4, 9, 14])
+	for row: int in roads:
+		if absi(cell.y - row) <= 1:
+			return 0
+	if cell.y <= 2 or cell.y >= size.y - 3 or absi(cell.x - (6 + index)) <= 1:
+		return 2
+	var meadow: float = _grass_noise.get_noise_2d(float(cell.x), float(cell.y))
+	if meadow < -0.18:
+		return 0
+	if meadow > 0.18:
+		return 2
+	return 1
+
+
+func _woods(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i, index: int) -> void:
+	var variant: int = posmod(floori(float(cell.x) / 4.0) + floori(float(cell.y) / 3.0) + index, 3)
+	terrain.set_cell(cell, _woods_sources[variant], Vector2i.ZERO)
+	buildings.set_cell(cell, _wood_building_sources[variant], Vector2i.ZERO)
+
+
+func _can_plant(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i) -> bool:
+	if ground.get_cell_source_id(cell) < 0 or buildings.get_cell_source_id(cell) >= 0:
+		return false
+	var data: TileData = terrain.get_cell_tile_data(cell)
+	return data == null or str(data.get_custom_data("name")) == "Field"
+
+
+func _place_orchards(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, index: int) -> void:
+	for plot: Rect2i in ORCHARD_PLOTS[index]:
+		for x: int in range(plot.position.x, plot.end.x):
+			for y: int in range(plot.position.y, plot.end.y):
+				var cell: Vector2i = Vector2i(x, y)
+				if _can_plant(ground, terrain, buildings, cell):
+					var variant: int = posmod(floori(float(x) / 3.0) + floori(float(y) / 3.0) + index, 3)
+					terrain.set_cell(cell, _orchard_sources[variant], Vector2i.ZERO)
+
+
+func _place_fields(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, index: int) -> void:
+	var plot_index: int = 0
+	for plot: Rect2i in FIELD_PLOTS[index]:
+		var sources: Array[int] = _wheat_sources
+		if plot_index % 2 == 1:
+			sources = _crop_sources
+		var variant: int = posmod(floori(float(plot_index) / 2.0) + index, 3)
+		for x: int in range(plot.position.x, plot.end.x):
+			for y: int in range(plot.position.y, plot.end.y):
+				var cell: Vector2i = Vector2i(x, y)
+				if _can_plant(ground, terrain, buildings, cell):
+					terrain.set_cell(cell, sources[variant], Vector2i.ZERO)
+		plot_index += 1
 
 
 func _road(terrain: HexagonTileMapLayer, cell: Vector2i) -> void:

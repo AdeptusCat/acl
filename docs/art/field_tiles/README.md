@@ -10,12 +10,10 @@ flat-topped hex grid:
 | `field_ploughed.png` | Not used in Alderbrook |
 | `field_stubble.png` | Not used in Alderbrook |
 
-The eight existing Field atlas sources in
-`resources/campaigns/alderbrook_terrain.tres` use only wheat and green crops. Their
-source IDs, alternatives, flips, hindrance, and blocking data remain unchanged.
-The current campaign field cells use wheat; green crops are also available
-in the terrain palette. The campaign authoring tool preserves this restriction
-when maps are regenerated. Original field assets used by other maps remain intact.
+Alderbrook now uses three variations of both wheat and green crops, arranged in
+coherent plots; see [the terrain variation pack](../terrain_variations/README.md).
+The original sprites listed above remain available. The campaign authoring tool
+preserves the wheat/green-crop restriction when maps are regenerated.
 
 High-resolution generated masters are in `assets/tiles/fields/source/`.
 That directory is excluded from Godot import. Run

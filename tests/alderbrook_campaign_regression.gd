@@ -30,6 +30,7 @@ func _run() -> void:
 		_test_content()
 		_test_progression()
 		_test_bridges()
+		_test_visual_variants()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -185,6 +186,42 @@ func _test_bridges() -> void:
 		_check(graph.get_id_path(from, to).is_empty(), "There is no hidden path around the river barrier")
 		for id: int in disabled:
 			graph.set_point_disabled(id, false)
+
+
+func _test_visual_variants() -> void:
+	var families: Dictionary[String, Dictionary] = {
+		"open_ground_green": {}, "woods_green": {}, "field_wheat": {}, "field_green_rows": {}, "orchard_green": {},
+	}
+	for map: Map in campaign_maps:
+		var ground: HexagonTileMapLayer = map.get_ground_layer()
+		var terrain: HexagonTileMapLayer = map.get_terrain_layer()
+		var buildings: HexagonTileMapLayer = map.get_building_layer()
+		var crops: Dictionary[String, bool] = {}
+		for layer: HexagonTileMapLayer in [ground, terrain]:
+			for cell: Vector2i in layer.get_used_cells():
+				var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+				var file: String = source.texture.resource_path.get_file().get_basename()
+				for family: String in families:
+					if not file.begins_with(family + "_"):
+						continue
+					families[family][file] = true
+					var data: TileData = layer.get_cell_tile_data(cell)
+					if family == "open_ground_green":
+						_check(int(data.get_custom_data("elevation")) == 0 and data.get_collision_polygons_count(0) == 0, "Every meadow variant keeps open-ground elevation and collision rules")
+					elif family == "woods_green":
+						_check(bool(data.get_custom_data("woods")) and bool(data.get_custom_data("hindrance")) and bool(data.get_custom_data("blocking")), "Every woodland variant preserves woodland LOS rules")
+						var canopy: TileSetAtlasSource = buildings.tile_set.get_source(buildings.get_cell_source_id(cell)) as TileSetAtlasSource
+						_check(canopy.texture.resource_path == source.texture.resource_path and int(buildings.get_cell_tile_data(cell).get_custom_data("cover")) == 1, "The terrain and cover layers show the same woodland canopy")
+					else:
+						_check(bool(data.get_custom_data("hindrance")) and not bool(data.get_custom_data("blocking")), "Field and orchard variants retain their original terrain rules")
+						_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods")
+						if family in ["field_wheat", "field_green_rows"]:
+							crops[family] = true
+				if layer == terrain and str(layer.get_cell_tile_data(cell).get_custom_data("name")) == "Field":
+					_check(file.begins_with("field_wheat_") or file.begins_with("field_green_rows_"), "Alderbrook fields use only wheat and green crops")
+		_check(crops.size() == 2, "Every mission has both wheat and green-crop plots")
+	for family: String in families:
+		_check(families[family].size() == 3, "All three " + family + " variations appear across the campaign")
 
 
 func _test_match(index: int) -> void:

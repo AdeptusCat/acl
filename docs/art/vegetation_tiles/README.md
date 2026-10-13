@@ -5,11 +5,11 @@ Two transparent 64 × 64 hex terrain sprites:
 - `assets/tiles/vegetation/open_ground_green.png`: fresh short meadow grass.
 - `assets/tiles/vegetation/woods_green.png`: dense leafy broadleaf woodland.
 
-Alderbrook uses the new open-ground image in its ground layers and the new
-woodland image in both its terrain and building tile sets. The campaign
-authoring tool preserves this artwork when regenerating maps. Terrain labels,
-cover, hindrance, blocking flags, and pathfinding remain unchanged. The campaign
-LOS caches are rebuilt because the woodland image has a new opaque silhouette.
+Alderbrook now uses three variations derived from each original sprite; see
+[the terrain variation pack](../terrain_variations/README.md). The campaign
+authoring tool groups them in meadow patches and woodland clusters, matching
+woodland canopies between terrain and building layers. Terrain rules remain
+unchanged, and LOS caches are rebuilt with the new artwork and farmland layout.
 Field artwork remains restricted to wheat and green crops.
 
 Generated masters are preserved in `assets/tiles/vegetation/source/`, which

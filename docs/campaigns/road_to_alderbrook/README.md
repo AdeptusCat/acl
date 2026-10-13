@@ -48,6 +48,11 @@ All five maps are new, editable Godot scenes. The rivers have no ground or
 pathfinding points outside bridge cells. Each map ships compressed line of
 sight data calculated by the existing LOS service.
 
+Open ground, woods, wheat, green crops, and orchards each use three visual
+variations. Meadows form broad patches, woods form canopy clusters, and crops
+form coherent farm plots near settlements. See the
+[terrain variation pack](../../art/terrain_variations/README.md) for the assets.
+
 The images show the exact authored terrain, deployments, and objective
 coordinates. They are designer overviews; the game's normal fog of war and
 enemy-intelligence briefing remain in effect.
