@@ -10,7 +10,7 @@ layout_mode = 0
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -222.0
+offset_left = -264.0
 offset_top = 12.0
 offset_right = -12.0
 offset_bottom = 42.0
@@ -27,6 +27,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
+
+[node name="MuteButton" type="Button" parent="Toolbar"]
+custom_minimum_size = Vector2(36, 30)
+layout_mode = 2
+tooltip_text = "Mute sound"
+toggle_mode = true
+icon_alignment = 1
 
 [node name="SettingsButton" type="Button" parent="Toolbar"]
 layout_mode = 2

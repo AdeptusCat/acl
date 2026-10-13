@@ -1,5 +1,8 @@
 extends Control
 
+const SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker.svg")
+const MUTED_SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker_muted.svg")
+
 const CONTROL_HINTS: Dictionary[String, String] = {
 	"Left click": "Select / deselect squad",
 	"Roster row": "Select and center squad",
@@ -11,6 +14,7 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 	"Esc": "Close the open panel",
 }
 
+@onready var mute_button: Button = $Toolbar/MuteButton
 @onready var settings_button: Button = $Toolbar/SettingsButton
 @onready var controls_button: Button = $Toolbar/ControlsButton
 @onready var menu: PanelContainer = $Menu
@@ -25,6 +29,9 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 
 
 func _ready() -> void:
+	mute_button.toggled.connect(_on_mute_toggled)
+	SessionAudio.master_mute_changed.connect(_on_master_mute_changed)
+	_on_master_mute_changed(SessionAudio.master_muted)
 	settings_button.toggled.connect(_on_settings_toggled)
 	controls_button.toggled.connect(_on_controls_toggled)
 	$Menu/Content/Heading/Close.pressed.connect(close_panels)
@@ -63,6 +70,19 @@ func close_panels() -> void:
 	controls_panel.hide()
 	settings_button.set_pressed_no_signal(false)
 	controls_button.set_pressed_no_signal(false)
+
+
+func _on_mute_toggled(muted: bool) -> void:
+	SessionAudio.set_master_muted(muted)
+
+
+func _on_master_mute_changed(muted: bool) -> void:
+	mute_button.set_pressed_no_signal(muted)
+	mute_button.icon = SPEAKER_ICON
+	mute_button.tooltip_text = "Mute sound"
+	if muted:
+		mute_button.icon = MUTED_SPEAKER_ICON
+		mute_button.tooltip_text = "Unmute sound"
 
 
 func _on_settings_toggled(open: bool) -> void:

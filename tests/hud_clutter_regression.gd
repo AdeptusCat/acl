@@ -16,6 +16,7 @@ func _run() -> void:
 	var world: Node = main.world
 	var settings: Control = world.ui.get_node("Control/Settings") as Control
 	var debug: PanelContainer = world.ui.get_node("Control/Debug") as PanelContainer
+	var muted_before: bool = SessionAudio.master_muted
 	_check(not settings.menu.visible and not settings.controls_panel.visible, "Settings and controls start closed")
 	_check(debug.section.folded, "Development controls start collapsed")
 	var map: Map = world.maps.get_node("DefaultMap")
@@ -36,18 +37,40 @@ func _run() -> void:
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
 	_pointer_event(Vector2(1000, 100), MouseButton.MOUSE_BUTTON_WHEEL_UP)
 	_check(zoom_events == 1, "Closed settings do not block zoom over their former HUD area")
+	_check_top_layout(world, settings)
+	var master_before: float = SessionAudio.master_linear
+	var music_before: float = SessionAudio.music_linear
+	SessionAudio.set_master_muted(false)
+	var speaker_icon: Texture2D = settings.mute_button.icon
+	_check(settings.mute_button.get_global_rect().end.x < settings.settings_button.get_global_rect().position.x and settings.mute_button.size.x <= 36.0, "The compact speaker button sits immediately left of Settings")
+	_pointer_event(settings.mute_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_check(SessionAudio.master_muted and AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")) and settings.mute_button.button_pressed and settings.mute_button.icon != speaker_icon, "Clicking the speaker mutes all sound and displays the crossed-out icon")
+	_check(is_equal_approx(SessionAudio.master_linear, master_before) and is_equal_approx(SessionAudio.music_linear, music_before) and map_clicks == 0 and not settings.menu.visible, "Muting preserves volume levels and consumes the click without opening a menu")
 	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(settings.menu.visible and settings.settings_button.button_pressed and not settings.controls_panel.visible, "The Settings button opens the audio menu")
 	_check(map_clicks == 0, "Opening the menu does not select a battlefield hex")
-	var master_before: float = SessionAudio.master_linear
-	var music_before: float = SessionAudio.music_linear
 	var links_before: bool = SessionSettings.showCmdConnectivity
 	settings.s1.value = 0.35
 	settings.s2.value = 0.42
 	_check(is_equal_approx(SessionAudio.master_linear, 0.35) and is_equal_approx(SessionAudio.music_linear, 0.42), "Menu sliders update both session audio levels")
 	_check(is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master")), SessionAudio.linear_to_db(0.35)) and is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music")), SessionAudio.linear_to_db(0.42)), "Audio changes reach the actual master and music buses")
 	_check(settings.master_label.text.ends_with("35%") and settings.music_label.text.ends_with("42%"), "Readable labels display the current volume percentages")
+	_check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "Changing volume while muted keeps the master bus muted")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("muted-settings")
+	_pointer_event(settings.mute_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_check(not SessionAudio.master_muted and not AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")) and not settings.mute_button.button_pressed and settings.mute_button.icon == speaker_icon, "Clicking the crossed-out speaker restores sound and the normal icon")
+	_check(settings.menu.visible and is_equal_approx(SessionAudio.master_linear, 0.35) and is_equal_approx(SessionAudio.music_linear, 0.42), "Unmuting restores the chosen volume levels and leaves Settings open")
+	SessionAudio.set_master_muted(true)
+	var recreated: Control = load("res://scenes/ui/panels/battle_settings_panel.tscn").instantiate()
+	world.ui.get_node("Control").add_child(recreated)
+	await _settle()
+	_check(recreated.mute_button.button_pressed and recreated.mute_button.icon == settings.mute_button.icon and AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "A recreated toolbar retains the session mute state")
+	recreated.queue_free()
+	await _settle()
+	SessionAudio.set_master_muted(false)
+	_check(not settings.mute_button.button_pressed and settings.mute_button.tooltip_text == "Mute sound", "Session mute changes keep the existing toolbar synchronized")
 	var slider: HSlider = settings.s1
 	_pointer_event(slider.get_global_rect().position + Vector2(slider.size.x * 0.75, slider.size.y * 0.5), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(SessionAudio.master_linear > 0.65 and SessionAudio.master_linear < 0.85 and is_equal_approx(SessionAudio.music_linear, 0.42), "An actual slider click changes only master volume")
@@ -126,6 +149,7 @@ func _run() -> void:
 	_check(countdown.timer_label.modulate == Color.WHITE, "A reset restores the normal timer appearance")
 	get_tree().root.size = Vector2i(800, 600)
 	await _settle()
+	_check_top_layout(world, settings)
 	_pointer_event(settings.controls_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(_inside_hud(settings.controls_panel, world), "The controls panel stays inside the small viewport")
@@ -139,12 +163,30 @@ func _run() -> void:
 	settings.close_panels()
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("battle-compact")
+	get_tree().root.size = Vector2i(708, 639)
+	await _settle()
+	_check_top_layout(world, settings)
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("battle-narrow")
 	SessionAudio.set_master_linear(master_before)
 	SessionAudio.set_music_linear(music_before)
+	SessionAudio.set_master_muted(muted_before)
 	main.queue_free()
 	await _settle()
 	print("HUD clutter checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _check_top_layout(world: Node, settings: Control) -> void:
+	var retry: Control = world.ui.get_node("Control/TryAgain")
+	var countdown: Control = world.ui.countdown_panel_container
+	var retry_rect: Rect2 = retry.get_rect()
+	var timer_rect: Rect2 = countdown.get_rect()
+	var header_rect: Rect2 = retry_rect.merge(timer_rect)
+	var hud_width: float = world.ui.get_node("Control").size.x
+	_check(is_equal_approx(header_rect.get_center().x, hud_width * 0.5) and is_equal_approx(retry_rect.position.y, timer_rect.position.y) and is_equal_approx(timer_rect.position.x - retry_rect.end.x, 8.0), "Try Again and Time Left form a centered adjacent row at width %d" % int(hud_width))
+	_check(_inside_hud(retry, world) and _inside_hud(countdown, world) and not header_rect.intersects(settings.get_rect()), "The centered header stays onscreen without overlapping the speaker and settings buttons")
+	_check(not header_rect.intersects(world.ui.mission_objectives.get_rect()) and not header_rect.intersects(world.ui.squad_roster.get_rect()), "The header leaves objectives and the squad roster clear")
 
 
 func _inside_hud(panel: Control, world: Node) -> bool:

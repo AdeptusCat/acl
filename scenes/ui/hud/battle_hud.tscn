@@ -21,6 +21,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/terrain_card.tscn" id="35_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/hex_hint_panel.tscn" id="36_hint"]
 
+[sub_resource type="StyleBoxEmpty" id="RetryPanel"]
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
 atlas = ExtResource("27_7ygsn")
 region = Rect2(0, 0, 64, 64)
@@ -69,9 +71,10 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -115.0
-offset_right = 115.0
-offset_bottom = 23.0
+offset_left = -55.0
+offset_top = 12.0
+offset_right = 175.0
+offset_bottom = 50.0
 grow_horizontal = 2
 theme_override_styles/panel = ExtResource("15_mgwkc")
 script = ExtResource("5_svq4k")
@@ -153,10 +156,16 @@ layout_mode = 1
 layout_mode = 1
 
 [node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
-layout_mode = 0
-offset_right = 135.0
-offset_bottom = 51.0
-theme_override_styles/panel = ExtResource("15_mgwkc")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -175.0
+offset_top = 12.0
+offset_right = -63.0
+offset_bottom = 50.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("RetryPanel")
 
 [node name="ColorRect" type="ColorRect" parent="Control/TryAgain" unique_id=1726606033]
 visible = false

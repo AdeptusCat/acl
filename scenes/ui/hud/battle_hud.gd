@@ -4,6 +4,7 @@ extends CanvasLayer
 @export var ground_layer : HexagonTileMapLayer
 
 @onready var countdown_panel_container: PanelContainer = $Control/Countdown
+@onready var retry_panel: PanelContainer = $Control/TryAgain
 @onready var mission_objectives: MissionObjectivesPanel = $Control/MissionObjectives
 @onready var squad_roster: SquadRosterPanel = $Control/SquadRoster
 
@@ -18,6 +19,7 @@ extends CanvasLayer
 @onready var debug_panel: PanelContainer = $Control/Debug
 
 var _left_layout_queued: bool = false
+var _top_layout_queued: bool = false
 
 signal try_again
 
@@ -36,6 +38,10 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 		#print(option)
 
 func _ready() -> void:
+	$Control.resized.connect(_queue_top_layout)
+	$Control/Settings.item_rect_changed.connect(_queue_top_layout)
+	countdown_panel_container.minimum_size_changed.connect(_queue_top_layout)
+	retry_panel.minimum_size_changed.connect(_queue_top_layout)
 	$Control.resized.connect(_layout_mission_objectives)
 	countdown_panel_container.item_rect_changed.connect(_layout_mission_objectives)
 	$Control/Settings.item_rect_changed.connect(_layout_mission_objectives)
@@ -51,6 +57,36 @@ func _ready() -> void:
 	$Control/TryAgain.item_rect_changed.connect(_queue_left_layout)
 	tile_details.details.folding_changed.connect(_on_terrain_folding_changed)
 	debug_panel.section.folding_changed.connect(_on_debug_folding_changed)
+	_queue_top_layout()
+	_queue_left_layout()
+
+
+func _queue_top_layout() -> void:
+	if _top_layout_queued:
+		return
+	_top_layout_queued = true
+	_layout_top_bar.call_deferred()
+
+
+func _layout_top_bar() -> void:
+	_top_layout_queued = false
+	if not is_node_ready() or is_queued_for_deletion():
+		return
+	var retry_minimum: Vector2 = retry_panel.get_combined_minimum_size()
+	var timer_minimum: Vector2 = countdown_panel_container.get_combined_minimum_size()
+	var height: float = maxf(30.0, maxf(retry_minimum.y, timer_minimum.y))
+	retry_panel.size = Vector2(maxf(112.0, retry_minimum.x), height)
+	countdown_panel_container.size = Vector2(maxf(230.0, timer_minimum.x), height)
+	var width: float = retry_panel.size.x + 8.0 + countdown_panel_container.size.x
+	var left: float = ($Control.size.x - width) * 0.5
+	var top: float = 12.0
+	var toolbar_rect: Rect2 = $Control/Settings.get_rect()
+	if left + width + 12.0 > toolbar_rect.position.x:
+		top = toolbar_rect.end.y + 8.0
+	retry_panel.position = Vector2(left, top)
+	countdown_panel_container.position = Vector2(left + retry_panel.size.x + 8.0, top)
+	_layout_mission_objectives()
+	_layout_order_feedback()
 	_queue_left_layout()
 
 
@@ -129,7 +165,8 @@ func _layout_mission_objectives() -> void:
 	mission_objectives.custom_minimum_size.x = panel_width
 	mission_objectives.size.x = panel_width
 	var toolbar: Control = $Control/Settings
-	mission_objectives.position = Vector2(viewport_width - panel_width - 12.0, toolbar.get_rect().end.y + 12.0)
+	var top: float = maxf(toolbar.get_rect().end.y, countdown_panel_container.get_rect().end.y) + 12.0
+	mission_objectives.position = Vector2(viewport_width - panel_width - 12.0, top)
 
 
 func setup() -> void:

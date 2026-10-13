@@ -138,7 +138,8 @@ func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size:
 	var retry_panel: Control = hud.get_node("Control/TryAgain")
 	_check(not panel_rect.intersects(retry_panel.get_rect()), "Mission panel never overlaps the restart control")
 	var toolbar: Control = hud.get_node("Control/Settings")
-	_check(is_equal_approx(panel_rect.end.x, canvas_size.x - 12.0) and is_equal_approx(panel_rect.position.y, toolbar.get_rect().end.y + 12.0), "Objectives stay on the right below Settings and Controls")
+	var header_bottom: float = maxf(toolbar.get_rect().end.y, timer_rect.end.y)
+	_check(is_equal_approx(panel_rect.end.x, canvas_size.x - 12.0) and is_equal_approx(panel_rect.position.y, header_bottom + 12.0), "Objectives stay on the right below the top HUD controls")
 	_check(not panel_rect.intersects(hud.squad_roster.get_rect()), "Objectives leave the roster column clear")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await RenderingServer.frame_post_draw
