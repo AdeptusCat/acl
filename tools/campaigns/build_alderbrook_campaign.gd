@@ -1,0 +1,460 @@
+extends Node
+
+const MAP_DIRECTORY: String = "res://scenes/campaigns/alderbrook/"
+const RESOURCE_DIRECTORY: String = "res://resources/campaigns/"
+const IMAGE_DIRECTORY: String = "res://docs/campaigns/road_to_alderbrook/maps/"
+const MISSIONS: Array[Dictionary] = [
+	{
+		"id": "01_quiet_approach", "title": "1. Quiet Approach", "map": "Alderbrook Approach", "size": Vector2i(16, 10), "seconds": 600.0,
+		"briefing": "Road to Alderbrook - mission 1 of 5.\n\nA small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.\n\nMajor: occupy the farm at A for 15 seconds. Minor: hold the rally point at B when time expires. A minor or major victory opens the next mission.",
+		"player": [[1, "hq", 2, 6], [1, "rifle", 2, 5], [1, "rifle", 2, 7]],
+		"enemy": [[1, "hq", 14, 5], [1, "rifle", 12, 5]],
+		"allied_markers": [[1, 12, 5], [2, 7, 6], [4, 2, 6]], "axis_markers": [[1, 12, 5], [4, 14, 5]],
+	},
+	{
+		"id": "02_orchard_outpost", "title": "2. Orchard Outpost", "map": "Alderbrook Orchard", "size": Vector2i(18, 12), "seconds": 600.0,
+		"briefing": "Road to Alderbrook - mission 2 of 5.\n\nYour full platoon now has a machine-gun team. Clear the orchard outpost before the company moves up. The central lane is quick but exposed; the orchard and northern woodland give covered alternatives. Set up the gun before sending rifle squads forward.\n\nMajor: destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met. Minor: hold the orchard barn at B when time expires.",
+		"player": [[1, "hq", 2, 6], [1, "rifle", 3, 5], [1, "rifle", 3, 6], [1, "rifle", 3, 7], [1, "mg", 2, 8]],
+		"enemy": [[1, "hq", 15, 7], [1, "rifle", 13, 6], [1, "rifle", 14, 5], [1, "mg", 12, 4]],
+		"allied_markers": [[1, 13, 6], [2, 9, 8], [4, 2, 6]], "axis_markers": [[1, 13, 6], [4, 15, 7]],
+	},
+	{
+		"id": "03_the_roadblock", "title": "3. The Roadblock", "map": "Alderbrook Roadblock", "size": Vector2i(20, 14), "seconds": 540.0,
+		"briefing": "Road to Alderbrook - mission 3 of 5.\n\nAn enemy column is trying to pass the roadblock and escape to the west. Your platoon has two machine-gun teams but no reinforcements. Cover the road and its woodland bypass, keep a rifle squad in reserve, and protect the western exits. The enemy starts beyond the wooded bend.\n\nMajor: destroy two enemy units and allow no enemy exits before the deadline. Minor: hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory.",
+		"player": [[1, "hq", 5, 9], [1, "rifle", 6, 6], [1, "rifle", 7, 6], [1, "rifle", 6, 8], [1, "mg", 7, 7], [1, "mg", 8, 8]],
+		"enemy": [[1, "hq", 18, 5], [1, "rifle", 17, 5], [1, "rifle", 17, 6], [2, "hq", 18, 9], [2, "rifle", 17, 8], [2, "rifle", 17, 9], [0, "company_hq", 19, 7]],
+		"allied_markers": [[1, 7, 7], [4, 5, 9]], "axis_markers": [[0, 0, 6], [0, 0, 7], [4, 18, 7]],
+	},
+	{
+		"id": "04_two_crossings", "title": "4. Two Crossings", "map": "Alderbrook Crossings", "size": Vector2i(24, 16), "seconds": 720.0,
+		"briefing": "Road to Alderbrook - mission 4 of 5.\n\nTwo reinforced platoons must open the river crossings and move a force into the village approaches. The river is impassable away from the two bridges. Assign a platoon to each crossing; leave a garrison on each eastern bank while the remaining squads pass through.\n\nMajor: hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together. Minor: exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches.",
+		"player": [[1, "hq", 2, 4], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "rifle", 3, 5], [1, "mg", 2, 6], [2, "hq", 2, 10], [2, "rifle", 3, 9], [2, "rifle", 3, 10], [2, "rifle", 3, 11], [2, "mg", 2, 12], [0, "company_hq", 1, 7]],
+		"enemy": [[1, "hq", 17, 4], [1, "rifle", 14, 3], [1, "rifle", 14, 5], [1, "mg", 16, 4], [2, "hq", 17, 10], [2, "rifle", 14, 9], [2, "rifle", 14, 11], [2, "mg", 16, 10], [0, "company_hq", 20, 7]],
+		"allied_markers": [[1, 13, 4], [2, 13, 10], [0, 22, 4], [0, 22, 10], [4, 2, 7]], "axis_markers": [[1, 13, 4], [4, 17, 7]],
+	},
+	{
+		"id": "05_battle_for_alderbrook", "title": "5. Battle for Alderbrook", "map": "Alderbrook Village", "size": Vector2i(26, 18), "seconds": 900.0,
+		"briefing": "Road to Alderbrook - mission 5 of 5.\n\nThe full company attacks across three bridge approaches into the village. You have three rifle platoons, their machine-gun teams, company headquarters, and a light mortar. Give each platoon a district, establish covering fire, and keep a reserve until the defense shows a weakness. Enemy survivors may try to escape east after their command post falls; secure the exit routes before the final assault.\n\nMajor: hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline. Minor: hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient.",
+		"player": [[1, "hq", 2, 3], [1, "rifle", 3, 2], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "mg", 2, 5], [2, "hq", 2, 8], [2, "rifle", 3, 7], [2, "rifle", 3, 8], [2, "rifle", 3, 9], [2, "mg", 2, 10], [3, "hq", 2, 13], [3, "rifle", 3, 12], [3, "rifle", 3, 13], [3, "rifle", 3, 14], [3, "mg", 2, 15], [0, "company_hq", 1, 8], [0, "light_mortar", 1, 10]],
+		"enemy": [[1, "hq", 21, 4], [1, "rifle", 18, 3], [1, "rifle", 18, 5], [1, "mg", 17, 4], [2, "hq", 23, 9], [2, "rifle", 20, 8], [2, "rifle", 20, 10], [2, "mg", 20, 9], [3, "hq", 22, 14], [3, "rifle", 19, 13], [3, "rifle", 19, 15], [3, "mg", 18, 14], [0, "company_hq", 24, 11], [0, "medium_mortar", 24, 7]],
+		"allied_markers": [[1, 17, 4], [2, 20, 9], [3, 18, 14], [4, 2, 8]], "axis_markers": [[1, 20, 9], [2, 17, 4], [3, 18, 14], [0, 25, 8], [0, 25, 10], [4, 23, 9]],
+	},
+]
+
+var _terrain_set: TileSet
+var _wall_set: TileSet
+var _building_set: TileSet
+var _water_set: TileSet
+var _terrain_sources: Dictionary[String, int] = {}
+var _building_sources: Dictionary[String, int] = {}
+
+
+func _ready() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	var main: Node = load("res://scenes/main.tscn").instantiate()
+	main.name = "Main"
+	get_tree().root.add_child(main)
+	main.process_mode = Node.PROCESS_MODE_DISABLED
+	var template: Node = main.world
+	var base: Map = template.get_node("Maps/DefaultMap") as Map
+	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
+	_wall_set = base.get_wall_layer().tile_set.duplicate(true) as TileSet
+	_building_set = base.get_building_layer().tile_set.duplicate(true) as TileSet
+	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
+	woods.texture = load("res://assets/tiles/buildings/woods.png") as Texture2D
+	woods.texture_region_size = Vector2i(64, 64)
+	woods.create_tile(Vector2i.ZERO)
+	_terrain_set.add_source(woods)
+	var woods_data: TileData = woods.get_tile_data(Vector2i.ZERO, 0)
+	woods_data.set_custom_data("woods", true)
+	woods_data.set_custom_data("hindrance", true)
+	woods_data.set_custom_data("blocking", true)
+	woods_data.set_custom_data("name", "Woods")
+	var road: TileSetAtlasSource = TileSetAtlasSource.new()
+	road.texture = load("res://assets/tiles/campaign/road.svg") as Texture2D
+	road.texture_region_size = Vector2i(64, 64)
+	road.create_tile(Vector2i.ZERO)
+	var road_source: int = _terrain_set.add_source(road)
+	road.create_alternative_tile(Vector2i.ZERO, 1)
+	for alternative: int in [0, 1]:
+		road.get_tile_data(Vector2i.ZERO, alternative).set_custom_data("name", "Road")
+	road.get_tile_data(Vector2i.ZERO, 1).flip_v = true
+	ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
+	ResourceSaver.save(_wall_set, RESOURCE_DIRECTORY + "alderbrook_walls.tres")
+	ResourceSaver.save(_building_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
+	_terrain_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
+	_wall_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_walls.tres")
+	_building_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
+	for label: String in ["Woods", "Orchard", "Field", "Road"]:
+		_terrain_sources[label] = _source_for(_terrain_set, label)
+	_terrain_sources["Road"] = road_source
+	for label: String in ["Stone Building", "Wood Building", "Woods"]:
+		_building_sources[label] = _source_for(_building_set, label)
+	_water_set = TileSet.new()
+	_water_set.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	_water_set.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	_water_set.tile_size = Vector2i(64, 64)
+	for kind: String in ["river", "bridge"]:
+		var source: TileSetAtlasSource = TileSetAtlasSource.new()
+		source.texture = load("res://assets/tiles/campaign/" + kind + ".svg") as Texture2D
+		source.texture_region_size = Vector2i(64, 64)
+		source.create_tile(Vector2i.ZERO)
+		_water_set.add_source(source)
+		if kind == "bridge":
+			source.create_alternative_tile(Vector2i.ZERO, 1)
+			source.get_tile_data(Vector2i.ZERO, 1).flip_v = true
+	ResourceSaver.save(_water_set, RESOURCE_DIRECTORY + "alderbrook_water.tres")
+	_water_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_water.tres")
+	var maps: Array[PackedScene] = []
+	for index: int in range(MISSIONS.size()):
+		var map: Map = _build_map(MISSIONS[index], index)
+		add_child(map)
+		await get_tree().process_frame
+		var packed: PackedScene = PackedScene.new()
+		var error: Error = packed.pack(map)
+		assert(error == OK)
+		var path: String = MAP_DIRECTORY + str(MISSIONS[index]["id"]) + ".tscn"
+		assert(ResourceSaver.save(packed, path) == OK)
+		maps.append(ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene)
+		_export_layout(map, MISSIONS[index])
+		await _bake_los(map)
+		map.queue_free()
+		await get_tree().process_frame
+	var campaign: CampaignDefinition = CampaignDefinition.new()
+	campaign.campaign_id = "road_to_alderbrook"
+	campaign.title = "Road to Alderbrook"
+	campaign.mission_maps = maps
+	assert(ResourceSaver.save(campaign, RESOURCE_DIRECTORY + "road_to_alderbrook.tres") == OK)
+	main.queue_free()
+	print("Built five Alderbrook campaign missions and baked all line of sight data.")
+	get_tree().quit()
+
+
+func _source_for(tiles: TileSet, label: String) -> int:
+	for index: int in range(tiles.get_source_count()):
+		var id: int = tiles.get_source_id(index)
+		var source: TileSetAtlasSource = tiles.get_source(id) as TileSetAtlasSource
+		if source == null or not source.has_tile(Vector2i.ZERO):
+			continue
+		var data: TileData = source.get_tile_data(Vector2i.ZERO, 0)
+		if str(data.get_custom_data("name")) == label:
+			return id
+	push_error("Missing campaign tile: " + label)
+	return -1
+
+
+func _layer(label: String, tiles: TileSet, script_path: String) -> HexagonTileMapLayer:
+	var layer: HexagonTileMapLayer = HexagonTileMapLayer.new()
+	layer.name = label
+	layer.tile_set = tiles
+	if not script_path.is_empty():
+		layer.set_script(load(script_path))
+	return layer
+
+
+func _build_map(spec: Dictionary, index: int) -> Map:
+	var map: Map = load("res://scenes/world/maps/map.tscn").instantiate() as Map
+	map.name = "Alderbrook" + str(index + 1)
+	map.map_name = spec["map"]
+	map.campaign_name = "Road to Alderbrook"
+	map.grid_size = spec["size"]
+	map.los_resource_path = "res://resources/los/alderbrook_" + str(spec["id"]) + ".res"
+	var layers: Node2D = map.get_node("TileMapLayers") as Node2D
+	var ground: HexagonTileMapLayer = load("res://scenes/world/maps/layers/ground_tile_map_layer.tscn").instantiate() as HexagonTileMapLayer
+	ground.clear()
+	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
+	var walls: HexagonTileMapLayer = _layer("WallTileMapLayer", _wall_set, "res://scenes/world/maps/layers/wall_tile_map_layer.gd")
+	var buildings: HexagonTileMapLayer = _layer("BuildingTileMapLayer", _building_set, "res://scenes/world/maps/layers/building_tile_map_layer.gd")
+	var water: HexagonTileMapLayer = _layer("WaterTileMapLayer", _water_set, "")
+	layers.add_child(ground)
+	layers.add_child(water)
+	layers.add_child(terrain)
+	layers.add_child(walls)
+	layers.add_child(buildings)
+	for layer: Node in layers.get_children():
+		layer.owner = map
+	var middle: int = map.grid_size.y / 2
+	for x: int in range(map.grid_size.x):
+		for y: int in range(map.grid_size.y):
+			var cell: Vector2i = Vector2i(x, y)
+			ground.set_cell(cell, 1, Vector2i.ZERO)
+			if y == middle:
+				_road(terrain, cell)
+			elif (x * 7 + y * 11 + index) % 13 < 3 and x > 3 and x < map.grid_size.x - 3:
+				terrain.set_cell(cell, _terrain_sources["Field"], Vector2i.ZERO)
+			if y <= 1 or y >= map.grid_size.y - 2:
+				if x % 4 != 0:
+					_woods(terrain, buildings, cell)
+	var belt: int = 6 + index
+	for y: int in range(2, map.grid_size.y - 2):
+		if absi(y - middle) > 1:
+			_woods(terrain, buildings, Vector2i(belt, y))
+	if index == 1:
+		for x: int in range(5, 11):
+			for y: int in range(3, 10):
+				if y != middle and terrain.get_cell_source_id(Vector2i(x, y)) != _terrain_sources["Woods"]:
+					terrain.set_cell(Vector2i(x, y), _terrain_sources["Orchard"], Vector2i.ZERO)
+	if index == 0:
+		_house(buildings, terrain, Vector2i(12, 5), false)
+	elif index == 1:
+		_house(buildings, terrain, Vector2i(13, 6), true)
+		_house(buildings, terrain, Vector2i(9, 8), false)
+	elif index == 2:
+		_house(buildings, terrain, Vector2i(7, 7), true)
+		_house(buildings, terrain, Vector2i(8, 9), false)
+	elif index >= 3:
+		var river_x: int = 11
+		var crossings: Array[int] = [4, 10]
+		var river_width: int = 2
+		if index == 4:
+			river_x = 10
+			river_width = 1
+			crossings = [4, 9, 14]
+		for x: int in range(river_x, river_x + river_width):
+			for y: int in range(map.grid_size.y):
+				var cell: Vector2i = Vector2i(x, y)
+				terrain.erase_cell(cell)
+				buildings.erase_cell(cell)
+				water.set_cell(cell, 0, Vector2i.ZERO)
+				if crossings.has(y):
+					var alternative: int = 0
+					if x % 2 == 0:
+						alternative = 1
+					water.set_cell(cell, 1, Vector2i.ZERO, alternative)
+				else:
+					ground.erase_cell(cell)
+		for crossing: int in crossings:
+			for x: int in range(4, map.grid_size.x - 2):
+				var cell: Vector2i = Vector2i(x, crossing)
+				if x < river_x or x >= river_x + river_width:
+					_road(terrain, cell)
+		if index == 3:
+			for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
+				_house(buildings, terrain, cell, true)
+		else:
+			for x: int in range(16, 23):
+				for y: int in range(3, 16):
+					if x % 3 != 0 and y % 3 == 1:
+						_house(buildings, terrain, Vector2i(x, y), true)
+			for cell: Vector2i in [Vector2i(17, 4), Vector2i(20, 9), Vector2i(18, 14)]:
+				_house(buildings, terrain, cell, true)
+	var scenario: Scenario = Scenario.new()
+	scenario.name = "Mission"
+	map.get_node("Scenarios").add_child(scenario)
+	scenario.owner = map
+	var units: Node2D = Node2D.new()
+	units.name = "Units"
+	scenario.add_child(units)
+	units.owner = map
+	var objectives: Node2D = Node2D.new()
+	objectives.name = "Objectives"
+	scenario.add_child(objectives)
+	objectives.owner = map
+	var marker_template: Scenario = load("res://scenes/scenarios/scenario.tscn").instantiate() as Scenario
+	for label: String in ["AxisObjectivesTileMapLayer", "AlliedObjectivesTileMapLayer"]:
+		var original: HexagonTileMapLayer = marker_template.get_node("Objectives/" + label) as HexagonTileMapLayer
+		var marker_layer: HexagonTileMapLayer = _layer(label, original.tile_set, "")
+		objectives.add_child(marker_layer)
+		marker_layer.owner = map
+	marker_template.free()
+	scenario.scenario_name = spec["title"]
+	scenario.scenario_id = "alderbrook_" + str(spec["id"])
+	scenario.campaign_id = "road_to_alderbrook"
+	scenario.campaign_mission = index + 1
+	scenario.scenario_description = spec["briefing"]
+	scenario.duration_s = spec["seconds"]
+	scenario.use_authored_duration = true
+	scenario.released = true
+	scenario.player_team = Globals.Team.ALLIES
+	scenario.axis_ai_status = Scenario.AIStatus.ON
+	scenario.axis_ai_mode = Scenario.AIMode.DEFEND
+	scenario.allies_ai_status = Scenario.AIStatus.OFF
+	if index == 2:
+		scenario.axis_ai_mode = Scenario.AIMode.ATTACK
+	scenario.victory_conditions = _conditions(index, scenario)
+	_add_units(scenario, map, ground, spec["player"], Globals.Team.ALLIES)
+	_add_units(scenario, map, ground, spec["enemy"], Globals.Team.AXIS)
+	_set_markers(scenario.get_node("Objectives/AlliedObjectivesTileMapLayer") as HexagonTileMapLayer, spec["allied_markers"], true)
+	_set_markers(scenario.get_node("Objectives/AxisObjectivesTileMapLayer") as HexagonTileMapLayer, spec["axis_markers"], false)
+	return map
+
+
+func _woods(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i) -> void:
+	terrain.set_cell(cell, _terrain_sources["Woods"], Vector2i.ZERO)
+	buildings.set_cell(cell, _building_sources["Woods"], Vector2i.ZERO)
+
+
+func _road(terrain: HexagonTileMapLayer, cell: Vector2i) -> void:
+	var alternative: int = 0
+	if cell.x % 2 == 0:
+		alternative = 1
+	terrain.set_cell(cell, _terrain_sources["Road"], Vector2i.ZERO, alternative)
+
+
+func _house(buildings: HexagonTileMapLayer, terrain: HexagonTileMapLayer, cell: Vector2i, stone: bool) -> void:
+	var kind: String = "Wood Building"
+	if stone:
+		kind = "Stone Building"
+	buildings.set_cell(cell, _building_sources[kind], Vector2i.ZERO)
+	terrain.erase_cell(cell)
+
+
+func _add_units(scenario: Scenario, map: Map, ground: HexagonTileMapLayer, roster: Array, team: Globals.Team) -> void:
+	var numbers: Dictionary[int, int] = {}
+	var faction: String = "germany"
+	if team == Globals.Team.ALLIES:
+		faction = "united_states"
+	for entry: Array in roster:
+		var unit: Unit = load("res://scenes/game/units/unit.tscn").instantiate() as Unit
+		unit.company = Unit.Company.A
+		unit.platoon = int(entry[0])
+		unit.team = team
+		var kind: String = str(entry[1])
+		var loadout: String = "rifle_squad"
+		unit.squad_type = Globals.SquadType.Rifle
+		if kind == "hq":
+			loadout = "platoon_hq"
+			unit.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
+		elif kind == "company_hq":
+			loadout = "company_hq"
+			unit.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+		elif kind == "mg":
+			loadout = "lmg_squad"
+			unit.squad_type = Globals.SquadType.MG
+		elif kind == "light_mortar" or kind == "medium_mortar":
+			loadout = kind + "_squad"
+			unit.squad_type = Globals.SquadType.MORTAR
+		unit.squad = 0
+		if kind != "hq" and kind != "company_hq":
+			numbers[unit.platoon] = numbers.get(unit.platoon, 0) + 1
+			unit.squad = numbers[unit.platoon]
+		unit.squad_loadout = load("res://resources/squads/" + faction + "/" + loadout + ".tres") as SquadLoadoutSpec
+		unit.loadouts = unit.squad_loadout.soldiers.duplicate()
+		unit.formation_id = unit.platoon
+		unit.position = ground.map_to_local(Vector2i(int(entry[2]), int(entry[3])))
+		unit.name = "%s_P%d_S%d_%s" % [faction, unit.platoon, unit.squad, kind]
+		scenario.get_node("Units").add_child(unit)
+		unit.owner = map
+
+
+func _set_markers(layer: HexagonTileMapLayer, markers: Array, allies: bool) -> void:
+	layer.clear()
+	var sources: Array[int] = [1, 3, 4, 5, 9]
+	if allies:
+		sources = [0, 6, 7, 8, 2]
+	for marker: Array in markers:
+		layer.set_cell(Vector2i(int(marker[1]), int(marker[2])), sources[int(marker[0])], Vector2i.ZERO)
+
+
+func _occupy(team: Globals.Team, objective: OccupyObjectiveCondition.ObjectiveId, seconds: float, major: bool, deadline: bool) -> OccupyObjectiveCondition:
+	var condition: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+	condition.team = team
+	condition.objective_id = objective
+	condition.required_time_s = seconds
+	condition.test_at_scenario_end = deadline
+	if not major:
+		condition.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	return condition
+
+
+func _destroy(team: Globals.Team, count: int, major: bool, deadline: bool) -> DestroyUnitsCondition:
+	var condition: DestroyUnitsCondition = DestroyUnitsCondition.new()
+	condition.team = team
+	condition.required_unit_count = count
+	condition.test_at_scenario_end = deadline
+	if not major:
+		condition.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	return condition
+
+
+func _exit(team: Globals.Team, count: int, major: bool, deadline: bool) -> ExitUnitsCondition:
+	var condition: ExitUnitsCondition = ExitUnitsCondition.new()
+	condition.team = team
+	condition.required_unit_count = count
+	condition.test_at_scenario_end = deadline
+	if not major:
+		condition.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	return condition
+
+
+func _prevent(team: Globals.Team, count: int, major: bool) -> PreventEnemyExitCondition:
+	var condition: PreventEnemyExitCondition = PreventEnemyExitCondition.new()
+	condition.team = team
+	condition.max_allowed_enemy_exits = count
+	if not major:
+		condition.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	return condition
+
+
+func _conditions(index: int, scenario: Scenario) -> Array[VictoryCondition]:
+	var player: Globals.Team = Globals.Team.ALLIES
+	var enemy: Globals.Team = Globals.Team.AXIS
+	var a: OccupyObjectiveCondition.ObjectiveId = OccupyObjectiveCondition.ObjectiveId.A
+	var b: OccupyObjectiveCondition.ObjectiveId = OccupyObjectiveCondition.ObjectiveId.B
+	var c: OccupyObjectiveCondition.ObjectiveId = OccupyObjectiveCondition.ObjectiveId.C
+	match index:
+		0:
+			return [_occupy(player, a, 15.0, true, false), _occupy(player, b, 15.0, false, true), _occupy(enemy, a, 15.0, true, true), _destroy(enemy, 1, true, true)]
+		1:
+			return [_occupy(player, a, 30.0, true, false), _destroy(player, 2, true, false), _occupy(player, b, 30.0, false, true), _occupy(enemy, a, 30.0, true, true), _destroy(enemy, 3, true, true)]
+		2:
+			return [_prevent(player, 0, true), _destroy(player, 2, true, true), _prevent(player, 2, false), _occupy(player, a, 30.0, false, true), _exit(enemy, 3, true, false)]
+		3:
+			return [_occupy(player, a, 20.0, true, false), _occupy(player, b, 20.0, true, false), _exit(player, 3, true, false), _exit(player, 2, false, true), _occupy(enemy, a, 30.0, true, true), _prevent(enemy, 1, true)]
+		4:
+			var hold: OccupyObjectiveCondition = _occupy(enemy, a, 45.0, true, true)
+			var fallback: ExitUnitsCondition = _exit(enemy, 2, false, true)
+			var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+			policy.hold_condition = hold
+			policy.exit_condition = fallback
+			policy.confirmation_seconds = 6.0
+			policy.withdrawal_margin_seconds = 20.0
+			policy.minimum_combat_squads = 4
+			scenario.ai_fallback_policies = [policy]
+			return [_occupy(player, a, 45.0, true, true), _occupy(player, b, 45.0, true, true), _occupy(player, c, 45.0, true, true), _destroy(player, 6, true, true), _prevent(player, 1, true), _occupy(player, b, 45.0, false, true), _destroy(player, 3, false, true), hold, _occupy(enemy, b, 45.0, true, true), _occupy(enemy, c, 45.0, true, true), _destroy(enemy, 6, true, true), fallback]
+	return []
+
+
+func _export_layout(map: Map, spec: Dictionary) -> void:
+	var layers: Array[Dictionary] = []
+	for layer: HexagonTileMapLayer in map.get_tilemap_layers():
+		var cells: Array[Dictionary] = []
+		for cell: Vector2i in layer.get_used_cells():
+			var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+			var position: Vector2 = layer.map_to_local(cell)
+			var data: TileData = layer.get_cell_tile_data(cell)
+			cells.append({"hex": [cell.x, cell.y], "position": [position.x, position.y], "texture": source.texture.resource_path, "flip_h": data.flip_h, "flip_v": data.flip_v})
+		layers.append({"name": str(layer.name), "cells": cells})
+	var data: Dictionary = {"title": spec["title"], "id": spec["id"], "size": [map.grid_size.x, map.grid_size.y], "seconds": spec["seconds"], "player": spec["player"], "enemy": spec["enemy"], "allied_markers": spec["allied_markers"], "axis_markers": spec["axis_markers"], "layers": layers}
+	var file: FileAccess = FileAccess.open(IMAGE_DIRECTORY + str(spec["id"]) + ".json", FileAccess.WRITE)
+	file.store_string(JSON.stringify(data, "\t"))
+
+
+func _bake_los(map: Map) -> void:
+	LOSHelper.ground_layer = map.get_ground_layer()
+	LOSHelper.terrain_layer = map.get_terrain_layer()
+	LOSHelper.building_layer = map.get_building_layer()
+	LOSHelper.wall_layer = map.get_wall_layer()
+	var lookup: Dictionary = {}
+	var ground: HexagonTileMapLayer = map.get_ground_layer()
+	for ox: int in range(map.grid_size.x):
+		for oy: int in range(map.grid_size.y):
+			var origin: Vector2i = Vector2i(ox, oy)
+			lookup[origin] = {}
+			for tx: int in range(map.grid_size.x):
+				for ty: int in range(map.grid_size.y):
+					var target: Vector2i = Vector2i(tx, ty)
+					if origin == target:
+						continue
+					var result: Dictionary = LOSHelper.check_los(ground.map_to_local(origin), ground.map_to_local(target), 1, 0, 1, 0)
+					if not result["blocked"]:
+						lookup[origin][target] = {"shooter_cover": result["shooter_cover"], "target_cover": result["target_cover"], "wall_cover": result["wall_cover"], "hindrance": result["hindrance"], "target_concealment": result["target_concealment"]}
+		if ox % 4 == 0:
+			print(map.map_name, ": baked column ", ox + 1, "/", map.grid_size.x)
+		await get_tree().process_frame
+	var resource: LosLookupData = LosLookupData.new()
+	resource.los_lookup = lookup
+	assert(ResourceSaver.save(resource, map.los_resource_path, ResourceSaver.FLAG_COMPRESS) == OK)

@@ -1,5 +1,7 @@
 extends Node2D
 
+const ALDERBROOK_CAMPAIGN: CampaignDefinition = preload("res://resources/campaigns/road_to_alderbrook.tres")
+
 # --- SETUP ---
 @onready var tile_map_layers: Node2D = $TileMapLayers
 
@@ -41,6 +43,7 @@ func _exit_tree() -> void:
 
 func _ready() -> void:
 	Globals.reset()
+	ALDERBROOK_CAMPAIGN.install(maps)
 	maps.hide()
 	var _maps: Array[Map] = []
 	_maps.assign(maps.get_children())
@@ -400,8 +403,10 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	ui.hide_target_hex_cover_distance()
 	var match_save: MatchSaveData = MatchSaveData.new()
 	
-	match_save.match_id = Globals.scenario_chosen.scenario_name.to_lower().replace(" ", "_")
+	match_save.match_id = Globals.scenario_chosen.get_save_id()
 	match_save.scenario_id = Globals.scenario_chosen.scenario_name
+	if not Globals.scenario_chosen.scenario_id.is_empty():
+		match_save.scenario_id = Globals.scenario_chosen.scenario_id
 	match_save.battle_id = Globals.battle_id
 	match_save.casualty_records.assign(Globals.battle_casualties)
 	match_save.exit_records.assign(Globals.battle_exits)

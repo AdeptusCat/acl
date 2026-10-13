@@ -39,9 +39,11 @@ func effectiveness() -> float:
 	return total / float(maxi(count, 1))
 
 
-func firepower() -> float:
+func support_firepower() -> float:
 	var total: float = 0.0
 	for unit: Unit in combat_units():
+		if unit.squad_type not in [Globals.SquadType.Rifle, Globals.SquadType.MG] or not PositionQueryService.can_follow_intent(unit):
+			continue
 		total += InfluenceUnitQuery.get_unit_firepower(unit)
 	return total
 

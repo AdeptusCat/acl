@@ -9,8 +9,12 @@ enum AIMode { ATTACK, DEFEND }
 @onready var allied_objectives_tile_map_layer: HexagonTileMapLayer = $Objectives/AlliedObjectivesTileMapLayer
 
 @export var scenario_name: String = "scenario"
+@export var scenario_id: String = ""
+@export var campaign_id: String = ""
+@export var campaign_mission: int = 0
 @export var scenario_description: String = ""
 @export var duration_s: float = 180.0
+@export var use_authored_duration: bool = false
 @export var released: bool = false
 @export var previous_scenario: Scenario
 
@@ -46,6 +50,12 @@ func is_ai_enabled(team: Globals.Team) -> bool:
 	if team == Globals.Team.AXIS:
 		return axis_ai_status == AIStatus.ON
 	return allies_ai_status == AIStatus.ON
+
+
+func get_save_id() -> String:
+	if not scenario_id.is_empty():
+		return scenario_id
+	return scenario_name.to_lower().replace(" ", "_")
 
 
 func get_ai_mode(team: Globals.Team) -> PositionProfile.Mode:

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CampaignDefinition" format=3 uid="uid://dkwyr86ndhiix"]
+
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/01_quiet_approach.tscn" id="1_fsdvc"]
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/02_orchard_outpost.tscn" id="2_3ia7j"]
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/03_the_roadblock.tscn" id="3_lpcmr"]
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/04_two_crossings.tscn" id="4_u5qlt"]
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/05_battle_for_alderbrook.tscn" id="5_cobea"]
+[ext_resource type="Script" uid="uid://iodsnpnipb2l" path="res://resources/campaigns/campaign_definition.gd" id="6_a4x8y"]
+
+[resource]
+script = ExtResource("6_a4x8y")
+campaign_id = "road_to_alderbrook"
+title = "Road to Alderbrook"
+mission_maps = Array[PackedScene]([ExtResource("1_fsdvc"), ExtResource("2_3ia7j"), ExtResource("3_lpcmr"), ExtResource("4_u5qlt"), ExtResource("5_cobea")])

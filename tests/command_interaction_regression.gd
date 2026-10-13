@@ -28,6 +28,10 @@ func _run() -> void:
 	var ground: HexagonTileMapLayer = world.ground_layer
 	var unit: Unit = Globals.get_units_for_team(Globals.team_player)[1]
 	controller.select_and_center_unit(unit)
+	# Native camera smoothing continues even after the fixture freezes scripts.
+	controller.camera.position_smoothing_enabled = false
+	controller.camera.reset_smoothing()
+	controller.camera.force_update_scroll()
 	controller.order_feedback.connect(_on_feedback)
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
 	world.ui.hide_target_hex_cover_distance()
@@ -75,7 +79,7 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("move")
 	_right_release(move_point)
-	_check(unit.action_controller.action_order_id > order_before and unit.action_controller.objective_hex == destination, "Releasing Move submits the original target hex through the actual input path")
+	_check(unit.action_controller.action_order_id > order_before and unit.action_controller.objective_hex == destination, "Releasing Move submits the original target hex through the actual input path (expected %s; selected %s; ordered %s)" % [destination, world.selected_map_hex, unit.action_controller.objective_hex])
 	_check(bool(feedback.back()["accepted"]) and _feedback_title(world).contains("Order accepted · Move"), "Accepted movement gets explicit positive feedback")
 	_right_open(target_point)
 	await _settle()
@@ -155,12 +159,14 @@ func _run() -> void:
 	_right_open(settings.settings_button.get_global_rect().get_center())
 	_check(not wheel.is_open(), "Right clicking a HUD control does not open a battlefield command wheel")
 	_right_release(settings.settings_button.get_global_rect().get_center())
-	for point: Vector2 in [Vector2(1.0, 1.0), Vector2(1151.0, 1.0), Vector2(1.0, 647.0), Vector2(1151.0, 647.0)]:
+	for point: Vector2 in [Vector2(1.0, 1.0), Vector2(1151.0, 1.0), Vector2(1.0, 647.0), Vector2(1151.0, 647.0), Vector2(576.0, 1.0), Vector2(576.0, 647.0), Vector2(1.0, 324.0), Vector2(1151.0, 324.0)]:
 		wheel.open(point)
-		wheel.select_at(wheel.position + wheel.get_option_point(0))
+		_check(wheel.get_global_transform_with_canvas().origin.is_equal_approx(point), "The wheel opens centered on the original pointer near %s" % point)
 		await _settle()
-		_check(Rect2(Vector2.ZERO, world.ui.get_node("Control").size).encloses(wheel.get_wheel_rect()), "The complete wheel and command status stay onscreen near %s" % point)
-		wheel.cancel()
+		_check(wheel.get_global_transform_with_canvas().origin.is_equal_approx(point), "Deferred status layout preserves the pointer anchor near %s" % point)
+		_check(Rect2(Vector2.ZERO, world.ui.get_node("Control").size).encloses(wheel.status_panel.get_global_rect()), "The command status stays onscreen near %s" % point)
+		wheel.select_at(point)
+		_check(wheel.close() == WheelOption.Option.MOVE_NORMAL, "Releasing at the original pointer selects Move near %s" % point)
 	LOSHelper.los_lookup[unit.current_hex] = original_los
 	await _check_rout(world, unit, other)
 	main.queue_free()

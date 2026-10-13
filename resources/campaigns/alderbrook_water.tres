@@ -1,0 +1,24 @@
+[gd_resource type="TileSet" format=3 uid="uid://dxxe4r2tnfsw2"]
+
+[ext_resource type="Texture2D" uid="uid://o8bpg4fjirov" path="res://assets/tiles/campaign/river.svg" id="1_xq4m5"]
+[ext_resource type="Texture2D" uid="uid://b0lai51iy0lmw" path="res://assets/tiles/campaign/bridge.svg" id="2_4o0pi"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xq4m5"]
+texture = ExtResource("1_xq4m5")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4o0pi"]
+texture = ExtResource("2_4o0pi")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/1 = 1
+0:0/1/flip_v = true
+
+[resource]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_xq4m5")
+sources/1 = SubResource("TileSetAtlasSource_4o0pi")

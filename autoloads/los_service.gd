@@ -43,12 +43,18 @@ func _ready() -> void:
 
 func load_prebaked_los(map: Map) -> void:
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
+	if not map.los_resource_path.is_empty():
+		file_path = map.los_resource_path
 	var los_resource: LosLookupData = load(file_path) as LosLookupData
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
 	terrain_layer = map.get_terrain_layer()
 	grid_size = map.grid_size
+	if los_resource == null:
+		los_lookup = {}
+		push_error("Missing baked line of sight for " + map.map_name)
+		return
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 

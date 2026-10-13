@@ -56,11 +56,17 @@ func setup_map_options(maps: Array[Map]) -> void:
 	scenario_buttons.clear()
 	var group: ButtonGroup = ButtonGroup.new()
 	group.allow_unpress = false
+	var campaign_heading: String = ""
 	for map: Map in maps:
-		var heading: Label = Label.new()
-		heading.theme_type_variation = &"HudHeading"
-		heading.text = map.map_name
-		maps_v_box_container.add_child(heading)
+		var heading_text: String = map.map_name
+		if not map.campaign_name.is_empty():
+			heading_text = map.campaign_name
+		if map.campaign_name.is_empty() or campaign_heading != map.campaign_name:
+			var heading: Label = Label.new()
+			heading.theme_type_variation = &"HudHeading"
+			heading.text = heading_text
+			maps_v_box_container.add_child(heading)
+		campaign_heading = map.campaign_name
 		for scenario: Scenario in map.get_scenarios():
 			var button: Button = Button.new()
 			button.toggle_mode = true
@@ -100,13 +106,16 @@ func get_lock_reason(scenario: Scenario) -> String:
 	if scenario.previous_scenario == null:
 		return ""
 	var previous: Scenario = scenario.previous_scenario
-	var match_id: String = previous.scenario_name.to_lower().replace(" ", "_")
+	var match_id: String = previous.get_save_id()
 	var save_path: String = "user://matches/%s.tres" % match_id
 	if ResourceLoader.exists(save_path):
 		# Inspect progression without importing a previous battle's casualty records.
 		var saved: MatchSaveData = ResourceLoader.load(save_path, "", ResourceLoader.CACHE_MODE_IGNORE) as MatchSaveData
 		if saved != null and saved.winner_team == saved.player_team:
-			return ""
+			if previous.scenario_id.is_empty():
+				return ""
+			if saved.scenario_id == previous.scenario_id and saved.player_team == previous.player_team:
+				return ""
 	return "Win \"%s\" to unlock this mission." % previous.scenario_name
 
 
@@ -118,6 +127,8 @@ func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
 	scenario_buttons[scenario].set_pressed_no_signal(true)
 	scenario_title.text = scenario.scenario_name
 	scenario_description.text = scenario.scenario_description
+	if scenario.use_authored_duration:
+		time_spinbox.value = scenario.duration_s / 60.0
 	lock_label.text = get_lock_reason(scenario)
 	lock_label.visible = not lock_label.text.is_empty()
 	start_button.disabled = not lock_label.text.is_empty()

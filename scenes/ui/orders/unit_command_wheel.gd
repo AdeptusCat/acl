@@ -211,17 +211,23 @@ func _fit_wheel() -> void:
 		return
 	status_panel.custom_minimum_size.x = float(outer_radius * 2)
 	status_panel.size = Vector2(float(outer_radius * 2), status_panel.get_combined_minimum_size().y)
-	status_panel.position = Vector2(-outer_radius, outer_radius + STATUS_GAP)
-	var bounds: Vector2 = get_parent().size
-	position.x = clampf(_anchor_point.x, outer_radius + SCREEN_MARGIN, maxf(outer_radius + SCREEN_MARGIN, bounds.x - outer_radius - SCREEN_MARGIN))
-	position.y = clampf(_anchor_point.y, outer_radius + SCREEN_MARGIN, maxf(outer_radius + SCREEN_MARGIN, bounds.y - outer_radius - STATUS_GAP - status_panel.size.y - SCREEN_MARGIN))
+	var parent: Control = get_parent() as Control
+	# Keep Move under the original pointer even when the outer wheel is clipped.
+	position = parent.get_global_transform_with_canvas().affine_inverse() * _anchor_point
+	var bounds: Vector2 = parent.size
+	var status_position: Vector2 = position + Vector2(-status_panel.size.x * 0.5, outer_radius + STATUS_GAP)
+	if status_position.y + status_panel.size.y > bounds.y - SCREEN_MARGIN:
+		status_position.y = position.y - outer_radius - STATUS_GAP - status_panel.size.y
+	status_position.x = clampf(status_position.x, SCREEN_MARGIN, maxf(SCREEN_MARGIN, bounds.x - status_panel.size.x - SCREEN_MARGIN))
+	status_position.y = clampf(status_position.y, SCREEN_MARGIN, maxf(SCREEN_MARGIN, bounds.y - status_panel.size.y - SCREEN_MARGIN))
+	status_panel.position = status_position - position
 
 
 func get_wheel_rect() -> Rect2:
-	var height: float = float(outer_radius * 2)
+	var rect: Rect2 = Rect2(position - Vector2(outer_radius, outer_radius), Vector2.ONE * float(outer_radius * 2))
 	if status_panel != null:
-		height += STATUS_GAP + status_panel.size.y
-	return Rect2(position - Vector2(outer_radius, outer_radius), Vector2(float(outer_radius * 2), height))
+		rect = rect.merge(Rect2(position + status_panel.position, status_panel.size))
+	return rect
 
 
 func _sector_start_angle() -> float:

@@ -1,0 +1,5217 @@
+{
+	"allied_markers": [
+		[
+			1,
+			13,
+			6
+		],
+		[
+			2,
+			9,
+			8
+		],
+		[
+			4,
+			2,
+			6
+		]
+	],
+	"axis_markers": [
+		[
+			1,
+			13,
+			6
+		],
+		[
+			4,
+			15,
+			7
+		]
+	],
+	"enemy": [
+		[
+			1,
+			"hq",
+			15,
+			7
+		],
+		[
+			1,
+			"rifle",
+			13,
+			6
+		],
+		[
+			1,
+			"rifle",
+			14,
+			5
+		],
+		[
+			1,
+			"mg",
+			12,
+			4
+		]
+	],
+	"id": "02_orchard_outpost",
+	"layers": [
+		{
+			"cells": [
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						0
+					],
+					"position": [
+						32.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						80.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						128.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						128.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						80.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						1
+					],
+					"position": [
+						32.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						2
+					],
+					"position": [
+						32.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						2
+					],
+					"position": [
+						80.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						2
+					],
+					"position": [
+						128.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						2
+					],
+					"position": [
+						176.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						3
+					],
+					"position": [
+						32.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						3
+					],
+					"position": [
+						80.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						3
+					],
+					"position": [
+						128.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						3
+					],
+					"position": [
+						176.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						176.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						0
+					],
+					"position": [
+						224.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						272.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						272.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						4
+					],
+					"position": [
+						176.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						4
+					],
+					"position": [
+						128.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						4
+					],
+					"position": [
+						80.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						4
+					],
+					"position": [
+						32.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						32.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						5
+					],
+					"position": [
+						80.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						128.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						5
+					],
+					"position": [
+						224.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						6
+					],
+					"position": [
+						32.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						80.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						6
+					],
+					"position": [
+						128.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						176.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						224.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						320.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						272.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						5
+					],
+					"position": [
+						272.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						320.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						320.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						320.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						320.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						320.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						320.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						368.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						368.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						176.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						4
+					],
+					"position": [
+						224.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						272.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						2
+					],
+					"position": [
+						272.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						3
+					],
+					"position": [
+						224.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						2
+					],
+					"position": [
+						224.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						1
+					],
+					"position": [
+						224.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						0
+					],
+					"position": [
+						416.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						368.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						2
+					],
+					"position": [
+						416.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						3
+					],
+					"position": [
+						368.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						3
+					],
+					"position": [
+						416.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						416.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						5
+					],
+					"position": [
+						416.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						1
+					],
+					"position": [
+						416.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						368.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						5
+					],
+					"position": [
+						368.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						6
+					],
+					"position": [
+						416.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						7
+					],
+					"position": [
+						416.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						8
+					],
+					"position": [
+						416.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						8
+					],
+					"position": [
+						368.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						8
+					],
+					"position": [
+						320.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						8
+					],
+					"position": [
+						272.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						8
+					],
+					"position": [
+						224.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						8
+					],
+					"position": [
+						176.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						8
+					],
+					"position": [
+						128.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						8
+					],
+					"position": [
+						80.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						8
+					],
+					"position": [
+						32.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						7
+					],
+					"position": [
+						32.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						7
+					],
+					"position": [
+						80.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						7
+					],
+					"position": [
+						128.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						7
+					],
+					"position": [
+						176.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						7
+					],
+					"position": [
+						224.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						272.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						320.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						7
+					],
+					"position": [
+						368.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						368.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						464.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						512.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						560.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						1
+					],
+					"position": [
+						608.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						0
+					],
+					"position": [
+						608.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						512.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						656.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						704.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						752.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						1
+					],
+					"position": [
+						800.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						848.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						0
+					],
+					"position": [
+						800.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						2
+					],
+					"position": [
+						512.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						464.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						2
+					],
+					"position": [
+						560.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						2
+					],
+					"position": [
+						608.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						2
+					],
+					"position": [
+						656.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						656.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						1
+					],
+					"position": [
+						560.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						704.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						752.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						2
+					],
+					"position": [
+						704.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						2
+					],
+					"position": [
+						464.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						464.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						3
+					],
+					"position": [
+						512.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						3
+					],
+					"position": [
+						560.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						3
+					],
+					"position": [
+						608.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						3
+					],
+					"position": [
+						656.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						3
+					],
+					"position": [
+						704.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						512.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						4
+					],
+					"position": [
+						560.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						4
+					],
+					"position": [
+						608.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						704.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						4
+					],
+					"position": [
+						656.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						512.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						464.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						5
+					],
+					"position": [
+						608.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"position": [
+						560.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						5
+					],
+					"position": [
+						656.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						608.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						464.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						464.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						512.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"position": [
+						560.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						6
+					],
+					"position": [
+						656.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						7
+					],
+					"position": [
+						512.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						7
+					],
+					"position": [
+						464.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						8
+					],
+					"position": [
+						512.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						7
+					],
+					"position": [
+						560.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						9
+					],
+					"position": [
+						32.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						9
+					],
+					"position": [
+						128.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						9
+					],
+					"position": [
+						224.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						9
+					],
+					"position": [
+						272.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						9
+					],
+					"position": [
+						176.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						9
+					],
+					"position": [
+						80.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						9
+					],
+					"position": [
+						320.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						9
+					],
+					"position": [
+						368.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						9
+					],
+					"position": [
+						416.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						9
+					],
+					"position": [
+						464.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						9
+					],
+					"position": [
+						512.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						8
+					],
+					"position": [
+						464.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						9
+					],
+					"position": [
+						560.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						9
+					],
+					"position": [
+						608.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						9
+					],
+					"position": [
+						656.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						9
+					],
+					"position": [
+						704.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						9
+					],
+					"position": [
+						752.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						9
+					],
+					"position": [
+						800.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						9
+					],
+					"position": [
+						848.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						8
+					],
+					"position": [
+						848.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						8
+					],
+					"position": [
+						800.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						8
+					],
+					"position": [
+						752.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						8
+					],
+					"position": [
+						704.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						8
+					],
+					"position": [
+						656.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						8
+					],
+					"position": [
+						608.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						8
+					],
+					"position": [
+						560.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						7
+					],
+					"position": [
+						848.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						7
+					],
+					"position": [
+						752.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						7
+					],
+					"position": [
+						704.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						7
+					],
+					"position": [
+						656.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						7
+					],
+					"position": [
+						800.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"position": [
+						848.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						752.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						5
+					],
+					"position": [
+						848.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						4
+					],
+					"position": [
+						848.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						4
+					],
+					"position": [
+						800.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						4
+					],
+					"position": [
+						752.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						5
+					],
+					"position": [
+						704.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						704.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						5
+					],
+					"position": [
+						752.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						6
+					],
+					"position": [
+						800.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						5
+					],
+					"position": [
+						800.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						3
+					],
+					"position": [
+						848.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						3
+					],
+					"position": [
+						752.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						2
+					],
+					"position": [
+						848.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						3
+					],
+					"position": [
+						800.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						2
+					],
+					"position": [
+						752.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						848.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						2
+					],
+					"position": [
+						800.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						7
+					],
+					"position": [
+						608.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						10
+					],
+					"position": [
+						32.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						11
+					],
+					"position": [
+						32.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						10
+					],
+					"position": [
+						80.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						80.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						10
+					],
+					"position": [
+						128.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						128.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						176.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						10
+					],
+					"position": [
+						224.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						11
+					],
+					"position": [
+						224.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						272.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						272.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						320.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						320.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						368.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						11
+					],
+					"position": [
+						368.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						10
+					],
+					"position": [
+						416.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						11
+					],
+					"position": [
+						416.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						464.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						464.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						512.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						11
+					],
+					"position": [
+						512.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						10
+					],
+					"position": [
+						560.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						11
+					],
+					"position": [
+						560.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						10
+					],
+					"position": [
+						608.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						11
+					],
+					"position": [
+						608.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						656.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						11
+					],
+					"position": [
+						656.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						704.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						11
+					],
+					"position": [
+						704.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						752.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						11
+					],
+					"position": [
+						752.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						10
+					],
+					"position": [
+						800.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						11
+					],
+					"position": [
+						800.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						10
+					],
+					"position": [
+						848.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						11
+					],
+					"position": [
+						848.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/ground/base_tile.png"
+				}
+			],
+			"name": "GroundTileMapLayer"
+		},
+		{
+			"cells": [],
+			"name": "WaterTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						0,
+						6
+					],
+					"position": [
+						32.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						80.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						80.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						80.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						10
+					],
+					"position": [
+						80.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						80.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						128.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						128.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						2,
+						6
+					],
+					"position": [
+						128.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						10
+					],
+					"position": [
+						128.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						128.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						176.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						176.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						176.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						1
+					],
+					"position": [
+						224.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						224.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						7
+					],
+					"position": [
+						224.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						8
+					],
+					"position": [
+						224.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						272.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						272.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						5
+					],
+					"position": [
+						272.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						272.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						272.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						272.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						320.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						320.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						320.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						320.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						8
+					],
+					"position": [
+						320.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						320.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						320.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						368.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						368.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						5
+					],
+					"position": [
+						368.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						368.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						368.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						11
+					],
+					"position": [
+						368.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						2
+					],
+					"position": [
+						416.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						8,
+						6
+					],
+					"position": [
+						416.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						8
+					],
+					"position": [
+						416.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						9
+					],
+					"position": [
+						416.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						464.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						464.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						464.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						464.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						464.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						464.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						512.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						512.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						2
+					],
+					"position": [
+						512.0,
+						160.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						3
+					],
+					"position": [
+						512.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						512.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						9
+					],
+					"position": [
+						512.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						512.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						11
+					],
+					"position": [
+						512.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						560.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						1
+					],
+					"position": [
+						560.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"position": [
+						560.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						10
+					],
+					"position": [
+						560.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						11
+					],
+					"position": [
+						560.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						3
+					],
+					"position": [
+						608.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						608.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						9
+					],
+					"position": [
+						608.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						10
+					],
+					"position": [
+						608.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						656.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						656.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						7
+					],
+					"position": [
+						656.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						656.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						11
+					],
+					"position": [
+						656.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						704.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						704.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						3
+					],
+					"position": [
+						704.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						704.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/terrain/field.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						704.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						704.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						11
+					],
+					"position": [
+						704.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						752.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						752.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						752.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						752.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						11
+					],
+					"position": [
+						752.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						16,
+						6
+					],
+					"position": [
+						800.0,
+						416.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						848.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						848.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"position": [
+						848.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/road.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						10
+					],
+					"position": [
+						848.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						11
+					],
+					"position": [
+						848.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						368.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						3
+					],
+					"position": [
+						368.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						368.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						8
+					],
+					"position": [
+						368.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						9
+					],
+					"position": [
+						368.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						272.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						272.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						8
+					],
+					"position": [
+						272.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						9
+					],
+					"position": [
+						272.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						320.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						320.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						320.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						320.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						9
+					],
+					"position": [
+						320.0,
+						608.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						7
+					],
+					"position": [
+						368.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						3
+					],
+					"position": [
+						416.0,
+						224.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						416.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						5
+					],
+					"position": [
+						416.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						7
+					],
+					"position": [
+						416.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						464.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						464.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						7
+					],
+					"position": [
+						464.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						9
+					],
+					"position": [
+						464.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						512.0,
+						288.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						512.0,
+						352.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						7
+					],
+					"position": [
+						512.0,
+						480.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						8
+					],
+					"position": [
+						512.0,
+						544.0
+					],
+					"texture": "res://assets/tiles/buildings/orchard.png"
+				}
+			],
+			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [],
+			"name": "WallTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						80.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						80.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						10
+					],
+					"position": [
+						80.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						80.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						128.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						128.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						10
+					],
+					"position": [
+						128.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						128.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						176.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						176.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						272.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						272.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						272.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						320.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						320.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						320.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						320.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						368.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						368.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						368.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						11
+					],
+					"position": [
+						368.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						464.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						464.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						464.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						464.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						512.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						512.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						512.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						11
+					],
+					"position": [
+						512.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						560.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						1
+					],
+					"position": [
+						560.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						10
+					],
+					"position": [
+						560.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						11
+					],
+					"position": [
+						560.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						656.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						656.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						656.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						11
+					],
+					"position": [
+						656.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						704.0,
+						32.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						704.0,
+						96.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						704.0,
+						672.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						11
+					],
+					"position": [
+						704.0,
+						736.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						752.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						752.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						752.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						11
+					],
+					"position": [
+						752.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						848.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						848.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						10
+					],
+					"position": [
+						848.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						11
+					],
+					"position": [
+						848.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						368.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						3
+					],
+					"position": [
+						368.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						368.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						8
+					],
+					"position": [
+						368.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						9
+					],
+					"position": [
+						368.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/buildings/woods.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						6
+					],
+					"position": [
+						656.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						8
+					],
+					"position": [
+						464.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/buildings/building_wood_01.png"
+				}
+			],
+			"name": "BuildingTileMapLayer"
+		}
+	],
+	"player": [
+		[
+			1,
+			"hq",
+			2,
+			6
+		],
+		[
+			1,
+			"rifle",
+			3,
+			5
+		],
+		[
+			1,
+			"rifle",
+			3,
+			6
+		],
+		[
+			1,
+			"rifle",
+			3,
+			7
+		],
+		[
+			1,
+			"mg",
+			2,
+			8
+		]
+	],
+	"seconds": 600.0,
+	"size": [
+		18,
+		12
+	],
+	"title": "2. Orchard Outpost"
+}

@@ -7,6 +7,8 @@ class_name Map
 @onready var scenarios: Node2D = $Scenarios
 
 @export var map_name: String = "map"
+@export var campaign_name: String = ""
+@export_file("*.tres", "*.res") var los_resource_path: String = ""
 
 
 

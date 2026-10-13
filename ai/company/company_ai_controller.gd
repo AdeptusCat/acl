@@ -364,7 +364,7 @@ func _choose_support(members: Array[CompanyPlatoon], maneuver: CompanyPlatoon) -
 	for formation: CompanyPlatoon in members:
 		if formation == maneuver or formation.task != null or formation.effectiveness() <= 0.0:
 			continue
-		var score: float = formation.firepower()
+		var score: float = formation.support_firepower()
 		if formation.role == CompanyPlatoon.Role.SUPPORT:
 			score *= 1.5
 		if score > best:
