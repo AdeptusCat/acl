@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://scenes/world/maps/map.gd" id="1_ydgeg"]
 [ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_water.tres" id="2_y6j5a"]
 [ext_resource type="Script" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="4_7tw40"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green.png" id="4_iyxsn"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/ground_tile_map_layer.tscn" id="5_66v7w"]
 [ext_resource type="Texture2D" path="res://assets/tiles/elevation/crest_line.png" id="6_f6jma"]
-[ext_resource type="Texture2D" path="res://assets/tiles/ground/base_tile.png" id="7_bori0"]
 [ext_resource type="Texture2D" path="res://assets/tiles/16x16_2b - Kopie.png" id="8_2bhww"]
 [ext_resource type="Script" path="res://scenes/world/maps/layers/ground_tile_map_layer.gd" id="9_iftf4"]
 [ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_nvs37"]
@@ -74,24 +74,25 @@
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_b.png" id="72_e635y"]
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_c.png" id="73_x3q3n"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4d7sh"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wtyv4"]
 texture = ExtResource("6_f6jma")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ir8iy"]
-texture = ExtResource("7_bori0")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q36b3"]
+resource_name = "Open Ground - Spring Summer"
+texture = ExtResource("4_iyxsn")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pk8t6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k4me4"]
 texture = ExtResource("8_2bhww")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 1:0/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_rj586"]
+[sub_resource type="TileSet" id="TileSet_x06ee"]
 tile_shape = 3
 tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
@@ -99,43 +100,43 @@ physics_layer_0/collision_layer = 4
 physics_layer_0/collision_mask = 4
 custom_data_layer_0/name = "elevation"
 custom_data_layer_0/type = 2
-sources/0 = SubResource("TileSetAtlasSource_4d7sh")
-sources/1 = SubResource("TileSetAtlasSource_ir8iy")
-sources/2 = SubResource("TileSetAtlasSource_pk8t6")
+sources/0 = SubResource("TileSetAtlasSource_wtyv4")
+sources/1 = SubResource("TileSetAtlasSource_q36b3")
+sources/2 = SubResource("TileSetAtlasSource_k4me4")
 
-[sub_resource type="Resource" id="Resource_iyxsn"]
+[sub_resource type="Resource" id="Resource_m5tve"]
 script = ExtResource("49_6apu7")
 required_time_s = 45.0
 team = 1
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_wtyv4"]
+[sub_resource type="Resource" id="Resource_640b4"]
 script = ExtResource("49_6apu7")
 objective_id = 2
 required_time_s = 45.0
 team = 1
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_q36b3"]
+[sub_resource type="Resource" id="Resource_fhlvw"]
 script = ExtResource("49_6apu7")
 objective_id = 3
 required_time_s = 45.0
 team = 1
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_k4me4"]
+[sub_resource type="Resource" id="Resource_r28t1"]
 script = ExtResource("50_xtvnm")
 required_unit_count = 6
 team = 1
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_x06ee"]
+[sub_resource type="Resource" id="Resource_ilf4m"]
 script = ExtResource("51_dl3mi")
 max_allowed_enemy_exits = 1
 team = 1
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_m5tve"]
+[sub_resource type="Resource" id="Resource_uam5t"]
 script = ExtResource("49_6apu7")
 objective_id = 2
 required_time_s = 45.0
@@ -143,45 +144,45 @@ team = 1
 outcome_level = 0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_640b4"]
+[sub_resource type="Resource" id="Resource_ao1lx"]
 script = ExtResource("50_xtvnm")
 required_unit_count = 3
 team = 1
 outcome_level = 0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_fhlvw"]
+[sub_resource type="Resource" id="Resource_jqe2x"]
 script = ExtResource("49_6apu7")
 required_time_s = 45.0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_r28t1"]
+[sub_resource type="Resource" id="Resource_fflgn"]
 script = ExtResource("49_6apu7")
 objective_id = 2
 required_time_s = 45.0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_ilf4m"]
+[sub_resource type="Resource" id="Resource_ychgx"]
 script = ExtResource("49_6apu7")
 objective_id = 3
 required_time_s = 45.0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_uam5t"]
+[sub_resource type="Resource" id="Resource_d3vmv"]
 script = ExtResource("50_xtvnm")
 required_unit_count = 6
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_ao1lx"]
+[sub_resource type="Resource" id="Resource_xby52"]
 script = ExtResource("52_4sv80")
 required_unit_count = 2
 outcome_level = 0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_jqe2x"]
+[sub_resource type="Resource" id="Resource_2oei0"]
 script = ExtResource("53_xii21")
-hold_condition = SubResource("Resource_fhlvw")
-exit_condition = SubResource("Resource_ao1lx")
+hold_condition = SubResource("Resource_jqe2x")
+exit_condition = SubResource("Resource_xby52")
 confirmation_seconds = 6.0
 withdrawal_margin_seconds = 20.0
 minimum_combat_squads = 4
@@ -326,7 +327,7 @@ role = 1
 weapon = ExtResource("56_7x7wo")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
-[sub_resource type="Resource" id="Resource_3six5"]
+[sub_resource type="Resource" id="Resource_5m35y"]
 script = ExtResource("24_q36b3")
 nickname = "Zugführer"
 rank_grade = 4
@@ -334,7 +335,7 @@ role = 8
 weapon = ExtResource("60_sltvd")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
-[sub_resource type="Resource" id="Resource_8yauu"]
+[sub_resource type="Resource" id="Resource_gm074"]
 script = ExtResource("24_q36b3")
 nickname = "Hauptfeldwebel"
 rank_grade = 3
@@ -342,7 +343,7 @@ role = 6
 weapon = ExtResource("60_sltvd")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
-[sub_resource type="Resource" id="Resource_7vrku"]
+[sub_resource type="Resource" id="Resource_n6lta"]
 script = ExtResource("24_q36b3")
 nickname = "Melderführer"
 rank_grade = 3
@@ -350,7 +351,7 @@ role = 6
 weapon = ExtResource("60_sltvd")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
-[sub_resource type="Resource" id="Resource_m20rh"]
+[sub_resource type="Resource" id="Resource_psw4a"]
 script = ExtResource("24_q36b3")
 nickname = "Funker"
 rank_grade = 2
@@ -358,7 +359,7 @@ role = 6
 weapon = ExtResource("48_hsovp")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
-[sub_resource type="Resource" id="Resource_s118w"]
+[sub_resource type="Resource" id="Resource_7m3uo"]
 script = ExtResource("24_q36b3")
 weapon = ExtResource("48_hsovp")
 metadata/_custom_type_script = "uid://doub5i2qbimo0"
@@ -506,7 +507,7 @@ los_resource_path = "res://resources/los/alderbrook_05_battle_for_alderbrook.res
 
 [node name="GroundTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1569268173 instance=ExtResource("5_66v7w")]
 tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAABAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAAAAAMAAQAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAQAAAAAAAAADAAEAAQAAAAAAAAAEAAAAAQAAAAAAAAAFAAAAAQAAAAAAAAAFAAQAAQAAAAAAAAADAAQAAQAAAAAAAAACAAQAAQAAAAAAAAABAAQAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAAUAAQAAAAAAAAABAAUAAQAAAAAAAAACAAUAAQAAAAAAAAAEAAUAAQAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYAAQAAAAAAAAAFAAUAAQAAAAAAAAAGAAUAAQAAAAAAAAAGAAQAAQAAAAAAAAAGAAMAAQAAAAAAAAAGAAIAAQAAAAAAAAAGAAEAAQAAAAAAAAAGAAAAAQAAAAAAAAAFAAEAAQAAAAAAAAAHAAAAAQAAAAAAAAAHAAIAAQAAAAAAAAADAAUAAQAAAAAAAAAEAAQAAQAAAAAAAAAFAAMAAQAAAAAAAAAFAAIAAQAAAAAAAAAEAAMAAQAAAAAAAAAEAAIAAQAAAAAAAAAEAAEAAQAAAAAAAAAIAAAAAQAAAAAAAAAHAAEAAQAAAAAAAAAIAAIAAQAAAAAAAAAHAAMAAQAAAAAAAAAIAAMAAQAAAAAAAAAIAAQAAQAAAAAAAAAIAAUAAQAAAAAAAAAIAAEAAQAAAAAAAAAHAAQAAQAAAAAAAAAHAAUAAQAAAAAAAAAIAAYAAQAAAAAAAAAIAAcAAQAAAAAAAAAIAAgAAQAAAAAAAAAHAAgAAQAAAAAAAAAGAAgAAQAAAAAAAAAFAAgAAQAAAAAAAAAEAAgAAQAAAAAAAAADAAgAAQAAAAAAAAACAAgAAQAAAAAAAAABAAgAAQAAAAAAAAAAAAgAAQAAAAAAAAAAAAcAAQAAAAAAAAABAAcAAQAAAAAAAAACAAcAAQAAAAAAAAADAAcAAQAAAAAAAAAEAAcAAQAAAAAAAAAFAAcAAQAAAAAAAAAGAAcAAQAAAAAAAAAHAAcAAQAAAAAAAAAHAAYAAQAAAAAAAAAJAAAAAQAAAAAAAAALAAAAAQAAAAAAAAAMAAEAAQAAAAAAAAAMAAAAAQAAAAAAAAANAAAAAQAAAAAAAAAOAAAAAQAAAAAAAAAPAAAAAQAAAAAAAAAQAAEAAQAAAAAAAAARAAAAAQAAAAAAAAAQAAAAAQAAAAAAAAASAAAAAQAAAAAAAAATAAAAAQAAAAAAAAAUAAAAAQAAAAAAAAAVAAAAAQAAAAAAAAAWAAAAAQAAAAAAAAAWAAEAAQAAAAAAAAAXAAAAAQAAAAAAAAAWAAIAAQAAAAAAAAAWAAMAAQAAAAAAAAAWAAQAAQAAAAAAAAAWAAUAAQAAAAAAAAAWAAYAAQAAAAAAAAAJAAEAAQAAAAAAAAALAAIAAQAAAAAAAAAMAAIAAQAAAAAAAAANAAIAAQAAAAAAAAANAAEAAQAAAAAAAAALAAEAAQAAAAAAAAAOAAEAAQAAAAAAAAAPAAEAAQAAAAAAAAAOAAIAAQAAAAAAAAAJAAIAAQAAAAAAAAAJAAMAAQAAAAAAAAALAAMAAQAAAAAAAAAMAAMAAQAAAAAAAAANAAMAAQAAAAAAAAAOAAMAAQAAAAAAAAAKAAQAAQAAAAAAAAALAAQAAQAAAAAAAAAMAAQAAQAAAAAAAAAOAAQAAQAAAAAAAAANAAQAAQAAAAAAAAAJAAQAAQAAAAAAAAAMAAUAAQAAAAAAAAALAAUAAQAAAAAAAAANAAUAAQAAAAAAAAAMAAYAAQAAAAAAAAAJAAUAAQAAAAAAAAAJAAYAAQAAAAAAAAALAAYAAQAAAAAAAAANAAYAAQAAAAAAAAAJAAcAAQAAAAAAAAALAAcAAQAAAAAAAAAAAAkAAQAAAAAAAAACAAkAAQAAAAAAAAAEAAkAAQAAAAAAAAAFAAkAAQAAAAAAAAADAAkAAQAAAAAAAAABAAkAAQAAAAAAAAAGAAkAAQAAAAAAAAAHAAkAAQAAAAAAAAAIAAkAAQAAAAAAAAAJAAkAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAgAAQAAAAAAAAALAAkAAQAAAAAAAAAMAAkAAQAAAAAAAAANAAkAAQAAAAAAAAAOAAkAAQAAAAAAAAAPAAkAAQAAAAAAAAAQAAkAAQAAAAAAAAARAAkAAQAAAAAAAAASAAkAAQAAAAAAAAATAAkAAQAAAAAAAAAUAAkAAQAAAAAAAAAVAAkAAQAAAAAAAAAWAAkAAQAAAAAAAAAXAAkAAQAAAAAAAAAXAAgAAQAAAAAAAAAXAAcAAQAAAAAAAAAXAAYAAQAAAAAAAAAXAAUAAQAAAAAAAAAXAAQAAQAAAAAAAAAXAAMAAQAAAAAAAAAXAAIAAQAAAAAAAAAXAAEAAQAAAAAAAAAWAAcAAQAAAAAAAAAVAAcAAQAAAAAAAAAWAAgAAQAAAAAAAAAVAAgAAQAAAAAAAAAUAAgAAQAAAAAAAAATAAgAAQAAAAAAAAASAAgAAQAAAAAAAAARAAgAAQAAAAAAAAAQAAgAAQAAAAAAAAAPAAgAAQAAAAAAAAAOAAgAAQAAAAAAAAANAAgAAQAAAAAAAAAMAAgAAQAAAAAAAAALAAgAAQAAAAAAAAARAAcAAQAAAAAAAAAPAAcAAQAAAAAAAAAOAAcAAQAAAAAAAAANAAcAAQAAAAAAAAAQAAcAAQAAAAAAAAASAAcAAQAAAAAAAAATAAYAAQAAAAAAAAAUAAcAAQAAAAAAAAARAAYAAQAAAAAAAAAPAAYAAQAAAAAAAAASAAYAAQAAAAAAAAAUAAYAAQAAAAAAAAATAAcAAQAAAAAAAAAVAAYAAQAAAAAAAAAVAAUAAQAAAAAAAAATAAUAAQAAAAAAAAAUAAUAAQAAAAAAAAASAAUAAQAAAAAAAAARAAUAAQAAAAAAAAATAAQAAQAAAAAAAAARAAQAAQAAAAAAAAAQAAQAAQAAAAAAAAAPAAQAAQAAAAAAAAAOAAUAAQAAAAAAAAAOAAYAAQAAAAAAAAAPAAUAAQAAAAAAAAAQAAYAAQAAAAAAAAAQAAUAAQAAAAAAAAASAAQAAQAAAAAAAAATAAMAAQAAAAAAAAARAAMAAQAAAAAAAAAPAAMAAQAAAAAAAAASAAMAAQAAAAAAAAARAAIAAQAAAAAAAAAQAAMAAQAAAAAAAAAPAAIAAQAAAAAAAAATAAIAAQAAAAAAAAAUAAIAAQAAAAAAAAATAAEAAQAAAAAAAAASAAIAAQAAAAAAAAARAAEAAQAAAAAAAAAQAAIAAQAAAAAAAAASAAEAAQAAAAAAAAAVAAEAAQAAAAAAAAAUAAEAAQAAAAAAAAAVAAIAAQAAAAAAAAAVAAMAAQAAAAAAAAAUAAQAAQAAAAAAAAAVAAQAAQAAAAAAAAAUAAMAAQAAAAAAAAAMAAcAAQAAAAAAAAAAAAoAAQAAAAAAAAAAAAsAAQAAAAAAAAAAAAwAAQAAAAAAAAAAAA0AAQAAAAAAAAAAAA4AAQAAAAAAAAAAAA8AAQAAAAAAAAAAABAAAQAAAAAAAAAAABEAAQAAAAAAAAABAAoAAQAAAAAAAAABAAsAAQAAAAAAAAABAAwAAQAAAAAAAAABAA0AAQAAAAAAAAABAA4AAQAAAAAAAAABAA8AAQAAAAAAAAABABAAAQAAAAAAAAABABEAAQAAAAAAAAACAAoAAQAAAAAAAAACAAsAAQAAAAAAAAACAAwAAQAAAAAAAAACAA0AAQAAAAAAAAACAA4AAQAAAAAAAAACAA8AAQAAAAAAAAACABAAAQAAAAAAAAACABEAAQAAAAAAAAADAAoAAQAAAAAAAAADAAsAAQAAAAAAAAADAAwAAQAAAAAAAAADAA0AAQAAAAAAAAADAA4AAQAAAAAAAAADAA8AAQAAAAAAAAADABAAAQAAAAAAAAADABEAAQAAAAAAAAAEAAoAAQAAAAAAAAAEAAsAAQAAAAAAAAAEAAwAAQAAAAAAAAAEAA0AAQAAAAAAAAAEAA4AAQAAAAAAAAAEAA8AAQAAAAAAAAAEABAAAQAAAAAAAAAEABEAAQAAAAAAAAAFAAoAAQAAAAAAAAAFAAsAAQAAAAAAAAAFAAwAAQAAAAAAAAAFAA0AAQAAAAAAAAAFAA4AAQAAAAAAAAAFAA8AAQAAAAAAAAAFABAAAQAAAAAAAAAFABEAAQAAAAAAAAAGAAoAAQAAAAAAAAAGAAsAAQAAAAAAAAAGAAwAAQAAAAAAAAAGAA0AAQAAAAAAAAAGAA4AAQAAAAAAAAAGAA8AAQAAAAAAAAAGABAAAQAAAAAAAAAGABEAAQAAAAAAAAAHAAoAAQAAAAAAAAAHAAsAAQAAAAAAAAAHAAwAAQAAAAAAAAAHAA0AAQAAAAAAAAAHAA4AAQAAAAAAAAAHAA8AAQAAAAAAAAAHABAAAQAAAAAAAAAHABEAAQAAAAAAAAAIAAoAAQAAAAAAAAAIAAsAAQAAAAAAAAAIAAwAAQAAAAAAAAAIAA0AAQAAAAAAAAAIAA4AAQAAAAAAAAAIAA8AAQAAAAAAAAAIABAAAQAAAAAAAAAIABEAAQAAAAAAAAAJAAoAAQAAAAAAAAAJAAsAAQAAAAAAAAAJAAwAAQAAAAAAAAAJAA0AAQAAAAAAAAAJAA4AAQAAAAAAAAAJAA8AAQAAAAAAAAAJABAAAQAAAAAAAAAJABEAAQAAAAAAAAAKAA4AAQAAAAAAAAALAAoAAQAAAAAAAAALAAsAAQAAAAAAAAALAAwAAQAAAAAAAAALAA0AAQAAAAAAAAALAA4AAQAAAAAAAAALAA8AAQAAAAAAAAALABAAAQAAAAAAAAALABEAAQAAAAAAAAAMAAoAAQAAAAAAAAAMAAsAAQAAAAAAAAAMAAwAAQAAAAAAAAAMAA0AAQAAAAAAAAAMAA4AAQAAAAAAAAAMAA8AAQAAAAAAAAAMABAAAQAAAAAAAAAMABEAAQAAAAAAAAANAAoAAQAAAAAAAAANAAsAAQAAAAAAAAANAAwAAQAAAAAAAAANAA0AAQAAAAAAAAANAA4AAQAAAAAAAAANAA8AAQAAAAAAAAANABAAAQAAAAAAAAANABEAAQAAAAAAAAAOAAoAAQAAAAAAAAAOAAsAAQAAAAAAAAAOAAwAAQAAAAAAAAAOAA0AAQAAAAAAAAAOAA4AAQAAAAAAAAAOAA8AAQAAAAAAAAAOABAAAQAAAAAAAAAOABEAAQAAAAAAAAAPAAoAAQAAAAAAAAAPAAsAAQAAAAAAAAAPAAwAAQAAAAAAAAAPAA0AAQAAAAAAAAAPAA4AAQAAAAAAAAAPAA8AAQAAAAAAAAAPABAAAQAAAAAAAAAPABEAAQAAAAAAAAAQAAoAAQAAAAAAAAAQAAsAAQAAAAAAAAAQAAwAAQAAAAAAAAAQAA0AAQAAAAAAAAAQAA4AAQAAAAAAAAAQAA8AAQAAAAAAAAAQABAAAQAAAAAAAAAQABEAAQAAAAAAAAARAAoAAQAAAAAAAAARAAsAAQAAAAAAAAARAAwAAQAAAAAAAAARAA0AAQAAAAAAAAARAA4AAQAAAAAAAAARAA8AAQAAAAAAAAARABAAAQAAAAAAAAARABEAAQAAAAAAAAASAAoAAQAAAAAAAAASAAsAAQAAAAAAAAASAAwAAQAAAAAAAAASAA0AAQAAAAAAAAASAA4AAQAAAAAAAAASAA8AAQAAAAAAAAASABAAAQAAAAAAAAASABEAAQAAAAAAAAATAAoAAQAAAAAAAAATAAsAAQAAAAAAAAATAAwAAQAAAAAAAAATAA0AAQAAAAAAAAATAA4AAQAAAAAAAAATAA8AAQAAAAAAAAATABAAAQAAAAAAAAATABEAAQAAAAAAAAAUAAoAAQAAAAAAAAAUAAsAAQAAAAAAAAAUAAwAAQAAAAAAAAAUAA0AAQAAAAAAAAAUAA4AAQAAAAAAAAAUAA8AAQAAAAAAAAAUABAAAQAAAAAAAAAUABEAAQAAAAAAAAAVAAoAAQAAAAAAAAAVAAsAAQAAAAAAAAAVAAwAAQAAAAAAAAAVAA0AAQAAAAAAAAAVAA4AAQAAAAAAAAAVAA8AAQAAAAAAAAAVABAAAQAAAAAAAAAVABEAAQAAAAAAAAAWAAoAAQAAAAAAAAAWAAsAAQAAAAAAAAAWAAwAAQAAAAAAAAAWAA0AAQAAAAAAAAAWAA4AAQAAAAAAAAAWAA8AAQAAAAAAAAAWABAAAQAAAAAAAAAWABEAAQAAAAAAAAAXAAoAAQAAAAAAAAAXAAsAAQAAAAAAAAAXAAwAAQAAAAAAAAAXAA0AAQAAAAAAAAAXAA4AAQAAAAAAAAAXAA8AAQAAAAAAAAAXABAAAQAAAAAAAAAXABEAAQAAAAAAAAAYAAAAAQAAAAAAAAAYAAEAAQAAAAAAAAAYAAIAAQAAAAAAAAAYAAMAAQAAAAAAAAAYAAQAAQAAAAAAAAAYAAUAAQAAAAAAAAAYAAYAAQAAAAAAAAAYAAcAAQAAAAAAAAAYAAgAAQAAAAAAAAAYAAkAAQAAAAAAAAAYAAoAAQAAAAAAAAAYAAsAAQAAAAAAAAAYAAwAAQAAAAAAAAAYAA0AAQAAAAAAAAAYAA4AAQAAAAAAAAAYAA8AAQAAAAAAAAAYABAAAQAAAAAAAAAYABEAAQAAAAAAAAAZAAAAAQAAAAAAAAAZAAEAAQAAAAAAAAAZAAIAAQAAAAAAAAAZAAMAAQAAAAAAAAAZAAQAAQAAAAAAAAAZAAUAAQAAAAAAAAAZAAYAAQAAAAAAAAAZAAcAAQAAAAAAAAAZAAgAAQAAAAAAAAAZAAkAAQAAAAAAAAAZAAoAAQAAAAAAAAAZAAsAAQAAAAAAAAAZAAwAAQAAAAAAAAAZAA0AAQAAAAAAAAAZAA4AAQAAAAAAAAAZAA8AAQAAAAAAAAAZABAAAQAAAAAAAAAZABEAAQAAAAAAAAA=")
-tile_set = SubResource("TileSet_rj586")
+tile_set = SubResource("TileSet_x06ee")
 script = ExtResource("9_iftf4")
 pathfinding_enabled = true
 metadata/_edit_lock_ = true
@@ -549,8 +550,8 @@ duration_s = 900.0
 use_authored_duration = true
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("48_j75m7")]([SubResource("Resource_iyxsn"), SubResource("Resource_wtyv4"), SubResource("Resource_q36b3"), SubResource("Resource_k4me4"), SubResource("Resource_x06ee"), SubResource("Resource_m5tve"), SubResource("Resource_640b4"), SubResource("Resource_fhlvw"), SubResource("Resource_r28t1"), SubResource("Resource_ilf4m"), SubResource("Resource_uam5t"), SubResource("Resource_ao1lx")])
-ai_fallback_policies = Array[ExtResource("53_xii21")]([SubResource("Resource_jqe2x")])
+victory_conditions = Array[ExtResource("48_j75m7")]([SubResource("Resource_m5tve"), SubResource("Resource_640b4"), SubResource("Resource_fhlvw"), SubResource("Resource_r28t1"), SubResource("Resource_ilf4m"), SubResource("Resource_uam5t"), SubResource("Resource_ao1lx"), SubResource("Resource_jqe2x"), SubResource("Resource_fflgn"), SubResource("Resource_ychgx"), SubResource("Resource_d3vmv"), SubResource("Resource_xby52")])
+ai_fallback_policies = Array[ExtResource("53_xii21")]([SubResource("Resource_2oei0")])
 axis_ai_status = 1
 allies_ai_status = 0
 
@@ -1045,7 +1046,7 @@ position = Vector2(1184, 736)
 script = ExtResource("23_wtyv4")
 retreat_speed = 100.0
 fire_rate = 1.5
-loadouts = Array[ExtResource("24_q36b3")]([ExtResource("59_rbyit"), SubResource("Resource_3six5"), SubResource("Resource_8yauu"), SubResource("Resource_7vrku"), SubResource("Resource_m20rh"), SubResource("Resource_s118w"), ExtResource("54_xii21")])
+loadouts = Array[ExtResource("24_q36b3")]([ExtResource("59_rbyit"), SubResource("Resource_5m35y"), SubResource("Resource_gm074"), SubResource("Resource_n6lta"), SubResource("Resource_psw4a"), SubResource("Resource_7m3uo"), ExtResource("54_xii21")])
 squad_loadout = ExtResource("61_1x771")
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")

@@ -3,6 +3,8 @@ extends Node
 const MAP_DIRECTORY: String = "res://scenes/campaigns/alderbrook/"
 const RESOURCE_DIRECTORY: String = "res://resources/campaigns/"
 const IMAGE_DIRECTORY: String = "res://docs/campaigns/road_to_alderbrook/maps/"
+const OPEN_GROUND_IMAGE: String = "res://assets/tiles/vegetation/open_ground_green.png"
+const WOODS_IMAGE: String = "res://assets/tiles/vegetation/woods_green.png"
 const FIELD_IMAGES: Dictionary[String, String] = {
 	"field_nw_sw_alt.png": "res://assets/tiles/fields/field_wheat.png",
 	"field_sw_so.png": "res://assets/tiles/fields/field_green_rows.png",
@@ -74,8 +76,10 @@ func _run() -> void:
 	_update_field_art()
 	_wall_set = base.get_wall_layer().tile_set.duplicate(true) as TileSet
 	_building_set = base.get_building_layer().tile_set.duplicate(true) as TileSet
+	_update_woods_art(_terrain_set)
+	_update_woods_art(_building_set)
 	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
-	woods.texture = load("res://assets/tiles/buildings/woods.png") as Texture2D
+	woods.texture = load(WOODS_IMAGE) as Texture2D
 	woods.texture_region_size = Vector2i(64, 64)
 	woods.create_tile(Vector2i.ZERO)
 	_terrain_set.add_source(woods)
@@ -144,6 +148,14 @@ func _run() -> void:
 	get_tree().quit()
 
 
+func _update_woods_art(tiles: TileSet) -> void:
+	for index: int in range(tiles.get_source_count()):
+		var source: TileSetAtlasSource = tiles.get_source(tiles.get_source_id(index)) as TileSetAtlasSource
+		if source != null and source.texture != null and source.texture.resource_path.get_file() == "woods.png":
+			source.texture = load(WOODS_IMAGE) as Texture2D
+			source.resource_name = "Woods - Spring Summer"
+
+
 func _update_field_art() -> void:
 	for index: int in range(_terrain_set.get_source_count()):
 		var source: TileSetAtlasSource = _terrain_set.get_source(_terrain_set.get_source_id(index)) as TileSetAtlasSource
@@ -189,6 +201,10 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	map.los_resource_path = "res://resources/los/alderbrook_" + str(spec["id"]) + ".res"
 	var layers: Node2D = map.get_node("TileMapLayers") as Node2D
 	var ground: HexagonTileMapLayer = load("res://scenes/world/maps/layers/ground_tile_map_layer.tscn").instantiate() as HexagonTileMapLayer
+	ground.tile_set = ground.tile_set.duplicate(true) as TileSet
+	var open_ground: TileSetAtlasSource = ground.tile_set.get_source(1) as TileSetAtlasSource
+	open_ground.texture = load(OPEN_GROUND_IMAGE) as Texture2D
+	open_ground.resource_name = "Open Ground - Spring Summer"
 	ground.clear()
 	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
 	var walls: HexagonTileMapLayer = _layer("WallTileMapLayer", _wall_set, "res://scenes/world/maps/layers/wall_tile_map_layer.gd")

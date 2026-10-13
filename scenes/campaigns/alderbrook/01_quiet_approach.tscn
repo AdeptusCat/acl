@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://scenes/world/maps/map.gd" id="1_u0vfx"]
 [ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_water.tres" id="2_32d4c"]
 [ext_resource type="Script" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="4_gq6xk"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green.png" id="4_yycqq"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/ground_tile_map_layer.tscn" id="5_yycqq"]
 [ext_resource type="Texture2D" path="res://assets/tiles/elevation/crest_line.png" id="6_7c7xa"]
-[ext_resource type="Texture2D" path="res://assets/tiles/ground/base_tile.png" id="7_hi3l8"]
 [ext_resource type="Texture2D" path="res://assets/tiles/16x16_2b - Kopie.png" id="8_fy3lb"]
 [ext_resource type="Script" path="res://scenes/world/maps/layers/ground_tile_map_layer.gd" id="9_dlgsm"]
 [ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_hfvsb"]
@@ -55,24 +55,25 @@
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_b.png" id="53_tii1o"]
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_c.png" id="54_1k02o"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4d7sh"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7c7xa"]
 texture = ExtResource("6_7c7xa")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ir8iy"]
-texture = ExtResource("7_hi3l8")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hi3l8"]
+resource_name = "Open Ground - Spring Summer"
+texture = ExtResource("4_yycqq")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pk8t6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fy3lb"]
 texture = ExtResource("8_fy3lb")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 1:0/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_rj586"]
+[sub_resource type="TileSet" id="TileSet_dlgsm"]
 tile_shape = 3
 tile_offset_axis = 1
 tile_size = Vector2i(64, 64)
@@ -80,16 +81,16 @@ physics_layer_0/collision_layer = 4
 physics_layer_0/collision_mask = 4
 custom_data_layer_0/name = "elevation"
 custom_data_layer_0/type = 2
-sources/0 = SubResource("TileSetAtlasSource_4d7sh")
-sources/1 = SubResource("TileSetAtlasSource_ir8iy")
-sources/2 = SubResource("TileSetAtlasSource_pk8t6")
+sources/0 = SubResource("TileSetAtlasSource_7c7xa")
+sources/1 = SubResource("TileSetAtlasSource_hi3l8")
+sources/2 = SubResource("TileSetAtlasSource_fy3lb")
 
-[sub_resource type="Resource" id="Resource_yycqq"]
+[sub_resource type="Resource" id="Resource_qw1vt"]
 script = ExtResource("49_hte11")
 required_time_s = 15.0
 team = 1
 
-[sub_resource type="Resource" id="Resource_7c7xa"]
+[sub_resource type="Resource" id="Resource_wi054"]
 script = ExtResource("49_hte11")
 objective_id = 2
 required_time_s = 15.0
@@ -97,12 +98,12 @@ team = 1
 outcome_level = 0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_hi3l8"]
+[sub_resource type="Resource" id="Resource_yac84"]
 script = ExtResource("49_hte11")
 required_time_s = 15.0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_fy3lb"]
+[sub_resource type="Resource" id="Resource_h7ai6"]
 script = ExtResource("50_t3t2e")
 test_at_scenario_end = true
 
@@ -309,7 +310,7 @@ los_resource_path = "res://resources/los/alderbrook_01_quiet_approach.res"
 
 [node name="GroundTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1569268173 instance=ExtResource("5_yycqq")]
 tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAABAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAAAAAMAAQAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAQAAAAAAAAADAAEAAQAAAAAAAAAEAAAAAQAAAAAAAAAFAAAAAQAAAAAAAAAFAAQAAQAAAAAAAAADAAQAAQAAAAAAAAACAAQAAQAAAAAAAAABAAQAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAAUAAQAAAAAAAAABAAUAAQAAAAAAAAACAAUAAQAAAAAAAAAEAAUAAQAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYAAQAAAAAAAAAFAAUAAQAAAAAAAAAGAAUAAQAAAAAAAAAGAAQAAQAAAAAAAAAGAAMAAQAAAAAAAAAGAAIAAQAAAAAAAAAGAAEAAQAAAAAAAAAGAAAAAQAAAAAAAAAFAAEAAQAAAAAAAAAHAAAAAQAAAAAAAAAHAAIAAQAAAAAAAAADAAUAAQAAAAAAAAAEAAQAAQAAAAAAAAAFAAMAAQAAAAAAAAAFAAIAAQAAAAAAAAAEAAMAAQAAAAAAAAAEAAIAAQAAAAAAAAAEAAEAAQAAAAAAAAAIAAAAAQAAAAAAAAAHAAEAAQAAAAAAAAAIAAIAAQAAAAAAAAAHAAMAAQAAAAAAAAAIAAMAAQAAAAAAAAAIAAQAAQAAAAAAAAAIAAUAAQAAAAAAAAAIAAEAAQAAAAAAAAAHAAQAAQAAAAAAAAAHAAUAAQAAAAAAAAAIAAYAAQAAAAAAAAAIAAcAAQAAAAAAAAAIAAgAAQAAAAAAAAAHAAgAAQAAAAAAAAAGAAgAAQAAAAAAAAAFAAgAAQAAAAAAAAAEAAgAAQAAAAAAAAADAAgAAQAAAAAAAAACAAgAAQAAAAAAAAABAAgAAQAAAAAAAAAAAAgAAQAAAAAAAAAAAAcAAQAAAAAAAAABAAcAAQAAAAAAAAACAAcAAQAAAAAAAAADAAcAAQAAAAAAAAAEAAcAAQAAAAAAAAAFAAcAAQAAAAAAAAAGAAcAAQAAAAAAAAAHAAcAAQAAAAAAAAAHAAYAAQAAAAAAAAAJAAAAAQAAAAAAAAAKAAEAAQAAAAAAAAALAAAAAQAAAAAAAAAMAAEAAQAAAAAAAAAMAAAAAQAAAAAAAAAKAAAAAQAAAAAAAAANAAAAAQAAAAAAAAAOAAAAAQAAAAAAAAAPAAAAAQAAAAAAAAAKAAIAAQAAAAAAAAAJAAEAAQAAAAAAAAALAAIAAQAAAAAAAAAMAAIAAQAAAAAAAAANAAIAAQAAAAAAAAANAAEAAQAAAAAAAAALAAEAAQAAAAAAAAAOAAEAAQAAAAAAAAAPAAEAAQAAAAAAAAAOAAIAAQAAAAAAAAAJAAIAAQAAAAAAAAAJAAMAAQAAAAAAAAAKAAMAAQAAAAAAAAALAAMAAQAAAAAAAAAMAAMAAQAAAAAAAAANAAMAAQAAAAAAAAAOAAMAAQAAAAAAAAAKAAQAAQAAAAAAAAALAAQAAQAAAAAAAAAMAAQAAQAAAAAAAAAOAAQAAQAAAAAAAAANAAQAAQAAAAAAAAAKAAUAAQAAAAAAAAAJAAQAAQAAAAAAAAAMAAUAAQAAAAAAAAALAAUAAQAAAAAAAAANAAUAAQAAAAAAAAAMAAYAAQAAAAAAAAAJAAUAAQAAAAAAAAAJAAYAAQAAAAAAAAAKAAYAAQAAAAAAAAALAAYAAQAAAAAAAAANAAYAAQAAAAAAAAAKAAcAAQAAAAAAAAAJAAcAAQAAAAAAAAAKAAgAAQAAAAAAAAALAAcAAQAAAAAAAAAAAAkAAQAAAAAAAAACAAkAAQAAAAAAAAAEAAkAAQAAAAAAAAAFAAkAAQAAAAAAAAADAAkAAQAAAAAAAAABAAkAAQAAAAAAAAAGAAkAAQAAAAAAAAAHAAkAAQAAAAAAAAAIAAkAAQAAAAAAAAAJAAkAAQAAAAAAAAAKAAkAAQAAAAAAAAAJAAgAAQAAAAAAAAALAAkAAQAAAAAAAAAMAAkAAQAAAAAAAAANAAkAAQAAAAAAAAAOAAkAAQAAAAAAAAAPAAkAAQAAAAAAAAAPAAgAAQAAAAAAAAAOAAgAAQAAAAAAAAANAAgAAQAAAAAAAAAMAAgAAQAAAAAAAAALAAgAAQAAAAAAAAAPAAcAAQAAAAAAAAAOAAcAAQAAAAAAAAANAAcAAQAAAAAAAAAPAAYAAQAAAAAAAAAPAAQAAQAAAAAAAAAOAAUAAQAAAAAAAAAOAAYAAQAAAAAAAAAPAAUAAQAAAAAAAAAPAAMAAQAAAAAAAAAPAAIAAQAAAAAAAAAMAAcAAQAAAAAAAAA=")
-tile_set = SubResource("TileSet_rj586")
+tile_set = SubResource("TileSet_dlgsm")
 script = ExtResource("9_dlgsm")
 pathfinding_enabled = true
 metadata/_edit_lock_ = true
@@ -351,7 +352,7 @@ duration_s = 600.0
 use_authored_duration = true
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_yycqq"), SubResource("Resource_7c7xa"), SubResource("Resource_hi3l8"), SubResource("Resource_fy3lb")])
+victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_qw1vt"), SubResource("Resource_wi054"), SubResource("Resource_yac84"), SubResource("Resource_h7ai6")])
 axis_ai_status = 1
 allies_ai_status = 0
 
