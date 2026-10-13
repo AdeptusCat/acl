@@ -6,6 +6,7 @@ signal cancelled
 const ICON_SIZE: Vector2 = Vector2(32.0, 32.0)
 const SCREEN_MARGIN: float = 12.0
 const STATUS_GAP: float = 8.0
+const ROUT_COLOR: Color = Color(0.95, 0.65, 0.35)
 
 @export var bkg_color: Color = Color(0.09, 0.1, 0.085, 1.0)
 @export var line_color: Color = Color(0.53, 0.54, 0.43)
@@ -24,6 +25,7 @@ var _anchor_point: Vector2
 var _restriction_provider: Callable
 var _restrictions: Dictionary[WheelOption.Option, String] = {}
 var _refresh_elapsed_s: float = 0.0
+var _state_source: StressController
 
 
 func _ready() -> void:
@@ -59,7 +61,11 @@ func _ready() -> void:
 	hide()
 
 
-func open(event_position: Vector2, restriction_provider: Callable = Callable()) -> void:
+func open(event_position: Vector2, restriction_provider: Callable = Callable(), state_source: StressController = null) -> void:
+	_disconnect_state_source()
+	_state_source = state_source
+	if is_instance_valid(_state_source):
+		_state_source.state_changed.connect(_on_morale_state_changed)
 	_anchor_point = event_position
 	_restriction_provider = restriction_provider
 	selection = 0
@@ -83,6 +89,7 @@ func close() -> WheelOption.Option:
 		return WheelOption.Option.NONE
 	var command: WheelOption.Option = options[selection].option
 	_active = false
+	_disconnect_state_source()
 	set_process(false)
 	hide()
 	return command
@@ -92,9 +99,26 @@ func cancel() -> void:
 	if not is_open():
 		return
 	_active = false
+	_disconnect_state_source()
 	set_process(false)
 	hide()
 	cancelled.emit()
+
+
+func _exit_tree() -> void:
+	_disconnect_state_source()
+
+
+func _disconnect_state_source() -> void:
+	if is_instance_valid(_state_source) and _state_source.state_changed.is_connected(_on_morale_state_changed):
+		_state_source.state_changed.disconnect(_on_morale_state_changed)
+	_state_source = null
+
+
+func _on_morale_state_changed(_previous: int, _next: int) -> void:
+	if is_open():
+		_refresh_restrictions()
+		_update_status()
 
 
 func _input(event: InputEvent) -> void:
@@ -158,10 +182,23 @@ func _update_status() -> void:
 	var color: Color = Color(0.93, 0.91, 0.82)
 	if command == WheelOption.Option.NONE:
 		restriction_label.text = "Release to cancel."
-	elif not reason.is_empty():
+	elif command == WheelOption.Option.ROUT:
+		selected_label.text = "Rout · attempt escape"
+		restriction_label.text = "Uncontrolled retreat.\nNo escape route means surrender."
+		color = ROUT_COLOR
+	if not reason.is_empty():
 		restriction_label.text = reason
 		color = Color(0.96, 0.62, 0.43)
+	selected_label.add_theme_color_override("font_color", _command_color(command))
 	restriction_label.add_theme_color_override("font_color", color)
+
+
+func _command_color(command: WheelOption.Option) -> Color:
+	if not str(_restrictions.get(command, "")).is_empty():
+		return Color(0.62, 0.63, 0.57)
+	if command == WheelOption.Option.ROUT:
+		return ROUT_COLOR
+	return Color(0.93, 0.91, 0.82)
 
 
 func _queue_fit() -> void:
@@ -218,9 +255,7 @@ func _draw() -> void:
 		var edge: Vector2 = Vector2.from_angle(start)
 		draw_line(edge * inner_radius, edge * outer_radius, line_color, float(line_width), true)
 		var point: Vector2 = get_option_point(index)
-		var color: Color = Color(0.93, 0.91, 0.82)
-		if not str(_restrictions.get(options[index].option, "")).is_empty():
-			color = Color(0.62, 0.63, 0.57)
+		var color: Color = _command_color(options[index].option)
 		var label: String = str(WheelOption.COMMAND_NAMES.get(options[index].option, "Cancel"))
 		var label_point: Vector2 = point + Vector2(-4.0, 5.0)
 		if options[index].option == WheelOption.Option.NONE:

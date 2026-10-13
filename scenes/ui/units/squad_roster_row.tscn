@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/units/squad_roster_row.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/rout.svg" id="2_rout"]
 
 [sub_resource type="StyleBoxFlat" id="BarBackground"]
 bg_color = Color(0.2, 0.2, 0.17, 1)
@@ -68,6 +69,25 @@ show_percentage = false
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 4
+
+[node name="RoutSlot" type="Control" parent="Content/Status"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="RoutAvailable" type="TextureRect" parent="Content/Status/RoutSlot"]
+visible = false
+modulate = Color(0.95, 0.65, 0.35, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_rout")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Morale" type="Label" parent="Content/Status"]
 layout_mode = 2

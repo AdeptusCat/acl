@@ -5,9 +5,19 @@ class_name SquadRosterRow
 @onready var strength: Label = $Content/Top/Strength/Count
 @onready var strength_bar: ProgressBar = $Content/Top/Strength/Bar
 @onready var morale: Label = $Content/Status/Morale
+@onready var rout_available: TextureRect = $Content/Status/RoutSlot/RoutAvailable
 @onready var isolation: Label = $Content/Status/Isolation
 
 var unit: Unit
+
+
+func _ready() -> void:
+	if is_instance_valid(unit):
+		unit.stress_system.state_changed.connect(_on_morale_state_changed)
+
+
+func _on_morale_state_changed(_previous: int, _next: int) -> void:
+	refresh()
 
 
 func refresh() -> void:
@@ -36,9 +46,12 @@ func refresh() -> void:
 		morale.text = "Surrendered"
 		morale_color = Color(0.7, 0.67, 0.6)
 	morale.add_theme_color_override("font_color", morale_color)
+	rout_available.visible = unit.can_rout()
 	isolation.visible = _is_isolated()
 	set_pressed_no_signal(unit.selected)
 	tooltip_text = "%s · %s\nCompany %s · Platoon %d · Squad %d\nStrength: %d/%d · Morale: %s\nClick to select and center" % [designation, unit.get_squad_type_name(unit.squad_type), Unit.COMPANY_NAMES[unit.company], unit.platoon, unit.squad, remaining, unit.original_size, morale.text]
+	if rout_available.visible:
+		tooltip_text += "\nRout available: select this squad, then right click for Rout.\nAn uncontrolled retreat; no escape route means surrender."
 	if isolation.visible:
 		tooltip_text += "\nIsolated: no communication link to an active headquarters"
 	else:

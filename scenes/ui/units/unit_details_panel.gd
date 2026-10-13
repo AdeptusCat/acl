@@ -308,7 +308,7 @@ func _on_state_changed(state: int) -> void:
 		STATES.MoraleState.COMBAT_INEFFECTIVE:
 			color = Color(0.75, 0.6, 1.0)
 	unit_status_label.add_theme_color_override("font_color", color)
-	var rout_available: bool = state == STATES.MoraleState.PINNED and not unit.in_close_combat and not unit.surrendered
+	var rout_available: bool = unit.can_rout()
 	if rout_button.disabled == rout_available:
 		rout_button.set_rout_available(rout_available)
 	rout_explanation.visible = state == STATES.MoraleState.PINNED and not unit.surrendered
@@ -374,5 +374,5 @@ func _on_surrender_pressed() -> void:
 
 
 func _on_rout_pressed() -> void:
-	if is_instance_valid(unit) and unit.stress_system.state == STATES.MoraleState.PINNED and not unit.in_close_combat:
-		unit.stress_system._set_state(STATES.MoraleState.PANIC)
+	if is_instance_valid(unit):
+		unit.request_rout()

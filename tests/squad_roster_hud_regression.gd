@@ -58,7 +58,21 @@ func _run() -> void:
 			rifle = unit
 			break
 	var rifle_row: SquadRosterRow = panel.rows[rifle]
+	_check(not rifle_row.rout_available.visible, "Fresh squads have no retreat availability icon")
+	var morale_position: Vector2 = rifle_row.morale.position
+	var row_size: Vector2 = rifle_row.size
 	rifle.stress_system._set_state(STATES.MoraleState.PINNED)
+	_check(rifle_row.rout_available.visible and rifle_row.tooltip_text.contains("right click for Rout") and rifle_row.tooltip_text.contains("surrender"), "Pinned squads immediately show a quiet retreat icon with an explanation")
+	for transition: int in range(3):
+		rifle.stress_system._set_state(STATES.MoraleState.CAUTIOUS)
+		_check(not rifle_row.rout_available.visible, "Recovery immediately hides the retreat availability icon")
+		await _settle()
+		_check(rifle_row.morale.position == morale_position and rifle_row.size == row_size, "Frequent morale transitions do not shift roster text or row size")
+		rifle.stress_system._set_state(STATES.MoraleState.PINNED)
+	rifle.in_close_combat = true
+	panel.refresh()
+	_check(not rifle_row.rout_available.visible, "Close combat suppresses the retreat cue")
+	rifle.in_close_combat = false
 	panel._process(0.25)
 	_check(rifle_row.morale.text == "Pinned" and rifle_row.morale.get_theme_color("font_color").r > 0.9, "Live pinned morale is clearly labeled and colored")
 	rifle.command_squad = selected

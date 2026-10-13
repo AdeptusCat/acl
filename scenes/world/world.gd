@@ -365,7 +365,7 @@ func _on_input_manager_right_button_pressed() -> void:
 	ui.hide_target_hex_cover_distance()
 	ui.hide_order_feedback()
 	LOSHelper.clear_los()
-	ui.selection_wheel_alt.open(mouse_screen_pos, _wheel_restriction)
+	ui.selection_wheel_alt.open(mouse_screen_pos, _wheel_restriction, _command_unit.stress_system)
 
 
 func _wheel_restriction(option: WheelOption.Option) -> String:

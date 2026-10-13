@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/battle_settings_panel.tscn" id="33_settings"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/terrain_card.tscn" id="35_terrain"]
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/hex_hint_panel.tscn" id="36_hint"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/rout.svg" id="37_rout"]
 
 [sub_resource type="StyleBoxEmpty" id="RetryPanel"]
 
@@ -50,6 +51,13 @@ load_path = "res://.godot/imported/moving_ger.png-8a57d4315287c6a7a2caaedcab290e
 [sub_resource type="AtlasTexture" id="AtlasTexture_yy7ol"]
 atlas = SubResource("CompressedTexture2D_o2sfg")
 script = ExtResource("26_vnqvi")
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rout"]
+atlas = ExtResource("37_rout")
+region = Rect2(0, 0, 32, 32)
+script = ExtResource("26_vnqvi")
+option = 7
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
 [node name="Ui" type="CanvasLayer" unique_id=2069341874]
@@ -406,7 +414,7 @@ text = "Show Enemies"
 [node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
 visible = false
 layout_mode = 1
-options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol")])
+options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol"), SubResource("AtlasTexture_rout")])
 
 [node name="SelectionWheel" parent="Control" unique_id=266719107 instance=ExtResource("25_o71gb")]
 visible = false

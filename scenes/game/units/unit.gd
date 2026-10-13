@@ -907,6 +907,31 @@ func is_active() -> bool:
 	return alive and not exited
 
 
+func get_rout_restriction() -> String:
+	if not is_active() or members_alive <= 0:
+		return "Select an active squad."
+	if surrendered:
+		return "This squad has surrendered."
+	if broken or movement.retreating or action_controller.action_state == SquadActionController.SquadActionState.ROUTING:
+		return "This squad is already routed."
+	if in_close_combat:
+		return "Cannot rout during close combat."
+	if stress_system.state != STATES.MoraleState.PINNED:
+		return "Available while pinned."
+	return ""
+
+
+func can_rout() -> bool:
+	return get_rout_restriction().is_empty()
+
+
+func request_rout() -> bool:
+	if not can_rout():
+		return false
+	stress_system._set_state(STATES.MoraleState.PANIC)
+	return true
+
+
 func die() -> void:
 	if not is_active():
 		return

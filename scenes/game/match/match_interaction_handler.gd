@@ -16,6 +16,8 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 	var unit: Unit = controller.selected_unit
 	if not is_instance_valid(unit) or not unit.is_active():
 		return "Select an active squad."
+	if option == WheelOption.Option.ROUT:
+		return unit.get_rout_restriction()
 	if unit.surrendered:
 		return "This squad has surrendered."
 	if unit.broken:
@@ -29,7 +31,7 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 	match option:
 		WheelOption.Option.MOVE_NORMAL:
 			if unit.stress_system.state == STATES.MoraleState.PINNED:
-				return "Cannot move while pinned."
+				return "Pinned: use Rout to attempt escape."
 			if map_hex == unit.current_hex:
 				return "The squad is already at this hex."
 			var pathfinder: AStar2D = Globals.astars.get(unit.team)
@@ -90,6 +92,11 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 			unit.clear_orders()
 			unit.squad_fire.clear_target()
 			unit.setAttackState(Unit.AttackState.AUTO)
+			glow_hex = unit.current_hex
+		WheelOption.Option.ROUT:
+			if not unit.request_rout():
+				controller.order_feedback.emit(false, command, unit.get_rout_restriction())
+				return false
 			glow_hex = unit.current_hex
 	controller.hex_glow(controller.ground_layer.map_to_local(glow_hex))
 	controller.order_feedback.emit(true, command, "")
