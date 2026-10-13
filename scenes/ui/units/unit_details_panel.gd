@@ -296,7 +296,7 @@ func _on_state_changed(state: int) -> void:
 	unit_status_label.text = "Morale: " + unit.get_state_name(state)
 	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		unit_status_label.text = "Morale: Ineffective"
-	unit_status_label.tooltip_text = "%s\nStress: %.2f/%.0f\nIncoming stress: +%.2f/s\nRecovery: -%.2f/s\nNet stress: %+.2f/s\nMeasured over the last %.2f s." % [unit_status_label.text, unit.stress_system.S_eff, unit.stress_system.S_CAP, unit.stress_system.incoming_stress_rate, unit.stress_system.stress_recovery_rate, unit.stress_system.net_stress_rate, unit.stress_system.balance_sample_duration_s]
+	unit_status_label.tooltip_text = "%s\nStress: %.2f/%.0f\nIncoming stress: +%.2f/s\nRecovery capacity: %.2f/s\nActual recovery: -%.2f/s\nNet stress change: %+.2f/s\nAveraged over the last %.2f s." % [unit_status_label.text, unit.stress_system.S_eff, unit.stress_system.S_CAP, unit.stress_system.incoming_stress_rate, unit.stress_system.recovery_capacity_rate, unit.stress_system.stress_recovery_rate, unit.stress_system.net_stress_rate, unit.stress_system.balance_sample_duration_s]
 	var color: Color = Color(0.65, 0.85, 0.55)
 	match state:
 		STATES.MoraleState.CAUTIOUS:

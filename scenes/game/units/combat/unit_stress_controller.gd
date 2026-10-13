@@ -2,6 +2,7 @@ class_name StressController
 extends Node
 
 const BALANCE_SAMPLE_SECONDS: float = 0.5
+const BALANCE_WINDOW_SAMPLES: int = 4
 
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
@@ -126,25 +127,40 @@ var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
 var under_fire: bool = false
 
-# Both rates use the actual change in effective stress after modifiers and caps.
+# Actual change stays separate from recovery capacity when the stress bins are empty.
 var incoming_stress_rate: float = 0.0
 var stress_recovery_rate: float = 0.0
+var recovery_capacity_rate: float = 0.0
 var net_stress_rate: float = 0.0
 var balance_sample_duration_s: float = 0.0
 var _balance_elapsed_s: float = 0.0
 var _balance_stress_added: float = 0.0
 var _balance_stress_recovered: float = 0.0
+var _balance_recovery_capacity: float = 0.0
+var _balance_history: Array[StressBalanceSample] = []
 
 # --- SIGNALS ---
 signal state_changed(previous: int, next: int)
 signal stress_changed(effective_stress: float)
-signal stress_balance_changed(incoming_rate: float, recovery_rate: float, net_rate: float)
+signal stress_balance_changed(incoming_rate: float, recovery_capacity: float, actual_recovery_rate: float, net_rate: float)
 signal leadership_changed(_leadership_bonus: float)
 
 var leader_presence_strength: float = 0.0
 var _leadership_cohesion_mult: float = 1.0
 var _casualty_recovery_t: float = 0.0
 var _casualty_recovery_shock: float = 0.0
+
+class StressBalanceSample:
+	var duration_s: float
+	var added: float
+	var recovered: float
+	var capacity: float
+
+	func _init(duration: float, gain: float, recovery: float, available_recovery: float) -> void:
+		duration_s = duration
+		added = gain
+		recovered = recovery
+		capacity = available_recovery
 
 class LeadershipMod:
 	var bonus: float
@@ -209,14 +225,39 @@ func _sample_stress_balance(delta: float) -> void:
 	_balance_elapsed_s += delta
 	if _balance_elapsed_s < BALANCE_SAMPLE_SECONDS:
 		return
-	balance_sample_duration_s = _balance_elapsed_s
-	incoming_stress_rate = _balance_stress_added / balance_sample_duration_s
-	stress_recovery_rate = _balance_stress_recovered / balance_sample_duration_s
+	_balance_history.append(StressBalanceSample.new(_balance_elapsed_s, _balance_stress_added, _balance_stress_recovered, _balance_recovery_capacity))
+	if _balance_history.size() > BALANCE_WINDOW_SAMPLES:
+		_balance_history.pop_front()
+	# Duration-weighted averages preserve the measured gain/loss at varying frame rates.
+	balance_sample_duration_s = 0.0
+	var added: float = 0.0
+	var recovered: float = 0.0
+	var capacity: float = 0.0
+	for sample: StressBalanceSample in _balance_history:
+		balance_sample_duration_s += sample.duration_s
+		added += sample.added
+		recovered += sample.recovered
+		capacity += sample.capacity
+	incoming_stress_rate = added / balance_sample_duration_s
+	stress_recovery_rate = recovered / balance_sample_duration_s
+	recovery_capacity_rate = capacity / balance_sample_duration_s
 	net_stress_rate = incoming_stress_rate - stress_recovery_rate
 	_balance_elapsed_s = 0.0
 	_balance_stress_added = 0.0
 	_balance_stress_recovered = 0.0
-	stress_balance_changed.emit(incoming_stress_rate, stress_recovery_rate, net_stress_rate)
+	_balance_recovery_capacity = 0.0
+	stress_balance_changed.emit(incoming_stress_rate, recovery_capacity_rate, stress_recovery_rate, net_stress_rate)
+
+
+func get_recovery_capacity() -> float:
+	var squad_bonus: float = _state_mod_dict[state]
+	var leader_presence: float = clampf(leader_presence_strength, 0.0, 1.0)
+	var combined: float = 1.0 - ((1.0 - squad_bonus) * (1.0 - leader_presence))
+	if _is_headquarters():
+		combined *= maxf(hq_recovery_multiplier, 0.0)
+		if state == STATES.MoraleState.PANIC:
+			combined = maxf(combined, hq_panic_recovery_floor)
+	return combined * maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
 
 
 func _process(delta: float) -> void:
@@ -348,19 +389,8 @@ func _process(delta: float) -> void:
 	_update_effective_stress()
 	var stress_before_recovery: float = S_eff
 	
-	# - 1.0 stress per seconds
-	# FIXME leader bonus needs adjusting. factor 5 was too much
-	var _state_mod_squad: float = _state_mod_dict[state]
-	var squad_bonus: float = 1.0 * _state_mod_squad
-	var combined: float = 1.0 - ((1.0 - squad_bonus) * (1.0 - leader_presence_strength))
-	#if leader_presence_strength == 0.0:
-		#pass
-	#print(squad_bonus, " ",leader_presence_strength, " ",combined)
-	if _is_headquarters():
-		combined *= maxf(hq_recovery_multiplier, 0.0)
-		if state == STATES.MoraleState.PANIC:
-			combined = maxf(combined, hq_panic_recovery_floor)
-	combined *= maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
+	# This same capacity drives gameplay decay and the green-arrow magnitude.
+	var combined: float = get_recovery_capacity()
 	var stress_decay_f_per_second: float = combined
 	var stress_decay_s_per_second: float = combined
 	#if leader_presence_strength == 0.0:
@@ -373,6 +403,7 @@ func _process(delta: float) -> void:
 	_clamp_bins()
 	_update_effective_stress()
 	_balance_stress_recovered += maxf(0.0, stress_before_recovery - S_eff)
+	_balance_recovery_capacity += combined * delta
 	_sample_stress_balance(delta)
 	
 	## --- smooth leader effect so it never steps the meter ---

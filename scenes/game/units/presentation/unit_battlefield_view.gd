@@ -2,6 +2,9 @@
 extends Control
 class_name UnitUi
 
+const MEDIUM_INFLUENCE_RATE: float = 0.5
+const STRONG_INFLUENCE_RATE: float = 1.5
+
 var detail_ui: UnitUi = null
 
 @export var sprite_team_0: Texture2D
@@ -59,7 +62,7 @@ func _ready() -> void:
 		return
 	Debug.debug_text_visibility_changed.connect(_set_debug_text_visible)
 	_set_debug_text_visible(Debug.show_debug_text)
-	_on_stress_balance_changed(0.0, 0.0, 0.0)
+	_on_stress_balance_changed(0.0, 0.0, 0.0, 0.0)
 
 
 func _set_debug_text_visible(enabled: bool) -> void:
@@ -88,33 +91,29 @@ func _set_loadout(soldiers: Array[Soldier]) -> void:
 		soldier_detail.set_soldier_detail(soldier)
 		soldiers_detail_container.add_child(soldier_detail)
 
-func _on_stress_balance_changed(incoming_rate: float, recovery_rate: float, net_rate: float) -> void:
-	var counts: Vector2i = stress_balance_arrow_counts(incoming_rate, recovery_rate)
+func _on_stress_balance_changed(incoming_rate: float, recovery_capacity: float, actual_recovery_rate: float, net_rate: float) -> void:
+	var counts: Vector2i = stress_balance_arrow_counts(incoming_rate, recovery_capacity)
 	stress_arrows.text = "<".repeat(counts.x)
 	recovery_arrows.text = ">".repeat(counts.y)
-	var explanation: String = "Recent stress balance\nIncoming stress: +%.2f/s\nRecovery: -%.2f/s\nNet stress: %+.2f/s\nMore arrows show the stronger influence." % [incoming_rate, recovery_rate, net_rate]
+	var explanation: String = "Stress influence · recent average\nIncoming stress: +%.2f/s\nRecovery capacity: %.2f/s\nActual recovery: -%.2f/s\nNet stress change: %+.2f/s\nArrows: 1 ≤0.5/s · 2 ≤1.5/s · 3 >1.5/s" % [incoming_rate, recovery_capacity, actual_recovery_rate, net_rate]
 	stress_arrows.tooltip_text = explanation
 	recovery_arrows.tooltip_text = explanation
 	if detail_ui != null:
-		detail_ui._on_stress_balance_changed(incoming_rate, recovery_rate, net_rate)
+		detail_ui._on_stress_balance_changed(incoming_rate, recovery_capacity, actual_recovery_rate, net_rate)
 
 
-static func stress_balance_arrow_counts(incoming_rate: float, recovery_rate: float) -> Vector2i:
-	var incoming: float = maxf(0.0, incoming_rate)
-	var recovery: float = maxf(0.0, recovery_rate)
-	if incoming == 0.0 and recovery == 0.0:
-		return Vector2i.ZERO
-	if is_equal_approx(incoming, recovery):
-		return Vector2i(2, 2)
-	if incoming > recovery:
-		var green_count: int = 0
-		if recovery > 0.0:
-			green_count = clampi(roundi(3.0 * recovery / incoming), 1, 2)
-		return Vector2i(3, green_count)
-	var red_count: int = 0
-	if incoming > 0.0:
-		red_count = clampi(roundi(3.0 * incoming / recovery), 1, 2)
-	return Vector2i(red_count, 3)
+static func stress_balance_arrow_counts(incoming_rate: float, recovery_capacity: float) -> Vector2i:
+	return Vector2i(_influence_arrow_count(incoming_rate), _influence_arrow_count(recovery_capacity))
+
+
+static func _influence_arrow_count(rate: float) -> int:
+	if rate <= 0.0:
+		return 0
+	if rate <= MEDIUM_INFLUENCE_RATE:
+		return 1
+	if rate <= STRONG_INFLUENCE_RATE:
+		return 2
+	return 3
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]

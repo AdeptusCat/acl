@@ -202,6 +202,8 @@ func setup() -> void:
 	stress_system.state_changed.connect(_on_state_changed)
 	stress_system.stress_changed.connect(_on_stress_changed)
 	stress_system.stress_balance_changed.connect(ui._on_stress_balance_changed)
+	stress_system.recovery_capacity_rate = stress_system.get_recovery_capacity()
+	ui._on_stress_balance_changed(0.0, stress_system.recovery_capacity_rate, 0.0, 0.0)
 	
 	squad_fire.set_mg(machine_guns)
 	
