@@ -3944,7 +3944,7 @@
 						224.0,
 						96.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -3957,7 +3957,7 @@
 						224.0,
 						160.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -3983,7 +3983,7 @@
 						224.0,
 						544.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4022,7 +4022,7 @@
 						272.0,
 						384.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4048,7 +4048,7 @@
 						272.0,
 						768.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4113,7 +4113,7 @@
 						320.0,
 						160.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4139,7 +4139,7 @@
 						320.0,
 						544.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4152,7 +4152,7 @@
 						320.0,
 						608.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4217,7 +4217,7 @@
 						368.0,
 						384.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4230,7 +4230,7 @@
 						368.0,
 						448.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4334,7 +4334,7 @@
 						464.0,
 						448.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4412,7 +4412,7 @@
 						512.0,
 						224.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4438,7 +4438,7 @@
 						512.0,
 						608.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4451,7 +4451,7 @@
 						512.0,
 						672.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4516,7 +4516,7 @@
 						560.0,
 						448.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4568,7 +4568,7 @@
 						608.0,
 						224.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4581,7 +4581,7 @@
 						608.0,
 						288.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4607,7 +4607,7 @@
 						608.0,
 						672.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4711,7 +4711,7 @@
 						704.0,
 						288.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4737,7 +4737,7 @@
 						704.0,
 						672.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4750,7 +4750,7 @@
 						704.0,
 						736.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4828,7 +4828,7 @@
 						752.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4867,7 +4867,7 @@
 						800.0,
 						288.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4880,7 +4880,7 @@
 						800.0,
 						352.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,
@@ -4906,7 +4906,7 @@
 						800.0,
 						736.0
 					],
-					"texture": "res://assets/tiles/fields/field_stubble.png"
+					"texture": "res://assets/tiles/fields/field_wheat.png"
 				},
 				{
 					"flip_h": false,

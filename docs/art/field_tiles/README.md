@@ -3,19 +3,19 @@
 Four generated sprites, exported as transparent 64 × 64 PNGs for the project's
 flat-topped hex grid:
 
-| Tile | Primary campaign palette source |
+| Tile | Alderbrook palette sources |
 | --- | --- |
-| `field_wheat.png` | 6 |
-| `field_green_rows.png` | 7 |
-| `field_ploughed.png` | 8 |
-| `field_stubble.png` | 9 |
+| `field_wheat.png` | 3, 6, 9, 10 |
+| `field_green_rows.png` | 7, 8, 11, 12 |
+| `field_ploughed.png` | Not used in Alderbrook |
+| `field_stubble.png` | Not used in Alderbrook |
 
 The eight existing Field atlas sources in
-`resources/campaigns/alderbrook_terrain.tres` now use these four images. Their
+`resources/campaigns/alderbrook_terrain.tres` use only wheat and green crops. Their
 source IDs, alternatives, flips, hindrance, and blocking data remain unchanged.
-The current campaign field cells use wheat; the other variants are available
-in the terrain palette. The campaign authoring tool preserves the new art when
-maps are regenerated. Original field assets used by other maps remain intact.
+The current campaign field cells use wheat; green crops are also available
+in the terrain palette. The campaign authoring tool preserves this restriction
+when maps are regenerated. Original field assets used by other maps remain intact.
 
 High-resolution generated masters are in `assets/tiles/fields/source/`.
 That directory is excluded from Godot import. Run

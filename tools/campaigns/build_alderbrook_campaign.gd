@@ -6,12 +6,12 @@ const IMAGE_DIRECTORY: String = "res://docs/campaigns/road_to_alderbrook/maps/"
 const FIELD_IMAGES: Dictionary[String, String] = {
 	"field_nw_sw_alt.png": "res://assets/tiles/fields/field_wheat.png",
 	"field_sw_so.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field_n_s.png": "res://assets/tiles/fields/field_ploughed.png",
-	"field.png": "res://assets/tiles/fields/field_stubble.png",
+	"field_n_s.png": "res://assets/tiles/fields/field_green_rows.png",
+	"field.png": "res://assets/tiles/fields/field_wheat.png",
 	"field_nw_no.png": "res://assets/tiles/fields/field_wheat.png",
 	"field_nw_sw.png": "res://assets/tiles/fields/field_green_rows.png",
-	"field_no_sw.png": "res://assets/tiles/fields/field_ploughed.png",
-	"field_sw_s.png": "res://assets/tiles/fields/field_stubble.png",
+	"field_no_sw.png": "res://assets/tiles/fields/field_green_rows.png",
+	"field_sw_s.png": "res://assets/tiles/fields/field_wheat.png",
 }
 const MISSIONS: Array[Dictionary] = [
 	{
