@@ -128,6 +128,29 @@ layout_mode = 2
 text = "Select a scenario to read its briefing, then press Start mission."
 autowrap_mode = 3
 
+[node name="Forces" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Your force"
+
+[node name="PlayerRoster" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EnemyHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Enemy assessment"
+
+[node name="EnemyAssessment" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces"]
+layout_mode = 2
+autowrap_mode = 3
+
 [node name="MajorHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing"]
 layout_mode = 2
 theme_type_variation = &"HudHeading"

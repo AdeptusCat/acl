@@ -18,6 +18,9 @@ signal time_changed(time_minutes: float)
 @onready var scenario_scroll: ScrollContainer = $Control/Center/Panel/Content/Body/ScenarioScroll
 @onready var briefing_scroll: ScrollContainer = $Control/Center/Panel/Content/Body/BriefingScroll
 @onready var panel: PanelContainer = $Control/Center/Panel
+@onready var force_briefing: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces
+@onready var player_roster: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerRoster
+@onready var enemy_assessment: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/EnemyAssessment
 
 var team_texture: Dictionary[Globals.Team, Texture2D] = {
 	Globals.Team.AXIS: preload("res://assets/ui/axis_flag.png"),
@@ -26,6 +29,7 @@ var team_texture: Dictionary[Globals.Team, Texture2D] = {
 var selected_map: Map
 var selected_scenario: Scenario
 var scenario_buttons: Dictionary[Scenario, Button] = {}
+var player_roster_rows: Dictionary[Unit, HBoxContainer] = {}
 var time: float = 3.0
 var _starting: bool = false
 var _fit_queued: bool = false
@@ -84,6 +88,7 @@ func setup_map_options(maps: Array[Map]) -> void:
 		team.hide()
 		player_label.text = ""
 		_clear_objectives()
+		_clear_forces()
 	_queue_fit()
 
 
@@ -119,6 +124,7 @@ func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
 	player_label.text = "Player: Axis"
 	if scenario.player_team == Globals.Team.ALLIES:
 		player_label.text = "Player: Allies"
+	_update_force_briefing(scenario)
 	_clear_objectives()
 	for condition: VictoryCondition in scenario.victory_conditions:
 		if condition.team != scenario.player_team:
@@ -133,6 +139,92 @@ func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
 	minor_objectives_label.visible = minor_victory_conditions_v_box_container.get_child_count() > 0
 	briefing_scroll.scroll_vertical = 0
 	_queue_fit()
+
+
+func _update_force_briefing(scenario: Scenario) -> void:
+	_clear_forces()
+	var friendly_units: Array[Unit] = []
+	var enemy_types: Dictionary[Globals.SquadType, bool] = {}
+	# Read deployment templates without starting units or creating battle state.
+	for node: Node in scenario.get_units():
+		if not node is Unit:
+			continue
+		var unit: Unit = node as Unit
+		if not unit.is_active() or unit.is_queued_for_deletion():
+			continue
+		if unit.team == scenario.player_team:
+			friendly_units.append(unit)
+		else:
+			enemy_types[unit.squad_type] = true
+	friendly_units.sort_custom(_roster_less)
+	var previous_formation: String = ""
+	for unit: Unit in friendly_units:
+		var formation: String = unit.get_formation_name()
+		if formation != previous_formation:
+			previous_formation = formation
+			var heading: Label = Label.new()
+			heading.text = formation
+			heading.theme_type_variation = &"HudSecondary"
+			player_roster.add_child(heading)
+		var row: HBoxContainer = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		player_roster.add_child(row)
+		var identity: Label = Label.new()
+		identity.name = "Identity"
+		identity.text = unit.get_hud_name()
+		identity.tooltip_text = identity.text
+		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		identity.clip_text = true
+		identity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(identity)
+		var strength: Label = Label.new()
+		strength.name = "Strength"
+		strength.theme_type_variation = &"HudSecondary"
+		strength.text = "Strength unknown"
+		if unit.squad_loadout != null:
+			var soldiers: int = unit.squad_loadout.soldiers.size()
+			strength.text = "%d soldiers" % soldiers
+			if soldiers == 1:
+				strength.text = "1 soldier"
+		row.add_child(strength)
+		player_roster_rows[unit] = row
+	if friendly_units.is_empty():
+		var empty: Label = Label.new()
+		empty.text = "No player units assigned."
+		player_roster.add_child(empty)
+	enemy_assessment.text = _enemy_assessment(enemy_types)
+	force_briefing.show()
+
+
+func _roster_less(left: Unit, right: Unit) -> bool:
+	if left.company != right.company:
+		return left.company < right.company
+	if left.platoon != right.platoon:
+		return left.platoon < right.platoon
+	if left.squad != right.squad:
+		return left.squad < right.squad
+	return left.get_instance_id() < right.get_instance_id()
+
+
+func _enemy_assessment(types: Dictionary[Globals.SquadType, bool]) -> String:
+	var infantry: bool = types.has(Globals.SquadType.Rifle)
+	var support: bool = types.has(Globals.SquadType.MG) or types.has(Globals.SquadType.MORTAR) or types.has(Globals.SquadType.ANTITANK)
+	if infantry and support:
+		return "Reports suggest infantry resistance with possible fire support."
+	if infantry:
+		return "Reports suggest infantry resistance."
+	if support:
+		return "Enemy fire support may be present."
+	return "No reliable intelligence on enemy composition."
+
+
+func _clear_forces() -> void:
+	player_roster_rows.clear()
+	for child: Node in player_roster.get_children():
+		player_roster.remove_child(child)
+		child.queue_free()
+	enemy_assessment.text = ""
+	force_briefing.hide()
 
 
 func _clear_objectives() -> void:
