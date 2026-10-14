@@ -17,6 +17,7 @@ func _run() -> void:
 	add_child(layer)
 	_test_woods(layer)
 	_test_crops(layer)
+	_test_orchards(layer)
 	await _test_selection()
 	layer.free()
 	print("Terrain art checks: ", checks, "; failures: ", failures)
@@ -86,18 +87,59 @@ func _test_crops(layer: HexagonTileMapLayer) -> void:
 				families[Vector2i(x, y)] = family
 		var region: ConnectedTerrainBaker.TerrainRegion = ConnectedTerrainBaker.render_region(layer, families, family)
 		var center: Vector2 = layer.map_to_local(Vector2i(1, 1))
-		var rows: int = 0
-		var previous_solid: bool = false
-		var clear: int = 0
-		var across: Vector2 = Vector2(1, 1).normalized()
-		for step: int in range(-50, 51):
-			var solid: bool = _alpha(region, center + across * step) > 0.1
-			if solid and not previous_solid:
-				rows += 1
-			if not solid:
-				clear += 1
-			previous_solid = solid
-		_check(rows >= 8 and rows <= 15 and clear >= 25, family + " has many small-scale rows and transparent lanes per hex")
+		var covered: int = 0
+		for y: int in range(-32, 32):
+			for x: int in range(-32, 32):
+				if _alpha(region, center + Vector2(x, y)) > 0.1:
+					covered += 1
+		_check(covered > 4000, family + " forms a continuous canopy instead of dotted rows")
+		var longest_gap: int = 0
+		for direction: Vector2 in [Vector2.RIGHT, Vector2.DOWN, Vector2(1, 1).normalized()]:
+			var gap: int = 0
+			for step: int in range(-50, 51):
+				if _alpha(region, center + direction * step) > 0.1:
+					gap = 0
+				else:
+					gap += 1
+					longest_gap = maxi(longest_gap, gap)
+		_check(longest_gap <= 2, family + " has no straight machine lanes through the field interior")
+		var join: Vector2 = (center + layer.map_to_local(Vector2i(1, 2))) * 0.5
+		var connected: int = 0
+		for x: int in range(-30, 31):
+			if _alpha(region, join + Vector2(x, 0)) > 0.1:
+				connected += 1
+		_check(connected > 58, family + " remains continuous across a shared hex edge")
+		var island: Dictionary[Vector2i, String] = {Vector2i.ZERO: family}
+		var fringe: ConnectedTerrainBaker.TerrainRegion = ConnectedTerrainBaker.render_region(layer, island, family)
+		_check(_alpha(fringe, Vector2(0, -62)) == 0.0 and _alpha(fringe, Vector2(62, 0)) == 0.0, family + " preserves transparent margins at exposed hex edges")
+
+
+func _test_orchards(layer: HexagonTileMapLayer) -> void:
+	var families: Dictionary[Vector2i, String] = {}
+	var woods: Dictionary[Vector2i, String] = {}
+	for x: int in range(3):
+		for y: int in range(3):
+			families[Vector2i(x, y)] = "orchard"
+			woods[Vector2i(x, y)] = "woods"
+	var orchard: ConnectedTerrainBaker.TerrainRegion = ConnectedTerrainBaker.render_region(layer, families, "orchard")
+	var woodland: ConnectedTerrainBaker.TerrainRegion = ConnectedTerrainBaker.render_region(layer, woods, "woods")
+	var center: Vector2 = layer.map_to_local(Vector2i(1, 1))
+	var covered: int = 0
+	var fruit_pixels: int = 0
+	for y: int in range(-64, 64):
+		for x: int in range(-64, 64):
+			var world: Vector2 = center + Vector2(x, y)
+			var point: Vector2i = Vector2i(world) - orchard.origin
+			var color: Color = orchard.image.get_pixelv(point)
+			if color.a > 0.1:
+				covered += 1
+				if color.r > color.g * 1.25 and color.r > color.b * 1.5:
+					fruit_pixels += 1
+	_check(covered > 7000, "Mature fruit trees fill a connected orchard rather than leaving a few random crowns")
+	_check(fruit_pixels > 40 and orchard.image.get_data() != woodland.image.get_data(), "Orchards use distinct fruit-bearing canopies at woodland scale")
+	var fruit: Image = (load("res://assets/tiles/connected/stamps/fruit_01.png") as Texture2D).get_image()
+	var tree: Image = (load("res://assets/tiles/connected/stamps/tree_01.png") as Texture2D).get_image()
+	_check(fruit.get_size() == tree.get_size(), "Fruit and woodland source crowns use the same scale")
 
 
 func _test_selection() -> void:

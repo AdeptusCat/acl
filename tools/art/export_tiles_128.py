@@ -1,6 +1,6 @@
 """Export whole terrain stamps and 128-pixel tiles with alpha for pixel-based LOS."""
 
-from math import sqrt
+from collections import deque
 from pathlib import Path
 from random import Random
 from PIL import Image
@@ -37,6 +37,51 @@ def normalize(source: Path, size: tuple[int, int]) -> Image.Image:
     return image.crop(bounds).resize(size, Image.Resampling.LANCZOS)
 
 
+def crown_regions(image: Image.Image) -> list[tuple[int, int, int, int]]:
+    """Extract the four full sprites independently of their sheet's gutters."""
+    mask: bytearray = bytearray(image.getchannel("A").point(solid_alpha).tobytes())
+    components: list[tuple[int, tuple[int, int, int, int]]] = []
+    width: int = image.width
+    for start in range(len(mask)):
+        if mask[start] == 0:
+            continue
+        queue: deque[int] = deque([start])
+        mask[start] = 0
+        count: int = 0
+        left: int = width
+        top: int = image.height
+        right: int = 0
+        bottom: int = 0
+        while queue:
+            point: int = queue.popleft()
+            x: int = point % width
+            y: int = point // width
+            count += 1
+            left, top = min(left, x), min(top, y)
+            right, bottom = max(right, x), max(bottom, y)
+            neighbors: list[int] = []
+            if x > 0:
+                neighbors.append(point - 1)
+            if x + 1 < width:
+                neighbors.append(point + 1)
+            if y > 0:
+                neighbors.append(point - width)
+            if y + 1 < image.height:
+                neighbors.append(point + width)
+            for neighbor in neighbors:
+                if mask[neighbor] != 0:
+                    mask[neighbor] = 0
+                    queue.append(neighbor)
+        if count > 1024:
+            components.append((count, (max(0, left - 4), max(0, top - 4), min(width, right + 5), min(image.height, bottom + 5))))
+    components.sort(reverse=True)
+    if len(components) < 4:
+        raise ValueError("Fruit crown sheet must have four separate full trees")
+    regions: list[tuple[int, int, int, int]] = [component[1] for component in components[:4]]
+    regions.sort(key=lambda region: (region[1] + region[3], region[0]))
+    return sorted(regions[:2]) + sorted(regions[2:])
+
+
 def export_stamps() -> None:
     STAMPS.mkdir(exist_ok=True)
     trees: Image.Image = Image.open(CONNECTED / "source/tree_crowns.png").convert("RGBA")
@@ -44,8 +89,11 @@ def export_stamps() -> None:
     regions: list[tuple[int, int, int, int]] = [(0, 0, 700, 610), (700, 0, 1254, 640), (0, 610, 700, 1254), (700, 640, 1254, 1254)]
     for index, region in enumerate(regions, 1):
         fit_sprite(trees.crop(region), 64).save(STAMPS / f"tree_{index:02}.png")
-    for family, source in [("wheat", "wheat_clump"), ("crops", "crop_clump")]:
-        fit_sprite(Image.open(CONNECTED / f"source/{source}.png").convert("RGBA"), 32).save(STAMPS / f"{family}.png")
+    fruit: Image.Image = Image.open(CONNECTED / "source/fruit_crowns.png").convert("RGBA")
+    for index, region in enumerate(crown_regions(fruit), 1):
+        fit_sprite(fruit.crop(region), 64).save(STAMPS / f"fruit_{index:02}.png")
+    for family, source in [("wheat", "wheat_stand"), ("crops", "crop_stand")]:
+        fit_sprite(Image.open(CONNECTED / f"source/{source}.png").convert("RGBA"), 64).save(STAMPS / f"{family}.png")
 
 
 def whole_stamp_fits(origin: tuple[int, int], stamp: Image.Image, size: int, fringe: float) -> bool:
@@ -63,27 +111,42 @@ def whole_stamp_fits(origin: tuple[int, int], stamp: Image.Image, size: int, fri
 def terrain_tile(family: str, variant: int, size: int = SIZE) -> Image.Image:
     tile: Image.Image = Image.new("RGBA", (size, size))
     random: Random = Random(713 + variant * 479)
-    if family in ["woods", "orchard"]:
+    if family == "orchard":
+        for row in range(-size // 34, size // 34 + 1):
+            for column in range(-size // 36, size // 36 + 1):
+                x: int = size // 2 + column * 36 + row % 2 * 18 + random.randrange(-3, 4)
+                y: int = size // 2 + row * 34 + random.randrange(-3, 4)
+                crown: Image.Image = Image.open(STAMPS / f"fruit_{random.randrange(1, 5):02}.png").convert("RGBA")
+                extent: int = random.randrange(32, 41)
+                crown = crown.resize((extent, extent), Image.Resampling.LANCZOS)
+                origin: tuple[int, int] = (x - extent // 2, y - extent // 2)
+                if not whole_stamp_fits(origin, crown, size, 4):
+                    crown = crown.resize((24, 24), Image.Resampling.LANCZOS)
+                    origin = (x - 12, y - 12)
+                if whole_stamp_fits(origin, crown, size, 4):
+                    tile.alpha_composite(crown, origin)
+    elif family == "woods":
         spacing: int = 24
-        if family == "orchard":
-            spacing = 60
         for y in range(12, size, spacing):
             for x in range(12, size, spacing):
-                crown: Image.Image = Image.open(STAMPS / f"tree_{random.randrange(1, 5):02}.png").convert("RGBA")
+                crown = Image.open(STAMPS / f"tree_{random.randrange(1, 5):02}.png").convert("RGBA")
                 extent: int = random.randrange(22, 39)
                 crown = crown.resize((extent, extent), Image.Resampling.LANCZOS)
                 origin: tuple[int, int] = (x + random.randrange(-5, 6) - extent // 2, y + random.randrange(-5, 6) - extent // 2)
                 if whole_stamp_fits(origin, crown, size, 6):
                     tile.alpha_composite(crown, origin)
     else:
-        plant: Image.Image = Image.open(STAMPS / f"{family}.png").convert("RGBA").resize((6, 6), Image.Resampling.LANCZOS)
-        for row in range(-size // 9, size // 9 + 1):
-            for column in range(-size // 4, size // 4 + 1):
-                x: int = round((column * 4 + row * 9) / sqrt(2)) + size // 2
-                y: int = round((-column * 4 + row * 9) / sqrt(2)) + size // 2
-                origin = (x - 3, y - 3)
-                if whole_stamp_fits(origin, plant, size, 6):
-                    tile.alpha_composite(plant, origin)
+        stand: Image.Image = Image.open(STAMPS / f"{family}.png").convert("RGBA").resize((32, 32), Image.Resampling.LANCZOS)
+        fringe: Image.Image = stand.resize((16, 16), Image.Resampling.LANCZOS)
+        for y in range(0, size, 14):
+            for x in range(0, size, 14):
+                origin = (x + random.randrange(-3, 4) - 16, y + random.randrange(-3, 4) - 16)
+                if whole_stamp_fits(origin, stand, size, 6):
+                    tile.alpha_composite(stand, origin)
+                else:
+                    origin = (origin[0] + 8, origin[1] + 8)
+                    if whole_stamp_fits(origin, fringe, size, 6):
+                        tile.alpha_composite(fringe, origin)
     return tile
 
 

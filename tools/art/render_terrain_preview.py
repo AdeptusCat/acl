@@ -1,4 +1,4 @@
-"""Render current map art and the authored selection marker at their display sizes."""
+"""Render current crops, orchards, woods and buildings at their display sizes."""
 
 from pathlib import Path
 import json
@@ -12,25 +12,27 @@ ART: Path = ROOT / "docs/art"
 def main() -> None:
     data: dict = json.loads((MAPS / "03_the_roadblock.json").read_text())
     map_image: Image.Image = Image.open(MAPS / "03_the_roadblock.png").convert("RGBA")
-    preview: Image.Image = Image.new("RGBA", (1000, 660), "#e9e4d7")
+    preview: Image.Image = Image.new("RGBA", (1000, 946), "#e9e4d7")
     draw: ImageDraw.ImageDraw = ImageDraw.Draw(preview)
     font_path: str = "/usr/share/fonts/TTF/DejaVuSans.ttf"
     if not Path(font_path).exists():
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
     title: ImageFont.FreeTypeFont = ImageFont.truetype(font_path, 26)
     label: ImageFont.FreeTypeFont = ImageFont.truetype(font_path, 18)
-    draw.text((24, 18), "Terrain and selection corrections", font=title, fill="#25352f")
+    draw.text((24, 18), "Continuous fields and lively fruit orchards", font=title, fill="#25352f")
     samples: list[tuple[str, tuple[int, int], tuple[int, int]]] = [
         ("Connected woods with intact, irregular fringes", (544, 320), (24, 98)),
-        ("Wheat at field scale", (544, 640), (524, 98)),
-        ("Small green crops with transparent lanes", (1216, 640), (24, 384)),
+        ("Continuous hand-sown wheat", (544, 640), (524, 98)),
+        ("Dense green crops without machine tracks", (1216, 640), (24, 384)),
+        ("Fruit orchards with mature, varied crowns", (1024, 1472), (524, 384)),
+        ("Farm building beside trees for scale", (832, 1280), (24, 670)),
     ]
     for caption, center, position in samples:
         cx, cy = center[0] + 60, center[1] + 152
         crop: Image.Image = map_image.crop((cx - 216, cy - 112, cx + 216, cy + 112))
         preview.alpha_composite(crop, position)
         draw.text((position[0], position[1] - 30), caption, font=label, fill="#25352f")
-    draw.text((524, 354), "Selection marker centered on the unit", font=label, fill="#25352f")
+    draw.text((524, 640), "Unit display for scale", font=label, fill="#25352f")
     panel: Image.Image = Image.new("RGBA", (432, 224), "#70766b")
     ground: dict = data["layers"][0]["cells"][0]
     ground_tile: Image.Image = Image.open(ROOT / ground["texture"].removeprefix("res://")).convert("RGBA")
@@ -55,8 +57,8 @@ def main() -> None:
     ui.rectangle((origin[0] + 5, origin[1] + 53, origin[0] + 59, origin[1] + 62), fill="#008e00")
     marker: Image.Image = Image.open(ROOT / "assets/ui/unit_selected.png").convert("RGBA").resize((64, 64), Image.Resampling.LANCZOS)
     panel.alpha_composite(marker, origin)
-    preview.alpha_composite(panel, (524, 384))
-    draw.text((24, 627), "128-pixel hexes. Terrain and marker samples shown at their authored display sizes.", font=label, fill="#25352f")
+    preview.alpha_composite(panel, (524, 670))
+    draw.text((24, 913), "128-pixel hexes. All samples shown at their authored display sizes.", font=label, fill="#25352f")
     preview.convert("RGB").save(ART / "terrain_refinement_preview.png")
     preview.convert("RGB").save(ART / "tiles_128_preview.png")
     print("Rendered current terrain and selection preview.")

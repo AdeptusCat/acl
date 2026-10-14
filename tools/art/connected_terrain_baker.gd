@@ -112,19 +112,21 @@ static func render_region(layer: HexagonTileMapLayer, families: Dictionary[Vecto
 	var crowns: Array[Image] = []
 	var crop: Image
 	if family == "woods" or family == "orchard":
+		var prefix: String = "tree_"
+		if family == "orchard":
+			prefix = "fruit_"
 		for variant: int in range(1, 5):
-			crowns.append((load("res://assets/tiles/connected/stamps/tree_0" + str(variant) + ".png") as Texture2D).get_image())
+			crowns.append((load("res://assets/tiles/connected/stamps/" + prefix + "0" + str(variant) + ".png") as Texture2D).get_image())
 	else:
 		crop = (load("res://assets/tiles/connected/stamps/" + family + ".png") as Texture2D).get_image()
 	var along: Vector2 = Vector2.RIGHT
 	var across: Vector2 = Vector2.DOWN
 	var spacing: Vector2 = Vector2(24, 24)
 	if family == "orchard":
-		spacing = Vector2(60, 60)
+		spacing = Vector2(36, 34)
 	elif crop != null:
-		along = Vector2(1, -1).normalized()
-		across = Vector2(1, 1).normalized()
-		spacing = Vector2(4, 9)
+		# Overlapping stands form hand-sown crops without rows or machine lanes.
+		spacing = Vector2(14, 14)
 	var lattice: Rect2 = Rect2(Vector2(bounds.position.dot(along), bounds.position.dot(across)), Vector2.ZERO)
 	for corner: Vector2 in [bounds.position, Vector2(bounds.end.x, bounds.position.y), bounds.end, Vector2(bounds.position.x, bounds.end.y)]:
 		lattice = lattice.expand(Vector2(corner.dot(along), corner.dot(across)))
@@ -132,14 +134,21 @@ static func render_region(layer: HexagonTileMapLayer, families: Dictionary[Vecto
 	for row: int in range(floori(lattice.position.y / spacing.y) - 1, ceili(lattice.end.y / spacing.y) + 2):
 		for column: int in range(floori(lattice.position.x / spacing.x) - 1, ceili(lattice.end.x / spacing.x) + 2):
 			var center: Vector2 = along * column * spacing.x + across * row * spacing.y
-			var size: int = 6
+			var size: int = 32
 			var variant: int = 0
-			if crop == null:
-				center += Vector2(_noise(column, row, 1) - 0.5, _noise(column, row, 2) - 0.5) * 16.0
+			if crop != null:
+				center += Vector2(_noise(column, row, 1) - 0.5, _noise(column, row, 2) - 0.5) * 6.0
+			else:
+				var jitter: float = 16.0
+				if family == "orchard":
+					jitter = 8.0
+				center += Vector2(_noise(column, row, 1) - 0.5, _noise(column, row, 2) - 0.5) * jitter
 				size = 30 + floori(_noise(column, row, 3) * 15.0)
 				variant = floori(_noise(column, row, 4) * crowns.size())
 				if family == "orchard":
-					size = 30 + floori(_noise(column, row, 3) * 7.0)
+					# Staggered planting remains recognizable across connected orchard hexes.
+					center.x += posmod(row, 2) * spacing.x * 0.5
+					size = 32 + floori(_noise(column, row, 3) * 9.0)
 			center = center.round()
 			if families.get(layer.local_to_map(center), "") != family:
 				continue
@@ -149,6 +158,10 @@ static func render_region(layer: HexagonTileMapLayer, families: Dictionary[Vecto
 			if family == "woods" and distance < size * 0.5 + FRINGE:
 				# Saplings taper the fringe without cutting a straight line through foliage.
 				size = 18 + floori(_noise(column, row, 5) * 9.0)
+			elif family == "orchard" and distance < size * 0.5 + FRINGE:
+				size = 24 + floori(_noise(column, row, 5) * 5.0)
+			elif crop != null and distance < size * 0.5 + FRINGE:
+				size = 16
 			if distance < size * 0.5 + FRINGE:
 				continue
 			var key: Vector2i = Vector2i(variant, size)
