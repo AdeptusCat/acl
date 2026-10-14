@@ -1,6 +1,7 @@
 extends Node2D
 
 const ALDERBROOK_CAMPAIGN: CampaignDefinition = preload("res://resources/campaigns/road_to_alderbrook.tres")
+const WESTERN_APPROACH: PackedScene = preload("res://scenes/scenarios/standalone/alderbrook_western_approach.tscn")
 
 # --- SETUP ---
 @onready var tile_map_layers: Node2D = $TileMapLayers
@@ -45,6 +46,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	Globals.reset()
 	ALDERBROOK_CAMPAIGN.install(maps)
+	maps.add_child(WESTERN_APPROACH.instantiate())
 	maps.hide()
 	var _maps: Array[Map] = []
 	_maps.assign(maps.get_children())

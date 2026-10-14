@@ -8,11 +8,12 @@ class_name Map
 
 @export var map_name: String = "map"
 @export var campaign_name: String = ""
+@export var use_terrain_palette: bool = false
 @export_file("*.tres", "*.res") var los_resource_path: String = ""
 
 
 func _ready() -> void:
-	if campaign_name == TerrainPalette.CAMPAIGN:
+	if use_terrain_palette or campaign_name == TerrainPalette.CAMPAIGN:
 		for layer: Node in get_tilemap_layers():
 			if layer is TileMapLayer:
 				TerrainPalette.apply(layer as TileMapLayer)

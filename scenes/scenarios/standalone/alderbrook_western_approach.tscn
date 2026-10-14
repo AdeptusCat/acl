@@ -1,0 +1,1077 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://scenes/world/maps/map.gd" id="1_2mt5x"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/ground_tile_map_layer.tscn" id="2_n8gq1"]
+[ext_resource type="Texture2D" path="res://assets/tiles/elevation/crest_line.png" id="3_ityj5"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_01.png" id="4_1vtcj"]
+[ext_resource type="Texture2D" path="res://assets/tiles/16x16_2b - Kopie.png" id="5_2bsss"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_02.png" id="6_wld8x"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_03.png" id="7_v17ed"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/ground_tile_map_layer.gd" id="8_1et88"]
+[ext_resource type="Texture2D" path="res://assets/tiles/scenarios/town_paving.png" id="8_n8gq1"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_water.tres" id="9_k7vpc"]
+[ext_resource type="Script" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="10_v3pi7"]
+[ext_resource type="TileSet" path="res://resources/scenarios/alderbrook_western_approach_terrain.tres" id="11_vxkrw"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/terrain_tile_map_layer.gd" id="12_6v4pp"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_walls.tres" id="13_6khyr"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/wall_tile_map_layer.gd" id="14_2n6pb"]
+[ext_resource type="TileSet" path="res://resources/scenarios/alderbrook_western_approach_buildings.tres" id="15_2gr6m"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/building_tile_map_layer.gd" id="16_dsc8c"]
+[ext_resource type="Script" path="res://scenes/scenarios/scenario.gd" id="17_203f7"]
+[ext_resource type="Script" path="res://scenes/scenarios/victory_conditions/victory_condition.gd" id="18_ncxt2"]
+[ext_resource type="Script" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="19_6hsid"]
+[ext_resource type="PackedScene" path="res://scenes/game/units/unit.tscn" id="20_cowe5"]
+[ext_resource type="Script" path="res://scenes/game/units/unit.gd" id="21_a6xq1"]
+[ext_resource type="Script" path="res://resources/soldiers/soldier_loadout.gd" id="22_b20c6"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/platoon_leader.tres" id="23_rnlvf"]
+[ext_resource type="Resource" path="res://resources/weapons/m1_garand.tres" id="24_lo3kk"]
+[ext_resource type="Resource" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="25_ea42u"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/platoon_hq.tres" id="26_gf0xm"]
+[ext_resource type="Script" path="res://resources/weapons/weapon_spec.gd" id="27_ur0ia"]
+[ext_resource type="Resource" path="res://resources/squads/team_squad_loadout_catalog.tres" id="28_h6i0c"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/squad_leader.tres" id="29_v8myi"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/team_leader.tres" id="30_pn0x0"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/mg_gunner.tres" id="31_17hmh"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/loader.tres" id="32_2ie1m"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/rifle_grenadier.tres" id="33_uolb7"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/rifleman.tres" id="34_mtxcl"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/rifle_squad.tres" id="35_vpn1k"]
+[ext_resource type="Resource" path="res://resources/weapons/m1919a4.tres" id="36_o74q7"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/assistant.tres" id="37_5a1w0"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/lmg_squad.tres" id="38_ep0i7"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/company_leader.tres" id="39_jl2qs"]
+[ext_resource type="Resource" path="res://resources/weapons/m1_carbine.tres" id="40_clxfo"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/company_hq.tres" id="41_335xo"]
+[ext_resource type="Resource" path="res://resources/weapons/m2_60mm_mortar.tres" id="42_hro7m"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/light_mortar_squad.tres" id="43_4dcbg"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/platoon_leader.tres" id="44_qqupv"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/squad_leader_assistant.tres" id="45_ffl3g"]
+[ext_resource type="Resource" path="res://resources/weapons/kar98.tres" id="46_x582n"]
+[ext_resource type="Resource" path="res://resources/squads/germany/platoon_hq.tres" id="47_4yg1x"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/squad_leader.tres" id="48_mvkbi"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/mg_gunner.tres" id="49_aua67"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/loader.tres" id="50_lvrk7"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/rifle_grenadier.tres" id="51_w3i4t"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/rifleman.tres" id="52_v0lb3"]
+[ext_resource type="Resource" path="res://resources/squads/germany/rifle_squad.tres" id="53_5lj4k"]
+[ext_resource type="Resource" path="res://resources/weapons/mg34_heavy.tres" id="54_kv8vr"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/assistant.tres" id="55_khi2r"]
+[ext_resource type="Resource" path="res://resources/squads/germany/lmg_squad.tres" id="56_bfla5"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/company_leader.tres" id="57_ovw71"]
+[ext_resource type="Resource" path="res://resources/weapons/mp40.tres" id="58_cswn4"]
+[ext_resource type="Resource" path="res://resources/squads/germany/company_hq.tres" id="59_7xpfm"]
+[ext_resource type="Resource" path="res://resources/weapons/granatwerfer_34.tres" id="60_fm1ab"]
+[ext_resource type="Resource" path="res://resources/squads/germany/medium_mortar_squad.tres" id="61_hpap0"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_exit.png" id="62_j2pa8"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_a.png" id="63_xj4ob"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_b.png" id="64_nmx3p"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_c.png" id="65_fb526"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_start.png" id="66_oowk4"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_exit.png" id="67_0imm2"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_start.png" id="68_qx0db"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_a.png" id="69_lc1sc"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_b.png" id="70_ql3br"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_c.png" id="71_26s8f"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n8gq1"]
+texture = ExtResource("3_ityj5")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ityj5"]
+resource_name = "Open Ground 1"
+texture = ExtResource("4_1vtcj")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1vtcj"]
+texture = ExtResource("5_2bsss")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2bsss"]
+resource_name = "Open Ground 2"
+texture = ExtResource("6_wld8x")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wld8x"]
+resource_name = "Open Ground 3"
+texture = ExtResource("7_v17ed")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v17ed"]
+resource_name = "Town Paving"
+texture = ExtResource("8_n8gq1")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_1 = "stone"
+
+[sub_resource type="TileSet" id="TileSet_1et88"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+physics_layer_0/collision_layer = 4
+physics_layer_0/collision_mask = 4
+custom_data_layer_0/name = "elevation"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "art_family"
+custom_data_layer_1/type = 4
+sources/0 = SubResource("TileSetAtlasSource_n8gq1")
+sources/1 = SubResource("TileSetAtlasSource_ityj5")
+sources/2 = SubResource("TileSetAtlasSource_1vtcj")
+sources/3 = SubResource("TileSetAtlasSource_2bsss")
+sources/4 = SubResource("TileSetAtlasSource_wld8x")
+sources/5 = SubResource("TileSetAtlasSource_v17ed")
+
+[sub_resource type="Resource" id="Resource_k7vpc"]
+script = ExtResource("19_6hsid")
+required_time_s = 30.0
+team = 1
+
+[sub_resource type="Resource" id="Resource_v3pi7"]
+script = ExtResource("19_6hsid")
+objective_id = 2
+required_time_s = 30.0
+team = 1
+
+[sub_resource type="Resource" id="Resource_vxkrw"]
+script = ExtResource("19_6hsid")
+objective_id = 3
+required_time_s = 30.0
+team = 1
+
+[sub_resource type="Resource" id="Resource_6v4pp"]
+script = ExtResource("19_6hsid")
+objective_id = 2
+required_time_s = 30.0
+team = 1
+outcome_level = 0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_6khyr"]
+script = ExtResource("19_6hsid")
+required_time_s = 30.0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_2n6pb"]
+script = ExtResource("19_6hsid")
+objective_id = 2
+required_time_s = 30.0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_2gr6m"]
+script = ExtResource("19_6hsid")
+objective_id = 3
+required_time_s = 30.0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_dsc8c"]
+script = ExtResource("19_6hsid")
+objective_id = 2
+required_time_s = 30.0
+outcome_level = 0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_dlmmx"]
+script = ExtResource("22_b20c6")
+nickname = "Platoon Seargeant"
+rank_grade = 3
+role = 8
+weapon = ExtResource("24_lo3kk")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ahjmf"]
+script = ExtResource("22_b20c6")
+nickname = "Platoon Guide"
+rank_grade = 3
+role = 6
+weapon = ExtResource("25_ea42u")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_asadm"]
+script = ExtResource("22_b20c6")
+nickname = "Messenger 1"
+weapon = ExtResource("24_lo3kk")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ihjum"]
+script = ExtResource("22_b20c6")
+nickname = "Messenger 2"
+weapon = ExtResource("24_lo3kk")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_v8x2n"]
+script = ExtResource("27_ur0ia")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_b5oeb"]
+script = ExtResource("27_ur0ia")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_ga1pk"]
+script = ExtResource("27_ur0ia")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_jsgmt"]
+script = ExtResource("22_b20c6")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("36_o74q7")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ugw8x"]
+script = ExtResource("22_b20c6")
+nickname = "Executive Officer"
+rank_grade = 4
+role = 8
+weapon = ExtResource("40_clxfo")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_opqin"]
+script = ExtResource("22_b20c6")
+nickname = "First Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("40_clxfo")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_m0wo0"]
+script = ExtResource("22_b20c6")
+nickname = "Communications Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("25_ea42u")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_gfsc7"]
+script = ExtResource("22_b20c6")
+nickname = "Bugler"
+rank_grade = 1
+role = 6
+weapon = ExtResource("40_clxfo")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_5hgqf"]
+script = ExtResource("22_b20c6")
+nickname = "Messenger 1"
+weapon = ExtResource("24_lo3kk")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_yyuxn"]
+script = ExtResource("22_b20c6")
+nickname = "Messenger 2"
+weapon = ExtResource("24_lo3kk")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_rxxvr"]
+script = ExtResource("22_b20c6")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("42_hro7m")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_rwfxm"]
+script = ExtResource("22_b20c6")
+nickname = "Sanitäter"
+rank_grade = 3
+role = 6
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_h7cha"]
+script = ExtResource("22_b20c6")
+nickname = "Melder"
+rank_grade = 3
+role = 6
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_vumxo"]
+script = ExtResource("22_b20c6")
+nickname = "Funker"
+role = 6
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_vcyyo"]
+script = ExtResource("22_b20c6")
+nickname = "Bote 1"
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ryqsp"]
+script = ExtResource("22_b20c6")
+nickname = "Bote 2"
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_g85e3"]
+script = ExtResource("22_b20c6")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("54_kv8vr")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_203f7"]
+script = ExtResource("22_b20c6")
+nickname = "Zugführer"
+rank_grade = 4
+role = 8
+weapon = ExtResource("58_cswn4")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ncxt2"]
+script = ExtResource("22_b20c6")
+nickname = "Hauptfeldwebel"
+rank_grade = 3
+role = 6
+weapon = ExtResource("58_cswn4")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_6hsid"]
+script = ExtResource("22_b20c6")
+nickname = "Melderführer"
+rank_grade = 3
+role = 6
+weapon = ExtResource("58_cswn4")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_cowe5"]
+script = ExtResource("22_b20c6")
+nickname = "Funker"
+rank_grade = 2
+role = 6
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_a6xq1"]
+script = ExtResource("22_b20c6")
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_xsi6h"]
+script = ExtResource("22_b20c6")
+nickname = "Truppführer"
+rank_grade = 2
+role = 7
+weapon = ExtResource("46_x582n")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_y8se1"]
+script = ExtResource("22_b20c6")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("60_fm1ab")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
+texture = ExtResource("62_j2pa8")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_2 = "Exit"
+0:0/0/custom_data_3 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
+texture = ExtResource("63_xj4ob")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
+texture = ExtResource("64_nmx3p")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
+texture = ExtResource("65_fb526")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0jm0n"]
+texture = ExtResource("66_oowk4")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 4
+0:0/0/custom_data_3 = "Start"
+
+[sub_resource type="TileSet" id="TileSet_0jm0n"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "objective_id"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "display_name"
+custom_data_layer_2/type = 4
+custom_data_layer_3/name = "zone_type"
+custom_data_layer_3/type = 4
+sources/3 = SubResource("TileSetAtlasSource_28uas")
+sources/4 = SubResource("TileSetAtlasSource_4cu88")
+sources/5 = SubResource("TileSetAtlasSource_eq3s3")
+sources/1 = SubResource("TileSetAtlasSource_06hnl")
+sources/9 = SubResource("TileSetAtlasSource_0jm0n")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
+texture = ExtResource("67_0imm2")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Exit"
+0:0/0/custom_data_3 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
+texture = ExtResource("68_qx0db")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 4
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_3 = "Start"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
+texture = ExtResource("69_lc1sc")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
+texture = ExtResource("70_ql3br")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
+texture = ExtResource("71_26s8f")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
+
+[sub_resource type="TileSet" id="TileSet_cwow2"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "objective_id"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "display_name"
+custom_data_layer_2/type = 4
+custom_data_layer_3/name = "zone_type"
+custom_data_layer_3/type = 4
+sources/6 = SubResource("TileSetAtlasSource_fcp7w")
+sources/7 = SubResource("TileSetAtlasSource_int16")
+sources/8 = SubResource("TileSetAtlasSource_6ys5q")
+sources/2 = SubResource("TileSetAtlasSource_ofo72")
+sources/0 = SubResource("TileSetAtlasSource_kp5un")
+
+[node name="WesternApproach" type="Node2D" unique_id=1128763383]
+script = ExtResource("1_2mt5x")
+grid_size = Vector2i(28, 18)
+map_name = "Alderbrook Western Approach"
+use_terrain_palette = true
+los_resource_path = "res://resources/los/alderbrook_western_approach.res"
+
+[node name="TileMapLayers" type="Node2D" parent="." unique_id=1478662733]
+
+[node name="GroundTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1569268173 instance=ExtResource("2_n8gq1")]
+tile_map_data = PackedByteArray("AAAAAAAAAwAAAAAAAAABAAAAAwAAAAAAAAACAAAAAwAAAAAAAAADAAAAAwAAAAAAAAACAAEAAwAAAAAAAAABAAEAAwAAAAAAAAAAAAEAAwAAAAAAAAAAAAIAAwAAAAAAAAABAAIAAwAAAAAAAAACAAIAAwAAAAAAAAADAAIAAwAAAAAAAAAAAAMAAwAAAAAAAAABAAMAAwAAAAAAAAACAAMAAwAAAAAAAAADAAMAAwAAAAAAAAADAAEAAwAAAAAAAAAEAAAAAwAAAAAAAAAFAAAAAQAAAAAAAAAFAAQAAwAAAAAAAAADAAQAAQAAAAAAAAACAAQAAwAAAAAAAAABAAQAAwAAAAAAAAAAAAQABAAAAAAAAAAAAAUABAAAAAAAAAABAAUAAwAAAAAAAAACAAUAAwAAAAAAAAAEAAUAAwAAAAAAAAAAAAYAAwAAAAAAAAABAAYAAwAAAAAAAAACAAYAAwAAAAAAAAADAAYAAwAAAAAAAAAEAAYAAwAAAAAAAAAGAAYAAwAAAAAAAAAFAAYAAwAAAAAAAAAFAAUAAwAAAAAAAAAGAAUAAwAAAAAAAAAGAAQAAwAAAAAAAAAGAAMAAwAAAAAAAAAGAAIAAwAAAAAAAAAGAAEAAwAAAAAAAAAGAAAAAQAAAAAAAAAFAAEAAwAAAAAAAAAHAAAAAQAAAAAAAAAHAAIAAwAAAAAAAAADAAUAAwAAAAAAAAAEAAQAAwAAAAAAAAAFAAMAAwAAAAAAAAAFAAIAAwAAAAAAAAAEAAMAAwAAAAAAAAAEAAIAAwAAAAAAAAAEAAEAAwAAAAAAAAAIAAAAAwAAAAAAAAAHAAEAAwAAAAAAAAAIAAIAAwAAAAAAAAAHAAMABAAAAAAAAAAIAAMABAAAAAAAAAAIAAQABAAAAAAAAAAIAAUAAwAAAAAAAAAIAAEAAwAAAAAAAAAHAAQABAAAAAAAAAAHAAUAAwAAAAAAAAAIAAYAAwAAAAAAAAAIAAcAAwAAAAAAAAAIAAgAAwAAAAAAAAAHAAgAAwAAAAAAAAAGAAgAAwAAAAAAAAAFAAgAAwAAAAAAAAAEAAgAAwAAAAAAAAADAAgAAQAAAAAAAAACAAgAAwAAAAAAAAABAAgAAwAAAAAAAAAAAAgAAwAAAAAAAAAAAAcABAAAAAAAAAABAAcAAwAAAAAAAAACAAcAAwAAAAAAAAADAAcAAwAAAAAAAAAEAAcAAwAAAAAAAAAFAAcAAwAAAAAAAAAGAAcAAwAAAAAAAAAHAAcAAwAAAAAAAAAHAAYAAwAAAAAAAAAJAAAAAwAAAAAAAAAKAAEABAAAAAAAAAALAAAAAwAAAAAAAAAMAAEAAwAAAAAAAAAMAAAAAwAAAAAAAAAKAAAAAwAAAAAAAAANAAAAAwAAAAAAAAAOAAAAAwAAAAAAAAAPAAAAAwAAAAAAAAAQAAEAAwAAAAAAAAARAAAAAwAAAAAAAAAQAAAAAwAAAAAAAAASAAAAAwAAAAAAAAATAAAABQAAAAAAAAAUAAAABQAAAAAAAAAVAAAABQAAAAAAAAAWAAAABQAAAAAAAAAWAAEABQAAAAAAAAAXAAAABQAAAAAAAAAWAAIABQAAAAAAAAAWAAMABQAAAAAAAAAWAAQABQAAAAAAAAAWAAUABQAAAAAAAAAWAAYABQAAAAAAAAAKAAIAAwAAAAAAAAAJAAEAAwAAAAAAAAALAAIAAwAAAAAAAAAMAAIAAwAAAAAAAAANAAIAAwAAAAAAAAANAAEAAwAAAAAAAAALAAEAAwAAAAAAAAAOAAEAAwAAAAAAAAAPAAEAAwAAAAAAAAAOAAIAAwAAAAAAAAAJAAIABAAAAAAAAAAJAAMABAAAAAAAAAAKAAMABAAAAAAAAAALAAMAAwAAAAAAAAAMAAMAAwAAAAAAAAANAAMAAwAAAAAAAAAOAAMAAwAAAAAAAAAKAAQAAwAAAAAAAAALAAQAAwAAAAAAAAAMAAQAAwAAAAAAAAAOAAQAAwAAAAAAAAANAAQAAwAAAAAAAAAKAAUAAwAAAAAAAAAJAAQABAAAAAAAAAAMAAUAAwAAAAAAAAALAAUAAwAAAAAAAAANAAUAAwAAAAAAAAAMAAYAAwAAAAAAAAAJAAUAAwAAAAAAAAAJAAYAAwAAAAAAAAAKAAYAAwAAAAAAAAALAAYAAwAAAAAAAAANAAYAAwAAAAAAAAAKAAcABAAAAAAAAAAJAAcAAwAAAAAAAAAKAAgABAAAAAAAAAALAAcABAAAAAAAAAAAAAkAAwAAAAAAAAACAAkAAwAAAAAAAAAEAAkAAQAAAAAAAAAFAAkAAQAAAAAAAAADAAkAAQAAAAAAAAABAAkAAwAAAAAAAAAGAAkAAwAAAAAAAAAHAAkAAwAAAAAAAAAIAAkAAwAAAAAAAAAJAAkAAwAAAAAAAAAKAAkAAwAAAAAAAAAJAAgAAwAAAAAAAAALAAkAAwAAAAAAAAAMAAkAAwAAAAAAAAANAAkABAAAAAAAAAAOAAkABAAAAAAAAAAPAAkABAAAAAAAAAAQAAkAAwAAAAAAAAARAAkABQAAAAAAAAASAAkABQAAAAAAAAATAAkABQAAAAAAAAAUAAkABQAAAAAAAAAVAAkABQAAAAAAAAAWAAkABQAAAAAAAAAXAAkABQAAAAAAAAAXAAgABQAAAAAAAAAXAAcABQAAAAAAAAAXAAYABQAAAAAAAAAXAAUABQAAAAAAAAAXAAQABQAAAAAAAAAXAAMABQAAAAAAAAAXAAIABQAAAAAAAAAXAAEABQAAAAAAAAAWAAcABQAAAAAAAAAVAAcABQAAAAAAAAAWAAgABQAAAAAAAAAVAAgABQAAAAAAAAAUAAgABQAAAAAAAAATAAgABQAAAAAAAAASAAgABQAAAAAAAAARAAgABQAAAAAAAAAQAAgABQAAAAAAAAAPAAgABAAAAAAAAAAOAAgABAAAAAAAAAANAAgABAAAAAAAAAAMAAgAAwAAAAAAAAALAAgAAwAAAAAAAAARAAcABQAAAAAAAAAPAAcAAwAAAAAAAAAOAAcABAAAAAAAAAANAAcAAwAAAAAAAAAQAAcABQAAAAAAAAASAAcABQAAAAAAAAATAAYABQAAAAAAAAAUAAcABQAAAAAAAAARAAYAAwAAAAAAAAAPAAYAAwAAAAAAAAASAAYABQAAAAAAAAAUAAYABQAAAAAAAAATAAcABQAAAAAAAAAVAAYABQAAAAAAAAAVAAUABQAAAAAAAAATAAUABQAAAAAAAAAUAAUABQAAAAAAAAASAAUABQAAAAAAAAARAAUABQAAAAAAAAATAAQABQAAAAAAAAARAAQABAAAAAAAAAAQAAQAAwAAAAAAAAAPAAQAAwAAAAAAAAAOAAUAAwAAAAAAAAAOAAYAAwAAAAAAAAAPAAUAAwAAAAAAAAAQAAYAAwAAAAAAAAAQAAUAAwAAAAAAAAASAAQABAAAAAAAAAATAAMABQAAAAAAAAARAAMABAAAAAAAAAAPAAMAAwAAAAAAAAASAAMABQAAAAAAAAARAAIAAwAAAAAAAAAQAAMAAwAAAAAAAAAPAAIAAwAAAAAAAAATAAIABQAAAAAAAAAUAAIABQAAAAAAAAATAAEABQAAAAAAAAASAAIAAwAAAAAAAAARAAEAAwAAAAAAAAAQAAIAAwAAAAAAAAASAAEABQAAAAAAAAAVAAEABQAAAAAAAAAUAAEABQAAAAAAAAAVAAIABQAAAAAAAAAVAAMABQAAAAAAAAAUAAQABQAAAAAAAAAVAAQABQAAAAAAAAAUAAMABQAAAAAAAAAMAAcAAwAAAAAAAAAAAAoAAwAAAAAAAAAAAAsAAwAAAAAAAAAAAAwAAwAAAAAAAAAAAA0ABAAAAAAAAAAAAA4AAwAAAAAAAAAAAA8AAwAAAAAAAAAAABAAAQAAAAAAAAAAABEAAQAAAAAAAAABAAoAAwAAAAAAAAABAAsAAwAAAAAAAAABAAwABAAAAAAAAAABAA0ABAAAAAAAAAABAA4AAwAAAAAAAAABAA8AAwAAAAAAAAABABAAAwAAAAAAAAABABEAAQAAAAAAAAACAAoAAwAAAAAAAAACAAsAAwAAAAAAAAACAAwAAwAAAAAAAAACAA0AAwAAAAAAAAACAA4AAwAAAAAAAAACAA8AAwAAAAAAAAACABAAAwAAAAAAAAACABEAAwAAAAAAAAADAAoAAwAAAAAAAAADAAsAAwAAAAAAAAADAAwAAwAAAAAAAAADAA0AAwAAAAAAAAADAA4AAwAAAAAAAAADAA8AAwAAAAAAAAADABAAAwAAAAAAAAADABEAAwAAAAAAAAAEAAoAAQAAAAAAAAAEAAsAAwAAAAAAAAAEAAwAAwAAAAAAAAAEAA0AAwAAAAAAAAAEAA4ABAAAAAAAAAAEAA8AAwAAAAAAAAAEABAAAwAAAAAAAAAEABEAAwAAAAAAAAAFAAoAAwAAAAAAAAAFAAsAAwAAAAAAAAAFAAwAAwAAAAAAAAAFAA0AAwAAAAAAAAAFAA4AAwAAAAAAAAAFAA8AAwAAAAAAAAAFABAAAwAAAAAAAAAFABEAAwAAAAAAAAAGAAoAAwAAAAAAAAAGAAsAAwAAAAAAAAAGAAwAAwAAAAAAAAAGAA0AAwAAAAAAAAAGAA4AAwAAAAAAAAAGAA8AAwAAAAAAAAAGABAAAwAAAAAAAAAGABEAAwAAAAAAAAAHAAoAAQAAAAAAAAAHAAsAAQAAAAAAAAAHAAwAAwAAAAAAAAAHAA0AAwAAAAAAAAAHAA4AAwAAAAAAAAAHAA8AAwAAAAAAAAAHABAAAwAAAAAAAAAHABEAAQAAAAAAAAAIAAoAAwAAAAAAAAAIAAsAAQAAAAAAAAAIAAwAAQAAAAAAAAAIAA0AAwAAAAAAAAAIAA4ABAAAAAAAAAAIAA8ABAAAAAAAAAAIABAAAwAAAAAAAAAIABEAAwAAAAAAAAAJAAoAAwAAAAAAAAAJAAsAAwAAAAAAAAAJAAwAAwAAAAAAAAAJAA0AAwAAAAAAAAAJAA4AAwAAAAAAAAAJAA8ABAAAAAAAAAAJABAAAwAAAAAAAAAJABEAAwAAAAAAAAAKAA4ABAAAAAAAAAALAAoAAwAAAAAAAAALAAsAAwAAAAAAAAALAAwAAwAAAAAAAAALAA0AAwAAAAAAAAALAA4AAwAAAAAAAAALAA8AAwAAAAAAAAALABAABAAAAAAAAAALABEAAwAAAAAAAAAMAAoAAwAAAAAAAAAMAAsAAwAAAAAAAAAMAAwAAwAAAAAAAAAMAA0AAwAAAAAAAAAMAA4AAwAAAAAAAAAMAA8AAwAAAAAAAAAMABAAAwAAAAAAAAAMABEAAwAAAAAAAAANAAoAAwAAAAAAAAANAAsAAwAAAAAAAAANAAwAAwAAAAAAAAANAA0AAwAAAAAAAAANAA4AAwAAAAAAAAANAA8AAwAAAAAAAAANABAAAwAAAAAAAAANABEAAwAAAAAAAAAOAAoAAwAAAAAAAAAOAAsAAwAAAAAAAAAOAAwAAwAAAAAAAAAOAA0AAwAAAAAAAAAOAA4AAwAAAAAAAAAOAA8AAwAAAAAAAAAOABAAAwAAAAAAAAAOABEAAwAAAAAAAAAPAAoAAwAAAAAAAAAPAAsAAwAAAAAAAAAPAAwAAwAAAAAAAAAPAA0AAwAAAAAAAAAPAA4AAwAAAAAAAAAPAA8AAwAAAAAAAAAPABAAAwAAAAAAAAAPABEAAwAAAAAAAAAQAAoAAwAAAAAAAAAQAAsAAwAAAAAAAAAQAAwAAwAAAAAAAAAQAA0AAwAAAAAAAAAQAA4AAwAAAAAAAAAQAA8AAwAAAAAAAAAQABAAAwAAAAAAAAAQABEAAwAAAAAAAAARAAoAAwAAAAAAAAARAAsAAwAAAAAAAAARAAwABQAAAAAAAAARAA0AAwAAAAAAAAARAA4AAwAAAAAAAAARAA8AAwAAAAAAAAARABAAAwAAAAAAAAARABEAAwAAAAAAAAASAAoABQAAAAAAAAASAAsAAwAAAAAAAAASAAwABQAAAAAAAAASAA0ABQAAAAAAAAASAA4AAwAAAAAAAAASAA8ABQAAAAAAAAASABAAAwAAAAAAAAASABEAAwAAAAAAAAATAAoABQAAAAAAAAATAAsABQAAAAAAAAATAAwABQAAAAAAAAATAA0ABQAAAAAAAAATAA4ABQAAAAAAAAATAA8ABQAAAAAAAAATABAAAwAAAAAAAAATABEABAAAAAAAAAAUAAoABQAAAAAAAAAUAAsABQAAAAAAAAAUAAwABQAAAAAAAAAUAA0ABQAAAAAAAAAUAA4ABQAAAAAAAAAUAA8ABQAAAAAAAAAUABAABQAAAAAAAAAUABEABQAAAAAAAAAVAAoABQAAAAAAAAAVAAsABQAAAAAAAAAVAAwABQAAAAAAAAAVAA0ABQAAAAAAAAAVAA4ABQAAAAAAAAAVAA8ABQAAAAAAAAAVABAABQAAAAAAAAAVABEABQAAAAAAAAAWAAoABQAAAAAAAAAWAAsABQAAAAAAAAAWAAwABQAAAAAAAAAWAA0ABQAAAAAAAAAWAA4ABQAAAAAAAAAWAA8ABQAAAAAAAAAWABAABQAAAAAAAAAWABEABQAAAAAAAAAXAAoABQAAAAAAAAAXAAsABQAAAAAAAAAXAAwABQAAAAAAAAAXAA0ABQAAAAAAAAAXAA4ABQAAAAAAAAAXAA8ABQAAAAAAAAAXABAABQAAAAAAAAAXABEABQAAAAAAAAAYAAAABQAAAAAAAAAYAAEABQAAAAAAAAAYAAIABQAAAAAAAAAYAAMABQAAAAAAAAAYAAQABQAAAAAAAAAYAAUABQAAAAAAAAAYAAYABQAAAAAAAAAYAAcABQAAAAAAAAAYAAgABQAAAAAAAAAYAAkABQAAAAAAAAAYAAoABQAAAAAAAAAYAAsABQAAAAAAAAAYAAwABQAAAAAAAAAYAA0ABQAAAAAAAAAYAA4ABQAAAAAAAAAYAA8ABQAAAAAAAAAYABAABQAAAAAAAAAYABEABQAAAAAAAAAZAAAABQAAAAAAAAAZAAEABQAAAAAAAAAZAAIABQAAAAAAAAAZAAMABQAAAAAAAAAZAAQABQAAAAAAAAAZAAUABQAAAAAAAAAZAAYABQAAAAAAAAAZAAcABQAAAAAAAAAZAAgABQAAAAAAAAAZAAkABQAAAAAAAAAZAAoABQAAAAAAAAAZAAsABQAAAAAAAAAZAAwABQAAAAAAAAAZAA0ABQAAAAAAAAAZAA4ABQAAAAAAAAAZAA8ABQAAAAAAAAAZABAABQAAAAAAAAAZABEABQAAAAAAAAAKAAoAAwAAAAAAAAAKAAsAAwAAAAAAAAAKAAwAAwAAAAAAAAAKAA0AAwAAAAAAAAAKAA8ABAAAAAAAAAAKABAABAAAAAAAAAAKABEAAwAAAAAAAAAaAAAABQAAAAAAAAAaAAEABQAAAAAAAAAaAAIABQAAAAAAAAAaAAMABQAAAAAAAAAaAAQABQAAAAAAAAAaAAUABQAAAAAAAAAaAAYABQAAAAAAAAAaAAcABQAAAAAAAAAaAAgABQAAAAAAAAAaAAkABQAAAAAAAAAaAAoABQAAAAAAAAAaAAsABQAAAAAAAAAaAAwABQAAAAAAAAAaAA0ABQAAAAAAAAAaAA4ABQAAAAAAAAAaAA8ABQAAAAAAAAAaABAABQAAAAAAAAAaABEABQAAAAAAAAAbAAAABQAAAAAAAAAbAAEABQAAAAAAAAAbAAIABQAAAAAAAAAbAAMABQAAAAAAAAAbAAQABQAAAAAAAAAbAAUABQAAAAAAAAAbAAYABQAAAAAAAAAbAAcABQAAAAAAAAAbAAgABQAAAAAAAAAbAAkABQAAAAAAAAAbAAoABQAAAAAAAAAbAAsABQAAAAAAAAAbAAwABQAAAAAAAAAbAA0ABQAAAAAAAAAbAA4ABQAAAAAAAAAbAA8ABQAAAAAAAAAbABAABQAAAAAAAAAbABEABQAAAAAAAAA=")
+tile_set = SubResource("TileSet_1et88")
+script = ExtResource("8_1et88")
+pathfinding_enabled = true
+metadata/_edit_lock_ = true
+
+[node name="WaterTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1311752223]
+tile_map_data = PackedByteArray("AAAKAAAA//////////8KAAEA//////////8KAAIA//////////8KAAMA//////////8KAAQA//////////8KAAUA//////////8KAAYA//////////8KAAcA//////////8KAAgA//////////8KAAkA//////////8KAAoA//////////8KAAsA//////////8KAAwA//////////8KAA0A//////////8KAA4A//////////8KAA8A//////////8KABAA//////////8KABEA//////////8=")
+tile_set = ExtResource("9_k7vpc")
+script = ExtResource("10_v3pi7")
+
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=27381256]
+tile_map_data = PackedByteArray("AAABAAAAIgADAAAAAAABAAEAIgAEAAAAAAABABAAIgAAAAEAAAABABEA//////////8CAAAAIgABAAEAAAACAAEAIgACAAEAAAACABAAIgAFAAEAAAACABEAIgAGAAEAAAADAAAAIgAHAAEAAAADAAEA//////////8DABAA//////////8DABEAIgADAAIAAAAFAAAA//////////8FAAEAIgAGAAMAAAAFABAAIgAGAAQAAAAFABEAIgAHAAQAAAAGAAAAIgAAAAUAAAAGAAEAIgABAAUAAAAGABAAIgACAAYAAAAGABEA//////////8HAAAAIgADAAYAAAAHAAEAIgAEAAYAAAAHABAAIgAFAAcAAAAHABEAIgAGAAcAAAAJAAAAIgAFAAgAAAAJAAEAIgAGAAgAAAAJABAAIgAFAAkAAAAJABEAIgAGAAkAAAALAAAAIgAEAAoAAAALAAEAIgAFAAoAAAALABAAIgABAAsAAAALABEA//////////8NAAAAIgAAAAwAAAANAAEAIgABAAwAAAANABAA//////////8NABEA//////////8OAAAA//////////8OAAEA//////////8OABAA//////////8OABEA//////////8PAAAA//////////8PAAEA//////////8PABAA//////////8PABEA//////////8RAAAA//////////8RAAEA//////////8RABAA//////////8RABEA//////////8SAAAA//////////8SAAEA//////////8SABAA//////////8SABEA//////////8TAAAA//////////8TAAEA//////////8TABAA//////////8TABEA//////////8VAAAA//////////8VAAEA//////////8VABAA//////////8VABEA//////////8WAAAA//////////8WAAEA//////////8WABAA//////////8WABEA//////////8XAAAA//////////8XAAEA//////////8XABAA//////////8XABEA//////////8ZAAAA//////////8ZAAEA//////////8ZABAA//////////8ZABEA//////////8AAAUAIQABAAAAAAAAAAYA//////////8AAAkAIQACAAAAAAAAAA0AIQADAAAAAAAAAA4A//////////8BAAUAIgAGAAAAAAABAAgAIQAFAAAAAAABAAkA//////////8BAA0AIQAHAAAAAAACAAUAIQABAAEAAAACAAYAIgAEAAEAAAACAAkAIQADAAEAAAACAA0AIQAEAAEAAAACAA4A//////////8DAAUAIgABAAIAAAADAAgAIQAGAAEAAAADAA0A//////////8EAAUAIgAHAAIAAAAEAAgAIQABAAIAAAAEAAkAIQACAAIAAAAEAA0AIQADAAIAAAAEAA4A//////////8FAAQAIQAEAAIAAAAFAAUAIgAAAAQAAAAFAAgAIQAFAAIAAAAFAA0AIQAHAAIAAAAGAAQAIQAAAAMAAAAGAAUAIgAEAAUAAAAGAAgAIQABAAMAAAAGAAkAIgAGAAUAAAAGAA4A//////////8HAAQAIgAGAAYAAAAHAAgAIQAEAAMAAAAHAAkA//////////8HAA0AIQAFAAMAAAAHAA4A//////////8IAAQAIgAAAAgAAAAIAAkA//////////8IAA4AIQAAAAQAAAAJAAQAIgAAAAkAAAAJAAkA//////////8JAA4AIQADAAQAAAALAAQAIQADAAUAAAALAAkA//////////8LAA4AIQAGAAUAAAAMAAQAIgAEAAsAAAAMAAkAIQAEAAYAAAAMAA4AIgAHAAsAAAAMAA8AIQAFAAYAAAANAAMAIgACAAwAAAANAAQA//////////8NAAgAIQABAAcAAAANAAkA//////////8NAA4AIQACAAcAAAAOAAMAIQAFAAcAAAAOAAQA//////////8OAAkAIQAAAAgAAAAOAA8AIQABAAgAAAAPAAIAIQACAAgAAAAPAAMA//////////8PAAgAIQAEAAgAAAAPAA4AIQAFAAgAAAAPAA8AIQAGAAgAAAAQAAMAIQAAAAkAAAAQAAkAIQACAAkAAAAQAA8AIQADAAkAAAARAAIAIQAEAAkAAAARAAMA//////////8RAAgAIQAFAAkAAAARAA4AIQAAAAoAAAARAA8A//////////8SAAMAIQABAAoAAAASAAgAIQACAAoAAAASAAkA//////////8SAA8A//////////8TAAMAIQAHAAoAAAATAAgAIQAAAAsAAAATAA4A//////////8UAAMAIQAEAAsAAAAUAAgAIQAGAAsAAAAUAA8A//////////8VAAMAIQABAAwAAAAVAAgAIQAEAAwAAAAVAA4A//////////8WAAMAIQAGAAwAAAAWAAgAIQABAA0AAAAWAA8A//////////8XAAMAIQAEAA0AAAAXAAgAIQAGAA0AAAAXAA4A//////////8XAA8A//////////8YAAMAIQABAA4AAAAYAAgAIQACAA4AAAAYAAkAIQADAA4AAAAYAA8A//////////8ZAAMAIQAAAA8AAAAZAAgAIQABAA8AAAAZAA4A//////////8ZAA8A//////////8PAAUA//////////8PAAYA//////////8QAAUA//////////8QAAYA//////////8VAAsA//////////8VAAwA//////////8WAAsA//////////8WAAwA//////////8XAAsA//////////8XAAwA//////////8EAAIA//////////8EAAMAIgAGAAIAAAAFAAIA//////////8FAAMAIgAHAAMAAAAGAAIAIgACAAUAAAAGAAMAIgADAAUAAAAHAAIAIgAFAAYAAAAHAAMAIQADAAMAAAAMAAIAIQAHAAUAAAAMAAMAIQAAAAYAAAANAAIAIQAGAAYAAAAOAAIAIQAEAAcAAAAEAAYAIgAAAAMAAAAEAAcA//////////8FAAYAIgABAAQAAAAFAAcAIgACAAQAAAAGAAYAIgAFAAUAAAAGAAcA//////////8HAAYAIgAAAAcAAAAHAAcAIgABAAcAAAAMAAYAIQACAAYAAAAMAAcA//////////8NAAYAIQAAAAcAAAANAAcA//////////8OAAYA//////////8OAAcAIQAGAAcAAAAPAAcAIQADAAgAAAAEAAsAIgACAAMAAAAEAAwAIgADAAMAAAAFAAsAIgAFAAQAAAAFAAwAIQAGAAIAAAAGAAsAIgAAAAYAAAAGAAwAIgABAAYAAAAHAAsAIgADAAcAAAAHAAwAIgAEAAcAAAAMAAsAIgAFAAsAAAAMAAwAIgAGAAsAAAANAAsAIgADAAwAAAANAAwAIgAEAAwAAAAOAAsA//////////8OAAwA//////////8PAAsA//////////8PAAwA//////////8EAA8A//////////8FAA8A//////////8GAA8A//////////8HAA8A//////////8XAA0AIQAAAA4AAAAYAA0AIQAGAA4AAAAYAA4AIQAHAA4AAAAAAAEAIgAAAAAAAAAEAAAAIgAEAAIAAAAEAAEAIgAFAAIAAAAAABAAIgABAAAAAAAAABEAIgACAAAAAAAEABAAIgAEAAMAAAAEABEAIgAFAAMAAAAIABEAIgAEAAgAAAAKABAAIgACAAoAAAAKABEAIgADAAoAAAAIAAoAIgACAAgAAAAIAAwAIgADAAgAAAAJAAoAIgACAAkAAAAJAAsAIgADAAkAAAAJAAwAIgAEAAkAAAABAAMAIgAFAAAAAAABAAQAIQAEAAAAAAABAAYAIgAHAAAAAAACAAMAIgADAAEAAAACAAQAIQAAAAEAAAADAAMAIgAAAAIAAAADAAQAIQAFAAEAAAADAAYAIgACAAIAAAAEAAQAIQAAAAIAAAAEAAoAIgABAAMAAAAFAAkAIgADAAQAAAAFAAoAIgAEAAQAAAAGAAoAIgAHAAUAAAAGAA0AIQACAAMAAAAHAAoAIgACAAcAAAAKAAAAIgAHAAkAAAAKAAEAIgAAAAoAAAAMAAAAIgACAAsAAAAMAAEAIgADAAsAAAAHAAUAIgAHAAYAAAAIAAIAIgAHAAcAAAAIAAMAIQAGAAMAAAAIAAUAIgABAAgAAAAJAAIAIQABAAQAAAAJAAMAIgAHAAgAAAAJAAUAIgABAAkAAAAKAAIAIQAEAAQAAAAKAAMAIQAFAAQAAAAKAAQAIQAGAAQAAAAKAAUAIgABAAoAAAALAAIAIQABAAUAAAALAAMAIQACAAUAAAALAAUAIQAEAAUAAAAMAAUAIQABAAYAAAANAAUAIQAHAAYAAAALAAsAIgAGAAoAAAALAAwAIgAHAAoAAAALAA0AIgAAAAsAAAAMAA0A//////////8NAA0AIgAFAAwAAAAAAAQAIQAAAAAAAAABAAwAIQAGAAAAAAACAAgAIQACAAEAAAADAAwAIQAHAAEAAAAIAAgAIQAHAAMAAAAJAAgAIQACAAQAAAAKAAgAIQAHAAQAAAAKAA8AIQAAAAUAAAALAAgAIQAFAAUAAAAMAAgAIQADAAYAAAANAA8AIQADAAcAAAAOAAgAIQAHAAcAAAAQAAIAIQAHAAgAAAAQAAgAIQABAAkAAAARAAkAIQAGAAkAAAARAAoAIQAHAAkAAAASAAoAIQADAAoAAAASAAsAIQAEAAoAAAASAAwAIQAFAAoAAAASAA4AIQAGAAoAAAATAAsAIQABAAsAAAATAAwAIQACAAsAAAATAA0AIQADAAsAAAAUAAQAIQAFAAsAAAAUAA0AIQAHAAsAAAAUAA4AIQAAAAwAAAAVAAQAIQACAAwAAAAVAAUAIQADAAwAAAAVAA0AIQAFAAwAAAAWAAYAIQAHAAwAAAAWAAcAIQAAAA0AAAAWAA0AIQACAA0AAAAWAA4AIQADAA0AAAAXAAcAIQAFAA0AAAAXAAkAIQAHAA0AAAAYAAoAIQAEAA4AAAAYAAsAIQAFAA4AAAAZAAoAIQACAA8AAAAZAAsAIQADAA8AAAAZAAwAIQAEAA8AAAAZAA0AIQAFAA8AAAAaAAMAIQAGAA8AAAAaAAgAIQAHAA8AAAAaAA0AIQAAABAAAAAbAAMAIQABABAAAAAbAAgAIQACABAAAAAbAA0AIQADABAAAAA=")
+tile_set = ExtResource("11_vxkrw")
+script = ExtResource("12_6v4pp")
+
+[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=858582721]
+tile_map_data = PackedByteArray("AAAGAAUAAwAAAAAAAAAHAAUAAwAAAAAAAAAIAAUAAwAAAAAAAAAJAAUAAwAAAAAAAAAKAAYAAwAAAAAAAAA=")
+tile_set = ExtResource("13_6khyr")
+script = ExtResource("14_2n6pb")
+
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=290294061]
+tile_map_data = PackedByteArray("AAABAAAAEAADAAAAAAABAAEAEAAEAAAAAAABABAAEAAFAAAAAAABABEA//////////8CAAAAEAAGAAAAAAACAAEAEAAHAAAAAAACABAAEAAAAAEAAAACABEAEAABAAEAAAADAAAAEAACAAEAAAADAAEA//////////8DABAA//////////8DABEAEAADAAEAAAAFAAAA//////////8FAAEAEAAAAAIAAAAFABAAEAADAAIAAAAFABEAEAAEAAIAAAAGAAAAEAAFAAIAAAAGAAEAEAAGAAIAAAAGABAAEAAAAAMAAAAGABEA//////////8HAAAAEAABAAMAAAAHAAEAEAACAAMAAAAHABAAEAAFAAMAAAAHABEAEAAGAAMAAAAJAAAA//////////8JAAEA//////////8JABAAEAAFAAQAAAAJABEAEAAGAAQAAAALAAAA//////////8LAAEA//////////8LABAAEAABAAUAAAALABEA//////////8NAAAA//////////8NAAEA//////////8NABAA//////////8NABEA//////////8OAAAA//////////8OAAEA//////////8OABAA//////////8OABEA//////////8PAAAA//////////8PAAEA//////////8PABAA//////////8PABEA//////////8RAAAA//////////8RAAEAAAAAAAAAAAARABAAAQAAAAAAAAARABEA//////////8SAAAA//////////8SAAEAAQAAAAAAAAASABAAAAAAAAAAAAASABEA//////////8TAAAA//////////8TAAEA//////////8TABAA//////////8TABEA//////////8VAAAA//////////8VAAEA//////////8VABAA//////////8VABEA//////////8WAAAA//////////8WAAEAAQAAAAAAAAAWABAAAAAAAAAAAAAWABEA//////////8XAAAA//////////8XAAEAAAAAAAAAAAAXABAAAQAAAAAAAAAXABEA//////////8ZAAAA//////////8ZAAEAAAAAAAAAAAAZABAAAQAAAAAAAAAZABEA//////////8QAAQA//////////8QAAcA//////////8QAAoA//////////8QAA0A//////////8RAAQA//////////8RAAcAAAAAAAAAAAARAAoA//////////8RAA0AAAAAAAAAAAATAAQAAQAAAAAAAAATAAcAAAAAAAAAAAATAAoA//////////8TAA0A//////////8UAAQA//////////8UAAcAAQAAAAAAAAAUAAoAAAAAAAAAAAAUAA0A//////////8WAAQA//////////8WAAcA//////////8WAAoA//////////8WAA0A//////////8UAAkA//////////8SAA4A//////////8AAAEAEAAAAAAAAAAEAAAAEAAEAAEAAAAEAAEAEAAFAAEAAAAAABAAEAABAAAAAAAAABEAEAACAAAAAAAEABAAEAAGAAEAAAAEABEAEAAHAAEAAAAIABEAEAABAAQAAAAKABAAEAAHAAQAAAAKABEAEAAAAAUAAAAFAAYAEAABAAIAAAAFAAcAEAACAAIAAAAGAAYAEAAHAAIAAAAHAAYAEAADAAMAAAAHAAcAEAAEAAMAAAAIAAoAEAAHAAMAAAAIAAwAEAAAAAQAAAAJAAoAEAACAAQAAAAJAAsAEAADAAQAAAAJAAwAEAAEAAQAAAAHAAkAAAAAAAAAAAAKAAcAAQAAAAAAAAALAAYAAQAAAAAAAAANAAkAAAAAAAAAAAAOAAoAAAAAAAAAAAANAAQAAQAAAAAAAAAOAAQAAAAAAAAAAAAPAAQAAQAAAAAAAAAPAAYAAQAAAAAAAAARAAUAAAAAAAAAAAAKAAwAAwAAAAAAAAAMAA0AAwAAAAAAAAAOAAwABAAAAAAAAAAQAA4AAgAAAAAAAAARAAMAAAAAAAAAAAARAAYAAQAAAAAAAAARAAsAAAAAAAAAAAARAAwAAQAAAAAAAAASAAQAAAAAAAAAAAASAAUAAQAAAAAAAAASAAYAAAAAAAAAAAASAAkAAQAAAAAAAAASAA8AAQAAAAAAAAATAAIAAQAAAAAAAAATAA4AAQAAAAAAAAAUAAEAAQAAAAAAAAAUAAIAAAAAAAAAAAAUAAUAAQAAAAAAAAAUAAYAAAAAAAAAAAAUAAsAAQAAAAAAAAAUAAwAAAAAAAAAAAAUAA8AAQAAAAAAAAAUABAAAAAAAAAAAAAVAAoAAQAAAAAAAAAVAA4AAQAAAAAAAAAVAA8AAAAAAAAAAAAWAAIAAAAAAAAAAAAWAAsAAQAAAAAAAAAWAAwAAAAAAAAAAAAXAAQAAQAAAAAAAAAXAAUAAAAAAAAAAAAXAAYAAQAAAAAAAAAXAAoAAQAAAAAAAAAXAAsAAAAAAAAAAAAXAA4AAQAAAAAAAAAXAA8AAAAAAAAAAAAYAAIAAAAAAAAAAAAYAAQAAAAAAAAAAAAYAAcAAQAAAAAAAAAYAAwAAAAAAAAAAAAZAAIAAQAAAAAAAAAZAAUAAAAAAAAAAAAZAAYAAQAAAAAAAAAZAAcAAAAAAAAAAAAZAA8AAAAAAAAAAAAaAAQAAAAAAAAAAAAaAAUAAQAAAAAAAAAaAAkAAQAAAAAAAAAaAAoAAAAAAAAAAAAaAA4AAAAAAAAAAAAaAA8AAQAAAAAAAAAbAAEAAAAAAAAAAAAbAAIAAQAAAAAAAAAbAAYAAQAAAAAAAAAbAAcAAAAAAAAAAAAbAAsAAAAAAAAAAAAbAAwAAQAAAAAAAAAbABAAAQAAAAAAAAA=")
+tile_set = ExtResource("15_2gr6m")
+script = ExtResource("16_dsc8c")
+
+[node name="Scenarios" type="Node2D" parent="." unique_id=976409343]
+
+[node name="Mission" type="Node2D" parent="Scenarios" unique_id=863863419]
+script = ExtResource("17_203f7")
+scenario_name = "Alderbrook: The Western Approach"
+scenario_id = "alderbrook_western_approach"
+scenario_description = "Standalone alternative to Battle for Alderbrook.
+
+Your company has reached the western outskirts. Fields give way to an orchard estate, roadside houses and workshop yards, then tight town blocks. There is no river barrier: move between the approaches and choose where to commit your reserve.
+
+[b]North - Orchard estate (A):[/b] the orchard conceals the approach but hinders fire. Clear its edge and use the estate to turn the market defense.
+[b]Center - Market square (B):[/b] the main road is fast and exposed. Cover the approach from the roadside houses, or enter the square from a flank.
+[b]South - Workshop yard (C):[/b] scattered timber sheds provide stepping stones into town. Take the yard, then use the diagonal street to support the market assault.
+
+Three rifle platoons each have a machine-gun team. Company HQ and a light mortar support the attack. Keep one platoon available until you identify the weaker approach. Enemy infantry and machine guns defend the outskirts, with mortar support deeper in town.
+
+[b]Major Victory:[/b] hold A, B and C simultaneously, each for 30 uninterrupted seconds. This ends the battle immediately.
+[b]Minor Victory:[/b] hold B for 30 uninterrupted seconds at the 15-minute deadline.
+
+Objectives require a unit in good order; enemy presence contests control. There are no destruction or exit quotas. The defenders win by holding all three districts at the deadline, or earn a minor victory by holding B."
+duration_s = 900.0
+use_authored_duration = true
+released = true
+player_team = 1
+victory_conditions = Array[ExtResource("18_ncxt2")]([SubResource("Resource_k7vpc"), SubResource("Resource_v3pi7"), SubResource("Resource_vxkrw"), SubResource("Resource_6v4pp"), SubResource("Resource_6khyr"), SubResource("Resource_2n6pb"), SubResource("Resource_2gr6m"), SubResource("Resource_dsc8c")])
+axis_ai_status = 1
+allies_ai_status = 0
+
+[node name="Units" type="Node2D" parent="Scenarios/Mission" unique_id=1873809724]
+
+[node name="CA_P1_S0_Allies_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=437630089 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 448)
+script = ExtResource("21_a6xq1")
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("23_rnlvf"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+squad_loadout = ExtResource("26_gf0xm")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=693192686 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 384)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=472932140 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 512)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S3_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=399154150 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 768)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S4_Allies_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1752092129 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 704)
+script = ExtResource("21_a6xq1")
+squad = 4
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), SubResource("Resource_jsgmt"), ExtResource("32_2ie1m"), ExtResource("37_5a1w0"), ExtResource("37_5a1w0")])
+squad_loadout = ExtResource("38_ep0i7")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S0_Allies_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1678771242 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 1088)
+script = ExtResource("21_a6xq1")
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("23_rnlvf"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+squad_loadout = ExtResource("26_gf0xm")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=210432421 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1024)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1082070777 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1152)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S3_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2054123352 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1280)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S4_Allies_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1693153080 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 1344)
+script = ExtResource("21_a6xq1")
+squad = 4
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), SubResource("Resource_jsgmt"), ExtResource("32_2ie1m"), ExtResource("37_5a1w0"), ExtResource("37_5a1w0")])
+squad_loadout = ExtResource("38_ep0i7")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S0_Allies_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=782628394 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 1728)
+script = ExtResource("21_a6xq1")
+platoon = 3
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("23_rnlvf"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+squad_loadout = ExtResource("26_gf0xm")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=903470731 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1664)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 3
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1296036751 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1792)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 3
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S3_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=565264416 instance=ExtResource("20_cowe5")]
+position = Vector2(352, 1920)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 3
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), ExtResource("30_pn0x0"), ExtResource("31_17hmh"), ExtResource("32_2ie1m"), ExtResource("33_uolb7"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl"), ExtResource("34_mtxcl")])
+squad_loadout = ExtResource("35_vpn1k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S4_Allies_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1785551320 instance=ExtResource("20_cowe5")]
+position = Vector2(256, 1984)
+script = ExtResource("21_a6xq1")
+squad = 4
+platoon = 3
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("29_v8myi"), SubResource("Resource_jsgmt"), ExtResource("32_2ie1m"), ExtResource("37_5a1w0"), ExtResource("37_5a1w0")])
+squad_loadout = ExtResource("38_ep0i7")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P0_S0_Allies_CompanyHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1082876126 instance=ExtResource("20_cowe5")]
+position = Vector2(160, 1152)
+script = ExtResource("21_a6xq1")
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("39_jl2qs"), SubResource("Resource_ugw8x"), SubResource("Resource_opqin"), SubResource("Resource_m0wo0"), SubResource("Resource_gfsc7"), SubResource("Resource_5hgqf"), SubResource("Resource_yyuxn")])
+squad_loadout = ExtResource("41_335xo")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 5
+metadata/_edit_lock_ = true
+
+[node name="CA_P0_S1_Allies_Mortar" type="Node2D" parent="Scenarios/Mission/Units" unique_id=451044734 instance=ExtResource("20_cowe5")]
+position = Vector2(160, 1408)
+script = ExtResource("21_a6xq1")
+squad = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("30_pn0x0"), SubResource("Resource_rxxvr"), ExtResource("32_2ie1m"), ExtResource("37_5a1w0"), ExtResource("37_5a1w0")])
+squad_loadout = ExtResource("43_4dcbg")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 3
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1614480099 instance=ExtResource("20_cowe5")]
+position = Vector2(1696, 768)
+script = ExtResource("21_a6xq1")
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("44_qqupv"), ExtResource("45_ffl3g"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
+squad_loadout = ExtResource("47_4yg1x")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2045075244 instance=ExtResource("20_cowe5")]
+position = Vector2(1312, 640)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S2_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1674158457 instance=ExtResource("20_cowe5")]
+position = Vector2(1504, 896)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S3_Axis_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=421907761 instance=ExtResource("20_cowe5")]
+position = Vector2(1504, 640)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), SubResource("Resource_g85e3"), ExtResource("50_lvrk7"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("56_bfla5")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=105232964 instance=ExtResource("20_cowe5")]
+position = Vector2(2368, 1216)
+script = ExtResource("21_a6xq1")
+platoon = 2
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("44_qqupv"), ExtResource("45_ffl3g"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
+squad_loadout = ExtResource("47_4yg1x")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=729443656 instance=ExtResource("20_cowe5")]
+position = Vector2(1984, 1216)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 2
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S2_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1623640844 instance=ExtResource("20_cowe5")]
+position = Vector2(2176, 960)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 2
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S3_Axis_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=924861150 instance=ExtResource("20_cowe5")]
+position = Vector2(1792, 1088)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 2
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), SubResource("Resource_g85e3"), ExtResource("50_lvrk7"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("56_bfla5")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=924837688 instance=ExtResource("20_cowe5")]
+position = Vector2(2080, 2048)
+script = ExtResource("21_a6xq1")
+platoon = 3
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("44_qqupv"), ExtResource("45_ffl3g"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
+squad_loadout = ExtResource("47_4yg1x")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1154695218 instance=ExtResource("20_cowe5")]
+position = Vector2(1600, 1856)
+script = ExtResource("21_a6xq1")
+squad = 1
+platoon = 3
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S2_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=241872060 instance=ExtResource("20_cowe5")]
+position = Vector2(1792, 1600)
+script = ExtResource("21_a6xq1")
+squad = 2
+platoon = 3
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), ExtResource("45_ffl3g"), ExtResource("49_aua67"), ExtResource("50_lvrk7"), ExtResource("51_w3i4t"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("53_5lj4k")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+metadata/_edit_lock_ = true
+
+[node name="CA_P3_S3_Axis_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1622506291 instance=ExtResource("20_cowe5")]
+position = Vector2(1792, 1856)
+script = ExtResource("21_a6xq1")
+squad = 3
+platoon = 3
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("48_mvkbi"), SubResource("Resource_g85e3"), ExtResource("50_lvrk7"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("56_bfla5")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 3
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P0_S0_Axis_CompanyHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=46330309 instance=ExtResource("20_cowe5")]
+position = Vector2(2464, 1536)
+script = ExtResource("21_a6xq1")
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([ExtResource("57_ovw71"), SubResource("Resource_203f7"), SubResource("Resource_ncxt2"), SubResource("Resource_6hsid"), SubResource("Resource_cowe5"), SubResource("Resource_a6xq1"), ExtResource("52_v0lb3")])
+squad_loadout = ExtResource("59_7xpfm")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 5
+metadata/_edit_lock_ = true
+
+[node name="CA_P0_S1_Axis_Mortar" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1084225975 instance=ExtResource("20_cowe5")]
+position = Vector2(2464, 896)
+script = ExtResource("21_a6xq1")
+squad = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("22_b20c6")]([SubResource("Resource_xsi6h"), SubResource("Resource_y8se1"), ExtResource("50_lvrk7"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r"), ExtResource("55_khi2r")])
+squad_loadout = ExtResource("61_hpap0")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("28_h6i0c")
+squad_type = 3
+metadata/_edit_lock_ = true
+
+[node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=472568943]
+
+[node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1654170501]
+tile_map_data = PackedByteArray("AAAUAAkABAAAAAAAAAARAAQA//////////8SAA4A//////////8ZAAgA//////////8ZAAoA//////////8XAAkA//////////8NAAQAAwAAAAAAAAAQAA4ABQAAAAAAAAAYAAkACQAAAAAAAAA=")
+tile_set = SubResource("TileSet_0jm0n")
+script = ExtResource("10_v3pi7")
+
+[node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1906976286]
+tile_map_data = PackedByteArray("AAARAAQA//////////8UAAkABwAAAAAAAAASAA4A//////////8CAAgAAgAAAAAAAAANAAQABgAAAAAAAAAQAA4ACAAAAAAAAAA=")
+tile_set = SubResource("TileSet_cwow2")
+script = ExtResource("10_v3pi7")

@@ -34,13 +34,13 @@ def ramp(brightness: np.ndarray, family: str) -> np.ndarray:
 
 
 def family_for_cell(layer: str, cell: dict) -> str:
-    if layer == "GroundTileMapLayer":
-        return "open_ground"
     family: str = cell.get("art_family", "")
     if family == "crops":
         return "green_crops"
     if family:
         return family
+    if layer == "GroundTileMapLayer":
+        return "open_ground"
     path: str = cell["texture"]
     for needle, family in [("bridge", "bridge"), ("river", "water"), ("road", "roads"),
                            ("building_stone", "stone"), ("building_wood", "timber"),

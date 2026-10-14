@@ -1,6 +1,7 @@
 """Export designer map images from the authored Godot tile layout manifests."""
 
 from pathlib import Path
+import argparse
 import json
 import sys
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -58,11 +59,13 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
     canvas: Image.Image = Image.new("RGBA", (max(1000, max_x + 120), max_y + 284), PAPER)
     draw: ImageDraw.ImageDraw = ImageDraw.Draw(canvas)
     draw.rectangle((0, 0, canvas.width, 124), fill=INK)
-    draw.text((38, 20), "ROAD TO ALDERBROOK", font=font(16, True), fill="#c9c9b2")
+    draw.text((38, 20), data.get("series", "ROAD TO ALDERBROOK"), font=font(16, True), fill="#c9c9b2")
     draw.text((38, 47), data["title"], font=font(30, True), fill=PAPER)
-    index: int = int(data["id"][:2]) - 1
+    index: int = 0
+    if "force_summary" not in data:
+        index = int(data["id"][:2]) - 1
     duration: int = int(data["seconds"] / 60)
-    subtitle: str = f"{PHASES[index]}  |  {duration} minutes  |  {data['size'][0]} x {data['size'][1]} hexes"
+    subtitle: str = f"{data.get('force_summary', PHASES[index])}  |  {duration} minutes  |  {data['size'][0]} x {data['size'][1]} hexes"
     draw.text((38, 91), subtitle, font=font(16), fill="#c9c9b2")
     for layer in data["layers"]:
         for cell in layer["cells"]:
@@ -107,7 +110,7 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
             draw.text((px, py), label, font=font(10, True), fill=INK, anchor="mm")
     footer_y: int = canvas.height - 100
     draw.line((38, footer_y - 15, canvas.width - 38, footer_y - 15), fill="#afa99b", width=1)
-    draw.text((38, footer_y), GOALS[index], font=font(17, True), fill=INK)
+    draw.text((38, footer_y), data.get("goal", GOALS[index]), font=font(17, True), fill=INK)
     draw.text((38, footer_y + 33), "Blue: Allied deployment    Red: Axis deployment    Gold: objectives / exits", font=font(14), fill=INK)
     draw.text((38, footer_y + 60), "Designer overview. Terrain and deployment coordinates match the playable map.", font=font(12), fill="#5f665a")
     image: Image.Image = canvas.convert("RGB")
@@ -159,8 +162,15 @@ def render_overview(maps: list[tuple[dict, Image.Image]]) -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("manifests", nargs="*", type=Path, help="Render selected standalone or campaign map manifests")
+    arguments = parser.parse_args()
     rendered: list[tuple[dict, Image.Image]] = []
-    for source in sorted(OUTPUT.glob("0*.json")):
+    sources: list[Path] = arguments.manifests
+    if not sources:
+        sources = sorted(OUTPUT.glob("0*.json"))
+    for source in sources:
         rendered.append(render_map(source))
-    render_overview(rendered)
-    print("Rendered five playable map overviews and the campaign overview.")
+    if not arguments.manifests:
+        render_overview(rendered)
+    print(f"Rendered {len(rendered)} playable map overviews.")

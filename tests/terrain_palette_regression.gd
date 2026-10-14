@@ -24,6 +24,7 @@ func _run() -> void:
 	var maps: Node = template.get_node("Maps")
 	for packed: PackedScene in template.ALDERBROOK_CAMPAIGN.mission_maps:
 		maps.add_child(packed.instantiate())
+	maps.add_child(template.WESTERN_APPROACH.instantiate())
 	var originals: Dictionary[String, TileSet] = {}
 	for map: Map in maps.get_children():
 		for layer: Node in map.get_node("TileMapLayers").get_children():
@@ -38,6 +39,7 @@ func _run() -> void:
 	var used_families: Dictionary[String, bool] = {}
 	for map: Map in maps.get_children():
 		var campaign: bool = map.campaign_name == TerrainPalette.CAMPAIGN
+		var colored: bool = campaign or map.use_terrain_palette
 		if campaign:
 			campaign_maps += 1
 		for node: Node in map.get_tilemap_layers():
@@ -52,7 +54,7 @@ func _run() -> void:
 				if checked.has(data):
 					continue
 				checked[data] = true
-				if not campaign:
+				if not colored:
 					_check(data.material == null, "Campaign palettes do not affect base maps")
 					continue
 				var source_id: int = layer.get_cell_source_id(cell)
@@ -60,10 +62,11 @@ func _run() -> void:
 				var original_source: TileSetAtlasSource = original.get_source(source_id) as TileSetAtlasSource
 				var original_data: TileData = original_source.get_tile_data(layer.get_cell_atlas_coords(cell), layer.get_cell_alternative_tile(cell))
 				var family: String = TerrainPalette.family_for_tile(layer.name, data, source.texture.resource_path)
-				_check(not family.is_empty(), "Every used campaign tile has a palette")
+				_check(not family.is_empty(), "Every tile in a palette-enabled map has a palette")
 				if family.is_empty():
 					continue
-				used_families[family] = true
+				if campaign:
+					used_families[family] = true
 				_check(data.material == TerrainPalette.material_for_family(family, layer.get_viewport().use_hdr_2d), "Every connected atlas cell has its correct family material")
 				_check(data != original_data and original_data.material == null, "Shared TileData remains unchanged")
 				_check(source.texture == original_source.texture, "Original texture pixels and LOS alpha are retained")

@@ -42,14 +42,14 @@ static func apply(layer: TileMapLayer) -> void:
 
 
 static func family_for_tile(layer_name: StringName, data: TileData, texture_path: String = "") -> String:
-	if layer_name == &"GroundTileMapLayer":
-		return "open_ground"
 	if data.has_custom_data("art_family"):
 		var family: String = str(data.get_custom_data("art_family"))
 		if family == "crops":
 			return "green_crops"
-		if family in ["woods", "orchard", "wheat"]:
+		if family in ["woods", "orchard", "wheat", "stone"]:
 			return family
+	if layer_name == &"GroundTileMapLayer":
+		return "open_ground"
 	if "bridge" in texture_path:
 		return "bridge"
 	if "river" in texture_path:

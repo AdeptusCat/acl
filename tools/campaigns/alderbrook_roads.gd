@@ -34,10 +34,14 @@ const ROUTES: Array[Array] = [
 
 
 func layout(index: int, size: Vector2i) -> Dictionary:
+	return layout_for_routes(ROUTES[index], size)
+
+
+func layout_for_routes(routes: Array, size: Vector2i) -> Dictionary:
 	var curves: Array[Curve2D] = []
 	var verges: Array[PackedVector2Array] = []
 	var paths: Array[String] = []
-	for knots: Array in ROUTES[index]:
+	for knots: Array in routes:
 		var curve: Curve2D = _curve(knots)
 		curves.append(curve)
 		paths.append(_svg_path(curve))
