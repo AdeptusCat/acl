@@ -3,7 +3,7 @@ extends RefCounted
 
 # Advisory response routes end at covered cells that can actually intercept this branch.
 # All work is incremental. Hidden intelligence supplies sector pressure, never transit danger.
-enum Phase { COVERAGE, TARGETS, FIELD, RESPONSES, FINISH }
+enum Phase { FORECAST, COVERAGE, TARGETS, FIELD, RESPONSES, FINISH }
 
 const WATCH_SECONDS: float = 12.0
 const ESTIMATED_WATCH_SECONDS: float = 20.0
@@ -20,7 +20,8 @@ var coverage: Dictionary[String, float] = {}
 var responses: Dictionary[String, Dictionary] = {}
 var emergency: String = ""
 var watch_branch: String = ""
-var phase: Phase = Phase.COVERAGE
+var phase: Phase = Phase.FORECAST
+var forecast_job: InfluenceSnapshot.ForecastJob
 var branch_index: int = 0
 var unit_index: int = 0
 var cell_index: int = 0
@@ -53,16 +54,23 @@ func start(assessment: DefenseAreaAssessment, snapshot: InfluenceSnapshot, team:
 	query.defense_radius = radius
 	query.snapshot = snapshot
 	query.defense_area = area
-	query.forecast_data = snapshot.get_forecast_data(team, area.objective_hex)
 	if query.unit == null or not area.geometry.has("cells"):
 		completed = true
 
 
 func advance(deadline_usec: int) -> void:
 	while not completed and (deadline_usec < 0 or Time.get_ticks_usec() < deadline_usec):
-		if branch_index >= branches.size():
+		if phase != Phase.FORECAST and branch_index >= branches.size():
 			phase = Phase.FINISH
 		match phase:
+			Phase.FORECAST:
+				if forecast_job == null:
+					forecast_job = query.snapshot.request_forecast(query.team, query.objective_hex)
+				forecast_job.advance(deadline_usec)
+				if not forecast_job.completed:
+					return
+				query.forecast_data = forecast_job.data
+				phase = Phase.COVERAGE
 			Phase.COVERAGE:
 				var branch: Dictionary = branches[branch_index]
 				if unit_index < units.size():

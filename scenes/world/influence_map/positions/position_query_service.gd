@@ -9,7 +9,7 @@ static func query_positions(query: PositionQuery) -> PositionResult:
 	return job.result
 
 
-static func initialize(query: PositionQuery, result: PositionResult) -> bool:
+static func initialize(query: PositionQuery, result: PositionResult, prepare_forecast: bool = true) -> bool:
 	result.unit = query.unit
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.snapshot != null:
 		HqSupportPositionPolicy.prepare(query)
@@ -45,7 +45,8 @@ static func initialize(query: PositionQuery, result: PositionResult) -> bool:
 		return false
 	result.cell_states.fill(PositionResult.CellState.UNEVALUATED)
 	result.rejection_reasons.fill("")
-	query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
+	if prepare_forecast:
+		query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
 	query.reset_evaluation()
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		DefensePositionPolicy.prepare(query)

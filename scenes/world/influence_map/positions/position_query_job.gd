@@ -1,7 +1,7 @@
 class_name PositionQueryJob
 extends RefCounted
 
-enum Phase { AREA, INITIALIZE, SUPPORT, ACCEPTED_ORDER, CURRENT_POSITION, RAPID_SCAN, RAPID_EVALUATE, FILTER, FLOOD, EVALUATE, FINISH }
+enum Phase { AREA, INITIALIZE, FORECAST, SUPPORT, ACCEPTED_ORDER, CURRENT_POSITION, RAPID_SCAN, RAPID_EVALUATE, FILTER, FLOOD, EVALUATE, FINISH }
 
 const RAPID_CANDIDATE_LIMIT: int = 16
 
@@ -20,6 +20,7 @@ var support_cursor: int = 0
 var profile_prepared: bool = false
 var rapid_candidates: Array[Dictionary] = []
 var rapid_search: bool = false
+var forecast_job: InfluenceSnapshot.ForecastJob
 
 
 func advance(deadline_usec: int) -> void:
@@ -52,14 +53,21 @@ func advance(deadline_usec: int) -> void:
 					query.assigned_sector = query.defense_area.sector_at(query.axis.source_hex)
 				phase = Phase.INITIALIZE
 			Phase.INITIALIZE:
-				if not PositionQueryService.initialize(query, result):
+				if not PositionQueryService.initialize(query, result, false):
 					completed = true
 				else:
-					phase = Phase.ACCEPTED_ORDER
-					if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null:
-						support_duties = query.defense_area.support_duties(query)
-						support_units.assign(query.snapshot.positions.keys())
-						phase = Phase.SUPPORT
+					forecast_job = query.snapshot.request_forecast(query.team, query.objective_hex)
+					phase = Phase.FORECAST
+			Phase.FORECAST:
+				forecast_job.advance(deadline_usec)
+				if not forecast_job.completed:
+					return
+				query.forecast_data = forecast_job.data
+				phase = Phase.ACCEPTED_ORDER
+				if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null:
+					support_duties = query.defense_area.support_duties(query)
+					support_units.assign(query.snapshot.positions.keys())
+					phase = Phase.SUPPORT
 			Phase.SUPPORT:
 				if cursor < support_duties.size():
 					var duty: Dictionary = support_duties[cursor]

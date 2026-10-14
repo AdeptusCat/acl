@@ -37,6 +37,7 @@ var inspection_jobs: Dictionary[Unit, PositionQueryJob] = {}
 var inspection_results: Dictionary[Unit, PositionResult] = {}
 var last_position_slice_usec: int = 0
 var defense_geometry_cache: Dictionary = {}
+var forecast_cache: InfluenceSnapshot.ForecastCache = InfluenceSnapshot.ForecastCache.new()
 var defense_area_jobs: Array[DefenseAreaJob] = []
 var defense_refresh_requested: bool = false
 var _capture_job: InfluenceSnapshotBuilder.CaptureJob
@@ -60,6 +61,7 @@ func reset_for_match() -> void:
 	position_jobs.clear()
 	defense_area_jobs.clear()
 	defense_geometry_cache.clear()
+	forecast_cache.clear()
 	defense_refresh_requested = false
 	inspection_jobs.clear()
 	inspection_results.clear()
@@ -102,6 +104,7 @@ func create_maps(_delta: float) -> void:
 	_capture_policy = knowledge_policy
 	_capture_job = InfluenceSnapshotBuilder.begin_capture(version, objectives_by_team, knowledge_policy, create_default_weights())
 	pending_snapshot = _capture_job.snapshot
+	pending_snapshot.forecast_cache = forecast_cache
 	rebuild_pending = true
 
 

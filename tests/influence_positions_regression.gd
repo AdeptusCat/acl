@@ -113,6 +113,7 @@ func _run() -> void:
 	_test_publication()
 	_test_snapshot_capture_slices()
 	_test_cached_stamp_geometry()
+	_test_forecast_jobs()
 	_test_selection()
 	_test_geography()
 	_test_ownership_and_reservations()
@@ -348,6 +349,118 @@ func _test_cached_stamp_geometry() -> void:
 						if reference.is_valid_cell(cell) and InfluenceMapLayerOps.should_write_stamp_value(value, mode):
 							InfluenceMapLayerOps.write_layer_value(reference, InfluenceMap.Layer.UNIT_INFLUENCE, cell, value, mode)
 				_check(optimized.get_layer_data_copy(InfluenceMap.Layer.UNIT_INFLUENCE) == reference.get_layer_data_copy(InfluenceMap.Layer.UNIT_INFLUENCE), "Batched stamp writes preserve clipped layer values for every supported mode")
+
+
+func _reference_forecast(snapshot: InfluenceSnapshot, team: int, objective: Vector2i) -> PackedFloat32Array:
+	var forecast: InfluenceMap = InfluenceMap.new()
+	forecast.configure(snapshot.maps[team].bounds)
+	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+	config.objective_hex = objective
+	for source: ProjectionSource in ProjectionSourceBuilder.build_from_contacts(snapshot.get_contacts(team), config):
+		LosInfluenceProjector.project_los_from_source(forecast, source, false, snapshot.los)
+	return forecast.get_layer_data_copy(InfluenceMap.Layer.FORECAST_THREAT)
+
+
+func _forecast_capture(version: int, cache: InfluenceSnapshot.ForecastCache) -> InfluenceSnapshot:
+	var snapshot: InfluenceSnapshot = InfluenceSnapshotBuilder.capture(version, controller.objectives_by_team, InfluenceMapController.KnowledgePolicy.OMNISCIENT, controller.create_default_weights())
+	snapshot.forecast_cache = cache
+	return snapshot
+
+
+func _test_forecast_jobs() -> void:
+	var cache: InfluenceSnapshot.ForecastCache = InfluenceSnapshot.ForecastCache.new()
+	var snapshot: InfluenceSnapshot = _forecast_capture(400, cache)
+	var objective: Vector2i = Vector2i(4, 2)
+	var expected: PackedFloat32Array = _reference_forecast(snapshot, own.team, objective)
+	var job: InfluenceSnapshot.ForecastJob = snapshot.request_forecast(own.team, objective)
+	_check(snapshot.request_forecast(own.team, objective) == job, "Queries for the same captured objective share one forecast job")
+	job.advance(Time.get_ticks_usec() - 1)
+	_check(not job.completed and job.data.is_empty() and cache.entries.is_empty(), "An exhausted deadline leaves forecasts unpublished")
+	var slices: int = 0
+	var max_slice: int = 0
+	while not job.completed and slices < 1000:
+		var started: int = Time.get_ticks_usec()
+		job.advance(started + 100)
+		max_slice = maxi(max_slice, Time.get_ticks_usec() - started)
+		slices += 1
+	_check(job.completed and slices > 1 and max_slice < 10000, "Forecast projection yields across sources and visible hexes within its caller's deadline")
+	_check(job.data == expected and job.projected_cells > 0, "Incremental forecast values match the original complete projection exactly")
+	var repeated: InfluenceSnapshot = _forecast_capture(401, cache)
+	var reused: InfluenceSnapshot.ForecastJob = repeated.request_forecast(own.team, objective)
+	reused.advance(-1)
+	_check(reused.reused and reused.projected_cells == 0 and reused.data == expected, "A later snapshot reuses an unchanged forecast without projecting any hexes")
+	for field: String in ["hex", "confidence", "firepower", "effectiveness", "weapon_range"]:
+		var changed: InfluenceSnapshot = _forecast_capture(402, cache)
+		var contact: InfluenceContact = changed.get_contacts(own.team)[0]
+		match field:
+			"hex":
+				contact.hex += Vector2i(1, 0)
+			"confidence":
+				contact.confidence *= 0.8
+			"firepower":
+				contact.firepower += 0.0000000001
+			"effectiveness":
+				contact.effectiveness *= 0.5
+			"weapon_range":
+				contact.weapon_range += 1
+		var invalidated: InfluenceSnapshot.ForecastJob = changed.request_forecast(own.team, objective)
+		invalidated.advance(-1)
+		_check(not invalidated.reused and invalidated.data == _reference_forecast(changed, own.team, objective), "Changed contact " + field + " invalidates forecast reuse")
+	var changed_los: InfluenceSnapshot = _forecast_capture(403, cache)
+	changed_los.los = changed_los.los.duplicate(true)
+	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+	config.objective_hex = objective
+	var observer: Vector2i = ProjectionSourceBuilder.build_from_contacts(changed_los.get_contacts(own.team), config)[0].observer_hex
+	var visible: Dictionary = changed_los.los[observer]
+	var target: Vector2i = visible.keys()[0]
+	visible[target]["target_cover"] = 3.0
+	var los_job: InfluenceSnapshot.ForecastJob = changed_los.request_forecast(own.team, objective)
+	los_job.advance(-1)
+	_check(not los_job.reused and los_job.data == _reference_forecast(changed_los, own.team, objective), "Changed LOS records invalidate cached forecasts")
+	var changing: InfluenceSnapshot = _forecast_capture(406, InfluenceSnapshot.ForecastCache.new())
+	changing.los = changing.los.duplicate(true)
+	var changing_job: InfluenceSnapshot.ForecastJob = changing.request_forecast(own.team, objective)
+	while changing_job.projected_cells == 0 and not changing_job.completed:
+		changing_job.advance(Time.get_ticks_usec() + 50)
+	changing.los[observer][target]["hindrance"] = 4.0
+	changing_job.advance(-1)
+	_check(changing_job.completed and changing_job.data == _reference_forecast(changing, own.team, objective), "LOS edits during a forecast restart the job before publishing mixed inputs")
+	var saved_cache: PackedFloat32Array = cache.entries.values()[0].duplicate()
+	job.data[0] += 10.0
+	_check(cache.entries.values()[0] == saved_cache, "Published forecast buffers cannot modify the shared cache")
+	var second_objective: Vector2i = objective + Vector2i(1, 0)
+	var other_job: InfluenceSnapshot.ForecastJob = repeated.request_forecast(own.team, second_objective)
+	other_job.advance(-1)
+	_check(not other_job.reused and other_job.data == _reference_forecast(repeated, own.team, second_objective), "Different objectives receive their own forecast")
+	var cold: InfluenceSnapshot = _forecast_capture(404, InfluenceSnapshot.ForecastCache.new())
+	var query: PositionQuery = _query(PositionProfile.Mode.ADVANCE)
+	query.snapshot = cold
+	query.objective_hex = objective
+	var query_job: PositionQueryJob = PositionQueryJob.new()
+	query_job.query = query
+	for attempt: int in range(100):
+		query_job.advance(Time.get_ticks_usec() + 100)
+		if query_job.phase == PositionQueryJob.Phase.FORECAST or query_job.completed:
+			break
+	_check(not query_job.completed and query_job.phase == PositionQueryJob.Phase.FORECAST and query.forecast_data.is_empty(), "Position queries wait for a complete forecast before evaluating candidates")
+	query_job.advance(-1)
+	_check(query_job.completed and query.forecast_data == expected, "Waiting position queries resume with the complete forecast")
+	var readiness_snapshot: InfluenceSnapshot = _forecast_capture(405, InfluenceSnapshot.ForecastCache.new())
+	var area_job: DefenseAreaJob = readiness_snapshot.defense_area_job(own.team, objective, 3, 5)
+	area_job.advance(-1)
+	var readiness: DefenseReadinessJob = DefenseReadinessJob.new()
+	readiness.start(area_job.result, readiness_snapshot, own.team, [own, other], null, 3)
+	_check(readiness.forecast_job == null and readiness.query.forecast_data.is_empty(), "Starting reserve readiness does not synchronously build forecasts")
+	readiness.advance(Time.get_ticks_usec() - 1)
+	_check(not readiness.completed and readiness.phase == DefenseReadinessJob.Phase.FORECAST, "Reserve readiness also waits within its caller's deadline")
+	readiness.advance(-1)
+	_check(readiness.completed and readiness.query.forecast_data == expected, "Reserve readiness resumes after its budgeted forecast completes")
+	controller.forecast_cache.store(["fixture"], expected)
+	controller.reset_for_match()
+	_check(controller.forecast_cache.entries.is_empty(), "Match reset releases the shared forecast cache")
+	controller.set_objective_for_team(own.team, Vector2i(3, 3))
+	controller.set_objective_for_team(enemy.team, Vector2i(5, 3))
+	_publish()
 
 
 func _test_selection() -> void:
