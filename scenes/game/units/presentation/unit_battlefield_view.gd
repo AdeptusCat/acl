@@ -28,7 +28,8 @@ var detail_ui: UnitUi = null
 
 # === Nodes ===
 @onready var sprite_node: TextureRect = $Sprite2D
-@onready var morale_bar: ColorRect = $MoraleBar
+@onready var morale_bar: UnitMoraleBar = $MoraleBar
+@onready var formation_marker: Label = $FormationMarker
 @onready var stress_arrows: Label = $StressLevel
 @onready var recovery_arrows: Label = $LeadershipBonus
 @onready var cover_label: Label = $CoverLabel
@@ -54,6 +55,9 @@ var detail_ui: UnitUi = null
 
 var _surrendered: bool = false
 var _exited: bool = false
+var _pressure: float = 0.0
+var _morale_state: int = STATES.MoraleState.NORMAL
+var _formation_key: Vector3i = Vector3i(-1, -1, -1)
 
 signal debug_kill_soldier
 
@@ -63,6 +67,7 @@ func _ready() -> void:
 	Debug.debug_text_visibility_changed.connect(_set_debug_text_visible)
 	_set_debug_text_visible(Debug.show_debug_text)
 	_on_stress_balance_changed(0.0, 0.0, 0.0, 0.0)
+	update_formation_marker()
 
 
 func _set_debug_text_visible(enabled: bool) -> void:
@@ -146,6 +151,8 @@ func deselect() -> void:
 
 
 func state_changed(next:int) -> void:
+	_morale_state = next
+	morale_bar.set_morale(_pressure, next)
 	match next:
 		STATES.MoraleState.NORMAL:
 			$UnitStates/StateTexture.hide()
@@ -193,6 +200,27 @@ func set_members_alive(members_alive: int) -> void:
 
 func set_unit_designation(designation: String) -> void:
 	unit_designation_label.text = designation
+	update_formation_marker()
+
+
+func update_formation_marker() -> void:
+	var unit: Unit = get_parent() as Unit
+	if unit == null or formation_marker == null:
+		return
+	var formation: Vector3i = Vector3i(unit.company, unit.platoon, unit.squad_type)
+	if formation == _formation_key:
+		return
+	_formation_key = formation
+	formation_marker.text = UnitHudStyle.formation_code(unit)
+	formation_marker.tooltip_text = unit.get_formation_name()
+	var chip: StyleBoxFlat = StyleBoxFlat.new()
+	chip.bg_color = UnitHudStyle.formation_color(unit)
+	chip.set_corner_radius_all(2)
+	chip.content_margin_left = 3.0
+	chip.content_margin_right = 3.0
+	chip.content_margin_top = 0.0
+	chip.content_margin_bottom = 0.0
+	formation_marker.add_theme_stylebox_override("normal", chip)
 
 
 func _on_unit_arrived_at_hex(_hex: Vector2i) -> void:
@@ -275,16 +303,9 @@ func _on_morale_success() -> void:
 
 func update_bar(current: int, _max: int) -> void:
 	if morale_bar:
-		var ratio: float = clamp(float(current) / float(_max), 0.0, 1.0)
-		morale_bar.scale.x = ratio
-
-		#morale_bar.color = Color(1, 0, 0)
-		#if ratio < 0.5:
-			#morale_bar.color = Color(0, 1, 0)
-		#elif ratio < 0.8:
-			#morale_bar.color = Color(1, 1, 0)
-		#else:
-			#morale_bar.color = Color(1, 0, 0)
+		_pressure = clampf(float(current) / float(maxi(_max, 1)), 0.0, 1.0)
+		morale_bar.set_morale(_pressure, _morale_state)
+		morale_bar.tooltip_text = "Morale reserve: %d%%\nStress: %d/%d" % [roundi((1.0 - _pressure) * 100.0), current, _max]
 	if detail_ui:
 		detail_ui.update_bar(current, _max)
 		
@@ -473,6 +494,7 @@ func mark_exited() -> void:
 
 func die() -> void:
 	dead.show()
+	formation_marker.hide()
 	_set_debug_text_visible(false)
 	$StressLevel.hide()
 	$MoraleBar.hide()

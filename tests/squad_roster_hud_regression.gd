@@ -58,6 +58,8 @@ func _run() -> void:
 			rifle = unit
 			break
 	var rifle_row: SquadRosterRow = panel.rows[rifle]
+	_check(rifle.ui.formation_marker.text == "A · P1", "Battlefield counters identify their company and platoon")
+	_check(not rifle.ui.formation_marker.get_global_rect().intersects(rifle.ui.rank_texture_rect.get_global_rect()) and not rifle.ui.morale_bar.get_global_rect().intersects(rifle.ui.idle_texture_rect.get_global_rect()), "Formation labels and morale gauges leave the existing rank and figures unobstructed: label %s; rank %s; gauge %s; figure %s" % [rifle.ui.formation_marker.get_global_rect(), rifle.ui.rank_texture_rect.get_global_rect(), rifle.ui.morale_bar.get_global_rect(), rifle.ui.idle_texture_rect.get_global_rect()])
 	_check(not rifle_row.rout_available.visible, "Fresh squads have no retreat availability icon")
 	var morale_position: Vector2 = rifle_row.morale.position
 	var row_size: Vector2 = rifle_row.size
@@ -165,6 +167,9 @@ func _run() -> void:
 	world.game_controller.show_unit_details_in_ui.emit(rifle)
 	await _settle()
 	_check(panel.scroll.get_global_rect().encloses(panel.rows[rifle].get_global_rect()), "Rapid selections reveal the latest squad rather than an earlier queued selection")
+	rifle.ui.update_bar(60, 100)
+	_check(is_equal_approx(rifle.ui.morale_bar.value, 0.4) and rifle.ui.morale_bar.scale == Vector2.ONE, "Morale reserve falls with stress while the gauge keeps a fixed size")
+	_check((rifle.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color == UnitHudStyle.morale_color(STATES.MoraleState.PINNED), "The morale gauge follows the squad's current morale state")
 	panel.scroll.scroll_vertical = 0
 	world.game_controller.select_and_center_unit(rifle)
 	world.ui.hide_target_hex_cover_distance()
@@ -193,6 +198,7 @@ func _run() -> void:
 	await _settle()
 	var heading: Label = panel.rows[other].get_parent().get_child(0) as Label
 	_check(heading.text == "Company B · Platoon 2", "Changing formation moves a squad under its correct company and platoon")
+	_check(other.ui.formation_marker.text == "B · P2" and (other.ui.formation_marker.get_theme_stylebox("normal") as StyleBoxFlat).bg_color == UnitHudStyle.formation_color(other), "Changing formation updates the battlefield counter's company, platoon and color")
 	_check(panel.rows[selected].get_parent() != panel.rows[other].get_parent(), "Different companies do not share a platoon group")
 	var reinforcement: Unit = enemies[0]
 	reinforcement.team = Globals.team_player
@@ -209,6 +215,7 @@ func _run() -> void:
 	other.die()
 	panel.refresh()
 	_check(not panel.rows.has(other), "Dead squads leave the roster")
+	_check(not other.ui.formation_marker.visible, "Dead squads hide the added formation label")
 	reinforcement.queue_free()
 	panel.refresh()
 	_check(not panel.rows.has(reinforcement), "Queued removal does not leave a clickable stale row")

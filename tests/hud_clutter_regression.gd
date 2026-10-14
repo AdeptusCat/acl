@@ -186,7 +186,7 @@ func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
 	var leadership_arrow: Label = squad.ui.get_node("LeadershipBonus")
 	var stress_text_before: String = stress_arrow.text
 	var leadership_text_before: String = leadership_arrow.text
-	var morale_scale_before: Vector2 = squad.ui.morale_bar.scale
+	var morale_value_before: float = squad.ui.morale_bar.value
 	_check(not Debug.show_ai_placement and not draw.visible and not draw.debug_enabled and not draw.is_processing() and not panel.placement_options.visible, "AI placement overlays start hidden and inactive")
 	_check(not Debug.show_debug_text and not draw.draw_cell_values and not draw.draw_layer_access_text and not squad.ui.get_node("AmmunitionLeft").visible, "Numeric counters, map values and diagnostic text start hidden")
 	squad.stress_system.stress_changed.emit(60.0)
@@ -254,7 +254,7 @@ func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
 	world.game_controller._deselect_unit(squad)
 	stress_arrow.text = stress_text_before
 	leadership_arrow.text = leadership_text_before
-	squad.ui.morale_bar.scale = morale_scale_before
+	squad.ui.morale_bar.value = morale_value_before
 	await _settle()
 
 
@@ -271,7 +271,7 @@ func _check_morale_markers(squad: Unit, context: String) -> void:
 	var stress: Label = squad.ui.get_node("StressLevel")
 	var leadership: Label = squad.ui.get_node("LeadershipBonus")
 	_check(stress.visible and stress.text == "<<<" and leadership.visible and leadership.text == ">>", "%s preserves working stress and recovery arrows" % context)
-	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.scale.x, 0.6) and squad.ui.rank_texture_rect.visible and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
+	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.value, 0.4) and squad.ui.rank_texture_rect.visible and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
 
 
 func _check_top_layout(world: Node, settings: Control) -> void:

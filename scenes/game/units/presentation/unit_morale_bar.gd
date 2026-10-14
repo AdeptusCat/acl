@@ -33,5 +33,10 @@ func set_morale(pressure: float, state: int) -> void:
 
 func _draw() -> void:
 	for segment: int in range(1, 5):
-		var x: float = size.x * float(segment) / 5.0
-		draw_line(Vector2(x, 1.0), Vector2(x, size.y - 1.0), Color("0c151a"), 1.0)
+		var fraction: float = float(segment) / 5.0
+		if fill_mode == ProgressBar.FILL_BOTTOM_TO_TOP or fill_mode == ProgressBar.FILL_TOP_TO_BOTTOM:
+			var y: float = size.y * fraction
+			draw_line(Vector2(1.0, y), Vector2(size.x - 1.0, y), Color("0c151a"), 1.0)
+		else:
+			var x: float = size.x * fraction
+			draw_line(Vector2(x, 1.0), Vector2(x, size.y - 1.0), Color("0c151a"), 1.0)

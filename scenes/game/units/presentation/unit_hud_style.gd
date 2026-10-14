@@ -14,8 +14,8 @@ static func formation_color(unit: Unit) -> Color:
 static func formation_code(unit: Unit) -> String:
 	var company: String = Unit.COMPANY_NAMES[unit.company]
 	if unit.platoon <= 0 or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
-		return company + "·HQ"
-	return "%s·%d" % [company, unit.platoon]
+		return company + " · HQ"
+	return "%s · P%d" % [company, unit.platoon]
 
 
 static func morale_color(state: int) -> Color:
