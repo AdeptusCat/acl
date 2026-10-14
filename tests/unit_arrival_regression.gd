@@ -52,6 +52,7 @@ func _run() -> void:
 	_test_cancellation_and_replacement()
 	_test_late_arrivals()
 	_test_direct_ai_move()
+	_test_recovery_moves()
 	_prepare()
 	unit.give_move_to_hex_order(START, _path([START]), true)
 	_advance()
@@ -166,6 +167,71 @@ func _test_direct_ai_move() -> void:
 	_advance()
 	_check_state(SquadActionController.SquadActionState.HOLDING_POSITION, "Direct AI movement leaves the moving state on arrival")
 	unit.squad_ai_controller.set_order(null)
+
+
+func _test_recovery_moves() -> void:
+	var original_unit: Unit = unit
+	for candidate: Unit in Globals.get_units_for_team(original_unit.team):
+		if candidate.squad_type == Globals.SquadType.Rifle:
+			unit = candidate
+			break
+	if unit != original_unit:
+		unit.unit_arrived_at_hex.connect(_on_arrival)
+	var local_ai: SquadAiController = unit.squad_ai_controller
+	var original_effectiveness: float = unit.combat_stats.combat_effectiveness
+	var original_mission_control: bool = local_ai.defensive_mission_controlled
+	local_ai.defensive_mission_controlled = false
+	local_ai.set_order(null)
+	for close_combat: bool in [false, true]:
+		_prepare()
+		unit.give_move_to_hex_order(DESTINATION, _path([START, WAYPOINT, DESTINATION]), false)
+		unit.movement._process(0.1)
+		if close_combat:
+			unit.in_close_combat = true
+			unit.clear_orders()
+			unit.in_close_combat = false
+			unit.movement.resume_centering()
+		else:
+			unit.stress_system._set_state(STATES.MoraleState.PINNED)
+			unit.stress_system._set_state(STATES.MoraleState.CAUTIOUS)
+		unit.movement._process(100.0)
+		_check(unit.current_hex == START and not unit.movement.is_moving and not unit.movement.pending_recenter, "Recovery completes centering once; close combat=" + str(close_combat))
+		for effectiveness: float in [0.3, 0.1]:
+			unit.combat_stats.combat_effectiveness = effectiveness
+			arrivals.clear()
+			unit.order(Globals.UnitCmd.MOVE, DESTINATION)
+			var commanded_path: Array[Vector2i] = unit.movement.path_hexes.duplicate()
+			var start_position: Vector2 = unit.position
+			for tick: int in range(8):
+				local_ai._physics_process(local_ai.decision_interval)
+				unit.movement._process(0.05)
+			_check(unit.movement.is_moving and unit.goal_hex != START and unit.movement.path_hexes == commanded_path and unit.movement.target_hex == DESTINATION, "Idle local AI preserves a fresh movement order after recovery; close combat=" + str(close_combat) + "; effectiveness=" + str(effectiveness))
+			_check(unit.position.distance_to(start_position) > 0.1, "Recovered movement progresses instead of returning to its start center")
+			_advance()
+			_advance()
+			_check(unit.current_hex == DESTINATION and arrivals == [DESTINATION], "Recovered movement completes its new route and emits one final arrival")
+			_prepare()
+		unit.stress_system._set_state(STATES.MoraleState.NORMAL)
+	# Explicit squad orders still own their movement and reactive hold behavior.
+	_prepare()
+	unit.combat_stats.combat_effectiveness = 1.0
+	var order: AiOrder = AiOrder.new()
+	order.order_type = AiOrder.OrderType.MOVE_TO
+	order.target_hex = DESTINATION
+	local_ai.set_order(order)
+	local_ai._decision_tick()
+	_check(unit.movement.is_moving and unit.goal_hex == DESTINATION, "Assigned local AI still starts its explicit move order")
+	unit.movement._process(0.1)
+	unit.combat_stats.combat_effectiveness = 0.3
+	local_ai._decision_tick()
+	unit.movement._process(100.0)
+	_check(unit.current_hex == START and not unit.movement.is_moving, "Assigned local AI retains its low-effectiveness hold policy")
+	local_ai.set_order(null)
+	local_ai.defensive_mission_controlled = original_mission_control
+	unit.combat_stats.combat_effectiveness = original_effectiveness
+	if unit != original_unit:
+		unit.unit_arrived_at_hex.disconnect(_on_arrival)
+	unit = original_unit
 
 
 func _check_establish_then_hold(label: String, destination: Vector2i = DESTINATION) -> void:

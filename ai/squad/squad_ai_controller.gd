@@ -37,6 +37,10 @@ func _decision_tick() -> void:
 	# Mission-controlled defense owns repositioning and withdrawal; do not open a gap independently.
 	if defensive_mission_controlled or unit.ai_support_only:
 		return
+	# Without a local AI order, movement belongs to the player or mission planner.
+	# Recovery can leave effectiveness low; idle rally/withdraw decisions must not cancel it.
+	if current_order == null:
+		return
 	if unit.stress_system.state == STATES.MoraleState.PANIC:
 		#_retreat_to_cover()
 		return
@@ -56,10 +60,6 @@ func _decision_tick() -> void:
 	
 	if unit.combat_stats.combat_effectiveness < 0.35:
 		_rally_or_hold()
-		return
-	
-	if current_order == null:
-		#_hold_position()
 		return
 	
 	_execute_order()
