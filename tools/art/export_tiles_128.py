@@ -1,11 +1,14 @@
-"""Export source art at 128 pixels and retain alpha for pixel-based line of sight."""
+"""Export whole terrain stamps and 128-pixel tiles with alpha for pixel-based LOS."""
 
+from math import sqrt
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageChops
+from random import Random
+from PIL import Image
 
 ROOT: Path = Path(__file__).resolve().parents[2]
 TILES: Path = ROOT / "assets/tiles"
 CONNECTED: Path = TILES / "connected"
+STAMPS: Path = CONNECTED / "stamps"
 SIZE: int = 128
 
 
@@ -13,6 +16,17 @@ def solid_alpha(value: int) -> int:
     if value > 8:
         return 255
     return 0
+
+
+def fit_sprite(image: Image.Image, size: int) -> Image.Image:
+    bounds: tuple[int, int, int, int] | None = image.getchannel("A").point(solid_alpha).getbbox()
+    if bounds is None:
+        raise ValueError("Empty source sprite")
+    sprite: Image.Image = image.crop(bounds)
+    sprite.thumbnail((size - 4, size - 4), Image.Resampling.LANCZOS)
+    tile: Image.Image = Image.new("RGBA", (size, size))
+    tile.alpha_composite(sprite, ((size - sprite.width) // 2, (size - sprite.height) // 2))
+    return tile
 
 
 def normalize(source: Path, size: tuple[int, int]) -> Image.Image:
@@ -23,19 +37,60 @@ def normalize(source: Path, size: tuple[int, int]) -> Image.Image:
     return image.crop(bounds).resize(size, Image.Resampling.LANCZOS)
 
 
+def export_stamps() -> None:
+    STAMPS.mkdir(exist_ok=True)
+    trees: Image.Image = Image.open(CONNECTED / "source/tree_crowns.png").convert("RGBA")
+    # Gutters separate complete silhouettes, including the elongated third crown.
+    regions: list[tuple[int, int, int, int]] = [(0, 0, 700, 610), (700, 0, 1254, 640), (0, 610, 700, 1254), (700, 640, 1254, 1254)]
+    for index, region in enumerate(regions, 1):
+        fit_sprite(trees.crop(region), 64).save(STAMPS / f"tree_{index:02}.png")
+    for family, source in [("wheat", "wheat_clump"), ("crops", "crop_clump")]:
+        fit_sprite(Image.open(CONNECTED / f"source/{source}.png").convert("RGBA"), 32).save(STAMPS / f"{family}.png")
+
+
+def whole_stamp_fits(origin: tuple[int, int], stamp: Image.Image, size: int, fringe: float) -> bool:
+    alpha = stamp.getchannel("A")
+    for y in range(stamp.height):
+        for x in range(stamp.width):
+            if alpha.getpixel((x, y)) > 0:
+                px: float = origin[0] + x + 0.5 - size / 2
+                py: float = origin[1] + y + 0.5 - size / 2
+                if abs(py) > size / 2 - fringe or abs(px) + abs(py) * 0.5 > size / 2 - fringe:
+                    return False
+    return True
+
+
+def terrain_tile(family: str, variant: int, size: int = SIZE) -> Image.Image:
+    tile: Image.Image = Image.new("RGBA", (size, size))
+    random: Random = Random(713 + variant * 479)
+    if family in ["woods", "orchard"]:
+        spacing: int = 24
+        if family == "orchard":
+            spacing = 60
+        for y in range(12, size, spacing):
+            for x in range(12, size, spacing):
+                crown: Image.Image = Image.open(STAMPS / f"tree_{random.randrange(1, 5):02}.png").convert("RGBA")
+                extent: int = random.randrange(22, 39)
+                crown = crown.resize((extent, extent), Image.Resampling.LANCZOS)
+                origin: tuple[int, int] = (x + random.randrange(-5, 6) - extent // 2, y + random.randrange(-5, 6) - extent // 2)
+                if whole_stamp_fits(origin, crown, size, 6):
+                    tile.alpha_composite(crown, origin)
+    else:
+        plant: Image.Image = Image.open(STAMPS / f"{family}.png").convert("RGBA").resize((6, 6), Image.Resampling.LANCZOS)
+        for row in range(-size // 9, size // 9 + 1):
+            for column in range(-size // 4, size // 4 + 1):
+                x: int = round((column * 4 + row * 9) / sqrt(2)) + size // 2
+                y: int = round((-column * 4 + row * 9) / sqrt(2)) + size // 2
+                origin = (x - 3, y - 3)
+                if whole_stamp_fits(origin, plant, size, 6):
+                    tile.alpha_composite(plant, origin)
+    return tile
+
+
 def main() -> None:
-    # Keep a map-space texture independent of the final hex boundary.
-    for family in ["woods", "wheat", "crops"]:
-        image: Image.Image = Image.open(CONNECTED / "source" / f"{family}.png").convert("RGBA")
-        image.resize((256, 256), Image.Resampling.LANCZOS).save(CONNECTED / f"{family}.png")
-    # Orchard uses separated tree crowns, with transparent lanes between them.
-    woods: Image.Image = Image.open(CONNECTED / "woods.png").convert("RGBA")
-    orchard: Image.Image = Image.new("RGBA", (256, 256))
-    crown: Image.Image = woods.crop((20, 20, 115, 115)).resize((58, 58), Image.Resampling.LANCZOS)
-    for y in range(8, 256, 85):
-        for x in range(8, 256, 85):
-            orchard.alpha_composite(crown, (x, y))
-    orchard.save(CONNECTED / "orchard.png")
+    export_stamps()
+    for family in ["woods", "wheat", "crops", "orchard"]:
+        terrain_tile(family, 0, 256).save(CONNECTED / f"{family}.png")
     for folder in ["vegetation", "fields", "orchard"]:
         for source in (TILES / folder / "source").glob("*.png"):
             name: str = source.stem
@@ -49,19 +104,15 @@ def main() -> None:
             elif name.startswith("orchard"):
                 family = "orchard"
             if family:
-                pattern: Image.Image = Image.open(CONNECTED / f"{family}.png").convert("RGBA")
                 variant: int = 0
                 if name[-2:].isdigit():
                     variant = int(name[-2:]) - 1
-                image = pattern.crop((variant * 32, variant * 16, variant * 32 + SIZE, variant * 16 + SIZE))
-                mask: Image.Image = Image.new("L", (SIZE, SIZE))
-                ImageDraw.Draw(mask).polygon([(38, 12), (90, 12), (116, 64), (90, 116), (38, 116), (12, 64)], fill=255)
-                image.putalpha(ImageChops.multiply(image.getchannel("A"), mask))
+                image: Image.Image = terrain_tile(family, variant)
             else:
                 image = normalize(source, (SIZE, SIZE))
             image.save(TILES / folder / source.name)
-    # Grid markers, walls and legacy terrain retain their shapes at the new spacing.
-    for folder in [TILES, ROOT / "assets/objectives", ROOT / "assets/ui"]:
+    # Scale grid art only. Unit markers and other HUD textures keep their UI size.
+    for folder in [TILES, ROOT / "assets/objectives"]:
         for path in folder.rglob("*.png"):
             if "source" in path.parts or "connected" in path.parts:
                 continue
@@ -86,7 +137,7 @@ def main() -> None:
         Image.open(TILES / "buildings" / f"{name}.png").save(TILES / "buildings" / f"{alias}.png")
     Image.open(TILES / "vegetation/woods_green_01.png").save(TILES / "buildings/woods.png")
     Image.open(TILES / "orchard/orchard_green_01.png").save(TILES / "buildings/orchard.png")
-    print("Exported 128-pixel terrain, buildings, walls and grid markers.")
+    print("Exported whole terrain stamps and 128-pixel terrain tiles.")
 
 
 if __name__ == "__main__":

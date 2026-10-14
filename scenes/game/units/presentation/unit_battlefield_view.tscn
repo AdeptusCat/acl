@@ -191,8 +191,11 @@ text = "Broken
 [node name="UnitSelectedSprite" type="TextureRect" parent="." unique_id=1721719164]
 visible = false
 layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
 mouse_filter = 2
 texture = ExtResource("4_3gpgx")
+expand_mode = 1
 
 [node name="UnitStatus" type="Control" parent="." unique_id=929161135]
 anchors_preset = 0

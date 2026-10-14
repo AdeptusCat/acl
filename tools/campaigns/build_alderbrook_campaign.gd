@@ -141,6 +141,20 @@ func _run() -> void:
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	var template: Node = main.world
 	template.fully_freed.disconnect(main._on_fully_freed)
+	if OS.get_cmdline_user_args().has("--art-only"):
+		for index: int in range(MISSIONS.size()):
+			var map: Map = template.maps.get_node("Alderbrook" + str(index + 1)) as Map
+			ConnectedTerrainBaker.bake(map.get_terrain_layer(), str(MISSIONS[index]["id"]) + "_terrain")
+			ConnectedTerrainBaker.bake(map.get_building_layer(), str(MISSIONS[index]["id"]) + "_woods")
+			_export_layout(map, MISSIONS[index])
+		var first: Map = template.maps.get_node("Alderbrook1") as Map
+		assert(ResourceSaver.save(first.get_terrain_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres") == OK)
+		assert(ResourceSaver.save(first.get_building_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres") == OK)
+		main.queue_free()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("--manifest-only"):
 		for index: int in range(MISSIONS.size()):
 			_export_layout(template.maps.get_node("Alderbrook" + str(index + 1)) as Map, MISSIONS[index])
