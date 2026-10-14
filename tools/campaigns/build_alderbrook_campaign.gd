@@ -180,7 +180,7 @@ func _run() -> void:
 	var base: Map = template.get_node("Maps/DefaultMap") as Map
 	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
 	_update_field_art()
-	_wall_set = base.get_wall_layer().tile_set.duplicate(true) as TileSet
+	_wall_set = load(ConnectedWalls.TILE_SET_PATH) as TileSet
 	_building_set = load(BuildingVariations.SHARED_TILE_SET) as TileSet
 	_update_woods_art(_terrain_set)
 	_update_woods_art(_building_set)
@@ -211,10 +211,10 @@ func _run() -> void:
 			road.create_tile(tile)
 			road.get_tile_data(tile, 0).set_custom_data("name", "Road")
 	ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
-	ResourceSaver.save(_wall_set, RESOURCE_DIRECTORY + "alderbrook_walls.tres")
+	ResourceSaver.save(_wall_set, ConnectedWalls.TILE_SET_PATH)
 	ResourceSaver.save(_building_set, BuildingVariations.SHARED_TILE_SET)
 	_terrain_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
-	_wall_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_walls.tres")
+	_wall_set.take_over_path(ConnectedWalls.TILE_SET_PATH)
 	_building_set.take_over_path(BuildingVariations.SHARED_TILE_SET)
 	for label: String in ["Stone Building", "Wood Building", "Woods"]:
 		_building_sources[label] = _source_for(_building_set, label)
@@ -353,7 +353,8 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	_grass_noise.frequency = 0.12
 	ground.clear()
 	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
-	var walls: HexagonTileMapLayer = _layer("WallTileMapLayer", _wall_set, "res://scenes/world/maps/layers/wall_tile_map_layer.gd")
+	var walls: HexagonTileMapLayer = load(ConnectedWalls.LAYER_SCENE).instantiate() as HexagonTileMapLayer
+	walls.tile_set = _wall_set
 	var buildings: HexagonTileMapLayer = load(BuildingVariations.LAYER_SCENE).instantiate() as HexagonTileMapLayer
 	buildings.tile_set = _building_set
 	var water: HexagonTileMapLayer = _layer("WaterTileMapLayer", _water_set, "")
@@ -731,6 +732,7 @@ func _bake_los(map: Map) -> void:
 	LOSHelper.building_layer = map.get_building_layer()
 	LOSHelper.wall_layer = map.get_wall_layer()
 	var building_signature: String = LOSHelper.building_layout_signature()
+	var wall_signature: String = LOSHelper.wall_layout_signature()
 	var lookup: Dictionary = {}
 	var ground: HexagonTileMapLayer = map.get_ground_layer()
 	for ox: int in range(map.grid_size.x):
@@ -751,4 +753,5 @@ func _bake_los(map: Map) -> void:
 	var resource: LosLookupData = LosLookupData.new()
 	resource.los_lookup = lookup
 	resource.building_layout_signature = building_signature
+	resource.wall_layout_signature = wall_signature
 	assert(ResourceSaver.save(resource, map.los_resource_path, ResourceSaver.FLAG_COMPRESS) == OK)

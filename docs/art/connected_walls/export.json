@@ -1,0 +1,66 @@
+{
+  "tile_size": 128,
+  "columns": 8,
+  "connections": [
+    "n",
+    "ne",
+    "se",
+    "s",
+    "sw",
+    "nw"
+  ],
+  "styles": [
+    {
+      "name": "Stone Wall",
+      "texture": "res://assets/tiles/walls/connected/stone_connections.png",
+      "cover": 2
+    },
+    {
+      "name": "Hedge",
+      "texture": "res://assets/tiles/walls/connected/hedge_connections.png",
+      "cover": 1
+    }
+  ],
+  "legacy_sources": {
+    "0": [
+      "stone",
+      8
+    ],
+    "1": [
+      "stone",
+      16
+    ],
+    "2": [
+      "stone",
+      24
+    ],
+    "3": [
+      "hedge",
+      16
+    ],
+    "4": [
+      "stone",
+      6
+    ],
+    "5": [
+      "hedge",
+      24
+    ],
+    "6": [
+      "hedge",
+      4
+    ],
+    "7": [
+      "hedge",
+      4
+    ],
+    "8": [
+      "hedge",
+      6
+    ],
+    "9": [
+      "hedge",
+      8
+    ]
+  }
+}

@@ -59,21 +59,23 @@ func load_prebaked_los(map: Map) -> void:
 	terrain_layer = map.get_terrain_layer()
 	grid_size = map.grid_size
 	var signature: String = building_layout_signature()
+	var wall_signature: String = wall_layout_signature()
 	if los_resource == null:
-		if not signature.is_empty():
+		if not signature.is_empty() or not wall_signature.is_empty():
 			los_lookup = {}
 			prebake_los()
 			return
 		los_lookup = {}
 		push_error("Missing baked line of sight for " + map.map_name)
 		return
-	if los_resource.building_layout_signature != signature:
-		print("Rebuilding LOS for changed multihex buildings: ", map.map_name)
+	if los_resource.building_layout_signature != signature or los_resource.wall_layout_signature != wall_signature:
+		print("Rebuilding LOS for changed buildings or barriers: ", map.map_name)
 		los_lookup = {}
 		prebake_los()
 		# Retain the refreshed active lookup in memory; authoring tools save it.
 		los_resource.los_lookup = los_lookup
 		los_resource.building_layout_signature = signature
+		los_resource.wall_layout_signature = wall_signature
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
 
@@ -81,6 +83,12 @@ func load_prebaked_los(map: Map) -> void:
 func building_layout_signature() -> String:
 	if building_layer is BuildingTileMapLayer:
 		return (building_layer as BuildingTileMapLayer).los_layout_signature()
+	return ""
+
+
+func wall_layout_signature() -> String:
+	if wall_layer is WallTileMapLayer:
+		return (wall_layer as WallTileMapLayer).los_layout_signature()
 	return ""
 
 
@@ -114,6 +122,7 @@ func bake_and_save_los_data(map: Map) -> void:
 	var los_resource: LosLookupData = LosLookupData.new()
 	los_resource.los_lookup = los_lookup
 	los_resource.building_layout_signature = building_layout_signature()
+	los_resource.wall_layout_signature = wall_layout_signature()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	
 	ResourceSaver.save(los_resource, file_path)
@@ -121,6 +130,7 @@ func bake_and_save_los_data(map: Map) -> void:
 
 func prebake_los() -> void:
 	building_layout_signature()
+	wall_layout_signature()
 	los_lookup = {}
 	for ox: int in range(grid_size.x):
 		for oy: int in range(grid_size.y):
@@ -1186,7 +1196,7 @@ func _tile_pixel_is_solid(point: Vector2, layer: TileMapLayer, cell: Vector2i) -
 	if source == null or source.texture == null:
 		return false
 	var data: TileData = layer.get_cell_tile_data(cell)
-	if _is_multihex_building(data) and layer.local_to_map(point) != cell:
+	if (_is_multihex_building(data) or ConnectedWalls.is_barrier(data)) and layer.local_to_map(point) != cell:
 		return false
 	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 	var offset: Vector2 = point - layer.map_to_local(cell) + Vector2(data.texture_origin)
@@ -1214,7 +1224,7 @@ func _tile_pixel_is_solid(point: Vector2, layer: TileMapLayer, cell: Vector2i) -
 func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: Vector2i) -> Vector2:
 	var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
 	var data: TileData = layer.get_cell_tile_data(cell)
-	var clip_to_cell: bool = _is_multihex_building(data)
+	var clip_to_cell: bool = _is_multihex_building(data) or ConnectedWalls.is_barrier(data)
 	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 	var size: Vector2 = Vector2(region.size)
 	if data.transpose:
