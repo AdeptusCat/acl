@@ -1,0 +1,381 @@
+[
+	{
+		"cells": [
+			{
+				"cover": 3,
+				"hex": [
+					11,
+					3
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					11,
+					4
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					12,
+					3
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			}
+		],
+		"id": "orchard_road"
+	},
+	{
+		"cells": [
+			{
+				"cover": 2,
+				"hex": [
+					3,
+					15
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					3,
+					17
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					4,
+					14
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					4,
+					16
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					4,
+					18
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					7,
+					7
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					9,
+					8
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_02"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					9,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					9,
+					17
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					10,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					10,
+					10
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					11,
+					13
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					14,
+					8
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					16,
+					8
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					17,
+					7
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					19,
+					7
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					19,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					20,
+					8
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					21,
+					13
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					22,
+					8
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					22,
+					12
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					22,
+					15
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					23,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					23,
+					15
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					24,
+					13
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					24,
+					14
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					24,
+					16
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					25,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					25,
+					11
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					25,
+					14
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					26,
+					8
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					26,
+					10
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					27,
+					7
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					27,
+					9
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					29,
+					9
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					30,
+					9
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					30,
+					16
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					31,
+					4
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_01"
+			}
+		],
+		"id": "default_map"
+	}
+]

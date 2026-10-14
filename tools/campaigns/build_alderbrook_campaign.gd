@@ -111,21 +111,28 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	for index: int in range(MISSIONS.size()):
+		_road_layouts.append(_roads.layout(index, MISSIONS[index]["size"]))
 	if OS.get_cmdline_user_args().has("--los-only"):
 		var bake_main: Node = load("res://scenes/main.tscn").instantiate()
 		get_tree().root.add_child(bake_main)
 		bake_main.process_mode = Node.PROCESS_MODE_DISABLED
 		bake_main.world.fully_freed.disconnect(bake_main._on_fully_freed)
+		var selected: int = 0
+		for argument: String in OS.get_cmdline_user_args():
+			if argument.begins_with("--mission="):
+				selected = argument.trim_prefix("--mission=").to_int()
 		for index: int in range(MISSIONS.size()):
+			if selected > 0 and selected != index + 1:
+				continue
 			var map: Map = bake_main.world.maps.get_node("Alderbrook" + str(index + 1)) as Map
+			_export_layout(map, MISSIONS[index])
 			await _bake_los(map)
 		bake_main.queue_free()
 		await get_tree().process_frame
 		await get_tree().process_frame
 		get_tree().quit()
 		return
-	for index: int in range(MISSIONS.size()):
-		_road_layouts.append(_roads.layout(index, MISSIONS[index]["size"]))
 	if OS.get_cmdline_user_args().has("--roads-only"):
 		for index: int in range(MISSIONS.size()):
 			_roads.write_assets(str(MISSIONS[index]["id"]), _road_layouts[index])
@@ -141,6 +148,13 @@ func _run() -> void:
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	var template: Node = main.world
 	template.fully_freed.disconnect(main._on_fully_freed)
+	if OS.get_cmdline_user_args().has("--buildings-only"):
+		await _replace_building_art()
+		main.queue_free()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		get_tree().quit()
+		return
 	if OS.get_cmdline_user_args().has("--art-only"):
 		for index: int in range(MISSIONS.size()):
 			var map: Map = template.maps.get_node("Alderbrook" + str(index + 1)) as Map
@@ -149,7 +163,7 @@ func _run() -> void:
 			_export_layout(map, MISSIONS[index])
 		var first: Map = template.maps.get_node("Alderbrook1") as Map
 		assert(ResourceSaver.save(first.get_terrain_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres") == OK)
-		assert(ResourceSaver.save(first.get_building_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres") == OK)
+		assert(ResourceSaver.save(first.get_building_layer().tile_set, BuildingVariations.SHARED_TILE_SET) == OK)
 		main.queue_free()
 		await get_tree().process_frame
 		await get_tree().process_frame
@@ -167,7 +181,7 @@ func _run() -> void:
 	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
 	_update_field_art()
 	_wall_set = base.get_wall_layer().tile_set.duplicate(true) as TileSet
-	_building_set = base.get_building_layer().tile_set.duplicate(true) as TileSet
+	_building_set = load(BuildingVariations.SHARED_TILE_SET) as TileSet
 	_update_woods_art(_terrain_set)
 	_update_woods_art(_building_set)
 	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
@@ -198,10 +212,10 @@ func _run() -> void:
 			road.get_tile_data(tile, 0).set_custom_data("name", "Road")
 	ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
 	ResourceSaver.save(_wall_set, RESOURCE_DIRECTORY + "alderbrook_walls.tres")
-	ResourceSaver.save(_building_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
+	ResourceSaver.save(_building_set, BuildingVariations.SHARED_TILE_SET)
 	_terrain_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
 	_wall_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_walls.tres")
-	_building_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
+	_building_set.take_over_path(BuildingVariations.SHARED_TILE_SET)
 	for label: String in ["Stone Building", "Wood Building", "Woods"]:
 		_building_sources[label] = _source_for(_building_set, label)
 	_water_set = TileSet.new()
@@ -242,7 +256,7 @@ func _run() -> void:
 		await get_tree().process_frame
 	var campaign: CampaignDefinition = CampaignDefinition.new()
 	assert(ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres") == OK)
-	assert(ResourceSaver.save(_building_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres") == OK)
+	assert(ResourceSaver.save(_building_set, BuildingVariations.SHARED_TILE_SET) == OK)
 	campaign.campaign_id = "road_to_alderbrook"
 	campaign.title = "Road to Alderbrook"
 	campaign.mission_maps = maps
@@ -340,7 +354,8 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	ground.clear()
 	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
 	var walls: HexagonTileMapLayer = _layer("WallTileMapLayer", _wall_set, "res://scenes/world/maps/layers/wall_tile_map_layer.gd")
-	var buildings: HexagonTileMapLayer = _layer("BuildingTileMapLayer", _building_set, "res://scenes/world/maps/layers/building_tile_map_layer.gd")
+	var buildings: HexagonTileMapLayer = load(BuildingVariations.LAYER_SCENE).instantiate() as HexagonTileMapLayer
+	buildings.tile_set = _building_set
 	var water: HexagonTileMapLayer = _layer("WaterTileMapLayer", _water_set, "")
 	layers.add_child(ground)
 	layers.add_child(water)
@@ -443,7 +458,42 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	_add_units(scenario, map, ground, spec["enemy"], Globals.Team.AXIS)
 	_set_markers(scenario.get_node("Objectives/AlliedObjectivesTileMapLayer") as HexagonTileMapLayer, spec["allied_markers"], true)
 	_set_markers(scenario.get_node("Objectives/AxisObjectivesTileMapLayer") as HexagonTileMapLayer, spec["axis_markers"], false)
+	BuildingVariations.apply(buildings, scenario.scenario_id)
 	return map
+
+
+func _replace_building_art() -> void:
+	var tiles: TileSet = load(BuildingVariations.SHARED_TILE_SET) as TileSet
+	BuildingVariations.install(tiles)
+	assert(ResourceSaver.save(tiles, BuildingVariations.SHARED_TILE_SET) == OK)
+	tiles.take_over_path(BuildingVariations.SHARED_TILE_SET)
+	for index: int in range(MISSIONS.size()):
+		var path: String = MAP_DIRECTORY + str(MISSIONS[index]["id"]) + ".tscn"
+		var scene: PackedScene = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as PackedScene
+		var map: Map = scene.instantiate() as Map
+		var original_cells: Dictionary[StringName, PackedByteArray] = {}
+		for layer: HexagonTileMapLayer in map.get_node("TileMapLayers").get_children():
+			if layer.name != &"BuildingTileMapLayer":
+				original_cells[layer.name] = layer.tile_map_data
+		# Save source artwork without baking runtime palette materials into the scene.
+		var campaign_name: String = map.campaign_name
+		map.campaign_name = ""
+		add_child(map)
+		map.campaign_name = campaign_name
+		map.get_building_layer().tile_set = tiles
+		BuildingVariations.apply(map.get_building_layer(), map.get_scenario(0).scenario_id)
+		for layer: HexagonTileMapLayer in map.get_tilemap_layers():
+			if original_cells.has(layer.name):
+				layer.tile_map_data = original_cells[layer.name]
+		var packed: PackedScene = PackedScene.new()
+		assert(packed.pack(map) == OK)
+		assert(ResourceSaver.save(packed, path) == OK)
+		_export_layout(map, MISSIONS[index])
+		if not OS.get_cmdline_user_args().has("--skip-los"):
+			await _bake_los(map)
+		map.queue_free()
+		await get_tree().process_frame
+	print("Replaced building artwork in all five Alderbrook campaign maps.")
 
 
 func _ground_variation(cell: Vector2i, size: Vector2i, index: int) -> int:

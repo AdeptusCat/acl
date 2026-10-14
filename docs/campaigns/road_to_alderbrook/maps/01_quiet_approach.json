@@ -4996,7 +4996,13 @@
 						1216.0,
 						704.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				}
 			],
 			"name": "BuildingTileMapLayer"

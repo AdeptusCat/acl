@@ -14947,9 +14947,9 @@
 						1696.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -14967,9 +14967,9 @@
 						1696.0,
 						2176.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -14987,9 +14987,9 @@
 						1792.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -15007,9 +15007,9 @@
 						1792.0,
 						2112.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15027,9 +15027,9 @@
 						2176.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15047,9 +15047,9 @@
 						2176.0,
 						2112.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -15067,7 +15067,7 @@
 						2272.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
 						0,
 						0,
@@ -15087,9 +15087,9 @@
 						2272.0,
 						2176.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15107,9 +15107,9 @@
 						2464.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -15127,9 +15127,9 @@
 						2464.0,
 						2176.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15147,7 +15147,7 @@
 						1696.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
 						0,
 						0,
@@ -15167,9 +15167,9 @@
 						1696.0,
 						1792.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15187,9 +15187,9 @@
 						1888.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -15207,9 +15207,9 @@
 						1888.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15227,9 +15227,9 @@
 						1984.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15247,9 +15247,9 @@
 						1984.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15667,9 +15667,9 @@
 						736.0,
 						1280.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -15687,9 +15687,9 @@
 						1024.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15707,9 +15707,9 @@
 						1120.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -15727,9 +15727,9 @@
 						1312.0,
 						1280.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -15747,9 +15747,9 @@
 						1408.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15767,9 +15767,9 @@
 						1312.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15787,9 +15787,9 @@
 						1408.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -15807,7 +15807,7 @@
 						1504.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -15827,9 +15827,9 @@
 						1504.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15847,9 +15847,9 @@
 						1696.0,
 						768.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -15867,7 +15867,7 @@
 						1024.0,
 						1600.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -15887,7 +15887,7 @@
 						1216.0,
 						1728.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -15907,9 +15907,9 @@
 						1408.0,
 						1600.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -15927,9 +15927,9 @@
 						1600.0,
 						1856.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -15947,9 +15947,9 @@
 						1696.0,
 						512.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -15967,9 +15967,9 @@
 						1696.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -15987,9 +15987,9 @@
 						1696.0,
 						1536.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16007,9 +16007,9 @@
 						1696.0,
 						1664.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16027,7 +16027,7 @@
 						1792.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -16047,9 +16047,9 @@
 						1792.0,
 						704.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16067,9 +16067,9 @@
 						1792.0,
 						832.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16087,9 +16087,9 @@
 						1792.0,
 						1216.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16107,9 +16107,9 @@
 						1792.0,
 						1984.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16127,9 +16127,9 @@
 						1888.0,
 						384.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16147,9 +16147,9 @@
 						1888.0,
 						1920.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16167,9 +16167,9 @@
 						1984.0,
 						192.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16187,7 +16187,7 @@
 						1984.0,
 						320.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -16207,9 +16207,9 @@
 						1984.0,
 						704.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16227,9 +16227,9 @@
 						1984.0,
 						832.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16247,9 +16247,9 @@
 						1984.0,
 						1472.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16267,9 +16267,9 @@
 						1984.0,
 						1600.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16287,9 +16287,9 @@
 						1984.0,
 						1984.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16307,9 +16307,9 @@
 						1984.0,
 						2112.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16327,9 +16327,9 @@
 						2080.0,
 						1408.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16347,9 +16347,9 @@
 						2080.0,
 						1920.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16367,7 +16367,7 @@
 						2080.0,
 						2048.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
 						0,
 						0,
@@ -16387,9 +16387,9 @@
 						2176.0,
 						320.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16407,9 +16407,9 @@
 						2176.0,
 						1472.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16427,9 +16427,9 @@
 						2176.0,
 						1600.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16447,9 +16447,9 @@
 						2272.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16467,9 +16467,9 @@
 						2272.0,
 						768.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16487,7 +16487,7 @@
 						2272.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -16507,9 +16507,9 @@
 						2272.0,
 						1408.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16527,9 +16527,9 @@
 						2272.0,
 						1536.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16547,7 +16547,7 @@
 						2272.0,
 						1920.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
 						0,
 						0,
@@ -16567,7 +16567,7 @@
 						2272.0,
 						2048.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
 						0,
 						0,
@@ -16587,7 +16587,7 @@
 						2368.0,
 						320.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
 						0,
 						0,
@@ -16607,9 +16607,9 @@
 						2368.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16627,9 +16627,9 @@
 						2368.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16647,9 +16647,9 @@
 						2368.0,
 						1600.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16667,9 +16667,9 @@
 						2464.0,
 						384.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16687,9 +16687,9 @@
 						2464.0,
 						768.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16707,9 +16707,9 @@
 						2464.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16727,9 +16727,9 @@
 						2464.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16747,9 +16747,9 @@
 						2464.0,
 						2048.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16767,9 +16767,9 @@
 						2560.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16787,9 +16787,9 @@
 						2560.0,
 						704.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16807,9 +16807,9 @@
 						2560.0,
 						1216.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16827,7 +16827,7 @@
 						2560.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
 						0,
 						0,
@@ -16847,9 +16847,9 @@
 						2560.0,
 						1856.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128
@@ -16867,9 +16867,9 @@
 						2560.0,
 						1984.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						384,
 						0,
 						128,
 						128
@@ -16887,9 +16887,9 @@
 						2656.0,
 						256.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -16907,9 +16907,9 @@
 						2656.0,
 						384.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16927,7 +16927,7 @@
 						2656.0,
 						896.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
 						0,
 						0,
@@ -16947,9 +16947,9 @@
 						2656.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						128,
 						0,
 						128,
 						128
@@ -16967,9 +16967,9 @@
 						2656.0,
 						1536.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_03.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
 					"texture_region": [
-						0,
+						512,
 						0,
 						128,
 						128
@@ -16987,9 +16987,9 @@
 						2656.0,
 						1664.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
 					"texture_region": [
-						0,
+						256,
 						0,
 						128,
 						128
@@ -17007,9 +17007,9 @@
 						2656.0,
 						2176.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_02.png",
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
 					"texture_region": [
-						0,
+						640,
 						0,
 						128,
 						128

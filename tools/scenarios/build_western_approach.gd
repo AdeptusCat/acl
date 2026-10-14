@@ -50,23 +50,40 @@ func _run() -> void:
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	main.world.fully_freed.disconnect(main._on_fully_freed)
 	var map: Map
-	if OS.get_cmdline_user_args().has("--los-only"):
+	if OS.get_cmdline_user_args().has("--los-only") or OS.get_cmdline_user_args().has("--manifest-only"):
 		map = load(APPROACH_SCENE).instantiate() as Map
 		add_child(map)
+		if OS.get_cmdline_user_args().has("--manifest-only"):
+			_export_layout(map, {})
 	else:
-		map = _create_approach()
-		ConnectedTerrainBaker.bake(map.get_terrain_layer(), APPROACH_ID + "_terrain")
-		ConnectedTerrainBaker.bake(map.get_building_layer(), APPROACH_ID + "_woods")
+		if OS.get_cmdline_user_args().has("--buildings-only"):
+			map = load(APPROACH_SCENE).instantiate() as Map
+			var original_cells: Dictionary[StringName, PackedByteArray] = {}
+			for layer: HexagonTileMapLayer in map.get_node("TileMapLayers").get_children():
+				if layer.name != &"BuildingTileMapLayer":
+					original_cells[layer.name] = layer.tile_map_data
+			map.use_terrain_palette = false
+			add_child(map)
+			map.get_building_layer().tile_set = map.get_building_layer().tile_set.duplicate(true) as TileSet
+			BuildingVariations.apply(map.get_building_layer(), APPROACH_ID)
+			for layer: HexagonTileMapLayer in map.get_tilemap_layers():
+				if original_cells.has(layer.name):
+					layer.tile_map_data = original_cells[layer.name]
+		else:
+			map = _create_approach()
+			ConnectedTerrainBaker.bake(map.get_terrain_layer(), APPROACH_ID + "_terrain")
+			ConnectedTerrainBaker.bake(map.get_building_layer(), APPROACH_ID + "_woods")
 		assert(ResourceSaver.save(map.get_terrain_layer().tile_set, APPROACH_RESOURCES + APPROACH_ID + "_terrain.tres") == OK)
-		assert(ResourceSaver.save(map.get_building_layer().tile_set, APPROACH_RESOURCES + APPROACH_ID + "_buildings.tres") == OK)
+		var shared: TileSet = load(BuildingVariations.SHARED_TILE_SET) as TileSet
+		BuildingVariations.use_shared(map.get_building_layer(), shared)
+		assert(ResourceSaver.save(shared, BuildingVariations.SHARED_TILE_SET) == OK)
 		map.get_terrain_layer().tile_set.take_over_path(APPROACH_RESOURCES + APPROACH_ID + "_terrain.tres")
-		map.get_building_layer().tile_set.take_over_path(APPROACH_RESOURCES + APPROACH_ID + "_buildings.tres")
 		map.use_terrain_palette = true
 		var packed: PackedScene = PackedScene.new()
 		assert(packed.pack(map) == OK)
 		assert(ResourceSaver.save(packed, APPROACH_SCENE) == OK)
 		_export_layout(map, {})
-	if not OS.get_cmdline_user_args().has("--skip-los"):
+	if not OS.get_cmdline_user_args().has("--skip-los") and not OS.get_cmdline_user_args().has("--manifest-only"):
 		await _bake_los(map)
 	map.queue_free()
 	main.queue_free()
@@ -104,8 +121,9 @@ func _create_approach() -> Map:
 	_crop_sources = _sources_for_images(_terrain_set, CROP_IMAGES)
 	for kind: String in ["Stone Building", "Wood Building"]:
 		_building_sources[kind] = _source_for(_building_set, kind)
-	approach_stone_sources = _sources_for_images(_building_set, ["res://assets/tiles/buildings/building_stone_01.png", "res://assets/tiles/buildings/building_stone_02.png"])
-	approach_timber_sources = _sources_for_images(_building_set, ["res://assets/tiles/buildings/building_wood_01.png", "res://assets/tiles/buildings/building_wood_02.png", "res://assets/tiles/buildings/building_wood_03.png"])
+	BuildingVariations.install(_building_set)
+	approach_stone_sources = _sources_for_images(_building_set, [BuildingVariations.texture_path("building_stone_01"), BuildingVariations.texture_path("building_stone_02")])
+	approach_timber_sources = _sources_for_images(_building_set, [BuildingVariations.texture_path("building_wood_01"), BuildingVariations.texture_path("building_wood_02"), BuildingVariations.texture_path("building_wood_03")])
 	var ground_sources: Array[int] = _sources_for_images(ground.tile_set, OPEN_GROUND_IMAGES)
 	_grass_noise.seed = 18731
 	_grass_noise.frequency = 0.12
@@ -173,6 +191,7 @@ func _create_approach() -> Map:
 	axis.append([4, 24, 9])
 	_set_markers(scenario.get_objectives_layer(Globals.Team.ALLIES), allied, true)
 	_set_markers(scenario.get_objectives_layer(Globals.Team.AXIS), axis, false)
+	BuildingVariations.apply(buildings, scenario.scenario_id)
 	# Process disabling is only for generation, never stored in the playable scene.
 	map.process_mode = Node.PROCESS_MODE_INHERIT
 	return map

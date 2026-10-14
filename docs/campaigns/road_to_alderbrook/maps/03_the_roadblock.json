@@ -7736,7 +7736,13 @@
 						832.0,
 						1216.0
 					],
-					"texture": "res://assets/tiles/buildings/building_wood_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "woods",
@@ -7790,7 +7796,13 @@
 						736.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				}
 			],
 			"name": "BuildingTileMapLayer"

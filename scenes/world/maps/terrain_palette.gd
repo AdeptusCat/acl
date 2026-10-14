@@ -5,6 +5,7 @@ const CAMPAIGN: String = "Road to Alderbrook"
 const PALETTE_PATH: String = "res://assets/palettes/terrain_palettes.json"
 const PALETTE: JSON = preload(PALETTE_PATH)
 const SHADER: Shader = preload("res://assets/shader/terrain_palette.gdshader")
+const APPROVED_BUILDINGS: String = "res://assets/tiles/buildings/rotated/"
 
 static var _materials: Dictionary[String, ShaderMaterial] = {}
 static var _palettes: Dictionary = {}
@@ -36,6 +37,10 @@ static func apply(layer: TileMapLayer) -> void:
 			continue
 		visited[data] = true
 		var source: TileSetAtlasSource = copy.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+		if source.texture.resource_path.begins_with(APPROVED_BUILDINGS):
+			# The approved sprites already distinguish brown timber and grey masonry roofs.
+			data.material = null
+			continue
 		var family: String = family_for_tile(layer.name, data, source.texture.resource_path)
 		if not family.is_empty():
 			data.material = material_for_family(family, layer.get_viewport().use_hdr_2d)

@@ -67,7 +67,10 @@ func _run() -> void:
 					continue
 				if campaign:
 					used_families[family] = true
-				_check(data.material == TerrainPalette.material_for_family(family, layer.get_viewport().use_hdr_2d), "Every connected atlas cell has its correct family material")
+				if source.texture.resource_path.begins_with(TerrainPalette.APPROVED_BUILDINGS):
+					_check(data.material == null, "Approved building sprites retain their brown and grey roof colors")
+				else:
+					_check(data.material == TerrainPalette.material_for_family(family, layer.get_viewport().use_hdr_2d), "Every connected atlas cell has its correct family material")
 				_check(data != original_data and original_data.material == null, "Shared TileData remains unchanged")
 				_check(source.texture == original_source.texture, "Original texture pixels and LOS alpha are retained")
 	_check(campaign_maps == 5 and used_families.size() == 10, "All five maps and all ten used tile families are covered")

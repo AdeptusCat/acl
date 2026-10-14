@@ -12357,7 +12357,13 @@
 						1600.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12371,7 +12377,13 @@
 						1600.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12385,7 +12397,13 @@
 						1600.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12399,7 +12417,13 @@
 						1600.0,
 						1728.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12413,7 +12437,13 @@
 						1696.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12427,7 +12457,13 @@
 						1696.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12441,7 +12477,13 @@
 						1696.0,
 						1408.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12455,7 +12497,13 @@
 						1696.0,
 						1792.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12469,7 +12517,13 @@
 						1888.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12483,7 +12537,13 @@
 						1888.0,
 						1024.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12497,7 +12557,13 @@
 						1888.0,
 						1408.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12511,7 +12577,13 @@
 						1888.0,
 						1792.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12525,7 +12597,13 @@
 						1984.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12539,7 +12617,13 @@
 						1984.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12553,7 +12637,13 @@
 						1984.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12567,7 +12657,13 @@
 						1984.0,
 						1728.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12581,7 +12677,13 @@
 						2176.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12595,7 +12697,13 @@
 						2176.0,
 						960.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12609,7 +12717,13 @@
 						2176.0,
 						1344.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12623,7 +12737,13 @@
 						2176.0,
 						1728.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12637,7 +12757,13 @@
 						1984.0,
 						1216.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
 					"art_family": "",
@@ -12651,7 +12777,13 @@
 						1792.0,
 						1856.0
 					],
-					"texture": "res://assets/tiles/buildings/building_stone_01.png"
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				}
 			],
 			"name": "BuildingTileMapLayer"

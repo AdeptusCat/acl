@@ -1,39 +1,71 @@
-[gd_resource type="TileSet" format=3 uid="uid://s63tnd14vgxe"]
+[gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" uid="uid://b52ml4syvr0bp" path="res://assets/tiles/buildings/building_stone_01.png" id="1_nec0o"]
-[ext_resource type="Texture2D" uid="uid://cher7bis77ehd" path="res://assets/tiles/buildings/building_stone_02.png" id="2_0fxmj"]
-[ext_resource type="Texture2D" uid="uid://opr210nnyx0i" path="res://assets/tiles/buildings/building_wood_01.png" id="3_dojtx"]
-[ext_resource type="Texture2D" uid="uid://bys5pajljo7cw" path="res://assets/tiles/buildings/building_wood_02.png" id="4_38dfh"]
-[ext_resource type="Texture2D" uid="uid://2vt8uiuwyvmj" path="res://assets/tiles/connected/maps/01_quiet_approach_woods.png" id="4_iii8q"]
-[ext_resource type="Texture2D" uid="uid://vvsqrcbgo0xc" path="res://assets/tiles/buildings/building_wood_03.png" id="5_0gxb4"]
-[ext_resource type="Texture2D" uid="uid://d0b5vkgpdmijf" path="res://assets/tiles/connected/maps/02_orchard_outpost_woods.png" id="5_dmegu"]
-[ext_resource type="Texture2D" uid="uid://37m5ydwj8jhd" path="res://assets/tiles/vegetation/woods_green_01.png" id="6_dojtx"]
-[ext_resource type="Texture2D" uid="uid://nl7dqdqdl8se" path="res://assets/tiles/connected/maps/03_the_roadblock_woods.png" id="6_w33jf"]
-[ext_resource type="Texture2D" uid="uid://c85g157ntsvfe" path="res://assets/tiles/vegetation/woods_green_02.png" id="7_38dfh"]
-[ext_resource type="Texture2D" uid="uid://bo34om71nvfkh" path="res://assets/tiles/connected/maps/04_two_crossings_woods.png" id="7_d2r15"]
-[ext_resource type="Texture2D" uid="uid://ydo6mryviyos" path="res://assets/tiles/buildings/house.png" id="7_lgnxu"]
-[ext_resource type="Texture2D" uid="uid://c08fpegl0pjxa" path="res://assets/tiles/vegetation/woods_green_03.png" id="8_0gxb4"]
-[ext_resource type="Texture2D" uid="uid://djpyixx6n48jd" path="res://assets/tiles/connected/maps/05_battle_for_alderbrook_woods.png" id="8_2vmo6"]
-[ext_resource type="Texture2D" uid="uid://d05441nryep4x" path="res://assets/tiles/connected/maps/orchard_road_woods.png" id="8_5aqc0"]
-[ext_resource type="Texture2D" uid="uid://bcc1vt18umkx4" path="res://assets/tiles/connected/maps/default_map_woods.png" id="9_lgnxu"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_stone_01.png" id="1_iii8q"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_stone_02.png" id="2_dmegu"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/01_quiet_approach_woods.png" id="4_iii8q"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/02_orchard_outpost_woods.png" id="5_dmegu"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/woods_green_01.png" id="6_dojtx"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/03_the_roadblock_woods.png" id="6_w33jf"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/woods_green_02.png" id="7_38dfh"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/04_two_crossings_woods.png" id="7_d2r15"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/woods_green_03.png" id="8_0gxb4"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/05_battle_for_alderbrook_woods.png" id="8_2vmo6"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/orchard_road_woods.png" id="8_5aqc0"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_stone_03.png" id="9_ieaxv"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/default_map_woods.png" id="9_lgnxu"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_wood_01.png" id="9_w33jf"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_wood_02.png" id="10_d2r15"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/woods.png" id="10_fiap2"]
+[ext_resource type="Texture2D" path="res://assets/tiles/buildings/rotated/building_wood_03.png" id="11_2vmo6"]
+[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/alderbrook_western_approach_woods.png" id="11_14l4k"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sqnly"]
-resource_name = "Stone Building"
-texture = ExtResource("1_nec0o")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d2oqw"]
+resource_name = "Stone Building 01"
+texture = ExtResource("1_iii8q")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_1 = "Stone Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 3
+1:0/0/custom_data_1 = "Stone Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 3
+2:0/0/custom_data_1 = "Stone Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 3
+3:0/0/custom_data_1 = "Stone Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 3
+4:0/0/custom_data_1 = "Stone Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 3
+5:0/0/custom_data_1 = "Stone Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eo611"]
-resource_name = "Stone Building"
-texture = ExtResource("2_0fxmj")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cnwb"]
+resource_name = "Stone Building 02"
+texture = ExtResource("2_dmegu")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_1 = "Stone Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 3
+1:0/0/custom_data_1 = "Stone Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 3
+2:0/0/custom_data_1 = "Stone Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 3
+3:0/0/custom_data_1 = "Stone Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 3
+4:0/0/custom_data_1 = "Stone Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 3
+5:0/0/custom_data_1 = "Stone Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iii8q"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bmlbu"]
 resource_name = "Woods 3"
 texture = ExtResource("8_0gxb4")
 texture_region_size = Vector2i(128, 128)
@@ -41,7 +73,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mc6tb"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eym0r"]
 resource_name = "Connected terrain - 01_quiet_approach_woods"
 texture = ExtResource("4_iii8q")
 texture_region_size = Vector2i(128, 128)
@@ -250,7 +282,7 @@ texture_region_size = Vector2i(128, 128)
 2:6/0/custom_data_1 = "Woods"
 2:6/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dqdef"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mc6tb"]
 resource_name = "Connected terrain - 02_orchard_outpost_woods"
 texture = ExtResource("5_dmegu")
 texture_region_size = Vector2i(128, 128)
@@ -483,7 +515,7 @@ texture_region_size = Vector2i(128, 128)
 0:7/0/custom_data_1 = "Woods"
 0:7/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_438s8"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dqdef"]
 resource_name = "Connected terrain - 03_the_roadblock_woods"
 texture = ExtResource("6_w33jf")
 texture_region_size = Vector2i(128, 128)
@@ -752,7 +784,7 @@ texture_region_size = Vector2i(128, 128)
 1:8/0/custom_data_1 = "Woods"
 1:8/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_seen1"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_438s8"]
 resource_name = "Connected terrain - 04_two_crossings_woods"
 texture = ExtResource("7_d2r15")
 texture_region_size = Vector2i(128, 128)
@@ -1057,7 +1089,7 @@ texture_region_size = Vector2i(128, 128)
 2:9/0/custom_data_1 = "Woods"
 2:9/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ylnc6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_seen1"]
 resource_name = "Connected terrain - 05_battle_for_alderbrook_woods"
 texture = ExtResource("8_2vmo6")
 texture_region_size = Vector2i(128, 128)
@@ -1350,31 +1382,280 @@ texture_region_size = Vector2i(128, 128)
 7:8/0/custom_data_1 = "Woods"
 7:8/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dmegu"]
-resource_name = "Wood Building"
-texture = ExtResource("3_dojtx")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0n1mt"]
+resource_name = "Stone Building 03"
+texture = ExtResource("9_ieaxv")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = "Stone Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 3
+1:0/0/custom_data_1 = "Stone Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 3
+2:0/0/custom_data_1 = "Stone Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 3
+3:0/0/custom_data_1 = "Stone Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 3
+4:0/0/custom_data_1 = "Stone Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 3
+5:0/0/custom_data_1 = "Stone Building"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jvrfu"]
+resource_name = "Woods"
+texture = ExtResource("10_fiap2")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = "Woods"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n53m8"]
+resource_name = "Connected terrain - alderbrook_western_approach_woods"
+texture = ExtResource("11_14l4k")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = "Woods"
+0:0/0/custom_data_2 = "woods"
+1:0/0 = 0
+1:0/0/custom_data_0 = 1
+1:0/0/custom_data_1 = "Woods"
+1:0/0/custom_data_2 = "woods"
+2:0/0 = 0
+2:0/0/custom_data_0 = 1
+2:0/0/custom_data_1 = "Woods"
+2:0/0/custom_data_2 = "woods"
+3:0/0 = 0
+3:0/0/custom_data_0 = 1
+3:0/0/custom_data_1 = "Woods"
+3:0/0/custom_data_2 = "woods"
+4:0/0 = 0
+4:0/0/custom_data_0 = 1
+4:0/0/custom_data_1 = "Woods"
+4:0/0/custom_data_2 = "woods"
+5:0/0 = 0
+5:0/0/custom_data_0 = 1
+5:0/0/custom_data_1 = "Woods"
+5:0/0/custom_data_2 = "woods"
+6:0/0 = 0
+6:0/0/custom_data_0 = 1
+6:0/0/custom_data_1 = "Woods"
+6:0/0/custom_data_2 = "woods"
+7:0/0 = 0
+7:0/0/custom_data_0 = 1
+7:0/0/custom_data_1 = "Woods"
+7:0/0/custom_data_2 = "woods"
+0:1/0 = 0
+0:1/0/custom_data_0 = 1
+0:1/0/custom_data_1 = "Woods"
+0:1/0/custom_data_2 = "woods"
+1:1/0 = 0
+1:1/0/custom_data_0 = 1
+1:1/0/custom_data_1 = "Woods"
+1:1/0/custom_data_2 = "woods"
+2:1/0 = 0
+2:1/0/custom_data_0 = 1
+2:1/0/custom_data_1 = "Woods"
+2:1/0/custom_data_2 = "woods"
+3:1/0 = 0
+3:1/0/custom_data_0 = 1
+3:1/0/custom_data_1 = "Woods"
+3:1/0/custom_data_2 = "woods"
+4:1/0 = 0
+4:1/0/custom_data_0 = 1
+4:1/0/custom_data_1 = "Woods"
+4:1/0/custom_data_2 = "woods"
+5:1/0 = 0
+5:1/0/custom_data_0 = 1
+5:1/0/custom_data_1 = "Woods"
+5:1/0/custom_data_2 = "woods"
+6:1/0 = 0
+6:1/0/custom_data_0 = 1
+6:1/0/custom_data_1 = "Woods"
+6:1/0/custom_data_2 = "woods"
+7:1/0 = 0
+7:1/0/custom_data_0 = 1
+7:1/0/custom_data_1 = "Woods"
+7:1/0/custom_data_2 = "woods"
+0:2/0 = 0
+0:2/0/custom_data_0 = 1
+0:2/0/custom_data_1 = "Woods"
+0:2/0/custom_data_2 = "woods"
+1:2/0 = 0
+1:2/0/custom_data_0 = 1
+1:2/0/custom_data_1 = "Woods"
+1:2/0/custom_data_2 = "woods"
+2:2/0 = 0
+2:2/0/custom_data_0 = 1
+2:2/0/custom_data_1 = "Woods"
+2:2/0/custom_data_2 = "woods"
+3:2/0 = 0
+3:2/0/custom_data_0 = 1
+3:2/0/custom_data_1 = "Woods"
+3:2/0/custom_data_2 = "woods"
+4:2/0 = 0
+4:2/0/custom_data_0 = 1
+4:2/0/custom_data_1 = "Woods"
+4:2/0/custom_data_2 = "woods"
+5:2/0 = 0
+5:2/0/custom_data_0 = 1
+5:2/0/custom_data_1 = "Woods"
+5:2/0/custom_data_2 = "woods"
+6:2/0 = 0
+6:2/0/custom_data_0 = 1
+6:2/0/custom_data_1 = "Woods"
+6:2/0/custom_data_2 = "woods"
+7:2/0 = 0
+7:2/0/custom_data_0 = 1
+7:2/0/custom_data_1 = "Woods"
+7:2/0/custom_data_2 = "woods"
+0:3/0 = 0
+0:3/0/custom_data_0 = 1
+0:3/0/custom_data_1 = "Woods"
+0:3/0/custom_data_2 = "woods"
+1:3/0 = 0
+1:3/0/custom_data_0 = 1
+1:3/0/custom_data_1 = "Woods"
+1:3/0/custom_data_2 = "woods"
+2:3/0 = 0
+2:3/0/custom_data_0 = 1
+2:3/0/custom_data_1 = "Woods"
+2:3/0/custom_data_2 = "woods"
+3:3/0 = 0
+3:3/0/custom_data_0 = 1
+3:3/0/custom_data_1 = "Woods"
+3:3/0/custom_data_2 = "woods"
+4:3/0 = 0
+4:3/0/custom_data_0 = 1
+4:3/0/custom_data_1 = "Woods"
+4:3/0/custom_data_2 = "woods"
+5:3/0 = 0
+5:3/0/custom_data_0 = 1
+5:3/0/custom_data_1 = "Woods"
+5:3/0/custom_data_2 = "woods"
+6:3/0 = 0
+6:3/0/custom_data_0 = 1
+6:3/0/custom_data_1 = "Woods"
+6:3/0/custom_data_2 = "woods"
+7:3/0 = 0
+7:3/0/custom_data_0 = 1
+7:3/0/custom_data_1 = "Woods"
+7:3/0/custom_data_2 = "woods"
+0:4/0 = 0
+0:4/0/custom_data_0 = 1
+0:4/0/custom_data_1 = "Woods"
+0:4/0/custom_data_2 = "woods"
+1:4/0 = 0
+1:4/0/custom_data_0 = 1
+1:4/0/custom_data_1 = "Woods"
+1:4/0/custom_data_2 = "woods"
+2:4/0 = 0
+2:4/0/custom_data_0 = 1
+2:4/0/custom_data_1 = "Woods"
+2:4/0/custom_data_2 = "woods"
+3:4/0 = 0
+3:4/0/custom_data_0 = 1
+3:4/0/custom_data_1 = "Woods"
+3:4/0/custom_data_2 = "woods"
+4:4/0 = 0
+4:4/0/custom_data_0 = 1
+4:4/0/custom_data_1 = "Woods"
+4:4/0/custom_data_2 = "woods"
+5:4/0 = 0
+5:4/0/custom_data_0 = 1
+5:4/0/custom_data_1 = "Woods"
+5:4/0/custom_data_2 = "woods"
+6:4/0 = 0
+6:4/0/custom_data_0 = 1
+6:4/0/custom_data_1 = "Woods"
+6:4/0/custom_data_2 = "woods"
+7:4/0 = 0
+7:4/0/custom_data_0 = 1
+7:4/0/custom_data_1 = "Woods"
+7:4/0/custom_data_2 = "woods"
+0:5/0 = 0
+0:5/0/custom_data_0 = 1
+0:5/0/custom_data_1 = "Woods"
+0:5/0/custom_data_2 = "woods"
+1:5/0 = 0
+1:5/0/custom_data_0 = 1
+1:5/0/custom_data_1 = "Woods"
+1:5/0/custom_data_2 = "woods"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ylnc6"]
+resource_name = "Wood Building 01"
+texture = ExtResource("9_w33jf")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = "Wood Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 2
+1:0/0/custom_data_1 = "Wood Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 2
+2:0/0/custom_data_1 = "Wood Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 2
+3:0/0/custom_data_1 = "Wood Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 2
+4:0/0/custom_data_1 = "Wood Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 2
+5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w33jf"]
-resource_name = "<null>"
-texture = ExtResource("4_38dfh")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ipbws"]
+resource_name = "Wood Building 02"
+texture = ExtResource("10_d2r15")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = "Wood Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 2
+1:0/0/custom_data_1 = "Wood Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 2
+2:0/0/custom_data_1 = "Wood Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 2
+3:0/0/custom_data_1 = "Wood Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 2
+4:0/0/custom_data_1 = "Wood Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 2
+5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d2r15"]
-resource_name = "Wood Building"
-texture = ExtResource("5_0gxb4")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wk7t3"]
+resource_name = "Wood Building 03"
+texture = ExtResource("11_2vmo6")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = "Wood Building"
+1:0/0 = 0
+1:0/0/custom_data_0 = 2
+1:0/0/custom_data_1 = "Wood Building"
+2:0/0 = 0
+2:0/0/custom_data_0 = 2
+2:0/0/custom_data_1 = "Wood Building"
+3:0/0 = 0
+3:0/0/custom_data_0 = 2
+3:0/0/custom_data_1 = "Wood Building"
+4:0/0 = 0
+4:0/0/custom_data_0 = 2
+4:0/0/custom_data_1 = "Wood Building"
+5:0/0 = 0
+5:0/0/custom_data_0 = 2
+5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2vmo6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_srrqu"]
 resource_name = "Woods 1"
 texture = ExtResource("6_dojtx")
 texture_region_size = Vector2i(128, 128)
@@ -1382,7 +1663,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d2oqw"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wkm1b"]
 resource_name = "Connected terrain - orchard_road_woods"
 texture = ExtResource("8_5aqc0")
 texture_region_size = Vector2i(128, 128)
@@ -1403,7 +1684,7 @@ texture_region_size = Vector2i(128, 128)
 3:0/0/custom_data_1 = "Woods"
 3:0/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cnwb"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ufbgw"]
 resource_name = "Connected terrain - default_map_woods"
 texture = ExtResource("9_lgnxu")
 texture_region_size = Vector2i(128, 128)
@@ -1752,12 +2033,7 @@ texture_region_size = Vector2i(128, 128)
 5:10/0/custom_data_1 = "Woods"
 5:10/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bmlbu"]
-texture = ExtResource("7_lgnxu")
-texture_region_size = Vector2i(128, 128)
-0:0/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eym0r"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fgia5"]
 resource_name = "Woods 2"
 texture = ExtResource("7_38dfh")
 texture_region_size = Vector2i(128, 128)
@@ -1775,19 +2051,21 @@ custom_data_layer_1/name = "name"
 custom_data_layer_1/type = 4
 custom_data_layer_2/name = "art_family"
 custom_data_layer_2/type = 4
-sources/8 = SubResource("TileSetAtlasSource_bmlbu")
-sources/0 = SubResource("TileSetAtlasSource_sqnly")
-sources/1 = SubResource("TileSetAtlasSource_eo611")
-sources/2 = SubResource("TileSetAtlasSource_dmegu")
-sources/3 = SubResource("TileSetAtlasSource_w33jf")
-sources/4 = SubResource("TileSetAtlasSource_d2r15")
-sources/5 = SubResource("TileSetAtlasSource_2vmo6")
-sources/6 = SubResource("TileSetAtlasSource_d2oqw")
-sources/7 = SubResource("TileSetAtlasSource_4cnwb")
-sources/9 = SubResource("TileSetAtlasSource_eym0r")
-sources/10 = SubResource("TileSetAtlasSource_iii8q")
-sources/11 = SubResource("TileSetAtlasSource_mc6tb")
-sources/12 = SubResource("TileSetAtlasSource_dqdef")
-sources/13 = SubResource("TileSetAtlasSource_438s8")
-sources/14 = SubResource("TileSetAtlasSource_seen1")
-sources/15 = SubResource("TileSetAtlasSource_ylnc6")
+sources/5 = SubResource("TileSetAtlasSource_srrqu")
+sources/6 = SubResource("TileSetAtlasSource_wkm1b")
+sources/7 = SubResource("TileSetAtlasSource_ufbgw")
+sources/9 = SubResource("TileSetAtlasSource_fgia5")
+sources/10 = SubResource("TileSetAtlasSource_bmlbu")
+sources/11 = SubResource("TileSetAtlasSource_eym0r")
+sources/12 = SubResource("TileSetAtlasSource_mc6tb")
+sources/13 = SubResource("TileSetAtlasSource_dqdef")
+sources/14 = SubResource("TileSetAtlasSource_438s8")
+sources/15 = SubResource("TileSetAtlasSource_seen1")
+sources/0 = SubResource("TileSetAtlasSource_d2oqw")
+sources/1 = SubResource("TileSetAtlasSource_4cnwb")
+sources/2 = SubResource("TileSetAtlasSource_ylnc6")
+sources/3 = SubResource("TileSetAtlasSource_ipbws")
+sources/4 = SubResource("TileSetAtlasSource_wk7t3")
+sources/16 = SubResource("TileSetAtlasSource_0n1mt")
+sources/17 = SubResource("TileSetAtlasSource_jvrfu")
+sources/18 = SubResource("TileSetAtlasSource_n53m8")

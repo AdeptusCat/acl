@@ -10,6 +10,7 @@ estate, roadside cottages and workshop yards, then dense town blocks. Most house
 are timber, with stone retained at the estate and a few town landmarks. Green open
 ground covers the entire map beneath the roads, fields and buildings.
 The current layout has 69 timber houses and 15 stone buildings.
+Buildings use the [approved brown and grey roofs with mixed orientations](../../art/building_rotations/README.md).
 There is no river. Three continuous roads and two diagonal connecting streets
 support lateral movement; the northern and southern approaches remain usable
 when the central approach is unavailable.
@@ -80,6 +81,6 @@ minor victory. Run with `--fixed-fps 60` and isolated user data.
 Automated validation establishes scenario loading, movement and victory behavior.
 Human balance and combat pacing remain unverified.
 
-Validated with Godot 4.7.2 after the timber and green-ground revision: 267 standalone
-scenario checks and 6,121 terrain palette checks passed. All 251 project scripts
-parsed and passed the explicit-type and no-ternary convention check.
+The timber and green-ground revision passed 267 scenario checks before the
+building artwork replacement. The building-art regression additionally checks
+the preserved material categories and the regenerated sight data.

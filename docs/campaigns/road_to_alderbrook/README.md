@@ -48,6 +48,11 @@ All five maps are new, editable Godot scenes. The rivers have no ground or
 pathfinding points outside bridge cells. Each map ships compressed line of
 sight data calculated by the existing LOS service.
 
+Buildings use the [approved generated orientation set](../../art/building_rotations/README.md):
+brown roofs for timber and grey roofs for stone. Each house retains its position,
+design and cover category; seeded random orientations are saved with the map and
+included in its baked sight data.
+
 Open ground, woods, wheat, green crops, and orchards each use three visual
 variations. Meadows form broad patches, woods form canopy clusters, and crops
 form coherent farm plots near settlements. See the

@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/world/maps/layers/building_tile_map_layer.gd" id="1"]
+[ext_resource type="TileSet" path="res://resources/tilesets/buildings.tres" id="2"]
+
+[node name="BuildingTileMapLayer" type="TileMapLayer" groups=["tilemaplayers"]]
+tile_set = ExtResource("2")
+script = ExtResource("1")

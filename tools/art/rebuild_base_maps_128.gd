@@ -15,14 +15,16 @@ func _run() -> void:
 	world.fully_freed.disconnect(main._on_fully_freed)
 	var maps: Array[Map] = []
 	for map: Map in world.maps.get_children():
-		if not map.campaign_name.is_empty():
+		if not map.campaign_name.is_empty() or not map.los_resource_path.is_empty():
 			continue
 		maps.append(map)
 		if OS.get_cmdline_user_args().has("--los-only"):
 			continue
 		ConnectedTerrainBaker.bake(map.get_terrain_layer(), map.map_name.to_snake_case() + "_terrain")
 		ConnectedTerrainBaker.bake(map.get_building_layer(), map.map_name.to_snake_case() + "_woods")
+		BuildingVariations.apply(map.get_building_layer(), map.map_name.to_snake_case())
 	if not OS.get_cmdline_user_args().has("--los-only"):
+		assert(ResourceSaver.save(maps[0].get_building_layer().tile_set, BuildingVariations.SHARED_TILE_SET) == OK)
 		var packed: PackedScene = PackedScene.new()
 		assert(packed.pack(world) == OK)
 		assert(ResourceSaver.save(packed, path) == OK)
