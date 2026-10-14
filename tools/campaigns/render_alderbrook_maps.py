@@ -40,6 +40,8 @@ def texture(path: str, cache: dict[str, Image.Image]) -> Image.Image:
     local: Path = ROOT / path.removeprefix("res://")
     if local.suffix == ".svg":
         raster: Path = ROOT / "docs/art/roads/rasters" / (local.stem + ".png")
+        if not raster.exists():
+            raster = ROOT / "docs/art/water/rasters" / (local.stem + ".png")
         tile: Image.Image = Image.open(raster).convert("RGBA")
     else:
         tile = Image.open(local).convert("RGBA")
@@ -162,7 +164,7 @@ def render_overview(maps: list[tuple[dict, Image.Image]]) -> None:
         draw.text((x + 24, caption_y + 34), f"{int(data['seconds'] / 60)} minutes  |  {data['size'][0]} x {data['size'][1]} hexes", font=font(15), fill="#59675c")
         if index == 4:
             draw.text((x + 1000, y + 146), "The final battle", font=font(28, True), fill=INK)
-            for row, line in enumerate(["Three rifle platoons", "Machine-gun and mortar support", "Three bridge approaches", "Three village objectives", "Enemy withdrawal and exit denial"]):
+            for row, line in enumerate(["Three rifle platoons", "Machine-gun and mortar support", "Fields, orchard and garden lanes", "Estate, market and timber yard", "Enemy withdrawal and exit denial"]):
                 draw.text((x + 1000, y + 211 + row * 43), line, font=font(19), fill="#59675c")
     draw.text((46, 2290), "Designer overview: blue Allied deployment, red Axis deployment, gold objectives and exits.", font=font(16), fill=INK)
     canvas.save(OUTPUT / "campaign_overview.png")

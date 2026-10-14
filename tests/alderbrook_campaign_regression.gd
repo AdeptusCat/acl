@@ -169,7 +169,7 @@ func _test_progression() -> void:
 
 
 func _test_bridges() -> void:
-	for index: int in [3, 4]:
+	for index: int in [3]:
 		var map: Map = campaign_maps[index]
 		var graph: AStar2D = map.get_ground_layer().astar
 		var from: int = graph.get_closest_point(map.get_ground_layer().map_to_local(Vector2i(3, 4)))
@@ -226,10 +226,10 @@ func _test_visual_variants() -> void:
 							images[texture] = texture.get_image()
 					var terrain_image: Image = images[source.texture].get_region(source.get_tile_texture_region(layer.get_cell_atlas_coords(cell)))
 					var canopy_image: Image = images[canopy.texture].get_region(canopy.get_tile_texture_region(buildings.get_cell_atlas_coords(cell)))
-					_check(_same_visible_pixels(terrain_image, canopy_image) and int(buildings.get_cell_tile_data(cell).get_custom_data("cover")) == 1, "Terrain and cover layers use identical transparent canopy pixels")
+					_check(_same_visible_pixels(terrain_image, canopy_image) and int(buildings.get_cell_tile_data(cell).get_custom_data("cover")) == 1, "Terrain and cover layers use identical transparent canopy pixels in " + map.map_name + " at " + str(cell))
 				else:
 					_check(bool(data.get_custom_data("hindrance")) and not bool(data.get_custom_data("blocking")), "Fields and orchards retain their terrain rules")
-					_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods")
+					_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods in " + map.map_name + " at " + str(cell))
 					if family in ["field_wheat", "field_green_rows"]:
 						crops[family] = true
 		_check(crops.size() == 2, "Every mission has both wheat and green-crop plots")

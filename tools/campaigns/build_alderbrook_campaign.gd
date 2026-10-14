@@ -82,11 +82,10 @@ const MISSIONS: Array[Dictionary] = [
 		"allied_markers": [[1, 13, 4], [2, 13, 10], [0, 22, 4], [0, 22, 10], [4, 2, 7]], "axis_markers": [[1, 13, 4], [4, 17, 7]],
 	},
 	{
-		"id": "05_battle_for_alderbrook", "title": "5. Battle for Alderbrook", "map": "Alderbrook Village", "size": Vector2i(26, 18), "seconds": 900.0,
-		"briefing": "Road to Alderbrook - mission 5 of 5.\n\nThe full company attacks across three bridge approaches into the village. You have three rifle platoons, their machine-gun teams, company headquarters, and a light mortar. Give each platoon a district, establish covering fire, and keep a reserve until the defense shows a weakness. Enemy survivors may try to escape east after their command post falls; secure the exit routes before the final assault.\n\n[b]Major Victory:[/b] hold A, B, and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline.\n\n[b]Minor Victory:[/b] hold the central square at B and destroy three enemy units. The defenders have a withdrawal fallback, so capturing ground alone is insufficient.",
-		"player": [[1, "hq", 2, 3], [1, "rifle", 3, 2], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "mg", 2, 5], [2, "hq", 2, 8], [2, "rifle", 3, 7], [2, "rifle", 3, 8], [2, "rifle", 3, 9], [2, "mg", 2, 10], [3, "hq", 2, 13], [3, "rifle", 3, 12], [3, "rifle", 3, 13], [3, "rifle", 3, 14], [3, "mg", 2, 15], [0, "company_hq", 1, 8], [0, "light_mortar", 1, 10]],
-		"enemy": [[1, "hq", 21, 4], [1, "rifle", 18, 3], [1, "rifle", 18, 5], [1, "mg", 17, 4], [2, "hq", 23, 9], [2, "rifle", 20, 8], [2, "rifle", 20, 10], [2, "mg", 20, 9], [3, "hq", 22, 14], [3, "rifle", 19, 13], [3, "rifle", 19, 15], [3, "mg", 18, 14], [0, "company_hq", 24, 11], [0, "medium_mortar", 24, 7]],
-		"allied_markers": [[1, 17, 4], [2, 20, 9], [3, 18, 14], [4, 2, 8]], "axis_markers": [[1, 20, 9], [2, 17, 4], [3, 18, 14], [0, 25, 8], [0, 25, 10], [4, 23, 9]],
+		"id": "05_battle_for_alderbrook", "title": "5. Battle for Alderbrook", "map": "Alderbrook Village", "size": AlderbrookVillageLayout.SIZE, "seconds": 900.0,
+		"briefing": AlderbrookVillageLayout.BRIEFING,
+		"player": AlderbrookVillageLayout.PLAYER, "enemy": AlderbrookVillageLayout.ENEMY,
+		"allied_markers": AlderbrookVillageLayout.ALLIED_MARKERS, "axis_markers": AlderbrookVillageLayout.AXIS_MARKERS,
 	},
 ]
 
@@ -158,8 +157,13 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--art-only"):
 		for index: int in range(MISSIONS.size()):
 			var map: Map = template.maps.get_node("Alderbrook" + str(index + 1)) as Map
-			ConnectedTerrainBaker.bake(map.get_terrain_layer(), str(MISSIONS[index]["id"]) + "_terrain")
-			ConnectedTerrainBaker.bake(map.get_building_layer(), str(MISSIONS[index]["id"]) + "_woods")
+			var art_id: String = str(MISSIONS[index]["id"])
+			if index == 4:
+				art_id += "_village"
+			ConnectedTerrainBaker.bake(map.get_terrain_layer(), art_id + "_terrain")
+			ConnectedTerrainBaker.bake(map.get_building_layer(), art_id + "_woods")
+			if index == 4:
+				assert(ResourceSaver.save(map.get_terrain_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_village_terrain.tres") == OK)
 			_export_layout(map, MISSIONS[index])
 		var first: Map = template.maps.get_node("Alderbrook1") as Map
 		assert(ResourceSaver.save(first.get_terrain_layer().tile_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres") == OK)
@@ -241,8 +245,27 @@ func _run() -> void:
 			return
 		add_child(map)
 		await get_tree().process_frame
-		ConnectedTerrainBaker.bake(map.get_terrain_layer(), str(MISSIONS[index]["id"]) + "_terrain")
-		ConnectedTerrainBaker.bake(map.get_building_layer(), str(MISSIONS[index]["id"]) + "_woods")
+		if index == 4:
+			var village: Node = load("res://tools/campaigns/build_alderbrook_village.gd").new()
+			village.village_layout = _road_layouts[index]
+			village._create_village(map)
+			if not village._validate_village(map):
+				village.free()
+				get_tree().quit(1)
+				return
+			village.free()
+		var art_id: String = str(MISSIONS[index]["id"])
+		if index == 4:
+			art_id += "_village"
+		ConnectedTerrainBaker.bake(map.get_terrain_layer(), art_id + "_terrain")
+		ConnectedTerrainBaker.bake(map.get_building_layer(), art_id + "_woods")
+		if index == 4:
+			var village_path: String = RESOURCE_DIRECTORY + "alderbrook_village_terrain.tres"
+			assert(ResourceSaver.save(map.get_terrain_layer().tile_set, village_path) == OK)
+			map.get_terrain_layer().tile_set.take_over_path(village_path)
+			var village: Node = load("res://tools/campaigns/build_alderbrook_village.gd").new()
+			village.share_buildings(map.get_building_layer(), _building_set)
+			village.free()
 		var packed: PackedScene = PackedScene.new()
 		var error: Error = packed.pack(map)
 		assert(error == OK)
@@ -385,14 +408,10 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	elif index == 2:
 		_house(buildings, terrain, Vector2i(7, 7), true)
 		_house(buildings, terrain, Vector2i(8, 9), false)
-	elif index >= 3:
+	elif index == 3:
 		var river_x: int = 11
 		var crossings: Array[int] = [4, 10]
 		var river_width: int = 2
-		if index == 4:
-			river_x = 10
-			river_width = 1
-			crossings = [4, 9, 14]
 		for x: int in range(river_x, river_x + river_width):
 			for y: int in range(map.grid_size.y):
 				var cell: Vector2i = Vector2i(x, y)
@@ -406,16 +425,8 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 					water.set_cell(cell, 1, Vector2i.ZERO, alternative)
 				else:
 					ground.erase_cell(cell)
-		if index == 3:
-			for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
-				_house(buildings, terrain, cell, true)
-		else:
-			for x: int in range(16, 23):
-				for y: int in range(3, 16):
-					if x % 3 != 0 and y % 3 == 1:
-						_house(buildings, terrain, Vector2i(x, y), true)
-			for cell: Vector2i in [Vector2i(17, 4), Vector2i(20, 9), Vector2i(18, 14)]:
-				_house(buildings, terrain, cell, true)
+		for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
+			_house(buildings, terrain, cell, true)
 	if not _place_roads(ground, terrain, buildings, water, index, ground_sources[0]):
 		map.free()
 		return null
