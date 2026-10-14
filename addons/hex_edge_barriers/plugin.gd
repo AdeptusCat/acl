@@ -7,10 +7,12 @@ var _layer: WallTileMapLayer
 var _enabled: bool = false
 var _kind: int = 0
 var _dragging: bool = false
+var _stroke_button: MouseButton = MOUSE_BUTTON_NONE
 var _erasing: bool = false
 var _hover: Vector3i = Vector3i.ZERO
 var _has_hover: bool = false
 var _previous_point: Vector2 = Vector2.ZERO
+var _stroke_transform: Transform2D = Transform2D.IDENTITY
 var _before: Dictionary[Vector2i, Vector4i] = {}
 var _after: Dictionary[Vector2i, Vector4i] = {}
 var _visited: Dictionary[Vector3i, bool] = {}
@@ -80,9 +82,25 @@ func _select_kind(kind: int) -> void:
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not _enabled or not is_instance_valid(_layer):
 		return false
+	if event is InputEventPanGesture or event is InputEventMagnifyGesture or Input.is_key_pressed(KEY_SPACE):
+		_finish_navigation()
+		return false
+	if event is InputEventKey:
+		var key: InputEventKey = event as InputEventKey
+		if key.keycode == KEY_SPACE and key.pressed:
+			_finish_navigation()
+		return false
 	if event is InputEventMouseMotion:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
-		var point: Vector2 = _layer.get_global_transform_with_canvas().affine_inverse() * motion.position
+		if (motion.button_mask & MOUSE_BUTTON_MASK_MIDDLE) != 0:
+			_finish_navigation()
+			return false
+		var transform: Transform2D = _editor_transform()
+		if _dragging:
+			var button_mask: int = 1 << (_stroke_button - 1)
+			if not transform.is_equal_approx(_stroke_transform) or (motion.button_mask & button_mask) == 0:
+				_finish_stroke()
+		var point: Vector2 = transform.affine_inverse() * motion.position
 		_hover = _closest_edge(point)
 		_has_hover = true
 		if _dragging:
@@ -95,11 +113,18 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event as InputEventMouseButton
 		if mouse.button_index != MOUSE_BUTTON_LEFT and mouse.button_index != MOUSE_BUTTON_RIGHT:
+			if mouse.pressed:
+				_finish_navigation()
+			return false
+		if not mouse.pressed and mouse.button_index != _stroke_button:
 			return false
 		if mouse.pressed:
+			_finish_stroke()
 			_dragging = true
+			_stroke_button = mouse.button_index
 			_erasing = mouse.button_index == MOUSE_BUTTON_RIGHT or _kind == -1
-			_previous_point = _layer.get_global_transform_with_canvas().affine_inverse() * mouse.position
+			_stroke_transform = _editor_transform()
+			_previous_point = _stroke_transform.affine_inverse() * mouse.position
 			_hover = _closest_edge(_previous_point)
 			_has_hover = true
 			_paint_edge(_hover)
@@ -108,6 +133,18 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		update_overlays()
 		return true
 	return false
+
+
+func _editor_transform() -> Transform2D:
+	# The 2D editor stores zoom and pan in the viewport's global canvas transform.
+	var viewport: SubViewport = EditorInterface.get_editor_viewport_2d()
+	return viewport.get_global_canvas_transform() * _layer.get_global_transform_with_canvas()
+
+
+func _finish_navigation() -> void:
+	_finish_stroke()
+	_has_hover = false
+	update_overlays()
 
 
 func _closest_edge(point: Vector2) -> Vector3i:
@@ -159,6 +196,7 @@ func _cell_value(cell: Vector2i) -> Vector4i:
 
 func _finish_stroke() -> void:
 	_dragging = false
+	_stroke_button = MOUSE_BUTTON_NONE
 	var changed: bool = false
 	for cell: Vector2i in _before:
 		if _before[cell] != _after[cell]:
@@ -183,7 +221,7 @@ func _forward_canvas_draw_over_viewport(overlay: Control) -> void:
 	if not _enabled or not _has_hover or not is_instance_valid(_layer):
 		return
 	var center: Vector2 = _layer.map_to_local(Vector2i(_hover.x, _hover.y))
-	var transform: Transform2D = _layer.get_global_transform_with_canvas()
+	var transform: Transform2D = _editor_transform()
 	var start: Vector2 = transform * (center + ConnectedWalls.VERTICES[_hover.z])
 	var end: Vector2 = transform * (center + ConnectedWalls.VERTICES[(_hover.z + 1) % 6])
 	var color: Color = Color("f5df85")

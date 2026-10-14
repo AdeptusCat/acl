@@ -35,7 +35,7 @@
 [ext_resource type="Texture2D" uid="uid://db61fyfwg55rl" path="res://assets/tiles/buildings/multihex/building_stone_03_2hex_a.png" id="28_rdo28"]
 [ext_resource type="Texture2D" uid="uid://bnwo5enwt28oi" path="res://assets/tiles/buildings/multihex/building_stone_03_2hex_b.png" id="29_ntb2d"]
 [ext_resource type="Texture2D" uid="uid://cb2qup84gq1wi" path="res://assets/tiles/buildings/multihex/building_stone_03_3hex.png" id="30_spw3i"]
-[ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/05_battle_for_alderbrook_village_woods.png" id="31_gpnq4"]
+[ext_resource type="Texture2D" uid="uid://jyfuffxxols8" path="res://assets/tiles/connected/maps/05_battle_for_alderbrook_village_woods.png" id="31_gpnq4"]
 [ext_resource type="Texture2D" uid="uid://bgttefrlnmcu5" path="res://assets/tiles/buildings/multihex/building_wood_01_2hex_a.png" id="35_n5ppm"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_ye61f"]

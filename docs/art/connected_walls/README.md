@@ -15,6 +15,12 @@ the legacy edge pieces. Hex interiors stay open.
 4. Choose **Erase edge**, or drag with the right mouse button, to remove sides.
 5. Use normal editor undo/redo to restore a stroke.
 
+Zoom and pan the 2D view normally while the brush is enabled. Middle-button or
+Space-drag pans the map; wheel and trackpad navigation remain available. Starting
+navigation ends the current paint stroke, so moving the view cannot connect
+unrelated edges. Painting and the hover highlight both include the editor view's
+zoom/pan transform and the layer's parent transforms.
+
 The brush highlights the selected border, snaps to its nearest side and chooses
 the matching corner or multi-side piece. It uses one owner for a shared side,
 so straying across the border cannot create a doubled wall. Existing copies on
@@ -66,5 +72,13 @@ The regression checks every edge combination, clear hex centers, matching pixels
 and directional flags, cover and LOS in all six directions and both column
 parities, single-edge erasure, legacy preservation, save/load and cached sight.
 
-The editor brush was also exercised in editor mode with border snapping,
-single-edge erasure and the native scene undo/redo history.
+The editor brush regression exercises 25–400% zoom, multiple pan offsets,
+translated/rotated/scaled parents, positive and negative hex coordinates, all
+six sides, drag interpolation, erasure, viewport navigation, and native scene
+undo/redo. Run it in editor mode:
+
+```sh
+godot --headless --editor --path . --script res://tests/editor/hex_edge_brush_regression.gd
+```
+
+It opens an isolated fixture and does not save any map scenes.
