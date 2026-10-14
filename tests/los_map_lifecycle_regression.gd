@@ -12,6 +12,7 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	await _start_mission(main, "Alderbrook5")
+	_check_fog(main)
 	_draw_preview()
 	_check(not LOSHelper.los_lines.is_empty(), "The new company map produces a live LOS preview")
 	LOSHelper.clear_los()
@@ -30,6 +31,7 @@ func _run() -> void:
 	LOSHelper.generate_los_lines_for_debug()
 	_check(LOSHelper.los_lines.is_empty(), "Late preview requests are harmless while the mission menu has no active map")
 	await _start_mission(main, "Alderbrook1")
+	_check_fog(main)
 	_check(LOSHelper.grid_size == Vector2i(16, 10) and not LOSHelper.los_lookup.is_empty(), "The next mission loads its own map and LOS data")
 	_draw_preview()
 	_check(not LOSHelper.los_lines.is_empty(), "Drawing resumes on the replacement campaign map")
@@ -60,6 +62,28 @@ func _start_mission(main: Node, map_name: String) -> void:
 func _draw_preview() -> void:
 	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
 	LOSHelper.draw_los(ground.map_to_local(Vector2i(2, 3)), ground.map_to_local(Vector2i(3, 3)))
+
+
+func _check_fog(main: Node) -> void:
+	var fog: FogOfWarOverlay = main.world.fog_of_war
+	var image: Image = fog._mask_image
+	_check(image.get_size() == LOSHelper.grid_size, "The active fog mask uses the current mission dimensions")
+	var matching: bool = true
+	for x: int in range(image.get_width()):
+		for y: int in range(image.get_height()):
+			var cell: Vector2i = Vector2i(x, y)
+			var state: Color = image.get_pixelv(cell)
+			if state.r > 0.5:
+				var visible: bool = LOSHelper.visible_hexes[Globals.team_player].has(cell)
+				if visible != (state.g < 0.5):
+					matching = false
+	_check(matching, "Live fog follows the current player's LOS on startup and after returning to the menu")
+	Debug.hide_fog_of_war = true
+	main.world._process(0.0)
+	_check(not fog.visible, "The existing fog debug toggle hides the animated overlay")
+	Debug.hide_fog_of_war = false
+	main.world._process(0.0)
+	_check(fog.visible, "The existing fog debug toggle restores the animated overlay")
 
 
 func _check_unloaded() -> void:

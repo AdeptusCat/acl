@@ -15,7 +15,7 @@ extends Node2D
 @export var allies_objective_tilemap : TileMapLayer
 @export var axis_objective_tilemap : TileMapLayer
 @export var ground_layer : HexagonTileMapLayer
-@export var fog_of_war_layer : HexagonTileMapLayer
+@export var fog_of_war_layer: FogOfWarOverlay
 @export var glow_maker_scene: PackedScene
 @export var unit_scene: PackedScene
 @export var formation_ai_controller_scene: PackedScene

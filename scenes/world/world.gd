@@ -9,7 +9,7 @@ const ALDERBROOK_CAMPAIGN: CampaignDefinition = preload("res://resources/campaig
 #@onready var building_layer : HexagonTileMapLayer = $TileMapLayers/BuildingTileMapLayer
 #@onready var wall_layer : HexagonTileMapLayer = $TileMapLayers/WallTileMapLayer
 #@onready var terrain_layer : HexagonTileMapLayer = $TileMapLayers/TerrainTileMapLayer
-@onready var fog_of_war_tile_map_layer: TileMapLayer = $TileMapLayers/FogOfWarTileMapLayer
+@onready var fog_of_war: FogOfWarOverlay = $TileMapLayers/FogOfWarOverlay
 @onready var selected_tile_map_layer: HexagonTileMapLayer = $TileMapLayers/SelectedTileMapLayer
 
 @onready var result_screen: CanvasLayer = $ResultScreen
@@ -268,9 +268,6 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	terrain_layer = map.get_terrain_layer()
 	wall_layer = map.get_wall_layer()
 	building_layer = map.get_building_layer()
-	fog_of_war_tile_map_layer.material = null
-	if map.campaign_name == TerrainPalette.CAMPAIGN:
-		fog_of_war_tile_map_layer.material = TerrainPalette.material_for_family("grid_fog", get_viewport().use_hdr_2d)
 	
 	
 	LOSHelper.ground_layer = map.get_ground_layer()
@@ -291,8 +288,14 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	
 	
 	var layers: Array[Node] = map.get_tilemap_layers()
+	var fog_cells: Dictionary[Vector2i, bool] = {}
 	for layer: Node in layers:
+		if layer is TileMapLayer:
+			for cell: Vector2i in (layer as TileMapLayer).get_used_cells():
+				fog_cells[cell] = true
 		layer.reparent(tile_map_layers)
+	var board_cells: Array[Vector2i] = fog_cells.keys()
+	fog_of_war.configure(ground_layer, map.grid_size, board_cells)
 	
 	var units: Array[Node] = scenario.get_units()
 	for unit: Node in units:
@@ -301,7 +304,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 		unit.reparent(game_controller.unit_container)
 		unit.game_start()
 	
-	fog_of_war_tile_map_layer.move_to_front()
+	fog_of_war.move_to_front()
 	selected_tile_map_layer.move_to_front()
 	
 	var axis_objectives_layer: HexagonTileMapLayer = scenario.get_objectives_layer(Globals.Team.AXIS)
@@ -339,9 +342,9 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 
 func _process(delta: float) -> void:
 	if Debug.hide_fog_of_war:
-		fog_of_war_tile_map_layer.hide()
+		fog_of_war.hide()
 	else:
-		fog_of_war_tile_map_layer.show()
+		fog_of_war.show()
 
 
 func _on_ui_try_again() -> void:

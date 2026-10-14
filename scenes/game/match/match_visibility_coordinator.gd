@@ -5,16 +5,7 @@ class_name MatchVisibilityCoordinator
 
 
 static func draw_fog(controller: Node2D) -> void:
-	var used_cells: Array[Vector2i] = controller.fog_of_war_layer.get_used_cells()
-	for cell: Vector2i in used_cells:
-		if LOSHelper.visible_hexes[Globals.team_player].has(cell):
-			controller.fog_of_war_layer.set_cell(cell, -1, Vector2i(0, 0))  # Clear fog
-		else:
-			controller.fog_of_war_layer.set_cell(cell, 0, Vector2i(0, 0))  # Set fog tile with ID 1
-	for x: int in LOSHelper.grid_size.x:
-		for y: int in LOSHelper.grid_size.y:
-			if not LOSHelper.visible_hexes[Globals.team_player].has(Vector2i(x, y)):
-				controller.fog_of_war_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0))
+	controller.fog_of_war_layer.update_visibility(LOSHelper.visible_hexes[Globals.team_player])
 
 
 static func show_visible_units(controller: Node2D) -> void:
