@@ -2,7 +2,7 @@
 
 The campaign uses the approved [base-tile palette](palette-proposals/natural-richness.png), anchored on grass green `#427012`. Runtime colors and source brightness stops are stored in [terrain_palettes.json](../../assets/palettes/terrain_palettes.json).
 
-All five missions use these colors for open ground, woods, orchard foliage and fruit, continuous wheat and green crops, roads, river water, bridge timber, and stone and timber buildings. Existing outlines and fog use the neutral palette. Woods use deeper forest greens; orchards use warmer olive foliage with red apples, amber pears and pale blossoms.
+All five missions use these colors for open ground, woods, orchard foliage and fruit, continuous wheat and green crops, roads, river water, bridge timber, and stone and timber buildings. Existing outlines and fog use the neutral palette. Woods use the approved muted olive `#555F2D` foliage and dark brown `#2C2A16` shadows, with nearby shading stops for the existing canopy detail. Their single-material ramp keeps warm source pixels within the same olive-and-brown scheme. Orchards retain their lighter foliage with red apples, amber pears and pale blossoms.
 
 The palette changes RGB during rendering. Source textures, their alpha, tile spacing, cell placement, connected terrain shapes, cover metadata and baked LOS remain unchanged. Campaign layers clone their used tile sources before assigning materials, so shared base maps retain their original colors. The palette JSON is preloaded as a Godot resource and included through its normal export dependency.
 

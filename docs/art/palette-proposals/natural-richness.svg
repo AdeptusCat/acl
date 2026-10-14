@@ -2,7 +2,7 @@
 <rect width="1680" height="1570" fill="#EDE6D8"/>
 <text x="48" y="70" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="bold" fill="#302D27">BASE-TILE TERRAIN PALETTE</text>
 <text x="48" y="110" font-family="DejaVu Sans, sans-serif" font-size="26" font-weight="normal" fill="#302D27">Anchored to the supplied grass tile: #427012</text>
-<text x="48" y="150" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="normal" fill="#736C5E">Ground: reference green  /  Woods: deeper forest green  /  Orchards: warmer olive highlights</text>
+<text x="48" y="150" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="normal" fill="#736C5E">Ground: reference green  /  Woods: olive and dark brown  /  Orchards: lighter fruit-tree highlights</text>
 <image x="1490" y="28" width="128" height="128" href="../../../assets/tiles/ground/base_tile.png"/>
 <rect x="40" y="188" width="780" height="148" rx="10" fill="#FBF7EE"/>
 <text x="58" y="224" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Open ground</text>
@@ -24,21 +24,21 @@
 <text x="662" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
 <rect x="860" y="188" width="780" height="148" rx="10" fill="#FBF7EE"/>
 <text x="878" y="224" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Woods</text>
-<text x="878" y="250" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Deeper forest greens; cooler and darker than open ground</text>
-<rect x="878" y="274" width="140" height="31" rx="3" fill="#152A1A"/>
-<text x="878" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#152A1A</text>
+<text x="878" y="250" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Muted olive foliage with earthy dark brown shadows</text>
+<rect x="878" y="274" width="140" height="31" rx="3" fill="#1F1D0E"/>
+<text x="878" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#1F1D0E</text>
 <text x="878" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
-<rect x="1029" y="274" width="140" height="31" rx="3" fill="#23462B"/>
-<text x="1029" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#23462B</text>
+<rect x="1029" y="274" width="140" height="31" rx="3" fill="#2C2A16"/>
+<text x="1029" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#2C2A16</text>
 <text x="1029" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
-<rect x="1180" y="274" width="140" height="31" rx="3" fill="#35643D"/>
-<text x="1180" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#35643D</text>
+<rect x="1180" y="274" width="140" height="31" rx="3" fill="#555F2D"/>
+<text x="1180" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#555F2D</text>
 <text x="1180" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
-<rect x="1331" y="274" width="140" height="31" rx="3" fill="#5B8D48"/>
-<text x="1331" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#5B8D48</text>
+<rect x="1331" y="274" width="140" height="31" rx="3" fill="#677037"/>
+<text x="1331" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#677037</text>
 <text x="1331" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
-<rect x="1482" y="274" width="140" height="31" rx="3" fill="#8FAE64"/>
-<text x="1482" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#8FAE64</text>
+<rect x="1482" y="274" width="140" height="31" rx="3" fill="#7B8347"/>
+<text x="1482" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#7B8347</text>
 <text x="1482" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
 <rect x="40" y="350" width="780" height="148" rx="10" fill="#FBF7EE"/>
 <text x="58" y="386" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Orchard foliage</text>
@@ -292,5 +292,5 @@
 <rect x="1482" y="1408" width="140" height="31" rx="3" fill="#D3D7CA"/>
 <text x="1482" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D3D7CA</text>
 <text x="1482" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Fog light</text>
-<text x="48" y="1530" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="normal" fill="#736C5E">Proposal only. No recoloring, shaders, artwork changes or LOS changes have been applied.</text>
+<text x="48" y="1530" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="normal" fill="#736C5E">Applied to Road to Alderbrook. Source artwork, transparency and LOS shapes are preserved.</text>
 </svg>

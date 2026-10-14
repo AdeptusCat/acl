@@ -1,7 +1,7 @@
 {
   "name": "Base-tile terrain palette",
   "status": "Applied to Road to Alderbrook through terrain color materials; source artwork and transparency are preserved",
-  "intent": "Use the reference grass green as the main open-ground color. Keep a related natural landscape palette with deep shaded woods, warmer lighter fruit-tree foliage, and richer material accents.",
+  "intent": "Use the reference grass green as the main open-ground color. Woods use the approved olive-and-dark-brown color study; fruit-tree foliage keeps its lighter highlights and material accents.",
   "families": [
     {
       "id": "open_ground",
@@ -19,13 +19,13 @@
     {
       "id": "woods",
       "label": "Woods",
-      "character": "Deeper forest greens; cooler and darker than open ground",
+      "character": "Muted olive foliage with earthy dark brown shadows",
       "colors": [
-        "#152A1A",
-        "#23462B",
-        "#35643D",
-        "#5B8D48",
-        "#8FAE64"
+        "#1F1D0E",
+        "#2C2A16",
+        "#555F2D",
+        "#677037",
+        "#7B8347"
       ],
       "assets": "Woodland crowns, woods tiles and woodland cover"
     },
