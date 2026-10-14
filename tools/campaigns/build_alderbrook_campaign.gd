@@ -730,6 +730,7 @@ func _bake_los(map: Map) -> void:
 	LOSHelper.terrain_layer = map.get_terrain_layer()
 	LOSHelper.building_layer = map.get_building_layer()
 	LOSHelper.wall_layer = map.get_wall_layer()
+	var building_signature: String = LOSHelper.building_layout_signature()
 	var lookup: Dictionary = {}
 	var ground: HexagonTileMapLayer = map.get_ground_layer()
 	for ox: int in range(map.grid_size.x):
@@ -749,4 +750,5 @@ func _bake_los(map: Map) -> void:
 		await get_tree().process_frame
 	var resource: LosLookupData = LosLookupData.new()
 	resource.los_lookup = lookup
+	resource.building_layout_signature = building_signature
 	assert(ResourceSaver.save(resource, map.los_resource_path, ResourceSaver.FLAG_COMPRESS) == OK)

@@ -31,6 +31,7 @@ var initialized: bool = false
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
 var _texture_images: Dictionary[Texture2D, Image] = {}
+var _active_los_resource: LosLookupData
 
 enum BetweenAxis {
 	NONE,
@@ -48,18 +49,39 @@ func load_prebaked_los(map: Map) -> void:
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	if not map.los_resource_path.is_empty():
 		file_path = map.los_resource_path
-	var los_resource: LosLookupData = load(file_path) as LosLookupData
+	var los_resource: LosLookupData
+	if ResourceLoader.exists(file_path):
+		los_resource = load(file_path) as LosLookupData
+	_active_los_resource = los_resource
 	ground_layer = map.get_ground_layer()
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
 	terrain_layer = map.get_terrain_layer()
 	grid_size = map.grid_size
+	var signature: String = building_layout_signature()
 	if los_resource == null:
+		if not signature.is_empty():
+			los_lookup = {}
+			prebake_los()
+			return
 		los_lookup = {}
 		push_error("Missing baked line of sight for " + map.map_name)
 		return
+	if los_resource.building_layout_signature != signature:
+		print("Rebuilding LOS for changed multihex buildings: ", map.map_name)
+		los_lookup = {}
+		prebake_los()
+		# Retain the refreshed active lookup in memory; authoring tools save it.
+		los_resource.los_lookup = los_lookup
+		los_resource.building_layout_signature = signature
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
+
+
+func building_layout_signature() -> String:
+	if building_layer is BuildingTileMapLayer:
+		return (building_layer as BuildingTileMapLayer).los_layout_signature()
+	return ""
 
 
 func unload_map() -> void:
@@ -71,6 +93,7 @@ func unload_map() -> void:
 	terrain_layer = null
 	grid_size = Vector2i.ZERO
 	los_lookup = {}
+	_active_los_resource = null
 	visible_hexes = {Globals.Team.AXIS: [], Globals.Team.ALLIES: []}
 	initialized = false
 
@@ -90,12 +113,15 @@ func bake_and_save_los_data(map: Map) -> void:
 
 	var los_resource: LosLookupData = LosLookupData.new()
 	los_resource.los_lookup = los_lookup
+	los_resource.building_layout_signature = building_layout_signature()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	
 	ResourceSaver.save(los_resource, file_path)
 	print("LOS data saved to: ", file_path)
 
 func prebake_los() -> void:
+	building_layout_signature()
+	los_lookup = {}
 	for ox: int in range(grid_size.x):
 		for oy: int in range(grid_size.y):
 			var o_hex: Vector2i = Vector2i(ox, oy)
@@ -1160,6 +1186,8 @@ func _tile_pixel_is_solid(point: Vector2, layer: TileMapLayer, cell: Vector2i) -
 	if source == null or source.texture == null:
 		return false
 	var data: TileData = layer.get_cell_tile_data(cell)
+	if _is_multihex_building(data) and layer.local_to_map(point) != cell:
+		return false
 	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 	var offset: Vector2 = point - layer.map_to_local(cell) + Vector2(data.texture_origin)
 	if data.transpose:
@@ -1186,6 +1214,7 @@ func _tile_pixel_is_solid(point: Vector2, layer: TileMapLayer, cell: Vector2i) -
 func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: Vector2i) -> Vector2:
 	var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
 	var data: TileData = layer.get_cell_tile_data(cell)
+	var clip_to_cell: bool = _is_multihex_building(data)
 	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 	var size: Vector2 = Vector2(region.size)
 	if data.transpose:
@@ -1214,6 +1243,8 @@ func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: 
 		return Vector2.INF
 	for index: int in range(steps + 1):
 		var point: Vector2 = origin.lerp(target, lerpf(near, far, float(index) / float(steps)))
+		if clip_to_cell and layer.local_to_map(point) != cell:
+			continue
 		var offset: Vector2 = point - center
 		if data.transpose:
 			offset = Vector2(offset.y, offset.x)
@@ -1228,6 +1259,11 @@ func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: 
 		if pixel.x < image.get_width() and pixel.y < image.get_height() and image.get_pixelv(pixel).a > 0.1:
 			return point
 	return Vector2.INF
+
+
+func _is_multihex_building(data: TileData) -> bool:
+	# The visible anchor draws the full roof, but each hex owns its LOS slice.
+	return data.has_custom_data("building_hexes") and int(data.get_custom_data("building_hexes")) >= 2
 
 
 func _texture_obstacle_candidates(hexes: Array[Vector3i]) -> Dictionary[Vector2i, bool]:
