@@ -6,7 +6,10 @@ A playable standalone candidate for replacing **Battle for Alderbrook**. Select
 under `alderbrook_western_approach`.
 
 The 28 × 18 map transitions from farm plots and broken woodland to an orchard
-estate, roadside cottages and workshop yards, then dense paved town blocks.
+estate, roadside cottages and workshop yards, then dense town blocks. Most houses
+are timber, with stone retained at the estate and a few town landmarks. Green open
+ground covers the entire map beneath the roads, fields and buildings.
+The current layout has 69 timber houses and 15 stone buildings.
 There is no river. Three continuous roads and two diagonal connecting streets
 support lateral movement; the northern and southern approaches remain usable
 when the central approach is unavailable.
@@ -20,14 +23,14 @@ duration is fifteen minutes.
 | Objective | Location | Tactical role |
 | --- | --- | --- |
 | A — Orchard estate | `(13, 4)` | Orchard concealment and hedges screen approach; stone buildings anchor a flank into town. |
-| B — Market square | `(20, 9)` | Deepest objective, in an open paved square. Roadside houses and diagonal streets provide alternatives to a frontal advance. |
+| B — Market square | `(20, 9)` | Deepest objective, in an open green square. Roadside houses and diagonal streets provide alternatives to a frontal advance. |
 | C — Workshop yard | `(16, 14)` | Timber sheds give successive covered positions. The connecting street supports a southern attack on the market. |
 
 Objectives lie at different depths. A platoon can capture an outer district and
 help a neighboring attack while another holds it. Fields hinder fire, woodland
-blocks sight, and buildings provide the existing stone or timber cover. Paving
-uses open-ground movement and elevation rules. Roads clear building and woodland
-cover from their hexes. The market has no building cover.
+blocks sight, and buildings provide the existing stone or timber cover. Roads
+clear building and woodland cover from their hexes. The market has no building
+cover.
 
 Major victory requires A, B and C to be held simultaneously, each for thirty
 uninterrupted seconds, and ends the battle immediately. Minor victory requires B
@@ -60,15 +63,16 @@ godot --headless --editor --path . --import
 python3 tools/campaigns/render_alderbrook_maps.py docs/scenarios/western_approach/alderbrook_western_approach.json
 ```
 
-The image renderer requires Pillow and NumPy. `--roads-only` also rasterizes the
-vector town paving. `--los-only` rebakes sight from the saved scene. `--skip-los`
-is available for terrain iteration; rebake before playing changed terrain.
+The image renderer requires Pillow and NumPy. `--los-only` rebakes sight from the
+saved scene. `--skip-los` is available for terrain iteration; rebake before
+playing changed terrain.
 
 ## Verification
 
 `tests/western_approach_regression.tscn` exercises normal menu availability, unique
-save and command identities, faction loadouts, deployment legality, country-to-town
-building density, connected roads, both flanks with the center disabled, complete
+save and command identities, faction loadouts, deployment legality, green open
+ground, predominantly timber buildings, country-to-town building density,
+connected roads, both flanks with the center disabled, complete
 baked LOS, real match startup and defending company AI. It also checks simultaneous
 occupation, hold timing, loss of control, contested objectives and deadline-only
 minor victory. Run with `--fixed-fps 60` and isolated user data.
@@ -76,6 +80,6 @@ minor victory. Run with `--fixed-fps 60` and isolated user data.
 Automated validation establishes scenario loading, movement and victory behavior.
 Human balance and combat pacing remain unverified.
 
-Validated with Godot 4.7.2: 266 standalone scenario checks, 6,125 terrain palette
-checks and 6,959 existing campaign checks passed. All 251 project scripts parsed
-and passed the explicit-type and no-ternary convention check.
+Validated with Godot 4.7.2 after the timber and green-ground revision: 267 standalone
+scenario checks and 6,121 terrain palette checks passed. All 251 project scripts
+parsed and passed the explicit-type and no-ternary convention check.

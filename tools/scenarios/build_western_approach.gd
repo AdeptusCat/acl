@@ -6,7 +6,6 @@ const APPROACH_SCENE: String = "res://scenes/scenarios/standalone/alderbrook_wes
 const APPROACH_RESOURCES: String = "res://resources/scenarios/"
 const APPROACH_DOCS: String = "res://docs/scenarios/western_approach/"
 const APPROACH_SIZE: Vector2i = Vector2i(28, 18)
-const APPROACH_PAVING_EDGE: Array[int] = [19, 18, 19, 18, 19, 17, 18, 16, 16, 17, 18, 19, 17, 18, 19, 18, 20, 20]
 const APPROACH_ROUTES: Array[Array] = [
 	[Vector3(-1, 8.5, 0), Vector3(5, 8.0, -0.1), Vector3(11, 8.2, 0.12), Vector3(16, 8.1, 0), Vector3(22, 8.1, 0), Vector3(28, 8.1, 0)],
 	[Vector3(-1, 4.3, 0), Vector3(5, 4.0, -0.1), Vector3(9, 2.3, 0), Vector3(15, 2.2, 0), Vector3(20, 3.1, 0), Vector3(28, 3.1, 0)],
@@ -39,9 +38,6 @@ func _run() -> void:
 	approach_layout = _roads.layout_for_routes(APPROACH_ROUTES, APPROACH_SIZE)
 	if OS.get_cmdline_user_args().has("--roads-only"):
 		_roads.write_assets(APPROACH_ID, approach_layout)
-		var paving: Image = Image.new()
-		assert(paving.load_svg_from_string(FileAccess.get_file_as_string("res://assets/tiles/scenarios/town_paving.svg")) == OK)
-		assert(paving.save_png("res://assets/tiles/scenarios/town_paving.png") == OK)
 		get_tree().quit()
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(APPROACH_SCENE.get_base_dir()))
@@ -111,7 +107,6 @@ func _create_approach() -> Map:
 	approach_stone_sources = _sources_for_images(_building_set, ["res://assets/tiles/buildings/building_stone_01.png", "res://assets/tiles/buildings/building_stone_02.png"])
 	approach_timber_sources = _sources_for_images(_building_set, ["res://assets/tiles/buildings/building_wood_01.png", "res://assets/tiles/buildings/building_wood_02.png", "res://assets/tiles/buildings/building_wood_03.png"])
 	var ground_sources: Array[int] = _sources_for_images(ground.tile_set, OPEN_GROUND_IMAGES)
-	var paving_source: int = _paving_source(ground.tile_set)
 	_grass_noise.seed = 18731
 	_grass_noise.frequency = 0.12
 	for x: int in range(APPROACH_SIZE.x):
@@ -119,8 +114,6 @@ func _create_approach() -> Map:
 			var cell: Vector2i = Vector2i(x, y)
 			var variant: int = clampi(floori((_grass_noise.get_noise_2d(x, y) + 1.0) * 1.5), 0, 2)
 			ground.set_cell(cell, ground_sources[variant], Vector2i.ZERO)
-			if x >= APPROACH_PAVING_EDGE[y]:
-				ground.set_cell(cell, paving_source, Vector2i.ZERO)
 	# Broken woodland edges screen deployment without dividing the battlefield.
 	for plot: Rect2i in [Rect2i(0, 0, 8, 2), Rect2i(0, 16, 12, 2), Rect2i(5, 6, 3, 2), Rect2i(8, 10, 2, 3)]:
 		for x: int in range(plot.position.x, plot.end.x):
@@ -135,14 +128,17 @@ func _create_approach() -> Map:
 	_paint_approach_roads(terrain, buildings)
 	# Sparse farm/outskirts buildings become irregular, denser town blocks.
 	for cell: Vector2i in [Vector2i(7, 9), Vector2i(10, 7), Vector2i(11, 6), Vector2i(13, 9), Vector2i(14, 10), Vector2i(15, 7), Vector2i(13, 4), Vector2i(14, 4), Vector2i(15, 4), Vector2i(15, 6), Vector2i(17, 5)]:
-		_place_approach_house(terrain, buildings, cell, true)
+		var stone: bool = cell.y == 4 and cell.x >= 13 and cell.x <= 15
+		_place_approach_house(terrain, buildings, cell, stone)
 	for cell: Vector2i in [Vector2i(5, 12), Vector2i(10, 12), Vector2i(12, 13), Vector2i(14, 12), Vector2i(16, 14), Vector2i(17, 14), Vector2i(18, 14), Vector2i(18, 12)]:
 		_place_approach_house(terrain, buildings, cell, false)
 	for x: int in range(17, 28):
 		for y: int in range(1, 17):
 			var cell: Vector2i = Vector2i(x, y)
 			if posmod(x * 2 + y, 5) <= 2 and not (y == 9 and x >= 19 and x <= 21):
-				_place_approach_house(terrain, buildings, cell, true)
+				# Keep occasional stone landmarks among predominantly timber houses.
+				var stone: bool = posmod(x + y * 2, 5) == 0
+				_place_approach_house(terrain, buildings, cell, stone)
 	var walls: HexagonTileMapLayer = map.get_wall_layer()
 	var hedge_source: int = _sources_for_images(walls.tile_set, ["res://assets/tiles/walls/hedge_nw.png"])[0]
 	for cell: Vector2i in [Vector2i(6, 5), Vector2i(7, 5), Vector2i(8, 5), Vector2i(9, 5), Vector2i(10, 6)]:
@@ -223,21 +219,6 @@ func _place_approach_house(terrain: HexagonTileMapLayer, buildings: HexagonTileM
 		if stone:
 			sources = approach_stone_sources
 		buildings.set_cell(cell, sources[posmod(cell.x + cell.y, sources.size())], Vector2i.ZERO)
-
-
-func _paving_source(tiles: TileSet) -> int:
-	var custom: int = tiles.get_custom_data_layers_count()
-	tiles.add_custom_data_layer()
-	tiles.set_custom_data_layer_name(custom, "art_family")
-	tiles.set_custom_data_layer_type(custom, TYPE_STRING)
-	var source: TileSetAtlasSource = TileSetAtlasSource.new()
-	source.resource_name = "Town Paving"
-	source.texture = load("res://assets/tiles/scenarios/town_paving.png") as Texture2D
-	source.texture_region_size = Vector2i(128, 128)
-	source.create_tile(Vector2i.ZERO)
-	var id: int = tiles.add_source(source)
-	source.get_tile_data(Vector2i.ZERO, 0).set_custom_data("art_family", "stone")
-	return id
 
 
 func _approach_conditions() -> Array[VictoryCondition]:

@@ -80,21 +80,34 @@ func _test_terrain(map: Map) -> void:
 	_check(str(buildings.get_cell_tile_data(OBJECTIVES[0]).get_custom_data("name")) == "Stone Building", "Orchard objective has estate cover")
 	_check(buildings.get_cell_source_id(OBJECTIVES[1]) < 0, "Market objective remains an open square")
 	_check(str(buildings.get_cell_tile_data(OBJECTIVES[2]).get_custom_data("name")) == "Wood Building", "Workshop objective has timber cover")
-	var paving: TileData = ground.get_cell_tile_data(OBJECTIVES[1])
-	_check(str(paving.get_custom_data("art_family")) == "stone" and int(paving.get_custom_data("elevation")) == 0 and paving.get_collision_polygons_count(0) == 0, "Town paving changes appearance while retaining open-ground movement rules")
-	_check(paving.material == TerrainPalette.material_for_family("stone", ground.get_viewport().use_hdr_2d), "Standalone town paving receives the stone palette")
-	var paving_atlas: TileSetAtlasSource = ground.tile_set.get_source(ground.get_cell_source_id(OBJECTIVES[1])) as TileSetAtlasSource
-	_check(paving_atlas.texture.get_image().get_pixel(64, 64).a > 0.95, "Town paving rasterizes as solid terrain rather than an empty SVG pattern")
+	var green_ground: bool = true
+	for cell: Vector2i in ground.get_used_cells():
+		var source: TileSetAtlasSource = ground.tile_set.get_source(ground.get_cell_source_id(cell)) as TileSetAtlasSource
+		if not source.texture.resource_path.begins_with("res://assets/tiles/vegetation/open_ground_green_"):
+			green_ground = false
+			break
+	_check(green_ground, "Every ground hex uses green open ground")
+	var market_ground: TileData = ground.get_cell_tile_data(OBJECTIVES[1])
+	_check(int(market_ground.get_custom_data("elevation")) == 0 and market_ground.get_collision_polygons_count(0) == 0, "Market ground retains open-ground movement rules")
+	_check(market_ground.material == TerrainPalette.material_for_family("open_ground", ground.get_viewport().use_hdr_2d), "The town uses the green open-ground palette")
 	var country_houses: int = 0
 	var town_houses: int = 0
+	var stone_houses: int = 0
+	var wooden_houses: int = 0
 	for cell: Vector2i in buildings.get_used_cells():
-		if str(buildings.get_cell_tile_data(cell).get_custom_data("name")) not in ["Stone Building", "Wood Building"]:
+		var kind: String = str(buildings.get_cell_tile_data(cell).get_custom_data("name"))
+		if kind not in ["Stone Building", "Wood Building"]:
 			continue
+		if kind == "Stone Building":
+			stone_houses += 1
+		else:
+			wooden_houses += 1
 		if cell.x < 10:
 			country_houses += 1
 		elif cell.x >= 17:
 			town_houses += 1
 	_check(town_houses > country_houses * 4, "Building density increases from farmland to town")
+	_check(stone_houses > 0 and wooden_houses >= stone_houses * 3, "Wooden houses form the large majority while stone landmarks remain")
 	# Remove the entire central approach to prove the northern and southern flanks survive.
 	var graph: AStar2D = ground.astar
 	var disabled: Array[int] = []
