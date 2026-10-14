@@ -41,10 +41,11 @@ squads_collection = ExtResource("3_8iqcm")
 metadata/_edit_lock_ = true
 
 [node name="UnitUi" parent="." unique_id=1803731449 instance=ExtResource("10_ga1pk")]
-offset_left = -33.0
-offset_top = -32.0
-offset_right = 7.0
-offset_bottom = 8.0
+offset_left = -61.0
+offset_top = -62.0
+offset_right = 139.0
+offset_bottom = 3.0
+scale = Vector2(2, 2)
 morale_popup_scene = ExtResource("5_djab4")
 morale_flash_scene = ExtResource("5_djab4")
 metadata/_edit_use_anchors_ = true
