@@ -166,6 +166,8 @@ func _remove_participant(participant: Participant) -> void:
 	if is_instance_valid(participant.unit):
 		_disconnect_unit(participant.unit)
 		participant.unit.in_close_combat = false
+		if participant.unit.movement != null:
+			participant.unit.movement.resume_centering()
 	participants.erase(participant)
 	participant.unit = null
 

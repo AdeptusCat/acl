@@ -180,7 +180,7 @@ color = Color(0.233925, 0.233925, 0.233925, 1)
 
 [node name="TryAgainButton" type="Button" parent="Control/TryAgain" unique_id=567185487]
 layout_mode = 2
-text = "Try Again!"
+text = "Main Menu"
 
 [node name="MarginContainer" type="MarginContainer" parent="Control/TryAgain" unique_id=2091473546]
 visible = false

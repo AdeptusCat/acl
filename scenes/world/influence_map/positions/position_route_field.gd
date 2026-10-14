@@ -153,6 +153,8 @@ func _neighbor_edges(from: Vector2i) -> Array:
 		if _graph.is_point_disabled(neighbor):
 			continue
 		var cell: Vector2i = LOSHelper.ground_layer.local_to_map(_graph.get_point_position(neighbor))
+		if _query.profile.avoid_unsuppressed_defenders and not PositionQueryService.approach_path_is_safe(_query, [_origin, cell]):
+			continue
 		var step: Dictionary = step_data(cell)
 		if step["risk"] > _query.profile.max_route_exposure or _query.snapshot.maps[_query.team].get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0:
 			continue

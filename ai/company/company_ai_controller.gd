@@ -280,6 +280,8 @@ func _assign_roles() -> void:
 		formation.objective = owner.current_order.objective_hex
 		if formation.task != null:
 			formation.objective = formation.task.hex
+			if formation.task.breach_required:
+				formation.objective = formation.task.breach_hex
 		var key: String = str([formation.company, formation.objective])
 		if not groups.has(key):
 			groups[key] = []
@@ -362,7 +364,8 @@ func _choose_support(members: Array[CompanyPlatoon], maneuver: CompanyPlatoon) -
 	var selected: CompanyPlatoon
 	var best: float = 0.0
 	for formation: CompanyPlatoon in members:
-		if formation == maneuver or formation.task != null or formation.effectiveness() <= 0.0:
+		var shared_breach: bool = formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT and formation.task.breach_required and formation.objective == maneuver.objective
+		if formation == maneuver or (formation.task != null and not shared_breach) or formation.effectiveness() <= 0.0:
 			continue
 		var score: float = formation.support_firepower()
 		if formation.role == CompanyPlatoon.Role.SUPPORT:

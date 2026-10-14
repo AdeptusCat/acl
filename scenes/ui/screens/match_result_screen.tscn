@@ -67,7 +67,7 @@ alignment = 1
 
 [node name="TryAgain" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=409671125]
 layout_mode = 2
-text = "Try Again"
+text = "Main Menu"
 
 [node name="KeepPlaying" type="Button" parent="Control/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=972328819]
 layout_mode = 2

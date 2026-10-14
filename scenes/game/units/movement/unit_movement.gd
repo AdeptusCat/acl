@@ -2,6 +2,7 @@ class_name UnitMovement
 extends Node
 
 var unit: Unit
+const REFERENCE_TILE_SIZE: float = 64.0
 
 # Movement state
 var path_hexes: Array[Vector2i] = []
@@ -52,8 +53,11 @@ enum TerrainType { OPEN, ROAD, ORCHARD, GRAIN, BRUSH, WOODS, BUILDING }
 @export var cover_to_move_mult: Array[float] = [1.00, 0.85, 0.70, 0.60]
 
 var terrain_mult: float = 1.0
+var pending_recenter: bool = false
 
 func _process(delta: float) -> void:
+	if pending_recenter:
+		resume_centering()
 	if is_moving:
 		_process_movement(delta)
 
@@ -64,8 +68,9 @@ func _process(delta: float) -> void:
 
 func stop() -> void:
 	_clear_path_state()
-	if not unit.is_active() or unit.in_close_combat or _is_pinned():
+	if not unit.is_active() or unit.surrendered or unit.in_close_combat or _is_pinned():
 		# Combat locks the occupied hex immediately, without recentering or arrival callbacks.
+		pending_recenter = unit.is_active() and not unit.surrendered and is_instance_valid(LOSHelper.ground_layer) and unit.position.distance_to(LOSHelper.ground_layer.map_to_local(unit.current_hex)) > 0.1
 		var was_moving: bool = is_moving or unit.is_moving
 		is_moving = false
 		unit.is_moving = false
@@ -76,10 +81,43 @@ func stop() -> void:
 			stopped_moving.emit()
 		new_target_hex.emit(target_hex)
 		return
+	pending_recenter = false
 	if is_moving:
 		_start_move_to_hex(unit.current_hex)
 		target_hex = unit.current_hex
 		new_target_hex.emit(target_hex)
+
+
+func resume_centering() -> void:
+	if not pending_recenter:
+		return
+	if not unit.is_active() or unit.surrendered:
+		pending_recenter = false
+		return
+	if unit.in_close_combat or _is_pinned() or not is_instance_valid(LOSHelper.ground_layer):
+		return
+	pending_recenter = false
+	target_hex = unit.current_hex
+	_start_move_to_hex(unit.current_hex)
+	new_target_hex.emit(target_hex)
+
+
+func remaining_waypoints() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	if not unit.is_active() or unit.surrendered:
+		return result
+	if not is_moving and not attack_in_progress:
+		return result
+	if path_hexes.is_empty():
+		result.append(unit.goal_hex)
+	else:
+		for index: int in range(path_index, path_hexes.size()):
+			result.append(path_hexes[index])
+	if attack_in_progress and not in_exposed_phase:
+		for hex: Vector2i in exposed_path_hexes:
+			if result.is_empty() or result[-1] != hex:
+				result.append(hex)
+	return result
 
 
 func move_to_hex(new_hex: Vector2i) -> void:
@@ -88,9 +126,10 @@ func move_to_hex(new_hex: Vector2i) -> void:
 
 
 func _start_move_to_hex(new_hex: Vector2i) -> void:
-	if not unit.is_active() or unit.in_close_combat or _is_pinned():
+	if not unit.is_active() or unit.surrendered or unit.in_close_combat or _is_pinned():
 		stop()
 		return
+	pending_recenter = false
 	_get_terrain_multiplier()
 	unit.goal_hex = new_hex
 	target_position = LOSHelper.ground_layer.map_to_local(unit.goal_hex)
@@ -212,12 +251,14 @@ func _start_exposed_phase() -> void:
 # ----------------------------------------------------------------------
 
 func _process_movement(delta: float) -> void:
-	if not unit.is_active() or unit.in_close_combat or _is_pinned():
+	if not is_moving:
+		return
+	if not unit.is_active() or unit.surrendered or unit.in_close_combat or _is_pinned():
 		stop()
 		return
 	var dir: Vector2 = (target_position - unit.position).normalized()
 	var dist: float = unit.position.distance_to(target_position)
-	var step: float = move_speed * terrain_mult * delta
+	var step: float = move_speed * _movement_scale() * terrain_mult * delta
 	
 	# check if arrived at hex
 	if dist <= step:
@@ -305,6 +346,8 @@ func state_changed(next: int) -> void:
 	_apply_speed(base_speed * move_mult)
 	if next == STATES.MoraleState.PINNED:
 		stop()
+	else:
+		resume_centering()
 
 
 func _is_pinned() -> bool:
@@ -339,10 +382,17 @@ func _mf_to_speed_mult(mf_total: float) -> float:
 
 
 func estimate_travel_seconds(from: Vector2, to: Vector2, movement_factor: float) -> float:
-	var speed: float = move_speed * _mf_to_speed_mult(movement_factor)
+	var speed: float = move_speed * _movement_scale() * _mf_to_speed_mult(movement_factor)
 	if speed <= 0.0:
 		return INF
 	return from.distance_to(to) / speed
+
+
+func _movement_scale() -> float:
+	if not is_instance_valid(LOSHelper.ground_layer) or LOSHelper.ground_layer.tile_set == null:
+		return 1.0
+	# Art resolution changes world distances, while a hex crossing keeps its duration.
+	return float(LOSHelper.ground_layer.tile_set.tile_size.x) / REFERENCE_TILE_SIZE
 
 
 func _terrain_mf(t: int) -> float:

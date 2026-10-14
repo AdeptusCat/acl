@@ -1,20 +1,20 @@
-[gd_resource type="TileSet" format=3 uid="uid://4pgbo7m727w4"]
+[gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" uid="uid://dr58l8fmnfbr8" path="res://assets/tiles/walls/wall_w.png" id="1_k1uxc"]
-[ext_resource type="Texture2D" uid="uid://djsd12yixqcnd" path="res://assets/tiles/walls/wall_nw.png" id="2_n4nhl"]
-[ext_resource type="Texture2D" uid="uid://c2u24pcpcb65s" path="res://assets/tiles/walls/wall_nw_w.png" id="3_kclvk"]
-[ext_resource type="Texture2D" uid="uid://bvb7p06gp153q" path="res://assets/tiles/walls/hedge_nw.png" id="4_d77u8"]
-[ext_resource type="Texture2D" uid="uid://beb0yfr6kl7yi" path="res://assets/tiles/walls/wall_sw_so.png" id="5_b4mfo"]
-[ext_resource type="Texture2D" uid="uid://6j8xpdq38u1b" path="res://assets/tiles/walls/hedge_nw_w.png" id="6_cesmb"]
-[ext_resource type="Texture2D" uid="uid://dpmbh5n4eq7fv" path="res://assets/tiles/walls/hedge_so.png" id="7_5ojxw"]
-[ext_resource type="Texture2D" uid="uid://06ki7p0r3su" path="res://assets/tiles/walls/hedge_sw.png" id="8_3coot"]
-[ext_resource type="Texture2D" uid="uid://dcvm30237shwe" path="res://assets/tiles/walls/hedge_sw_so.png" id="9_277ok"]
-[ext_resource type="Texture2D" uid="uid://cjrrdpi6l47tv" path="res://assets/tiles/walls/hedge_w.png" id="10_33rv5"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/wall_w.png" id="1_k1uxc"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/wall_nw.png" id="2_n4nhl"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/wall_nw_w.png" id="3_kclvk"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_nw.png" id="4_d77u8"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/wall_sw_so.png" id="5_b4mfo"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_nw_w.png" id="6_cesmb"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_so.png" id="7_5ojxw"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_sw.png" id="8_3coot"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_sw_so.png" id="9_277ok"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/hedge_w.png" id="10_33rv5"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k1uxc"]
 resource_name = "Wall"
 texture = ExtResource("1_k1uxc")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -29,7 +29,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n4nhl"]
 resource_name = "Wall"
 texture = ExtResource("2_n4nhl")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -55,7 +55,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kclvk"]
 resource_name = "Wall"
 texture = ExtResource("3_kclvk")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -85,7 +85,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d77u8"]
 resource_name = "Hedge"
 texture = ExtResource("4_d77u8")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -107,7 +107,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b4mfo"]
 resource_name = "Wall"
 texture = ExtResource("5_b4mfo")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -124,7 +124,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cesmb"]
 resource_name = "Hedge"
 texture = ExtResource("6_cesmb")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -154,13 +154,13 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5ojxw"]
 resource_name = "Hedge"
 texture = ExtResource("7_5ojxw")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3coot"]
 resource_name = "Hedge"
 texture = ExtResource("8_3coot")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -182,7 +182,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_277ok"]
 resource_name = "Hedge"
 texture = ExtResource("9_277ok")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -199,7 +199,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_33rv5"]
 resource_name = "Hedge"
 texture = ExtResource("10_33rv5")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/next_alternative_id = 3
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -214,7 +214,7 @@ texture_region_size = Vector2i(64, 64)
 [resource]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "cover"
 custom_data_layer_0/type = 2
 custom_data_layer_1/name = "n"

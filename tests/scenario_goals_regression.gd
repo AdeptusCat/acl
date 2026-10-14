@@ -18,6 +18,19 @@ func _run() -> void:
 	var world: Node = main.world
 	var map: Map = world.maps.get_node("DefaultMap")
 	var scenario: Scenario = map.get_scenario(0)
+	# These squad-allocation checks exercise one platoon; company allocation has its own suite.
+	var headquarters_found: bool = false
+	for child: Node in scenario.get_units():
+		var unit: Unit = child as Unit
+		if unit == null or unit.team != Globals.Team.AXIS:
+			continue
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			if headquarters_found:
+				unit.queue_free()
+				continue
+			headquarters_found = true
+		unit.platoon = 1
+		unit.formation_id = 1
 	# Keep this denial fixture independent of authored scenario victory edits.
 	var occupation: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
 	occupation.team = Globals.Team.ALLIES
@@ -177,7 +190,7 @@ func _test_multiple_goals() -> void:
 	goals.configure(planner.team, [condition, exit], PositionProfile.Mode.ASSAULT)
 	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 300.0))
 	goals.update(planner, 300.0, 40.0)
-	_check(goals.assignments.size() == 3 and goals.assignments[rifles[2]].kind == ScenarioGoalTask.Kind.EXIT, "Distinct squads receive exit and occupation duties in one winning package")
+	_check(goals.assignments.size() == 3 and goals.assignments[rifles[2]].kind == ScenarioGoalTask.Kind.EXIT, "Distinct squads receive exit and occupation duties in one winning package: " + str(goals.diagnostics))
 	exit.advance_time(0.1)
 	goals.update(planner, 300.0, 41.0)
 	_check(goals.assignments.size() == 2 and not goals.assignments.has(rifles[2]), "Completed exit duties release squads without extra trips")
@@ -478,7 +491,7 @@ func _test_hold_to_exit_fallback() -> void:
 				planner.executor.cancel(query.unit, true)
 				query.unit.give_hold_order()
 				_set_hex(query.unit, query.unit.current_hex)
-	_check(hq_exits == 1 and planner._planning_requests.size() == planner.squads.size(), "The real planner gives HQ one exact exit request instead of a competing support request")
+	_check(hq_exits == 1 and planner._planning_requests.size() == planner.squads.size(), "The real planner gives HQ one exact exit request instead of a competing support request: exits %d; requests %d; squads %d" % [hq_exits, planner._planning_requests.size(), planner.squads.size()])
 	planner._cancel_plan()
 	_check(goals.primary.reason.contains("Too few combat squads"), "Withdrawal advice explains why the linked hold was abandoned")
 	hold.required_unit_count = 1
@@ -659,7 +672,7 @@ func _test_fallback_minimum_force() -> void:
 	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
 	goals.update(planner, 10000.0, 420.0)
 	goals.update(planner, 10000.0, 425.0)
-	_check(goals.active_fallback == policy and goals.fallback_reason.contains("remaining: 0") and goals.assignments.size() == 1 and goals.assignments.has(headquarters), "HQ is excluded from the combat threshold and withdraws when it is the only survivor")
+	_check(goals.active_fallback == policy and goals.fallback_reason.contains("remaining: 0") and goals.assignments.size() == 1 and goals.assignments.has(headquarters), "HQ is excluded from the combat threshold and withdraws when it is the only survivor: " + str(goals.assignments.size()) + "; " + goals.fallback_reason)
 	planner._planning_snapshot = snapshot
 	planner._planning_reservations = {}
 	planner._planning_requests.clear()

@@ -16,6 +16,8 @@ func _pathfinding_does_tile_connect(_tile: Vector2i, _neighbor: Vector2i) -> boo
 		return true
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
 	#pathfinding_enabled = true
 	#if Engine.is_editor_hint():
 		## allow this CanvasItem to receive gui_input in the editor

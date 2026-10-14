@@ -71,7 +71,7 @@ func _run() -> void:
 		formation.planner.executor.cancel_all(true)
 	for unit: Unit in commander.squads:
 		unit.give_hold_order()
-		unit.movement._process_movement(1.0)
+		unit.movement._process_movement(100.0)
 		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
 	controller.influence_map_controller.create_maps(0.0)
 	_test_support_gate()

@@ -33,14 +33,14 @@ def main() -> None:
             bounds: tuple[int, int, int, int] | None = alpha.point(visible_alpha).getbbox()
             if bounds is None or alpha.getextrema()[0] != 0:
                 raise ValueError(f"{name} must have transparent surroundings")
-            tile: Image.Image = source.crop(bounds).resize((64, 64), Image.Resampling.LANCZOS)
+            tile: Image.Image = source.crop(bounds).resize((128, 128), Image.Resampling.LANCZOS)
             tile.save(folder / f"{name}.png")
             enlarged: Image.Image = tile.resize((256, 256), Image.Resampling.NEAREST)
             preview.paste(enlarged, (column * 280 + 12, row * 316 + 48), enlarged)
     output: Path = ROOT / "docs/art/terrain_variations"
     output.mkdir(parents=True, exist_ok=True)
     preview.save(output / "preview.png")
-    print("Exported 15 transparent 64x64 terrain variations and their preview.")
+    print("Exported 15 transparent 128x128 terrain variations and their preview.")
 
 
 if __name__ == "__main__":

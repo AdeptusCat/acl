@@ -99,6 +99,7 @@ func _run() -> void:
 	_test_stop(unit, ground, movement)
 	_test_replacement_moves(unit, ground, movement)
 	_test_action_orders(unit, ground, movement)
+	_test_combat_recenter(unit, ground, movement)
 	_test_pinned_movement(unit, ground, movement)
 
 	unit.stress_system.free()
@@ -132,10 +133,57 @@ func _test_pinned_movement(unit: Unit, ground: HexagonTileMapLayer, movement: Un
 	_check(not PositionQueryService.can_follow_intent(unit), "Tactical planner cannot move a pinned unit")
 	unit.stress_system.state = UnitStates.MoraleState.NORMAL
 	movement.state_changed(UnitStates.MoraleState.NORMAL)
-	_check(not movement.is_moving, "Recovery does not resume a canceled path")
+	_check(movement.is_moving and unit.goal_hex == unit.current_hex, "Recovery resumes centering in the occupied hex")
+	movement._process_movement(100.0)
+	_check(unit.position == ground.map_to_local(unit.current_hex), "Recovered unit reaches its current hex center")
+	_check(not movement.is_moving and unit.current_hex == start, "Centering does not resume the canceled route")
 	movement.move_to_hex(destination)
 	movement._process_movement(100.0)
 	_check(unit.current_hex == destination, "Recovered unit can follow a new movement order")
+
+
+func _test_combat_recenter(unit: Unit, ground: HexagonTileMapLayer, movement: UnitMovement) -> void:
+	var start: Vector2i = Vector2i(2, 2)
+	_reset(unit, ground, start)
+	movement.move_to_hex(start + Vector2i(0, 2))
+	_check(movement.remaining_waypoints() == [start + Vector2i(0, 2)], "Direct moves expose their destination waypoint")
+	movement._process(0.1)
+	var locked_position: Vector2 = unit.position
+	unit.in_close_combat = true
+	movement.stop()
+	_check(movement.pending_recenter and movement.remaining_waypoints().is_empty(), "Combat cancels the route and retains only centering intent")
+	movement._process(100.0)
+	_check(unit.position == locked_position and arrived_hexes.is_empty(), "Close combat prevents centering and false arrival")
+	unit.stress_system.state = STATES.MoraleState.PINNED
+	unit.in_close_combat = false
+	movement.resume_centering()
+	_check(not movement.is_moving and movement.pending_recenter, "Clearing close combat does not bypass pinning")
+	unit.stress_system.state = STATES.MoraleState.NORMAL
+	movement.state_changed(STATES.MoraleState.NORMAL)
+	movement._process(100.0)
+	_check(unit.position == ground.map_to_local(start) and unit.current_hex == start and not movement.pending_recenter, "Centering finishes after both combat locks clear")
+	_check(arrived_hexes == [start], "Combat recovery emits one real centered arrival")
+	movement._process_movement(100.0)
+	_check(arrived_hexes == [start], "Late movement calls cannot duplicate a completed arrival")
+	_begin_attack(unit, ground, movement, start)
+	_check(movement.remaining_waypoints() == [start + Vector2i(0, 1), start + Vector2i(0, 2)], "Attack routes include the covered and exposed waypoints")
+	movement._process(100.0)
+	_check(movement.remaining_waypoints() == [start + Vector2i(0, 2)], "Completed waypoints disappear while the route continues")
+	movement.stop()
+	movement._process(100.0)
+	_check(movement.remaining_waypoints().is_empty(), "Canceled routes leave no visible waypoints")
+	_reset(unit, ground, start)
+	movement.move_to_hex(start + Vector2i(0, 2))
+	movement._process(0.1)
+	locked_position = unit.position
+	unit.in_close_combat = true
+	movement.stop()
+	unit.surrendered = true
+	unit.in_close_combat = false
+	movement.resume_centering()
+	movement._process(100.0)
+	_check(not movement.is_moving and not movement.pending_recenter and unit.position == locked_position, "Surrendered combat participants cannot resume centering")
+	unit.surrendered = false
 
 
 func _test_stop(unit: Unit, ground: HexagonTileMapLayer, movement: UnitMovement) -> void:

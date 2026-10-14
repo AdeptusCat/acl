@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64">
 <path d="M16 0H48L64 32 48 64H16L0 32Z" fill="#457c8b"/>
 <defs><clipPath id="hex"><path d="M16 0H48L64 32 48 64H16L0 32Z"/></clipPath></defs>
 <g clip-path="url(#hex)" fill="none" stroke-linejoin="round">
-<path d="M-16 0L32 32 80 0" stroke="#514c40" stroke-width="22"/>
-<path d="M-16 0L32 32 80 0" stroke="#ad9c7c" stroke-width="17"/>
-<path d="M-16 0L32 32 80 0" stroke="#766c55" stroke-width="17" stroke-dasharray="1 8"/>
+<path d="M-8 16H72" stroke="#514c40" stroke-width="22"/>
+<path d="M-8 16H72" stroke="#ad9c7c" stroke-width="17"/>
+<path d="M-8 16H72" stroke="#766c55" stroke-width="17" stroke-dasharray="1 8"/>
 </g>
 </svg>

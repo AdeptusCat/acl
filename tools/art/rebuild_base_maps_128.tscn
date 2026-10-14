@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/art/rebuild_base_maps_128.gd" id="1"]
+
+[node name="RebuildBaseMaps128" type="Node"]
+script = ExtResource("1")

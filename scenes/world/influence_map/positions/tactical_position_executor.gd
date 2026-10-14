@@ -146,7 +146,9 @@ static func select_support_target(unit: Unit, objective: Vector2i) -> Unit:
 			continue
 		var suppressed: bool = is_sufficiently_suppressed(enemy)
 		var stress: float = enemy.stress_system.S_eff
-		if selected == null or (selected_suppressed and not suppressed) or (selected_suppressed == suppressed and stress < lowest_stress):
+		var preferred_objective: bool = selected != null and enemy.current_hex == objective and selected.current_hex != objective
+		var same_objective_priority: bool = selected == null or (enemy.current_hex == objective) == (selected.current_hex == objective)
+		if selected == null or (selected_suppressed and not suppressed) or (selected_suppressed == suppressed and (preferred_objective or (same_objective_priority and stress < lowest_stress))):
 			selected = enemy
 			lowest_stress = stress
 			selected_suppressed = suppressed

@@ -31,6 +31,7 @@ func _run() -> void:
 		_test_progression()
 		_test_bridges()
 		_test_visual_variants()
+		_test_roads()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -192,36 +193,108 @@ func _test_visual_variants() -> void:
 	var families: Dictionary[String, Dictionary] = {
 		"open_ground_green": {}, "woods_green": {}, "field_wheat": {}, "field_green_rows": {}, "orchard_green": {},
 	}
+	var family_names: Dictionary[String, String] = {"woods": "woods_green", "wheat": "field_wheat", "crops": "field_green_rows", "orchard": "orchard_green"}
+	var images: Dictionary[Texture2D, Image] = {}
 	for map: Map in campaign_maps:
 		var ground: HexagonTileMapLayer = map.get_ground_layer()
 		var terrain: HexagonTileMapLayer = map.get_terrain_layer()
 		var buildings: HexagonTileMapLayer = map.get_building_layer()
 		var crops: Dictionary[String, bool] = {}
+		for layer: HexagonTileMapLayer in map.get_tilemap_layers():
+			_check(layer.tile_set.tile_size == Vector2i(128, 128), "All map layers use matching 128-pixel spacing")
 		for layer: HexagonTileMapLayer in [ground, terrain]:
 			for cell: Vector2i in layer.get_used_cells():
 				var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+				var data: TileData = layer.get_cell_tile_data(cell)
+				var family: String = ""
 				var file: String = source.texture.resource_path.get_file().get_basename()
-				for family: String in families:
-					if not file.begins_with(family + "_"):
-						continue
-					families[family][file] = true
-					var data: TileData = layer.get_cell_tile_data(cell)
-					if family == "open_ground_green":
-						_check(int(data.get_custom_data("elevation")) == 0 and data.get_collision_polygons_count(0) == 0, "Every meadow variant keeps open-ground elevation and collision rules")
-					elif family == "woods_green":
-						_check(bool(data.get_custom_data("woods")) and bool(data.get_custom_data("hindrance")) and bool(data.get_custom_data("blocking")), "Every woodland variant preserves woodland LOS rules")
-						var canopy: TileSetAtlasSource = buildings.tile_set.get_source(buildings.get_cell_source_id(cell)) as TileSetAtlasSource
-						_check(canopy.texture.resource_path == source.texture.resource_path and int(buildings.get_cell_tile_data(cell).get_custom_data("cover")) == 1, "The terrain and cover layers show the same woodland canopy")
-					else:
-						_check(bool(data.get_custom_data("hindrance")) and not bool(data.get_custom_data("blocking")), "Field and orchard variants retain their original terrain rules")
-						_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods")
-						if family in ["field_wheat", "field_green_rows"]:
-							crops[family] = true
-				if layer == terrain and str(layer.get_cell_tile_data(cell).get_custom_data("name")) == "Field":
-					_check(file.begins_with("field_wheat_") or file.begins_with("field_green_rows_"), "Alderbrook fields use only wheat and green crops")
+				if file.begins_with("open_ground_green_"):
+					family = "open_ground_green"
+				elif data.has_custom_data("art_family"):
+					family = family_names.get(str(data.get_custom_data("art_family")), "")
+				if family == "":
+					continue
+				families[family][str([file, layer.get_cell_atlas_coords(cell)])] = true
+				_check(source.texture_region_size == Vector2i(128, 128), "Terrain images match their 128-pixel cells")
+				if family == "open_ground_green":
+					_check(int(data.get_custom_data("elevation")) == 0 and data.get_collision_polygons_count(0) == 0, "Meadow art keeps open-ground rules")
+				elif family == "woods_green":
+					_check(bool(data.get_custom_data("woods")) and bool(data.get_custom_data("hindrance")) and bool(data.get_custom_data("blocking")), "Woodland art preserves LOS rules")
+					var canopy: TileSetAtlasSource = buildings.tile_set.get_source(buildings.get_cell_source_id(cell)) as TileSetAtlasSource
+					for texture: Texture2D in [source.texture, canopy.texture]:
+						if not images.has(texture):
+							images[texture] = texture.get_image()
+					var terrain_image: Image = images[source.texture].get_region(source.get_tile_texture_region(layer.get_cell_atlas_coords(cell)))
+					var canopy_image: Image = images[canopy.texture].get_region(canopy.get_tile_texture_region(buildings.get_cell_atlas_coords(cell)))
+					_check(_same_visible_pixels(terrain_image, canopy_image) and int(buildings.get_cell_tile_data(cell).get_custom_data("cover")) == 1, "Terrain and cover layers use identical transparent canopy pixels")
+				else:
+					_check(bool(data.get_custom_data("hindrance")) and not bool(data.get_custom_data("blocking")), "Fields and orchards retain their terrain rules")
+					_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods")
+					if family in ["field_wheat", "field_green_rows"]:
+						crops[family] = true
 		_check(crops.size() == 2, "Every mission has both wheat and green-crop plots")
 	for family: String in families:
-		_check(families[family].size() == 3, "All three " + family + " variations appear across the campaign")
+		_check(families[family].size() >= 3, "Multiple connected " + family + " pieces appear across the campaign")
+
+
+func _same_visible_pixels(first: Image, second: Image) -> bool:
+	first.convert(Image.FORMAT_RGBA8)
+	second.convert(Image.FORMAT_RGBA8)
+	var a: PackedByteArray = first.get_data()
+	var b: PackedByteArray = second.get_data()
+	if a.size() != b.size():
+		return false
+	for index: int in range(0, a.size(), 4):
+		if a[index + 3] != b[index + 3]:
+			return false
+		# Import fills the RGB of fully transparent atlas padding from its neighbors.
+		if a[index + 3] > 25:
+			for channel: int in range(3):
+				if a[index + channel] != b[index + channel]:
+					return false
+	return true
+
+
+func _test_roads() -> void:
+	for map: Map in campaign_maps:
+		var ground: HexagonTileMapLayer = map.get_ground_layer()
+		var terrain: HexagonTileMapLayer = map.get_terrain_layer()
+		var buildings: HexagonTileMapLayer = map.get_building_layer()
+		var water: HexagonTileMapLayer = map.tile_map_layers.get_node("WaterTileMapLayer") as HexagonTileMapLayer
+		var corridor: Dictionary[Vector2i, bool] = {}
+		var variants: Dictionary[Vector2i, bool] = {}
+		var frontier: Array[Vector2i] = []
+		for cell: Vector2i in terrain.get_used_cells():
+			if str(terrain.get_cell_tile_data(cell).get_custom_data("name")) != "Road":
+				continue
+			corridor[cell] = true
+			variants[terrain.get_cell_atlas_coords(cell)] = true
+			_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Road corridors have playable ground and no hidden woodland or buildings")
+			_check(not bool(terrain.get_cell_tile_data(cell).get_custom_data("hindrance")) and not bool(terrain.get_cell_tile_data(cell).get_custom_data("blocking")), "Curved road pieces preserve open-road LOS rules")
+			if cell.x == 0:
+				frontier.append(cell)
+		for cell: Vector2i in water.get_used_cells():
+			if water.get_cell_source_id(cell) == 1:
+				corridor[cell] = true
+		_check(variants.size() >= 12, "Each mission uses distinct road pieces instead of a repeated chevron")
+		_check(not frontier.is_empty(), "Each road network enters from the western map edge")
+		var reached: Dictionary[Vector2i, bool] = {}
+		for start: Vector2i in frontier:
+			reached[start] = true
+		var cursor: int = 0
+		while cursor < frontier.size():
+			var cell: Vector2i = frontier[cursor]
+			cursor += 1
+			for neighbor: Vector2i in ground.get_surrounding_cells(cell):
+				if corridor.has(neighbor) and not reached.has(neighbor):
+					reached[neighbor] = true
+					frontier.append(neighbor)
+		_check(reached.size() == corridor.size(), "All road and bridge pieces belong to continuous routes from the western bank")
+		var eastern_connections: int = 0
+		for cell: Vector2i in reached:
+			if cell.x == map.grid_size.x - 1:
+				eastern_connections += 1
+		_check(eastern_connections > 0, "The curved road network reaches the eastern map edge")
 
 
 func _test_match(index: int) -> void:

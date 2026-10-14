@@ -111,6 +111,7 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
 
 
 func _draw() -> void:
+	_draw_player_routes()
 	#return
 	# 🔥 New: Draw blue lines to visible enemies
 	if Debug.show_los_lines:
@@ -145,8 +146,33 @@ func _draw() -> void:
 			#aim_line.set_line(
 				#connection["from"],
 				#connection["to"]
-			#)
-			##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+				#)
+				##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+
+func _draw_player_routes() -> void:
+	if not is_instance_valid(LOSHelper.ground_layer):
+		return
+	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
+		if not unit.is_active() or unit.movement == null:
+			continue
+		var waypoints: Array[Vector2i] = unit.movement.remaining_waypoints()
+		if waypoints.is_empty():
+			continue
+		var color: Color = Color(0.45, 0.85, 1.0, 0.8)
+		var width: float = 2.5
+		if unit.selected:
+			color = Color(1.0, 0.87, 0.24, 1.0)
+			width = 4.0
+		var previous: Vector2 = to_local(unit.global_position)
+		for index: int in range(waypoints.size()):
+			var point: Vector2 = to_local(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(waypoints[index])))
+			draw_line(previous, point, Color(0.05, 0.08, 0.05, 0.85), width + 3.0, true)
+			draw_line(previous, point, color, width, true)
+			draw_circle(point, 4.0, color)
+			if index == waypoints.size() - 1:
+				draw_arc(point, 10.0, 0.0, TAU, 32, Color(0.05, 0.08, 0.05, 0.9), width + 3.0, true)
+				draw_arc(point, 10.0, 0.0, TAU, 32, color, width, true)
+			previous = point
 
 func strength_to_color_hsv(strength: float) -> Color:
 	var s: float = strength

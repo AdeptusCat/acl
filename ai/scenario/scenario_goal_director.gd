@@ -173,6 +173,17 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 				best_cost = cost
 		if blocked != null:
 			_add_denial_tasks(blocked, planner)
+	for task: ScenarioGoalTask in tasks:
+		if task.kind != ScenarioGoalTask.Kind.EXIT:
+			continue
+		var breach: InfluenceContact = ExitBreachPlanner.select(planner, ScenarioGoalTask.exit_state_for(task.condition).exit_hexes)
+		if breach != null:
+			task.breach_required = true
+			task.breach_hex = breach.hex
+			# Concentrate the column before spending a platoon on a competing denial duty.
+			task.priority = maxf(task.priority, 140.0)
+			task.urgent = true
+			task.reason += "; breach the weakest defended corridor at " + str(breach.hex)
 	tasks.sort_custom(_prefer_task)
 
 

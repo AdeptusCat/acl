@@ -1,4 +1,4 @@
-"""Normalize generated field sprites to the game's 64-pixel terrain format."""
+"""Normalize generated field sprites to the game's 128-pixel terrain format."""
 
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
@@ -29,7 +29,7 @@ def main() -> None:
         bounds: tuple[int, int, int, int] | None = alpha.point(visible_alpha).getbbox()
         if bounds is None or alpha.getextrema()[0] != 0:
             raise ValueError(f"{name} must contain a visible sprite with transparent surroundings")
-        tile: Image.Image = source.crop(bounds).resize((64, 64), Image.Resampling.LANCZOS)
+        tile: Image.Image = source.crop(bounds).resize((128, 128), Image.Resampling.LANCZOS)
         tile.save(ASSETS / f"{name}.png")
         enlarged: Image.Image = tile.resize((256, 256), Image.Resampling.NEAREST)
         preview.paste(enlarged, (index * 280 + 12, 20), enlarged)
@@ -37,7 +37,7 @@ def main() -> None:
     output: Path = ROOT / "docs/art/field_tiles"
     output.mkdir(parents=True, exist_ok=True)
     preview.save(output / "preview.png")
-    print("Exported four transparent 64x64 field tiles and their game-size preview.")
+    print("Exported four transparent 128x128 field tiles and their game-size preview.")
 
 
 if __name__ == "__main__":

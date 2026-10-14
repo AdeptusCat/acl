@@ -299,7 +299,9 @@ func _test_path_interception() -> void:
 				_check(participant.side_role == CloseCombatInstance.SideRole.ATTACKER, "Movement locking preserves the entering squad's attacker role")
 		holder.surrender()
 		mover.movement._process(100.0)
-		_check(mover.current_hex == COMBAT_HEX and arrivals.is_empty(), "A canceled intercepted path stays canceled after resolution")
+		_check(mover.current_hex == COMBAT_HEX and not mover.movement.is_moving and mover.position == LOSHelper.ground_layer.map_to_local(COMBAT_HEX), "Resolved combat recenters the survivor without restoring the intercepted route")
+		if entry_position != LOSHelper.ground_layer.map_to_local(COMBAT_HEX):
+			_check(arrivals == [COMBAT_HEX], "A partially entered combat hex emits arrival after recentering")
 		await _clear_fixtures()
 
 

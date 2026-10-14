@@ -53,6 +53,12 @@ variations. Meadows form broad patches, woods form canopy clusters, and crops
 form coherent farm plots near settlements. See the
 [terrain variation pack](../../art/terrain_variations/README.md) for the assets.
 
+Roads follow continuous, individually authored curves, with unequal bend lengths
+and long straight approaches to the bridges. Unique matching hex pieces keep the
+road smooth across the column stagger. Roads skirt village buildings, clear
+woodland from their corridors, and cross water only at the existing bridges.
+See the [curved road assets](../../art/roads/README.md).
+
 The images show the exact authored terrain, deployments, and objective
 coordinates. They are designer overviews; the game's normal fog of war and
 enemy-intelligence briefing remain in effect.
@@ -68,10 +74,14 @@ enemy-intelligence briefing remain in effect.
 
 The campaign definition is `resources/campaigns/road_to_alderbrook.tres`; its
 mission scenes are in `scenes/campaigns/alderbrook/`. Edit the mission blueprints
-in `tools/campaigns/build_alderbrook_campaign.gd` and run its matching scene to
+in `tools/campaigns/build_alderbrook_campaign.gd` and road knots in
+`tools/campaigns/alderbrook_roads.gd`. When editing roads, run the builder scene
+with `-- --roads-only`, import the resulting SVG atlases in Godot, then run the
+builder scene normally to
 regenerate scenes, shared tile sets, layout manifests, and LOS data. The image
 renderer `tools/campaigns/render_alderbrook_maps.py` reads those manifests and
-uses Pillow to export the PNGs. Regenerate LOS after changing terrain.
+uses Pillow to export the PNGs, including the exact atlas regions and Godot's SVG
+rasters. Regenerate LOS after changing terrain.
 
 `tests/alderbrook_campaign_regression.tscn` checks content, progression, victory
 thresholds, deployment identities, the quiet opener, and bridge connectivity.

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 import json
-from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ROOT: Path = Path(__file__).resolve().parents[2]
 OUTPUT: Path = ROOT / "docs/campaigns/road_to_alderbrook/maps"
@@ -33,28 +33,8 @@ def texture(path: str, cache: dict[str, Image.Image]) -> Image.Image:
         return cache[path]
     local: Path = ROOT / path.removeprefix("res://")
     if local.suffix == ".svg":
-        tile: Image.Image = Image.new("RGBA", (64, 64))
-        draw: ImageDraw.ImageDraw = ImageDraw.Draw(tile)
-        if local.stem != "road":
-            draw.polygon([(16, 0), (48, 0), (64, 32), (48, 64), (16, 64), (0, 32)], fill="#457c8b")
-        if local.stem == "road" or local.stem == "bridge":
-            stroke: int = 12
-            fill_stroke: int = 9
-            edge_color: str = "#6f725e"
-            fill_color: str = "#b9b097"
-            if local.stem == "bridge":
-                stroke = 22
-                fill_stroke = 17
-                edge_color = "#514c40"
-                fill_color = "#ad9c7c"
-            draw.line([(-16, 0), (32, 32), (80, 0)], fill=edge_color, width=stroke, joint="curve")
-            draw.line([(-16, 0), (32, 32), (80, 0)], fill=fill_color, width=fill_stroke, joint="curve")
-        else:
-            for y in [9, 24, 40, 55]:
-                draw.arc((12, y - 4, 52, y + 6), 10, 170, fill="#81adb2", width=2)
-        mask: Image.Image = Image.new("L", (64, 64))
-        ImageDraw.Draw(mask).polygon([(16, 0), (48, 0), (64, 32), (48, 64), (16, 64), (0, 32)], fill=255)
-        tile.putalpha(ImageChops.multiply(tile.getchannel("A"), mask))
+        raster: Path = ROOT / "docs/art/roads/rasters" / (local.stem + ".png")
+        tile: Image.Image = Image.open(raster).convert("RGBA")
     else:
         tile = Image.open(local).convert("RGBA")
     cache[path] = tile
@@ -68,8 +48,8 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
     for layer in data["layers"]:
         for cell in layer["cells"]:
             positions[tuple(cell["hex"])] = tuple(round(value) for value in cell["position"])
-    max_x: int = max(point[0] for point in positions.values()) + 32
-    max_y: int = max(point[1] for point in positions.values()) + 32
+    max_x: int = max(point[0] for point in positions.values()) + 64
+    max_y: int = max(point[1] for point in positions.values()) + 64
     offset: tuple[int, int] = (60, 152)
     canvas: Image.Image = Image.new("RGBA", (max(1000, max_x + 120), max_y + 284), PAPER)
     draw: ImageDraw.ImageDraw = ImageDraw.Draw(canvas)
@@ -83,6 +63,9 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
     for layer in data["layers"]:
         for cell in layer["cells"]:
             tile: Image.Image = texture(cell["texture"], cache)
+            if "texture_region" in cell:
+                x, y, width, height = cell["texture_region"]
+                tile = tile.crop((x, y, x + width, y + height))
             if cell.get("flip_h", False):
                 tile = ImageOps.mirror(tile)
             if cell.get("flip_v", False):

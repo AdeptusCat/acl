@@ -54,8 +54,8 @@
 						0
 					],
 					"position": [
-						32.0,
-						32.0
+						64.0,
+						64.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -67,59 +67,7 @@
 						0
 					],
 					"position": [
-						80.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						0
-					],
-					"position": [
-						128.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						0
-					],
-					"position": [
-						176.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						1
-					],
-					"position": [
-						128.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						1
-					],
-					"position": [
-						80.0,
+						160.0,
 						128.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
@@ -128,12 +76,64 @@
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
+						2,
+						0
+					],
+					"position": [
+						256.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						352.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						256.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						160.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
 						0,
 						1
 					],
 					"position": [
-						32.0,
-						96.0
+						64.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -145,8 +145,8 @@
 						2
 					],
 					"position": [
-						32.0,
-						160.0
+						64.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -158,8 +158,8 @@
 						2
 					],
 					"position": [
-						80.0,
-						192.0
+						160.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -171,8 +171,8 @@
 						2
 					],
 					"position": [
-						128.0,
-						160.0
+						256.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -184,8 +184,8 @@
 						2
 					],
 					"position": [
-						176.0,
-						192.0
+						352.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -197,8 +197,8 @@
 						3
 					],
 					"position": [
-						32.0,
-						224.0
+						64.0,
+						448.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
 				},
@@ -210,8 +210,8 @@
 						3
 					],
 					"position": [
-						80.0,
-						256.0
+						160.0,
+						512.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -223,8 +223,8 @@
 						3
 					],
 					"position": [
-						128.0,
-						224.0
+						256.0,
+						448.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -236,8 +236,8 @@
 						3
 					],
 					"position": [
-						176.0,
-						256.0
+						352.0,
+						512.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
 				},
@@ -249,410 +249,7 @@
 						1
 					],
 					"position": [
-						176.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						0
-					],
-					"position": [
-						224.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						0
-					],
-					"position": [
-						272.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						4
-					],
-					"position": [
-						272.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						4
-					],
-					"position": [
-						176.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						4
-					],
-					"position": [
-						128.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						4
-					],
-					"position": [
-						80.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						4
-					],
-					"position": [
-						32.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						5
-					],
-					"position": [
-						32.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						5
-					],
-					"position": [
-						80.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						5
-					],
-					"position": [
-						128.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						5
-					],
-					"position": [
-						224.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						6
-					],
-					"position": [
-						32.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						6
-					],
-					"position": [
-						80.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						6
-					],
-					"position": [
-						128.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						6
-					],
-					"position": [
-						176.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						6
-					],
-					"position": [
-						224.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						6
-					],
-					"position": [
-						320.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						6
-					],
-					"position": [
-						272.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						5
-					],
-					"position": [
-						272.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						5
-					],
-					"position": [
-						320.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						4
-					],
-					"position": [
-						320.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						3
-					],
-					"position": [
-						320.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						2
-					],
-					"position": [
-						320.0,
-						160.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						1
-					],
-					"position": [
-						320.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						0
-					],
-					"position": [
-						320.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						1
-					],
-					"position": [
-						272.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						0
-					],
-					"position": [
-						368.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						2
-					],
-					"position": [
-						368.0,
-						192.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						5
-					],
-					"position": [
-						176.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						4
-					],
-					"position": [
-						224.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						3
-					],
-					"position": [
-						272.0,
+						352.0,
 						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
@@ -661,12 +258,415 @@
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
+						4,
+						0
+					],
+					"position": [
+						448.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						544.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						544.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						4
+					],
+					"position": [
+						352.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						4
+					],
+					"position": [
+						256.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						4
+					],
+					"position": [
+						160.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						4
+					],
+					"position": [
+						64.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						64.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						5
+					],
+					"position": [
+						160.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						256.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						5
+					],
+					"position": [
+						448.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						6
+					],
+					"position": [
+						64.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						160.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						6
+					],
+					"position": [
+						256.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						352.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						448.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						640.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						544.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						5
+					],
+					"position": [
+						544.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						640.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						640.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						640.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						640.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						640.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						640.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						544.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						736.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						736.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						352.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						4
+					],
+					"position": [
+						448.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						544.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
 						5,
 						2
 					],
 					"position": [
-						272.0,
-						192.0
+						544.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -678,8 +678,8 @@
 						3
 					],
 					"position": [
-						224.0,
-						224.0
+						448.0,
+						448.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
 				},
@@ -691,8 +691,8 @@
 						2
 					],
 					"position": [
-						224.0,
-						160.0
+						448.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -704,8 +704,8 @@
 						1
 					],
 					"position": [
-						224.0,
-						96.0
+						448.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -717,8 +717,8 @@
 						0
 					],
 					"position": [
-						416.0,
-						32.0
+						832.0,
+						64.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -730,8 +730,8 @@
 						1
 					],
 					"position": [
-						368.0,
-						128.0
+						736.0,
+						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -743,8 +743,8 @@
 						2
 					],
 					"position": [
-						416.0,
-						160.0
+						832.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -756,8 +756,8 @@
 						3
 					],
 					"position": [
-						368.0,
-						256.0
+						736.0,
+						512.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -769,8 +769,8 @@
 						3
 					],
 					"position": [
-						416.0,
-						224.0
+						832.0,
+						448.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -782,10 +782,10 @@
 						4
 					],
 					"position": [
-						416.0,
-						288.0
+						832.0,
+						576.0
 					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
 				},
 				{
 					"flip_h": false,
@@ -795,8 +795,8 @@
 						5
 					],
 					"position": [
-						416.0,
-						352.0
+						832.0,
+						704.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -808,8 +808,8 @@
 						1
 					],
 					"position": [
-						416.0,
-						96.0
+						832.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -821,10 +821,10 @@
 						4
 					],
 					"position": [
-						368.0,
-						320.0
+						736.0,
+						640.0
 					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
 				{
 					"flip_h": false,
@@ -834,8 +834,8 @@
 						5
 					],
 					"position": [
-						368.0,
-						384.0
+						736.0,
+						768.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -847,8 +847,8 @@
 						6
 					],
 					"position": [
-						416.0,
-						416.0
+						832.0,
+						832.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -860,8 +860,8 @@
 						7
 					],
 					"position": [
-						416.0,
-						480.0
+						832.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -873,8 +873,8 @@
 						8
 					],
 					"position": [
-						416.0,
-						544.0
+						832.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -886,8 +886,8 @@
 						8
 					],
 					"position": [
-						368.0,
-						576.0
+						736.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -899,8 +899,8 @@
 						8
 					],
 					"position": [
-						320.0,
-						544.0
+						640.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -912,8 +912,8 @@
 						8
 					],
 					"position": [
-						272.0,
-						576.0
+						544.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -925,8 +925,8 @@
 						8
 					],
 					"position": [
-						224.0,
-						544.0
+						448.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -938,8 +938,8 @@
 						8
 					],
 					"position": [
-						176.0,
-						576.0
+						352.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -951,8 +951,8 @@
 						8
 					],
 					"position": [
-						128.0,
-						544.0
+						256.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -964,8 +964,8 @@
 						8
 					],
 					"position": [
-						80.0,
-						576.0
+						160.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -977,8 +977,8 @@
 						8
 					],
 					"position": [
-						32.0,
-						544.0
+						64.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -990,8 +990,8 @@
 						7
 					],
 					"position": [
-						32.0,
-						480.0
+						64.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1003,8 +1003,8 @@
 						7
 					],
 					"position": [
-						80.0,
-						512.0
+						160.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1016,8 +1016,8 @@
 						7
 					],
 					"position": [
-						128.0,
-						480.0
+						256.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1029,8 +1029,8 @@
 						7
 					],
 					"position": [
-						176.0,
-						512.0
+						352.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1042,8 +1042,8 @@
 						7
 					],
 					"position": [
-						224.0,
-						480.0
+						448.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1055,8 +1055,8 @@
 						7
 					],
 					"position": [
-						272.0,
-						512.0
+						544.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1068,8 +1068,8 @@
 						7
 					],
 					"position": [
-						320.0,
-						480.0
+						640.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1081,8 +1081,8 @@
 						7
 					],
 					"position": [
-						368.0,
-						512.0
+						736.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1094,10 +1094,10 @@
 						6
 					],
 					"position": [
-						368.0,
-						448.0
+						736.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
 				{
 					"flip_h": false,
@@ -1107,8 +1107,8 @@
 						0
 					],
 					"position": [
-						464.0,
-						64.0
+						928.0,
+						128.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1120,8 +1120,8 @@
 						1
 					],
 					"position": [
-						512.0,
-						96.0
+						1024.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1133,8 +1133,8 @@
 						0
 					],
 					"position": [
-						560.0,
-						64.0
+						1120.0,
+						128.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1146,8 +1146,8 @@
 						1
 					],
 					"position": [
-						608.0,
-						96.0
+						1216.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1159,8 +1159,8 @@
 						0
 					],
 					"position": [
-						608.0,
-						32.0
+						1216.0,
+						64.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1172,8 +1172,8 @@
 						0
 					],
 					"position": [
-						512.0,
-						32.0
+						1024.0,
+						64.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1185,8 +1185,8 @@
 						0
 					],
 					"position": [
-						656.0,
-						64.0
+						1312.0,
+						128.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1198,8 +1198,8 @@
 						0
 					],
 					"position": [
-						704.0,
-						32.0
+						1408.0,
+						64.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1211,8 +1211,8 @@
 						0
 					],
 					"position": [
-						752.0,
-						64.0
+						1504.0,
+						128.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1224,8 +1224,8 @@
 						2
 					],
 					"position": [
-						512.0,
-						160.0
+						1024.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1237,8 +1237,8 @@
 						1
 					],
 					"position": [
-						464.0,
-						128.0
+						928.0,
+						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1250,8 +1250,8 @@
 						2
 					],
 					"position": [
-						560.0,
-						192.0
+						1120.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1263,8 +1263,8 @@
 						2
 					],
 					"position": [
-						608.0,
-						160.0
+						1216.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1276,8 +1276,8 @@
 						2
 					],
 					"position": [
-						656.0,
-						192.0
+						1312.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1289,8 +1289,8 @@
 						1
 					],
 					"position": [
-						656.0,
-						128.0
+						1312.0,
+						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1302,8 +1302,8 @@
 						1
 					],
 					"position": [
-						560.0,
-						128.0
+						1120.0,
+						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1315,8 +1315,8 @@
 						1
 					],
 					"position": [
-						704.0,
-						96.0
+						1408.0,
+						192.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1328,8 +1328,8 @@
 						1
 					],
 					"position": [
-						752.0,
-						128.0
+						1504.0,
+						256.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1341,8 +1341,8 @@
 						2
 					],
 					"position": [
-						704.0,
-						160.0
+						1408.0,
+						320.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1354,8 +1354,8 @@
 						2
 					],
 					"position": [
-						464.0,
-						192.0
+						928.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1367,307 +1367,307 @@
 						3
 					],
 					"position": [
-						464.0,
-						256.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						3
-					],
-					"position": [
-						512.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						3
-					],
-					"position": [
-						560.0,
-						256.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						3
-					],
-					"position": [
-						608.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						3
-					],
-					"position": [
-						656.0,
-						256.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						3
-					],
-					"position": [
-						704.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						4
-					],
-					"position": [
-						512.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						4
-					],
-					"position": [
-						560.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						4
-					],
-					"position": [
-						608.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						4
-					],
-					"position": [
-						704.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						4
-					],
-					"position": [
-						656.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						5
-					],
-					"position": [
-						512.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						4
-					],
-					"position": [
-						464.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						5
-					],
-					"position": [
-						608.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						5
-					],
-					"position": [
-						560.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						5
-					],
-					"position": [
-						656.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						6
-					],
-					"position": [
-						608.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						5
-					],
-					"position": [
-						464.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						6
-					],
-					"position": [
-						464.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						6
-					],
-					"position": [
-						512.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						6
-					],
-					"position": [
-						560.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						6
-					],
-					"position": [
-						656.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						7
-					],
-					"position": [
-						512.0,
-						480.0
-					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						7
-					],
-					"position": [
-						464.0,
+						928.0,
 						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						3
+					],
+					"position": [
+						1024.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						3
+					],
+					"position": [
+						1120.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						3
+					],
+					"position": [
+						1216.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						3
+					],
+					"position": [
+						1312.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						3
+					],
+					"position": [
+						1408.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						1024.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						4
+					],
+					"position": [
+						1120.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						4
+					],
+					"position": [
+						1216.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						1408.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						4
+					],
+					"position": [
+						1312.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						1024.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						928.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						5
+					],
+					"position": [
+						1216.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"position": [
+						1120.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						5
+					],
+					"position": [
+						1312.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						1216.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						928.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						1024.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"position": [
+						1120.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						6
+					],
+					"position": [
+						1312.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						7
+					],
+					"position": [
+						1024.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						7
+					],
+					"position": [
+						928.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1679,8 +1679,8 @@
 						8
 					],
 					"position": [
-						512.0,
-						544.0
+						1024.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1692,8 +1692,8 @@
 						7
 					],
 					"position": [
-						560.0,
-						512.0
+						1120.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1705,8 +1705,8 @@
 						9
 					],
 					"position": [
-						32.0,
-						608.0
+						64.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1718,8 +1718,8 @@
 						9
 					],
 					"position": [
-						128.0,
-						608.0
+						256.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1731,8 +1731,8 @@
 						9
 					],
 					"position": [
-						224.0,
-						608.0
+						448.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1744,8 +1744,8 @@
 						9
 					],
 					"position": [
-						272.0,
-						640.0
+						544.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1757,8 +1757,8 @@
 						9
 					],
 					"position": [
-						176.0,
-						640.0
+						352.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1770,8 +1770,8 @@
 						9
 					],
 					"position": [
-						80.0,
-						640.0
+						160.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1783,8 +1783,8 @@
 						9
 					],
 					"position": [
-						320.0,
-						608.0
+						640.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1796,8 +1796,8 @@
 						9
 					],
 					"position": [
-						368.0,
-						640.0
+						736.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1809,8 +1809,8 @@
 						9
 					],
 					"position": [
-						416.0,
-						608.0
+						832.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1822,8 +1822,8 @@
 						9
 					],
 					"position": [
-						464.0,
-						640.0
+						928.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1835,8 +1835,8 @@
 						9
 					],
 					"position": [
-						512.0,
-						608.0
+						1024.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1848,8 +1848,8 @@
 						8
 					],
 					"position": [
-						464.0,
-						576.0
+						928.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1861,8 +1861,8 @@
 						9
 					],
 					"position": [
-						560.0,
-						640.0
+						1120.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1874,8 +1874,8 @@
 						9
 					],
 					"position": [
-						608.0,
-						608.0
+						1216.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1887,8 +1887,8 @@
 						9
 					],
 					"position": [
-						656.0,
-						640.0
+						1312.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1900,8 +1900,8 @@
 						9
 					],
 					"position": [
-						704.0,
-						608.0
+						1408.0,
+						1216.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1913,8 +1913,8 @@
 						9
 					],
 					"position": [
-						752.0,
-						640.0
+						1504.0,
+						1280.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1926,8 +1926,8 @@
 						8
 					],
 					"position": [
-						752.0,
-						576.0
+						1504.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1939,8 +1939,8 @@
 						8
 					],
 					"position": [
-						704.0,
-						544.0
+						1408.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1952,8 +1952,8 @@
 						8
 					],
 					"position": [
-						656.0,
-						576.0
+						1312.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1965,8 +1965,8 @@
 						8
 					],
 					"position": [
-						608.0,
-						544.0
+						1216.0,
+						1088.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1978,8 +1978,8 @@
 						8
 					],
 					"position": [
-						560.0,
-						576.0
+						1120.0,
+						1152.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -1991,8 +1991,8 @@
 						7
 					],
 					"position": [
-						752.0,
-						512.0
+						1504.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -2004,8 +2004,8 @@
 						7
 					],
 					"position": [
-						704.0,
-						480.0
+						1408.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -2017,8 +2017,8 @@
 						7
 					],
 					"position": [
-						656.0,
-						512.0
+						1312.0,
+						1024.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -2030,8 +2030,8 @@
 						6
 					],
 					"position": [
-						752.0,
-						448.0
+						1504.0,
+						896.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -2043,8 +2043,8 @@
 						4
 					],
 					"position": [
-						752.0,
-						320.0
+						1504.0,
+						640.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -2056,10 +2056,10 @@
 						5
 					],
 					"position": [
-						704.0,
-						352.0
+						1408.0,
+						704.0
 					],
-					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
 				},
 				{
 					"flip_h": false,
@@ -2069,8 +2069,8 @@
 						6
 					],
 					"position": [
-						704.0,
-						416.0
+						1408.0,
+						832.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -2082,8 +2082,8 @@
 						5
 					],
 					"position": [
-						752.0,
-						384.0
+						1504.0,
+						768.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -2095,8 +2095,8 @@
 						3
 					],
 					"position": [
-						752.0,
-						256.0
+						1504.0,
+						512.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
 				},
@@ -2108,8 +2108,8 @@
 						2
 					],
 					"position": [
-						752.0,
-						192.0
+						1504.0,
+						384.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				},
@@ -2121,8 +2121,8 @@
 						7
 					],
 					"position": [
-						608.0,
-						480.0
+						1216.0,
+						960.0
 					],
 					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
 				}
@@ -2136,175 +2136,1087 @@
 		{
 			"cells": [
 				{
+					"art_family": "woods",
 					"flip_h": false,
-					"flip_v": true,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						160.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						160.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						8
+					],
+					"position": [
+						160.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						9
+					],
+					"position": [
+						160.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						256.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						256.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						8
+					],
+					"position": [
+						256.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						9
+					],
+					"position": [
+						256.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						352.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						352.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						8
+					],
+					"position": [
+						352.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						9
+					],
+					"position": [
+						352.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						544.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						544.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						8
+					],
+					"position": [
+						544.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						9
+					],
+					"position": [
+						544.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						640.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						640.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						8
+					],
+					"position": [
+						640.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						9
+					],
+					"position": [
+						640.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						736.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						736.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						8
+					],
+					"position": [
+						736.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						9
+					],
+					"position": [
+						736.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						928.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						928.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						8
+					],
+					"position": [
+						928.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						9
+					],
+					"position": [
+						928.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						1024.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						8
+					],
+					"position": [
+						1024.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						9
+					],
+					"position": [
+						1024.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						1120.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						1
+					],
+					"position": [
+						1120.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						8
+					],
+					"position": [
+						1120.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						9
+					],
+					"position": [
+						1120.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						1312.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						1312.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						8
+					],
+					"position": [
+						1312.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						9
+					],
+					"position": [
+						1312.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						1408.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						896,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						1408.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						0,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						8
+					],
+					"position": [
+						1408.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						9
+					],
+					"position": [
+						1408.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						1504.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						1504.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						8
+					],
+					"position": [
+						1504.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						9
+					],
+					"position": [
+						1504.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						640.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						640.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						640.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
 					"hex": [
 						0,
-						5
+						6
 					],
 					"position": [
-						32.0,
-						352.0
+						64.0,
+						832.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
 						1,
-						0
+						6
 					],
 					"position": [
-						80.0,
-						64.0
+						160.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						1
-					],
-					"position": [
-						80.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						5
-					],
-					"position": [
-						80.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						8
-					],
-					"position": [
-						80.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						9
-					],
-					"position": [
-						80.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
 						2,
-						0
+						6
 					],
 					"position": [
-						128.0,
-						32.0
+						256.0,
+						832.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						1
-					],
-					"position": [
-						128.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
-					"hex": [
-						2,
-						5
-					],
-					"position": [
-						128.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						8
-					],
-					"position": [
-						128.0,
-						544.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						9
-					],
-					"position": [
-						128.0,
-						608.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						0
-					],
-					"position": [
-						176.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						1
-					],
-					"position": [
-						176.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -2312,77 +3224,59 @@
 						5
 					],
 					"position": [
-						176.0,
-						384.0
+						352.0,
+						768.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
 						3,
-						8
+						6
 					],
 					"position": [
-						176.0,
-						576.0
+						352.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
-					"hex": [
-						3,
-						9
-					],
-					"position": [
-						176.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
 					"hex": [
 						4,
-						5
+						6
 					],
 					"position": [
-						224.0,
-						352.0
+						448.0,
+						832.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						0
-					],
-					"position": [
-						272.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						1
-					],
-					"position": [
-						272.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -2390,129 +3284,59 @@
 						5
 					],
 					"position": [
-						272.0,
-						384.0
+						544.0,
+						768.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
-					"hex": [
-						5,
-						8
-					],
-					"position": [
-						272.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						9
-					],
-					"position": [
-						272.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						0
-					],
-					"position": [
-						320.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						1
-					],
-					"position": [
-						320.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
 					"hex": [
 						6,
 						5
 					],
 					"position": [
-						320.0,
-						352.0
+						640.0,
+						704.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
 						6,
-						8
+						6
 					],
 					"position": [
-						320.0,
-						544.0
+						640.0,
+						832.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						9
-					],
-					"position": [
-						320.0,
-						608.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						0
-					],
-					"position": [
-						368.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						1
-					],
-					"position": [
-						368.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -2520,77 +3344,39 @@
 						5
 					],
 					"position": [
-						368.0,
-						384.0
+						736.0,
+						768.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
-					"hex": [
-						7,
-						8
-					],
-					"position": [
-						368.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						9
-					],
-					"position": [
-						368.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
 					"hex": [
 						8,
 						5
 					],
 					"position": [
-						416.0,
-						352.0
+						832.0,
+						704.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						0
-					],
-					"position": [
-						464.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						1
-					],
-					"position": [
-						464.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -2598,467 +3384,279 @@
 						5
 					],
 					"position": [
-						464.0,
-						384.0
+						928.0,
+						768.0
 					],
-					"texture": "res://assets/tiles/campaign/road.svg"
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
-						9,
-						8
+						10,
+						5
 					],
 					"position": [
-						464.0,
+						1024.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						1024.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"position": [
+						1120.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						1216.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						5
+					],
+					"position": [
+						1312.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						1408.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						5
+					],
+					"position": [
+						1504.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						1504.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						3
+					],
+					"position": [
+						1024.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						1024.0,
 						576.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "orchard",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
-						9,
-						9
+						11,
+						3
 					],
 					"position": [
-						464.0,
+						1120.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						4
+					],
+					"position": [
+						1120.0,
 						640.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
-						10,
-						0
-					],
-					"position": [
-						512.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						1
-					],
-					"position": [
-						512.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
-					"hex": [
-						10,
-						5
-					],
-					"position": [
-						512.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						8
-					],
-					"position": [
-						512.0,
-						544.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						9
-					],
-					"position": [
-						512.0,
-						608.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						0
-					],
-					"position": [
-						560.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						1
-					],
-					"position": [
-						560.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						5
-					],
-					"position": [
-						560.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						8
-					],
-					"position": [
-						560.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						9
-					],
-					"position": [
-						560.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						0
-					],
-					"position": [
-						656.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						1
-					],
-					"position": [
-						656.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						5
-					],
-					"position": [
-						656.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						8
-					],
-					"position": [
-						656.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						9
-					],
-					"position": [
-						656.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						0
-					],
-					"position": [
-						704.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						1
-					],
-					"position": [
-						704.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": true,
-					"hex": [
-						14,
-						5
-					],
-					"position": [
-						704.0,
-						352.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						8
-					],
-					"position": [
-						704.0,
-						544.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						9
-					],
-					"position": [
-						704.0,
-						608.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						0
-					],
-					"position": [
-						752.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						1
-					],
-					"position": [
-						752.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						5
-					],
-					"position": [
-						752.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/campaign/road.svg"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						8
-					],
-					"position": [
-						752.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						9
-					],
-					"position": [
-						752.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
+						4,
 						2
 					],
 					"position": [
-						320.0,
-						160.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						3
-					],
-					"position": [
-						320.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						7
-					],
-					"position": [
-						320.0,
-						480.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						3
-					],
-					"position": [
-						512.0,
-						224.0
-					],
-					"texture": "res://assets/tiles/orchard/orchard_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						4
-					],
-					"position": [
-						512.0,
-						288.0
-					],
-					"texture": "res://assets/tiles/orchard/orchard_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						3
-					],
-					"position": [
-						560.0,
-						256.0
-					],
-					"texture": "res://assets/tiles/orchard/orchard_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						4
-					],
-					"position": [
-						560.0,
+						448.0,
 						320.0
 					],
-					"texture": "res://assets/tiles/orchard/orchard_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						2
-					],
-					"position": [
-						224.0,
-						160.0
-					],
-					"texture": "res://assets/tiles/fields/field_wheat_01.png"
-				},
-				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3066,12 +3664,19 @@
 						3
 					],
 					"position": [
-						224.0,
-						224.0
+						448.0,
+						448.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3079,12 +3684,19 @@
 						2
 					],
 					"position": [
-						272.0,
-						192.0
+						544.0,
+						384.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3092,12 +3704,19 @@
 						3
 					],
 					"position": [
-						272.0,
-						256.0
+						544.0,
+						512.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3105,12 +3724,19 @@
 						2
 					],
 					"position": [
-						512.0,
-						160.0
+						1024.0,
+						320.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3118,12 +3744,19 @@
 						2
 					],
 					"position": [
-						560.0,
-						192.0
+						1120.0,
+						384.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3131,12 +3764,19 @@
 						2
 					],
 					"position": [
-						608.0,
-						160.0
+						1216.0,
+						320.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						128,
+						896,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3144,25 +3784,19 @@
 						3
 					],
 					"position": [
-						608.0,
-						224.0
+						1216.0,
+						448.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						256,
+						896,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						6
-					],
-					"position": [
-						224.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/fields/field_wheat_02.png"
-				},
-				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3170,12 +3804,19 @@
 						7
 					],
 					"position": [
-						224.0,
-						480.0
+						448.0,
+						960.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3183,12 +3824,19 @@
 						6
 					],
 					"position": [
-						272.0,
-						448.0
+						544.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3196,12 +3844,19 @@
 						7
 					],
 					"position": [
-						272.0,
-						512.0
+						544.0,
+						1024.0
 					],
-					"texture": "res://assets/tiles/fields/field_wheat_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3209,12 +3864,19 @@
 						6
 					],
 					"position": [
-						464.0,
-						448.0
+						928.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3222,25 +3884,19 @@
 						7
 					],
 					"position": [
-						464.0,
-						512.0
+						928.0,
+						1024.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						6
-					],
-					"position": [
-						512.0,
-						416.0
-					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
-				},
-				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3248,12 +3904,19 @@
 						7
 					],
 					"position": [
-						512.0,
-						480.0
+						1024.0,
+						960.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3261,12 +3924,19 @@
 						6
 					],
 					"position": [
-						560.0,
-						448.0
+						1120.0,
+						896.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "crops",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3274,10 +3944,16 @@
 						7
 					],
 					"position": [
-						560.0,
-						512.0
+						1120.0,
+						1024.0
 					],
-					"texture": "res://assets/tiles/fields/field_green_rows_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_terrain.png",
+					"texture_region": [
+						768,
+						768,
+						128,
+						128
+					]
 				}
 			],
 			"name": "TerrainTileMapLayer"
@@ -3289,6 +3965,7 @@
 		{
 			"cells": [
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3296,12 +3973,19 @@
 						0
 					],
 					"position": [
-						80.0,
-						64.0
+						160.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3309,12 +3993,19 @@
 						1
 					],
 					"position": [
-						80.0,
-						128.0
+						160.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3322,12 +4013,19 @@
 						8
 					],
 					"position": [
-						80.0,
-						576.0
+						160.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3335,12 +4033,19 @@
 						9
 					],
 					"position": [
-						80.0,
-						640.0
+						160.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3348,12 +4053,19 @@
 						0
 					],
 					"position": [
-						128.0,
-						32.0
+						256.0,
+						64.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3361,12 +4073,19 @@
 						1
 					],
 					"position": [
-						128.0,
-						96.0
+						256.0,
+						192.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3374,12 +4093,19 @@
 						8
 					],
 					"position": [
-						128.0,
-						544.0
+						256.0,
+						1088.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3387,12 +4113,19 @@
 						9
 					],
 					"position": [
-						128.0,
-						608.0
+						256.0,
+						1216.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3400,12 +4133,19 @@
 						0
 					],
 					"position": [
-						176.0,
-						64.0
+						352.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3413,12 +4153,19 @@
 						1
 					],
 					"position": [
-						176.0,
-						128.0
+						352.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3426,12 +4173,19 @@
 						8
 					],
 					"position": [
-						176.0,
-						576.0
+						352.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3439,12 +4193,19 @@
 						9
 					],
 					"position": [
-						176.0,
-						640.0
+						352.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3452,12 +4213,19 @@
 						0
 					],
 					"position": [
-						272.0,
-						64.0
+						544.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3465,12 +4233,19 @@
 						1
 					],
 					"position": [
-						272.0,
-						128.0
+						544.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3478,12 +4253,19 @@
 						8
 					],
 					"position": [
-						272.0,
-						576.0
+						544.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3491,12 +4273,19 @@
 						9
 					],
 					"position": [
-						272.0,
-						640.0
+						544.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3504,12 +4293,19 @@
 						0
 					],
 					"position": [
-						320.0,
-						32.0
+						640.0,
+						64.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3517,12 +4313,19 @@
 						1
 					],
 					"position": [
-						320.0,
-						96.0
+						640.0,
+						192.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3530,12 +4333,19 @@
 						8
 					],
 					"position": [
-						320.0,
-						544.0
+						640.0,
+						1088.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3543,12 +4353,19 @@
 						9
 					],
 					"position": [
-						320.0,
-						608.0
+						640.0,
+						1216.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3556,12 +4373,19 @@
 						0
 					],
 					"position": [
-						368.0,
-						64.0
+						736.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3569,12 +4393,19 @@
 						1
 					],
 					"position": [
-						368.0,
-						128.0
+						736.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3582,12 +4413,19 @@
 						8
 					],
 					"position": [
-						368.0,
-						576.0
+						736.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3595,12 +4433,19 @@
 						9
 					],
 					"position": [
-						368.0,
-						640.0
+						736.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3608,12 +4453,19 @@
 						0
 					],
 					"position": [
-						464.0,
-						64.0
+						928.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3621,12 +4473,19 @@
 						1
 					],
 					"position": [
-						464.0,
-						128.0
+						928.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3634,12 +4493,19 @@
 						8
 					],
 					"position": [
-						464.0,
-						576.0
+						928.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3647,12 +4513,19 @@
 						9
 					],
 					"position": [
-						464.0,
-						640.0
+						928.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3660,64 +4533,99 @@
 						0
 					],
 					"position": [
-						512.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						1
-					],
-					"position": [
-						512.0,
-						96.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						8
-					],
-					"position": [
-						512.0,
-						544.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						9
-					],
-					"position": [
-						512.0,
-						608.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						0
-					],
-					"position": [
-						560.0,
+						1024.0,
 						64.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						8
+					],
+					"position": [
+						1024.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						9
+					],
+					"position": [
+						1024.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						1120.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3725,12 +4633,19 @@
 						1
 					],
 					"position": [
-						560.0,
-						128.0
+						1120.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3738,12 +4653,19 @@
 						8
 					],
 					"position": [
-						560.0,
-						576.0
+						1120.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3751,12 +4673,19 @@
 						9
 					],
 					"position": [
-						560.0,
-						640.0
+						1120.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3764,64 +4693,99 @@
 						0
 					],
 					"position": [
-						656.0,
+						1312.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						1312.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						8
+					],
+					"position": [
+						1312.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						9
+					],
+					"position": [
+						1312.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						1408.0,
 						64.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
 				},
 				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						1
-					],
-					"position": [
-						656.0,
-						128.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						8
-					],
-					"position": [
-						656.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						9
-					],
-					"position": [
-						656.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						0
-					],
-					"position": [
-						704.0,
-						32.0
-					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
-				},
-				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3829,12 +4793,19 @@
 						1
 					],
 					"position": [
-						704.0,
-						96.0
+						1408.0,
+						192.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3842,12 +4813,19 @@
 						8
 					],
 					"position": [
-						704.0,
-						544.0
+						1408.0,
+						1088.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3855,12 +4833,19 @@
 						9
 					],
 					"position": [
-						704.0,
-						608.0
+						1408.0,
+						1216.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3868,12 +4853,19 @@
 						0
 					],
 					"position": [
-						752.0,
-						64.0
+						1504.0,
+						128.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3881,12 +4873,19 @@
 						1
 					],
 					"position": [
-						752.0,
-						128.0
+						1504.0,
+						256.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3894,12 +4893,19 @@
 						8
 					],
 					"position": [
-						752.0,
-						576.0
+						1504.0,
+						1152.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3907,12 +4913,19 @@
 						9
 					],
 					"position": [
-						752.0,
-						640.0
+						1504.0,
+						1280.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3920,12 +4933,19 @@
 						2
 					],
 					"position": [
-						320.0,
-						160.0
+						640.0,
+						320.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_02.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3933,12 +4953,19 @@
 						3
 					],
 					"position": [
-						320.0,
-						224.0
+						640.0,
+						448.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_03.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3946,12 +4973,19 @@
 						7
 					],
 					"position": [
-						320.0,
-						480.0
+						640.0,
+						960.0
 					],
-					"texture": "res://assets/tiles/vegetation/woods_green_01.png"
+					"texture": "res://assets/tiles/connected/maps/01_quiet_approach_woods.png",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
 				},
 				{
+					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
 					"hex": [
@@ -3959,8 +4993,8 @@
 						5
 					],
 					"position": [
-						608.0,
-						352.0
+						1216.0,
+						704.0
 					],
 					"texture": "res://assets/tiles/buildings/building_wood_01.png"
 				}
@@ -3986,6 +5020,446 @@
 			"rifle",
 			2,
 			7
+		]
+	],
+	"road_centerlines": [
+		[
+			[
+				-32.0,
+				864.0
+			],
+			[
+				76.0,
+				863.239990234375
+			],
+			[
+				130.0,
+				861.975036621094
+			],
+			[
+				157.0,
+				861.029357910156
+			],
+			[
+				184.0,
+				859.840026855469
+			],
+			[
+				211.0,
+				858.380615234375
+			],
+			[
+				238.0,
+				856.625
+			],
+			[
+				265.0,
+				854.546875
+			],
+			[
+				292.0,
+				852.119995117188
+			],
+			[
+				319.0,
+				849.318115234375
+			],
+			[
+				346.0,
+				846.114990234375
+			],
+			[
+				373.0,
+				842.484375
+			],
+			[
+				400.0,
+				838.400024414062
+			],
+			[
+				402.625,
+				837.9677734375
+			],
+			[
+				405.25,
+				837.511169433594
+			],
+			[
+				410.5,
+				836.52685546875
+			],
+			[
+				415.75,
+				835.450134277344
+			],
+			[
+				421.0,
+				834.284362792969
+			],
+			[
+				426.25,
+				833.032775878906
+			],
+			[
+				431.5,
+				831.698547363281
+			],
+			[
+				436.75,
+				830.284851074219
+			],
+			[
+				442.0,
+				828.795043945312
+			],
+			[
+				447.25,
+				827.232177734375
+			],
+			[
+				452.5,
+				825.599609375
+			],
+			[
+				457.75,
+				823.900573730469
+			],
+			[
+				463.0,
+				822.13818359375
+			],
+			[
+				468.25,
+				820.315612792969
+			],
+			[
+				473.5,
+				818.436340332031
+			],
+			[
+				484.0,
+				814.52001953125
+			],
+			[
+				494.5,
+				810.414855957031
+			],
+			[
+				505.0,
+				806.146850585938
+			],
+			[
+				515.5,
+				801.74169921875
+			],
+			[
+				526.0,
+				797.22509765625
+			],
+			[
+				568.0,
+				778.56005859375
+			],
+			[
+				589.0,
+				769.229431152344
+			],
+			[
+				610.0,
+				760.175048828125
+			],
+			[
+				620.5,
+				755.81591796875
+			],
+			[
+				631.0,
+				751.603149414062
+			],
+			[
+				641.5,
+				747.562622070312
+			],
+			[
+				646.75,
+				745.614990234375
+			],
+			[
+				652.0,
+				743.719970703125
+			],
+			[
+				657.25,
+				741.881042480469
+			],
+			[
+				662.5,
+				740.101196289062
+			],
+			[
+				667.75,
+				738.3837890625
+			],
+			[
+				673.0,
+				736.731811523438
+			],
+			[
+				678.25,
+				735.148864746094
+			],
+			[
+				683.5,
+				733.637939453125
+			],
+			[
+				688.75,
+				732.202209472656
+			],
+			[
+				694.0,
+				730.845031738281
+			],
+			[
+				699.25,
+				729.569519042969
+			],
+			[
+				704.5,
+				728.379028320312
+			],
+			[
+				709.75,
+				727.276611328125
+			],
+			[
+				715.0,
+				726.265625
+			],
+			[
+				717.625,
+				725.79541015625
+			],
+			[
+				720.25,
+				725.349243164062
+			],
+			[
+				722.875,
+				724.927551269531
+			],
+			[
+				725.5,
+				724.530700683594
+			],
+			[
+				728.125,
+				724.159118652344
+			],
+			[
+				730.75,
+				723.813232421875
+			],
+			[
+				733.375,
+				723.493347167969
+			],
+			[
+				736.0,
+				723.200012207031
+			],
+			[
+				745.0,
+				722.30712890625
+			],
+			[
+				754.0,
+				721.546875
+			],
+			[
+				763.0,
+				720.9169921875
+			],
+			[
+				772.0,
+				720.415100097656
+			],
+			[
+				781.0,
+				720.038696289062
+			],
+			[
+				790.0,
+				719.785583496094
+			],
+			[
+				799.0,
+				719.653503417969
+			],
+			[
+				808.0,
+				719.640014648438
+			],
+			[
+				817.0,
+				719.742797851562
+			],
+			[
+				826.0,
+				719.959411621094
+			],
+			[
+				835.0,
+				720.287536621094
+			],
+			[
+				844.0,
+				720.724975585938
+			],
+			[
+				853.0,
+				721.269348144531
+			],
+			[
+				862.0,
+				721.918151855469
+			],
+			[
+				871.0,
+				722.669189453125
+			],
+			[
+				880.0,
+				723.52001953125
+			],
+			[
+				889.0,
+				724.468322753906
+			],
+			[
+				898.0,
+				725.511901855469
+			],
+			[
+				907.0,
+				726.648193359375
+			],
+			[
+				916.0,
+				727.875
+			],
+			[
+				925.0,
+				729.18994140625
+			],
+			[
+				934.0,
+				730.590637207031
+			],
+			[
+				943.0,
+				732.07470703125
+			],
+			[
+				952.0,
+				733.640014648438
+			],
+			[
+				970.0,
+				737.00439453125
+			],
+			[
+				988.0,
+				740.664978027344
+			],
+			[
+				1006.0,
+				744.603149414062
+			],
+			[
+				1024.0,
+				748.799987792969
+			],
+			[
+				1096.0,
+				765.880004882812
+			],
+			[
+				1168.0,
+				782.239990234375
+			],
+			[
+				1204.0,
+				790.0
+			],
+			[
+				1240.0,
+				797.400024414062
+			],
+			[
+				1276.0,
+				804.380004882812
+			],
+			[
+				1312.0,
+				810.880065917969
+			],
+			[
+				1348.0,
+				816.839965820312
+			],
+			[
+				1384.0,
+				822.200073242188
+			],
+			[
+				1402.0,
+				824.636291503906
+			],
+			[
+				1420.0,
+				826.900024414062
+			],
+			[
+				1438.0,
+				828.983764648438
+			],
+			[
+				1456.0,
+				830.880004882812
+			],
+			[
+				1474.0,
+				832.581298828125
+			],
+			[
+				1492.0,
+				834.080078125
+			],
+			[
+				1510.0,
+				835.368774414062
+			],
+			[
+				1528.0,
+				836.440063476562
+			],
+			[
+				1546.0,
+				837.286254882812
+			],
+			[
+				1564.0,
+				837.900024414062
+			],
+			[
+				1582.0,
+				838.273803710938
+			],
+			[
+				1600.0,
+				838.400024414062
+			]
 		]
 	],
 	"seconds": 600.0,

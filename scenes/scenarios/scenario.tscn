@@ -15,14 +15,14 @@
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
 texture = ExtResource("3_8cmm4")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_2 = "Exit"
 0:0/0/custom_data_3 = "Exit"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
 texture = ExtResource("2_rck5x")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_2 = "Objective A"
@@ -30,7 +30,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
 texture = ExtResource("3_xupyy")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = "Objective B"
@@ -38,7 +38,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
 texture = ExtResource("4_84jd5")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_2 = "Objective C"
@@ -46,7 +46,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0jm0n"]
 texture = ExtResource("11_06hnl")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 4
 0:0/0/custom_data_3 = "Start"
@@ -54,7 +54,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSet" id="TileSet_0jm0n"]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "objective_id"
 custom_data_layer_0/type = 2
 custom_data_layer_1/name = "team"
@@ -71,7 +71,7 @@ sources/9 = SubResource("TileSetAtlasSource_0jm0n")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
 texture = ExtResource("2_84jd5")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_1 = 1
 0:0/0/custom_data_2 = "Exit"
@@ -79,7 +79,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
 texture = ExtResource("4_kp5un")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 4
 0:0/0/custom_data_1 = 1
@@ -87,7 +87,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
 texture = ExtResource("5_8cmm4")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = 1
@@ -96,7 +96,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
 texture = ExtResource("6_kp5un")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = 1
@@ -105,7 +105,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
 texture = ExtResource("7_06hnl")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_1 = 1
@@ -115,7 +115,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSet" id="TileSet_cwow2"]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "objective_id"
 custom_data_layer_0/type = 2
 custom_data_layer_1/name = "team"

@@ -72,7 +72,7 @@ const MISSIONS: Array[Dictionary] = [
 		"briefing": "Road to Alderbrook - mission 3 of 5.\n\nAn enemy column is trying to pass the roadblock and escape to the west. Your platoon has two machine-gun teams but no reinforcements. Cover the road and its woodland bypass, keep a rifle squad in reserve, and protect the western exits. The enemy starts beyond the wooded bend.\n\n[b]Major Victory:[/b] destroy two enemy units and allow no enemy exits before the deadline.\n\n[b]Minor Victory:[/b] hold A at the deadline while allowing no more than two exits. Three enemy exits give the enemy victory.",
 		"player": [[1, "hq", 5, 9], [1, "rifle", 6, 6], [1, "rifle", 7, 6], [1, "rifle", 6, 8], [1, "mg", 7, 7], [1, "mg", 8, 8]],
 		"enemy": [[1, "hq", 18, 5], [1, "rifle", 17, 5], [1, "rifle", 17, 6], [2, "hq", 18, 9], [2, "rifle", 17, 8], [2, "rifle", 17, 9], [0, "company_hq", 19, 7]],
-		"allied_markers": [[1, 7, 7], [4, 5, 9]], "axis_markers": [[0, 0, 6], [0, 0, 7], [4, 18, 7]],
+		"allied_markers": [[1, 7, 7], [4, 5, 9]], "axis_markers": [[0, 0, 6], [0, 0, 7], [0, 0, 8], [0, 0, 9], [4, 18, 7]],
 	},
 	{
 		"id": "04_two_crossings", "title": "4. Two Crossings", "map": "Alderbrook Crossings", "size": Vector2i(24, 16), "seconds": 720.0,
@@ -94,7 +94,6 @@ var _terrain_set: TileSet
 var _wall_set: TileSet
 var _building_set: TileSet
 var _water_set: TileSet
-var _terrain_sources: Dictionary[String, int] = {}
 var _building_sources: Dictionary[String, int] = {}
 var _woods_sources: Array[int] = []
 var _wood_building_sources: Array[int] = []
@@ -102,6 +101,9 @@ var _orchard_sources: Array[int] = []
 var _wheat_sources: Array[int] = []
 var _crop_sources: Array[int] = []
 var _grass_noise: FastNoiseLite = FastNoiseLite.new()
+var _roads: AlderbrookRoads = AlderbrookRoads.new()
+var _road_layouts: Array[Dictionary] = []
+var _road_sources: Array[int] = []
 
 
 func _ready() -> void:
@@ -109,11 +111,44 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	if OS.get_cmdline_user_args().has("--los-only"):
+		var bake_main: Node = load("res://scenes/main.tscn").instantiate()
+		get_tree().root.add_child(bake_main)
+		bake_main.process_mode = Node.PROCESS_MODE_DISABLED
+		bake_main.world.fully_freed.disconnect(bake_main._on_fully_freed)
+		for index: int in range(MISSIONS.size()):
+			var map: Map = bake_main.world.maps.get_node("Alderbrook" + str(index + 1)) as Map
+			await _bake_los(map)
+		bake_main.queue_free()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		get_tree().quit()
+		return
+	for index: int in range(MISSIONS.size()):
+		_road_layouts.append(_roads.layout(index, MISSIONS[index]["size"]))
+	if OS.get_cmdline_user_args().has("--roads-only"):
+		for index: int in range(MISSIONS.size()):
+			_roads.write_assets(str(MISSIONS[index]["id"]), _road_layouts[index])
+		for kind: String in ["bridge", "river"]:
+			var image: Image = Image.new()
+			assert(image.load_svg_from_string(FileAccess.get_file_as_string("res://assets/tiles/campaign/" + kind + ".svg")) == OK)
+			assert(image.save_png(AlderbrookRoads.PREVIEW_DIRECTORY + kind + ".png") == OK)
+		get_tree().quit()
+		return
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	main.name = "Main"
 	get_tree().root.add_child(main)
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	var template: Node = main.world
+	template.fully_freed.disconnect(main._on_fully_freed)
+	if OS.get_cmdline_user_args().has("--manifest-only"):
+		for index: int in range(MISSIONS.size()):
+			_export_layout(template.maps.get_node("Alderbrook" + str(index + 1)) as Map, MISSIONS[index])
+		main.queue_free()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		get_tree().quit()
+		return
 	var base: Map = template.get_node("Maps/DefaultMap") as Map
 	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
 	_update_field_art()
@@ -123,7 +158,7 @@ func _run() -> void:
 	_update_woods_art(_building_set)
 	var woods: TileSetAtlasSource = TileSetAtlasSource.new()
 	woods.texture = load(WOODS_IMAGES[0]) as Texture2D
-	woods.texture_region_size = Vector2i(64, 64)
+	woods.texture_region_size = Vector2i(128, 128)
 	woods.create_tile(Vector2i.ZERO)
 	var woods_source: int = _terrain_set.add_source(woods)
 	var woods_data: TileData = woods.get_tile_data(Vector2i.ZERO, 0)
@@ -136,34 +171,33 @@ func _run() -> void:
 	_orchard_sources = _visual_sources(_terrain_set, _source_for(_terrain_set, "Orchard"), ORCHARD_IMAGES, "Orchard")
 	_wheat_sources = _sources_for_images(_terrain_set, WHEAT_IMAGES)
 	_crop_sources = _sources_for_images(_terrain_set, CROP_IMAGES)
-	var road: TileSetAtlasSource = TileSetAtlasSource.new()
-	road.texture = load("res://assets/tiles/campaign/road.svg") as Texture2D
-	road.texture_region_size = Vector2i(64, 64)
-	road.create_tile(Vector2i.ZERO)
-	var road_source: int = _terrain_set.add_source(road)
-	road.create_alternative_tile(Vector2i.ZERO, 1)
-	for alternative: int in [0, 1]:
-		road.get_tile_data(Vector2i.ZERO, alternative).set_custom_data("name", "Road")
-	road.get_tile_data(Vector2i.ZERO, 1).flip_v = true
+	for index: int in range(MISSIONS.size()):
+		var road: TileSetAtlasSource = TileSetAtlasSource.new()
+		road.resource_name = "Road - " + str(MISSIONS[index]["title"])
+		road.texture = load(AlderbrookRoads.ASSET_DIRECTORY + "road_" + str(MISSIONS[index]["id"]) + ".svg") as Texture2D
+		road.texture_region_size = Vector2i(128, 128)
+		var source_id: int = _terrain_set.add_source(road)
+		_road_sources.append(source_id)
+		for cell: Vector2i in _road_layouts[index]["cells"]:
+			var tile: Vector2i = _road_layouts[index]["cells"][cell]
+			road.create_tile(tile)
+			road.get_tile_data(tile, 0).set_custom_data("name", "Road")
 	ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
 	ResourceSaver.save(_wall_set, RESOURCE_DIRECTORY + "alderbrook_walls.tres")
 	ResourceSaver.save(_building_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
 	_terrain_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
 	_wall_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_walls.tres")
 	_building_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_buildings.tres")
-	for label: String in ["Woods", "Orchard", "Field", "Road"]:
-		_terrain_sources[label] = _source_for(_terrain_set, label)
-	_terrain_sources["Road"] = road_source
 	for label: String in ["Stone Building", "Wood Building", "Woods"]:
 		_building_sources[label] = _source_for(_building_set, label)
 	_water_set = TileSet.new()
 	_water_set.tile_shape = TileSet.TILE_SHAPE_HEXAGON
 	_water_set.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
-	_water_set.tile_size = Vector2i(64, 64)
+	_water_set.tile_size = Vector2i(128, 128)
 	for kind: String in ["river", "bridge"]:
 		var source: TileSetAtlasSource = TileSetAtlasSource.new()
 		source.texture = load("res://assets/tiles/campaign/" + kind + ".svg") as Texture2D
-		source.texture_region_size = Vector2i(64, 64)
+		source.texture_region_size = Vector2i(128, 128)
 		source.create_tile(Vector2i.ZERO)
 		_water_set.add_source(source)
 		if kind == "bridge":
@@ -174,8 +208,13 @@ func _run() -> void:
 	var maps: Array[PackedScene] = []
 	for index: int in range(MISSIONS.size()):
 		var map: Map = _build_map(MISSIONS[index], index)
+		if map == null:
+			get_tree().quit(1)
+			return
 		add_child(map)
 		await get_tree().process_frame
+		ConnectedTerrainBaker.bake(map.get_terrain_layer(), str(MISSIONS[index]["id"]) + "_terrain")
+		ConnectedTerrainBaker.bake(map.get_building_layer(), str(MISSIONS[index]["id"]) + "_woods")
 		var packed: PackedScene = PackedScene.new()
 		var error: Error = packed.pack(map)
 		assert(error == OK)
@@ -183,16 +222,21 @@ func _run() -> void:
 		assert(ResourceSaver.save(packed, path) == OK)
 		maps.append(ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE_DEEP) as PackedScene)
 		_export_layout(map, MISSIONS[index])
-		await _bake_los(map)
+		if not OS.get_cmdline_user_args().has("--skip-los"):
+			await _bake_los(map)
 		map.queue_free()
 		await get_tree().process_frame
 	var campaign: CampaignDefinition = CampaignDefinition.new()
+	assert(ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres") == OK)
+	assert(ResourceSaver.save(_building_set, RESOURCE_DIRECTORY + "alderbrook_buildings.tres") == OK)
 	campaign.campaign_id = "road_to_alderbrook"
 	campaign.title = "Road to Alderbrook"
 	campaign.mission_maps = maps
 	assert(ResourceSaver.save(campaign, RESOURCE_DIRECTORY + "road_to_alderbrook.tres") == OK)
 	main.queue_free()
-	print("Built five Alderbrook campaign missions and baked all line of sight data.")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	print("Built five Alderbrook campaign missions.")
 	get_tree().quit()
 
 
@@ -296,8 +340,6 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 		for y: int in range(map.grid_size.y):
 			var cell: Vector2i = Vector2i(x, y)
 			ground.set_cell(cell, ground_sources[_ground_variation(cell, map.grid_size, index)], Vector2i.ZERO)
-			if y == middle:
-				_road(terrain, cell)
 			if y <= 1 or y >= map.grid_size.y - 2:
 				if x % 4 != 0:
 					_woods(terrain, buildings, cell, index)
@@ -334,11 +376,6 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 					water.set_cell(cell, 1, Vector2i.ZERO, alternative)
 				else:
 					ground.erase_cell(cell)
-		for crossing: int in crossings:
-			for x: int in range(4, map.grid_size.x - 2):
-				var cell: Vector2i = Vector2i(x, crossing)
-				if x < river_x or x >= river_x + river_width:
-					_road(terrain, cell)
 		if index == 3:
 			for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
 				_house(buildings, terrain, cell, true)
@@ -349,6 +386,9 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 						_house(buildings, terrain, Vector2i(x, y), true)
 			for cell: Vector2i in [Vector2i(17, 4), Vector2i(20, 9), Vector2i(18, 14)]:
 				_house(buildings, terrain, cell, true)
+	if not _place_roads(ground, terrain, buildings, water, index, ground_sources[0]):
+		map.free()
+		return null
 	_place_orchards(ground, terrain, buildings, index)
 	_place_fields(ground, terrain, buildings, index)
 	var scenario: Scenario = Scenario.new()
@@ -399,14 +439,6 @@ func _ground_variation(cell: Vector2i, size: Vector2i, index: int) -> int:
 			river = 10
 		if absi(cell.x - river) <= 2:
 			return 1
-	var roads: Array[int] = [floori(float(size.y) * 0.5)]
-	if index == 3:
-		roads.append_array([4, 10])
-	elif index == 4:
-		roads.append_array([4, 9, 14])
-	for row: int in roads:
-		if absi(cell.y - row) <= 1:
-			return 0
 	if cell.y <= 2 or cell.y >= size.y - 3 or absi(cell.x - (6 + index)) <= 1:
 		return 2
 	var meadow: float = _grass_noise.get_noise_2d(float(cell.x), float(cell.y))
@@ -455,11 +487,23 @@ func _place_fields(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, bu
 		plot_index += 1
 
 
-func _road(terrain: HexagonTileMapLayer, cell: Vector2i) -> void:
-	var alternative: int = 0
-	if cell.x % 2 == 0:
-		alternative = 1
-	terrain.set_cell(cell, _terrain_sources["Road"], Vector2i.ZERO, alternative)
+func _place_roads(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, water: HexagonTileMapLayer, index: int, grass_source: int) -> bool:
+	# Validate the complete route before clearing or painting any terrain.
+	for cell: Vector2i in _road_layouts[index]["cells"]:
+		if water.get_cell_source_id(cell) == 0:
+			push_error("Road crosses unbridged water in mission %d at %s" % [index + 1, cell])
+			return false
+		var building: TileData = buildings.get_cell_tile_data(cell)
+		if building != null and str(building.get_custom_data("name")) != "Woods":
+			push_error("Road intersects a building in mission %d at %s" % [index + 1, cell])
+			return false
+	for cell: Vector2i in _road_layouts[index]["cells"]:
+		if water.get_cell_source_id(cell) >= 0:
+			continue
+		buildings.erase_cell(cell)
+		ground.set_cell(cell, grass_source, Vector2i.ZERO)
+		terrain.set_cell(cell, _road_sources[index], _road_layouts[index]["cells"][cell])
+	return true
 
 
 func _house(buildings: HexagonTileMapLayer, terrain: HexagonTileMapLayer, cell: Vector2i, stone: bool) -> void:
@@ -594,9 +638,21 @@ func _export_layout(map: Map, spec: Dictionary) -> void:
 			var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
 			var position: Vector2 = layer.map_to_local(cell)
 			var data: TileData = layer.get_cell_tile_data(cell)
-			cells.append({"hex": [cell.x, cell.y], "position": [position.x, position.y], "texture": source.texture.resource_path, "flip_h": data.flip_h, "flip_v": data.flip_v})
+			var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
+			var cell_data: Dictionary = {"hex": [cell.x, cell.y], "position": [position.x, position.y], "texture": source.texture.resource_path, "flip_h": data.flip_h, "flip_v": data.flip_v}
+			if data.has_custom_data("art_family"):
+				cell_data["art_family"] = str(data.get_custom_data("art_family"))
+			if region.position != Vector2i.ZERO or region.size != Vector2i(source.texture.get_size()):
+				cell_data["texture_region"] = [region.position.x, region.position.y, region.size.x, region.size.y]
+			cells.append(cell_data)
 		layers.append({"name": str(layer.name), "cells": cells})
-	var data: Dictionary = {"title": spec["title"], "id": spec["id"], "size": [map.grid_size.x, map.grid_size.y], "seconds": spec["seconds"], "player": spec["player"], "enemy": spec["enemy"], "allied_markers": spec["allied_markers"], "axis_markers": spec["axis_markers"], "layers": layers}
+	var centerlines: Array[Array] = []
+	for curve: Curve2D in _road_layouts[map.get_scenario(0).campaign_mission - 1]["curves"]:
+		var points: Array[Array] = []
+		for point: Vector2 in curve.tessellate(8, 0.5):
+			points.append([point.x * 2.0, point.y * 2.0])
+		centerlines.append(points)
+	var data: Dictionary = {"title": spec["title"], "id": spec["id"], "size": [map.grid_size.x, map.grid_size.y], "seconds": spec["seconds"], "player": spec["player"], "enemy": spec["enemy"], "allied_markers": spec["allied_markers"], "axis_markers": spec["axis_markers"], "road_centerlines": centerlines, "layers": layers}
 	var file: FileAccess = FileAccess.open(IMAGE_DIRECTORY + str(spec["id"]) + ".json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(data, "\t"))
 

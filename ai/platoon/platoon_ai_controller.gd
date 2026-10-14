@@ -423,7 +423,10 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 
 
 func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
-	var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, task.hex, current_order, accepted_positions)
+	var combat_hex: Vector2i = task.hex
+	if task.breach_required:
+		combat_hex = task.breach_hex
+	var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, combat_hex, current_order, accepted_positions)
 	config.sector_cells = []
 	config.fallback_hexes = []
 	config.geography = PositionQuery.Geography.OBJECTIVE_RADIUS
@@ -445,7 +448,7 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		config.profile.avoid_unsuppressed_defenders = true
 		var defenders: Array[Unit] = []
 		for contact: InfluenceContact in _planning_snapshot.get_contacts(team):
-			if contact.observed and LOSHelper.get_hex_distance(contact.hex, task.hex) <= 2 and TacticalPositionExecutor.is_active_defender(contact.unit):
+			if contact.observed and LOSHelper.get_hex_distance(contact.hex, combat_hex) <= 2 and TacticalPositionExecutor.is_active_defender(contact.unit):
 				defenders.append(contact.unit)
 		var ready: bool = defenders.is_empty()
 		if not defenders.is_empty():
@@ -453,15 +456,15 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 			for defender: Unit in defenders:
 				if not TacticalPositionExecutor.is_sufficiently_suppressed(defender):
 					ready = false
-			ready = ready and _goal_support_ready(unit, task.hex)
+			ready = ready and _goal_support_ready(unit, combat_hex)
 			for defender: Unit in defenders:
-				if defender.current_hex == task.hex and TacticalPositionExecutor.is_overwhelmed(defender):
+				if defender.current_hex == combat_hex and TacticalPositionExecutor.is_overwhelmed(defender):
 					ready = true
 		var press: bool = false
 		for defender: Unit in defenders:
-			if defender.current_hex == task.hex and TacticalPositionExecutor.is_overwhelmed(defender):
+			if defender.current_hex == combat_hex and TacticalPositionExecutor.is_overwhelmed(defender):
 				press = true
-		if not defenders.is_empty() and not press and _goal_maneuver(task.hex) != unit:
+		if not defenders.is_empty() and not press and _goal_maneuver(combat_hex) != unit:
 			ready = false
 		if task.kind == ScenarioGoalTask.Kind.OCCUPY and unit.current_hex == task.hex:
 			ready = true
@@ -470,28 +473,39 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		if not ready:
 			config.profile = PositionProfile.for_mode(PositionProfile.Mode.SUPPORT_BY_FIRE)
 			config.profile.minimum_cover = 0.1
-		elif LOSHelper.get_hex_distance(unit.current_hex, task.hex) == 1:
+		elif LOSHelper.get_hex_distance(unit.current_hex, combat_hex) == 1:
 			for defender: Unit in defenders:
-				if defender.current_hex == task.hex and TacticalPositionExecutor.is_sufficiently_suppressed(defender):
+				if defender.current_hex == combat_hex and TacticalPositionExecutor.is_sufficiently_suppressed(defender):
 					config.profile = PositionProfile.for_mode(PositionProfile.Mode.ASSAULT)
 					config.profile.enter_suppressed_enemy_hex = true
 					config.profile.avoid_unsuppressed_defenders = true
+	if task.breach_required:
+		# A blocked escape needs a deliberate fight rather than rejecting every exposed approach.
+		config.profile.max_incoming_risk = 1.0
+		config.profile.max_route_exposure = 1.0
+		config.profile.forecast_route_weight = 0.25
+		config.profile.minimum_cover = 0.0
+		if config.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+			config.profile.support_advance_weight = 8.0
 	var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
 	if task.withdrawal and HqSupportPositionPolicy.is_headquarters(unit):
 		# A deliberate exit duty overrides the default HQ support profile.
 		query.profile = config.profile
 	query.snapshot = _planning_snapshot
+	if task.breach_required and query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+		query.has_support_anchor = true
+		query.support_anchor_hex = combat_hex
 	query.use_defense_area = not advancing and task.kind != ScenarioGoalTask.Kind.PRESERVE
 	query.goal_key = task.key
 	query.goal_reason = task.reason
-	query.goal_destination_required = task.is_destination_goal() and query.profile.mode == PositionProfile.Mode.ADVANCE
+	query.goal_destination_required = task.is_destination_goal() and not task.breach_required and query.profile.mode == PositionProfile.Mode.ADVANCE
 	if task.kind == ScenarioGoalTask.Kind.OCCUPY:
 		query.goal_capacity = task.required_units
 	elif task.kind == ScenarioGoalTask.Kind.EXIT:
 		# Exited squads remain on the board; later squads must still be able to
 		# register at the same marker without waiting for a counted squad to leave.
 		query.goal_capacity = task.exit_capacity()
-	query.press_attack = _can_attack_without_overwatch(unit, task.hex)
+	query.press_attack = _can_attack_without_overwatch(unit, combat_hex)
 	if query.press_attack:
 		query.profile.forecast_weight = 0.0
 		query.profile.forecast_route_weight = 0.0
@@ -518,7 +532,10 @@ func _goal_support_ready(attacker: Unit, hex: Vector2i) -> bool:
 func _goal_maneuver(hex: Vector2i) -> Unit:
 	var selected: Unit
 	for unit: Unit in goal_assignments:
-		if goal_assignments[unit].hex != hex or unit.squad_type != Globals.SquadType.Rifle or not PositionQueryService.can_assault(unit) or not PositionQueryService.can_follow_intent(unit):
+		var objective: Vector2i = goal_assignments[unit].hex
+		if goal_assignments[unit].breach_required:
+			objective = goal_assignments[unit].breach_hex
+		if objective != hex or unit.squad_type != Globals.SquadType.Rifle or not PositionQueryService.can_assault(unit) or not PositionQueryService.can_follow_intent(unit):
 			continue
 		if PlatoonPositionStability.is_busy(unit) or unit.in_close_combat:
 			return unit

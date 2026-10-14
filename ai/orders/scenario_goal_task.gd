@@ -11,6 +11,8 @@ var required_units: int = 1
 var priority: float = 0.0
 var urgent: bool = false
 var withdrawal: bool = false
+var breach_required: bool = false
+var breach_hex: Vector2i
 var reason: String = ""
 
 

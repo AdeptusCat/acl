@@ -57,56 +57,56 @@
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_b.png" id="53_tii1o"]
 [ext_resource type="Texture2D" path="res://assets/objectives/allies_c.png" id="54_1k02o"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qw1vt"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hi3l8"]
 texture = ExtResource("6_7c7xa")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wi054"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fy3lb"]
 resource_name = "Open Ground 1"
 texture = ExtResource("4_hi3l8")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yac84"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dlgsm"]
 texture = ExtResource("8_fy3lb")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 1:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h7ai6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qw1vt"]
 resource_name = "Open Ground 2"
 texture = ExtResource("6_fy3lb")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yh8o1"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wi054"]
 resource_name = "Open Ground 3"
 texture = ExtResource("7_dlgsm")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_61x6b"]
+[sub_resource type="TileSet" id="TileSet_yac84"]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 physics_layer_0/collision_layer = 4
 physics_layer_0/collision_mask = 4
 custom_data_layer_0/name = "elevation"
 custom_data_layer_0/type = 2
-sources/0 = SubResource("TileSetAtlasSource_qw1vt")
-sources/1 = SubResource("TileSetAtlasSource_wi054")
-sources/2 = SubResource("TileSetAtlasSource_yac84")
-sources/3 = SubResource("TileSetAtlasSource_h7ai6")
-sources/4 = SubResource("TileSetAtlasSource_yh8o1")
+sources/0 = SubResource("TileSetAtlasSource_hi3l8")
+sources/1 = SubResource("TileSetAtlasSource_fy3lb")
+sources/2 = SubResource("TileSetAtlasSource_dlgsm")
+sources/3 = SubResource("TileSetAtlasSource_qw1vt")
+sources/4 = SubResource("TileSetAtlasSource_wi054")
 
-[sub_resource type="Resource" id="Resource_uobqf"]
+[sub_resource type="Resource" id="Resource_h7ai6"]
 script = ExtResource("49_hte11")
 required_time_s = 15.0
 team = 1
 
-[sub_resource type="Resource" id="Resource_8g80o"]
+[sub_resource type="Resource" id="Resource_yh8o1"]
 script = ExtResource("49_hte11")
 objective_id = 2
 required_time_s = 15.0
@@ -114,12 +114,12 @@ team = 1
 outcome_level = 0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_r7btv"]
+[sub_resource type="Resource" id="Resource_61x6b"]
 script = ExtResource("49_hte11")
 required_time_s = 15.0
 test_at_scenario_end = true
 
-[sub_resource type="Resource" id="Resource_ywl6i"]
+[sub_resource type="Resource" id="Resource_uobqf"]
 script = ExtResource("50_t3t2e")
 test_at_scenario_end = true
 
@@ -200,14 +200,14 @@ metadata/_custom_type_script = "uid://doub5i2qbimo0"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
 texture = ExtResource("45_fy0xc")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_2 = "Exit"
 0:0/0/custom_data_3 = "Exit"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
 texture = ExtResource("46_32k3o")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_2 = "Objective A"
@@ -215,7 +215,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
 texture = ExtResource("47_hecah")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_2 = "Objective B"
@@ -223,7 +223,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
 texture = ExtResource("48_f7d0x")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_2 = "Objective C"
@@ -231,7 +231,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0jm0n"]
 texture = ExtResource("49_utdv1")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 4
 0:0/0/custom_data_3 = "Start"
@@ -239,7 +239,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSet" id="TileSet_0jm0n"]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "objective_id"
 custom_data_layer_0/type = 2
 custom_data_layer_1/name = "team"
@@ -256,7 +256,7 @@ sources/9 = SubResource("TileSetAtlasSource_0jm0n")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
 texture = ExtResource("50_pif3l")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_1 = 1
 0:0/0/custom_data_2 = "Exit"
@@ -264,7 +264,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
 texture = ExtResource("51_mhcww")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 4
 0:0/0/custom_data_1 = 1
@@ -272,7 +272,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
 texture = ExtResource("52_sfbom")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = 1
@@ -281,7 +281,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
 texture = ExtResource("53_tii1o")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
 0:0/0/custom_data_1 = 1
@@ -290,7 +290,7 @@ texture_region_size = Vector2i(64, 64)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
 texture = ExtResource("54_1k02o")
-texture_region_size = Vector2i(64, 64)
+texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_0 = 3
 0:0/0/custom_data_1 = 1
@@ -300,7 +300,7 @@ texture_region_size = Vector2i(64, 64)
 [sub_resource type="TileSet" id="TileSet_cwow2"]
 tile_shape = 3
 tile_offset_axis = 1
-tile_size = Vector2i(64, 64)
+tile_size = Vector2i(128, 128)
 custom_data_layer_0/name = "objective_id"
 custom_data_layer_0/type = 2
 custom_data_layer_1/name = "team"
@@ -325,33 +325,33 @@ los_resource_path = "res://resources/los/alderbrook_01_quiet_approach.res"
 [node name="TileMapLayers" type="Node2D" parent="." unique_id=1478662733]
 
 [node name="GroundTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1569268173 instance=ExtResource("5_yycqq")]
-tile_map_data = PackedByteArray("AAAAAAAABAAAAAAAAAABAAAABAAAAAAAAAACAAAABAAAAAAAAAADAAAABAAAAAAAAAACAAEABAAAAAAAAAABAAEABAAAAAAAAAAAAAEABAAAAAAAAAAAAAIABAAAAAAAAAABAAIABAAAAAAAAAACAAIABAAAAAAAAAADAAIABAAAAAAAAAAAAAMAAwAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAwAAAAAAAAADAAEABAAAAAAAAAAEAAAABAAAAAAAAAAFAAAABAAAAAAAAAAFAAQAAQAAAAAAAAADAAQAAQAAAAAAAAACAAQAAQAAAAAAAAABAAQAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAAUAAQAAAAAAAAABAAUAAQAAAAAAAAACAAUAAQAAAAAAAAAEAAUAAQAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYAAQAAAAAAAAAFAAUAAQAAAAAAAAAGAAUAAQAAAAAAAAAGAAQAAQAAAAAAAAAGAAMABAAAAAAAAAAGAAIABAAAAAAAAAAGAAEABAAAAAAAAAAGAAAABAAAAAAAAAAFAAEABAAAAAAAAAAHAAAABAAAAAAAAAAHAAIABAAAAAAAAAADAAUAAQAAAAAAAAAEAAQAAQAAAAAAAAAFAAMABAAAAAAAAAAFAAIABAAAAAAAAAAEAAMAAwAAAAAAAAAEAAIABAAAAAAAAAAEAAEABAAAAAAAAAAIAAAABAAAAAAAAAAHAAEABAAAAAAAAAAIAAIABAAAAAAAAAAHAAMABAAAAAAAAAAIAAMABAAAAAAAAAAIAAQAAQAAAAAAAAAIAAUAAQAAAAAAAAAIAAEABAAAAAAAAAAHAAQAAQAAAAAAAAAHAAUAAQAAAAAAAAAIAAYAAQAAAAAAAAAIAAcABAAAAAAAAAAIAAgABAAAAAAAAAAHAAgABAAAAAAAAAAGAAgABAAAAAAAAAAFAAgABAAAAAAAAAAEAAgABAAAAAAAAAADAAgABAAAAAAAAAACAAgABAAAAAAAAAABAAgABAAAAAAAAAAAAAgABAAAAAAAAAAAAAcABAAAAAAAAAABAAcABAAAAAAAAAACAAcABAAAAAAAAAADAAcABAAAAAAAAAAEAAcABAAAAAAAAAAFAAcABAAAAAAAAAAGAAcABAAAAAAAAAAHAAcABAAAAAAAAAAHAAYAAQAAAAAAAAAJAAAABAAAAAAAAAAKAAEABAAAAAAAAAALAAAABAAAAAAAAAAMAAEABAAAAAAAAAAMAAAABAAAAAAAAAAKAAAABAAAAAAAAAANAAAABAAAAAAAAAAOAAAABAAAAAAAAAAPAAAABAAAAAAAAAAKAAIABAAAAAAAAAAJAAEABAAAAAAAAAALAAIABAAAAAAAAAAMAAIABAAAAAAAAAANAAIABAAAAAAAAAANAAEABAAAAAAAAAALAAEABAAAAAAAAAAOAAEABAAAAAAAAAAPAAEABAAAAAAAAAAOAAIABAAAAAAAAAAJAAIABAAAAAAAAAAJAAMAAwAAAAAAAAAKAAMAAwAAAAAAAAALAAMAAwAAAAAAAAAMAAMAAwAAAAAAAAANAAMAAQAAAAAAAAAOAAMAAQAAAAAAAAAKAAQAAQAAAAAAAAALAAQAAQAAAAAAAAAMAAQAAQAAAAAAAAAOAAQAAQAAAAAAAAANAAQAAQAAAAAAAAAKAAUAAQAAAAAAAAAJAAQAAQAAAAAAAAAMAAUAAQAAAAAAAAALAAUAAQAAAAAAAAANAAUAAQAAAAAAAAAMAAYAAQAAAAAAAAAJAAUAAQAAAAAAAAAJAAYAAQAAAAAAAAAKAAYAAQAAAAAAAAALAAYAAQAAAAAAAAANAAYAAQAAAAAAAAAKAAcABAAAAAAAAAAJAAcABAAAAAAAAAAKAAgABAAAAAAAAAALAAcABAAAAAAAAAAAAAkABAAAAAAAAAACAAkABAAAAAAAAAAEAAkABAAAAAAAAAAFAAkABAAAAAAAAAADAAkABAAAAAAAAAABAAkABAAAAAAAAAAGAAkABAAAAAAAAAAHAAkABAAAAAAAAAAIAAkABAAAAAAAAAAJAAkABAAAAAAAAAAKAAkABAAAAAAAAAAJAAgABAAAAAAAAAALAAkABAAAAAAAAAAMAAkABAAAAAAAAAANAAkABAAAAAAAAAAOAAkABAAAAAAAAAAPAAkABAAAAAAAAAAPAAgABAAAAAAAAAAOAAgABAAAAAAAAAANAAgABAAAAAAAAAAMAAgABAAAAAAAAAALAAgABAAAAAAAAAAPAAcABAAAAAAAAAAOAAcABAAAAAAAAAANAAcABAAAAAAAAAAPAAYAAQAAAAAAAAAPAAQAAQAAAAAAAAAOAAUAAQAAAAAAAAAOAAYAAQAAAAAAAAAPAAUAAQAAAAAAAAAPAAMAAQAAAAAAAAAPAAIABAAAAAAAAAAMAAcABAAAAAAAAAA=")
-tile_set = SubResource("TileSet_61x6b")
+tile_map_data = PackedByteArray("AAAAAAAABAAAAAAAAAABAAAABAAAAAAAAAACAAAABAAAAAAAAAADAAAABAAAAAAAAAACAAEABAAAAAAAAAABAAEABAAAAAAAAAAAAAEABAAAAAAAAAAAAAIABAAAAAAAAAABAAIABAAAAAAAAAACAAIABAAAAAAAAAADAAIABAAAAAAAAAAAAAMAAwAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAwAAAAAAAAADAAEABAAAAAAAAAAEAAAABAAAAAAAAAAFAAAABAAAAAAAAAAFAAQABAAAAAAAAAADAAQAAwAAAAAAAAACAAQAAwAAAAAAAAABAAQAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAAUAAwAAAAAAAAABAAUAAwAAAAAAAAACAAUABAAAAAAAAAAEAAUABAAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYABAAAAAAAAAAFAAUAAQAAAAAAAAAGAAUAAQAAAAAAAAAGAAQABAAAAAAAAAAGAAMABAAAAAAAAAAGAAIABAAAAAAAAAAGAAEABAAAAAAAAAAGAAAABAAAAAAAAAAFAAEABAAAAAAAAAAHAAAABAAAAAAAAAAHAAIABAAAAAAAAAADAAUAAQAAAAAAAAAEAAQAAwAAAAAAAAAFAAMABAAAAAAAAAAFAAIABAAAAAAAAAAEAAMAAwAAAAAAAAAEAAIABAAAAAAAAAAEAAEABAAAAAAAAAAIAAAABAAAAAAAAAAHAAEABAAAAAAAAAAIAAIABAAAAAAAAAAHAAMABAAAAAAAAAAIAAMABAAAAAAAAAAIAAQAAwAAAAAAAAAIAAUAAQAAAAAAAAAIAAEABAAAAAAAAAAHAAQABAAAAAAAAAAHAAUAAQAAAAAAAAAIAAYAAQAAAAAAAAAIAAcABAAAAAAAAAAIAAgABAAAAAAAAAAHAAgABAAAAAAAAAAGAAgABAAAAAAAAAAFAAgABAAAAAAAAAAEAAgABAAAAAAAAAADAAgABAAAAAAAAAACAAgABAAAAAAAAAABAAgABAAAAAAAAAAAAAgABAAAAAAAAAAAAAcABAAAAAAAAAABAAcABAAAAAAAAAACAAcABAAAAAAAAAADAAcABAAAAAAAAAAEAAcABAAAAAAAAAAFAAcABAAAAAAAAAAGAAcABAAAAAAAAAAHAAcABAAAAAAAAAAHAAYABAAAAAAAAAAJAAAABAAAAAAAAAAKAAEABAAAAAAAAAALAAAABAAAAAAAAAAMAAEABAAAAAAAAAAMAAAABAAAAAAAAAAKAAAABAAAAAAAAAANAAAABAAAAAAAAAAOAAAABAAAAAAAAAAPAAAABAAAAAAAAAAKAAIABAAAAAAAAAAJAAEABAAAAAAAAAALAAIABAAAAAAAAAAMAAIABAAAAAAAAAANAAIABAAAAAAAAAANAAEABAAAAAAAAAALAAEABAAAAAAAAAAOAAEABAAAAAAAAAAPAAEABAAAAAAAAAAOAAIABAAAAAAAAAAJAAIABAAAAAAAAAAJAAMAAwAAAAAAAAAKAAMAAwAAAAAAAAALAAMAAwAAAAAAAAAMAAMAAwAAAAAAAAANAAMAAQAAAAAAAAAOAAMAAQAAAAAAAAAKAAQAAwAAAAAAAAALAAQAAwAAAAAAAAAMAAQAAwAAAAAAAAAOAAQAAQAAAAAAAAANAAQAAwAAAAAAAAAKAAUAAQAAAAAAAAAJAAQAAwAAAAAAAAAMAAUAAwAAAAAAAAALAAUAAQAAAAAAAAANAAUAAQAAAAAAAAAMAAYAAQAAAAAAAAAJAAUAAQAAAAAAAAAJAAYAAQAAAAAAAAAKAAYAAQAAAAAAAAALAAYAAwAAAAAAAAANAAYAAQAAAAAAAAAKAAcABAAAAAAAAAAJAAcABAAAAAAAAAAKAAgABAAAAAAAAAALAAcABAAAAAAAAAAAAAkABAAAAAAAAAACAAkABAAAAAAAAAAEAAkABAAAAAAAAAAFAAkABAAAAAAAAAADAAkABAAAAAAAAAABAAkABAAAAAAAAAAGAAkABAAAAAAAAAAHAAkABAAAAAAAAAAIAAkABAAAAAAAAAAJAAkABAAAAAAAAAAKAAkABAAAAAAAAAAJAAgABAAAAAAAAAALAAkABAAAAAAAAAAMAAkABAAAAAAAAAANAAkABAAAAAAAAAAOAAkABAAAAAAAAAAPAAkABAAAAAAAAAAPAAgABAAAAAAAAAAOAAgABAAAAAAAAAANAAgABAAAAAAAAAAMAAgABAAAAAAAAAALAAgABAAAAAAAAAAPAAcABAAAAAAAAAAOAAcABAAAAAAAAAANAAcABAAAAAAAAAAPAAYAAQAAAAAAAAAPAAQAAQAAAAAAAAAOAAUAAwAAAAAAAAAOAAYAAQAAAAAAAAAPAAUAAQAAAAAAAAAPAAMAAQAAAAAAAAAPAAIABAAAAAAAAAAMAAcABAAAAAAAAAA=")
+tile_set = SubResource("TileSet_yac84")
 script = ExtResource("9_dlgsm")
 pathfinding_enabled = true
 metadata/_edit_lock_ = true
 
-[node name="WaterTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1160076774]
+[node name="WaterTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=971134527]
 tile_set = ExtResource("2_32d4c")
 script = ExtResource("4_gq6xk")
 
-[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1027716923]
-tile_map_data = PackedByteArray("AAAAAAUAFQAAAAAAAQABAAAAEAAAAAAAAAABAAEAEAAAAAAAAAABAAUAFQAAAAAAAAABAAgAEgAAAAAAAAABAAkAEAAAAAAAAAACAAAAEAAAAAAAAAACAAEAEAAAAAAAAAACAAUAFQAAAAAAAQACAAgAEgAAAAAAAAACAAkAEAAAAAAAAAADAAAAEAAAAAAAAAADAAEAEAAAAAAAAAADAAUAFQAAAAAAAAADAAgAEgAAAAAAAAADAAkAEAAAAAAAAAAEAAUAFQAAAAAAAQAFAAAAEQAAAAAAAAAFAAEAEQAAAAAAAAAFAAUAFQAAAAAAAAAFAAgAEAAAAAAAAAAFAAkAEQAAAAAAAAAGAAAAEQAAAAAAAAAGAAEAEQAAAAAAAAAGAAUAFQAAAAAAAQAGAAgAEAAAAAAAAAAGAAkAEQAAAAAAAAAHAAAAEQAAAAAAAAAHAAEAEQAAAAAAAAAHAAUAFQAAAAAAAAAHAAgAEAAAAAAAAAAHAAkAEQAAAAAAAAAIAAUAFQAAAAAAAQAJAAAAEgAAAAAAAAAJAAEAEgAAAAAAAAAJAAUAFQAAAAAAAAAJAAgAEQAAAAAAAAAJAAkAEgAAAAAAAAAKAAAAEgAAAAAAAAAKAAEAEgAAAAAAAAAKAAUAFQAAAAAAAQAKAAgAEQAAAAAAAAAKAAkAEgAAAAAAAAALAAAAEgAAAAAAAAALAAEAEgAAAAAAAAALAAUAFQAAAAAAAAALAAgAEQAAAAAAAAALAAkAEgAAAAAAAAANAAAAEAAAAAAAAAANAAEAEAAAAAAAAAANAAUAFQAAAAAAAAANAAgAEgAAAAAAAAANAAkAEAAAAAAAAAAOAAAAEAAAAAAAAAAOAAEAEAAAAAAAAAAOAAUAFQAAAAAAAQAOAAgAEgAAAAAAAAAOAAkAEAAAAAAAAAAPAAAAEAAAAAAAAAAPAAEAEAAAAAAAAAAPAAUAFQAAAAAAAAAPAAgAEgAAAAAAAAAPAAkAEAAAAAAAAAAGAAIAEQAAAAAAAAAGAAMAEgAAAAAAAAAGAAcAEAAAAAAAAAAKAAMAEwAAAAAAAAAKAAQAEwAAAAAAAAALAAMAEwAAAAAAAAALAAQAEwAAAAAAAAAEAAIAAwAAAAAAAAAEAAMAAwAAAAAAAAAFAAIAAwAAAAAAAAAFAAMAAwAAAAAAAAAKAAIABwAAAAAAAAALAAIABwAAAAAAAAAMAAIABwAAAAAAAAAMAAMABwAAAAAAAAAEAAYABgAAAAAAAAAEAAcABgAAAAAAAAAFAAYABgAAAAAAAAAFAAcABgAAAAAAAAAJAAYACAAAAAAAAAAJAAcACAAAAAAAAAAKAAYACAAAAAAAAAAKAAcACAAAAAAAAAALAAYACAAAAAAAAAALAAcACAAAAAAAAAA=")
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=255342050]
+tile_map_data = PackedByteArray("AAABAAAAHAAAAAAAAAABAAEAHAABAAAAAAABAAgAHAACAAAAAAABAAkAHAADAAAAAAACAAAAHAAEAAAAAAACAAEAHAAFAAAAAAACAAgAHAAGAAAAAAACAAkAHAAHAAAAAAADAAAAHAAAAAEAAAADAAEAHAABAAEAAAADAAgAHAACAAEAAAADAAkAHAADAAEAAAAFAAAAHAAHAAEAAAAFAAEAHAAAAAIAAAAFAAgAHAAFAAIAAAAFAAkAHAAGAAIAAAAGAAAAHAAHAAIAAAAGAAEAHAAAAAMAAAAGAAgAHAAEAAMAAAAGAAkAHAAFAAMAAAAHAAAAHAAGAAMAAAAHAAEAHAAHAAMAAAAHAAgAHAAAAAQAAAAHAAkAHAABAAQAAAAJAAAAHAACAAQAAAAJAAEAHAADAAQAAAAJAAgAHAAGAAQAAAAJAAkAHAAHAAQAAAAKAAAAHAAAAAUAAAAKAAEAHAABAAUAAAAKAAgAHAAGAAUAAAAKAAkAHAAHAAUAAAALAAAAHAAAAAYAAAALAAEAHAABAAYAAAALAAgAHAAHAAYAAAALAAkAHAAAAAcAAAANAAAAHAADAAcAAAANAAEAHAAEAAcAAAANAAgAHAAFAAcAAAANAAkAHAAGAAcAAAAOAAAAHAAHAAcAAAAOAAEAHAAAAAgAAAAOAAgAHAABAAgAAAAOAAkAHAACAAgAAAAPAAAAHAADAAgAAAAPAAEAHAAEAAgAAAAPAAgAHAAFAAgAAAAPAAkAHAAGAAgAAAAGAAIAHAABAAMAAAAGAAMAHAACAAMAAAAGAAcAHAADAAMAAAAAAAYAFwAAAAAAAAABAAYAFwABAAAAAAACAAYAFwACAAAAAAADAAUAFwADAAAAAAADAAYAFwAEAAAAAAAEAAYAFwAFAAAAAAAFAAUAFwAGAAAAAAAGAAUAFwAHAAAAAAAGAAYAFwAAAAEAAAAHAAUAFwABAAEAAAAIAAUAFwACAAEAAAAJAAUAFwADAAEAAAAKAAUAFwAEAAEAAAAKAAYAFwAFAAEAAAALAAUAFwAGAAEAAAAMAAYAFwAHAAEAAAANAAUAFwAAAAIAAAAOAAYAFwABAAIAAAAPAAUAFwACAAIAAAAPAAYAFwADAAIAAAAKAAMAHAADAAUAAAAKAAQAHAAEAAUAAAALAAMAHAADAAYAAAALAAQAHAAEAAYAAAAEAAIAHAAEAAEAAAAEAAMAHAAFAAEAAAAFAAIAHAABAAIAAAAFAAMAHAACAAIAAAAKAAIAHAACAAUAAAALAAIAHAACAAYAAAAMAAIAHAABAAcAAAAMAAMAHAACAAcAAAAEAAcAHAAGAAEAAAAFAAYAHAADAAIAAAAFAAcAHAAEAAIAAAAJAAYAHAAEAAQAAAAJAAcAHAAFAAQAAAAKAAcAHAAFAAUAAAALAAYAHAAFAAYAAAALAAcAHAAGAAYAAAA=")
 tile_set = ExtResource("9_hfvsb")
 script = ExtResource("26_w5w0i")
 
-[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=850703019]
+[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1554866552]
 tile_set = ExtResource("11_c41vj")
 script = ExtResource("37_mhcww")
 
-[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=38520878]
-tile_map_data = PackedByteArray("AAABAAAABQAAAAAAAAABAAEABQAAAAAAAAABAAgABwAAAAAAAAABAAkABQAAAAAAAAACAAAABQAAAAAAAAACAAEABQAAAAAAAAACAAgABwAAAAAAAAACAAkABQAAAAAAAAADAAAABQAAAAAAAAADAAEABQAAAAAAAAADAAgABwAAAAAAAAADAAkABQAAAAAAAAAFAAAABgAAAAAAAAAFAAEABgAAAAAAAAAFAAgABQAAAAAAAAAFAAkABgAAAAAAAAAGAAAABgAAAAAAAAAGAAEABgAAAAAAAAAGAAgABQAAAAAAAAAGAAkABgAAAAAAAAAHAAAABgAAAAAAAAAHAAEABgAAAAAAAAAHAAgABQAAAAAAAAAHAAkABgAAAAAAAAAJAAAABwAAAAAAAAAJAAEABwAAAAAAAAAJAAgABgAAAAAAAAAJAAkABwAAAAAAAAAKAAAABwAAAAAAAAAKAAEABwAAAAAAAAAKAAgABgAAAAAAAAAKAAkABwAAAAAAAAALAAAABwAAAAAAAAALAAEABwAAAAAAAAALAAgABgAAAAAAAAALAAkABwAAAAAAAAANAAAABQAAAAAAAAANAAEABQAAAAAAAAANAAgABwAAAAAAAAANAAkABQAAAAAAAAAOAAAABQAAAAAAAAAOAAEABQAAAAAAAAAOAAgABwAAAAAAAAAOAAkABQAAAAAAAAAPAAAABQAAAAAAAAAPAAEABQAAAAAAAAAPAAgABwAAAAAAAAAPAAkABQAAAAAAAAAGAAIABgAAAAAAAAAGAAMABwAAAAAAAAAGAAcABQAAAAAAAAAMAAUAAgAAAAAAAAA=")
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1559489130]
+tile_map_data = PackedByteArray("AAABAAAACwAAAAAAAAABAAEACwABAAAAAAABAAgACwACAAAAAAABAAkACwADAAAAAAACAAAACwAEAAAAAAACAAEACwAFAAAAAAACAAgACwAGAAAAAAACAAkACwAHAAAAAAADAAAACwAAAAEAAAADAAEACwABAAEAAAADAAgACwACAAEAAAADAAkACwADAAEAAAAFAAAACwAEAAEAAAAFAAEACwAFAAEAAAAFAAgACwAGAAEAAAAFAAkACwAHAAEAAAAGAAAACwAAAAIAAAAGAAEACwABAAIAAAAGAAgACwAFAAIAAAAGAAkACwAGAAIAAAAHAAAACwAHAAIAAAAHAAEACwAAAAMAAAAHAAgACwABAAMAAAAHAAkACwACAAMAAAAJAAAACwADAAMAAAAJAAEACwAEAAMAAAAJAAgACwAFAAMAAAAJAAkACwAGAAMAAAAKAAAACwAHAAMAAAAKAAEACwAAAAQAAAAKAAgACwABAAQAAAAKAAkACwACAAQAAAALAAAACwADAAQAAAALAAEACwAEAAQAAAALAAgACwAFAAQAAAALAAkACwAGAAQAAAANAAAACwAHAAQAAAANAAEACwAAAAUAAAANAAgACwABAAUAAAANAAkACwACAAUAAAAOAAAACwADAAUAAAAOAAEACwAEAAUAAAAOAAgACwAFAAUAAAAOAAkACwAGAAUAAAAPAAAACwAHAAUAAAAPAAEACwAAAAYAAAAPAAgACwABAAYAAAAPAAkACwACAAYAAAAGAAIACwACAAIAAAAGAAMACwADAAIAAAAGAAcACwAEAAIAAAAMAAUAAgAAAAAAAAA=")
 tile_set = ExtResource("13_bfe73")
 script = ExtResource("45_c5t67")
 
 [node name="Scenarios" type="Node2D" parent="." unique_id=976409343]
 
-[node name="Mission" type="Node2D" parent="Scenarios" unique_id=1698099181]
+[node name="Mission" type="Node2D" parent="Scenarios" unique_id=1770727197]
 script = ExtResource("47_i5hbn")
 scenario_name = "1. Quiet Approach"
 scenario_id = "alderbrook_01_quiet_approach"
@@ -368,14 +368,14 @@ duration_s = 600.0
 use_authored_duration = true
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_uobqf"), SubResource("Resource_8g80o"), SubResource("Resource_r7btv"), SubResource("Resource_ywl6i")])
+victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_h7ai6"), SubResource("Resource_yh8o1"), SubResource("Resource_61x6b"), SubResource("Resource_uobqf")])
 axis_ai_status = 1
 allies_ai_status = 0
 
-[node name="Units" type="Node2D" parent="Scenarios/Mission" unique_id=1210775505]
+[node name="Units" type="Node2D" parent="Scenarios/Mission" unique_id=113910127]
 
 [node name="CA_P1_S0_Allies_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=437630089 instance=ExtResource("19_yycqq")]
-position = Vector2(128, 416)
+position = Vector2(256, 832)
 script = ExtResource("20_7c7xa")
 platoon = 1
 team = 1
@@ -391,8 +391,8 @@ squads_collection = ExtResource("27_h7ai6")
 squad_type = 4
 metadata/_edit_lock_ = true
 
-[node name="CA_P1_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=13686369 instance=ExtResource("19_yycqq")]
-position = Vector2(128, 352)
+[node name="CA_P1_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1222315829 instance=ExtResource("19_yycqq")]
+position = Vector2(256, 704)
 script = ExtResource("20_7c7xa")
 squad = 1
 platoon = 1
@@ -408,8 +408,8 @@ formation_id = 1
 squads_collection = ExtResource("27_h7ai6")
 metadata/_edit_lock_ = true
 
-[node name="CA_P1_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2134595584 instance=ExtResource("19_yycqq")]
-position = Vector2(128, 480)
+[node name="CA_P1_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2004293180 instance=ExtResource("19_yycqq")]
+position = Vector2(256, 960)
 script = ExtResource("20_7c7xa")
 squad = 2
 platoon = 1
@@ -425,8 +425,8 @@ formation_id = 1
 squads_collection = ExtResource("27_h7ai6")
 metadata/_edit_lock_ = true
 
-[node name="CA_P1_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2012068616 instance=ExtResource("19_yycqq")]
-position = Vector2(704, 352)
+[node name="CA_P1_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1434628940 instance=ExtResource("19_yycqq")]
+position = Vector2(1408, 704)
 script = ExtResource("20_7c7xa")
 platoon = 1
 retreat_speed = 100.0
@@ -441,8 +441,8 @@ squads_collection = ExtResource("27_h7ai6")
 squad_type = 4
 metadata/_edit_lock_ = true
 
-[node name="CA_P1_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1761568342 instance=ExtResource("19_yycqq")]
-position = Vector2(608, 352)
+[node name="CA_P1_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1041334340 instance=ExtResource("19_yycqq")]
+position = Vector2(1216, 704)
 script = ExtResource("20_7c7xa")
 squad = 1
 platoon = 1
@@ -457,14 +457,14 @@ formation_id = 1
 squads_collection = ExtResource("27_h7ai6")
 metadata/_edit_lock_ = true
 
-[node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=2015346800]
+[node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=466539195]
 
-[node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1807953562]
+[node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=302602225]
 tile_map_data = PackedByteArray("AAAMAAUAAwAAAAAAAAAOAAUACQAAAAAAAAA=")
 tile_set = SubResource("TileSet_0jm0n")
 script = ExtResource("4_gq6xk")
 
-[node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=870413610]
+[node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=10734001]
 tile_map_data = PackedByteArray("AAAMAAUABgAAAAAAAAAHAAYABwAAAAAAAAACAAYAAgAAAAAAAAA=")
 tile_set = SubResource("TileSet_cwow2")
 script = ExtResource("4_gq6xk")

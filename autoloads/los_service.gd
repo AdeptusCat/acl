@@ -30,6 +30,7 @@ var initialized: bool = false
 
 # --- PUBLIC FUNCTION ---
 var los_lookup: Dictionary = {}
+var _texture_images: Dictionary[Texture2D, Image] = {}
 
 enum BetweenAxis {
 	NONE,
@@ -43,6 +44,7 @@ func _ready() -> void:
 
 func load_prebaked_los(map: Map) -> void:
 	clear_los()
+	_texture_images.clear()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	if not map.los_resource_path.is_empty():
 		file_path = map.los_resource_path
@@ -62,6 +64,7 @@ func load_prebaked_los(map: Map) -> void:
 
 func unload_map() -> void:
 	clear_los()
+	_texture_images.clear()
 	ground_layer = null
 	building_layer = null
 	wall_layer = null
@@ -296,6 +299,8 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	var target_hex_cube : Vector3i = ground_layer.local_to_cube(target_pos)
 	
 	var n: int = ground_layer.cube_distance(origin_hex_cube, target_hex_cube)
+	if n == 0:
+		return result
 	
 	var _is_between_hexes : bool = check_between_axes(origin_hex_map, target_hex_map)
 	
@@ -412,6 +417,9 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 	
 	var hexes : Array[Vector3i] = cube_line(origin_hex_cube, target_hex_cube, n)
 	result.hexes = hexes
+	result = _check_texture_obstacles(origin_pos, target_pos, hexes, result)
+	if result.blocked:
+		return result
 	var steps: int = hexes.size()
 	
 	if steps < 2:
@@ -462,21 +470,6 @@ func check_los(origin_pos: Vector2, target_pos: Vector2, origin_elevation: int, 
 		if sample_hex_map == origin_hex_map:
 			continue
 
-		if building_layer.get_cell_source_id(sample_hex_map) != -1:
-			result = _check_building_block(sample_hex_map, i, steps, origin_pos, target_pos, result)
-			if result.blocked:
-				return result
-		
-		if direction_between_axes == BetweenAxis.NONE:
-			if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
-				result = _check_hindrance(sample_hex_map, result)
-		
-		if terrain_layer.get_cell_source_id(sample_hex_map) != -1:
-			result = _check_blocking_terrain(sample_hex_map, result)
-			if result.blocked:
-				return result
-		
-		
 		var wall_result: Dictionary
 		if not prev_hex_map == origin_hex_map:
 			wall_result = is_wall_blocking(prev_hex_cube, sample_hex_cube, prev_hex_map, sample_point)
@@ -533,56 +526,6 @@ func _walk_between_axes_and_check_walls(
 		var next_middle_hex_cube : Vector3i = s_hex_cube + direction_2
 		var next_middle_hex_map : Vector2i = ground_layer.cube_to_map(next_middle_hex_cube)
 		
-		
-		var hindrance_result : Dictionary = {"hindrance" : 0}
-		if not start_hex_cube == origin_hex_cube:
-			if terrain_layer.get_cell_source_id(start_hex_map) != -1:
-				hindrance_result = _check_hindrance(start_hex_map, hindrance_result)
-				if hindrance_result.hindrance > 0:
-					result.hindrance += 1
-					result.shooter_cover += 1
-					result.target_cover += 1
-				result = _check_blocking_terrain(start_hex_map, result)
-				if result.blocked:
-					return result
-		
-		hindrance_result.hindrance = 0
-		if terrain_layer.get_cell_source_id(s_hex_map) != -1:
-			hindrance_result = _check_hindrance(s_hex_map, hindrance_result)
-			result = _check_blocking_terrain(s_hex_map, result)
-			if result.blocked:
-				return result
-		
-		if terrain_layer.get_cell_source_id(se_hex_map) != -1:
-			hindrance_result = _check_hindrance(se_hex_map, hindrance_result)
-			result = _check_blocking_terrain(se_hex_map, result)
-			if result.blocked:
-				return result
-		# only count one hindrance if the hexspine is edging on two hindrance hexes
-		if hindrance_result.hindrance > 0:
-			result.hindrance += 1
-			result.shooter_cover += 1
-			result.target_cover += 1
-		
-		
-		## check blocked by building from start to target hex, so test line is along hexspine
-		#if not start_hex_cube == origin_hex_cube:
-			#result["block_point"] = _refine_entry(ground_layer.cube_to_local(start_hex_cube), ground_layer.cube_to_local(next_middle_hex_cube))
-			#if result["block_point"] == Vector2.ZERO:
-				#result["blocked"] = true
-			#if result.blocked:
-				#return result
-		result["block_point"] = _refine_entry_alt(ground_layer.cube_to_local(start_hex_cube), ground_layer.cube_to_local(next_middle_hex_cube), se_hex_map)
-		if not result["block_point"] == Vector2.ZERO:
-			result["blocked"] = true
-		if result.blocked:
-			return result
-		
-		result["block_point"] = _refine_entry_alt(ground_layer.cube_to_local(start_hex_cube), ground_layer.cube_to_local(next_middle_hex_cube), s_hex_map)
-		if not result["block_point"] == Vector2.ZERO:
-			result["blocked"] = true
-		if result.blocked:
-			return result
 		
 		# check wall cover for shooter
 		if start_hex_map == origin_hex_map:
@@ -752,48 +695,8 @@ func _refine_entry(a: Vector2, b: Vector2) -> Vector2:
 	return Vector2.ZERO
 
 func is_pixel_in_building(world_pos_to_check: Vector2, tilemap: HexagonTileMapLayer) -> bool:
-	var hex_map : Vector2i = tilemap.local_to_map(world_pos_to_check)
-	var hex_pos: Vector2 = tilemap.map_to_local(hex_map)
-	var vector : Vector2 = world_pos_to_check - hex_pos
-	var pos_on_hex : Vector2 = Vector2(32,32) + vector
-	
-	# 1. Convert world coordinates to tile (cell) coordinates
-	#var cell_coords = tilemap.local_to_map(world_pos)
-	# 2. Get the tile ID at the cell
-	var tile_id: int = tilemap.get_cell_source_id(hex_map)
-	if tile_id == -1:
-		return false  # No tile here
+	return _tile_pixel_is_solid(world_pos_to_check, tilemap, tilemap.local_to_map(world_pos_to_check))
 
-	# 3. Get the atlas texture or tile texture
-	var tileset: TileSet = tilemap.tile_set
-	
-	var texture: Texture2D = tileset.get_source(tile_id).texture
-	if texture == null:
-		return false
-
-	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var _tex_size: Vector2 = texture.get_size()
-	var image: Image = texture.get_image()
-	if image == null:
-		return false
-
-	#var pixel_x = clamp(int(local_pos.x), 0, tex_size.x - 1)
-	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
-
-	#print(hex_map)
-	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
-	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
-		return false
-	var color: Color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
-	#print(pos_on_hex.x)
-	#print(pos_on_hex.y)
-	#print(color)
-
-	#print("Alpha at pixel:", color.a)
-	if color.a == 0.0:
-		return false
-	else:
-		return true
 
 func _refine_entry_alt(a: Vector2, b: Vector2, hex_to_check: Vector2i) -> Vector2:
 	var dir: Vector2 = (b - a).normalized()
@@ -816,48 +719,7 @@ func _refine_entry_alt(a: Vector2, b: Vector2, hex_to_check: Vector2i) -> Vector
 
 
 func is_pixel_in_building_alt(world_pos_to_check: Vector2, tilemap: HexagonTileMapLayer, hex_map_to_check: Vector2i) -> bool:
-	var hex_map : Vector2i = hex_map_to_check
-	var hex_pos: Vector2 = tilemap.map_to_local(hex_map)
-	var vector : Vector2 = world_pos_to_check - hex_pos
-	var pos_on_hex : Vector2 = Vector2(32,32) + vector
-	
-	# 1. Convert world coordinates to tile (cell) coordinates
-	#var cell_coords = tilemap.local_to_map(world_pos)
-	# 2. Get the tile ID at the cell
-	var tile_id: int = tilemap.get_cell_source_id(hex_map)
-	if tile_id == -1:
-		return false  # No tile here
-
-	# 3. Get the atlas texture or tile texture
-	var tileset: TileSet = tilemap.tile_set
-	
-	var texture: Texture2D = tileset.get_source(tile_id).texture
-	if texture == null:
-		return false
-
-	# 5. Convert to pixel coordinates (assuming 1:1 texel-to-pixel ratio)
-	var _tex_size: Vector2 = texture.get_size()
-	var image: Image = texture.get_image()
-	if image == null:
-		return false
-
-	#var pixel_x = clamp(int(local_pos.x), 0, tex_size.x - 1)
-	#var pixel_y = clamp(int(local_pos.y), 0, tex_size.y - 1)
-
-	#print(hex_map)
-	var hex_pxl_size : Vector2i = LOSHelper.ground_layer.tile_set.tile_size
-	if pos_on_hex.x == hex_pxl_size.x or pos_on_hex.y == hex_pxl_size.y:
-		return false
-	var color: Color = image.get_pixel(pos_on_hex.x, pos_on_hex.y)
-	#print(pos_on_hex.x)
-	#print(pos_on_hex.y)
-	#print(color)
-
-	#print("Alpha at pixel:", color.a)
-	if color.a == 0.0:
-		return false
-	else:
-		return true
+	return _tile_pixel_is_solid(world_pos_to_check, tilemap, hex_map_to_check)
 
 
 func _check_building_block(_sample_hex_map: Vector2i, i: int, steps: int, origin_pos: Vector2, target_pos: Vector2, result: Dictionary) -> Dictionary:
@@ -974,11 +836,11 @@ func get_target_concealment(sample_point: Vector2) -> int:
 	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
-		if tile_data and tile_data.has_custom_data("cover"):
+		if tile_data and tile_data.has_custom_data("cover") and is_pixel_in_building(sample_point, building_layer):
 			return 2
 	if terrain_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = terrain_layer.get_cell_tile_data(hex_map)
-		if tile_data and tile_data.has_custom_data("hindrance"):
+		if tile_data and tile_data.has_custom_data("hindrance") and bool(tile_data.get_custom_data("hindrance")) and is_pixel_in_building(sample_point, terrain_layer):
 			return 1
 	return 0
 	
@@ -1296,3 +1158,123 @@ func get_hex_ring(hex_center: Vector2i, radius: int, first_side: TileSet.CellNei
 	for cube: Vector3i in cube_ring:
 		hex_ring.append(LOSHelper.ground_layer.cube_to_map(cube))
 	return hex_ring
+
+
+# Atlas coordinates and alternative transforms match the image drawn by TileMapLayer.
+func _tile_pixel_is_solid(point: Vector2, layer: TileMapLayer, cell: Vector2i) -> bool:
+	if not is_instance_valid(layer) or layer.get_cell_source_id(cell) == -1:
+		return false
+	var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+	if source == null or source.texture == null:
+		return false
+	var data: TileData = layer.get_cell_tile_data(cell)
+	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
+	var offset: Vector2 = point - layer.map_to_local(cell) + Vector2(data.texture_origin)
+	if data.transpose:
+		offset = Vector2(offset.y, offset.x)
+	if data.flip_h:
+		offset.x = -offset.x
+	if data.flip_v:
+		offset.y = -offset.y
+	var pixel: Vector2i = Vector2i((offset + Vector2(region.size) * 0.5).floor())
+	if pixel.x < 0 or pixel.y < 0 or pixel.x >= region.size.x or pixel.y >= region.size.y:
+		return false
+	if not _texture_images.has(source.texture):
+		_texture_images[source.texture] = source.texture.get_image()
+	var image: Image = _texture_images[source.texture]
+	if image == null:
+		return false
+	pixel += region.position
+	if pixel.x >= image.get_width() or pixel.y >= image.get_height():
+		return false
+	return image.get_pixelv(pixel).a > 0.1
+
+
+# Clip the ray to the sprite bounds before visiting its pixels.
+func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: Vector2i) -> Vector2:
+	var source: TileSetAtlasSource = layer.tile_set.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
+	var data: TileData = layer.get_cell_tile_data(cell)
+	var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
+	var size: Vector2 = Vector2(region.size)
+	if data.transpose:
+		size = Vector2(size.y, size.x)
+	var center: Vector2 = layer.map_to_local(cell) - Vector2(data.texture_origin)
+	var bounds: Rect2 = Rect2(center - size * 0.5, size)
+	var delta: Vector2 = target - origin
+	var near: float = 0.0
+	var far: float = 1.0
+	for axis: int in range(2):
+		if absf(delta[axis]) < 0.000001:
+			if origin[axis] < bounds.position[axis] or origin[axis] >= bounds.end[axis]:
+				return Vector2.INF
+			continue
+		var first: float = (bounds.position[axis] - origin[axis]) / delta[axis]
+		var last: float = (bounds.end[axis] - origin[axis]) / delta[axis]
+		near = maxf(near, minf(first, last))
+		far = minf(far, maxf(first, last))
+		if near > far:
+			return Vector2.INF
+	var steps: int = maxi(1, ceili(delta.length() * (far - near) / STEP_SIZE_PIXELS))
+	if not _texture_images.has(source.texture):
+		_texture_images[source.texture] = source.texture.get_image()
+	var image: Image = _texture_images[source.texture]
+	if image == null:
+		return Vector2.INF
+	for index: int in range(steps + 1):
+		var point: Vector2 = origin.lerp(target, lerpf(near, far, float(index) / float(steps)))
+		var offset: Vector2 = point - center
+		if data.transpose:
+			offset = Vector2(offset.y, offset.x)
+		if data.flip_h:
+			offset.x = -offset.x
+		if data.flip_v:
+			offset.y = -offset.y
+		var pixel: Vector2i = Vector2i((offset + Vector2(region.size) * 0.5).floor())
+		if pixel.x < 0 or pixel.y < 0 or pixel.x >= region.size.x or pixel.y >= region.size.y:
+			continue
+		pixel += region.position
+		if pixel.x < image.get_width() and pixel.y < image.get_height() and image.get_pixelv(pixel).a > 0.1:
+			return point
+	return Vector2.INF
+
+
+func _check_texture_obstacles(origin: Vector2, target: Vector2, hexes: Array[Vector3i], result: Dictionary) -> Dictionary:
+	var candidates: Dictionary[Vector2i, bool] = {}
+	var origin_cell: Vector2i = ground_layer.local_to_map(origin)
+	var target_cell: Vector2i = ground_layer.local_to_map(target)
+	for cube: Vector3i in hexes:
+		candidates[ground_layer.cube_to_map(cube)] = true
+		# Also sample both sides of a hex spine, using the same ray.
+		for neighbor: Vector3i in ground_layer.cube_neighbors(cube):
+			candidates[ground_layer.cube_to_map(neighbor)] = true
+	var nearest: float = INF
+	for cell: Vector2i in candidates:
+		if cell == origin_cell or cell == target_cell:
+			continue
+		if building_layer.get_cell_source_id(cell) != -1:
+			var hit: Vector2 = _sprite_entry(origin, target, building_layer, cell)
+			if hit != Vector2.INF and origin.distance_squared_to(hit) < nearest:
+				nearest = origin.distance_squared_to(hit)
+				result.blocked = true
+				result.block_point = hit
+				return result
+		if terrain_layer.get_cell_source_id(cell) == -1:
+			continue
+		var data: TileData = terrain_layer.get_cell_tile_data(cell)
+		var blocks: bool = data.has_custom_data("blocking") and bool(data.get_custom_data("blocking"))
+		var hinders: bool = data.has_custom_data("hindrance") and bool(data.get_custom_data("hindrance"))
+		if not blocks and not hinders:
+			continue
+		var hit: Vector2 = _sprite_entry(origin, target, terrain_layer, cell)
+		if hit == Vector2.INF:
+			continue
+		if hinders:
+			result.hindrance += 1
+			result.shooter_cover += 1
+			result.target_cover += 1
+		if blocks and origin.distance_squared_to(hit) < nearest:
+			nearest = origin.distance_squared_to(hit)
+			result.blocked = true
+			result.block_point = hit
+			return result
+	return result
