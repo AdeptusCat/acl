@@ -945,33 +945,20 @@ func get_neighboring_hexes(hex: Vector2i) -> Array:
 func _draw() -> void:
 	if not debug_draw_enabled or not is_instance_valid(ground_layer) or los_lines.is_empty():
 		return
-	
 	if origin_hex == Vector2i(-1, -1):
 		return
-	
-	var origin_pos: Vector2 = ground_layer.map_to_local(origin_hex)
-	
+	var origin_pos: Vector2 = to_local(ground_layer.to_global(ground_layer.map_to_local(origin_hex)))
+	var decorated: bool = los_lines.size() == 1
 	for line_data: Dictionary in los_lines:
-		if line_data["blocked"]:
-			var block_point: Variant = line_data["block_point"]
-			if block_point == null:
-				block_point = origin_pos  # Failsafe
-			draw_line(block_point, line_data["target_pos"], Color(1, 0, 0), 2.0)
-	
-	for line_data: Dictionary in los_lines:
-		var block_point: Variant = line_data["block_point"]
-		if block_point == null:
-			block_point = origin_pos  # Failsafe
-		if not line_data["blocked"]:
-			draw_line(origin_pos, line_data["target_pos"], Color(0, 1, 0), 2.0)
-		else:
-			draw_line(origin_pos, block_point, Color(0, 1, 0), 2.0)
-		#var orig = origin_pos
-		#for hex in line_data["hexes"]:
-			#var pos = ground_layer.cube_to_local(hex)
-			#draw_line(orig, pos, Color(0, 1, 0), 2.0)
-			#orig = pos
-			
+		var target_pos: Vector2 = to_local(ground_layer.to_global(line_data["target_pos"]))
+		var block_point: Vector2 = origin_pos
+		var hit: Variant = line_data["block_point"]
+		if hit is Vector2:
+			var hit_point: Vector2 = hit
+			if hit_point.is_finite():
+				block_point = to_local(ground_layer.to_global(hit_point))
+		SightLineGraphic.draw(self, origin_pos, target_pos, bool(line_data["blocked"]), block_point, decorated)
+
 
 func generate_los_lines_for_debug() -> void:
 	if not debug_draw_enabled:

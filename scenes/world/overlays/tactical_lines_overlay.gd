@@ -112,13 +112,11 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
 
 func _draw() -> void:
 	_draw_player_routes()
-	#return
-	# 🔥 New: Draw blue lines to visible enemies
 	if Debug.show_los_lines:
 		for los_data: Dictionary in los_enemy_lines:
-			draw_line(los_data["from"], los_data["to"], Color(0.36, 0.074, 0.005, 1.0), 2.0)
+			_draw_sight_line(los_data, 0.55)
 		for los_data: Dictionary in los_to_target:
-			draw_line(los_data["from"], los_data["to"], Color(0.895, 0.0, 0.316, 1.0), 2.0)
+			_draw_sight_line(los_data, 0.9)
 	if Debug.show_movement_lines:
 		for los_data: Dictionary in movement_path:
 			draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
@@ -148,6 +146,14 @@ func _draw() -> void:
 				#connection["to"]
 				#)
 				##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+
+func _draw_sight_line(data: Dictionary, opacity: float) -> void:
+	if not is_instance_valid(LOSHelper.ground_layer):
+		return
+	var origin: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["from"]))
+	var target: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["to"]))
+	SightLineGraphic.draw(self, origin, target, false, origin, false, opacity)
+
 
 func _draw_player_routes() -> void:
 	if not is_instance_valid(LOSHelper.ground_layer):

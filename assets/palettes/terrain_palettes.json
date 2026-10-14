@@ -1,298 +1,298 @@
 {
-  "name": "Base-tile terrain palette",
-  "reference": {
-    "image": "assets/tiles/ground/base_tile.png",
-    "base_color": "#427012",
-    "sampling": "Median RGB of opaque green pixels in the central third of the tile"
-  },
-  "families": {
-    "open_ground": {
-      "label": "Open ground",
-      "colors": [
-        "#253D0A",
-        "#35570D",
-        "#427012",
-        "#6A912D",
-        "#A1B45D"
-      ],
-      "levels": [
-        0.28,
-        0.4,
-        0.515,
-        0.62,
-        0.74
-      ],
-      "mode": 1
-    },
-    "woods": {
-      "label": "Woods",
-      "colors": [
-        "#152A1A",
-        "#23462B",
-        "#35643D",
-        "#5B8D48",
-        "#8FAE64"
-      ],
-      "levels": [
-        0.06,
-        0.2,
-        0.4,
-        0.62,
-        0.85
-      ],
-      "mode": 2
-    },
-    "orchard": {
-      "label": "Orchard foliage",
-      "colors": [
-        "#3C4221",
-        "#58662C",
-        "#87933D",
-        "#B5AE55",
-        "#D1BE78"
-      ],
-      "levels": [
-        0.06,
-        0.19,
-        0.37,
-        0.6,
-        0.84
-      ],
-      "mode": 3
-    },
-    "fruit_blossom": {
-      "label": "Fruit and blossoms",
-      "colors": [
-        "#6E263A",
-        "#C94D3F",
-        "#AA712C",
-        "#E8B950",
-        "#F3DDD0"
-      ],
-      "levels": [
-        0,
-        0.25,
-        0.5,
-        0.75,
-        1
-      ],
-      "mode": 0
-    },
-    "wheat": {
-      "label": "Wheat fields",
-      "colors": [
-        "#674822",
-        "#9C6B27",
-        "#CB9838",
-        "#E4BF67",
-        "#F2DFAC"
-      ],
-      "levels": [
-        0.13,
-        0.32,
-        0.52,
-        0.7,
-        0.87
-      ],
-      "mode": 0
-    },
-    "green_crops": {
-      "label": "Green crop fields",
-      "colors": [
-        "#233B16",
-        "#3D5F24",
-        "#5B8632",
-        "#85AC49",
-        "#B3CD76"
-      ],
-      "levels": [
-        0.07,
-        0.24,
-        0.4,
-        0.6,
-        0.8
-      ],
-      "mode": 4
-    },
-    "stubble": {
-      "label": "Stubble fields",
-      "colors": [
-        "#57442C",
-        "#85673D",
-        "#B29158",
-        "#CFB67D",
-        "#E8D4A3"
-      ],
-      "levels": [
-        0.1,
-        0.27,
-        0.45,
-        0.64,
-        0.83
-      ],
-      "mode": 0
-    },
-    "ploughed": {
-      "label": "Ploughed soil",
-      "colors": [
-        "#3B2923",
-        "#66432F",
-        "#98613C",
-        "#C38A5A",
-        "#DEB081"
-      ],
-      "levels": [
-        0.06,
-        0.2,
-        0.36,
-        0.56,
-        0.78
-      ],
-      "mode": 0
-    },
-    "roads": {
-      "label": "Dirt roads",
-      "colors": [
-        "#625242",
-        "#8C7658",
-        "#B39C73",
-        "#D0BD94",
-        "#E8DABD"
-      ],
-      "levels": [
-        0.2,
-        0.34,
-        0.55,
-        0.7,
-        0.88
-      ],
-      "mode": 0
-    },
-    "water": {
-      "label": "River water",
-      "colors": [
-        "#1B3545",
-        "#2D586E",
-        "#477E99",
-        "#79ADC0",
-        "#C7DDE3"
-      ],
-      "levels": [
-        0.12,
-        0.28,
-        0.448,
-        0.66,
-        0.85
-      ],
-      "mode": 0
-    },
-    "timber": {
-      "label": "Timber and bridges",
-      "colors": [
-        "#382B27",
-        "#654B36",
-        "#946B48",
-        "#BE976C",
-        "#DFC5A0"
-      ],
-      "levels": [
-        0.06,
-        0.2,
-        0.35,
-        0.57,
-        0.8
-      ],
-      "mode": 6
-    },
-    "stone": {
-      "label": "Stone buildings and walls",
-      "colors": [
-        "#3F4140",
-        "#666D66",
-        "#969B89",
-        "#C1C2AC",
-        "#E0DCC5"
-      ],
-      "levels": [
-        0.05,
-        0.2,
-        0.39,
-        0.6,
-        0.84
-      ],
-      "mode": 5
-    },
-    "clay_roofs": {
-      "label": "Clay and brick roofs",
-      "colors": [
-        "#4F2D28",
-        "#854331",
-        "#B76243",
-        "#D78D63",
-        "#E9B590"
-      ],
-      "levels": [
-        0.06,
-        0.2,
-        0.36,
-        0.58,
-        0.82
-      ],
-      "mode": 0
-    },
-    "slate_roofs": {
-      "label": "Slate roofs",
-      "colors": [
-        "#293541",
-        "#4B5966",
-        "#7A8790",
-        "#AAB4B5",
-        "#D5D8D0"
-      ],
-      "levels": [
-        0.04,
-        0.18,
-        0.32,
-        0.53,
-        0.78
-      ],
-      "mode": 0
-    },
-    "hedges": {
-      "label": "Hedges",
-      "colors": [
-        "#1B3017",
-        "#304D20",
-        "#4B6D2B",
-        "#75913F",
-        "#A5B565"
-      ],
-      "levels": [
-        0.06,
-        0.2,
-        0.4,
-        0.62,
-        0.85
-      ],
-      "mode": 2
-    },
-    "grid_fog": {
-      "label": "Grid and fog overlay",
-      "colors": [
-        "#38392E",
-        "#59604C",
-        "#747D79",
-        "#A2AAA1",
-        "#D3D7CA"
-      ],
-      "levels": [
-        0,
-        0.2,
-        0.35,
-        0.5,
-        0.85
-      ],
-      "mode": 0
-    }
-  }
+	"name": "Base-tile terrain palette",
+	"reference": {
+		"image": "assets/tiles/ground/base_tile.png",
+		"base_color": "#427012",
+		"sampling": "Median RGB of opaque green pixels in the central third of the tile"
+	},
+	"families": {
+		"open_ground": {
+			"label": "Open ground",
+			"colors": [
+				"#253D0A",
+				"#35570D",
+				"#427012",
+				"#6A912D",
+				"#A1B45D"
+			],
+			"levels": [
+				0.28,
+				0.4,
+				0.515,
+				0.62,
+				0.74
+			],
+			"mode": 1.0
+		},
+		"woods": {
+			"label": "Woods",
+			"colors": [
+				"#152A1A",
+				"#23462B",
+				"#35643D",
+				"#5B8D48",
+				"#8FAE64"
+			],
+			"levels": [
+				0.06,
+				0.2,
+				0.4,
+				0.62,
+				0.85
+			],
+			"mode": 2.0
+		},
+		"orchard": {
+			"label": "Orchard foliage",
+			"colors": [
+				"#3C4221",
+				"#58662C",
+				"#87933D",
+				"#B5AE55",
+				"#D1BE78"
+			],
+			"levels": [
+				0.06,
+				0.19,
+				0.37,
+				0.6,
+				0.84
+			],
+			"mode": 3.0
+		},
+		"fruit_blossom": {
+			"label": "Fruit and blossoms",
+			"colors": [
+				"#6E263A",
+				"#C94D3F",
+				"#AA712C",
+				"#E8B950",
+				"#F3DDD0"
+			],
+			"levels": [
+				0.0,
+				0.25,
+				0.5,
+				0.75,
+				1.0
+			],
+			"mode": 0.0
+		},
+		"wheat": {
+			"label": "Wheat fields",
+			"colors": [
+				"#674822",
+				"#9C6B27",
+				"#CB9838",
+				"#E4BF67",
+				"#F2DFAC"
+			],
+			"levels": [
+				0.13,
+				0.32,
+				0.52,
+				0.7,
+				0.87
+			],
+			"mode": 0.0
+		},
+		"green_crops": {
+			"label": "Green crop fields",
+			"colors": [
+				"#233B16",
+				"#3D5F24",
+				"#5B8632",
+				"#85AC49",
+				"#B3CD76"
+			],
+			"levels": [
+				0.07,
+				0.24,
+				0.4,
+				0.6,
+				0.8
+			],
+			"mode": 4.0
+		},
+		"stubble": {
+			"label": "Stubble fields",
+			"colors": [
+				"#57442C",
+				"#85673D",
+				"#B29158",
+				"#CFB67D",
+				"#E8D4A3"
+			],
+			"levels": [
+				0.1,
+				0.27,
+				0.45,
+				0.64,
+				0.83
+			],
+			"mode": 0.0
+		},
+		"ploughed": {
+			"label": "Ploughed soil",
+			"colors": [
+				"#3B2923",
+				"#66432F",
+				"#98613C",
+				"#C38A5A",
+				"#DEB081"
+			],
+			"levels": [
+				0.06,
+				0.2,
+				0.36,
+				0.56,
+				0.78
+			],
+			"mode": 0.0
+		},
+		"roads": {
+			"label": "Dirt roads",
+			"colors": [
+				"#625242",
+				"#8C7658",
+				"#B39C73",
+				"#D0BD94",
+				"#E8DABD"
+			],
+			"levels": [
+				0.2,
+				0.34,
+				0.55,
+				0.7,
+				0.88
+			],
+			"mode": 0.0
+		},
+		"water": {
+			"label": "River water",
+			"colors": [
+				"#1B3545",
+				"#2D586E",
+				"#477E99",
+				"#79ADC0",
+				"#C7DDE3"
+			],
+			"levels": [
+				0.12,
+				0.28,
+				0.448,
+				0.66,
+				0.85
+			],
+			"mode": 0.0
+		},
+		"timber": {
+			"label": "Timber and bridges",
+			"colors": [
+				"#382B27",
+				"#654B36",
+				"#946B48",
+				"#BE976C",
+				"#DFC5A0"
+			],
+			"levels": [
+				0.06,
+				0.2,
+				0.35,
+				0.57,
+				0.8
+			],
+			"mode": 6.0
+		},
+		"stone": {
+			"label": "Stone buildings and walls",
+			"colors": [
+				"#3F4140",
+				"#666D66",
+				"#969B89",
+				"#C1C2AC",
+				"#E0DCC5"
+			],
+			"levels": [
+				0.05,
+				0.2,
+				0.39,
+				0.6,
+				0.84
+			],
+			"mode": 5.0
+		},
+		"clay_roofs": {
+			"label": "Clay and brick roofs",
+			"colors": [
+				"#4F2D28",
+				"#854331",
+				"#B76243",
+				"#D78D63",
+				"#E9B590"
+			],
+			"levels": [
+				0.06,
+				0.2,
+				0.36,
+				0.58,
+				0.82
+			],
+			"mode": 0.0
+		},
+		"slate_roofs": {
+			"label": "Slate roofs",
+			"colors": [
+				"#293541",
+				"#4B5966",
+				"#7A8790",
+				"#AAB4B5",
+				"#D5D8D0"
+			],
+			"levels": [
+				0.04,
+				0.18,
+				0.32,
+				0.53,
+				0.78
+			],
+			"mode": 0.0
+		},
+		"hedges": {
+			"label": "Hedges",
+			"colors": [
+				"#1B3017",
+				"#304D20",
+				"#4B6D2B",
+				"#75913F",
+				"#A5B565"
+			],
+			"levels": [
+				0.06,
+				0.2,
+				0.4,
+				0.62,
+				0.85
+			],
+			"mode": 2.0
+		},
+		"grid_fog": {
+			"label": "Grid and fog overlay",
+			"colors": [
+				"#38392E",
+				"#59604C",
+				"#747D79",
+				"#A2AAA1",
+				"#D3D7CA"
+			],
+			"levels": [
+				0.0,
+				0.2,
+				0.35,
+				0.5,
+				0.85
+			],
+			"mode": 0.0
+		}
+	}
 }

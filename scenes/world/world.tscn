@@ -27,7 +27,7 @@
 [ext_resource type="Script" uid="uid://cc2pavbgwgo06" path="res://scenes/world/maps/layers/terrain_tile_map_layer.gd" id="17_cmg7y"]
 [ext_resource type="Texture2D" uid="uid://bdvxy0txte44j" path="res://assets/tiles/terrain/road_n_so.png" id="17_fymcc"]
 [ext_resource type="Texture2D" uid="uid://xbgc0i6rgk0f" path="res://assets/tiles/elevation/crest_line.png" id="17_xox43"]
-[ext_resource type="Script" path="res://scenes/world/overlays/fog_of_war_overlay.gd" id="18_fog"]
+[ext_resource type="Script" uid="uid://d0qwip8idrnow" path="res://scenes/world/overlays/fog_of_war_overlay.gd" id="18_fog"]
 [ext_resource type="Texture2D" uid="uid://qqegbcmtyb81" path="res://assets/tiles/terrain/field_nw_sw_alt.png" id="18_nqe8x"]
 [ext_resource type="Texture2D" uid="uid://ceckxks431fw4" path="res://assets/tiles/ground/base_tile.png" id="18_y8aho"]
 [ext_resource type="Texture2D" uid="uid://bvb7p06gp153q" path="res://assets/tiles/walls/hedge_nw.png" id="19_5fxch"]
@@ -4420,6 +4420,7 @@ script = ExtResource("41_n78lu")
 metadata/_custom_type_script = "uid://buj6ft1vvdf2f"
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=441975905]
+visible = false
 modulate = Color(1, 1, 1, 0.172549)
 material = SubResource("ShaderMaterial_7rtjl")
 anchors_preset = 15
