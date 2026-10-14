@@ -9,23 +9,3 @@ static func formation_color(unit: Unit) -> Color:
 	if unit.platoon <= 0 or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 		return SUPPORT_COLOR
 	return PLATOON_COLORS[(unit.platoon - 1) % PLATOON_COLORS.size()]
-
-
-static func formation_code(unit: Unit) -> String:
-	var company: String = Unit.COMPANY_NAMES[unit.company]
-	if unit.platoon <= 0 or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
-		return company + " · HQ"
-	return "%s · P%d" % [company, unit.platoon]
-
-
-static func morale_color(state: int) -> Color:
-	match state:
-		STATES.MoraleState.CAUTIOUS:
-			return Color("e3ba69")
-		STATES.MoraleState.PINNED:
-			return Color("f0a16d")
-		STATES.MoraleState.PANIC:
-			return Color("eb827b")
-		STATES.MoraleState.COMBAT_INEFFECTIVE:
-			return Color("bc969a")
-	return Color("81c6a3")

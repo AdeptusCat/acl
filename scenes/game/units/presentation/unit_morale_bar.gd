@@ -2,18 +2,18 @@
 extends ProgressBar
 class_name UnitMoraleBar
 
+var _track: StyleBoxFlat = StyleBoxFlat.new()
 var _fill: StyleBoxFlat = StyleBoxFlat.new()
 
 
 func _ready() -> void:
-	var track: StyleBoxFlat = StyleBoxFlat.new()
-	track.bg_color = Color("0c151a")
-	track.set_corner_radius_all(2)
-	track.set_border_width_all(1)
-	track.border_color = Color("56615d")
-	_fill.bg_color = Color("81c6a3")
+	_track.bg_color = Color("0c151a")
+	_track.set_corner_radius_all(2)
+	_track.set_border_width_all(1)
+	_track.border_color = UnitHudStyle.SUPPORT_COLOR
+	_fill.bg_color = UnitHudStyle.SUPPORT_COLOR
 	_fill.set_corner_radius_all(2)
-	add_theme_stylebox_override("background", track)
+	add_theme_stylebox_override("background", _track)
 	add_theme_stylebox_override("fill", _fill)
 	max_value = 1.0
 	step = 0.001
@@ -21,13 +21,14 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-func set_morale(pressure: float, state: int) -> void:
+func set_morale(pressure: float, platoon_color: Color) -> void:
 	var remaining: float = 1.0 - clampf(pressure, 0.0, 1.0)
-	var tint: Color = UnitHudStyle.morale_color(state)
-	if is_equal_approx(value, remaining) and _fill.bg_color == tint:
+	if is_equal_approx(value, remaining) and _fill.bg_color == platoon_color:
 		return
 	value = remaining
-	_fill.bg_color = tint
+	if _fill.bg_color != platoon_color:
+		_fill.bg_color = platoon_color
+		_track.border_color = platoon_color
 	queue_redraw()
 
 

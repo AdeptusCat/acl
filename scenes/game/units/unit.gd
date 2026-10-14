@@ -497,7 +497,7 @@ func _make_squad() -> void:
 	squad_loadout = _squad
 	name =   "C" + str(COMPANY_NAMES[company]) + "_P" + str(platoon) + "_S" + str(squad) + "_" + Globals.TEAM_NAMES[team] + "_" + Globals.SQUAD_TYPE_NAMES[squad_type]
 	if is_instance_valid(ui):
-		ui.update_formation_marker()
+		ui.update_formation_color()
 
 
 # template builders (run in editor by ticking the bool, it resets to false)
