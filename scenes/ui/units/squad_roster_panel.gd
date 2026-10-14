@@ -17,6 +17,8 @@ var player_team: Globals.Team = Globals.Team.AXIS
 var rows: Dictionary[Unit, SquadRosterRow] = {}
 var _formation_signature: String = ""
 var _refresh_elapsed_s: float = 0.0
+var _pending_reveal: Unit
+var _reveal_queued: bool = false
 
 
 func _ready() -> void:
@@ -66,6 +68,29 @@ func get_minimum_height() -> float:
 		return get_combined_minimum_size().y
 	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
 	return overhead + minf(32.0, groups.get_combined_minimum_size().y)
+
+
+func focus_unit(unit: Unit) -> void:
+	if not is_instance_valid(unit) or not unit.is_active() or unit.team != player_team:
+		return
+	refresh()
+	if not rows.has(unit):
+		return
+	_pending_reveal = unit
+	section.expand()
+	if not _reveal_queued:
+		_reveal_queued = true
+		_reveal_selected.call_deferred()
+
+
+func _reveal_selected() -> void:
+	# Folding, roster rebuilds and HUD resizing defer their container layouts.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_reveal_queued = false
+	if is_instance_valid(_pending_reveal) and _pending_reveal.selected and rows.has(_pending_reveal):
+		scroll.ensure_control_visible(rows[_pending_reveal])
+	_pending_reveal = null
 
 
 func get_preferred_height() -> float:

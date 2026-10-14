@@ -290,6 +290,7 @@ func mouse_event_position_changed(_event_pos: Vector2) -> void:
 
 
 func _on_show_unit_details(unit: Unit) -> void:
+	squad_roster.focus_unit(unit)
 	unit_details.show_unit_detail(unit)
 	hide_target_hex_cover_distance()
 

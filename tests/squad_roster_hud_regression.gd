@@ -132,6 +132,40 @@ func _run() -> void:
 	_pointer_event(panel.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Scrolling the roster moves the list without zooming the battlefield")
 	panel.scroll.scroll_vertical = 0
+	var offscreen: Unit = players[players.size() - 1]
+	var original_hex: Vector2i = offscreen.current_hex
+	var original_position: Vector2 = offscreen.position
+	for hex: Vector2i in world.ground_layer.get_used_cells():
+		if LOSHelper.find_units_at(hex).is_empty():
+			offscreen.current_hex = hex
+			break
+	offscreen.position = world.ground_layer.map_to_local(offscreen.current_hex)
+	world.game_controller.camera.position = offscreen.position
+	world.game_controller.camera.reset_smoothing()
+	world.game_controller.camera.force_update_scroll()
+	var battlefield_point: Vector2 = world.game_controller.get_global_transform_with_canvas() * offscreen.position
+	_pointer_event(battlefield_point, MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_check(world.game_controller.selected_unit == offscreen and panel.scroll.scroll_vertical > 0 and panel.scroll.get_global_rect().encloses(panel.rows[offscreen].get_global_rect()), "Clicking a battlefield squad scrolls its complete offscreen roster row into view")
+	offscreen.current_hex = original_hex
+	offscreen.position = original_position
+	var manual_scroll: int = panel.scroll.scroll_vertical - 30
+	panel.scroll.scroll_vertical = manual_scroll
+	panel.refresh()
+	await _settle()
+	_check(panel.scroll.scroll_vertical == manual_scroll, "Periodic roster refresh leaves manual scrolling under player control")
+	panel.section.fold()
+	world.game_controller._select_unit(rifle)
+	world.game_controller.show_unit_details_in_ui.emit(rifle)
+	await _settle()
+	_check(not panel.section.folded and panel.scroll.get_global_rect().encloses(panel.rows[rifle].get_global_rect()), "Selecting a squad expands a folded roster and reveals its row")
+	world.game_controller._select_unit(offscreen)
+	world.game_controller.show_unit_details_in_ui.emit(offscreen)
+	world.game_controller._select_unit(rifle)
+	world.game_controller.show_unit_details_in_ui.emit(rifle)
+	await _settle()
+	_check(panel.scroll.get_global_rect().encloses(panel.rows[rifle].get_global_rect()), "Rapid selections reveal the latest squad rather than an earlier queued selection")
+	panel.scroll.scroll_vertical = 0
 	world.game_controller.select_and_center_unit(rifle)
 	world.ui.hide_target_hex_cover_distance()
 	panel.refresh()
