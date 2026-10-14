@@ -111,6 +111,8 @@ func _run() -> void:
 	_test_knowledge()
 	controller.defensive_memory.clear()
 	_test_publication()
+	_test_snapshot_capture_slices()
+	_test_cached_stamp_geometry()
 	_test_selection()
 	_test_geography()
 	_test_ownership_and_reservations()
@@ -276,6 +278,76 @@ func _test_publication() -> void:
 	_check(controller.snapshot.objectives[own.team] == Vector2i.ZERO and controller.snapshot.objectives[enemy.team] == Vector2i(5, 3), "Origin objective and independent team contexts are retained")
 	controller.set_objective_for_team(own.team, Vector2i(3, 3))
 	_publish()
+
+
+func _test_snapshot_capture_slices() -> void:
+	var weights: PackedFloat32Array = controller.create_default_weights()
+	var job: InfluenceSnapshotBuilder.CaptureJob = InfluenceSnapshotBuilder.begin_capture(99, controller.objectives_by_team, controller.knowledge_policy, weights)
+	var expected: InfluenceSnapshot = InfluenceSnapshotBuilder.capture(99, controller.objectives_by_team, controller.knowledge_policy, weights)
+	job.advance(Time.get_ticks_usec() - 1)
+	_check(not job.completed and job.snapshot.maps.is_empty(), "An exhausted capture budget leaves map construction pending")
+	var own_hex: Vector2i = own.current_hex
+	var enemy_hex: Vector2i = enemy.current_hex
+	var own_state: STATES.MoraleState = own.stress_system.state
+	own.current_hex += Vector2i(1, 0)
+	enemy.current_hex += Vector2i(-1, 0)
+	own.stress_system.state = STATES.MoraleState.PANIC
+	job.advance(-1)
+	_check(job.completed and job.snapshot.positions == expected.positions and job.snapshot.support_units == expected.support_units, "Capture slices retain initial unit positions and morale after live state changes")
+	for team: int in expected.maps:
+		for layer: int in range(InfluenceMap.Layer.COUNT):
+			_check(job.snapshot.maps[team].get_layer_data_copy(layer) == expected.maps[team].get_layer_data_copy(layer), "Budgeted capture preserves synchronous layer values")
+		_check(job.snapshot.point_ids[team] == expected.point_ids[team] and job.snapshot.route_topology_key == expected.route_topology_key, "Budgeted capture preserves navigation topology")
+	var fixture: InfluenceMapController = InfluenceMapController.new()
+	fixture.pending_snapshot = job.snapshot
+	var config: InfluenceProjectionConfig = InfluenceProjectionConfig.new()
+	config.unit_team = own.team
+	config.enemy_team = enemy.team
+	config.contacts = job.snapshot.get_contacts(own.team)
+	LosInfluenceProjector.begin_budgeted_rebuild_for_team(fixture, job.snapshot.maps[own.team], config)
+	var found: bool = false
+	for source: ProjectionSource in fixture.los_rebuild_jobs[0].sources:
+		if source.unit == own:
+			found = source.observer_hex == own_hex and source.effectiveness == expected.support_units.get(own, {})["effectiveness"]
+	_check(found, "Friendly LOS sources use the same captured positions and effectiveness as their tactical layers")
+	fixture.reset_for_match()
+	fixture.free()
+	own.current_hex = own_hex
+	enemy.current_hex = enemy_hex
+	own.stress_system.state = own_state
+
+
+func _test_cached_stamp_geometry() -> void:
+	for center: Vector2i in [Vector2i(-1, -1), Vector2i.ZERO, Vector2i(1, 2), Vector2i(2, 3)]:
+		for falloff: InfluenceMap.FalloffMode in [InfluenceMap.FalloffMode.NONE, InfluenceMap.FalloffMode.LINEAR, InfluenceMap.FalloffMode.SQUARE_ROOT, InfluenceMap.FalloffMode.EXPONENTIAL]:
+			var stamp: InfluenceStamp = InfluenceMapStampOps.create_radius_stamp(center, 3, 2.3, falloff)
+			var scaled: InfluenceStamp = InfluenceMapStampOps.create_radius_stamp(center, 3, -0.7, falloff)
+			var original: PackedFloat32Array = PackedFloat32Array()
+			var negative: PackedFloat32Array = PackedFloat32Array()
+			original.resize(stamp.values.size())
+			negative.resize(stamp.values.size())
+			for y: int in range(stamp.size.y):
+				for x: int in range(stamp.size.x):
+					var distance: int = LOSHelper.get_hex_distance(center, stamp.min_cell + Vector2i(x, y))
+					if distance <= 3:
+						original[y * stamp.size.x + x] = InfluenceMapStampOps.get_radius_falloff_value(2.3, distance, 3, falloff)
+						negative[y * stamp.size.x + x] = InfluenceMapStampOps.get_radius_falloff_value(-0.7, distance, 3, falloff)
+			_check(stamp.values == original and scaled.values == negative, "Cached hex geometry preserves exact falloff values across centers and strengths")
+			for mode: InfluenceMap.WriteMode in [InfluenceMap.WriteMode.SET, InfluenceMap.WriteMode.ADD, InfluenceMap.WriteMode.SUBTRACT, InfluenceMap.WriteMode.MAX, InfluenceMap.WriteMode.MIN]:
+				var optimized: InfluenceMap = InfluenceMap.new()
+				var reference: InfluenceMap = InfluenceMap.new()
+				optimized.configure(Rect2i(-2, -2, 7, 7))
+				reference.configure(optimized.bounds)
+				optimized.clear_layer(InfluenceMap.Layer.UNIT_INFLUENCE, 0.4)
+				reference.clear_layer(InfluenceMap.Layer.UNIT_INFLUENCE, 0.4)
+				optimized.write_stamp_to_layer(InfluenceMap.Layer.UNIT_INFLUENCE, stamp, mode)
+				for y: int in range(stamp.size.y):
+					for x: int in range(stamp.size.x):
+						var cell: Vector2i = stamp.min_cell + Vector2i(x, y)
+						var value: float = stamp.values[y * stamp.size.x + x]
+						if reference.is_valid_cell(cell) and InfluenceMapLayerOps.should_write_stamp_value(value, mode):
+							InfluenceMapLayerOps.write_layer_value(reference, InfluenceMap.Layer.UNIT_INFLUENCE, cell, value, mode)
+				_check(optimized.get_layer_data_copy(InfluenceMap.Layer.UNIT_INFLUENCE) == reference.get_layer_data_copy(InfluenceMap.Layer.UNIT_INFLUENCE), "Batched stamp writes preserve clipped layer values for every supported mode")
 
 
 func _test_selection() -> void:
@@ -1601,7 +1673,10 @@ func _test_axis_diagnostics() -> void:
 	var second_enemy: UnitProbe = _unit(Globals.Team.ALLIES, Vector2i(0, 6))
 	Globals.unit_visible_enemies[own] = [enemy, second_enemy]
 	_publish()
+	_check(controller.threat_axis_composites_by_team.is_empty(), "Axis diagnostics stay lazy when a new snapshot is published")
 	var composites: Array[ThreatAxisComposite] = controller.get_threat_axis_composites_for_team(own.team)
+	var cached: Array[ThreatAxisComposite] = controller.get_threat_axis_composites_for_team(own.team)
+	_check(cached.size() == composites.size() and cached[0] == composites[0] and not controller.threat_axis_composites_by_team.has(enemy.team), "Axis diagnostics reuse the requested team cache without computing the other team")
 	_check(composites.size() == 2 and composites[0].composite != composites[1].composite, "Axis diagnostics preserve distinct captured enemy contributions")
 	var published: PackedFloat32Array = controller.snapshot.maps[own.team].get_layer_data_copy(InfluenceMap.Layer.FORECAST_THREAT)
 	var alternate: PackedFloat32Array = controller.snapshot.get_forecast_data(own.team, Vector2i.ZERO)

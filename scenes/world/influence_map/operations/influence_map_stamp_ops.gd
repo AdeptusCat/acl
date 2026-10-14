@@ -1,6 +1,9 @@
 class_name InfluenceMapStampOps
 extends RefCounted
 
+static var _radius_configuration: Array[int] = []
+static var _radius_distances: Dictionary[Vector3i, PackedInt32Array] = {}
+
 
 static func create_radius_stamp(
 	center: Vector2i,
@@ -14,31 +17,26 @@ static func create_radius_stamp(
 		min_cell,
 		Vector2i(stamp_size, stamp_size)
 	)
-
-	var y: int = 0
-	while y < stamp.size.y:
-		var x: int = 0
-
-		while x < stamp.size.x:
-			var cell: Vector2i = Vector2i(
-				stamp.min_cell.x + x,
-				stamp.min_cell.y + y
-			)
-
-			var distance: int = LOSHelper.get_hex_distance(center, cell)
-
-			if distance <= radius:
-				var index: int = stamp.get_index(x, y)
-				stamp.values[index] = get_radius_falloff_value(
-					value,
-					distance,
-					radius,
-					falloff_mode
-				)
-
-			x += 1
-
-		y += 1
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var configuration: Array[int] = [ground.get_instance_id(), ground.tile_set.tile_layout, ground.tile_set.tile_offset_axis]
+	if configuration != _radius_configuration:
+		_radius_configuration = configuration
+		_radius_distances.clear()
+	var key: Vector3i = Vector3i(center.x, center.y, radius)
+	if not _radius_distances.has(key):
+		var distances: PackedInt32Array = PackedInt32Array()
+		distances.resize(stamp.values.size())
+		var center_cube: Vector3i = ground.map_to_cube(center)
+		for y: int in range(stamp_size):
+			for x: int in range(stamp_size):
+				var cell: Vector2i = min_cell + Vector2i(x, y)
+				distances[y * stamp_size + x] = ground.cube_distance(center_cube, ground.map_to_cube(cell))
+		_radius_distances[key] = distances
+	var distances: PackedInt32Array = _radius_distances[key]
+	for index: int in range(distances.size()):
+		var distance: int = distances[index]
+		if distance <= radius:
+			stamp.values[index] = get_radius_falloff_value(value, distance, radius, falloff_mode)
 
 	return stamp
 

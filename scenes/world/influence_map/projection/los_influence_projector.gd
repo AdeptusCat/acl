@@ -325,9 +325,15 @@ static func begin_budgeted_rebuild_for_team(controller: InfluenceMapController, 
 	job.influence_map = influence_map
 	job.defending_team = config.unit_team
 	job.los_lookup = controller.pending_snapshot.los
-	for unit: Unit in InfluenceUnitQuery.get_config_units(config.unit_team, config.unit_group):
-		var source: ProjectionSource = ProjectionSource.new(unit, unit.current_hex, InfluenceUnitQuery.get_unit_firepower(unit), InfluenceUnitQuery.get_unit_effectiveness(unit))
-		source.weapon_range = InfluenceUnitQuery.get_unit_range(unit)
+	var snapshot: InfluenceSnapshot = controller.pending_snapshot
+	for unit: Unit in snapshot.positions:
+		if snapshot.teams[unit] != config.unit_team:
+			continue
+		if config.unit_group != "" and (not is_instance_valid(unit) or not unit.is_in_group(config.unit_group)):
+			continue
+		var captured: Dictionary = snapshot.support_units[unit]
+		var source: ProjectionSource = ProjectionSource.new(unit, snapshot.positions[unit], captured["firepower"], captured["effectiveness"])
+		source.weapon_range = captured["weapon_range"]
 		job.sources.append(source)
 		job.projection_modes.append(true)
 	for contact: InfluenceContact in config.contacts:

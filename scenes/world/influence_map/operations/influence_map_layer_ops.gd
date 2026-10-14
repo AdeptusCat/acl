@@ -60,7 +60,10 @@ static func write_stamp_to_layer(
 ) -> void:
 	if not influence_map.is_valid_layer(layer_id):
 		return
-
+	if mode not in [InfluenceMap.WriteMode.SET, InfluenceMap.WriteMode.ADD, InfluenceMap.WriteMode.SUBTRACT, InfluenceMap.WriteMode.MAX, InfluenceMap.WriteMode.MIN]:
+		return
+	# Update one layer buffer per stamp instead of dispatching every hex write.
+	var values: PackedFloat32Array = influence_map._layers[layer_id]
 	var y: int = 0
 	while y < stamp.size.y:
 		var x: int = 0
@@ -76,11 +79,14 @@ static func write_stamp_to_layer(
 				)
 
 				if influence_map.is_valid_cell(cell):
-					write_layer_value(influence_map, layer_id, cell, write_value, mode)
+					var layer_index: int = influence_map.get_cell_index(cell)
+					values[layer_index] = get_write_mode_result_value(values[layer_index], write_value, mode)
+					influence_map._mark_dirty_index(layer_index)
 
 			x += 1
 
 		y += 1
+	influence_map._layers[layer_id] = values
 
 
 static func should_write_stamp_value(write_value: float, mode: int) -> bool:

@@ -5,6 +5,7 @@ signal influence_maps_updated()
 
 const REBUILD_CELLS_PER_FRAME: int = 400
 const LOS_SOURCES_PER_FRAME: int = 2
+const SNAPSHOT_CAPTURE_BUDGET_USEC: int = 2000
 const POSITION_QUERY_BUDGET_USEC: int = 2000
 const DEFENSE_RESPONSE_BUDGET_USEC: int = 4000
 
@@ -38,6 +39,8 @@ var last_position_slice_usec: int = 0
 var defense_geometry_cache: Dictionary = {}
 var defense_area_jobs: Array[DefenseAreaJob] = []
 var defense_refresh_requested: bool = false
+var _capture_job: InfluenceSnapshotBuilder.CaptureJob
+var _capture_policy: KnowledgePolicy = KnowledgePolicy.OMNISCIENT
 
 
 func _process(delta: float) -> void:
@@ -63,6 +66,7 @@ func reset_for_match() -> void:
 	defensive_memory.clear()
 	sector_pressure.clear()
 	los_rebuild_jobs.clear()
+	_capture_job = null
 	pending_snapshot = null
 	snapshot = null
 	maps_by_team.clear()
@@ -95,11 +99,17 @@ func create_maps(_delta: float) -> void:
 	var version: int = 1
 	if snapshot != null:
 		version = snapshot.version + 1
-	pending_snapshot = InfluenceSnapshotBuilder.capture(version, objectives_by_team, knowledge_policy, create_default_weights())
+	_capture_policy = knowledge_policy
+	_capture_job = InfluenceSnapshotBuilder.begin_capture(version, objectives_by_team, knowledge_policy, create_default_weights())
+	pending_snapshot = _capture_job.snapshot
+	rebuild_pending = true
+
+
+func _finish_snapshot_capture() -> void:
 	if snapshot != null and snapshot.terrain_key != pending_snapshot.terrain_key:
 		defense_geometry_cache.clear()
 	pending_snapshot.defense_geometry_cache = defense_geometry_cache
-	if knowledge_policy == KnowledgePolicy.OBSERVED_AND_MEMORY:
+	if _capture_policy == KnowledgePolicy.OBSERVED_AND_MEMORY:
 		defensive_memory.capture_into(pending_snapshot)
 		if hidden_sector_pressure_enabled:
 			sector_pressure.capture_into(pending_snapshot, Globals.get_enemy_team(Globals.team_player))
@@ -109,17 +119,24 @@ func create_maps(_delta: float) -> void:
 		sector_pressure.clear()
 	for team: int in _get_processed_teams():
 		var config: InfluenceProjectionConfig = _create_los_config_for_team(team)
+		config.objective_hex = pending_snapshot.objectives.get(team, Vector2i.ZERO)
+		config.has_objective = pending_snapshot.objectives.has(team)
 		config.contacts = pending_snapshot.get_contacts(team)
 		LosInfluenceProjector.begin_budgeted_rebuild_for_team(self, pending_snapshot.maps[team], config)
-	rebuild_pending = true
 
 
 func _process_los_rebuild() -> void:
+	if _capture_job != null:
+		_capture_job.advance(Time.get_ticks_usec() + SNAPSHOT_CAPTURE_BUDGET_USEC)
+		if _capture_job.completed:
+			_capture_job = null
+			_finish_snapshot_capture()
+		return
 	LosInfluenceProjector.process_budgeted_rebuild(self, LOS_SOURCES_PER_FRAME)
 
 
 func _process_budgeted_rebuild() -> void:
-	if not rebuild_pending or pending_snapshot == null or not los_rebuild_jobs.is_empty():
+	if not rebuild_pending or pending_snapshot == null or _capture_job != null or not los_rebuild_jobs.is_empty():
 		return
 	var complete: bool = true
 	for map: InfluenceMap in pending_snapshot.maps.values():
@@ -134,7 +151,8 @@ func _process_budgeted_rebuild() -> void:
 	maps_by_team = snapshot.maps
 	rebuild_pending = false
 	maps_initialized = true
-	_rebuild_threat_axis_composites_for_all_teams()
+	# Axis composites are diagnostics. Build them only when a reader requests them.
+	threat_axis_composites_by_team.clear()
 	influence_maps_updated.emit()
 
 
@@ -386,19 +404,25 @@ func _sort_threat_axis_by_score_descending(a: ThreatAxis, b: ThreatAxis) -> bool
 func _rebuild_threat_axis_composites_for_all_teams() -> void:
 	threat_axis_composites_by_team.clear()
 	for team: int in _get_processed_teams():
-		var results: Array[ThreatAxisComposite] = []
-		if snapshot.objectives.has(team):
-			var config: InfluenceProjectionConfig = create_axis_defense_config(team, snapshot.objectives[team])
-			for axis: ThreatAxis in get_sorted_threat_axes_for_team(team, snapshot.objectives[team]):
-				var result: ThreatAxisComposite = ThreatAxisComposite.new()
-				var composite: PackedFloat32Array = LosInfluenceProjector.create_axis_composite_from_enemy_units(maps_by_team[team], config, axis.enemy_units, create_default_weights())
-				result.configure(axis, composite)
-				results.append(result)
-		threat_axis_composites_by_team[team] = results
+		_rebuild_threat_axis_composites_for_team(team)
+
+
+func _rebuild_threat_axis_composites_for_team(team: int) -> void:
+	var results: Array[ThreatAxisComposite] = []
+	if snapshot != null and snapshot.maps.has(team) and snapshot.objectives.has(team):
+		var config: InfluenceProjectionConfig = create_axis_defense_config(team, snapshot.objectives[team])
+		for axis: ThreatAxis in get_sorted_threat_axes_for_team(team, snapshot.objectives[team]):
+			var result: ThreatAxisComposite = ThreatAxisComposite.new()
+			var composite: PackedFloat32Array = LosInfluenceProjector.create_axis_composite_from_enemy_units(snapshot.maps[team], config, axis.enemy_units, create_default_weights())
+			result.configure(axis, composite)
+			results.append(result)
+	threat_axis_composites_by_team[team] = results
 
 
 func get_threat_axis_composites_for_team(team: int) -> Array[ThreatAxisComposite]:
 	var result: Array[ThreatAxisComposite] = []
+	if not threat_axis_composites_by_team.has(team):
+		_rebuild_threat_axis_composites_for_team(team)
 	for item: ThreatAxisComposite in threat_axis_composites_by_team.get(team, []):
 		result.append(item)
 	return result
