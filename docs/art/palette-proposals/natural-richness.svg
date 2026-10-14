@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1570" viewBox="0 0 1680 1570">
+<rect width="1680" height="1570" fill="#EDE6D8"/>
+<text x="48" y="70" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="bold" fill="#302D27">BASE-TILE TERRAIN PALETTE</text>
+<text x="48" y="110" font-family="DejaVu Sans, sans-serif" font-size="26" font-weight="normal" fill="#302D27">Anchored to the supplied grass tile: #427012</text>
+<text x="48" y="150" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="normal" fill="#736C5E">Ground: reference green  /  Woods: deeper forest green  /  Orchards: warmer olive highlights</text>
+<image x="1490" y="28" width="128" height="128" href="../../../assets/tiles/ground/base_tile.png"/>
+<rect x="40" y="188" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="224" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Open ground</text>
+<text x="58" y="250" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Reference grass green; main color sampled from the tile</text>
+<rect x="58" y="274" width="140" height="31" rx="3" fill="#253D0A"/>
+<text x="58" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#253D0A</text>
+<text x="58" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="274" width="140" height="31" rx="3" fill="#35570D"/>
+<text x="209" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#35570D</text>
+<text x="209" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="274" width="140" height="31" rx="3" fill="#427012"/>
+<text x="360" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#427012</text>
+<text x="360" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="274" width="140" height="31" rx="3" fill="#6A912D"/>
+<text x="511" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#6A912D</text>
+<text x="511" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="274" width="140" height="31" rx="3" fill="#A1B45D"/>
+<text x="662" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#A1B45D</text>
+<text x="662" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="188" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="224" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Woods</text>
+<text x="878" y="250" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Deeper forest greens; cooler and darker than open ground</text>
+<rect x="878" y="274" width="140" height="31" rx="3" fill="#152A1A"/>
+<text x="878" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#152A1A</text>
+<text x="878" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="274" width="140" height="31" rx="3" fill="#23462B"/>
+<text x="1029" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#23462B</text>
+<text x="1029" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="274" width="140" height="31" rx="3" fill="#35643D"/>
+<text x="1180" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#35643D</text>
+<text x="1180" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="274" width="140" height="31" rx="3" fill="#5B8D48"/>
+<text x="1331" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#5B8D48</text>
+<text x="1331" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="274" width="140" height="31" rx="3" fill="#8FAE64"/>
+<text x="1482" y="329" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#8FAE64</text>
+<text x="1482" y="270" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="350" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="386" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Orchard foliage</text>
+<text x="58" y="412" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Warmer olive foliage; brighter fruit-tree highlights</text>
+<rect x="58" y="436" width="140" height="31" rx="3" fill="#3C4221"/>
+<text x="58" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#3C4221</text>
+<text x="58" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="436" width="140" height="31" rx="3" fill="#58662C"/>
+<text x="209" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#58662C</text>
+<text x="209" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="436" width="140" height="31" rx="3" fill="#87933D"/>
+<text x="360" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#87933D</text>
+<text x="360" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="436" width="140" height="31" rx="3" fill="#B5AE55"/>
+<text x="511" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#B5AE55</text>
+<text x="511" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="436" width="140" height="31" rx="3" fill="#D1BE78"/>
+<text x="662" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D1BE78</text>
+<text x="662" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="350" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="386" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Fruit and blossoms</text>
+<text x="878" y="412" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Crimson apples, amber pears, pale blossoms</text>
+<rect x="878" y="436" width="140" height="31" rx="3" fill="#6E263A"/>
+<text x="878" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#6E263A</text>
+<text x="878" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Cherry shadow</text>
+<rect x="1029" y="436" width="140" height="31" rx="3" fill="#C94D3F"/>
+<text x="1029" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#C94D3F</text>
+<text x="1029" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Ripe apple</text>
+<rect x="1180" y="436" width="140" height="31" rx="3" fill="#AA712C"/>
+<text x="1180" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#AA712C</text>
+<text x="1180" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Pear shadow</text>
+<rect x="1331" y="436" width="140" height="31" rx="3" fill="#E8B950"/>
+<text x="1331" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E8B950</text>
+<text x="1331" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Ripe pear</text>
+<rect x="1482" y="436" width="140" height="31" rx="3" fill="#F3DDD0"/>
+<text x="1482" y="491" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#F3DDD0</text>
+<text x="1482" y="432" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Blossom</text>
+<rect x="40" y="512" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="548" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Wheat fields</text>
+<text x="58" y="574" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Harvest gold; luminous straw highlights</text>
+<rect x="58" y="598" width="140" height="31" rx="3" fill="#674822"/>
+<text x="58" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#674822</text>
+<text x="58" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="598" width="140" height="31" rx="3" fill="#9C6B27"/>
+<text x="209" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#9C6B27</text>
+<text x="209" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="598" width="140" height="31" rx="3" fill="#CB9838"/>
+<text x="360" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#CB9838</text>
+<text x="360" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="598" width="140" height="31" rx="3" fill="#E4BF67"/>
+<text x="511" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E4BF67</text>
+<text x="511" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="598" width="140" height="31" rx="3" fill="#F2DFAC"/>
+<text x="662" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#F2DFAC</text>
+<text x="662" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="512" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="548" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Green crop fields</text>
+<text x="878" y="574" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Fresh leafy greens related to the reference grass</text>
+<rect x="878" y="598" width="140" height="31" rx="3" fill="#233B16"/>
+<text x="878" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#233B16</text>
+<text x="878" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="598" width="140" height="31" rx="3" fill="#3D5F24"/>
+<text x="1029" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#3D5F24</text>
+<text x="1029" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="598" width="140" height="31" rx="3" fill="#5B8632"/>
+<text x="1180" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#5B8632</text>
+<text x="1180" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="598" width="140" height="31" rx="3" fill="#85AC49"/>
+<text x="1331" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#85AC49</text>
+<text x="1331" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="598" width="140" height="31" rx="3" fill="#B3CD76"/>
+<text x="1482" y="653" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#B3CD76</text>
+<text x="1482" y="594" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="674" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="710" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Stubble fields</text>
+<text x="58" y="736" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Dry ochre, cut straw and earthy shadows</text>
+<rect x="58" y="760" width="140" height="31" rx="3" fill="#57442C"/>
+<text x="58" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#57442C</text>
+<text x="58" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="760" width="140" height="31" rx="3" fill="#85673D"/>
+<text x="209" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#85673D</text>
+<text x="209" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="760" width="140" height="31" rx="3" fill="#B29158"/>
+<text x="360" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#B29158</text>
+<text x="360" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="760" width="140" height="31" rx="3" fill="#CFB67D"/>
+<text x="511" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#CFB67D</text>
+<text x="511" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="760" width="140" height="31" rx="3" fill="#E8D4A3"/>
+<text x="662" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E8D4A3</text>
+<text x="662" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="674" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="710" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Ploughed soil</text>
+<text x="878" y="736" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Rich umber and warm terracotta earth</text>
+<rect x="878" y="760" width="140" height="31" rx="3" fill="#3B2923"/>
+<text x="878" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#3B2923</text>
+<text x="878" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="760" width="140" height="31" rx="3" fill="#66432F"/>
+<text x="1029" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#66432F</text>
+<text x="1029" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="760" width="140" height="31" rx="3" fill="#98613C"/>
+<text x="1180" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#98613C</text>
+<text x="1180" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="760" width="140" height="31" rx="3" fill="#C38A5A"/>
+<text x="1331" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#C38A5A</text>
+<text x="1331" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="760" width="140" height="31" rx="3" fill="#DEB081"/>
+<text x="1482" y="815" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#DEB081</text>
+<text x="1482" y="756" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="836" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="872" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Dirt roads</text>
+<text x="58" y="898" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Warm sandstone; lighter than surrounding soil</text>
+<rect x="58" y="922" width="140" height="31" rx="3" fill="#625242"/>
+<text x="58" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#625242</text>
+<text x="58" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="922" width="140" height="31" rx="3" fill="#8C7658"/>
+<text x="209" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#8C7658</text>
+<text x="209" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="922" width="140" height="31" rx="3" fill="#B39C73"/>
+<text x="360" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#B39C73</text>
+<text x="360" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="922" width="140" height="31" rx="3" fill="#D0BD94"/>
+<text x="511" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D0BD94</text>
+<text x="511" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="922" width="140" height="31" rx="3" fill="#E8DABD"/>
+<text x="662" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E8DABD</text>
+<text x="662" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="836" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="872" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">River water</text>
+<text x="878" y="898" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Natural blue; silver-blue surface highlights</text>
+<rect x="878" y="922" width="140" height="31" rx="3" fill="#1B3545"/>
+<text x="878" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#1B3545</text>
+<text x="878" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="922" width="140" height="31" rx="3" fill="#2D586E"/>
+<text x="1029" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#2D586E</text>
+<text x="1029" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="922" width="140" height="31" rx="3" fill="#477E99"/>
+<text x="1180" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#477E99</text>
+<text x="1180" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="922" width="140" height="31" rx="3" fill="#79ADC0"/>
+<text x="1331" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#79ADC0</text>
+<text x="1331" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="922" width="140" height="31" rx="3" fill="#C7DDE3"/>
+<text x="1482" y="977" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#C7DDE3</text>
+<text x="1482" y="918" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="998" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="1034" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Timber and bridges</text>
+<text x="58" y="1060" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Weathered chestnut and honey wood grain</text>
+<rect x="58" y="1084" width="140" height="31" rx="3" fill="#382B27"/>
+<text x="58" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#382B27</text>
+<text x="58" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="1084" width="140" height="31" rx="3" fill="#654B36"/>
+<text x="209" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#654B36</text>
+<text x="209" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="1084" width="140" height="31" rx="3" fill="#946B48"/>
+<text x="360" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#946B48</text>
+<text x="360" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="1084" width="140" height="31" rx="3" fill="#BE976C"/>
+<text x="511" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#BE976C</text>
+<text x="511" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="1084" width="140" height="31" rx="3" fill="#DFC5A0"/>
+<text x="662" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#DFC5A0</text>
+<text x="662" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="998" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="1034" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Stone buildings and walls</text>
+<text x="878" y="1060" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Cool stone shadows; warm limestone light</text>
+<rect x="878" y="1084" width="140" height="31" rx="3" fill="#3F4140"/>
+<text x="878" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#3F4140</text>
+<text x="878" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="1084" width="140" height="31" rx="3" fill="#666D66"/>
+<text x="1029" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#666D66</text>
+<text x="1029" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="1084" width="140" height="31" rx="3" fill="#969B89"/>
+<text x="1180" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#969B89</text>
+<text x="1180" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="1084" width="140" height="31" rx="3" fill="#C1C2AC"/>
+<text x="1331" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#C1C2AC</text>
+<text x="1331" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="1084" width="140" height="31" rx="3" fill="#E0DCC5"/>
+<text x="1482" y="1139" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E0DCC5</text>
+<text x="1482" y="1080" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="1160" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="1196" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Clay and brick roofs</text>
+<text x="58" y="1222" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Burnt sienna and rich terracotta</text>
+<rect x="58" y="1246" width="140" height="31" rx="3" fill="#4F2D28"/>
+<text x="58" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#4F2D28</text>
+<text x="58" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="1246" width="140" height="31" rx="3" fill="#854331"/>
+<text x="209" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#854331</text>
+<text x="209" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="1246" width="140" height="31" rx="3" fill="#B76243"/>
+<text x="360" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#B76243</text>
+<text x="360" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="1246" width="140" height="31" rx="3" fill="#D78D63"/>
+<text x="511" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D78D63</text>
+<text x="511" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="1246" width="140" height="31" rx="3" fill="#E9B590"/>
+<text x="662" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#E9B590</text>
+<text x="662" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="1160" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="1196" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Slate roofs</text>
+<text x="878" y="1222" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Blue-grey slate; clear separation from timber</text>
+<rect x="878" y="1246" width="140" height="31" rx="3" fill="#293541"/>
+<text x="878" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#293541</text>
+<text x="878" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="1029" y="1246" width="140" height="31" rx="3" fill="#4B5966"/>
+<text x="1029" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#4B5966</text>
+<text x="1029" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="1180" y="1246" width="140" height="31" rx="3" fill="#7A8790"/>
+<text x="1180" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#7A8790</text>
+<text x="1180" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="1331" y="1246" width="140" height="31" rx="3" fill="#AAB4B5"/>
+<text x="1331" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#AAB4B5</text>
+<text x="1331" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="1482" y="1246" width="140" height="31" rx="3" fill="#D5D8D0"/>
+<text x="1482" y="1301" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D5D8D0</text>
+<text x="1482" y="1242" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="40" y="1322" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="58" y="1358" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Hedges</text>
+<text x="58" y="1384" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Dense leaf greens with restrained warm highlights</text>
+<rect x="58" y="1408" width="140" height="31" rx="3" fill="#1B3017"/>
+<text x="58" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#1B3017</text>
+<text x="58" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Deep shadow</text>
+<rect x="209" y="1408" width="140" height="31" rx="3" fill="#304D20"/>
+<text x="209" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#304D20</text>
+<text x="209" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Shadow</text>
+<rect x="360" y="1408" width="140" height="31" rx="3" fill="#4B6D2B"/>
+<text x="360" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#4B6D2B</text>
+<text x="360" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Main color</text>
+<rect x="511" y="1408" width="140" height="31" rx="3" fill="#75913F"/>
+<text x="511" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#75913F</text>
+<text x="511" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Light</text>
+<rect x="662" y="1408" width="140" height="31" rx="3" fill="#A5B565"/>
+<text x="662" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#A5B565</text>
+<text x="662" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Highlight</text>
+<rect x="860" y="1322" width="780" height="148" rx="10" fill="#FBF7EE"/>
+<text x="878" y="1358" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="bold" fill="#302D27">Grid and fog overlay</text>
+<text x="878" y="1384" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#736C5E">Quiet neutral colors supporting terrain readability</text>
+<rect x="878" y="1408" width="140" height="31" rx="3" fill="#38392E"/>
+<text x="878" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#38392E</text>
+<text x="878" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Grid ink</text>
+<rect x="1029" y="1408" width="140" height="31" rx="3" fill="#59604C"/>
+<text x="1029" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#59604C</text>
+<text x="1029" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Edge shadow</text>
+<rect x="1180" y="1408" width="140" height="31" rx="3" fill="#747D79"/>
+<text x="1180" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#747D79</text>
+<text x="1180" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Fog shadow</text>
+<rect x="1331" y="1408" width="140" height="31" rx="3" fill="#A2AAA1"/>
+<text x="1331" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#A2AAA1</text>
+<text x="1331" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Fog body</text>
+<rect x="1482" y="1408" width="140" height="31" rx="3" fill="#D3D7CA"/>
+<text x="1482" y="1463" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="normal" fill="#302D27">#D3D7CA</text>
+<text x="1482" y="1404" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="normal" fill="#736C5E">Fog light</text>
+<text x="48" y="1530" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="normal" fill="#736C5E">Proposal only. No recoloring, shaders, artwork changes or LOS changes have been applied.</text>
+</svg>

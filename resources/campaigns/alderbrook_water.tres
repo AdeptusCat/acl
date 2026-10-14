@@ -1,7 +1,7 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://dkjw7ktdpc7d7"]
 
-[ext_resource type="Texture2D" path="res://assets/tiles/campaign/river.svg" id="1_xq4m5"]
-[ext_resource type="Texture2D" path="res://assets/tiles/campaign/bridge.svg" id="2_4o0pi"]
+[ext_resource type="Texture2D" uid="uid://o8bpg4fjirov" path="res://assets/tiles/campaign/river.svg" id="1_xq4m5"]
+[ext_resource type="Texture2D" uid="uid://b0lai51iy0lmw" path="res://assets/tiles/campaign/bridge.svg" id="2_4o0pi"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xq4m5"]
 texture = ExtResource("1_xq4m5")

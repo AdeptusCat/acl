@@ -11,6 +11,12 @@ class_name Map
 @export_file("*.tres", "*.res") var los_resource_path: String = ""
 
 
+func _ready() -> void:
+	if campaign_name == TerrainPalette.CAMPAIGN:
+		for layer: Node in get_tilemap_layers():
+			if layer is TileMapLayer:
+				TerrainPalette.apply(layer as TileMapLayer)
+
 
 func get_tilemap_layers() -> Array[Node]:
 	return tile_map_layers.get_children()

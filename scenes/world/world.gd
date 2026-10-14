@@ -268,6 +268,9 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	terrain_layer = map.get_terrain_layer()
 	wall_layer = map.get_wall_layer()
 	building_layer = map.get_building_layer()
+	fog_of_war_tile_map_layer.material = null
+	if map.campaign_name == TerrainPalette.CAMPAIGN:
+		fog_of_war_tile_map_layer.material = TerrainPalette.material_for_family("grid_fog", get_viewport().use_hdr_2d)
 	
 	
 	LOSHelper.ground_layer = map.get_ground_layer()

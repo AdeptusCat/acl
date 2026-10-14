@@ -3,6 +3,7 @@
 from pathlib import Path
 import json
 from PIL import Image, ImageDraw, ImageFont
+from terrain_palette_preview import apply_palette
 
 ROOT: Path = Path(__file__).resolve().parents[2]
 MAPS: Path = ROOT / "docs/campaigns/road_to_alderbrook/maps"
@@ -19,7 +20,7 @@ def main() -> None:
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
     title: ImageFont.FreeTypeFont = ImageFont.truetype(font_path, 26)
     label: ImageFont.FreeTypeFont = ImageFont.truetype(font_path, 18)
-    draw.text((24, 18), "Continuous fields and lively fruit orchards", font=title, fill="#25352f")
+    draw.text((24, 18), "Road to Alderbrook — approved terrain palette", font=title, fill="#25352f")
     samples: list[tuple[str, tuple[int, int], tuple[int, int]]] = [
         ("Connected woods with intact, irregular fringes", (544, 320), (24, 98)),
         ("Continuous hand-sown wheat", (544, 640), (524, 98)),
@@ -39,6 +40,7 @@ def main() -> None:
     if "texture_region" in ground:
         x, y, width, height = ground["texture_region"]
         ground_tile = ground_tile.crop((x, y, x + width, y + height))
+    ground_tile = apply_palette(ground_tile, "open_ground")
     for x in range(-32, 432, 96):
         for y in range(-64, 224, 128):
             offset_y: int = y

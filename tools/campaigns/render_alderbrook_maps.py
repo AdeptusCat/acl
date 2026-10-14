@@ -2,9 +2,13 @@
 
 from pathlib import Path
 import json
+import sys
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ROOT: Path = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools/art"))
+from terrain_palette_preview import apply_palette, family_for_cell
+
 OUTPUT: Path = ROOT / "docs/campaigns/road_to_alderbrook/maps"
 FONT: str = "/usr/share/fonts/TTF/DejaVuSans.ttf"
 BOLD: str = "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"
@@ -70,6 +74,7 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
                 tile = ImageOps.mirror(tile)
             if cell.get("flip_v", False):
                 tile = ImageOps.flip(tile)
+            tile = apply_palette(tile, family_for_cell(layer["name"], cell))
             point: list = cell["position"]
             canvas.alpha_composite(tile, (round(point[0] - tile.width / 2 + offset[0]), round(point[1] - tile.height / 2 + offset[1])))
     draw = ImageDraw.Draw(canvas)
