@@ -44,6 +44,7 @@ func _test_size(size: int) -> void:
 	_check(not result.blocked and result.hindrance == 1, "Field pixels hinder the ray once at size " + str(size))
 	result = LOSHelper.check_los(origin - shift, target - shift, 1, 0, 1, 0)
 	_check(not result.blocked and result.hindrance == 0, "Transparent crop lanes do not hinder LOS at size " + str(size))
+	_test_hindrance_crossings(size, terrain, source, id, origin, target, shift)
 	data.set_custom_data("blocking", true)
 	result = LOSHelper.check_los(origin + shift, target + shift, 1, 0, 1, 0)
 	_check(result.blocked and result.block_point != ground.map_to_local(cell), "Woods block at the tree image entry at size " + str(size))
@@ -57,6 +58,10 @@ func _test_size(size: int) -> void:
 	terrain.set_cell(cell, id, Vector2i(1, 0), 1)
 	_check(LOSHelper.check_los(origin - shift, target - shift, 1, 0, 1, 0).blocked, "Flipped woodland pixels match their display at size " + str(size))
 	_check(not LOSHelper.check_los(origin + shift, target + shift, 1, 0, 1, 0).blocked, "Flipped clear gaps stay clear at size " + str(size))
+	flipped.set_custom_data("blocking", false)
+	_check(LOSHelper.get_hindrance_crossings(origin - shift, target - shift).size() == 1, "Flipped hindrance markers follow visible pixels at size " + str(size))
+	_check(LOSHelper.get_hindrance_crossings(origin + shift, target + shift).is_empty(), "Flipped transparent margins add no marker at size " + str(size))
+	flipped.set_custom_data("blocking", true)
 	terrain.clear()
 	var building_source: TileSetAtlasSource = source.duplicate(true) as TileSetAtlasSource
 	var building_id: int = buildings.tile_set.add_source(building_source)
@@ -70,9 +75,47 @@ func _test_size(size: int) -> void:
 	var spine_origin: Vector2 = ground.map_to_local(Vector2i(0, 2))
 	var expected_hit: bool = LOSHelper._sprite_entry(spine_origin, spine_target, terrain, cell) != Vector2.INF
 	_check(LOSHelper.check_los(spine_origin, spine_target, 1, 0, 1, 0).blocked == expected_hit, "Hex-spine LOS follows sprite alpha at size " + str(size))
+	data.set_custom_data("blocking", false)
+	_check((LOSHelper.get_hindrance_crossings(spine_origin, spine_target).size() == 1) == expected_hit, "Hex-spine hindrance markers inspect both adjacent tiles at size " + str(size))
 	LOSHelper.unload_map()
 	for layer: HexagonTileMapLayer in [ground, terrain, buildings, walls]:
 		layer.free()
+
+
+func _test_hindrance_crossings(size: int, terrain: HexagonTileMapLayer, source: TileSetAtlasSource, id: int, origin: Vector2, target: Vector2, shift: Vector2) -> void:
+	var start: Vector2 = origin + shift
+	var finish: Vector2 = target + shift
+	var cell: Vector2i = Vector2i(2, 3)
+	var entries: PackedVector2Array = LOSHelper.get_hindrance_crossings(start, finish)
+	_check(entries.size() == 1 and entries[0].is_equal_approx(LOSHelper._sprite_entry(start, finish, terrain, cell)), "Hindrance marker starts at the actual image entry at size " + str(size))
+	_check(LOSHelper.get_hindrance_crossings(origin - shift, target - shift).is_empty(), "Transparent margins add no hindrance marker at size " + str(size))
+	# Connected fields accumulate once per hex, including when the ray is reversed.
+	for row: int in range(1, 6):
+		terrain.set_cell(Vector2i(2, row), id, Vector2i(1, 0))
+	entries = LOSHelper.get_hindrance_crossings(start, finish)
+	_check(entries.size() == 3, "Connected fields exclude shooter and target hexes at size " + str(size))
+	_check(entries.size() == LOSHelper.check_los(start, finish, 1, 0, 1, 0).hindrance, "Preview crossings match the gameplay hindrance count at size " + str(size))
+	if entries.size() == 3:
+		for index: int in range(3):
+			var expected: Vector2 = LOSHelper._sprite_entry(start, finish, terrain, Vector2i(2, index + 2))
+			_check(entries[index].is_equal_approx(expected), "Crossings are ordered from shooter to target at size " + str(size))
+	entries = LOSHelper.get_hindrance_crossings(finish, start)
+	if entries.size() == 3:
+		for index: int in range(3):
+			var expected: Vector2 = LOSHelper._sprite_entry(finish, start, terrain, Vector2i(2, 4 - index))
+			_check(entries[index].is_equal_approx(expected), "Reversing LOS reverses hindrance entry order at size " + str(size))
+	else:
+		_check(false, "Reverse LOS retains all hindrances at size " + str(size))
+	var middle_entry: Vector2 = LOSHelper._sprite_entry(start, finish, terrain, cell)
+	entries = LOSHelper.get_hindrance_crossings(start, finish, middle_entry)
+	_check(entries.size() == 1, "Hindrance markers stop before a blocking image at size " + str(size))
+	var data: TileData = source.get_tile_data(Vector2i(1, 0), 0)
+	data.set_custom_data("blocking", true)
+	_check(LOSHelper.get_hindrance_crossings(start, finish).is_empty(), "Blocking woods use the obstruction marker at size " + str(size))
+	data.set_custom_data("blocking", false)
+	_check(LOSHelper.get_hindrance_crossings(start, start).is_empty(), "Same-hex LOS adds no hindrance marker at size " + str(size))
+	terrain.clear()
+	terrain.set_cell(cell, id, Vector2i(1, 0))
 
 
 func _layer(size: int, _building: bool) -> HexagonTileMapLayer:

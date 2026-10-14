@@ -957,7 +957,10 @@ func _draw() -> void:
 			var hit_point: Vector2 = hit
 			if hit_point.is_finite():
 				block_point = to_local(ground_layer.to_global(hit_point))
-		SightLineGraphic.draw(self, origin_pos, target_pos, bool(line_data["blocked"]), block_point, decorated)
+		var crossings: PackedVector2Array = PackedVector2Array()
+		for point: Vector2 in line_data["hindrance_points"]:
+			crossings.append(to_local(ground_layer.to_global(point)))
+		SightLineGraphic.draw(self, origin_pos, target_pos, bool(line_data["blocked"]), block_point, decorated, 1.0, crossings)
 
 
 func generate_los_lines_for_debug() -> void:
@@ -986,7 +989,8 @@ func generate_los_lines_for_debug() -> void:
 				"target_pos": target_pos,
 				"blocked": los_result["blocked"],
 				"block_point": los_result["block_point"],
-				"hexes": los_result["hexes"]
+				"hexes": los_result["hexes"],
+				"hindrance_points": _preview_hindrance_crossings(origin_pos, target_pos, los_result)
 			})
 			
 			
@@ -1022,7 +1026,8 @@ func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 		"target_pos": target_pos,
 		"blocked": los_result["blocked"],
 		"block_point": los_result["block_point"],
-		"hexes": los_result["hexes"]
+		"hexes": los_result["hexes"],
+		"hindrance_points": _preview_hindrance_crossings(origin_pos, target_pos, los_result)
 	})
 	queue_redraw()
 
@@ -1225,15 +1230,70 @@ func _sprite_entry(origin: Vector2, target: Vector2, layer: TileMapLayer, cell: 
 	return Vector2.INF
 
 
-func _check_texture_obstacles(origin: Vector2, target: Vector2, hexes: Array[Vector3i], result: Dictionary) -> Dictionary:
+func _texture_obstacle_candidates(hexes: Array[Vector3i]) -> Dictionary[Vector2i, bool]:
 	var candidates: Dictionary[Vector2i, bool] = {}
-	var origin_cell: Vector2i = ground_layer.local_to_map(origin)
-	var target_cell: Vector2i = ground_layer.local_to_map(target)
 	for cube: Vector3i in hexes:
 		candidates[ground_layer.cube_to_map(cube)] = true
 		# Also sample both sides of a hex spine, using the same ray.
 		for neighbor: Vector3i in ground_layer.cube_neighbors(cube):
 			candidates[ground_layer.cube_to_map(neighbor)] = true
+	return candidates
+
+
+# Preview-only metadata: one entry per crossed hindering hex, ordered along the ray.
+# Reuse the combat pixel test so transparent sprite margins never add a marker.
+func get_hindrance_crossings(origin: Vector2, target: Vector2, obstruction: Vector2 = Vector2.INF) -> PackedVector2Array:
+	var crossings: PackedVector2Array = PackedVector2Array()
+	if not _has_map_layers() or not origin.is_finite() or not target.is_finite():
+		return crossings
+	var origin_cell: Vector2i = ground_layer.local_to_map(origin)
+	var target_cell: Vector2i = ground_layer.local_to_map(target)
+	if origin_cell == target_cell:
+		return crossings
+	var origin_cube: Vector3i = ground_layer.map_to_cube(origin_cell)
+	var target_cube: Vector3i = ground_layer.map_to_cube(target_cell)
+	var distance: int = ground_layer.cube_distance(origin_cube, target_cube)
+	var hexes: Array[Vector3i] = cube_line(origin_cube, target_cube, distance)
+	var direction: Vector2 = (target - origin).normalized()
+	var limit: float = origin.distance_to(target)
+	if obstruction.is_finite():
+		limit = clampf((obstruction - origin).dot(direction), 0.0, limit)
+	var entries: Array[float] = []
+	for cell: Vector2i in _texture_obstacle_candidates(hexes):
+		if cell == origin_cell or cell == target_cell or terrain_layer.get_cell_source_id(cell) == -1:
+			continue
+		var data: TileData = terrain_layer.get_cell_tile_data(cell)
+		if not data.has_custom_data("hindrance") or not bool(data.get_custom_data("hindrance")):
+			continue
+		if data.has_custom_data("blocking") and bool(data.get_custom_data("blocking")):
+			continue
+		var entry: Vector2 = _sprite_entry(origin, target, terrain_layer, cell)
+		if not entry.is_finite():
+			continue
+		var along_ray: float = (entry - origin).dot(direction)
+		if along_ray >= 0.0 and along_ray < limit:
+			entries.append(along_ray)
+	entries.sort()
+	for along_ray: float in entries:
+		crossings.append(origin + direction * along_ray)
+	return crossings
+
+
+func _preview_hindrance_crossings(origin: Vector2, target: Vector2, result: Dictionary) -> PackedVector2Array:
+	var obstruction: Vector2 = Vector2.INF
+	if bool(result["blocked"]):
+		obstruction = origin
+		if result["block_point"] is Vector2:
+			var hit: Vector2 = result["block_point"]
+			if hit.is_finite():
+				obstruction = hit
+	return get_hindrance_crossings(origin, target, obstruction)
+
+
+func _check_texture_obstacles(origin: Vector2, target: Vector2, hexes: Array[Vector3i], result: Dictionary) -> Dictionary:
+	var candidates: Dictionary[Vector2i, bool] = _texture_obstacle_candidates(hexes)
+	var origin_cell: Vector2i = ground_layer.local_to_map(origin)
+	var target_cell: Vector2i = ground_layer.local_to_map(target)
 	var nearest: float = INF
 	for cell: Vector2i in candidates:
 		if cell == origin_cell or cell == target_cell:

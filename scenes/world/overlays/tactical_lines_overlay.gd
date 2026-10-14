@@ -85,10 +85,14 @@ func _on_draw_draw_movement_path(from_hex: Vector2i, path: Array[Vector2i]) -> v
 func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i) -> void:
 	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
 	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+	var crossings: PackedVector2Array = PackedVector2Array()
+	if Debug.show_los_lines:
+		crossings = LOSHelper.get_hindrance_crossings(from_pos, to_pos)
 
 	los_to_target.append({
 		"from": from_pos,
 		"to": to_pos,
+		"hindrance_points": crossings,
 		"timer": 0.0,
 		"duration": 2.0  # Line fades out over 2 seconds
 	})
@@ -99,10 +103,14 @@ func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i) -> void:
 func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
 	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
 	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+	var crossings: PackedVector2Array = PackedVector2Array()
+	if Debug.show_los_lines:
+		crossings = LOSHelper.get_hindrance_crossings(from_pos, to_pos)
 
 	los_enemy_lines.append({
 		"from": from_pos,
 		"to": to_pos,
+		"hindrance_points": crossings,
 		"timer": 0.0,
 		"duration": 2.0  # Line fades out over 2 seconds
 	})
@@ -152,7 +160,10 @@ func _draw_sight_line(data: Dictionary, opacity: float) -> void:
 		return
 	var origin: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["from"]))
 	var target: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["to"]))
-	SightLineGraphic.draw(self, origin, target, false, origin, false, opacity)
+	var crossings: PackedVector2Array = PackedVector2Array()
+	for point: Vector2 in data["hindrance_points"]:
+		crossings.append(to_local(LOSHelper.ground_layer.to_global(point)))
+	SightLineGraphic.draw(self, origin, target, false, origin, false, opacity, crossings)
 
 
 func _draw_player_routes() -> void:
