@@ -34,7 +34,7 @@ def ramp(brightness: np.ndarray, family: str) -> np.ndarray:
 
 
 def family_for_cell(layer: str, cell: dict) -> str:
-    if cell["texture"].startswith("res://assets/tiles/buildings/rotated/"):
+    if cell["texture"].startswith(("res://assets/tiles/buildings/rotated/", "res://assets/tiles/buildings/multihex/")):
         return ""
     family: str = cell.get("art_family", "")
     if family == "crops":

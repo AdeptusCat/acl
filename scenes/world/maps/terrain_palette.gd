@@ -37,7 +37,7 @@ static func apply(layer: TileMapLayer) -> void:
 			continue
 		visited[data] = true
 		var source: TileSetAtlasSource = copy.get_source(layer.get_cell_source_id(cell)) as TileSetAtlasSource
-		if source.texture.resource_path.begins_with(APPROVED_BUILDINGS):
+		if source.texture.resource_path.begins_with(APPROVED_BUILDINGS) or source.texture.resource_path.begins_with(MultihexBuildings.DIRECTORY):
 			# The approved sprites already distinguish brown timber and grey masonry roofs.
 			data.material = null
 			continue

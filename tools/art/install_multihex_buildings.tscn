@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/art/install_multihex_buildings.gd" id="1"]
+
+[node name="InstallMultihexBuildings" type="Node"]
+script = ExtResource("1")

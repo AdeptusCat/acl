@@ -7,6 +7,9 @@ building is **Stone Building 03**, with stone cover 3 in all six orientations.
 The layer provides transparent 128-pixel hex tiles and the shared building script.
 Scenarios store their own cells while inheriting the scene's tileset.
 
+The same layer also supplies [18 multihex designs](../multihex_buildings/README.md)
+as complete two- and three-hex placement patterns, with six orientations each.
+
 All eight building layers use this scene: Orchard Road, Default Map, all five
 Road to Alderbrook maps, and the standalone Western Approach. Their original
 building coordinates, design variants, categories and cover values are preserved.

@@ -40,6 +40,8 @@ static func install(tiles: TileSet) -> void:
 		var original: TileSetAtlasSource = tiles.get_source(id) as TileSetAtlasSource
 		if original == null or original.texture == null or not original.has_tile(Vector2i.ZERO):
 			continue
+		if original.texture.resource_path.begins_with(MultihexBuildings.DIRECTORY):
+			continue
 		var data: TileData = original.get_tile_data(Vector2i.ZERO, 0)
 		if str(data.get_custom_data("name")) not in ["Stone Building", "Wood Building", "Wooden Building"]:
 			continue
@@ -120,7 +122,7 @@ static func _source_key(source: TileSetAtlasSource) -> String:
 	var data: TileData = source.get_tile_data(source.get_tile_id(0), 0)
 	var path: String = source.texture.resource_path
 	var kind: String = str(data.get_custom_data("name"))
-	if kind in ["Stone Building", "Wood Building", "Wooden Building"]:
+	if kind in ["Stone Building", "Wood Building", "Wooden Building"] and not path.begins_with(MultihexBuildings.DIRECTORY):
 		var variant: String = path.get_file().get_basename()
 		path = texture_path(ALIASES.get(variant, variant))
 	return path + "/" + kind + "/" + str(data.get_custom_data("cover")) + "/" + str(data.get_custom_data("art_family"))

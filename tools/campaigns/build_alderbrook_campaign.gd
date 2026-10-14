@@ -704,6 +704,10 @@ func _export_layout(map: Map, spec: Dictionary) -> void:
 			var data: TileData = layer.get_cell_tile_data(cell)
 			var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 			var cell_data: Dictionary = {"hex": [cell.x, cell.y], "position": [position.x, position.y], "texture": source.texture.resource_path, "flip_h": data.flip_h, "flip_v": data.flip_v}
+			if data.texture_origin != Vector2i.ZERO:
+				cell_data["texture_origin"] = [data.texture_origin.x, data.texture_origin.y]
+			if data.modulate != Color.WHITE:
+				cell_data["modulate"] = [data.modulate.r, data.modulate.g, data.modulate.b, data.modulate.a]
 			if data.has_custom_data("art_family"):
 				cell_data["art_family"] = str(data.get_custom_data("art_family"))
 			if region.position != Vector2i.ZERO or region.size != Vector2i(source.texture.get_size()):

@@ -4,6 +4,7 @@ from pathlib import Path
 import argparse
 import json
 import sys
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ROOT: Path = Path(__file__).resolve().parents[2]
@@ -69,6 +70,8 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
     draw.text((38, 91), subtitle, font=font(16), fill="#c9c9b2")
     for layer in data["layers"]:
         for cell in layer["cells"]:
+            if cell.get("modulate", [1, 1, 1, 1])[3] == 0:
+                continue
             tile: Image.Image = texture(cell["texture"], cache)
             if "texture_region" in cell:
                 x, y, width, height = cell["texture_region"]
@@ -78,8 +81,12 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
             if cell.get("flip_v", False):
                 tile = ImageOps.flip(tile)
             tile = apply_palette(tile, family_for_cell(layer["name"], cell))
+            if "modulate" in cell:
+                pixels: np.ndarray = np.asarray(tile, dtype=float) * np.array(cell["modulate"])
+                tile = Image.fromarray(np.clip(np.rint(pixels), 0, 255).astype(np.uint8))
             point: list = cell["position"]
-            canvas.alpha_composite(tile, (round(point[0] - tile.width / 2 + offset[0]), round(point[1] - tile.height / 2 + offset[1])))
+            origin: list = cell.get("texture_origin", [0, 0])
+            canvas.alpha_composite(tile, (round(point[0] - origin[0] - tile.width / 2 + offset[0]), round(point[1] - origin[1] - tile.height / 2 + offset[1])))
     draw = ImageDraw.Draw(canvas)
     labels: dict[str, str] = {"rifle": "R", "mg": "MG", "hq": "HQ", "company_hq": "CHQ", "light_mortar": "M", "medium_mortar": "M"}
     for key, color in [("player", BLUE), ("enemy", RED)]:
