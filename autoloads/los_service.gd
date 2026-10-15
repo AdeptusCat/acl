@@ -32,6 +32,8 @@ var initialized: bool = false
 var los_lookup: Dictionary = {}
 var _texture_images: Dictionary[Texture2D, Image] = {}
 var _active_los_resource: LosLookupData
+var _bake_cache: LosBakeCache
+var _last_bake_layout_signature: String = ""
 
 enum BetweenAxis {
 	NONE,
@@ -44,6 +46,8 @@ func _ready() -> void:
 	
 
 func load_prebaked_los(map: Map) -> void:
+	end_los_bake()
+	_last_bake_layout_signature = ""
 	clear_los()
 	_texture_images.clear()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
@@ -62,22 +66,60 @@ func load_prebaked_los(map: Map) -> void:
 	var wall_signature: String = wall_layout_signature()
 	if los_resource == null:
 		if not signature.is_empty() or not wall_signature.is_empty():
-			los_lookup = {}
-			prebake_los()
+			_active_los_resource = _load_or_rebuild_los(map, signature, wall_signature)
+			los_lookup = _active_los_resource.los_lookup
 			return
 		los_lookup = {}
 		push_error("Missing baked line of sight for " + map.map_name)
 		return
-	if los_resource.building_layout_signature != signature or los_resource.wall_layout_signature != wall_signature:
-		print("Rebuilding LOS for changed buildings or barriers: ", map.map_name)
-		los_lookup = {}
-		prebake_los()
+	var changed: bool = los_resource.building_layout_signature != signature or los_resource.wall_layout_signature != wall_signature
+	# New authored tables also detect vegetation, pixel and grid changes.
+	if not los_resource.bake_layout_signature.is_empty():
+		begin_los_bake()
+		changed = changed or los_resource.bake_layout_signature != bake_layout_signature()
+	if changed:
+		var rebuilt: LosLookupData = _load_or_rebuild_los(map, signature, wall_signature)
 		# Retain the refreshed active lookup in memory; authoring tools save it.
-		los_resource.los_lookup = los_lookup
+		los_resource.los_lookup = rebuilt.los_lookup
 		los_resource.building_layout_signature = signature
 		los_resource.wall_layout_signature = wall_signature
+		los_resource.bake_layout_signature = rebuilt.bake_layout_signature
+	end_los_bake()
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
+
+
+func _load_or_rebuild_los(map: Map, signature: String, wall_signature: String) -> LosLookupData:
+	if _bake_cache == null:
+		begin_los_bake()
+	var layout: String = bake_layout_signature()
+	var identity: String = map.los_resource_path
+	if identity.is_empty():
+		identity = map.scene_file_path
+	if identity.is_empty():
+		identity = map.map_name
+	var directory: String = "user://los_cache/"
+	var path: String = directory + identity.sha256_text() + ".res"
+	var rebuilt: LosLookupData
+	if ResourceLoader.exists(path):
+		rebuilt = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
+		if rebuilt != null and rebuilt.bake_layout_signature == layout:
+			end_los_bake()
+			print("Reused rebuilt LOS cache: ", map.map_name)
+			return rebuilt
+	print("Rebuilding LOS for changed map layout: ", map.map_name)
+	_bake_prepared_los()
+	rebuilt = LosLookupData.new()
+	rebuilt.los_lookup = los_lookup
+	rebuilt.building_layout_signature = signature
+	rebuilt.wall_layout_signature = wall_signature
+	rebuilt.bake_layout_signature = layout
+	end_los_bake()
+	if DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory)) == OK:
+		var error: Error = ResourceSaver.save(rebuilt, path, ResourceSaver.FLAG_COMPRESS)
+		if error != OK:
+			push_warning("Could not retain rebuilt LOS cache: " + error_string(error))
+	return rebuilt
 
 
 func building_layout_signature() -> String:
@@ -92,7 +134,13 @@ func wall_layout_signature() -> String:
 	return ""
 
 
+func bake_layout_signature() -> String:
+	return _last_bake_layout_signature
+
+
 func unload_map() -> void:
+	end_los_bake()
+	_last_bake_layout_signature = ""
 	clear_los()
 	_texture_images.clear()
 	ground_layer = null
@@ -123,59 +171,64 @@ func bake_and_save_los_data(map: Map) -> void:
 	los_resource.los_lookup = los_lookup
 	los_resource.building_layout_signature = building_layout_signature()
 	los_resource.wall_layout_signature = wall_layout_signature()
+	los_resource.bake_layout_signature = bake_layout_signature()
 	var file_path: String = "res://resources/los/" + map.map_name.to_lower().replace(" ", "_") + ".tres"
 	
 	ResourceSaver.save(los_resource, file_path)
 	print("LOS data saved to: ", file_path)
 
-func prebake_los() -> void:
+func begin_los_bake() -> void:
+	end_los_bake()
 	building_layout_signature()
 	wall_layout_signature()
-	los_lookup = {}
-	for ox: int in range(grid_size.x):
-		for oy: int in range(grid_size.y):
-			var o_hex: Vector2i = Vector2i(ox, oy)
-			var o_pos: Vector2 = ground_layer.map_to_local(o_hex)
+	_texture_images.clear()
+	var cache: LosBakeCache = LosBakeCache.new()
+	cache.setup(ground_layer, building_layer, wall_layer, terrain_layer)
+	for x: int in range(grid_size.x):
+		for y: int in range(grid_size.y):
+			var cell: Vector2i = Vector2i(x, y)
+			var point: Vector2 = ground_layer.map_to_local(cell)
+			cache.positions[cell] = point
+			cache.endpoint_cover[point] = is_sample_point_in_building(point)
+			cache.endpoint_concealment[point] = get_target_concealment(point)
+	_bake_cache = cache
+	_last_bake_layout_signature = cache.fingerprint(grid_size, STEP_SIZE_PIXELS)
 
-			# make this a Dictionary, not an Array
-			los_lookup[o_hex] = {}
 
-			for tx: int in range(grid_size.x):
-				for ty: int in range(grid_size.y):
-					var t_hex: Vector2i = Vector2i(tx, ty)
-					if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
-						pass
-					if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
-						pass
-					if o_hex == t_hex:
-						continue
-					
-					var t_pos: Vector2 = ground_layer.map_to_local(t_hex)
-					var los: Dictionary = check_los(o_pos, t_pos, 1, 0, 1, 0)
-					
-					if not los["blocked"]:
-						if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
-							pass
-						if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
-							pass
-					else:
-						if t_hex == Vector2i(24,9) or t_hex == Vector2i(23,8):
-							pass
-						if o_hex == Vector2i(24,9) or o_hex == Vector2i(23,8):
-							pass
-					
-					if not los["blocked"]:
-						# store both cover values under t_hex
-						los_lookup[o_hex][t_hex] = {
-							"shooter_cover": los["shooter_cover"],
-							"target_cover":  los["target_cover"],
-							"wall_cover": los["wall_cover"],
-							"hindrance": los["hindrance"],
-							"target_concealment": los["target_concealment"]
-						}
-				# end tx,ty
-			# end ox,oy
+func end_los_bake() -> void:
+	_bake_cache = null
+
+
+func bake_los_origin(origin: Vector2i) -> Dictionary:
+	assert(_bake_cache != null, "Begin the LOS rebuild before baking an origin")
+	var row: Dictionary = {}
+	var origin_pos: Vector2 = _bake_cache.positions[origin]
+	for target: Vector2i in _bake_cache.positions:
+		if origin == target:
+			continue
+		var result: Dictionary = check_los(origin_pos, _bake_cache.positions[target], 1, 0, 1, 0)
+		if not result["blocked"]:
+			row[target] = {
+				"shooter_cover": result["shooter_cover"],
+				"target_cover": result["target_cover"],
+				"wall_cover": result["wall_cover"],
+				"hindrance": result["hindrance"],
+				"target_concealment": result["target_concealment"],
+			}
+	return row
+
+
+func prebake_los() -> void:
+	begin_los_bake()
+	_bake_prepared_los()
+	end_los_bake()
 	print("LOS prebake with cover done!")
+
+
+func _bake_prepared_los() -> void:
+	los_lookup = {}
+	for origin: Vector2i in _bake_cache.positions:
+		los_lookup[origin] = bake_los_origin(origin)
 
 
 #func check_los(
@@ -805,6 +858,12 @@ func is_wall_cover(
 		_sample_pt: Vector2
 	) -> Dictionary:
 	var result: Dictionary = {}
+	if _bake_cache != null:
+		var edge: Vector2i = _bake_cache.walls.get(from_map, Vector2i.ZERO)
+		var direction: int = cube_direction_name(from_cube, to_cube)
+		if direction < 6 and (edge.x & (1 << direction)) != 0:
+			result["cover"] = edge.y
+		return result
 	# early out if there's no tile here or it's the origin tile
 	if wall_layer.get_cell_source_id(from_map) == -1:
 		return result
@@ -828,6 +887,13 @@ func is_wall_blocking(
 		sample_pt: Vector2
 	) -> Dictionary:
 	var result: Dictionary = {}
+	if _bake_cache != null:
+		var edge: Vector2i = _bake_cache.walls.get(from_map, Vector2i.ZERO)
+		var direction: int = cube_direction_name(from_cube, to_cube)
+		if direction < 6 and (edge.x & (1 << direction)) != 0:
+			result["blocked"] = true
+			result["block_point"] = sample_pt
+		return result
 	# early out if there's no tile here or it's the origin tile
 	if wall_layer.get_cell_source_id(from_map) == -1:
 		return result
@@ -869,6 +935,8 @@ func is_hex_hindrance(hex_map: Vector2i) -> bool:
 
 
 func get_target_concealment(sample_point: Vector2) -> int:
+	if _bake_cache != null and _bake_cache.endpoint_concealment.has(sample_point):
+		return _bake_cache.endpoint_concealment[sample_point]
 	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
@@ -883,6 +951,8 @@ func get_target_concealment(sample_point: Vector2) -> int:
 
 
 func is_sample_point_in_building(sample_point: Vector2) -> int:
+	if _bake_cache != null and _bake_cache.endpoint_cover.has(sample_point):
+		return _bake_cache.endpoint_cover[sample_point]
 	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
 	if building_layer.get_cell_source_id(hex_map) == -1:
 		return 0
@@ -1277,6 +1347,8 @@ func _is_multihex_building(data: TileData) -> bool:
 
 
 func _texture_obstacle_candidates(hexes: Array[Vector3i]) -> Dictionary[Vector2i, bool]:
+	if _bake_cache != null:
+		return _bake_cache.candidates(hexes)
 	var candidates: Dictionary[Vector2i, bool] = {}
 	for cube: Vector3i in hexes:
 		candidates[ground_layer.cube_to_map(cube)] = true
@@ -1337,6 +1409,8 @@ func _preview_hindrance_crossings(origin: Vector2, target: Vector2, result: Dict
 
 
 func _check_texture_obstacles(origin: Vector2, target: Vector2, hexes: Array[Vector3i], result: Dictionary) -> Dictionary:
+	if _bake_cache != null:
+		return _bake_cache.check_obstacles(origin, target, hexes, result, STEP_SIZE_PIXELS)
 	var candidates: Dictionary[Vector2i, bool] = _texture_obstacle_candidates(hexes)
 	var origin_cell: Vector2i = ground_layer.local_to_map(origin)
 	var target_cell: Vector2i = ground_layer.local_to_map(target)

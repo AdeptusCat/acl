@@ -744,25 +744,21 @@ func _bake_los(map: Map) -> void:
 	LOSHelper.wall_layer = map.get_wall_layer()
 	var building_signature: String = LOSHelper.building_layout_signature()
 	var wall_signature: String = LOSHelper.wall_layout_signature()
+	LOSHelper.grid_size = map.grid_size
+	LOSHelper.begin_los_bake()
+	var layout_signature: String = LOSHelper.bake_layout_signature()
 	var lookup: Dictionary = {}
-	var ground: HexagonTileMapLayer = map.get_ground_layer()
 	for ox: int in range(map.grid_size.x):
 		for oy: int in range(map.grid_size.y):
 			var origin: Vector2i = Vector2i(ox, oy)
-			lookup[origin] = {}
-			for tx: int in range(map.grid_size.x):
-				for ty: int in range(map.grid_size.y):
-					var target: Vector2i = Vector2i(tx, ty)
-					if origin == target:
-						continue
-					var result: Dictionary = LOSHelper.check_los(ground.map_to_local(origin), ground.map_to_local(target), 1, 0, 1, 0)
-					if not result["blocked"]:
-						lookup[origin][target] = {"shooter_cover": result["shooter_cover"], "target_cover": result["target_cover"], "wall_cover": result["wall_cover"], "hindrance": result["hindrance"], "target_concealment": result["target_concealment"]}
+			lookup[origin] = LOSHelper.bake_los_origin(origin)
 		if ox % 4 == 0:
 			print(map.map_name, ": baked column ", ox + 1, "/", map.grid_size.x)
 		await get_tree().process_frame
+	LOSHelper.end_los_bake()
 	var resource: LosLookupData = LosLookupData.new()
 	resource.los_lookup = lookup
 	resource.building_layout_signature = building_signature
 	resource.wall_layout_signature = wall_signature
+	resource.bake_layout_signature = layout_signature
 	assert(ResourceSaver.save(resource, map.los_resource_path, ResourceSaver.FLAG_COMPRESS) == OK)
