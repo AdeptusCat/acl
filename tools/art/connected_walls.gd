@@ -4,6 +4,7 @@ extends RefCounted
 const DIRECTORY: String = "res://assets/tiles/walls/connected/"
 const TILE_SET_PATH: String = "res://resources/tilesets/walls.tres"
 const LAYER_SCENE: String = "res://scenes/world/maps/layers/wall_tile_map_layer.tscn"
+const ART_REGION_SIZE: Vector2i = Vector2i(160, 160)
 const LABELS: Array[String] = ["Wall", "Hedge"]
 const STYLES: Array[String] = ["stone", "hedge"]
 const LEGACY_STYLES: Array[String] = ["stone", "stone", "stone", "hedge", "stone", "hedge", "hedge", "hedge", "hedge", "hedge"]
@@ -56,7 +57,7 @@ static func install(tiles: TileSet) -> void:
 		var source: TileSetAtlasSource = TileSetAtlasSource.new()
 		source.resource_name = ["Stone Wall Edges", "Hedge Edges"][kind]
 		source.texture = load(DIRECTORY + STYLES[kind] + "_connections.png") as Texture2D
-		source.texture_region_size = Vector2i(128, 128)
+		source.texture_region_size = ART_REGION_SIZE
 		if id >= 0:
 			source.resource_scene_unique_id = tiles.get_source(id).resource_scene_unique_id
 			tiles.remove_source(id)
@@ -76,4 +77,5 @@ static func install(tiles: TileSet) -> void:
 		if tiles.has_source(id):
 			var source: TileSetAtlasSource = tiles.get_source(id) as TileSetAtlasSource
 			source.texture = load(DIRECTORY + "legacy_" + LEGACY_STYLES[id] + "_%02d.png" % id) as Texture2D
+			source.texture_region_size = ART_REGION_SIZE
 			source.resource_name = "Legacy " + LEGACY_STYLES[id] + " edge " + str(id)

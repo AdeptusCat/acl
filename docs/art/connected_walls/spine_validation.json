@@ -1,0 +1,83 @@
+{
+  "logical_hex_size": 128,
+  "sprite_region_size": 160,
+  "full_widths": {
+    "stone": 11,
+    "hedge": 18
+  },
+  "outside_half_restored": true,
+  "ownership_comparisons": [
+    {
+      "kind": "stone",
+      "side": 0,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "stone",
+      "side": 1,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "stone",
+      "side": 2,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "stone",
+      "side": 3,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "stone",
+      "side": 4,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "stone",
+      "side": 5,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 0,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 1,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 2,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 3,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 4,
+      "maximum_rgba_difference": 0
+    },
+    {
+      "kind": "hedge",
+      "side": 5,
+      "maximum_rgba_difference": 0
+    }
+  ],
+  "checked_tile_combinations": 126,
+  "godot_version": "4.7.2",
+  "godot_edge_cover_and_los_checks": 5114,
+  "godot_failures": 0,
+  "editor_paint_checks": 4683,
+  "editor_paint_failures": 0,
+  "gdscript_files_checked": 271,
+  "gdscript_convention_violations": 0,
+  "all_map_scenes_preserved": true,
+  "all_building_images_preserved": true,
+  "baked_los_preserved": true,
+  "tileset_metadata_and_identities_preserved": true
+}

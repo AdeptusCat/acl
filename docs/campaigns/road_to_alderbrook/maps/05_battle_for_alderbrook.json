@@ -17763,9 +17763,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						256,
-						128,
-						128
+						320,
+						160,
+						160
 					]
 				},
 				{
@@ -17790,9 +17790,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						768,
-						128,
-						128
+						960,
+						160,
+						160
 					]
 				},
 				{
@@ -17816,10 +17816,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						896,
-						128,
-						128
+						640,
+						1120,
+						160,
+						160
 					]
 				},
 				{
@@ -17843,10 +17843,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
-						384,
-						128,
-						128
+						960,
+						480,
+						160,
+						160
 					]
 				},
 				{
@@ -17871,9 +17871,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -17897,10 +17897,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						128,
+						160,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -17924,10 +17924,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
-						128,
-						128,
-						128
+						960,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -17951,10 +17951,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						128,
-						768,
-						128,
-						128
+						160,
+						960,
+						160,
+						160
 					]
 				},
 				{
@@ -17979,9 +17979,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						384,
-						128,
-						128
+						480,
+						160,
+						160
 					]
 				},
 				{
@@ -18005,10 +18005,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18033,9 +18033,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						768,
-						128,
-						128
+						960,
+						160,
+						160
 					]
 				},
 				{
@@ -18059,10 +18059,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18086,10 +18086,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18097,34 +18097,7 @@
 					"art_family": "stone",
 					"atlas": [
 						0,
-						2
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						6
-					],
-					"kind": "Wall",
-					"position": [
-						1216.0,
-						832.0
-					],
-					"source_id": 10,
-					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "stone",
-					"atlas": [
-						0,
-						7
+						1
 					],
 					"flip_h": false,
 					"flip_v": false,
@@ -18141,36 +18114,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "stone",
-					"atlas": [
-						4,
-						3
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						7
-					],
-					"kind": "Wall",
-					"position": [
-						1312.0,
-						1024.0
-					],
-					"source_id": 10,
-					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
-					"texture_region": [
-						512,
-						384,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18195,9 +18141,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18221,10 +18167,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18249,9 +18195,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						768,
-						128,
-						128
+						960,
+						160,
+						160
 					]
 				},
 				{
@@ -18275,10 +18221,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
-						896,
-						128,
-						128
+						640,
+						1120,
+						160,
+						160
 					]
 				},
 				{
@@ -18303,9 +18249,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18329,10 +18275,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						384,
-						128,
-						128
+						640,
+						480,
+						160,
+						160
 					]
 				},
 				{
@@ -18356,10 +18302,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
-						896,
-						128,
-						128
+						960,
+						1120,
+						160,
+						160
 					]
 				},
 				{
@@ -18383,10 +18329,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18410,10 +18356,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18437,10 +18383,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18465,9 +18411,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18491,10 +18437,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
-						128,
-						128,
-						128
+						960,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18518,10 +18464,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18545,10 +18491,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18572,10 +18518,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18599,10 +18545,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18626,10 +18572,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18653,10 +18599,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18680,10 +18626,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18707,10 +18653,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18734,10 +18680,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18761,10 +18707,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18788,10 +18734,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18815,10 +18761,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18842,10 +18788,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18870,9 +18816,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18896,10 +18842,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -18923,10 +18869,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18950,10 +18896,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -18978,9 +18924,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19004,10 +18950,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19031,10 +18977,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19058,10 +19004,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19085,10 +19031,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19113,9 +19059,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19139,10 +19085,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19166,10 +19112,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19193,10 +19139,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19220,10 +19166,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19248,9 +19194,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19274,10 +19220,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19302,9 +19248,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19328,10 +19274,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19355,10 +19301,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19383,9 +19329,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19409,10 +19355,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19436,10 +19382,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19464,9 +19410,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19490,10 +19436,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19517,10 +19463,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
-						128,
-						128,
-						128
+						640,
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19544,10 +19490,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19571,10 +19517,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19598,10 +19544,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19625,10 +19571,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19653,9 +19599,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19679,10 +19625,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19706,10 +19652,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19733,10 +19679,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						128,
-						640,
-						128,
-						128
+						160,
+						800,
+						160,
+						160
 					]
 				},
 				{
@@ -19761,9 +19707,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -19787,10 +19733,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						384,
-						768,
-						128,
-						128
+						480,
+						960,
+						160,
+						160
 					]
 				},
 				{
@@ -19814,10 +19760,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						128,
+						160,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -19841,10 +19787,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						896,
-						512,
-						128,
-						128
+						1120,
+						640,
+						160,
+						160
 					]
 				},
 				{
@@ -19868,172 +19814,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "stone",
-					"atlas": [
-						0,
-						2
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						5
-					],
-					"kind": "Wall",
-					"position": [
-						1216.0,
-						704.0
-					],
-					"source_id": 10,
-					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						1,
-						6
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						23,
-						1
-					],
-					"kind": "Hedge",
-					"position": [
-						2272.0,
-						256.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						128,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						4,
-						6
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						23,
-						3
-					],
-					"kind": "Hedge",
-					"position": [
-						2272.0,
-						512.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						512,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						3,
-						4
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						24,
-						1
-					],
-					"kind": "Hedge",
-					"position": [
-						2368.0,
-						192.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						384,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						0,
-						1
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						24,
-						3
-					],
-					"kind": "Hedge",
-					"position": [
-						2368.0,
-						448.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						0,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						1,
-						0
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						25,
-						1
-					],
-					"kind": "Hedge",
-					"position": [
-						2464.0,
-						256.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20057,10 +19841,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20085,9 +19869,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						128,
-						128,
-						128
+						160,
+						160,
+						160
 					]
 				},
 				{
@@ -20111,10 +19895,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						128,
+						160,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20139,9 +19923,9 @@
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
 						0,
-						512,
-						128,
-						128
+						640,
+						160,
+						160
 					]
 				},
 				{
@@ -20165,10 +19949,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20192,10 +19976,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20219,10 +20003,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20246,10 +20030,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						512,
+						640,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20273,10 +20057,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						128,
+						160,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20300,37 +20084,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
-					]
-				},
-				{
-					"alternative": 0,
-					"art_family": "hedges",
-					"atlas": [
-						0,
-						1
-					],
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						18,
-						12
-					],
-					"kind": "Hedge",
-					"position": [
-						1792.0,
-						1600.0
-					],
-					"source_id": 11,
-					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
-					"texture_region": [
-						0,
-						128,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20354,10 +20111,10 @@
 					"source_id": 10,
 					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20382,9 +20139,9 @@
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
 						0,
-						256,
-						128,
-						128
+						320,
+						160,
+						160
 					]
 				},
 				{
@@ -20408,10 +20165,10 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						768,
+						960,
 						0,
-						128,
-						128
+						160,
+						160
 					]
 				},
 				{
@@ -20435,10 +20192,469 @@
 					"source_id": 11,
 					"texture": "res://assets/tiles/walls/connected/hedge_connections.png",
 					"texture_region": [
-						256,
+						320,
 						0,
-						128,
-						128
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						6,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						2080.0,
+						1024.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						960,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						8
+					],
+					"kind": "Wall",
+					"position": [
+						1984.0,
+						1088.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						0,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						1984.0,
+						960.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						0,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						1888.0,
+						1024.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						0,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						6
+					],
+					"kind": "Wall",
+					"position": [
+						1888.0,
+						896.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						0,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						1792.0,
+						960.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						0,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						6
+					],
+					"kind": "Wall",
+					"position": [
+						1792.0,
+						832.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						0,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"kind": "Wall",
+					"position": [
+						1696.0,
+						896.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						4,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						5
+					],
+					"kind": "Wall",
+					"position": [
+						1696.0,
+						768.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						640,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						4,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						5
+					],
+					"kind": "Wall",
+					"position": [
+						1792.0,
+						704.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						640,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						4,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						4
+					],
+					"kind": "Wall",
+					"position": [
+						1888.0,
+						640.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						640,
+						160,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						4,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						6
+					],
+					"kind": "Wall",
+					"position": [
+						2080.0,
+						896.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						640,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						6,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"kind": "Wall",
+					"position": [
+						1120.0,
+						768.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						960,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						6,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"kind": "Wall",
+					"position": [
+						1120.0,
+						896.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						960,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						1120.0,
+						1024.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						2,
+						0
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						8
+					],
+					"kind": "Wall",
+					"position": [
+						1216.0,
+						1088.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						320,
+						0,
+						160,
+						160
+					]
+				},
+				{
+					"alternative": 0,
+					"art_family": "stone",
+					"atlas": [
+						4,
+						1
+					],
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						7
+					],
+					"kind": "Wall",
+					"position": [
+						1312.0,
+						1024.0
+					],
+					"source_id": 10,
+					"texture": "res://assets/tiles/walls/connected/stone_connections.png",
+					"texture_region": [
+						640,
+						160,
+						160,
+						160
 					]
 				}
 			],

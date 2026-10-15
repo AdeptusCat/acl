@@ -8,8 +8,11 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "assets/tiles/walls/connected"
 DOCS = ROOT / "docs/art/connected_walls"
-SIZE = 128
+TILE_SIZE = 128
+PADDING = 16
+SIZE = TILE_SIZE + PADDING * 2
 SCALE = 3
+HALF_WIDTH = {"stone": 5.5, "hedge": 9.0}
 VERTICES = np.array([[-32, -64], [32, -64], [64, 0], [32, 64], [-32, 64], [-64, 0]], dtype=float)
 ENDS = np.array([[0, -64], [48, -32], [48, 32], [0, 64], [-48, 32], [-48, -32]], dtype=float)
 LEGACY = {0: ("stone", 8), 1: ("stone", 16), 2: ("stone", 24), 3: ("hedge", 16),
@@ -29,47 +32,45 @@ def material(kind: str) -> np.ndarray:
     return np.concatenate((strip, strip[:, ::-1]), axis=1)
 
 
-def tile(texture: np.ndarray, kind: str, mask: int, edges: bool = False) -> Image.Image:
+def tile(texture: np.ndarray, kind: str, mask: int) -> Image.Image:
     axis = (np.arange(SIZE * SCALE) + 0.5) / SCALE - SIZE / 2
     xx, yy = np.meshgrid(axis, axis)
     points = np.stack((xx, yy), axis=-1)
-    inside = (np.abs(yy) <= 64) & (np.abs(xx) + np.abs(yy) * 0.5 <= 64)
-    radius = 5.5 if kind == "stone" else 9.0
+    # Keep both halves of the strip. Clipping to the owner hex hid half its
+    # width and made the barrier visibly belong to that cell.
+    radius = HALF_WIDTH[kind]
     nearest = np.full(xx.shape, np.inf)
     tex_x = np.zeros(xx.shape)
     tex_y = np.zeros(xx.shape)
     for side in range(6):
         if not mask & (1 << side):
             continue
-        start = np.zeros(2)
-        end = ENDS[side]
-        if edges:
-            start, end = VERTICES[side], VERTICES[(side + 1) % 6]
+        start, end = VERTICES[side], VERTICES[(side + 1) % 6]
         delta = end - start
         length = float(np.linalg.norm(delta))
         unit = delta / length
         canonical = unit.copy()
+        canonical_start = start
         if side >= 3:
             canonical *= -1
+            canonical_start = end
         normal = np.array([-canonical[1], canonical[0]])
-        projection = np.sum((points - start) * unit, axis=-1)
-        foot = start + np.clip(projection, 0, length)[..., None] * unit
-        distance = np.linalg.norm(points - foot, axis=-1)
+        # The same physical corner anchors the material from either owner.
+        # Canonical local offsets also avoid any texture jump across the spine.
+        relative = np.round(points - canonical_start, 12)
+        along = np.sum(relative * canonical, axis=-1)
+        cross = np.sum(relative * normal, axis=-1)
+        past_end = np.maximum(np.maximum(-along, along - length), 0)
+        distance = np.hypot(cross, past_end)
         selected = distance < nearest
         nearest = np.minimum(nearest, distance)
-        # Opposite arms share a texture phase and cross-section at their join.
-        phase = (np.sum(points * canonical, axis=-1) / (2 * length) + 0.5) % 1
-        cross = np.sum((points - foot) * normal, axis=-1)
+        phase = np.round((along / (2 * length) + 0.5) % 1, 12)
         tex_x[selected] = phase[selected]
-        tex_y[selected] = np.clip(cross[selected] / (2 * radius) + 0.5, 0, 1)
-    if mask == 0:
-        nearest = np.sqrt(xx * xx + yy * yy)
-        tex_x = (xx / (radius * 2) + 0.5) % 1
-        tex_y = np.clip(yy / (radius * 2) + 0.5, 0, 1)
+        tex_y[selected] = np.round(np.clip(cross[selected] / (2 * radius) + 0.5, 0, 1), 12)
     rows = np.minimum((tex_y * texture.shape[0]).astype(int), texture.shape[0] - 1)
     columns = (tex_x * texture.shape[1]).astype(int) % texture.shape[1]
     pixels = texture[rows, columns].copy()
-    coverage = np.clip((radius - nearest) * SCALE + 0.5, 0, 1) * inside
+    coverage = np.clip((radius - nearest) * SCALE + 0.5, 0, 1)
     pixels[:, :, 3] = np.round(pixels[:, :, 3] * coverage).astype(np.uint8)
     return Image.fromarray(pixels).resize((SIZE, SIZE), Image.Resampling.LANCZOS)
 
@@ -86,15 +87,18 @@ def main() -> None:
         for mask in range(64):
             image = Image.new("RGBA", (SIZE, SIZE))
             if mask > 0:
-                image = tile(textures[kind], kind, mask, edges=True)
+                image = tile(textures[kind], kind, mask)
             tiles[kind].append(image)
             atlas.paste(image, ((mask % 8) * SIZE, (mask // 8) * SIZE))
         atlas.save(OUT / f"{kind}_connections.png")
     for source, (kind, mask) in LEGACY.items():
-        tile(textures[kind], kind, mask, edges=True).save(OUT / f"legacy_{kind}_{source:02}.png")
+        tile(textures[kind], kind, mask).save(OUT / f"legacy_{kind}_{source:02}.png")
     preview(tiles)
     (DOCS / "export.json").write_text(json.dumps({
-        "tile_size": SIZE, "columns": 8, "connections": ["n", "ne", "se", "s", "sw", "nw"],
+        "tile_size": TILE_SIZE, "region_size": SIZE, "padding": PADDING,
+        "alignment": "full strip centered on the shared hex spine",
+        "visible_width_multiplier": 2, "widths": {kind: radius * 2 for kind, radius in HALF_WIDTH.items()},
+        "columns": 8, "connections": ["n", "ne", "se", "s", "sw", "nw"],
         "styles": [{"name": "Stone Wall", "texture": "res://assets/tiles/walls/connected/stone_connections.png", "cover": 2},
                    {"name": "Hedge", "texture": "res://assets/tiles/walls/connected/hedge_connections.png", "cover": 1}],
         "legacy_sources": LEGACY,
@@ -129,7 +133,7 @@ def preview(tiles: dict) -> None:
                     mask |= 1 << side
             if x == 2:
                 mask |= (1 << 1) | (1 << 2)
-            board.alpha_composite(tiles[kind][mask], (int(center[0] + offset[0] - 64), int(center[1] + offset[1] - 64)))
+            board.alpha_composite(tiles[kind][mask], (int(center[0] + offset[0] - SIZE / 2), int(center[1] + offset[1] - SIZE / 2)))
     board.convert("RGB").save(DOCS / "preview.png")
 
 

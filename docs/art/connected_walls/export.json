@@ -1,5 +1,13 @@
 {
   "tile_size": 128,
+  "region_size": 160,
+  "padding": 16,
+  "alignment": "full strip centered on the shared hex spine",
+  "visible_width_multiplier": 2,
+  "widths": {
+    "stone": 11.0,
+    "hedge": 18.0
+  },
   "columns": 8,
   "connections": [
     "n",

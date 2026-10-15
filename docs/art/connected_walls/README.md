@@ -2,10 +2,20 @@
 
 ![Placement preview](preview.png)
 
-All eight map wall layers reuse
+All map wall layers reuse
 `scenes/world/maps/layers/wall_tile_map_layer.tscn` and
 `resources/tilesets/walls.tres`. Walls and hedges lie on hex sides, exactly like
-the legacy edge pieces. Hex interiors stay open.
+the legacy edge pieces. Hex centers stay open.
+
+The complete strip is centered on the shared hex spine: stone walls span 11
+pixels and hedges span 18 pixels. Previously the artwork was clipped to the
+owning hex, hiding one half. Keeping both halves doubles the visible width.
+Each sprite now has a 160 × 160 region with 16 pixels of transparent padding
+around the logical 128-pixel hex, so roofs, ground tiles and edge placements
+keep their original coordinates. Texture phase and cross-section are identical
+when the same physical edge is stored on either neighboring hex.
+
+![Previous and centered barrier widths](width_comparison.png)
 
 ## Draw in the designer
 
@@ -48,7 +58,9 @@ it preserves its visible sides while converting it into a correct new piece.
 The built-in imagegen tool created the source stone and foliage materials in
 `assets/tiles/walls/connected/source/`. [prompts.json](prompts.json) records the
 exact prompts. The exporter maps these materials onto the six hex borders,
-joining corners at the same vertices and leaving all interior pixels clear.
+joining corners at the same vertices and keeping the hex centers clear. The
+existing generated materials are reused; the exporter changes their placement
+and padding without generating new material artwork.
 
 The edge brush is in `addons/hex_edge_barriers/plugin.gd` and is enabled in the
 project. `WallTileMapLayer.edit_edge(cell, side, kind, erase)` edits one side;
@@ -71,6 +83,16 @@ references and verifies that every authored tile array stays identical.
 The regression checks every edge combination, clear hex centers, matching pixels
 and directional flags, cover and LOS in all six directions and both column
 parities, single-edge erasure, legacy preservation, save/load and cached sight.
+It also samples the visible strip on both sides of the spine and compares its
+colors after transferring ownership to the opposite hex. The raster checks in
+[spine_validation.json](spine_validation.json) compare all twelve single-edge
+renders pixel-for-pixel from both owners and verify unclipped padding and clear
+centers for all 126 connected tiles.
+
+Verified in Godot 4.7.2: 5,114 edge-art, cover and LOS checks and 4,683 editor
+brush checks pass. All map scenes, building images and baked LOS resources are
+unchanged. The shared TileSet retains its IDs, alternative transforms and cover
+metadata; only its texture regions expand to include the padding.
 
 The editor brush regression exercises 25–400% zoom, multiple pan offsets,
 translated/rotated/scaled parents, positive and negative hex coordinates, all

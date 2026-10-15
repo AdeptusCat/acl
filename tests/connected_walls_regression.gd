@@ -2,6 +2,7 @@ extends Node
 
 var checks: int = 0
 var failures: int = 0
+var artwork: Dictionary[Texture2D, Image] = {}
 
 
 func _ready() -> void:
@@ -37,10 +38,12 @@ func _run() -> void:
 
 
 func _test_catalog(walls: WallTileMapLayer) -> void:
+	_check(walls.tile_set.tile_size == Vector2i(128, 128), "Art padding leaves the logical hex grid unchanged")
 	_check(walls.tile_set.get_source_count() == 12, "The catalog retains ten legacy sources and two edge atlases")
 	_check(walls.tile_set.get_terrain_sets_count() == 0, "Hex-edge barriers expose no center-linking terrain brush")
 	for kind: int in range(2):
 		var source: TileSetAtlasSource = walls.tile_set.get_source(ConnectedWalls.source_for(walls.tile_set, kind)) as TileSetAtlasSource
+		_check(source.texture_region_size == ConnectedWalls.ART_REGION_SIZE, "Padded sprites expose the complete barrier on both sides of the spine")
 		_check(source.get_tiles_count() == 63 and not source.has_tile(Vector2i.ZERO), "Each style includes every nonempty combination of six hex sides")
 		for mask: int in range(1, 64):
 			var atlas: Vector2i = ConnectedWalls.atlas_coords(mask)
@@ -74,6 +77,7 @@ func _test_edge(walls: WallTileMapLayer, kind: int, cell: Vector2i, side: int) -
 	walls.clear()
 	walls.paint_edges([cell], kind, 1 << side)
 	var neighbor: Vector2i = walls.get_neighbor_cell(cell, ConnectedWalls.SIDES[side])
+	_test_spine_art(walls, kind, cell, neighbor, side)
 	var center: Vector2 = walls.map_to_local(cell)
 	var incoming: Dictionary = LOSHelper.check_los(walls.map_to_local(neighbor), center, 1, 0, 1, 0)
 	var outgoing: Dictionary = LOSHelper.check_los(center, walls.map_to_local(neighbor), 1, 0, 1, 0)
@@ -92,6 +96,39 @@ func _test_edge(walls: WallTileMapLayer, kind: int, cell: Vector2i, side: int) -
 	walls.edit_edge(cell, side, kind, true)
 	_check(walls.get_cell_source_id(cell) == -1, "Erasing the last edge removes its tile")
 	_check(not LOSHelper.check_los(walls.map_to_local(origin), walls.map_to_local(target), 1, 0, 1, 0)["blocked"], "Erasing an edge creates a real LOS opening")
+
+
+func _test_spine_art(walls: WallTileMapLayer, kind: int, cell: Vector2i, neighbor: Vector2i, side: int) -> void:
+	var start: Vector2 = walls.map_to_local(cell) + ConnectedWalls.VERTICES[side]
+	var end: Vector2 = walls.map_to_local(cell) + ConnectedWalls.VERTICES[(side + 1) % 6]
+	var direction: Vector2 = end - start
+	var normal: Vector2 = Vector2(direction.y, -direction.x).normalized()
+	var points: Array[Vector2] = []
+	var colors: Array[Color] = []
+	for fraction: float in [0.2, 0.5, 0.8]:
+		for distance: float in [-2.0, 0.0, 2.0]:
+			var point: Vector2 = start.lerp(end, fraction) + normal * distance
+			var color: Color = _art_pixel(walls, cell, point)
+			_check(color.a > 0.1, "The visible strip covers the spine and both neighboring hexes")
+			points.append(point)
+			colors.append(color)
+	walls.erase_cell(cell)
+	walls.paint_edges([neighbor], kind, 1 << ((side + 3) % 6))
+	for index: int in range(points.size()):
+		_check(_art_pixel(walls, neighbor, points[index]).is_equal_approx(colors[index]), "Changing the owning hex cannot change the barrier's position, material phase or cross-section")
+	walls.erase_cell(neighbor)
+	walls.paint_edges([cell], kind, 1 << side)
+
+
+func _art_pixel(walls: WallTileMapLayer, cell: Vector2i, point: Vector2) -> Color:
+	# Inspect the drawn sprite, including padding outside the owner's hex.
+	var source: TileSetAtlasSource = walls.tile_set.get_source(walls.get_cell_source_id(cell)) as TileSetAtlasSource
+	if not artwork.has(source.texture):
+		artwork[source.texture] = source.texture.get_image()
+	var region: Rect2i = source.get_tile_texture_region(walls.get_cell_atlas_coords(cell))
+	var origin: Vector2i = walls.get_cell_tile_data(cell).texture_origin
+	var pixel: Vector2i = Vector2i((point - walls.map_to_local(cell) + Vector2(origin) + Vector2(region.size) * 0.5).floor())
+	return artwork[source.texture].get_pixelv(region.position + pixel)
 
 
 func _test_editing(walls: WallTileMapLayer) -> void:

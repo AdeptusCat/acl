@@ -16,7 +16,7 @@
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k1uxc"]
 resource_name = "Legacy stone edge 0"
 texture = ExtResource("1_b5ar3")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -31,7 +31,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n4nhl"]
 resource_name = "Legacy stone edge 1"
 texture = ExtResource("2_8bjyn")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -57,7 +57,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21xne"]
 resource_name = "Stone Wall Edges"
 texture = ExtResource("3_b775y")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 1:0/0 = 0
 1:0/0/custom_data_0 = 2
 1:0/0/custom_data_1 = true
@@ -569,7 +569,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c6xf2"]
 resource_name = "Hedge Edges"
 texture = ExtResource("4_d6mv4")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 1:0/0 = 0
 1:0/0/custom_data_0 = 1
 1:0/0/custom_data_1 = true
@@ -1081,7 +1081,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kclvk"]
 resource_name = "Legacy stone edge 2"
 texture = ExtResource("5_b775y")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -1111,7 +1111,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d77u8"]
 resource_name = "Legacy hedge edge 3"
 texture = ExtResource("6_d6mv4")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -1133,7 +1133,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b4mfo"]
 resource_name = "Legacy stone edge 4"
 texture = ExtResource("7_m122a")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 2
@@ -1150,7 +1150,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cesmb"]
 resource_name = "Legacy hedge edge 5"
 texture = ExtResource("8_ivbbf")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -1180,13 +1180,13 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5ojxw"]
 resource_name = "Legacy hedge edge 6"
 texture = ExtResource("9_4dwk0")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3coot"]
 resource_name = "Legacy hedge edge 7"
 texture = ExtResource("10_cgmwa")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 4
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -1208,7 +1208,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_277ok"]
 resource_name = "Legacy hedge edge 8"
 texture = ExtResource("11_rtufq")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
@@ -1225,7 +1225,7 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_33rv5"]
 resource_name = "Legacy hedge edge 9"
 texture = ExtResource("12_pwial")
-texture_region_size = Vector2i(128, 128)
+texture_region_size = Vector2i(160, 160)
 0:0/next_alternative_id = 3
 0:0/0 = 0
 0:0/0/custom_data_0 = 1
