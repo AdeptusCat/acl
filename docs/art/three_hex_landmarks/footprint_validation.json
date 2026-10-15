@@ -223,9 +223,9 @@
       "angle": 0,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        3369,
-        6927,
-        3330
+        3034,
+        6743,
+        4106
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0
@@ -235,9 +235,9 @@
       "angle": 60,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        1809,
-        6126,
-        5599
+        3375,
+        6105,
+        4504
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0
@@ -247,9 +247,9 @@
       "angle": 120,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        1806,
-        6126,
-        5606
+        3882,
+        6121,
+        3972
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0
@@ -259,9 +259,9 @@
       "angle": 180,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        3369,
-        6927,
-        3330
+        3034,
+        6743,
+        4106
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0
@@ -271,9 +271,9 @@
       "angle": 240,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        1809,
-        6126,
-        5599
+        3375,
+        6105,
+        4504
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0
@@ -283,9 +283,9 @@
       "angle": 300,
       "outside_pixels": 0,
       "roof_pixels_per_hex": [
-        1806,
-        6126,
-        5606
+        3882,
+        6121,
+        3972
       ],
       "minimum_inset": 3,
       "canvas_cropped_pixels": 0

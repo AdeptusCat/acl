@@ -984,7 +984,7 @@
       "orientation_method": "rigid clockwise rotation of one generated canonical roof",
       "region_size": 384,
       "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_textile_factory_3hex.png",
-      "scale": 0.2135439365002051,
+      "scale": 0.1931659245895127,
       "views": [
         {
           "angle": 0,
@@ -1034,7 +1034,7 @@
           ],
           "image_offset": [
             0,
-            0
+            10
           ]
         },
         {
@@ -1084,8 +1084,8 @@
             }
           ],
           "image_offset": [
-            -30,
-            18
+            -8,
+            6
           ]
         },
         {
@@ -1135,8 +1135,8 @@
             }
           ],
           "image_offset": [
-            -30,
-            -18
+            0,
+            0
           ]
         },
         {
@@ -1187,7 +1187,7 @@
           ],
           "image_offset": [
             0,
-            0
+            -10
           ]
         },
         {
@@ -1237,8 +1237,8 @@
             }
           ],
           "image_offset": [
-            30,
-            -18
+            8,
+            -6
           ]
         },
         {
@@ -1288,8 +1288,8 @@
             }
           ],
           "image_offset": [
-            30,
-            18
+            0,
+            0
           ]
         }
       ]

@@ -19,8 +19,17 @@
     },
     {
       "id": "building_stone_textile_factory_3hex",
-      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-03cd37ea-043a-497e-861e-f8b316145635.png",
-      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_stone_textile_factory_3hex.png"
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-cd1847ac-505b-4f72-96c8-e299ffcb78a1.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_stone_textile_factory_3hex.png",
+      "previous_tool_outputs": [
+        "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-03cd37ea-043a-497e-861e-f8b316145635.png",
+        "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6343d50e-9519-47ce-ad53-1f75060f85cf.png"
+      ],
+      "revision_note": "Rebuild raised saw-tooth shed geometry with triangular end cheeks and steep glazed faces, inspired by the user-provided Dalmine and Crespi photographs.",
+      "unselected_tool_outputs": [
+        "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-2c013480-83ac-4929-88c3-d0829f0ed26c.png"
+      ],
+      "reference_sources": "docs/art/three_hex_landmarks/textile_roof_references.json"
     },
     {
       "id": "building_stone_church_3hex",

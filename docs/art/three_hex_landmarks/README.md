@@ -22,6 +22,12 @@ Previews: [six designs](overview.png), [all orientations](preview.png),
 [wood](wood.png), [stone](stone.png).
 Green polygons show the actual occupied hexes and are not part of the sprites.
 
+The textile factory uses raised industrial saw-tooth shed bays with steep glazed
+faces, recessed gutters and visible triangular end profiles. Its grey roofing
+uses the user's Dalmine and Crespi d'Adda photographs as architectural inspiration;
+[textile_roof_references.json](textile_roof_references.json) records those sources.
+Its six corrected views are shown in [textile_factory_roof.png](textile_factory_roof.png).
+
 ## Strict footprint boundary
 
 This pack uses the union of the three actual flat-top hex polygons, rather than
@@ -64,8 +70,8 @@ godot --headless --path . tests/multihex_buildings_regression.tscn
 godot --headless --path . tests/multihex_placement_regression.tscn
 ```
 
-Validation: 1,917 strict-boundary checks pass, covering 2,299,584 visible pixel
+Validation: 1,917 strict-boundary checks pass, covering 2,310,576 visible pixel
 placements in Godot with zero pixels in a fourth hex. All 36 views retain at
-least 1,806 substantial roof pixels in every occupied cell. Catalog checks
+least 1,949 substantial roof pixels in every occupied cell. Catalog checks
 (9,710), placement/LOS/defense checks (28,286), and parsing/convention checks
 for all 269 GDScript files also pass.
