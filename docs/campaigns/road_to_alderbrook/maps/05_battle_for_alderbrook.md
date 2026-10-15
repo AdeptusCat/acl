@@ -23,13 +23,13 @@ impassable hexes and does not separate the battlefield.
 
 | District | Objective hex | Approach |
 | --- | --- | --- |
-| Orchard estate A | (14, 5) | Orchard concealment, farm lane and garden openings |
-| Market hall B | (20, 10) | Main road, connecting streets and nearby house cover |
+| Orchard estate A | (14, 6) | Orchard concealment, farm lane and garden openings |
+| Market hall B | (21, 10) | Main road, connecting streets and nearby house cover |
 | Timber yard C | (16, 15) | Crop boundaries, barns and the southern orchard edge |
 
-Coordinates are the editor's zero-based tile coordinates. Each objective lies
-in a three-hex building. Five further two-hex buildings provide barns and town
-landmarks. All footprint cells retain their cover and LOS behavior. Road
+Coordinates are the editor's zero-based tile coordinates. The saved editor
+layout supplies every building, its orientation and the objective locations.
+All footprint cells retain their cover and LOS behavior. Road
 corridors stay free of buildings. Barriers sit on hex sides and leave openings
 toward roads and courtyards.
 
@@ -38,7 +38,40 @@ Automated checks cover connectivity, deployments, supported terrain, material
 cover, complete building footprints, edge ownership, cached LOS and live match
 startup. A full balance playthrough remains outstanding.
 
+## Village garden detail
+
+The terrain pass preserves all 58 existing building cells, their material,
+orientation and multihex footprints. It adds 27 orchard hexes in gardens around
+the northern houses, western estate, eastern church, workshop courtyards, market
+and southern yards. Six isolated woodland hexes at (12, 4), (22, 4), (24, 7),
+(15, 10), (16, 12) and (18, 16) interrupt views through the village.
+
+There are 37 additional hedge edges and nine stone-wall edges. They follow
+garden boundaries, with openings toward the streets and courtyards. No new edge
+crosses a road or divides a multihex building. Existing barriers are retained.
+The ground, pond, roads, previous planting, deployments and objectives are
+unchanged. Woods are present in both the terrain and blocking layers, using
+matching canopy pixels for LOS and cover.
+
+LOS has been rebuilt for the saved layout. A sample of 1,500 pairs checks cached
+visibility, cover and hindrance against live calculations. Scene comparison
+checks preserve the existing buildings and all non-tile scene properties.
+Mission startup and enemy tactical planning pass all 23 checks at 60 fixed FPS.
+[Terrain-pass verification](05_battle_for_alderbrook_detail_verification.json)
+records the preservation and LOS results.
+
 ## Rebuild only this map
+
+To reapply only the additive garden pass, run
+`tools/campaigns/detail_alderbrook_village.tscn -- --apply --bake-los`.
+It patches only the three affected tile-data lines, retains occupied cells and
+existing barriers, and refreshes the map manifest. Without `--apply`, the tool
+only exports an inspection snapshot to `/tmp/alderbrook-village-current.json`;
+`--bake-los` can rebuild sight data independently. Repeated application makes no
+additional placements. Render the refreshed manifest to update the designer image.
+
+The following original builder regenerates the complete layout, including its
+buildings, and should only be used when that full replacement is intended.
 
 `tools/campaigns/alderbrook_village_layout.gd` defines roads, deployments,
 objectives and briefing. `tools/campaigns/build_alderbrook_village.gd` defines
