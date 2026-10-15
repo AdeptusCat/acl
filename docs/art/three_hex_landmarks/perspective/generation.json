@@ -172,13 +172,23 @@
         },
         {
           "angle": 60,
-          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/60.png",
-          "source_sha256": "7c0b9c8e6e471937a211bd071abb75d0effd571a1434360898da903f8287893b",
-          "method": "built-in image generation from fixed high-camera construction guide",
-          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d76e3578-3d7f-43db-ab0d-63e1cae10929.png",
-          "previous_tool_outputs": [
-            "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d2806639-c473-4ab4-9c30-345509a30e99.png"
-          ]
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/60.png",
+          "source_sha256": "b386ce9d6738700c3dfc0b3a881c54085ae9ccdeae23dbf56403da5576e1a196",
+          "method": "built-in image generation: corrected projection of user-supplied factory view",
+          "supplied_image": "/home/blight/Documents/godot/Projects/acl/docs/art/three_hex_landmarks/perspective/supplied_textile_views/supplied_60.png",
+          "previous_selections": [
+            {
+              "angle": 60,
+              "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/60.png",
+              "source_sha256": "7c0b9c8e6e471937a211bd071abb75d0effd571a1434360898da903f8287893b",
+              "method": "built-in image generation from fixed high-camera construction guide",
+              "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d76e3578-3d7f-43db-ab0d-63e1cae10929.png",
+              "previous_tool_outputs": [
+                "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d2806639-c473-4ab4-9c30-345509a30e99.png"
+              ]
+            }
+          ],
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-209be315-3900-495a-8071-513b40feb215.png"
         },
         {
           "angle": 120,
@@ -202,28 +212,48 @@
         },
         {
           "angle": 240,
-          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/240.png",
-          "source_sha256": "e7861aff854870c887833e0f52a9084de1e26c508a70ac676ad78db98e829edc",
-          "method": "built-in image generation from fixed high-camera construction guide",
-          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6c2246eb-db24-49ac-bddb-e781aa1b7316.png",
-          "previous_tool_outputs": [
-            "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-f1575d21-ccda-4c97-b2c2-5e3c6b4c5d49.png"
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/240.png",
+          "source_sha256": "2bb2d4d60f8da1ba5e9d408b8c74178ff454785f1791552b8fcb8aa576a9496b",
+          "method": "user-supplied independent view, fitted without rotation or clipping",
+          "supplied_image": "/home/blight/Documents/godot/Projects/acl/docs/art/three_hex_landmarks/perspective/supplied_textile_views/supplied_240.png",
+          "previous_selections": [
+            {
+              "angle": 240,
+              "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/240.png",
+              "source_sha256": "e7861aff854870c887833e0f52a9084de1e26c508a70ac676ad78db98e829edc",
+              "method": "built-in image generation from fixed high-camera construction guide",
+              "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6c2246eb-db24-49ac-bddb-e781aa1b7316.png",
+              "previous_tool_outputs": [
+                "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-f1575d21-ccda-4c97-b2c2-5e3c6b4c5d49.png"
+              ]
+            }
           ]
         },
         {
           "angle": 300,
-          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/300.png",
-          "source_sha256": "0b66605b72ab6ffe75d867c2ca9091f85c8a3b9c5132ac114747ab665259353e",
-          "method": "built-in image generation from fixed high-camera construction guide",
-          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-beddafca-11ab-4a63-8502-837ac6699588.png",
-          "previous_tool_outputs": [
-            "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6d15d6d0-e028-4296-b8df-81c98cb0946d.png"
-          ]
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/300.png",
+          "source_sha256": "b1b61f55731050131fdab9a68404951740058726a5c290948251d35032cfacf9",
+          "method": "built-in image generation: corrected projection of user-supplied factory view",
+          "supplied_image": "/home/blight/Documents/godot/Projects/acl/docs/art/three_hex_landmarks/perspective/supplied_textile_views/supplied_300.png",
+          "previous_selections": [
+            {
+              "angle": 300,
+              "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/300.png",
+              "source_sha256": "0b66605b72ab6ffe75d867c2ca9091f85c8a3b9c5132ac114747ab665259353e",
+              "method": "built-in image generation from fixed high-camera construction guide",
+              "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-beddafca-11ab-4a63-8502-837ac6699588.png",
+              "previous_tool_outputs": [
+                "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6d15d6d0-e028-4296-b8df-81c98cb0946d.png"
+              ]
+            }
+          ],
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4c5635f1-2463-4b4b-b89d-a7cbf8cbef80.png"
         }
       ],
       "world_size_reference_angle": 0,
       "camera_revision_prompts": "docs/art/three_hex_landmarks/perspective/textile_camera_revision/direct_prompts.json",
-      "camera_revision_note": "Preserve approved 0-degree view; redraw 60/120/180/240/300 with high overhead projection and four straight consistent saw-tooth bays."
+      "camera_revision_note": "Preserve approved 0-degree view; redraw 60/120/180/240/300 with high overhead projection and four straight consistent saw-tooth bays.",
+      "supplied_revision": "docs/art/three_hex_landmarks/perspective/supplied_textile_views/README.md"
     },
     {
       "id": "building_stone_church_3hex",

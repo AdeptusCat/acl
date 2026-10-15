@@ -15,7 +15,6 @@ from export_three_hex_landmarks import REGION, isolated_roof, masks_for
 ROOT: Path = Path(__file__).resolve().parents[2]
 DOCS: Path = ROOT / "docs/art/three_hex_landmarks/perspective"
 OUTPUT: Path = ROOT / "assets/tiles/buildings/multihex/three_hex_landmarks/perspective"
-SOURCE: Path = OUTPUT.parent / "source/perspective"
 INSET: int = 1
 CENTER_ALPHA: int = 128
 
@@ -107,7 +106,10 @@ def main() -> None:
     draw: ImageDraw.ImageDraw = ImageDraw.Draw(preview)
     font: ImageFont.FreeTypeFont = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
     for index, definition in enumerate(definitions):
-        sprites: list[Image.Image] = [isolated_roof(Image.open(SOURCE / definition["id"] / (str(angle * 60) + ".png")).convert("RGBA")) for angle in range(6)]
+        view_sources: dict[int, Path] = {int(view["angle"]): ROOT / view["saved_source"] for view in sources[definition["id"]]["views"]}
+        if set(view_sources) != set(range(0, 360, 60)):
+            raise ValueError(definition["id"] + " needs exactly six recorded source views")
+        sprites: list[Image.Image] = [isolated_roof(Image.open(view_sources[angle * 60]).convert("RGBA")) for angle in range(6)]
         views: list[dict] = copy.deepcopy(lines)
         if definition["footprint"] == "triangle":
             views = triangle_views()
@@ -124,7 +126,7 @@ def main() -> None:
                 if orientation == 0:
                     reference_length = world_length(canvas, 0)
                 view["world_length"] = world_length(canvas, orientation * 60)
-            view["source_image"] = str((SOURCE / definition["id"] / (str(orientation * 60) + ".png")).relative_to(ROOT))
+            view["source_image"] = str(view_sources[orientation * 60].relative_to(ROOT))
             original: np.ndarray = np.array(canvas)
             pieces: list[Image.Image] = []
             counts: list[int] = []

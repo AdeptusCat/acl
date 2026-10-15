@@ -1,5 +1,8 @@
 # Textile factory perspective correction
 
+This records the preceding factory revision. The latest 60-, 240- and 300-degree
+views are documented in [supplied textile views](../supplied_textile_views/README.md).
+
 The supplied 0-degree view remains unchanged, including its complete atlas
 column and LOS fragments. Five alternate views were redrawn with the built-in
 image generation tool using a shared roof model and a fixed high camera.

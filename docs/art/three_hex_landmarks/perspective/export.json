@@ -1213,18 +1213,18 @@
               ]
             }
           ],
-          "scale": 0.1797752808988764,
+          "scale": 0.20603907637655416,
           "image_position": [
-            74,
-            111
+            75,
+            98
           ],
           "center_alpha": [
-            252,
+            253,
             253,
             253
           ],
-          "world_length": 295.5,
-          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/60.png"
+          "world_length": 296.0,
+          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/60.png"
         },
         {
           "angle": 120,
@@ -1390,18 +1390,18 @@
               ]
             }
           ],
-          "scale": 0.19829059829059828,
+          "scale": 0.22546161321671526,
           "image_position": [
             75,
-            99
+            96
           ],
           "center_alpha": [
             253,
-            252,
+            253,
             253
           ],
           "world_length": 296.0,
-          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/240.png"
+          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/240.png"
         },
         {
           "angle": 300,
@@ -1449,18 +1449,18 @@
               ]
             }
           ],
-          "scale": 0.21803127874885003,
+          "scale": 0.1968225948808473,
           "image_position": [
-            71,
-            101
+            82,
+            97
           ],
           "center_alpha": [
-            253,
+            254,
             253,
             253
           ],
-          "world_length": 296.0,
-          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/300.png"
+          "world_length": 296.5,
+          "source_image": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/300.png"
         }
       ]
     },

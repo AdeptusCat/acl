@@ -3,7 +3,7 @@
   "designs": 6,
   "orientations": 36,
   "godot_checks": 7171,
-  "godot_visible_pixel_placements_checked": 2757448,
+  "godot_visible_pixel_placements_checked": 2777228,
   "godot_failures": 0,
   "gdscript_files_checked": 270,
   "gdscript_parse_failures": 0,
@@ -32,5 +32,23 @@
     "source_hashes_verified": 36,
     "preview": "textile_camera_revision/contact_sheet.png",
     "selected_sources": "textile_camera_revision/selected.json"
+  },
+  "supplied_textile_revision": {
+    "angles_installed": [
+      60,
+      240,
+      300
+    ],
+    "projection_corrected_angles": [
+      60,
+      300
+    ],
+    "unchanged_angles": [
+      0,
+      120,
+      180
+    ],
+    "report": "supplied_textile_views/verification.json",
+    "source_hashes_verified": 36
   }
 }

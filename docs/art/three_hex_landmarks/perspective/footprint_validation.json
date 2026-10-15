@@ -332,12 +332,12 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        3276,
-        5293,
-        3263
+        3728,
+        6344,
+        3732
       ],
       "center_alpha": [
-        252,
+        253,
         253,
         253
       ],
@@ -383,13 +383,13 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        3219,
-        5207,
-        3191
+        3971,
+        6472,
+        3862
       ],
       "center_alpha": [
         253,
-        252,
+        253,
         253
       ],
       "minimum_inset": 1
@@ -400,12 +400,12 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        3685,
-        5900,
-        3666
+        3634,
+        6398,
+        3554
       ],
       "center_alpha": [
-        253,
+        254,
         253,
         253
       ],

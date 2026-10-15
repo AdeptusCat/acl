@@ -17,6 +17,8 @@ own LOS pixels and wood cover 2 or stone cover 3.
 - [All 36 views](preview.png).
 - [Textile factory perspective correction](textile_camera_revision/README.md),
   with a six-view comparison and the selected generation prompts.
+- [Latest supplied textile factory views](supplied_textile_views/README.md),
+  checked and installed at 60, 240 and 300 degrees.
 - Six Godot atlases and 36 individual transparent PNGs under
   `assets/tiles/buildings/multihex/three_hex_landmarks/perspective/`.
 - [export.json](export.json), with the exact footprint, per-member image origins,
@@ -74,7 +76,7 @@ godot --headless --path . tests/landmark_perspectives_regression.tscn
 godot --headless --path . tests/multihex_placement_regression.tscn
 ```
 
-Verified in Godot 4.7.2: 7,171 installed-artwork checks pass across 2,757,448
+Verified in Godot 4.7.2: 7,171 installed-artwork checks pass across 2,777,228
 visible-pixel placements. Catalog and upgrade checks (9,734) and placement,
 erasure, save/load, live LOS and cached LOS checks (28,286) also pass.
 All 270 project scripts pass parsing and convention checks.
