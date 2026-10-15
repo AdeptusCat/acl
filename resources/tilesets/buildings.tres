@@ -43,12 +43,12 @@
 [ext_resource type="Texture2D" uid="uid://dnx8qt8ibeklu" path="res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_inn_2hex.png" id="ASL_36_3g6ih"]
 [ext_resource type="Texture2D" uid="uid://cmp3eygw5o54" path="res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_terrace_2hex.png" id="ASL_37_4sy08"]
 [ext_resource type="Texture2D" uid="uid://c64dmcm0lhsdi" path="res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_manor_3hex.png" id="ASL_38_ncvyk"]
-[ext_resource type="Texture2D" uid="uid://bx77glwlpk0hg" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_sawmill_factory_3hex.png" id="LANDMARK_39_eunvt"]
-[ext_resource type="Texture2D" uid="uid://bqs311n6r5yjw" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_granary_3hex.png" id="LANDMARK_40_rdo28"]
-[ext_resource type="Texture2D" uid="uid://cjneri0wfoma5" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_craft_hall_3hex.png" id="LANDMARK_41_ntb2d"]
-[ext_resource type="Texture2D" uid="uid://b7qr8l5tcfrnu" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_textile_factory_3hex.png" id="LANDMARK_42_spw3i"]
-[ext_resource type="Texture2D" uid="uid://cenu0th7vtyig" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_church_3hex.png" id="LANDMARK_43_n5ppm"]
-[ext_resource type="Texture2D" uid="uid://dpnxyqpap0gtd" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_guildhall_3hex.png" id="LANDMARK_44_d2ok4"]
+[ext_resource type="Texture2D" uid="uid://c7cui63b8np75" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_wood_sawmill_factory_3hex.png" id="LANDMARK_39_eunvt"]
+[ext_resource type="Texture2D" uid="uid://dg8f32wmpy4pf" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_wood_granary_3hex.png" id="LANDMARK_40_rdo28"]
+[ext_resource type="Texture2D" uid="uid://ctt1gyn6m7m68" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_wood_craft_hall_3hex.png" id="LANDMARK_41_ntb2d"]
+[ext_resource type="Texture2D" uid="uid://c6imu48wip16g" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_stone_textile_factory_3hex.png" id="LANDMARK_42_spw3i"]
+[ext_resource type="Texture2D" uid="uid://d2no1dkx6ucr" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_stone_church_3hex.png" id="LANDMARK_43_n5ppm"]
+[ext_resource type="Texture2D" uid="uid://wi8pgcpf35wr" path="res://assets/tiles/buildings/multihex/three_hex_landmarks/perspective/building_stone_guildhall_3hex.png" id="LANDMARK_44_d2ok4"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_ye61f"]
 resource_name = "Wood Building 01 - two hexes A - 0 degrees"

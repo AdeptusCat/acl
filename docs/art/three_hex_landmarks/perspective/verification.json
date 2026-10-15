@@ -2,7 +2,7 @@
   "engine": "Godot 4.7.2",
   "designs": 6,
   "orientations": 36,
-  "godot_checks": 7099,
+  "godot_checks": 7171,
   "godot_visible_pixel_placements_checked": 2858036,
   "godot_failures": 0,
   "gdscript_files_checked": 270,
@@ -12,5 +12,9 @@
   "minimum_hex_center_alpha": 183,
   "minimum_inset_pixels": 1,
   "godot_regression": "tests/landmark_perspectives_regression.tscn",
-  "palette_installation": "in-memory test only; separate preview assets"
+  "palette_installation": "installed in resources/tilesets/buildings.tres; tested directly through the shared layer",
+  "catalog_and_upgrade_checks": 9734,
+  "placement_and_los_checks": 28286,
+  "catalog_and_upgrade_failures": 0,
+  "placement_and_los_failures": 0
 }

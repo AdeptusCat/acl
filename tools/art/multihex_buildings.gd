@@ -4,7 +4,7 @@ extends RefCounted
 const DIRECTORY: String = "res://assets/tiles/buildings/multihex/"
 const MANIFEST: String = "res://docs/art/multihex_buildings/export.json"
 const ASL_MANIFEST: String = "res://docs/art/asl_inspired_buildings/export.json"
-const LANDMARK_MANIFEST: String = "res://docs/art/three_hex_landmarks/export.json"
+const LANDMARK_MANIFEST: String = "res://docs/art/three_hex_landmarks/perspective/export.json"
 const ORIENTATION_COUNT: int = 6
 
 
@@ -20,14 +20,20 @@ static func catalog() -> Array:
 
 static func install(tiles: TileSet) -> void:
 	_add_metadata(tiles)
+	var pattern_ids: Dictionary[String, String] = {}
 	# Replace only our patterns, leaving any unrelated editor patterns intact.
 	for index: int in range(tiles.get_patterns_count() - 1, -1, -1):
-		if tiles.get_pattern(index).has_meta("multihex_building"):
+		var previous: TileMapPattern = tiles.get_pattern(index)
+		if previous.has_meta("multihex_building"):
+			var key: String = str(previous.get_meta("multihex_building")) + ":" + str(previous.get_meta("angle"))
+			pattern_ids[key] = previous.resource_scene_unique_id
 			tiles.remove_pattern(index)
 	for design: Dictionary in catalog():
 		var source_id: int = _install_design(tiles, design)
 		for orientation: int in range(ORIENTATION_COUNT):
 			var pattern: TileMapPattern = TileMapPattern.new()
+			var key: String = str(design["id"]) + ":" + str(orientation * 60)
+			pattern.resource_scene_unique_id = pattern_ids.get(key, "")
 			var view: Dictionary = design["views"][orientation]
 			for part: int in range(view["parts"].size()):
 				var cell: Array = view["parts"][part]["cell"]
@@ -59,12 +65,24 @@ static func _add_metadata(tiles: TileSet) -> void:
 
 static func _install_design(tiles: TileSet, design: Dictionary) -> int:
 	var id: int = -1
+	var previous_id: int = -1
 	for index: int in range(tiles.get_source_count()):
 		var candidate: int = tiles.get_source_id(index)
 		var existing: TileSetAtlasSource = tiles.get_source(candidate) as TileSetAtlasSource
-		if existing != null and existing.texture.resource_path == design["texture"]:
+		if existing == null or existing.texture == null:
+			continue
+		var same_design: bool = false
+		if existing.has_tile(Vector2i.ZERO):
+			var data: TileData = existing.get_tile_data(Vector2i.ZERO, 0)
+			same_design = str(data.get_custom_data("building_id")) == str(design["id"])
+		if same_design and previous_id < 0:
+			previous_id = candidate
+		if existing.texture.resource_path == design["texture"]:
 			id = candidate
 			break
+	# Artwork upgrades retain the tile source referenced by existing maps.
+	if id < 0:
+		id = previous_id
 	var source: TileSetAtlasSource = TileSetAtlasSource.new()
 	source.resource_name = design["label"]
 	source.texture = load(design["texture"]) as Texture2D
@@ -91,7 +109,7 @@ static func _install_design(tiles: TileSet, design: Dictionary) -> int:
 			data.set_custom_data("name", kind)
 			data.set_custom_data("cover", cover)
 			data.set_custom_data("building_id", design["id"])
-			data.set_custom_data("building_hexes", design["hexes"])
+			data.set_custom_data("building_hexes", int(design["hexes"]))
 			data.set_custom_data("building_angle", orientation * 60)
 			data.set_custom_data("building_part", part)
 	return id

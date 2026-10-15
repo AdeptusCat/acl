@@ -1,5 +1,9 @@
 # Three-hex landmarks
 
+The shared building layer now uses the corrected fixed-camera artwork documented
+in [perspective/README.md](perspective/README.md). The original generation sources
+and previews below are retained as reference.
+
 Six new buildings, each with six clockwise orientations and exactly three
 occupied hexes. All wood roofs are brown; all stone roofs are slate grey.
 

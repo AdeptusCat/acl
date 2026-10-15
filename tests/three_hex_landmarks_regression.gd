@@ -1,6 +1,6 @@
 extends Node
 
-const MANIFEST: String = "res://docs/art/three_hex_landmarks/export.json"
+const MANIFEST: String = MultihexBuildings.LANDMARK_MANIFEST
 const ORIGINS: Array[Vector2i] = [Vector2i(4, 4), Vector2i(5, 4), Vector2i(-4, -4), Vector2i(-5, -4)]
 const CORNERS: Array[Vector2] = [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.5)]
 

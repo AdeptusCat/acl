@@ -4,8 +4,11 @@ Six views of each supplied building: 0, 60, 120, 180, 240 and 300 degrees.
 Wood roofs remain brown; stone roofs remain slate grey. The textile factory
 retains industrial saw-tooth roofing. Each building occupies exactly three hexes.
 
-This is a separate preview pack. The shared building palette and map placements
-continue to use the existing artwork.
+The shared building layer uses these views for the six landmark designs.
+Find their 36 orientations in the TileSet editor's **Patterns** tab under
+**3-hex**. Painting any atlas member fills all three occupied hexes automatically.
+Existing two-hex designs continue to fill two hexes. Every member supplies its
+own LOS pixels and wood cover 2 or stone cover 3.
 
 ## Deliverables
 
@@ -43,7 +46,9 @@ The Godot regression independently checks every nontransparent pixel against
 `TileMapLayer.local_to_map`, including boundary-pixel corners and placement on
 even, odd and negative columns. It also checks all center texels, exact matching
 LOS fragments, complete three-cell placement and material defense values.
-It installs the preview pack only into an in-memory copy of the shared palette.
+It tests the installed shared palette directly. Artwork upgrades preserve source
+IDs and pattern identities so existing map placements use the corrected views.
+Changed texture paths invalidate cached building LOS signatures.
 
 ## Generation and rebuilding
 
@@ -60,9 +65,13 @@ Rebuild with Pillow and NumPy available:
 ```sh
 python3 tools/art/export_landmark_perspectives.py
 godot --headless --editor --path . --recovery-mode --import --quit
+godot --headless --path . tools/art/install_multihex_buildings.tscn
 godot --headless --path . tests/landmark_perspectives_regression.tscn
+godot --headless --path . tests/multihex_placement_regression.tscn
 ```
 
-Verified in Godot 4.7.2: 7,099 checks pass across 2,858,036 visible-pixel
-placements, with zero failures. All 270 project scripts pass parsing and
-convention checks. [verification.json](verification.json) records the results.
+Verified in Godot 4.7.2: 7,171 installed-artwork checks pass across 2,858,036
+visible-pixel placements. Catalog and upgrade checks (9,734) and placement,
+erasure, save/load, live LOS and cached LOS checks (28,286) also pass.
+All 270 project scripts pass parsing and convention checks.
+[verification.json](verification.json) records the results.

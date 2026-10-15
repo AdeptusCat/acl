@@ -7,28 +7,19 @@ func _run() -> void:
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PERSPECTIVE_MANIFEST)) as Dictionary
 	var designs: Array = manifest["buildings"]
 	var layer: BuildingTileMapLayer = load(BuildingVariations.LAYER_SCENE).instantiate() as BuildingTileMapLayer
-	layer.tile_set = layer.tile_set.duplicate(true) as TileSet
-	# Test the preview pack in memory without replacing the shared editor palette.
-	for index: int in range(layer.tile_set.get_patterns_count() - 1, -1, -1):
-		if layer.tile_set.get_pattern(index).has_meta("multihex_building"):
-			layer.tile_set.remove_pattern(index)
-	for design: Dictionary in designs:
-		var source_id: int = MultihexBuildings._install_design(layer.tile_set, design)
-		for orientation: int in range(6):
-			var pattern: TileMapPattern = TileMapPattern.new()
-			var view: Dictionary = design["views"][orientation]
-			for part: int in range(3):
-				var cell: Array = view["parts"][part]["cell"]
-				pattern.set_cell(Vector2i(cell[0], cell[1]), source_id, Vector2i(orientation, part), 0)
-			pattern.set_meta("multihex_building", design["id"])
-			pattern.set_meta("angle", orientation * 60)
-			layer.tile_set.add_pattern(pattern)
 	add_child(layer)
 	LOSHelper.building_layer = layer
 	_check(designs.size() == 6, "Six reference buildings have perspective variants")
 	for design: Dictionary in designs:
 		_check(design["orientation_method"] == "independently generated world orientations under a fixed camera", "Alternate views originate in independent generated artwork")
 		for orientation: int in range(6):
+			var pattern: TileMapPattern = MultihexBuildings.pattern_for(layer.tile_set, design["id"], orientation)
+			_check(pattern != null, "The shared building layer includes every corrected orientation")
+			if pattern == null:
+				continue
+			var source_id: int = pattern.get_cell_source_id(pattern.get_used_cells()[0])
+			var source: TileSetAtlasSource = layer.tile_set.get_source(source_id) as TileSetAtlasSource
+			_check(source.texture.resource_path == design["texture"], "The shared layer paints the corrected artwork directly")
 			super._test_view(layer, design, orientation)
 			_test_hex_centers(layer, design, orientation)
 	LOSHelper.unload_map()

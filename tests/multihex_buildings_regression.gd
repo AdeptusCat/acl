@@ -20,7 +20,7 @@ func _run() -> void:
 	var landmark_counts: Dictionary[String, Array] = {"wood": [], "stone": []}
 	for design: Dictionary in designs:
 		_test_design(layer, design)
-		if design.get("pack", "") == "three_hex_landmarks":
+		if design.get("pack", "") == "three_hex_landmarks_perspective":
 			landmark_counts[design["material"]].append(int(design["hexes"]))
 			continue
 		if design.get("pack", "") == "asl_inspired":
@@ -44,10 +44,33 @@ func _run() -> void:
 	MultihexBuildings.install(copy)
 	MultihexBuildings.install(copy)
 	_check(copy.get_source_count() == count and copy.get_patterns_count() == 180, "Reinstalling retains source IDs and never duplicates patterns")
+	_test_art_upgrade(layer, designs)
 	LOSHelper.unload_map()
 	layer.free()
 	print("Multihex building checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_art_upgrade(layer: BuildingTileMapLayer, designs: Array) -> void:
+	var copy: TileSet = layer.tile_set.duplicate(true) as TileSet
+	var count: int = copy.get_source_count()
+	for design: Dictionary in designs:
+		if design.get("pack", "") != "three_hex_landmarks_perspective":
+			continue
+		var pattern: TileMapPattern = MultihexBuildings.pattern_for(copy, design["id"], 0)
+		var source_id: int = pattern.get_cell_source_id(pattern.get_used_cells()[0])
+		var source: TileSetAtlasSource = copy.get_source(source_id) as TileSetAtlasSource
+		var source_uid: String = source.resource_scene_unique_id
+		var pattern_uid: String = pattern.resource_scene_unique_id
+		var legacy: String = "res://assets/tiles/buildings/multihex/three_hex_landmarks/" + str(design["id"]) + ".png"
+		source.texture = load(legacy) as Texture2D
+		MultihexBuildings.install(copy)
+		var upgraded: TileMapPattern = MultihexBuildings.pattern_for(copy, design["id"], 0)
+		var installed: TileSetAtlasSource = copy.get_source(source_id) as TileSetAtlasSource
+		_check(upgraded.get_cell_source_id(upgraded.get_used_cells()[0]) == source_id, "Art upgrades retain existing map source IDs")
+		_check(installed.texture.resource_path == design["texture"], "The shared layer uses the approved fixed-camera atlas")
+		_check(installed.resource_scene_unique_id == source_uid and upgraded.resource_scene_unique_id == pattern_uid, "Art upgrades retain source and pattern resource identities")
+		_check(copy.get_source_count() == count, "Art upgrades replace existing sources without leaving duplicate buildings")
 
 
 func _test_design(layer: BuildingTileMapLayer, design: Dictionary) -> void:

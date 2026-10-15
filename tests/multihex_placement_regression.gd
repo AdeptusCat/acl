@@ -179,7 +179,7 @@ func _test_baked_sight() -> void:
 	var stale: LosLookupData = LosLookupData.new()
 	stale.los_lookup = {}
 	_check(ResourceSaver.save(stale, map.los_resource_path) == OK, "The stale-cache fixture saves successfully")
-	var pattern: TileMapPattern = MultihexBuildings.pattern_for(buildings.tile_set, "building_stone_01_3hex", 0)
+	var pattern: TileMapPattern = MultihexBuildings.pattern_for(buildings.tile_set, "building_stone_textile_factory_3hex", 0)
 	buildings.set_cell(Vector2i(2, 1), pattern.get_cell_source_id(Vector2i.ZERO), Vector2i.ZERO, 0)
 	# Load immediately, before the deferred painting update, as match startup can.
 	LOSHelper.load_prebaked_los(map)

@@ -315,5 +315,6 @@
     }
   ],
   "orientation_export": "Selected separately repainted views; uniform scaling and translation only; no final bitmap rotation or footprint clipping.",
-  "verification": "verification.json"
+  "verification": "verification.json",
+  "installed_shared_tile_set": "res://resources/tilesets/buildings.tres"
 }
