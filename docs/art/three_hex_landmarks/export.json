@@ -1,0 +1,1944 @@
+{
+  "tile_size": 128,
+  "orientation_count": 6,
+  "buildings": [
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "label": "3-hex Timber sawmill factory",
+      "material": "wood",
+      "parent": "building_wood_01",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "line",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_sawmill_factory_3hex.png",
+      "scale": 0.21361069734922178,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            2
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -6,
+            4
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -6,
+            -4
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            -2
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            6,
+            -4
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            6,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "label": "3-hex Timber granary",
+      "material": "wood",
+      "parent": "building_wood_02",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "line",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_granary_3hex.png",
+      "scale": 0.23243801652892562,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            18
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            2,
+            -2
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            2,
+            0
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            -18
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -2,
+            2
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -2,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "label": "3-hex Timber craft hall",
+      "material": "wood",
+      "parent": "building_wood_03",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "triangle",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_wood_craft_hall_3hex.png",
+      "scale": 0.23762284360859726,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            -4,
+            2
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -8,
+            -14
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            6,
+            -14
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            4,
+            -2
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            8,
+            14
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -6,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "label": "3-hex Stone textile factory",
+      "material": "stone",
+      "parent": "building_stone_02",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "line",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_textile_factory_3hex.png",
+      "scale": 0.2135439365002051,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -30,
+            18
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -30,
+            -18
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            30,
+            -18
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            30,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "label": "3-hex Stone village church",
+      "material": "stone",
+      "parent": "building_stone_03",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "triangle",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_church_3hex.png",
+      "scale": 0.21126940359477125,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -6,
+            -2
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            12,
+            -22
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            6,
+            2
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -12,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "label": "3-hex Stone guildhall",
+      "material": "stone",
+      "parent": "building_stone_01",
+      "pack": "three_hex_landmarks",
+      "hexes": 3,
+      "footprint": "triangle",
+      "strict_footprint": true,
+      "footprint_inset": 3,
+      "orientation_method": "rigid clockwise rotation of one generated canonical roof",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/three_hex_landmarks/building_stone_guildhall_3hex.png",
+      "scale": 0.22727459826132773,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            -2,
+            0
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            -8,
+            -12
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            }
+          ],
+          "image_offset": [
+            4,
+            -16
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            }
+          ],
+          "image_offset": [
+            2,
+            0
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            8,
+            12
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            }
+          ],
+          "image_offset": [
+            -4,
+            16
+          ]
+        }
+      ]
+    }
+  ]
+}

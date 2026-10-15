@@ -1,0 +1,1452 @@
+{
+  "tile_size": 128,
+  "orientation_count": 6,
+  "buildings": [
+    {
+      "id": "building_wood_asl_barn_2hex",
+      "label": "ASL Wood - Long barn (2 hex)",
+      "material": "wood",
+      "parent": "building_wood_01",
+      "pack": "asl_inspired",
+      "hexes": 2,
+      "footprint": "line",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_wood_asl_barn_2hex.png",
+      "scale": 0.4938911908474633,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_asl_workshop_2hex",
+      "label": "ASL Wood - Stepped workshop (2 hex)",
+      "material": "wood",
+      "parent": "building_wood_02",
+      "pack": "asl_inspired",
+      "hexes": 2,
+      "footprint": "line",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_wood_asl_workshop_2hex.png",
+      "scale": 0.46196850449281135,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_asl_farmhouse_3hex",
+      "label": "ASL Wood - L-shaped farmstead (3 hex)",
+      "material": "wood",
+      "parent": "building_wood_03",
+      "pack": "asl_inspired",
+      "hexes": 3,
+      "footprint": "triangle",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_wood_asl_farmhouse_3hex.png",
+      "scale": 0.656084656084656,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_asl_inn_2hex",
+      "label": "ASL Stone - Winged village inn (2 hex)",
+      "material": "stone",
+      "parent": "building_stone_01",
+      "pack": "asl_inspired",
+      "hexes": 2,
+      "footprint": "line",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_inn_2hex.png",
+      "scale": 0.40619323205771346,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_asl_terrace_2hex",
+      "label": "ASL Stone - Stepped town terrace (2 hex)",
+      "material": "stone",
+      "parent": "building_stone_02",
+      "pack": "asl_inspired",
+      "hexes": 2,
+      "footprint": "line",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_terrace_2hex.png",
+      "scale": 0.45929341510170635,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_asl_manor_3hex",
+      "label": "ASL Stone - Courtyard manor (3 hex)",
+      "material": "stone",
+      "parent": "building_stone_03",
+      "pack": "asl_inspired",
+      "hexes": 3,
+      "footprint": "triangle",
+      "orientation_method": "rigid clockwise rotation of canonical source view 0",
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/asl_inspired/building_stone_asl_manor_3hex.png",
+      "scale": 0.5835294117647059,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64,
+                64
+              ],
+              "texture_origin": [
+                -32,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64,
+                192
+              ],
+              "texture_origin": [
+                -64,
+                0
+              ]
+            },
+            {
+              "cell": [
+                1,
+                1
+              ],
+              "center": [
+                160,
+                256
+              ],
+              "texture_origin": [
+                32,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160,
+                128
+              ],
+              "texture_origin": [
+                32,
+                -64
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

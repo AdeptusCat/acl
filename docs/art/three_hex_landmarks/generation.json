@@ -1,0 +1,36 @@
+{
+  "provider": "built-in image_gen",
+  "orientation_export": "Six rigid rotations from one canonical roof; fit complete silhouettes inside the union of three actual hex polygons with a three-pixel inset; do not clip roofs.",
+  "designs": [
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-45ce989d-ca79-4398-b883-c21b04fa0c7c.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_wood_sawmill_factory_3hex.png"
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-aee9b413-f639-4ef9-968f-c5e4d6992dbc.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_wood_granary_3hex.png"
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-2a0d8bba-2b88-424d-9cd3-a6b897a4dbd5.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_wood_craft_hall_3hex.png"
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-03cd37ea-043a-497e-861e-f8b316145635.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_stone_textile_factory_3hex.png"
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-a76e4938-f018-4d77-85a4-33c68bd0e7a8.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_stone_church_3hex.png"
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d36cfd57-44c9-4f0d-b2a6-4ce33916b651.png",
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/building_stone_guildhall_3hex.png"
+    }
+  ]
+}

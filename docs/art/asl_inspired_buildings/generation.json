@@ -1,0 +1,60 @@
+{
+  "provider": "built-in image_gen",
+  "source_references": [
+    "shape_reference.png",
+    "style_reference.png"
+  ],
+  "orientation_export": "Six rigid clockwise rotations from canonical source view 0. This preserves the generated building silhouette and avoids mirrored or repeated alternate views.",
+  "designs": [
+    {
+      "id": "building_wood_asl_barn_2hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-42cb9004-5885-4ba3-97f5-c106dadd052a.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_wood_asl_barn_2hex.png",
+      "selected_view": 0
+    },
+    {
+      "id": "building_wood_asl_workshop_2hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-9df39715-1816-47cb-be8b-d48d7ca96a74.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_wood_asl_workshop_2hex.png",
+      "selected_view": 0
+    },
+    {
+      "id": "building_wood_asl_farmhouse_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-cc424fef-f8ef-4c2f-a385-be2c203733bd.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_wood_asl_farmhouse_3hex.png",
+      "selected_view": 0
+    },
+    {
+      "id": "building_stone_asl_inn_2hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6f4f6dc6-4c5a-4fc5-a65b-3ac4649e3734.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_stone_asl_inn_2hex.png",
+      "selected_view": 0
+    },
+    {
+      "id": "building_stone_asl_terrace_2hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-0d7b1a91-2a68-4633-a972-d2b4d9004477.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_stone_asl_terrace_2hex.png",
+      "selected_view": 0
+    },
+    {
+      "id": "building_stone_asl_manor_3hex",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-ad7b1979-b73a-4031-b45c-df8e1384c4eb.png",
+      "saved_source": "assets/tiles/buildings/multihex/asl_inspired/source/building_stone_asl_manor_3hex.png",
+      "selected_view": 0
+    }
+  ],
+  "correction_attempts": [
+    {
+      "id": "terrace",
+      "prompt": "Edit this sprite sheet. Keep the same single grey-roof stone terrace design and 3-column, 2-row layout. Correct ONLY the BOTTOM MIDDLE building (the 240 degree orientation). It currently repeats the diagonal of the bottom-right building. Replace that one view with the SAME terrace rigidly rotated 240 degrees clockwise from the TOP LEFT vertical building. Its long axis must run from LOWER LEFT to UPPER RIGHT: the top endpoint of the ridge sits to the RIGHT of its bottom endpoint. The chimney at the bottom of the top-left canonical building now sits toward the UPPER LEFT end of the corrected view; the little square stair roof must rotate with the terrace. All roof bays, chimney count, proportions, outline, details and scale remain the same. Preserve the other FIVE buildings in place. All roofs slate GREY. Genuine transparent background with alpha zero outside the six building silhouettes; remove the soft ambient glow. No text or scenery.",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-751fea91-c580-4910-aac7-9130fe05829f.png",
+      "selected": false
+    },
+    {
+      "id": "farmhouse",
+      "prompt": "Edit this six-view brown timber L-shaped farmstead sprite sheet. Keep its EXACT architecture: one long main wing, a shorter wing at a right angle at ONE END, one side porch halfway along the long wing, one chimney on the shorter wing. The top-left building is the CANONICAL 0 degree plan: main wing extends UP from the elbow and short wing extends RIGHT from the elbow. Make every view a rigid clockwise rotation of that plan, preserving its handedness. Fix the TOP RIGHT view to 120 degrees: main long wing extends DOWN RIGHT from an UPPER elbow, short wing extends DOWN LEFT; the open inside corner faces DOWN. Fix the BOTTOM LEFT view to 180 degrees: main long wing extends DOWN from an UPPER RIGHT elbow, short wing extends LEFT from that elbow, with chimney on that TOP LEFT wing; the open inside corner faces LOWER LEFT. Fix the BOTTOM RIGHT view to 300 degrees: main long wing extends UP LEFT from a LOWER elbow, short wing extends UP RIGHT, open inside corner faces UP. Keep top-left 0, top-middle 60 and bottom-middle 240 views as their existing orientations. Six isolated views on the same 3-column 2-row layout and same scale. Detailed painted brown wooden roofs, exact overhead camera. Genuine transparency around each complete roof silhouette and inside the L notches; no ambient glow, ground shadow, backdrop, labels, text or scenery. Do not mirror the building.",
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-c1a76982-0f43-431f-859a-fc394245748d.png",
+      "selected": false
+    }
+  ]
+}

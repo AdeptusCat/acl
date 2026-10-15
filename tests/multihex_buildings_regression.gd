@@ -13,24 +13,37 @@ func _run() -> void:
 	var layer: BuildingTileMapLayer = load(BuildingVariations.LAYER_SCENE).instantiate() as BuildingTileMapLayer
 	add_child(layer)
 	var designs: Array = MultihexBuildings.catalog()
-	_check(designs.size() == 18, "All six parent types have three multihex designs")
-	_check(layer.tile_set.get_patterns_count() == 108, "The shared building layer exposes 108 complete rotated patterns")
+	_check(designs.size() == 30, "The original designs, ASL pack and six three-hex landmarks are available")
+	_check(layer.tile_set.get_patterns_count() == 180, "The shared building layer exposes 180 complete rotated patterns")
 	var parents: Dictionary[String, Array] = {}
+	var asl_counts: Dictionary[String, Array] = {"wood": [], "stone": []}
+	var landmark_counts: Dictionary[String, Array] = {"wood": [], "stone": []}
 	for design: Dictionary in designs:
+		_test_design(layer, design)
+		if design.get("pack", "") == "three_hex_landmarks":
+			landmark_counts[design["material"]].append(int(design["hexes"]))
+			continue
+		if design.get("pack", "") == "asl_inspired":
+			asl_counts[design["material"]].append(int(design["hexes"]))
+			continue
 		var parent: String = design["parent"]
 		if not parents.has(parent):
 			parents[parent] = []
 		parents[parent].append(int(design["hexes"]))
-		_test_design(layer, design)
 	_check(parents.size() == 6, "Wood 01-03 and Stone 01-03 all receive multihex buildings")
 	for parent: String in parents:
 		parents[parent].sort()
 		_check(parents[parent] == [2, 2, 3], "Every parent has two two-hex designs and one three-hex design")
+	for material: String in asl_counts:
+		asl_counts[material].sort()
+		_check(asl_counts[material] == [2, 2, 3], "Each ASL material has two two-hex designs and one three-hex design")
+	for material: String in landmark_counts:
+		_check(landmark_counts[material] == [3, 3, 3], "Each landmark material has three three-hex designs")
 	var copy: TileSet = layer.tile_set.duplicate(true) as TileSet
 	var count: int = copy.get_source_count()
 	MultihexBuildings.install(copy)
 	MultihexBuildings.install(copy)
-	_check(copy.get_source_count() == count and copy.get_patterns_count() == 108, "Reinstalling retains source IDs and never duplicates patterns")
+	_check(copy.get_source_count() == count and copy.get_patterns_count() == 180, "Reinstalling retains source IDs and never duplicates patterns")
 	LOSHelper.unload_map()
 	layer.free()
 	print("Multihex building checks: ", checks, "; failures: ", failures)
@@ -50,6 +63,11 @@ func _test_design(layer: BuildingTileMapLayer, design: Dictionary) -> void:
 			layer.clear()
 			layer.place_multihex_building(anchor, design["id"], orientation)
 			_check(layer.get_used_cells().size() == int(design["hexes"]), "Patterns occupy exactly two or three hexes on even and odd columns")
+			if design.get("footprint", "") == "triangle":
+				for member: Vector2i in layer.get_used_cells():
+					for other: Vector2i in layer.get_used_cells():
+						if other != member:
+							_check(layer.get_surrounding_cells(member).has(other), "Compact ASL wings occupy three mutually adjacent hexes at every angle")
 			var center: Vector2 = Vector2.INF
 			for cell: Vector2i in layer.get_used_cells():
 				var data: TileData = layer.get_cell_tile_data(cell)

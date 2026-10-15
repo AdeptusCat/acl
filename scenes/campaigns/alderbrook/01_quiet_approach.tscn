@@ -1,6 +1,5 @@
 [gd_scene format=4 uid="uid://cjhwy1xvxwke4"]
 
-[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/wall_tile_map_layer.tscn" id="ConnectedWallLayer"]
 [ext_resource type="Script" uid="uid://cvyaglqgbhyux" path="res://scenes/world/maps/map.gd" id="1_u0vfx"]
 [ext_resource type="TileSet" uid="uid://dkjw7ktdpc7d7" path="res://resources/campaigns/alderbrook_water.tres" id="2_32d4c"]
 [ext_resource type="Script" uid="uid://buj6ft1vvdf2f" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="4_gq6xk"]
@@ -11,7 +10,6 @@
 [ext_resource type="Texture2D" uid="uid://llxva7vcrmr" path="res://assets/tiles/vegetation/open_ground_green_03.png" id="7_dlgsm"]
 [ext_resource type="Texture2D" uid="uid://drvniker1271f" path="res://assets/tiles/16x16_2b - Kopie.png" id="8_fy3lb"]
 [ext_resource type="TileSet" uid="uid://dky7ipek6sjb4" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_hfvsb"]
-[ext_resource type="TileSet" uid="uid://dathypxgtyctl" path="res://resources/campaigns/alderbrook_walls.tres" id="11_c41vj"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/building_tile_map_layer.tscn" id="15_fy3lb"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_yycqq"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="21_hi3l8"]
@@ -31,7 +29,6 @@
 [ext_resource type="Resource" uid="uid://dbwswwg50br4a" path="res://resources/soldiers/germany/platoon_leader.tres" id="35_lds10"]
 [ext_resource type="Resource" uid="uid://sglwlumhj57d" path="res://resources/soldiers/germany/squad_leader_assistant.tres" id="36_0kr27"]
 [ext_resource type="Resource" uid="uid://iovefgg2ny4g" path="res://resources/weapons/kar98.tres" id="37_5j0jh"]
-[ext_resource type="Script" uid="uid://dmau1rh153fsa" path="res://scenes/world/maps/layers/wall_tile_map_layer.gd" id="37_mhcww"]
 [ext_resource type="Resource" uid="uid://boephgpg2cfao" path="res://resources/squads/germany/platoon_hq.tres" id="38_g4gys"]
 [ext_resource type="Resource" uid="uid://dghlcxe7d1oeg" path="res://resources/soldiers/germany/squad_leader.tres" id="39_s51u0"]
 [ext_resource type="Resource" uid="uid://c58b0dx1dc5lv" path="res://resources/soldiers/germany/mg_gunner.tres" id="40_w5w0i"]
@@ -52,6 +49,7 @@
 [ext_resource type="Texture2D" uid="uid://ba7swy07te61o" path="res://assets/objectives/allies_a.png" id="52_sfbom"]
 [ext_resource type="Texture2D" uid="uid://bm1dwvmp0x7k3" path="res://assets/objectives/allies_b.png" id="53_tii1o"]
 [ext_resource type="Texture2D" uid="uid://dvigi28x8fe3i" path="res://assets/objectives/allies_c.png" id="54_1k02o"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/wall_tile_map_layer.tscn" id="ConnectedWallLayer"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hi3l8"]
 texture = ExtResource("6_7c7xa")
@@ -336,7 +334,7 @@ script = ExtResource("26_w5w0i")
 [node name="WallTileMapLayer" parent="TileMapLayers" unique_id=1554866552 instance=ExtResource("ConnectedWallLayer")]
 
 [node name="BuildingTileMapLayer" parent="TileMapLayers" unique_id=1245894557 instance=ExtResource("15_fy3lb")]
-tile_map_data = PackedByteArray("AAABAAAACwAAAAAAAAABAAEACwABAAAAAAABAAgACwACAAAAAAABAAkACwADAAAAAAACAAAACwAEAAAAAAACAAEACwAFAAAAAAACAAgACwAGAAAAAAACAAkACwAHAAAAAAADAAAACwAAAAEAAAADAAEACwABAAEAAAADAAgACwACAAEAAAADAAkACwADAAEAAAAFAAAACwAEAAEAAAAFAAEACwAFAAEAAAAFAAgACwAGAAEAAAAFAAkACwAHAAEAAAAGAAAACwAAAAIAAAAGAAEACwABAAIAAAAGAAgACwAFAAIAAAAGAAkACwAGAAIAAAAHAAAACwAHAAIAAAAHAAEACwAAAAMAAAAHAAgACwABAAMAAAAHAAkACwACAAMAAAAJAAAACwADAAMAAAAJAAEACwAEAAMAAAAJAAgACwAFAAMAAAAJAAkACwAGAAMAAAAKAAAACwAHAAMAAAAKAAEACwAAAAQAAAAKAAgACwABAAQAAAAKAAkACwACAAQAAAALAAAACwADAAQAAAALAAEACwAEAAQAAAALAAgACwAFAAQAAAALAAkACwAGAAQAAAANAAAACwAHAAQAAAANAAEACwAAAAUAAAANAAgACwABAAUAAAANAAkACwACAAUAAAAOAAAACwADAAUAAAAOAAEACwAEAAUAAAAOAAgACwAFAAUAAAAOAAkACwAGAAUAAAAPAAAACwAHAAUAAAAPAAEACwAAAAYAAAAPAAgACwABAAYAAAAPAAkACwACAAYAAAAGAAIACwACAAIAAAAGAAMACwADAAIAAAAGAAcACwAEAAIAAAAMAAUABAACAAAAAAA=")
+tile_map_data = PackedByteArray("AAABAAAACwAAAAAAAAABAAEACwABAAAAAAABAAgACwACAAAAAAABAAkACwADAAAAAAACAAAACwAEAAAAAAACAAEACwAFAAAAAAACAAgACwAGAAAAAAACAAkACwAHAAAAAAADAAAACwAAAAEAAAADAAEACwABAAEAAAADAAgACwACAAEAAAADAAkACwADAAEAAAAFAAAACwAEAAEAAAAFAAEACwAFAAEAAAAFAAgACwAGAAEAAAAFAAkACwAHAAEAAAAGAAAACwAAAAIAAAAGAAEACwABAAIAAAAGAAgACwAFAAIAAAAGAAkACwAGAAIAAAAHAAAACwAHAAIAAAAHAAEACwAAAAMAAAAHAAgACwABAAMAAAAHAAkACwACAAMAAAAJAAAACwADAAMAAAAJAAEACwAEAAMAAAAJAAgACwAFAAMAAAAJAAkACwAGAAMAAAAKAAAACwAHAAMAAAAKAAEACwAAAAQAAAAKAAgACwABAAQAAAAKAAkACwACAAQAAAALAAAACwADAAQAAAALAAEACwAEAAQAAAALAAgACwAFAAQAAAALAAkACwAGAAQAAAANAAAACwAHAAQAAAANAAEACwAAAAUAAAANAAgACwABAAUAAAANAAkACwACAAUAAAAOAAAACwADAAUAAAAOAAEACwAEAAUAAAAOAAgACwAFAAUAAAAOAAkACwAGAAUAAAAPAAAACwAHAAUAAAAPAAEACwAAAAYAAAAPAAgACwABAAYAAAAPAAkACwACAAYAAAAGAAIACwACAAIAAAAGAAMACwADAAIAAAAGAAcACwAEAAIAAAAMAAUABAACAAAAAAACAAYAMAACAAAAAAABAAUAMAACAAEAAAABAAYAMAACAAIAAAA=")
 
 [node name="Scenarios" type="Node2D" parent="." unique_id=976409343]
 

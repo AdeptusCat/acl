@@ -3,12 +3,19 @@ extends RefCounted
 
 const DIRECTORY: String = "res://assets/tiles/buildings/multihex/"
 const MANIFEST: String = "res://docs/art/multihex_buildings/export.json"
+const ASL_MANIFEST: String = "res://docs/art/asl_inspired_buildings/export.json"
+const LANDMARK_MANIFEST: String = "res://docs/art/three_hex_landmarks/export.json"
 const ORIENTATION_COUNT: int = 6
 
 
 static func catalog() -> Array:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST)) as Dictionary
-	return data["buildings"]
+	var designs: Array = data["buildings"]
+	var asl_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ASL_MANIFEST)) as Dictionary
+	designs.append_array(asl_data["buildings"])
+	var landmark_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(LANDMARK_MANIFEST)) as Dictionary
+	designs.append_array(landmark_data["buildings"])
+	return designs
 
 
 static func install(tiles: TileSet) -> void:

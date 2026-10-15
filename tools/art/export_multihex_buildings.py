@@ -87,7 +87,9 @@ def angle_order(sprites: list[Image.Image]) -> list[Image.Image]:
 
 def render_view(sprite: Image.Image, scale: float, parts: list[dict], region: int) -> tuple[Image.Image, list[Image.Image]]:
     centers: np.ndarray = np.array([part["center"] for part in parts], dtype=int)
-    center: np.ndarray = centers.mean(axis=0)
+    # Non-collinear footprints can have fractional centroids. Keep the common
+    # drawing origin on whole pixels so every cell aligns exactly in Godot.
+    center: np.ndarray = np.rint(centers.mean(axis=0)).astype(int)
     canvas: Image.Image = Image.new("RGBA", (region, region))
     scaled: Image.Image = sprite.resize((round(sprite.width * scale), round(sprite.height * scale)), Image.Resampling.LANCZOS)
     cx, cy = mass_center(scaled)

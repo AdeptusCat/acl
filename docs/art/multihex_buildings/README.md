@@ -1,5 +1,11 @@
 # Multihex building catalog
 
+The [ASL-inspired pack](../asl_inspired_buildings/README.md) adds six designs and
+36 orientations. The [three-hex landmarks](../three_hex_landmarks/README.md) add
+another six designs and 36 orientations with strict hex boundaries. The shared
+building layer now includes 30 multihex designs and 180 complete patterns.
+The original pack documented below remains available.
+
 The shared BuildingTileMapLayer includes 18 additional building designs and
 108 complete patterns. Wood 01, 02 and 03 keep brown roofs; Stone 01, 02 and 03
 keep grey roofs. Each parent has two distinct two-hex designs (A and B) and one
