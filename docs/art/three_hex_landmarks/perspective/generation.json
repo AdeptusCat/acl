@@ -1,0 +1,319 @@
+{
+  "provider": "built-in image_gen",
+  "status": "complete: all 36 views pass export and independent Godot verification",
+  "designs": [
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_28 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-3bd5bea6-5ea4-46d5-9e55-873730fc6333.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/0.png",
+          "source_sha256": "099499daa0a70d2c6b0739c48c2ee9c0c9181870436cd501c54354789c448519",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_28 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/60.png",
+          "source_sha256": "ec589ca12d719810aaa8c58a10b470f249db78793098ca8fbfa55b19cd10e431",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1a71a81e-6e58-4d3b-9d50-1761588ec993.png"
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/120.png",
+          "source_sha256": "40dc6027a61d9e5ff33534c4613bc506ad96dc7057ec2f1282995615e87553cc",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-21a8b3c4-1597-439f-8402-d67b38ff9a2e.png"
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/180.png",
+          "source_sha256": "836fb1e1aa5e9c59e6b4a8a39723a35274d7cbf6b87689790a718f122530723f",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-9fad077b-b343-4a58-b191-f7b496f37499.png"
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/240.png",
+          "source_sha256": "d5399464d38d25ea39b72a8d3c20a898f3a1c2098cd12352886adccb7538c74a",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-735e4410-4870-417a-b58b-51e1a8e4c074.png"
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_sawmill_factory_3hex/300.png",
+          "source_sha256": "05b1b7398704420cdf3b329a7d9aa91320e3e177257aef59c6d4bb5c8b7ea942",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-25022987-18fa-4bea-b7cd-4bdd6fac6a29.png"
+        }
+      ]
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_31 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/0.png",
+          "source_sha256": "1f0d26269db3d239549ae43871ed5d6d802c14ac3d72158816cc097d03cd09d4",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_31 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/60.png",
+          "source_sha256": "2dfe0afabea8a255d7d498f75e078e71c6f262fa8e32e9419dbded4d7300e776",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+          "sheet_frame": 1
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/120.png",
+          "source_sha256": "836bb6e7b55ddceb9e2fdbeee0c14d3c44512124b3680ea65310651883f988ae",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+          "sheet_frame": 2
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/180.png",
+          "source_sha256": "dde49345d8443d26ab628fb7e83e33de40c372b369a9ad5e63e44cc9c2bf12b8",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+          "sheet_frame": 3
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/240.png",
+          "source_sha256": "8767b81cb5949090e59716be52feb432e30900bc47021c600558467d96765b24",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+          "sheet_frame": 4
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_granary_3hex/300.png",
+          "source_sha256": "a52be898061037de27d7d9c001b808c415c57ca931ce5d3d20c818df645bf44a",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-1e0705f2-6545-4fe7-921c-d3dca6423670.png",
+          "sheet_frame": 5
+        }
+      ]
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_33 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4f1b29ba-724d-4a53-84f0-85bdbf30aa02.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/0.png",
+          "source_sha256": "6b5945684c7df5b5e70322af129813b060481db106692d26d4d0d1aca0048586",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_33 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/60.png",
+          "source_sha256": "9becf3a50b6779b04c69ebce8ebef305846765c741ac33713fd2fd7164a6054a",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4f1b29ba-724d-4a53-84f0-85bdbf30aa02.png",
+          "sheet_frame": 1
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/120.png",
+          "source_sha256": "fa55d8d7b5e79d5db8f35da94806a0a5cbcdc75721b89eafeca38eee77718732",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4f1b29ba-724d-4a53-84f0-85bdbf30aa02.png",
+          "sheet_frame": 2
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/180.png",
+          "source_sha256": "2e032ac06c64d69188983c79d132260ad1d567324f42c1ed671a2bc8e34e3d1d",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-8310db2a-6630-43c8-b5b8-15e6ea724b41.png"
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/240.png",
+          "source_sha256": "dfaefe4fc36794756801803af42f8ede78bad47581253b663758e09a7e49ac67",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4f1b29ba-724d-4a53-84f0-85bdbf30aa02.png",
+          "sheet_frame": 4
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_wood_craft_hall_3hex/300.png",
+          "source_sha256": "16491e8c60b81bbacd7c28526a42a9fbe6936373d63cef3b079fd73a95631526",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4f1b29ba-724d-4a53-84f0-85bdbf30aa02.png",
+          "sheet_frame": 5
+        }
+      ]
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_07_58 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-033b6c86-7257-475e-bc32-0a4c66e03adf.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/0.png",
+          "source_sha256": "ea4dfea651d7d16ef9060712ae4cc336fa5d3f2c101292066ff963f23aaa655c",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_07_58 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/60.png",
+          "source_sha256": "77bfb7babd7cd1e6595ecbdfc3d59f1431c60c09d31b8fe49afd92eaca5ec788",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d2806639-c473-4ab4-9c30-345509a30e99.png"
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/120.png",
+          "source_sha256": "535d4e5148aa001d0a59d8f346512f8053992860ae56df93f8e7a3d7de873d0f",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-2b2adac5-00db-4061-8e19-3989a598d95b.png"
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/180.png",
+          "source_sha256": "3fc6fa2a69058bb4c292562863e2212be823d4c189d3302e6e28b7d4528a8825",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-cebc0cc3-59be-4c83-b074-5bd50e9f1b96.png"
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/240.png",
+          "source_sha256": "8b1c99e8d2757822d56d603a2e7ad19d0de2d240f5912836f10c675d6e083a3c",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-f1575d21-ccda-4c97-b2c2-5e3c6b4c5d49.png"
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_textile_factory_3hex/300.png",
+          "source_sha256": "967e7a40f7f1ce5ecb4b5129240b0e97a8e6cb6216fdf1fc31bc7908de9964cf",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6d15d6d0-e028-4296-b8df-81c98cb0946d.png"
+        }
+      ]
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_16 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-ec01834d-51d2-4935-a507-93e3fdfe208a.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/0.png",
+          "source_sha256": "b45b448bd682a11c02500c8b98bef3d5f6d8f13edbff6a4fe9a0c845056ae51d",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_16 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/60.png",
+          "source_sha256": "4d5d49b8796fe0547bf12935b21f8de7844bf9798bda15267226a18416ddce30",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-ec01834d-51d2-4935-a507-93e3fdfe208a.png",
+          "sheet_frame": 1
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/120.png",
+          "source_sha256": "ab1aa3436516d33192ebf71e4efc1e7f6f5195b73ac767d47e70f0597a690fe0",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-5f8e02c6-9fef-4092-a9b2-a2d2dcd60f64.png"
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/180.png",
+          "source_sha256": "b6a77a335000667c384c357e1af2a4ce302c4eb9b81d8a7f1816cc8ce1c3fee6",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-ec01834d-51d2-4935-a507-93e3fdfe208a.png",
+          "sheet_frame": 3
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/240.png",
+          "source_sha256": "79d950ed35bfb342a008f27de852f3fa91a3ca6ab51552bf5efebab74a62599d",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-ec01834d-51d2-4935-a507-93e3fdfe208a.png",
+          "sheet_frame": 4
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_church_3hex/300.png",
+          "source_sha256": "09781d8af7c1acf7063b56bc54c6f81bcc32485ab4be947c21d7bdc4de4800a3",
+          "method": "built-in image generation, individual corrected view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-018e2e68-f3b0-405e-b1e8-486876a13586.png"
+        }
+      ]
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "source_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_21 AM.png",
+      "generated_sheet": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+      "views": [
+        {
+          "angle": 0,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/0.png",
+          "source_sha256": "4eaf7e88e45d13a0fc507e77d3543276b0aa86cf407fb9a7e7e99ed6d5542d3a",
+          "method": "preserved supplied original",
+          "supplied_image": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 11_13_21 AM.png"
+        },
+        {
+          "angle": 60,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/60.png",
+          "source_sha256": "87759223bf21d89633063bb29f1b092ae34384d30a7e654d233f991c8757b51e",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+          "sheet_frame": 1
+        },
+        {
+          "angle": 120,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/120.png",
+          "source_sha256": "e8184e94c03f46d7c91625c6e7a487a1fc8173ad9a603cbac75c84c01f74a00e",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+          "sheet_frame": 2
+        },
+        {
+          "angle": 180,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/180.png",
+          "source_sha256": "0cbfcc03ea1f50f8210f456edbcb0b58e5577fc20f0e1d03c0e8f456d010d0a3",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+          "sheet_frame": 3
+        },
+        {
+          "angle": 240,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/240.png",
+          "source_sha256": "46fe7b2a41c5a419c5e76d291bbf2d385b0e2e6992e2222491f55c82c70b2365",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+          "sheet_frame": 4
+        },
+        {
+          "angle": 300,
+          "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/perspective/building_stone_guildhall_3hex/300.png",
+          "source_sha256": "71320b3034b118937893b50aa1780d44475df8ecd9d07536eb1027e6c963da12",
+          "method": "built-in image generation, fixed-camera sheet view",
+          "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b8fc833f-b895-4167-937c-7af5655f7d35.png",
+          "sheet_frame": 5
+        }
+      ]
+    }
+  ],
+  "orientation_export": "Selected separately repainted views; uniform scaling and translation only; no final bitmap rotation or footprint clipping.",
+  "verification": "verification.json"
+}

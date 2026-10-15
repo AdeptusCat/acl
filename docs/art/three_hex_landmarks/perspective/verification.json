@@ -1,0 +1,16 @@
+{
+  "engine": "Godot 4.7.2",
+  "designs": 6,
+  "orientations": 36,
+  "godot_checks": 7099,
+  "godot_visible_pixel_placements_checked": 2858036,
+  "godot_failures": 0,
+  "gdscript_files_checked": 270,
+  "gdscript_parse_failures": 0,
+  "gdscript_convention_violations": 0,
+  "maximum_outside_pixels": 0,
+  "minimum_hex_center_alpha": 183,
+  "minimum_inset_pixels": 1,
+  "godot_regression": "tests/landmark_perspectives_regression.tscn",
+  "palette_installation": "in-memory test only; separate preview assets"
+}
