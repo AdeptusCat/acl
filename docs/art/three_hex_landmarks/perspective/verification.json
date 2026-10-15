@@ -3,7 +3,7 @@
   "designs": 6,
   "orientations": 36,
   "godot_checks": 7171,
-  "godot_visible_pixel_placements_checked": 2858036,
+  "godot_visible_pixel_placements_checked": 2757448,
   "godot_failures": 0,
   "gdscript_files_checked": 270,
   "gdscript_parse_failures": 0,
@@ -16,5 +16,21 @@
   "catalog_and_upgrade_checks": 9734,
   "placement_and_los_checks": 28286,
   "catalog_and_upgrade_failures": 0,
-  "placement_and_los_failures": 0
+  "placement_and_los_failures": 0,
+  "textile_camera_revision": {
+    "angles_replaced": [
+      60,
+      120,
+      180,
+      240,
+      300
+    ],
+    "zero_view_unchanged": true,
+    "other_building_images_unchanged": true,
+    "approved_zero_world_length": 296.0,
+    "world_length_tolerance_pixels": 0.5,
+    "source_hashes_verified": 36,
+    "preview": "textile_camera_revision/contact_sheet.png",
+    "selected_sources": "textile_camera_revision/selected.json"
+  }
 }

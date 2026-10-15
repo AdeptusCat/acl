@@ -332,12 +332,12 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        3687,
-        7270,
-        4577
+        3276,
+        5293,
+        3263
       ],
       "center_alpha": [
-        214,
+        252,
         253,
         253
       ],
@@ -349,9 +349,9 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        5904,
-        7360,
-        6326
+        3409,
+        5335,
+        3347
       ],
       "center_alpha": [
         253,
@@ -366,9 +366,9 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        4683,
-        7692,
-        5195
+        3749,
+        6084,
+        3690
       ],
       "center_alpha": [
         253,
@@ -383,13 +383,13 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        3768,
-        7075,
-        4454
+        3219,
+        5207,
+        3191
       ],
       "center_alpha": [
         253,
-        253,
+        252,
         253
       ],
       "minimum_inset": 1
@@ -400,9 +400,9 @@
       "outside_pixels": 0,
       "canvas_cropped_pixels": 0,
       "roof_pixels_per_hex": [
-        5598,
-        6756,
-        6608
+        3685,
+        5900,
+        3666
       ],
       "center_alpha": [
         253,

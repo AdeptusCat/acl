@@ -15,6 +15,8 @@ own LOS pixels and wood cover 2 or stone cover 3.
 - [Wood buildings](wood.png) and [stone buildings](stone.png), with hex boundaries
   and small yellow markers at the exact occupied centers.
 - [All 36 views](preview.png).
+- [Textile factory perspective correction](textile_camera_revision/README.md),
+  with a six-view comparison and the selected generation prompts.
 - Six Godot atlases and 36 individual transparent PNGs under
   `assets/tiles/buildings/multihex/three_hex_landmarks/perspective/`.
 - [export.json](export.json), with the exact footprint, per-member image origins,
@@ -49,6 +51,8 @@ LOS fragments, complete three-cell placement and material defense values.
 It tests the installed shared palette directly. Artwork upgrades preserve source
 IDs and pattern identities so existing map placements use the corrected views.
 Changed texture paths invalidate cached building LOS signatures.
+Building texture content is also included in the LOS fingerprint, so replacing
+the factory atlas at the existing path invalidates affected cached LOS.
 
 ## Generation and rebuilding
 
@@ -70,7 +74,7 @@ godot --headless --path . tests/landmark_perspectives_regression.tscn
 godot --headless --path . tests/multihex_placement_regression.tscn
 ```
 
-Verified in Godot 4.7.2: 7,171 installed-artwork checks pass across 2,858,036
+Verified in Godot 4.7.2: 7,171 installed-artwork checks pass across 2,757,448
 visible-pixel placements. Catalog and upgrade checks (9,734) and placement,
 erasure, save/load, live LOS and cached LOS checks (28,286) also pass.
 All 270 project scripts pass parsing and convention checks.

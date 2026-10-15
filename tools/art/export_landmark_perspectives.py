@@ -2,6 +2,7 @@
 
 import copy
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -26,7 +27,17 @@ def center_alpha(canvas: Image.Image, parts: list[dict]) -> list[int]:
                       REGION // 2 + part["texture_origin"][0] - 1:REGION // 2 + part["texture_origin"][0] + 1].min()) for part in parts]
 
 
-def fit_view(sprite: Image.Image, parts: list[dict]) -> tuple[Image.Image, list[np.ndarray], dict]:
+def world_length(sprite: Image.Image, angle: int) -> float:
+    """Measure the long-axis extent after undoing the hex ground projection."""
+    yy, xx = np.nonzero(np.asarray(sprite.getchannel("A")) > 0)
+    radians: float = math.radians(angle)
+    x_weight: float = -math.sin(radians) * 2 / math.sqrt(3)
+    y_weight: float = math.cos(radians)
+    projected: np.ndarray = x_weight * xx + y_weight * yy
+    return float(np.ptp(projected) + abs(x_weight) + abs(y_weight))
+
+
+def fit_view(sprite: Image.Image, parts: list[dict], angle: int = 0, maximum_world_length: float | None = None) -> tuple[Image.Image, list[np.ndarray], dict]:
     masks, _ = masks_for(parts)
     union: np.ndarray = np.logical_or.reduce(masks)
     padded_union: np.ndarray = np.pad(union, INSET, constant_values=False)
@@ -38,10 +49,15 @@ def fit_view(sprite: Image.Image, parts: list[dict]) -> tuple[Image.Image, list[
     # Center coverage creates a minimum size as well as a maximum. A binary
     # search from zero is invalid: tiny roofs fit the boundary but miss centers.
     # Search downward and select the largest complete, center-covering view.
-    for extent in range(REGION - INSET * 2, minimum_extent - 1, -1):
+    maximum_extent: int = REGION - INSET * 2
+    if maximum_world_length is not None:
+        maximum_extent = min(maximum_extent, math.floor(max(sprite.size) * maximum_world_length / world_length(sprite, angle)))
+    for extent in range(maximum_extent, minimum_extent - 1, -1):
         scale: float = extent / max(sprite.size)
         scaled: Image.Image = sprite.resize((max(1, round(sprite.width * scale)), max(1, round(sprite.height * scale))), Image.Resampling.LANCZOS)
         alpha: np.ndarray = np.asarray(scaled.getchannel("A"))
+        if maximum_world_length is not None and world_length(scaled, angle) > maximum_world_length + 0.5:
+            continue
         solid: np.ndarray = alpha > 0
         padded: np.ndarray = np.zeros((REGION, REGION), dtype=float)
         padded[:scaled.height, :scaled.width] = solid
@@ -96,12 +112,18 @@ def main() -> None:
         if definition["footprint"] == "triangle":
             views = triangle_views()
         atlas: Image.Image = Image.new("RGBA", (6 * REGION, 3 * REGION))
+        reference_length: float | None = None
+        match_zero_scale: bool = sources[definition["id"]].get("world_size_reference_angle") == 0
         for orientation, (sprite, view) in enumerate(zip(sprites, views)):
             try:
-                canvas, member_masks, placement = fit_view(sprite, view["parts"])
+                canvas, member_masks, placement = fit_view(sprite, view["parts"], orientation * 60, reference_length)
             except ValueError as error:
                 raise ValueError(definition["id"] + " / " + str(orientation * 60) + " degrees: " + str(error)) from error
             view.update(placement)
+            if match_zero_scale:
+                if orientation == 0:
+                    reference_length = world_length(canvas, 0)
+                view["world_length"] = world_length(canvas, orientation * 60)
             view["source_image"] = str((SOURCE / definition["id"] / (str(orientation * 60) + ".png")).relative_to(ROOT))
             original: np.ndarray = np.array(canvas)
             pieces: list[Image.Image] = []
