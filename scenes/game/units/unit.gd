@@ -317,8 +317,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team)
 				give_move_to_hex_order(to_hex, path, false)
 			else:
-				movement.stop()
-				#movement.move_to_hex(to_hex)
+				clear_orders()
 		Globals.UnitCmd.STOP:
 			movement.stop()
 			setAttackState(AttackState.AUTO)

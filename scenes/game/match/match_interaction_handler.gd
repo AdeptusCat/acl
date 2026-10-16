@@ -33,6 +33,8 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 			if unit.stress_system.state == STATES.MoraleState.PINNED:
 				return "Pinned: use Rout to attempt escape."
 			if map_hex == unit.current_hex:
+				if unit.movement.is_moving or unit.position.distance_to(controller.ground_layer.map_to_local(map_hex)) > 0.1:
+					return ""
 				return "The squad is already at this hex."
 			var pathfinder: AStar2D = Globals.astars.get(unit.team)
 			var from_id: int = controller.ground_layer.pathfinding_get_point_id(unit.current_hex)

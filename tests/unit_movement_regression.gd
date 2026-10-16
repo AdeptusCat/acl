@@ -279,7 +279,15 @@ func _test_action_orders(unit: Unit, ground: HexagonTileMapLayer, movement: Unit
 	_begin_attack(unit, ground, movement, start)
 	controller.clear_orders()
 	_check_assault_canceled(movement, "Clearing orders cancels pending assault")
-	_check(not movement.is_moving, "Clearing orders ends movement")
+	_check(not movement.is_moving, "Clearing orders at the hex center ends movement")
+
+	_begin_attack(unit, ground, movement, start)
+	movement._process(0.1)
+	controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+	controller.clear_orders()
+	_check(movement.is_moving and unit.goal_hex == unit.current_hex, "Clearing an active order preserves centering movement")
+	movement._process(100.0)
+	_check(unit.position == ground.map_to_local(start) and not movement.is_moving, "Cleared order finishes at the occupied hex center")
 
 	_begin_attack(unit, ground, movement, start)
 	var empty: Array[Vector3i] = []

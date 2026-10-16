@@ -82,9 +82,19 @@ func stop() -> void:
 		new_target_hex.emit(target_hex)
 		return
 	pending_recenter = false
-	if is_moving:
+	if unit.position.distance_to(LOSHelper.ground_layer.map_to_local(unit.current_hex)) > 0.1:
 		_start_move_to_hex(unit.current_hex)
 		target_hex = unit.current_hex
+		new_target_hex.emit(target_hex)
+	else:
+		var was_moving: bool = is_moving or unit.is_moving
+		is_moving = false
+		unit.is_moving = false
+		unit.goal_hex = unit.current_hex
+		target_hex = unit.current_hex
+		target_position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+		if was_moving:
+			stopped_moving.emit()
 		new_target_hex.emit(target_hex)
 
 

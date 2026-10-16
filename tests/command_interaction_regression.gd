@@ -86,6 +86,21 @@ func _run() -> void:
 	_right_release(wheel.position + wheel.get_option_point(2))
 	_check(unit.action_controller.action_state == SquadActionController.SquadActionState.NO_ORDER and not unit.movement.is_moving, "Stop clears the pending movement order")
 	_check(_feedback_title(world).contains("Order accepted · Stop"), "Stop reports acceptance")
+	unit.movement._process_movement(0.1)
+	# Exercise a real in-flight return through the command acceptance path.
+	controller.order_via_option_wheel(destination, WheelOption.Option.MOVE_NORMAL)
+	unit.movement._process_movement(0.1)
+	var occupied_hex: Vector2i = unit.current_hex
+	_check(controller.order_via_option_wheel(occupied_hex, WheelOption.Option.MOVE_NORMAL), "Move accepts the occupied hex while departing")
+	unit.movement._process_movement(100.0)
+	_check(unit.position == ground.map_to_local(occupied_hex) and not unit.movement.is_moving, "Moving back to the occupied hex reaches its center")
+	controller.order_via_option_wheel(destination, WheelOption.Option.MOVE_NORMAL)
+	unit.movement._process_movement(0.1)
+	occupied_hex = unit.current_hex
+	controller.order_via_option_wheel(destination, WheelOption.Option.STOP)
+	_check(unit.movement.is_moving, "Stop preserves movement toward the occupied hex center")
+	unit.movement._process_movement(100.0)
+	_check(unit.position == ground.map_to_local(occupied_hex) and not unit.movement.is_moving, "Stop finishes at the occupied hex center")
 	unit.stress_system._set_state(STATES.MoraleState.PINNED)
 	order_before = unit.action_controller.action_order_id
 	_right_open(target_point)

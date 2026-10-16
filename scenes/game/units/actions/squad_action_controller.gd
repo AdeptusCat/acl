@@ -224,8 +224,8 @@ func give_hold_order() -> void:
 
 func clear_orders() -> void:
 	action_order_id += 1
-	movement.stop()
 	_set_action_state(SquadActionState.NO_ORDER)
+	movement.stop()
 
 # ----------------------------------------------------------------------
 # MOVEMENT HELPERS
@@ -278,6 +278,9 @@ func _order_still_valid() -> bool:
 # ----------------------------------------------------------------------
 
 func on_started_moving() -> void:
+	# Returning to the occupied hex center does not create a new order.
+	if action_state == SquadActionState.NO_ORDER and movement.path_hexes.is_empty() and unit.goal_hex == unit.current_hex:
+		return
 	if action_state == SquadActionState.NO_ORDER or action_state == SquadActionState.HOLDING_POSITION:
 		_set_action_state(SquadActionState.MOVING_TO_POSITION)
 

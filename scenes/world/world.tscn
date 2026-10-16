@@ -55,7 +55,7 @@
 [ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/orchard_road_terrain.png" id="29_h7bpp"]
 [ext_resource type="Script" path="res://scenes/world/camera/battle_camera.gd" id="29_wnndm"]
 [ext_resource type="Texture2D" path="res://assets/tiles/connected/maps/default_map_terrain.png" id="30_gbjsl"]
-[ext_resource type="Texture2D" path="res://assets/tiles/ground/base_tile1 - Kopie.png" id="40_ij5nj"]
+[ext_resource type="Texture2D" path="res://assets/ui/hex_selection.svg" id="40_ij5nj"]
 [ext_resource type="Shader" path="res://assets/shader/grain_overlay.gdshader" id="41_j0rhc"]
 [ext_resource type="Script" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="41_n78lu"]
 [ext_resource type="Shader" path="res://assets/shader/drift.gdshader" id="41_sar2w"]
