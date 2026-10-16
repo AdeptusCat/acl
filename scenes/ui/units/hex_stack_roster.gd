@@ -15,6 +15,8 @@ const MARGIN: float = 12.0
 var cell: Vector2i
 var rows: Dictionary[int, SquadRosterRow] = {}
 var _member_ids: Array[int] = []
+var _pending_reveal_id: int = 0
+var _reveal_queued: bool = false
 
 
 func _ready() -> void:
@@ -45,6 +47,7 @@ func open(hex: Vector2i, members: Array[Unit]) -> void:
 
 func close() -> void:
 	hide()
+	_pending_reveal_id = 0
 	# Hidden rows must not retain dead or removed Unit references.
 	_clear_rows()
 
@@ -70,6 +73,27 @@ func refresh_members(members: Array[Unit]) -> void:
 	heading.text = "Squads in hex"
 	for row: SquadRosterRow in rows.values():
 		row.refresh()
+
+
+func reveal_unit(unit: Unit) -> void:
+	if not visible or not is_instance_valid(unit) or not rows.has(unit.get_instance_id()):
+		return
+	_pending_reveal_id = unit.get_instance_id()
+	if not _reveal_queued:
+		_reveal_queued = true
+		_reveal_selected.call_deferred()
+
+
+func _reveal_selected() -> void:
+	# Allow new rows, popup placement and scrolling containers to finish layout.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_reveal_queued = false
+	if visible and rows.has(_pending_reveal_id):
+		var row: SquadRosterRow = rows[_pending_reveal_id]
+		if is_instance_valid(row.unit) and row.unit.selected:
+			scroll.ensure_control_visible(row)
+	_pending_reveal_id = 0
 
 
 func _clear_rows() -> void:

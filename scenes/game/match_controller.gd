@@ -397,6 +397,12 @@ func open_stack_roster(cell: Vector2i) -> bool:
 	return false
 
 
+func cycle_stack_roster(cell: Vector2i, picked: Unit) -> bool:
+	if is_instance_valid(stack_presenter):
+		return stack_presenter.cycle_roster(cell, picked)
+	return false
+
+
 func select_and_center_unit(unit: Unit) -> void:
 	if not is_instance_valid(unit) or not unit.is_active() or unit.is_queued_for_deletion() or unit.team != Globals.team_player:
 		return

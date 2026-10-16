@@ -27,8 +27,8 @@ class ControllerProbe extends Node2D:
 			unit.deselect()
 			selected_unit = null
 
-	func open_stack_roster(cell: Vector2i) -> bool:
-		return stacks.open_roster(cell)
+	func cycle_stack_roster(cell: Vector2i, picked: Unit) -> bool:
+		return stacks.cycle_roster(cell, picked)
 
 	func click(point: Vector2) -> void:
 		map_clicks += 1
@@ -83,6 +83,8 @@ func _run() -> void:
 	ground.z_index = -10
 	controller.add_child(ground)
 	controller.ground_layer = ground
+	var previous_ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	LOSHelper.ground_layer = ground
 	for x: int in range(10):
 		for y: int in range(7):
 			ground.set_cell(Vector2i(x, y), 1, Vector2i.ZERO)
@@ -119,6 +121,7 @@ func _run() -> void:
 	commands.set_process(false)
 	await _settle()
 	_test_preserved_stack()
+	await _test_arrival_popup()
 	_test_enemy_visibility()
 	await _test_pointer_and_selection()
 	await _test_outside_hud_click()
@@ -128,6 +131,7 @@ func _run() -> void:
 	_test_removal_and_cleanup()
 	for unit: Unit in units:
 		unit.squad_fire.calc.free()
+	LOSHelper.ground_layer = previous_ground
 	world.free()
 	layer.free()
 	print("Stacked squad checks: ", checks, "; failures: ", failures)
@@ -156,11 +160,67 @@ func _unit(cell: Vector2i, number: int, type: Globals.SquadType, offset: Vector2
 
 func _test_preserved_stack() -> void:
 	_check(hud.get_child_count() == 1 and hud.get_child(0) == stacks.roster, "Stack interaction adds only the roster, with no squad-count indicator")
+	_check(not stacks.roster.visible, "Existing stacks do not open a roster during setup")
 	_check(Globals.get_units().size() == units.size(), "Stack interaction does not create gameplay units")
 	for unit: Unit in [first, second, third]:
 		_check(unit.ui.modulate.a == 1.0 and unit.ui.is_visible_in_tree(), "Each slightly offset squad counter remains visible")
 	_check(single.ui.modulate.a == 1.0, "Single squads retain their normal counter")
 	_test_model_positions()
+
+
+func _test_arrival_popup() -> void:
+	var mover: Unit = _unit(Vector2i(1, 4), 7, Globals.SquadType.Rifle)
+	stacks.refresh()
+	controller._select_unit(second)
+	_move_to(mover, Vector2i(1, 5))
+	_check(not stacks.roster.visible, "Moving into an empty hex does not open a roster")
+	_move_to(mover, headquarters.current_hex)
+	await _settle()
+	_check(stacks.roster.visible and stacks.roster.cell == headquarters.current_hex and stacks.roster.rows.size() == 2, "A real movement entry into a friendly squad's hex opens the two-squad roster")
+	_check(controller.selected_unit == second and mover.current_hex == headquarters.current_hex and mover.current_cube == headquarters.current_cube, "An arrival popup preserves selection and the movement system's occupied hex")
+	_check(mover.global_position.is_equal_approx(controller.ground_layer.to_global(controller.ground_layer.map_to_local(mover.current_hex))), "Opening the arrival roster leaves the movement endpoint unchanged")
+	stacks.roster.close()
+	for frame: int in range(3):
+		stacks.refresh()
+		await get_tree().process_frame
+	_move_to(mover, mover.current_hex)
+	_check(not stacks.roster.visible, "Dismissing an arrival roster keeps it closed through refresh and same-hex recentering")
+	_move_to(mover, stack_cell)
+	await _settle()
+	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 4 and stacks.roster.rows[second.get_instance_id()].button_pressed, "A later entry into a larger stack reopens its roster with the existing selection highlighted")
+	stacks.roster.close()
+	var enemy: Unit = _unit(Vector2i(1, 4), 8, Globals.SquadType.Rifle)
+	enemy.team = Globals.get_enemy_team(Globals.team_player)
+	stacks.refresh()
+	_move_to(enemy, stack_cell)
+	_check(not stacks.roster.visible, "Enemy movement does not open a friendly stack roster")
+	var hidden: Unit = _unit(Vector2i(1, 4), 9, Globals.SquadType.Rifle)
+	hidden.hide()
+	stacks.refresh()
+	_move_to(hidden, stack_cell)
+	_check(not stacks.roster.visible and not hidden.is_visible_in_tree(), "Hidden units cannot reveal a stack through automatic popups")
+	mover.exited = true
+	mover.unit_entered_hex.emit(mover, stack_cell)
+	_check(not stacks.roster.visible, "Exited units cannot open an arrival roster")
+	mover.exited = false
+	controller.end_game_handled = true
+	_move_to(mover, headquarters.current_hex)
+	_check(not stacks.roster.visible, "Movement after the match ends cannot open a roster")
+	controller.end_game_handled = false
+	for unit: Unit in [mover, enemy, hidden]:
+		units.erase(unit)
+		unit.squad_fire.calc.free()
+		unit.free()
+	stacks.refresh()
+	controller._deselect_unit(second)
+	_test_model_positions()
+
+
+func _move_to(unit: Unit, cell: Vector2i) -> void:
+	unit.goal_hex = cell
+	unit.movement.target_position = controller.to_local(controller.ground_layer.to_global(controller.ground_layer.map_to_local(cell)))
+	unit.movement.is_moving = true
+	unit.movement._process_movement(100.0)
 
 
 func _test_pointer_and_selection() -> void:
@@ -172,10 +232,19 @@ func _test_pointer_and_selection() -> void:
 		stacks.refresh()
 		await _settle()
 		stacks.refresh()
+		if is_instance_valid(controller.selected_unit):
+			controller._deselect_unit(controller.selected_unit)
 		var point: Vector2 = BattlefieldStacks.counter_rect(second).get_center()
 		_click(point)
 		await _settle()
 		_check(stacks.roster.visible and stacks.roster.rows.size() == 3, "One battlefield click opens all occupants after zoom and pan %.1f" % zoom)
+		_check(controller.selected_unit == third and stacks.roster.rows[third.get_instance_id()].button_pressed, "The first stack click selects the front counter and its roster row at zoom %.1f" % zoom)
+		for expected: Unit in [first, second, third]:
+			_click(point)
+			await _settle()
+			commands.refresh(0.0)
+			_check(stacks.roster.visible and controller.selected_unit == expected and stacks.roster.rows[expected.get_instance_id()].button_pressed, "Repeated clicks cycle through every squad and wrap the roster selection at zoom %.1f" % zoom)
+			_check(commands.displayed_links == [expected] and commands.highlighted_units.has(headquarters.get_instance_id()), "Every cycle step updates the selected squad's HQ connection")
 		var row: SquadRosterRow = stacks.roster.rows[second.get_instance_id()]
 		_check(row.identity.text.contains("/1/2") and row.identity.text.contains("MG") and row.command_status.visible, "Stack rows show unique formation identifiers, type and command status")
 		_click(row.get_global_transform_with_canvas() * (row.size * 0.5))
@@ -284,6 +353,18 @@ func _test_live_updates_and_large_stacks() -> void:
 	await _settle()
 	stacks.refresh()
 	_check(stacks.roster.rows.size() == 11 and hud.get_child_count() == 1, "Large stack rosters retain every squad without adding battlefield count indicators")
+	controller._select_unit(second)
+	stacks.refresh()
+	var point: Vector2 = BattlefieldStacks.counter_rect(second).get_center()
+	for click: int in range(9):
+		_click(point)
+	await _settle()
+	var last: Unit = units.back()
+	var last_row: SquadRosterRow = stacks.roster.rows[last.get_instance_id()]
+	_check(controller.selected_unit == last and last_row.button_pressed and stacks.roster.scroll.scroll_vertical > 0 and stacks.roster.scroll.get_global_rect().encloses(last_row.get_global_rect()), "Rapid stack clicks select and scroll to the last squad in a large roster")
+	_click(point)
+	await _settle()
+	_check(controller.selected_unit == first and stacks.roster.rows[first.get_instance_id()].button_pressed and stacks.roster.scroll.scroll_vertical == 0, "Cycling past the last squad wraps and scrolls back to the first row")
 	var scroll_point: Vector2 = stacks.roster.scroll.get_global_transform_with_canvas() * (stacks.roster.scroll.size * 0.5)
 	var before: int = zooms
 	_mouse(scroll_point, MouseButton.MOUSE_BUTTON_WHEEL_UP, true)
@@ -320,11 +401,14 @@ func _test_removal_and_cleanup() -> void:
 	stacks.open_roster(stack_cell)
 	var doomed: Unit = units.back()
 	var doomed_id: int = doomed.get_instance_id()
+	controller._select_unit(doomed)
 	units.erase(doomed)
 	doomed.squad_fire.calc.free()
 	doomed.free()
 	stacks.refresh()
 	_check(not stacks.roster.rows.has(doomed_id), "Freed squads disappear from open rosters without stale Node keys")
+	_click(BattlefieldStacks.counter_rect(second).get_center())
+	_check(is_instance_valid(controller.selected_unit) and controller.selected_unit.is_active() and stacks.roster.rows[controller.selected_unit.get_instance_id()].button_pressed, "Cycling skips removed squads and recovers from a freed current selection")
 	for unit: Unit in units:
 		if unit != second:
 			unit.current_hex = Vector2i(15 + unit.squad, 15)

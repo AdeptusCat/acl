@@ -38,7 +38,9 @@ func refresh() -> void:
 	# Keep the existing, slightly offset counters exactly as they are. Only the
 	# roster displays additional unit information; it never moves gameplay nodes.
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
-		if not unit.is_active() or unit.is_queued_for_deletion() or not unit.is_visible_in_tree() or not is_instance_valid(unit.ui) or not unit.ui.is_visible_in_tree():
+		if not unit.unit_entered_hex.is_connected(_on_unit_entered_hex):
+			unit.unit_entered_hex.connect(_on_unit_entered_hex)
+		if not _can_show_unit(unit):
 			continue
 		if not _units_by_hex.has(unit.current_hex):
 			_units_by_hex[unit.current_hex] = []
@@ -66,7 +68,35 @@ func open_roster(cell: Vector2i) -> bool:
 		return false
 	roster.open(cell, members)
 	_fit_roster(members)
+	if is_instance_valid(controller.selected_unit) and members.has(controller.selected_unit):
+		roster.reveal_unit(controller.selected_unit)
 	return true
+
+
+func cycle_roster(cell: Vector2i, picked: Unit = null) -> bool:
+	if not open_roster(cell):
+		return false
+	var members: Array[Unit] = _members_at(cell)
+	var index: int = -1
+	if is_instance_valid(controller.selected_unit):
+		index = members.find(controller.selected_unit)
+	if index >= 0:
+		index = (index + 1) % members.size()
+	else:
+		index = maxi(0, members.find(picked))
+	_on_unit_selected(members[index])
+	return true
+
+
+func _on_unit_entered_hex(unit: Unit, cell: Vector2i) -> void:
+	if not _can_show_unit(unit) or unit.current_hex != cell:
+		return
+	# Opening the roster observes movement; it never selects or orders a squad.
+	open_roster(cell)
+
+
+static func _can_show_unit(unit: Unit) -> bool:
+	return is_instance_valid(unit) and unit.is_active() and not unit.is_queued_for_deletion() and unit.team == Globals.team_player and unit.is_visible_in_tree() and is_instance_valid(unit.ui) and unit.ui.is_visible_in_tree()
 
 
 static func counter_rect(unit: Unit) -> Rect2:
@@ -96,6 +126,7 @@ func _on_unit_selected(unit: Unit) -> void:
 	controller.show_unit_details_in_ui.emit(unit)
 	LOSHelper.clear_los()
 	refresh()
+	roster.reveal_unit(unit)
 
 
 static func _formation_less(a: Unit, b: Unit) -> bool:
