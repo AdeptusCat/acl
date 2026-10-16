@@ -455,6 +455,7 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	scenario.scenario_description = spec["briefing"]
 	scenario.duration_s = spec["seconds"]
 	scenario.use_authored_duration = true
+	scenario.end_when_objectives_secured_and_enemy_gone = index == 4
 	scenario.released = true
 	scenario.player_team = Globals.Team.ALLIES
 	scenario.axis_ai_status = Scenario.AIStatus.ON

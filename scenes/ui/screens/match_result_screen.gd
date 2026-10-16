@@ -28,6 +28,11 @@ func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLe
 		result_label.text = "Defeat by Timeout!"
 	
 	show()
+	for container: VBoxContainer in [major_victory_conditions_v_box_container, minor_victory_conditions_v_box_container]:
+		for child: Node in container.get_children():
+			container.remove_child(child)
+			child.queue_free()
+	minor_objectives_label.hide()
 	
 	for victory_condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
 		if not victory_condition.team == Globals.team_player:
@@ -39,14 +44,15 @@ func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLe
 			VictoryCondition.OutcomeLevel.MINOR:
 				minor_victory_conditions_v_box_container.add_child(victory_condition_result)
 				minor_objectives_label.show()
-		victory_condition_result.set_victory_condition(victory_condition.is_condition_met(), victory_condition.get_description())
-		#var label = Label.new()
-		#label.text = victory_condition.get_description()
-		#if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
-			#major_victory_conditions_v_box_container.add_child(label)
-		#if victory_condition.outcome_level == VictoryCondition.OutcomeLevel.MINOR:
-			#minor_victory_conditions_v_box_container.add_child(label)
-			#minor_objectives_label.show()
+		var description: String = victory_condition.get_description()
+		if victory_condition is OccupyObjectiveCondition:
+			var progress: VictoryConditionProgress = VictoryConditionProgress.read(victory_condition)
+			var held_seconds: float = progress.required_seconds
+			for hex: Vector2i in progress.hexes:
+				held_seconds = minf(held_seconds, progress.held_seconds.get(hex, 0.0))
+			if progress.valid:
+				description += " Held: %.0f/%.0f s." % [floorf(held_seconds), progress.required_seconds]
+		victory_condition_result.set_victory_condition(victory_condition.is_condition_met(), description)
 
 func _on_try_again_pressed() -> void:
 	try_again.emit()

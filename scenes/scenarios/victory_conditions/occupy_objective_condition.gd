@@ -33,18 +33,7 @@ const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 
 
 func get_description() -> String:
-	var text: String = "Occupy the Hex(es) marked '{objective}' with your units.".format({
-	"objective": OBJECTIVE_NAMES[objective_id]
-	})
-	
-	#var plural_suffix: String = ""
-	#if hexes.size() > 1:
-		#plural_suffix = "es"
-	#var text: String = "Occupy the Hex{plural_suffix} marked '{objective}' with your units.".format({
-	#"plural_suffix": plural_suffix,
-	#"objective": OBJECTIVE_NAMES[objective_id]
-	#})
-	
+	var text: String = "Hold every '%s' hex with at least %d good-order squad(s) for %.0f continuous seconds." % [OBJECTIVE_NAMES[objective_id], required_unit_count, required_time_s]
 	return text
 
 

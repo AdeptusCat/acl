@@ -90,7 +90,7 @@ func refresh() -> void:
 				VictoryConditionProgress.Kind.PREVENT_EXIT:
 					var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
 					text = "Enemy exits: %d/%d allowed" % [prevention.state.units_exited.size(), prevention.max_allowed_enemy_exits]
-			# Capture rows show control only; the match still evaluates capture requirements.
+			# Capture rows distinguish a running hold from a secured objective.
 			if progress.kind != VictoryConditionProgress.Kind.OCCUPY:
 				if progress.complete:
 					if condition.test_at_scenario_end and time_left_seconds > 0.0:
@@ -114,9 +114,8 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 	var held_hexes: int = 0
 	var contested_hexes: int = 0
 	var enemy_hexes: int = 0
-	# Capture detail counters retained for a later UI expansion.
-	#var minimum_squads: int = progress.required_units
-	#var minimum_seconds: float = progress.required_seconds
+	var minimum_squads: int = progress.required_units
+	var minimum_seconds: float = progress.required_seconds
 	for hex: Vector2i in progress.hexes:
 		var friendly_count: int = 0
 		var enemy_count: int = 0
@@ -127,8 +126,8 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 				friendly_count += 1
 			else:
 				enemy_count += 1
-		#minimum_squads = mini(minimum_squads, friendly_count)
-		#minimum_seconds = minf(minimum_seconds, progress.held_seconds.get(hex, 0.0))
+		minimum_squads = mini(minimum_squads, friendly_count)
+		minimum_seconds = minf(minimum_seconds, progress.held_seconds.get(hex, 0.0))
 		if friendly_count > 0 and (not condition.contested_by_enemy_presence or enemy_count == 0):
 			held_hexes += 1
 		elif friendly_count > 0 and enemy_count > 0 and condition.contested_by_enemy_presence:
@@ -138,6 +137,10 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 	var status: String = "unoccupied"
 	if held_hexes == progress.hexes.size():
 		status = "player controlled"
+		if minimum_squads < progress.required_units:
+			status = "needs %d squads per hex" % progress.required_units
+		elif not progress.complete:
+			status = "securing · %.0f/%.0f s" % [floorf(minimum_seconds), progress.required_seconds]
 	elif contested_hexes > 0:
 		status = "contested"
 	elif held_hexes > 0:
@@ -147,9 +150,4 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 	elif enemy_hexes > 0:
 		status = "enemy present"
 	var text: String = "Objective %s: %s" % [OBJECTIVE_NAMES[condition.objective_id], status]
-	#if progress.hexes.size() > 1:
-		#text += "\nHexes held: %d/%d" % [held_hexes, progress.hexes.size()]
-	#else:
-		#text += "\nSquads: %d/%d" % [minimum_squads, progress.required_units]
-	#text += " · Hold: %.1f/%.1f s" % [minimum_seconds, progress.required_seconds]
 	return text

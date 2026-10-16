@@ -573,11 +573,12 @@ Your company attacks from farmland into Alderbrook. Hedges divide the fields, an
 
 Three rifle platoons, machine-gun teams, company headquarters and a light mortar support the attack. Establish covering fire and keep a reserve able to switch between districts. Enemy survivors may withdraw through the eastern roads after their defense breaks.
 
-[b]Major Victory:[/b] hold A, B and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline.
+[b]Major Victory:[/b] hold A, B and C for 45 seconds each, destroy six enemy units, and allow no more than one enemy exit. Victory is assessed at the deadline, or earlier once no active enemy remains and A, B and C have each been held for 45 seconds.
 
 [b]Minor Victory:[/b] hold B for 45 seconds and destroy three enemy units at the deadline."
 duration_s = 900.0
 use_authored_duration = true
+end_when_objectives_secured_and_enemy_gone = true
 released = true
 player_team = 1
 victory_conditions = Array[ExtResource("48_j75m7")]([SubResource("Resource_r28t1"), SubResource("Resource_ilf4m"), SubResource("Resource_uam5t"), SubResource("Resource_ao1lx"), SubResource("Resource_jqe2x"), SubResource("Resource_fflgn"), SubResource("Resource_ychgx"), SubResource("Resource_d3vmv"), SubResource("Resource_xby52"), SubResource("Resource_2oei0"), SubResource("Resource_2p27w"), SubResource("Resource_ekfsu")])

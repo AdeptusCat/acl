@@ -116,9 +116,29 @@ static func set_victory_conditions(controller: Node2D) -> void:
 					pass
 
 
+static func can_finish_after_enemy_departure() -> bool:
+	var scenario: Scenario = Globals.scenario_chosen
+	if not is_instance_valid(scenario) or not scenario.end_when_objectives_secured_and_enemy_gone:
+		return false
+	for unit: Unit in Globals.get_units_for_team(Globals.get_enemy_team(Globals.team_player)):
+		if unit.is_active() and not unit.surrendered:
+			return false
+	var collection: VictoryConditionCollection = Globals.victory_conditions.get(Globals.team_player)
+	if collection == null:
+		return false
+	var has_capture_objective: bool = false
+	for condition: VictoryCondition in collection.victory_conditions:
+		if condition is OccupyObjectiveCondition:
+			has_capture_objective = true
+			if not condition.is_condition_met():
+				return false
+	return has_capture_objective
+
+
 static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	if controller.end_game_handled:
 		return
+	var at_end: bool = controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
 	
 	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
 		Globals.Team.AXIS: false,
@@ -135,13 +155,12 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 		for victory_condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
 			conditions.append(victory_condition)
 	for team: Globals.Team in major_victory_conditions_met:
-		major_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MAJOR, controller.time_left_seconds <= 0.0)
-		minor_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MINOR, controller.time_left_seconds <= 0.0)
+		major_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MAJOR, at_end)
+		minor_victory_conditions_met[team] = VictoryConditionProgress.outcome_complete(conditions, team, VictoryCondition.OutcomeLevel.MINOR, at_end)
 	
 	if major_victory_conditions_met[Globals.Team.AXIS] and major_victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw
-		if controller.time_left_seconds <= 0:
-			controller.time_left_seconds = 0
+		if at_end:
 			controller.timer_running = false
 			controller.show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, false)
 			controller.end_game_handled = true
@@ -156,8 +175,7 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	
 	if minor_victory_conditions_met[Globals.Team.AXIS] and minor_victory_conditions_met[Globals.Team.ALLIES]:
 		# Its a Draw
-		if controller.time_left_seconds <= 0:
-			controller.time_left_seconds = 0
+		if at_end:
 			controller.timer_running = false
 			controller.show_winner.emit(-1, VictoryCondition.OutcomeLevel.MINOR, false)
 			controller.end_game_handled = true
@@ -170,7 +188,7 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 				controller.end_game_handled = true
 				return
 	
-	if controller.time_left_seconds <= 0:
-		controller.show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, true)
+	if at_end:
+		controller.show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, controller.time_left_seconds <= 0.0)
 		controller.timer_running = false
 		controller.end_game_handled = true

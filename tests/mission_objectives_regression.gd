@@ -63,7 +63,7 @@ func _run() -> void:
 	enemies[0].current_hex = Vector2i(-100, -100)
 	occupy.advance_time(1.25)
 	panel._process(0.2)
-	_check(_row(panel, 0) == "Objective A: player controlled", "Capture rows show player control without squad or hold details")
+	_check(_row(panel, 0) == "Objective A: securing · 1/3 s", "Capture rows distinguish occupation from completed capture")
 	for iteration: int in range(5):
 		panel.refresh()
 	_check(is_equal_approx(occupy.state.required_times_reached_s[objective_hex], 1.25), "Reading the HUD never advances mission progress")

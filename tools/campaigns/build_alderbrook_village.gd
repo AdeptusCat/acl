@@ -133,6 +133,7 @@ func _create_village(map: Map) -> void:
 	var scenario: Scenario = map.get_scenario(0)
 	# Keep existing unit identities, loadouts, campaign links and victory resources.
 	scenario.scenario_description = VILLAGE_BRIEFING
+	scenario.end_when_objectives_secured_and_enemy_gone = true
 	for roster: Array in [VILLAGE_PLAYER, VILLAGE_ENEMY]:
 		var team: Globals.Team = Globals.Team.ALLIES
 		if roster == VILLAGE_ENEMY:

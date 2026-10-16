@@ -15,6 +15,8 @@ enum AIMode { ATTACK, DEFEND }
 @export var scenario_description: String = ""
 @export var duration_s: float = 180.0
 @export var use_authored_duration: bool = false
+## Assess the final result once all player capture objectives are secured and no opponent remains.
+@export var end_when_objectives_secured_and_enemy_gone: bool = false
 @export var released: bool = false
 @export var previous_scenario: Scenario
 
