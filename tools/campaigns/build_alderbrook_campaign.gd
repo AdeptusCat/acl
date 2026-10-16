@@ -90,6 +90,7 @@ const MISSIONS: Array[Dictionary] = [
 ]
 
 var _terrain_set: TileSet
+var _road_set: TileSet
 var _wall_set: TileSet
 var _building_set: TileSet
 var _water_set: TileSet
@@ -183,6 +184,7 @@ func _run() -> void:
 		return
 	var base: Map = template.get_node("Maps/DefaultMap") as Map
 	_terrain_set = base.get_terrain_layer().tile_set.duplicate(true) as TileSet
+	_road_set = load(RoadTiles.TILE_SET_PATH) as TileSet
 	_update_field_art()
 	_wall_set = load(ConnectedWalls.TILE_SET_PATH) as TileSet
 	_building_set = load(BuildingVariations.SHARED_TILE_SET) as TileSet
@@ -204,17 +206,9 @@ func _run() -> void:
 	_wheat_sources = _sources_for_images(_terrain_set, WHEAT_IMAGES)
 	_crop_sources = _sources_for_images(_terrain_set, CROP_IMAGES)
 	for index: int in range(MISSIONS.size()):
-		var road: TileSetAtlasSource = TileSetAtlasSource.new()
-		road.resource_name = "Road - " + str(MISSIONS[index]["title"])
-		road.texture = load(AlderbrookRoads.ASSET_DIRECTORY + "road_" + str(MISSIONS[index]["id"]) + ".svg") as Texture2D
-		road.texture_region_size = Vector2i(128, 128)
-		var source_id: int = _terrain_set.add_source(road)
-		_road_sources.append(source_id)
-		for cell: Vector2i in _road_layouts[index]["cells"]:
-			var tile: Vector2i = _road_layouts[index]["cells"][cell]
-			road.create_tile(tile)
-			road.get_tile_data(tile, 0).set_custom_data("name", "Road")
+		_road_sources.append(RoadTiles.install_curve(_road_set, AlderbrookRoads.ASSET_DIRECTORY + "road_" + str(MISSIONS[index]["id"]) + ".svg", "Road - " + str(MISSIONS[index]["title"]), _road_layouts[index]["cells"]))
 	ResourceSaver.save(_terrain_set, RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
+	ResourceSaver.save(_road_set, RoadTiles.TILE_SET_PATH)
 	ResourceSaver.save(_wall_set, ConnectedWalls.TILE_SET_PATH)
 	ResourceSaver.save(_building_set, BuildingVariations.SHARED_TILE_SET)
 	_terrain_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_terrain.tres")
@@ -376,6 +370,8 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	_grass_noise.frequency = 0.12
 	ground.clear()
 	var terrain: HexagonTileMapLayer = _layer("TerrainTileMapLayer", _terrain_set, "res://scenes/world/maps/layers/terrain_tile_map_layer.gd")
+	var roads: HexagonTileMapLayer = load(RoadTiles.LAYER_SCENE).instantiate() as HexagonTileMapLayer
+	roads.tile_set = _road_set
 	var walls: HexagonTileMapLayer = load(ConnectedWalls.LAYER_SCENE).instantiate() as HexagonTileMapLayer
 	walls.tile_set = _wall_set
 	var buildings: HexagonTileMapLayer = load(BuildingVariations.LAYER_SCENE).instantiate() as HexagonTileMapLayer
@@ -384,6 +380,7 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	layers.add_child(ground)
 	layers.add_child(water)
 	layers.add_child(terrain)
+	layers.add_child(roads)
 	layers.add_child(walls)
 	layers.add_child(buildings)
 	for layer: Node in layers.get_children():
@@ -427,7 +424,7 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 					ground.erase_cell(cell)
 		for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
 			_house(buildings, terrain, cell, true)
-	if not _place_roads(ground, terrain, buildings, water, index, ground_sources[0]):
+	if not _place_roads(ground, terrain, roads, buildings, water, index, ground_sources[0]):
 		map.free()
 		return null
 	_place_orchards(ground, terrain, buildings, index)
@@ -534,6 +531,9 @@ func _woods(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: 
 func _can_plant(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i) -> bool:
 	if ground.get_cell_source_id(cell) < 0 or buildings.get_cell_source_id(cell) >= 0:
 		return false
+	var roads: TileMapLayer = ground.get_parent().get_node_or_null("RoadTileMapLayer") as TileMapLayer
+	if roads != null and roads.get_cell_source_id(cell) >= 0:
+		return false
 	var data: TileData = terrain.get_cell_tile_data(cell)
 	return data == null or str(data.get_custom_data("name")) == "Field"
 
@@ -563,7 +563,7 @@ func _place_fields(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, bu
 		plot_index += 1
 
 
-func _place_roads(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, water: HexagonTileMapLayer, index: int, grass_source: int) -> bool:
+func _place_roads(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, roads: HexagonTileMapLayer, buildings: HexagonTileMapLayer, water: HexagonTileMapLayer, index: int, grass_source: int) -> bool:
 	# Validate the complete route before clearing or painting any terrain.
 	for cell: Vector2i in _road_layouts[index]["cells"]:
 		if water.get_cell_source_id(cell) == 0:
@@ -578,7 +578,8 @@ func _place_roads(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, bui
 			continue
 		buildings.erase_cell(cell)
 		ground.set_cell(cell, grass_source, Vector2i.ZERO)
-		terrain.set_cell(cell, _road_sources[index], _road_layouts[index]["cells"][cell])
+		terrain.erase_cell(cell)
+		roads.set_cell(cell, _road_sources[index], _road_layouts[index]["cells"][cell])
 	return true
 
 
@@ -726,12 +727,7 @@ func _export_layout(map: Map, spec: Dictionary) -> void:
 				cell_data["texture_region"] = [region.position.x, region.position.y, region.size.x, region.size.y]
 			cells.append(cell_data)
 		layers.append({"name": str(layer.name), "cells": cells})
-	var centerlines: Array[Array] = []
-	for curve: Curve2D in _road_layouts[map.get_scenario(0).campaign_mission - 1]["curves"]:
-		var points: Array[Array] = []
-		for point: Vector2 in curve.tessellate(8, 0.5):
-			points.append([point.x * 2.0, point.y * 2.0])
-		centerlines.append(points)
+	var centerlines: Array[Array] = AlderbrookRoads.centerlines(_road_layouts[map.get_scenario(0).campaign_mission - 1])
 	var data: Dictionary = {"title": spec["title"], "id": spec["id"], "size": [map.grid_size.x, map.grid_size.y], "seconds": spec["seconds"], "player": spec["player"], "enemy": spec["enemy"], "allied_markers": spec["allied_markers"], "axis_markers": spec["axis_markers"], "road_centerlines": centerlines, "layers": layers}
 	var file: FileAccess = FileAccess.open(IMAGE_DIRECTORY + str(spec["id"]) + ".json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(data, "\t"))

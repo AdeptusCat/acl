@@ -49,6 +49,7 @@ func _run() -> void:
 		var buildings: BuildingTileMapLayer = map.get_building_layer() as BuildingTileMapLayer
 		ConnectedTerrainBaker.bake(buildings, VILLAGE_ID + "_village_woods")
 		assert(ResourceSaver.save(map.get_terrain_layer().tile_set, VILLAGE_TERRAIN) == OK)
+		assert(ResourceSaver.save(map.get_road_layer().tile_set, RoadTiles.TILE_SET_PATH) == OK)
 		map.get_terrain_layer().tile_set.take_over_path(VILLAGE_TERRAIN)
 		var shared: TileSet = load(BuildingVariations.SHARED_TILE_SET) as TileSet
 		share_buildings(buildings, shared)
@@ -110,7 +111,7 @@ func _create_village(map: Map) -> void:
 		for y: int in range(VILLAGE_SIZE.y):
 			var variation: int = clampi(floori((_grass_noise.get_noise_2d(x, y) + 1.0) * 1.5), 0, 2)
 			ground.set_cell(Vector2i(x, y), grasses[variation], Vector2i.ZERO)
-	_paint_roads(terrain)
+	_paint_roads(map.get_road_layer())
 	# Irregular woodland pockets screen deployment and interrupt long field views.
 	_patch(map, "woods", [Vector2(0, 0), Vector2(7, 0), Vector2(8, 1), Vector2(6, 2), Vector2(2, 2), Vector2(0, 3)])
 	_patch(map, "woods", [Vector2(0, 16), Vector2(3, 15), Vector2(5, 16), Vector2(8, 17), Vector2(8, 18), Vector2(0, 18)])
@@ -160,18 +161,11 @@ func _prune_terrain(tiles: TileSet) -> void:
 		tiles.remove_source(id)
 
 
-func _paint_roads(terrain: HexagonTileMapLayer) -> void:
-	var source: TileSetAtlasSource = TileSetAtlasSource.new()
-	source.resource_name = "Road - Alderbrook village streets"
-	source.texture = load(AlderbrookRoads.ASSET_DIRECTORY + "road_" + VILLAGE_ID + ".svg") as Texture2D
-	assert(source.texture != null, "Generate and import the roads before rebuilding the village")
-	source.texture_region_size = Vector2i(128, 128)
-	village_road = terrain.tile_set.add_source(source)
+func _paint_roads(roads: HexagonTileMapLayer) -> void:
+	village_road = RoadTiles.install_curve(roads.tile_set, AlderbrookRoads.ASSET_DIRECTORY + "road_" + VILLAGE_ID + ".svg", "Road - Alderbrook village streets", village_layout["cells"])
 	for cell: Vector2i in village_layout["cells"]:
 		var atlas: Vector2i = village_layout["cells"][cell]
-		source.create_tile(atlas)
-		source.get_tile_data(atlas, 0).set_custom_data("name", "Road")
-		terrain.set_cell(cell, village_road, atlas)
+		roads.set_cell(cell, village_road, atlas)
 
 
 func _patch(map: Map, family: String, vertices: Array[Vector2]) -> void:

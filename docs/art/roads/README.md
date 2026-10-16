@@ -1,38 +1,57 @@
-# Curved Alderbrook roads
+# Road layers
 
-Five editable SVG atlases contain matching 64 × 64 road variations for the five
-campaign maps. Each road is an individually authored sequence of cubic curves.
-Knots have unequal spacing, slope, and bend depth; shared tangents prevent sharp
-corners, and bridge approaches use horizontal tangents and straight spans.
+All eight maps use `scenes/world/maps/layers/road_tile_map_layer.tscn` and
+`resources/tilesets/roads.tres`. Select `TileMapLayers/RoadTileMapLayer` in the
+Godot scene tree to paint roads. The terrain layer contains vegetation and
+fields; its paint catalog no longer includes road sources.
 
-The curves are sliced against the actual flat hex footprint. Each painted cell
-uses its own atlas region rather than repeating or flipping one bend. Dirt
-shoulders, wheel tracks, and grass verges follow the same continuous geometry.
-Small clip overlaps suppress antialiasing seams at shared diagonal edges.
+The drawing order is ground, water where present, terrain, roads, walls, then
+buildings. A road can share a hex with an orchard or part of a building without
+replacing that terrain's LOS or defensive properties. Roads themselves remain
+open terrain with no blocking or hindrance. Inspection recognizes the road
+layer, with vegetation and buildings taking precedence when they share its hex.
 
-Roads pass around farms and village buildings. Woodland cover is removed where
-a road clears a corridor. Rivers remain impassable except at the original bridge
-cells. Crop and orchard placement reserves road cells; the campaign retains only
-wheat and green crops. LOS resources are rebuilt after the terrain changes.
+The shared catalog includes the existing reusable straight, bend and junction
+tiles, plus the curved atlases for the campaign and Western Approach. Curved
+atlas regions describe specific map positions; they are not an autotile set.
+The campaign builders paint these regions onto the road layer. All road verges
+are drawn before the road surfaces so branches cannot paint over junctions.
 
-## Authoring
+Battle for Alderbrook retains its buildings, orchards and other terrain. Its
+complete 132-cell road atlas is restored, including the two pieces at `(20, 5)`
+and `(23, 10)` previously replaced by orchard tiles.
 
-Edit `ROUTES` in `tools/campaigns/alderbrook_roads.gd`. Each `Vector3` is
-`(column, continuous row, row slope per column)`. Coordinates describe continuous
-world positions, independent of odd/even hex column offsets.
+## Curved road authoring
 
-1. Run `tools/campaigns/build_alderbrook_campaign.tscn` with `-- --roads-only`.
-   This writes the SVG atlases and Godot-rasterized PNGs in `rasters/`.
-2. Import the changed assets in Godot.
-3. Run the builder scene normally to save the five maps, tile sets, manifests,
-   and baked LOS resources.
-4. Run `tools/campaigns/render_alderbrook_maps.py` with Pillow to update map PNGs.
+The atlases slice authored cubic curves against the actual flat hex footprint.
+Each painted cell uses its own region rather than a repeated or flipped bend.
+Shared tangents keep bends smooth and bridge approaches straight. Small clip
+overlaps suppress antialiasing seams at shared diagonal edges. SVG geometry uses
+64 units per tile; imported textures and game cells use 128 pixels.
 
-The game loads the SVGs from `assets/tiles/campaign/roads/`. Designer previews
-read the exact same atlas regions from Godot's rasters, including bridge flips.
+Edit mission 1–4 routes in `tools/campaigns/alderbrook_roads.gd`, village routes
+in `tools/campaigns/alderbrook_village_layout.gd`, and standalone routes in
+`tools/scenarios/build_western_approach.gd`. Each knot is
+`Vector3(column, continuous row, row slope per column)`, independent of the
+odd/even column offsets.
 
-Verification includes road connectivity, bridge-only river crossings, building
-clearance, preserved terrain rules, and continuous visible centerlines across
-tile seams and bridge approaches.
+Run the appropriate builder with `-- --roads-only` to regenerate SVGs and the
+matching Godot rasters without rebuilding the map. Import the artwork in Godot.
+The full builder regenerates map layouts, TileSets, manifests and baked LOS;
+map-specific atlas regions must agree with the saved road cells. Field and
+orchard generation reserves road corridors, and rivers remain impassable away
+from bridges.
+
+The game loads SVGs from `assets/tiles/campaign/roads/`. Designer previews read
+the same atlas regions from `rasters/`, including bridge flips. Render a selected
+manifest with `tools/campaigns/render_alderbrook_maps.py` to update its map PNG.
+
+## Validation
+
+```sh
+godot --headless --path . tests/road_layers_regression.tscn
+python3 tests/alderbrook_road_art_regression.py
+godot --headless --path . tests/los_map_lifecycle_regression.tscn
+```
 
 [Campaign overview](../../campaigns/road_to_alderbrook/maps/campaign_overview.png)

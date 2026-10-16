@@ -87,7 +87,7 @@ func _check_fog(main: Node) -> void:
 
 
 func _check_unloaded() -> void:
-	_check(LOSHelper.ground_layer == null and LOSHelper.building_layer == null and LOSHelper.wall_layer == null and LOSHelper.terrain_layer == null, "World teardown releases all map layer references")
+	_check(LOSHelper.ground_layer == null and LOSHelper.building_layer == null and LOSHelper.wall_layer == null and LOSHelper.terrain_layer == null and LOSHelper.road_layer == null, "World teardown releases all map layer references")
 	_check(LOSHelper.origin_hex == Vector2i(-1, -1) and LOSHelper.los_lines.is_empty(), "World teardown removes the pending debug drawing")
 	_check(LOSHelper.grid_size == Vector2i.ZERO and LOSHelper.los_lookup.is_empty() and LOSHelper.visible_hexes[Globals.Team.ALLIES].is_empty() and LOSHelper.visible_hexes[Globals.Team.AXIS].is_empty(), "World teardown clears map-specific visibility and lookup state")
 

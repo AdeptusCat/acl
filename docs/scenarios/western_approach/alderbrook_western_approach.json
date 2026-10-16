@@ -10271,66 +10271,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						5
-					],
-					"position": [
-						64.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						9
-					],
-					"position": [
-						64.0,
-						1216.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						256,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						13
-					],
-					"position": [
-						64.0,
-						1728.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						384,
-						0,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
@@ -10346,66 +10286,6 @@
 					"texture_region": [
 						768,
 						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						8
-					],
-					"position": [
-						160.0,
-						1152.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						640,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						13
-					],
-					"position": [
-						160.0,
-						1792.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						896,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						5
-					],
-					"position": [
-						256.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						128,
-						128,
 						128,
 						128
 					]
@@ -10431,46 +10311,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						9
-					],
-					"position": [
-						256.0,
-						1216.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						384,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						13
-					],
-					"position": [
-						256.0,
-						1728.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						512,
-						128,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
@@ -10486,26 +10326,6 @@
 					"texture_region": [
 						128,
 						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						8
-					],
-					"position": [
-						352.0,
-						1152.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						768,
-						128,
 						128,
 						128
 					]
@@ -10531,86 +10351,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						8
-					],
-					"position": [
-						448.0,
-						1088.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						128,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						9
-					],
-					"position": [
-						448.0,
-						1216.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						256,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						13
-					],
-					"position": [
-						448.0,
-						1728.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						384,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						4
-					],
-					"position": [
-						544.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						512,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "wheat",
 					"flip_h": false,
 					"flip_v": false,
@@ -10626,66 +10366,6 @@
 					"texture_region": [
 						0,
 						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						8
-					],
-					"position": [
-						544.0,
-						1152.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						640,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						13
-					],
-					"position": [
-						544.0,
-						1792.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						896,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						4
-					],
-					"position": [
-						640.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						0,
-						384,
 						128,
 						128
 					]
@@ -10706,26 +10386,6 @@
 					"texture_region": [
 						512,
 						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						8
-					],
-					"position": [
-						640.0,
-						1088.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
-					"texture_region": [
-						128,
-						384,
 						128,
 						128
 					]
@@ -10771,6 +10431,1671 @@
 					]
 				},
 				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						832.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						928.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						4
+					],
+					"position": [
+						1216.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						14
+					],
+					"position": [
+						1216.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						3
+					],
+					"position": [
+						1312.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						3
+					],
+					"position": [
+						448.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						544.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						640.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						640.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						736.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						448.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						544.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						544.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						640.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						736.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						7
+					],
+					"position": [
+						736.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						11
+					],
+					"position": [
+						448.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						12
+					],
+					"position": [
+						448.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						544.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						640.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						12
+					],
+					"position": [
+						640.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						11
+					],
+					"position": [
+						736.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						12
+					],
+					"position": [
+						736.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						11
+					],
+					"position": [
+						1216.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						12
+					],
+					"position": [
+						1216.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						768,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						11
+					],
+					"position": [
+						1312.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						12
+					],
+					"position": [
+						1312.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						1
+					],
+					"position": [
+						64.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						0
+					],
+					"position": [
+						448.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						1
+					],
+					"position": [
+						448.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						16
+					],
+					"position": [
+						64.0,
+						2112.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						17
+					],
+					"position": [
+						64.0,
+						2240.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						16
+					],
+					"position": [
+						448.0,
+						2112.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						17
+					],
+					"position": [
+						448.0,
+						2240.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						17
+					],
+					"position": [
+						832.0,
+						2240.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						16
+					],
+					"position": [
+						1024.0,
+						2112.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						17
+					],
+					"position": [
+						1024.0,
+						2240.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						10
+					],
+					"position": [
+						832.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						12
+					],
+					"position": [
+						832.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						928.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						928.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						12
+					],
+					"position": [
+						928.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						3
+					],
+					"position": [
+						160.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						160.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						3
+					],
+					"position": [
+						256.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						3
+					],
+					"position": [
+						352.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						352.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						10
+					],
+					"position": [
+						448.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						9
+					],
+					"position": [
+						544.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						544.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						640.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						736.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						1024.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						0
+					],
+					"position": [
+						1216.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						256,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						1
+					],
+					"position": [
+						1216.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						384,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						5
+					],
+					"position": [
+						736.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						2
+					],
+					"position": [
+						832.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						5
+					],
+					"position": [
+						832.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						928.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						1024.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						128,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						11
+					],
+					"position": [
+						1120.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						768,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						12
+					],
+					"position": [
+						1120.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						896,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						13
+					],
+					"position": [
+						1120.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						0,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						13
+					],
+					"position": [
+						1312.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
+					"texture_region": [
+						640,
+						1536,
+						128,
+						128
+					]
+				}
+			],
+			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						64.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						9
+					],
+					"position": [
+						64.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						13
+					],
+					"position": [
+						64.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						8
+					],
+					"position": [
+						160.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						13
+					],
+					"position": [
+						160.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						256.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						9
+					],
+					"position": [
+						256.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						13
+					],
+					"position": [
+						256.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						8
+					],
+					"position": [
+						352.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						8
+					],
+					"position": [
+						448.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						9
+					],
+					"position": [
+						448.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						13
+					],
+					"position": [
+						448.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						544.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						8
+					],
+					"position": [
+						544.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						13
+					],
+					"position": [
+						544.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						640.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						8
+					],
+					"position": [
+						640.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -10811,26 +12136,6 @@
 					]
 				},
 				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						4
-					],
-					"position": [
-						832.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						1024,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -10846,26 +12151,6 @@
 					"texture_region": [
 						0,
 						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						4
-					],
-					"position": [
-						928.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						1152,
 						128,
 						128
 					]
@@ -10926,26 +12211,6 @@
 					"texture_region": [
 						768,
 						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						4
-					],
-					"position": [
-						1216.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						1408,
 						128,
 						128
 					]
@@ -10971,26 +12236,6 @@
 					]
 				},
 				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						14
-					],
-					"position": [
-						1216.0,
-						1856.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						1408,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -11006,26 +12251,6 @@
 					"texture_region": [
 						640,
 						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						3
-					],
-					"position": [
-						1312.0,
-						512.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						1536,
 						128,
 						128
 					]
@@ -11671,106 +12896,6 @@
 					]
 				},
 				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						3
-					],
-					"position": [
-						448.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						768,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						3
-					],
-					"position": [
-						544.0,
-						512.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						2
-					],
-					"position": [
-						640.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						3
-					],
-					"position": [
-						640.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						2
-					],
-					"position": [
-						736.0,
-						384.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						768,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -11865,126 +12990,6 @@
 					"texture": "res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg",
 					"texture_region": [
 						512,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						6
-					],
-					"position": [
-						448.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						6
-					],
-					"position": [
-						544.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						7
-					],
-					"position": [
-						544.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						6
-					],
-					"position": [
-						640.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						6
-					],
-					"position": [
-						736.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						7
-					],
-					"position": [
-						736.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
 						896,
 						128,
 						128
@@ -12071,66 +13076,6 @@
 					]
 				},
 				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						11
-					],
-					"position": [
-						448.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						12
-					],
-					"position": [
-						448.0,
-						1600.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						11
-					],
-					"position": [
-						544.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						512,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -12146,166 +13091,6 @@
 					"texture_region": [
 						768,
 						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						11
-					],
-					"position": [
-						640.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						12
-					],
-					"position": [
-						640.0,
-						1600.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						11
-					],
-					"position": [
-						736.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						12
-					],
-					"position": [
-						736.0,
-						1664.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						11
-					],
-					"position": [
-						1216.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						1408,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						12
-					],
-					"position": [
-						1216.0,
-						1600.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						768,
-						1408,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						11
-					],
-					"position": [
-						1312.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						1536,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						12
-					],
-					"position": [
-						1312.0,
-						1664.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						1536,
 						128,
 						128
 					]
@@ -12371,326 +13156,6 @@
 					]
 				},
 				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						1
-					],
-					"position": [
-						64.0,
-						192.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						0
-					],
-					"position": [
-						448.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						1
-					],
-					"position": [
-						448.0,
-						192.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						16
-					],
-					"position": [
-						64.0,
-						2112.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						17
-					],
-					"position": [
-						64.0,
-						2240.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						16
-					],
-					"position": [
-						448.0,
-						2112.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						17
-					],
-					"position": [
-						448.0,
-						2240.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						17
-					],
-					"position": [
-						832.0,
-						2240.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						1024,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						16
-					],
-					"position": [
-						1024.0,
-						2112.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						1280,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						17
-					],
-					"position": [
-						1024.0,
-						2240.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						1280,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						10
-					],
-					"position": [
-						832.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						1024,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						12
-					],
-					"position": [
-						832.0,
-						1600.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						1024,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						10
-					],
-					"position": [
-						928.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						1152,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						11
-					],
-					"position": [
-						928.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						1152,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "woods",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						12
-					],
-					"position": [
-						928.0,
-						1664.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						1152,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						3
-					],
-					"position": [
-						160.0,
-						512.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						0,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -12706,46 +13171,6 @@
 					"texture_region": [
 						512,
 						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						6
-					],
-					"position": [
-						160.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						3
-					],
-					"position": [
-						256.0,
-						448.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						128,
 						128,
 						128
 					]
@@ -12771,26 +13196,6 @@
 					]
 				},
 				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						3
-					],
-					"position": [
-						352.0,
-						512.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -12811,26 +13216,6 @@
 					]
 				},
 				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						6
-					],
-					"position": [
-						352.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -12846,86 +13231,6 @@
 					"texture_region": [
 						0,
 						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						10
-					],
-					"position": [
-						448.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						9
-					],
-					"position": [
-						544.0,
-						1280.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						10
-					],
-					"position": [
-						544.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						512,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						10
-					],
-					"position": [
-						640.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						640,
 						128,
 						128
 					]
@@ -12951,146 +13256,6 @@
 					]
 				},
 				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						10
-					],
-					"position": [
-						736.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						0
-					],
-					"position": [
-						1024.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						1152,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						1
-					],
-					"position": [
-						1024.0,
-						192.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						1280,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						0
-					],
-					"position": [
-						1216.0,
-						64.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						256,
-						1408,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "crops",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						1
-					],
-					"position": [
-						1216.0,
-						192.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						384,
-						1408,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						5
-					],
-					"position": [
-						736.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						2
-					],
-					"position": [
-						832.0,
-						320.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						896,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -13111,26 +13276,6 @@
 					]
 				},
 				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						5
-					],
-					"position": [
-						832.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						1024,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -13146,46 +13291,6 @@
 					"texture_region": [
 						128,
 						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						3
-					],
-					"position": [
-						928.0,
-						512.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						1024,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						5
-					],
-					"position": [
-						928.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						1152,
 						128,
 						128
 					]
@@ -13251,26 +13356,6 @@
 					]
 				},
 				{
-					"art_family": "orchard",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						5
-					],
-					"position": [
-						1024.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						128,
-						1280,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "",
 					"flip_h": false,
 					"flip_v": false,
@@ -13366,86 +13451,6 @@
 					"texture_region": [
 						896,
 						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						11
-					],
-					"position": [
-						1120.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						768,
-						1280,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						12
-					],
-					"position": [
-						1120.0,
-						1664.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						896,
-						1280,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						13
-					],
-					"position": [
-						1120.0,
-						1792.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						0,
-						1408,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "wheat",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						13
-					],
-					"position": [
-						1312.0,
-						1792.0
-					],
-					"texture": "res://assets/tiles/connected/maps/alderbrook_western_approach_terrain.png",
-					"texture_region": [
-						640,
-						1536,
 						128,
 						128
 					]
@@ -14391,7 +14396,7 @@
 					]
 				}
 			],
-			"name": "TerrainTileMapLayer"
+			"name": "RoadTileMapLayer"
 		},
 		{
 			"cells": [

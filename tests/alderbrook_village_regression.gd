@@ -44,9 +44,9 @@ func _test_content() -> void:
 	var terrain_names: Dictionary[String, bool] = {}
 	for cell: Vector2i in map.get_terrain_layer().get_used_cells():
 		var label: String = str(map.get_terrain_layer().get_cell_tile_data(cell).get_custom_data("name"))
-		_check(label in ["Road", "Woods", "Field", "Orchard"], "The layout uses supported terrain rules")
+		_check(label in ["Woods", "Field", "Orchard"], "Vegetation terrain excludes the separate road layer")
 		terrain_names[label] = true
-	_check(terrain_names.size() == 4, "Roads, woodland, crops and orchards all appear")
+	_check(terrain_names.size() == 3 and not map.get_road_layer().get_used_cells().is_empty(), "Roads, woodland, crops and orchards all appear")
 	var kinds: Dictionary[int, int] = {0: 0, 1: 0}
 	var walls: WallTileMapLayer = map.get_wall_layer() as WallTileMapLayer
 	for cell: Vector2i in walls.get_used_cells():
@@ -83,11 +83,10 @@ func _test_routes() -> void:
 				queue.append(neighbor)
 	_check(reached.size() == playable.size(), "Country, all districts and the east exits remain connected")
 	var roads: Dictionary[Vector2i, bool] = {}
-	for cell: Vector2i in map.get_terrain_layer().get_used_cells():
-		if str(map.get_terrain_layer().get_cell_tile_data(cell).get_custom_data("name")) != "Road":
-			continue
+	for cell: Vector2i in map.get_road_layer().get_used_cells():
 		roads[cell] = true
-		_check(map.get_building_layer().get_cell_source_id(cell) < 0, "Road verges have no hidden building or woodland footprint")
+		var building: TileData = map.get_building_layer().get_cell_tile_data(cell)
+		_check(building == null or str(building.get_custom_data("name")) != "Woods", "Road verges have no hidden woodland footprint")
 	var junctions: int = 0
 	for cell: Vector2i in roads:
 		var neighbors: int = 0

@@ -25,6 +25,8 @@ func _run() -> void:
 	var map: Map = main.world.maps.get_node("Alderbrook5") as Map
 	await get_tree().process_frame
 	_dump_layout(map, "/tmp/alderbrook-village-current.json")
+	if OS.get_cmdline_user_args().has("--manifest-only"):
+		_dump_layout(map, IMAGE_DIRECTORY + "05_battle_for_alderbrook.json")
 	if OS.get_cmdline_user_args().has("--apply"):
 		var before: Dictionary[Vector2i, Array] = _building_snapshot(map)
 		_add_details(map)
@@ -84,12 +86,12 @@ func _add_details(map: Map) -> void:
 
 
 func _empty_garden(map: Map, cell: Vector2i) -> bool:
-	return map.get_ground_layer().get_cell_source_id(cell) >= 0 and map.get_terrain_layer().get_cell_source_id(cell) < 0 and map.get_building_layer().get_cell_source_id(cell) < 0
+	return map.get_ground_layer().get_cell_source_id(cell) >= 0 and map.get_road_layer().get_cell_source_id(cell) < 0 and map.get_terrain_layer().get_cell_source_id(cell) < 0 and map.get_building_layer().get_cell_source_id(cell) < 0
 
 
 func _garden_boundary(map: Map, parcel: Rect2i, kind: int, gates: Array[Vector2i]) -> void:
 	var ground: HexagonTileMapLayer = map.get_ground_layer()
-	var terrain: HexagonTileMapLayer = map.get_terrain_layer()
+	var roads: HexagonTileMapLayer = map.get_road_layer()
 	var buildings: BuildingTileMapLayer = map.get_building_layer() as BuildingTileMapLayer
 	var walls: WallTileMapLayer = map.get_wall_layer() as WallTileMapLayer
 	for x: int in range(parcel.position.x, parcel.end.x):
@@ -101,7 +103,7 @@ func _garden_boundary(map: Map, parcel: Rect2i, kind: int, gates: Array[Vector2i
 					continue
 				if ground.get_cell_source_id(cell) < 0 or ground.get_cell_source_id(neighbor) < 0:
 					continue
-				if _is_road(terrain, cell) or _is_road(terrain, neighbor):
+				if _is_road(roads, cell) or _is_road(roads, neighbor):
 					continue
 				if buildings.get_building_cells(cell).has(neighbor):
 					continue
@@ -174,6 +176,7 @@ func _verify_los(map: Map) -> void:
 func _dump_layout(map: Map, path: String) -> void:
 	var scenario: Scenario = map.get_scenario(0)
 	var result: Dictionary = {"id": "05_battle_for_alderbrook", "title": scenario.scenario_name, "size": [map.grid_size.x, map.grid_size.y], "seconds": 900, "layers": [], "player": [], "enemy": [], "allied_markers": [], "axis_markers": []}
+	result["road_centerlines"] = AlderbrookRoads.centerlines(_roads.layout_for_routes(AlderbrookVillageLayout.ROUTES, map.grid_size))
 	for layer: HexagonTileMapLayer in map.get_tilemap_layers():
 		var cells: Array[Dictionary] = []
 		for cell: Vector2i in layer.get_used_cells():

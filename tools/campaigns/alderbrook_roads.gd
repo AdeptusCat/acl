@@ -62,6 +62,16 @@ func cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(32 + cell.x * 48, 32 + cell.y * 64 + (cell.x % 2) * 32)
 
 
+static func centerlines(data: Dictionary) -> Array[Array]:
+	var lines: Array[Array] = []
+	for curve: Curve2D in data["curves"]:
+		var points: Array[Array] = []
+		for point: Vector2 in curve.tessellate(8, 0.5):
+			points.append([point.x * 2.0, point.y * 2.0])
+		lines.append(points)
+	return lines
+
+
 func write_assets(id: String, data: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ASSET_DIRECTORY))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(PREVIEW_DIRECTORY))
@@ -74,15 +84,20 @@ func write_assets(id: String, data: Dictionary) -> void:
 		var tile: Vector2i = cells[cell]
 		var origin: Vector2 = cell_center(cell) - Vector2(32, 32)
 		svg += '<g transform="translate(%d %d)"><g clip-path="url(#hex)"><g transform="translate(%.3f %.3f)">\n' % [tile.x * 64, tile.y * 64, -origin.x, -origin.y]
-		for path: String in data["paths"]:
-			svg += '<g fill="none" stroke-linecap="round" stroke-linejoin="round">\n'
-			svg += '<path d="%s" stroke="#64765d" stroke-width="14" opacity=".7"/>\n' % path
-			svg += '<path d="%s" stroke="#8e8b6a" stroke-width="12"/>\n' % path
-			svg += '<path d="%s" stroke="#c6b999" stroke-width="9"/>\n' % path
-			svg += '<path d="%s" stroke="#b6a783" stroke-width="5" opacity=".45"/>\n' % path
-			for offset: float in [-2.2, 2.2]:
-				svg += '<path d="%s" transform="translate(0 %.1f)" stroke="#a79979" stroke-width=".7" opacity=".65"/>\n' % [path, offset]
-			svg += '</g>\n'
+		# Draw every verge before any road surface so junctions cannot be painted over.
+		svg += '<g fill="none" stroke-linecap="round" stroke-linejoin="round">\n'
+		var strokes: Array[String] = [
+			'<path d="%s" stroke="#64765d" stroke-width="14" opacity=".7"/>\n',
+			'<path d="%s" stroke="#8e8b6a" stroke-width="12"/>\n',
+			'<path d="%s" stroke="#c6b999" stroke-width="9"/>\n',
+			'<path d="%s" stroke="#b6a783" stroke-width="5" opacity=".45"/>\n',
+			'<path d="%s" transform="translate(0 -2.2)" stroke="#a79979" stroke-width=".7" opacity=".65"/>\n',
+			'<path d="%s" transform="translate(0 2.2)" stroke="#a79979" stroke-width=".7" opacity=".65"/>\n',
+		]
+		for stroke: String in strokes:
+			for path: String in data["paths"]:
+				svg += stroke % path
+		svg += '</g>\n'
 		svg += '</g></g></g>\n'
 	svg += '</svg>\n'
 	var path: String = ASSET_DIRECTORY + "road_" + id + ".svg"

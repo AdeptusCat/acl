@@ -276,6 +276,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	LOSHelper.building_layer = map.get_building_layer()
 	LOSHelper.wall_layer = map.get_wall_layer()
 	LOSHelper.terrain_layer = map.get_terrain_layer()
+	LOSHelper.road_layer = map.get_road_layer()
 	game_controller.ground_layer = map.get_ground_layer()
 	ui.ground_layer = map.get_ground_layer()
 	

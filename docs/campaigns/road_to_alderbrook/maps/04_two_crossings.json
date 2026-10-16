@@ -6553,26 +6553,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						4
-					],
-					"position": [
-						928.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "woods",
 					"flip_h": false,
 					"flip_v": false,
@@ -6608,26 +6588,6 @@
 					"texture_region": [
 						640,
 						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						10
-					],
-					"position": [
-						928.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						256,
 						128,
 						128
 					]
@@ -6685,1026 +6645,6 @@
 						1792.0
 					],
 					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
-					"texture_region": [
-						0,
-						896,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						5
-					],
-					"position": [
-						64.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						11
-					],
-					"position": [
-						64.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						5
-					],
-					"position": [
-						160.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						11
-					],
-					"position": [
-						160.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						5
-					],
-					"position": [
-						256.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						11
-					],
-					"position": [
-						256.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						5
-					],
-					"position": [
-						352.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						10
-					],
-					"position": [
-						352.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						11
-					],
-					"position": [
-						352.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						5
-					],
-					"position": [
-						448.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						11
-					],
-					"position": [
-						448.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						4
-					],
-					"position": [
-						544.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						10
-					],
-					"position": [
-						544.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						11
-					],
-					"position": [
-						544.0,
-						1536.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						4
-					],
-					"position": [
-						640.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						5
-					],
-					"position": [
-						640.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						10
-					],
-					"position": [
-						640.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						11
-					],
-					"position": [
-						640.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						4
-					],
-					"position": [
-						736.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						10
-					],
-					"position": [
-						736.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						4
-					],
-					"position": [
-						832.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						10
-					],
-					"position": [
-						832.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						4
-					],
-					"position": [
-						1024.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						10
-					],
-					"position": [
-						1024.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						4
-					],
-					"position": [
-						1312.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						10
-					],
-					"position": [
-						1312.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						384,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						4
-					],
-					"position": [
-						1408.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						10
-					],
-					"position": [
-						1408.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						4
-					],
-					"position": [
-						1504.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						9
-					],
-					"position": [
-						1504.0,
-						1280.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						10
-					],
-					"position": [
-						1504.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						16,
-						4
-					],
-					"position": [
-						1600.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						16,
-						5
-					],
-					"position": [
-						1600.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						16,
-						10
-					],
-					"position": [
-						1600.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						512,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						17,
-						4
-					],
-					"position": [
-						1696.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						17,
-						9
-					],
-					"position": [
-						1696.0,
-						1280.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						18,
-						5
-					],
-					"position": [
-						1792.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						18,
-						10
-					],
-					"position": [
-						1792.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						19,
-						4
-					],
-					"position": [
-						1888.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						19,
-						9
-					],
-					"position": [
-						1888.0,
-						1280.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						19,
-						10
-					],
-					"position": [
-						1888.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						20,
-						5
-					],
-					"position": [
-						1984.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						640,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						20,
-						10
-					],
-					"position": [
-						1984.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						0,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						21,
-						4
-					],
-					"position": [
-						2080.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						128,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						21,
-						10
-					],
-					"position": [
-						2080.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						256,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						22,
-						4
-					],
-					"position": [
-						2176.0,
-						576.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						384,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						22,
-						5
-					],
-					"position": [
-						2176.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						512,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						22,
-						10
-					],
-					"position": [
-						2176.0,
-						1344.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						640,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						22,
-						11
-					],
-					"position": [
-						2176.0,
-						1472.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						768,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						23,
-						4
-					],
-					"position": [
-						2272.0,
-						640.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
-					"texture_region": [
-						896,
-						768,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						23,
-						10
-					],
-					"position": [
-						2272.0,
-						1408.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
 					"texture_region": [
 						0,
 						896,
@@ -8714,6 +7654,1071 @@
 				}
 			],
 			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						928.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						928.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						64.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						11
+					],
+					"position": [
+						64.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						5
+					],
+					"position": [
+						160.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						160.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						256.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						256.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						352.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						352.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						352.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						5
+					],
+					"position": [
+						448.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						11
+					],
+					"position": [
+						448.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						544.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						544.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						544.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						640.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						640.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						640.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						640.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						736.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						736.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						832.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						10
+					],
+					"position": [
+						832.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						1024.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						1024.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						4
+					],
+					"position": [
+						1312.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						1312.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						1408.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						1408.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						4
+					],
+					"position": [
+						1504.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						9
+					],
+					"position": [
+						1504.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						1504.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						4
+					],
+					"position": [
+						1600.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						5
+					],
+					"position": [
+						1600.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						10
+					],
+					"position": [
+						1600.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						4
+					],
+					"position": [
+						1696.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						9
+					],
+					"position": [
+						1696.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						5
+					],
+					"position": [
+						1792.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						10
+					],
+					"position": [
+						1792.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						4
+					],
+					"position": [
+						1888.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						9
+					],
+					"position": [
+						1888.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						10
+					],
+					"position": [
+						1888.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						5
+					],
+					"position": [
+						1984.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						10
+					],
+					"position": [
+						1984.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						4
+					],
+					"position": [
+						2080.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						10
+					],
+					"position": [
+						2080.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						4
+					],
+					"position": [
+						2176.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						5
+					],
+					"position": [
+						2176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						10
+					],
+					"position": [
+						2176.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						11
+					],
+					"position": [
+						2176.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						4
+					],
+					"position": [
+						2272.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						10
+					],
+					"position": [
+						2272.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				}
+			],
+			"name": "RoadTileMapLayer"
 		},
 		{
 			"cells": [],

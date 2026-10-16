@@ -3156,406 +3156,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						6
-					],
-					"position": [
-						64.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						0,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						6
-					],
-					"position": [
-						160.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						6
-					],
-					"position": [
-						256.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						256,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						5
-					],
-					"position": [
-						352.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						384,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						6
-					],
-					"position": [
-						352.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						512,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						6
-					],
-					"position": [
-						448.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						640,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						5
-					],
-					"position": [
-						544.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						768,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						5
-					],
-					"position": [
-						640.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						896,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						6
-					],
-					"position": [
-						640.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						0,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						5
-					],
-					"position": [
-						736.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						128,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						5
-					],
-					"position": [
-						832.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						256,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						5
-					],
-					"position": [
-						928.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						384,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						5
-					],
-					"position": [
-						1024.0,
-						704.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						512,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						6
-					],
-					"position": [
-						1024.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						640,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						5
-					],
-					"position": [
-						1120.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						768,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						6
-					],
-					"position": [
-						1216.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						896,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						5
-					],
-					"position": [
-						1312.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						6
-					],
-					"position": [
-						1408.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						128,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						5
-					],
-					"position": [
-						1504.0,
-						768.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						256,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						6
-					],
-					"position": [
-						1504.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
-					"texture_region": [
-						384,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "orchard",
 					"flip_h": false,
 					"flip_v": false,
@@ -3957,6 +3557,411 @@
 				}
 			],
 			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						6
+					],
+					"position": [
+						64.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						160.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						6
+					],
+					"position": [
+						256.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						352.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						352.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						448.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						5
+					],
+					"position": [
+						544.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						640.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						640.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						5
+					],
+					"position": [
+						736.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						5
+					],
+					"position": [
+						832.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						1024.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						1024.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"position": [
+						1120.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						1216.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						5
+					],
+					"position": [
+						1312.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						1408.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						5
+					],
+					"position": [
+						1504.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						1504.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_01_quiet_approach.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				}
+			],
+			"name": "RoadTileMapLayer"
 		},
 		{
 			"cells": [],

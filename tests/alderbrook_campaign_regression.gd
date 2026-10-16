@@ -258,19 +258,16 @@ func _same_visible_pixels(first: Image, second: Image) -> bool:
 func _test_roads() -> void:
 	for map: Map in campaign_maps:
 		var ground: HexagonTileMapLayer = map.get_ground_layer()
-		var terrain: HexagonTileMapLayer = map.get_terrain_layer()
-		var buildings: HexagonTileMapLayer = map.get_building_layer()
+		var roads: HexagonTileMapLayer = map.get_road_layer()
 		var water: HexagonTileMapLayer = map.tile_map_layers.get_node("WaterTileMapLayer") as HexagonTileMapLayer
 		var corridor: Dictionary[Vector2i, bool] = {}
 		var variants: Dictionary[Vector2i, bool] = {}
 		var frontier: Array[Vector2i] = []
-		for cell: Vector2i in terrain.get_used_cells():
-			if str(terrain.get_cell_tile_data(cell).get_custom_data("name")) != "Road":
-				continue
+		for cell: Vector2i in roads.get_used_cells():
 			corridor[cell] = true
-			variants[terrain.get_cell_atlas_coords(cell)] = true
-			_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Road corridors have playable ground and no hidden woodland or buildings")
-			_check(not bool(terrain.get_cell_tile_data(cell).get_custom_data("hindrance")) and not bool(terrain.get_cell_tile_data(cell).get_custom_data("blocking")), "Curved road pieces preserve open-road LOS rules")
+			variants[roads.get_cell_atlas_coords(cell)] = true
+			_check(ground.get_cell_source_id(cell) >= 0, "Road corridors have playable ground")
+			_check(not bool(roads.get_cell_tile_data(cell).get_custom_data("hindrance")) and not bool(roads.get_cell_tile_data(cell).get_custom_data("blocking")), "Curved road pieces preserve open-road LOS rules")
 			if cell.x == 0:
 				frontier.append(cell)
 		for cell: Vector2i in water.get_used_cells():

@@ -5,6 +5,7 @@ extends Node2D
 @export var building_layer: HexagonTileMapLayer
 @export var wall_layer: HexagonTileMapLayer
 @export var terrain_layer: HexagonTileMapLayer
+@export var road_layer: HexagonTileMapLayer
 @export var debug_draw_enabled: bool = true
 
 var grid_size: Vector2i
@@ -61,6 +62,7 @@ func load_prebaked_los(map: Map) -> void:
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
 	terrain_layer = map.get_terrain_layer()
+	road_layer = map.get_road_layer()
 	grid_size = map.grid_size
 	var signature: String = building_layout_signature()
 	var wall_signature: String = wall_layout_signature()
@@ -147,6 +149,7 @@ func unload_map() -> void:
 	building_layer = null
 	wall_layer = null
 	terrain_layer = null
+	road_layer = null
 	grid_size = Vector2i.ZERO
 	los_lookup = {}
 	_active_los_resource = null
@@ -164,6 +167,7 @@ func bake_and_save_los_data(map: Map) -> void:
 	building_layer = map.get_building_layer()
 	wall_layer = map.get_wall_layer()
 	terrain_layer = map.get_terrain_layer()
+	road_layer = map.get_road_layer()
 	grid_size = map.grid_size
 	prebake_los()
 
@@ -966,6 +970,10 @@ func is_sample_point_in_building(sample_point: Vector2) -> int:
 func get_tile_name(sample_point: Vector2) -> String:
 	var tile_name: String = ""
 	var hex_map: Vector2i = building_layer.local_to_map(sample_point)
+	if is_instance_valid(road_layer) and road_layer.get_cell_source_id(hex_map) >= 0:
+		var road: TileData = road_layer.get_cell_tile_data(hex_map)
+		if road != null and road.has_custom_data("name"):
+			tile_name = str(road.get_custom_data("name"))
 	if not building_layer.get_cell_source_id(hex_map) == -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
 		if tile_data and tile_data.has_custom_data("name"):

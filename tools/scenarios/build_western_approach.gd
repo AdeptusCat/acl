@@ -143,7 +143,7 @@ func _create_approach() -> Map:
 	_plant_plot(ground, terrain, buildings, Rect2i(9, 0, 5, 2), _crop_sources[2])
 	_plant_plot(ground, terrain, buildings, Rect2i(6, 2, 8, 4), _orchard_sources[1])
 	_plant_plot(ground, terrain, buildings, Rect2i(11, 11, 3, 4), _wheat_sources[2])
-	_paint_approach_roads(terrain, buildings)
+	_paint_approach_roads(map.get_road_layer(), terrain, buildings)
 	# Sparse farm/outskirts buildings become irregular, denser town blocks.
 	for cell: Vector2i in [Vector2i(7, 9), Vector2i(10, 7), Vector2i(11, 6), Vector2i(13, 9), Vector2i(14, 10), Vector2i(15, 7), Vector2i(13, 4), Vector2i(14, 4), Vector2i(15, 4), Vector2i(15, 6), Vector2i(17, 5)]:
 		var stone: bool = cell.y == 4 and cell.x >= 13 and cell.x <= 15
@@ -216,19 +216,14 @@ func _plant_plot(ground: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buil
 				terrain.set_cell(cell, source, Vector2i.ZERO)
 
 
-func _paint_approach_roads(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer) -> void:
-	var source: TileSetAtlasSource = TileSetAtlasSource.new()
-	source.resource_name = "Road - Western Approach"
-	source.texture = load(AlderbrookRoads.ASSET_DIRECTORY + "road_" + APPROACH_ID + ".svg") as Texture2D
-	assert(source.texture != null, "Generate and import standalone roads before building the scenario")
-	source.texture_region_size = Vector2i(128, 128)
-	var id: int = terrain.tile_set.add_source(source)
+func _paint_approach_roads(roads: HexagonTileMapLayer, terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer) -> void:
+	var id: int = RoadTiles.install_curve(roads.tile_set, AlderbrookRoads.ASSET_DIRECTORY + "road_" + APPROACH_ID + ".svg", "Road - Western Approach", approach_layout["cells"])
 	for cell: Vector2i in approach_layout["cells"]:
 		var tile: Vector2i = approach_layout["cells"][cell]
-		source.create_tile(tile)
-		source.get_tile_data(tile, 0).set_custom_data("name", "Road")
-		terrain.set_cell(cell, id, tile)
+		terrain.erase_cell(cell)
+		roads.set_cell(cell, id, tile)
 		buildings.erase_cell(cell)
+	assert(ResourceSaver.save(roads.tile_set, RoadTiles.TILE_SET_PATH) == OK)
 
 
 func _place_approach_house(terrain: HexagonTileMapLayer, buildings: HexagonTileMapLayer, cell: Vector2i, stone: bool) -> void:
@@ -269,5 +264,6 @@ func _export_layout(map: Map, _spec: Dictionary) -> void:
 			cells.append(data)
 		layers.append({"name": str(layer.name), "cells": cells})
 	var data: Dictionary = {"series": "STANDALONE SCENARIO", "title": map.get_scenario(0).scenario_name, "id": APPROACH_ID, "size": [APPROACH_SIZE.x, APPROACH_SIZE.y], "seconds": 900.0, "force_summary": "Company: 3 platoons + MGs + light mortar", "goal": "Hold orchard estate A, market B and workshop yard C for 30 seconds together.", "player": APPROACH_PLAYER, "enemy": APPROACH_ENEMY, "allied_markers": APPROACH_MARKERS, "axis_markers": APPROACH_MARKERS, "layers": layers}
+	data["road_centerlines"] = AlderbrookRoads.centerlines(approach_layout)
 	var file: FileAccess = FileAccess.open(APPROACH_DOCS + APPROACH_ID + ".json", FileAccess.WRITE)
 	file.store_string(JSON.stringify(data, "\t"))

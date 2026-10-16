@@ -19,6 +19,7 @@ def check_map(path: Path) -> int:
     footprint: Image.Image = Image.new("L", (width, height))
     mask: ImageDraw.ImageDraw = ImageDraw.Draw(footprint)
     cache: dict[str, Image.Image] = {}
+    assert sum(layer["name"] == "RoadTileMapLayer" for layer in data["layers"]) == 1, f"{data['id']}: roads need a separate layer"
     for layer in data["layers"]:
         for cell in layer["cells"]:
             px, py = cell["position"]
@@ -27,6 +28,8 @@ def check_map(path: Path) -> int:
             name: str = Path(cell["texture"]).stem
             if not name.startswith("road_") and name != "bridge":
                 continue
+            if name.startswith("road_"):
+                assert layer["name"] == "RoadTileMapLayer", f"{data['id']}: road art remains in {layer['name']}"
             tile: Image.Image = texture(cell["texture"], cache)
             x, y, w, h = cell.get("texture_region", [0, 0, tile.width, tile.height])
             tile = tile.crop((x, y, x + w, y + h))
@@ -57,5 +60,7 @@ def check_map(path: Path) -> int:
 
 
 if __name__ == "__main__":
-    total: int = sum(check_map(path) for path in sorted((ROOT / "docs/campaigns/road_to_alderbrook/maps").glob("0*.json")))
+    sources: list[Path] = [path for path in sorted((ROOT / "docs/campaigns/road_to_alderbrook/maps").glob("0*.json")) if "layers" in json.loads(path.read_text())]
+    assert len(sources) == 5, "Road continuity must cover all five campaign maps"
+    total: int = sum(check_map(path) for path in sources)
     print(f"Road art checks: {total} centerline pixels across five maps")

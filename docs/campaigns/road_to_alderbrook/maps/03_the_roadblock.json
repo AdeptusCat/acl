@@ -5056,466 +5056,6 @@
 					]
 				},
 				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						0,
-						8
-					],
-					"position": [
-						64.0,
-						1088.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						0,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						1,
-						7
-					],
-					"position": [
-						160.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						128,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						2,
-						8
-					],
-					"position": [
-						256.0,
-						1088.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						256,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						3,
-						7
-					],
-					"position": [
-						352.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						384,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						7
-					],
-					"position": [
-						448.0,
-						960.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						512,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						4,
-						8
-					],
-					"position": [
-						448.0,
-						1088.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						640,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						5,
-						7
-					],
-					"position": [
-						544.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						768,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						6,
-						7
-					],
-					"position": [
-						640.0,
-						960.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						896,
-						0,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						7,
-						6
-					],
-					"position": [
-						736.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						0,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						8,
-						6
-					],
-					"position": [
-						832.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						128,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						9,
-						6
-					],
-					"position": [
-						928.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						256,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						10,
-						6
-					],
-					"position": [
-						1024.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						384,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						11,
-						6
-					],
-					"position": [
-						1120.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						512,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						12,
-						6
-					],
-					"position": [
-						1216.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						640,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						13,
-						6
-					],
-					"position": [
-						1312.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						768,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						6
-					],
-					"position": [
-						1408.0,
-						832.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						896,
-						128,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						14,
-						7
-					],
-					"position": [
-						1408.0,
-						960.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						0,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						15,
-						6
-					],
-					"position": [
-						1504.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						128,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						16,
-						7
-					],
-					"position": [
-						1600.0,
-						960.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						256,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						17,
-						6
-					],
-					"position": [
-						1696.0,
-						896.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						384,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						17,
-						7
-					],
-					"position": [
-						1696.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						512,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						18,
-						7
-					],
-					"position": [
-						1792.0,
-						960.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						640,
-						256,
-						128,
-						128
-					]
-				},
-				{
-					"art_family": "",
-					"flip_h": false,
-					"flip_v": false,
-					"hex": [
-						19,
-						7
-					],
-					"position": [
-						1888.0,
-						1024.0
-					],
-					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
-					"texture_region": [
-						768,
-						256,
-						128,
-						128
-					]
-				},
-				{
 					"art_family": "orchard",
 					"flip_h": false,
 					"flip_v": false,
@@ -6437,6 +5977,471 @@
 				}
 			],
 			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						8
+					],
+					"position": [
+						64.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						7
+					],
+					"position": [
+						160.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						8
+					],
+					"position": [
+						256.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						7
+					],
+					"position": [
+						352.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						7
+					],
+					"position": [
+						448.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						8
+					],
+					"position": [
+						448.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						544.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						640.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						736.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						6
+					],
+					"position": [
+						832.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						928.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						1024.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"position": [
+						1120.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						1216.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						6
+					],
+					"position": [
+						1312.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						1408.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						7
+					],
+					"position": [
+						1408.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						1504.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						7
+					],
+					"position": [
+						1600.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"position": [
+						1696.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						7
+					],
+					"position": [
+						1696.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						7
+					],
+					"position": [
+						1792.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						7
+					],
+					"position": [
+						1888.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_03_the_roadblock.svg",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				}
+			],
+			"name": "RoadTileMapLayer"
 		},
 		{
 			"cells": [],

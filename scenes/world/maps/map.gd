@@ -31,6 +31,10 @@ func get_terrain_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./TerrainTileMapLayer")
 
 
+func get_road_layer() -> HexagonTileMapLayer:
+	return tile_map_layers.get_node_or_null("./RoadTileMapLayer") as HexagonTileMapLayer
+
+
 func get_wall_layer() -> HexagonTileMapLayer:
 	return tile_map_layers.get_node("./WallTileMapLayer")
 

@@ -122,12 +122,11 @@ func _test_terrain(map: Map) -> void:
 		_check(not graph.get_id_path(from, to).is_empty(), "A flank still connects country to town when the center is unavailable")
 	for id: int in disabled:
 		graph.set_point_disabled(id, false)
-	var terrain: HexagonTileMapLayer = map.get_terrain_layer()
+	var road_layer: HexagonTileMapLayer = map.get_road_layer()
 	var roads: Dictionary[Vector2i, bool] = {}
-	for cell: Vector2i in terrain.get_used_cells():
-		if str(terrain.get_cell_tile_data(cell).get_custom_data("name")) == "Road":
-			roads[cell] = true
-			_check(buildings.get_cell_source_id(cell) < 0, "Roads never overlap hidden building or woodland cover")
+	for cell: Vector2i in road_layer.get_used_cells():
+		roads[cell] = true
+		_check(buildings.get_cell_source_id(cell) < 0, "Roads never overlap hidden building or woodland cover")
 	var reached: Dictionary[Vector2i, bool] = {}
 	var frontier: Array[Vector2i] = []
 	for cell: Vector2i in roads:
