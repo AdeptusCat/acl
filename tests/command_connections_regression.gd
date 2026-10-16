@@ -71,6 +71,7 @@ func _run() -> void:
 	_test_roster_contact()
 	await _test_settings()
 	await _test_freed_units()
+	_test_sight_range()
 	if OS.get_cmdline_user_args().has("--render"):
 		await _render_preview()
 	for unit: Unit in units:
@@ -261,6 +262,79 @@ func _test_freed_units() -> void:
 	await get_tree().process_frame
 	renderer.refresh(0.0)
 	_check(renderer.displayed_links.is_empty() and renderer._cues.size() == Globals.get_units().size(), "Freeing a selected squad between refresh and draw leaves no stale presentation references")
+
+
+func _test_sight_range() -> void:
+	var saved_ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var saved_lookup: Dictionary = LOSHelper.los_lookup
+	var ground: HexagonTileMapLayer = HexagonTileMapLayer.new()
+	ground.pathfinding_enabled = false
+	ground.tile_set = TileSet.new()
+	ground.tile_set.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ground.tile_set.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	ground.tile_set.tile_size = Vector2i(128, 128)
+	battlefield.add_child(ground)
+	LOSHelper.ground_layer = ground
+	var observer: Unit = _unit(Vector2(200.0, 300.0), Globals.SquadType.Rifle)
+	var leader: Unit = _unit(Vector2(600.0, 300.0), Globals.SquadType.PLATOON_HEADQUARTERS)
+	observer.command_squad = leader
+	observer.current_cube = Vector3i.ZERO
+	observer.current_hex = ground.cube_to_map(observer.current_cube)
+	leader.stress_system.state = STATES.MoraleState.NORMAL
+	var link: CommandConnectivity = observer.command_connectivity
+	var directions: Array[Vector3i] = [Vector3i(1, -1, 0), Vector3i(1, 0, -1), Vector3i(0, 1, -1), Vector3i(-1, 1, 0), Vector3i(-1, 0, 1), Vector3i(0, -1, 1)]
+	for direction: Vector3i in directions:
+		for distance: int in [1, 2, 3, 4]:
+			leader.current_cube = direction * distance
+			leader.current_hex = ground.cube_to_map(leader.current_cube)
+			LOSHelper.los_lookup = {observer.current_hex: {leader.current_hex: {"hindrance": 0}}}
+			link.compute_connectivity(observer, leader)
+			if distance == 1:
+				_check(link.los_to_leader and link.voice_range_to_leader and CommandConnectivity.contact_method_for(observer) == "Voice + sight", "Adjacent unobstructed HQ retains combined voice and sight in direction %s" % direction)
+			elif distance <= 3:
+				_check(link.los_to_leader and not link.voice_range_to_leader and CommandConnectivity.contact_method_for(observer) == "Sight", "Clear sight provides contact at %d hexes in direction %s" % [distance, direction])
+				_check(is_equal_approx(link.command_link_strength, 0.8) and CommandConnectivity.contact_state_for(observer) == CommandConnectivity.ContactState.CONNECTED, "Sight alone provides reliable command contact outside voice range")
+				_check(is_equal_approx(link.leader_presence_strength, 0.4), "Distant sight contact keeps its separate lower leadership presence")
+			else:
+				_check(not link.los_to_leader and CommandConnectivity.contact_method_for(observer) == "Runner", "A visible HQ beyond three hexes falls back to runner contact")
+			if distance <= 3:
+				for hindrance: int in [1, 2]:
+					LOSHelper.los_lookup = {observer.current_hex: {leader.current_hex: {"hindrance": hindrance}}}
+					link.compute_connectivity(observer, leader)
+					if hindrance == 1:
+						_check(link.los_to_leader, "One hindrance still permits sight contact at %d hexes in direction %s" % [distance, direction])
+					else:
+						_check(not link.los_to_leader and CommandConnectivity.contact_method_for(observer) == "Runner" and is_equal_approx(link.command_link_strength, 0.6), "Two hindrances obstruct sight contact and fall back to runners at %d hexes in direction %s" % [distance, direction])
+				# Obstructed paths are absent from the actual baked visibility table.
+				LOSHelper.los_lookup = {observer.current_hex: {}}
+				link.compute_connectivity(observer, leader)
+				_check(not link.los_to_leader and CommandConnectivity.contact_method_for(observer) != "Sight", "An obstruction prevents sight contact at %d hexes in direction %s" % [distance, direction])
+	leader.current_cube = directions[0] * 3
+	leader.current_hex = ground.cube_to_map(leader.current_cube)
+	LOSHelper.los_lookup = {observer.current_hex: {leader.current_hex: {"hindrance": 0}}}
+	link.compute_connectivity(observer, leader)
+	link.runner_chain_to_leader = false
+	_check(CommandConnectivity.contact_method_for(observer) == "Sight" and is_equal_approx(link.command_link_strength, 0.8), "Sight works without any runner or voice channel")
+	link.radio_link_to_leader = true
+	_check(CommandConnectivity.contact_method_for(observer) == "Radio" and is_equal_approx(link.command_link_strength, 1.0), "Radio remains the preferred contact when available")
+	link.radio_link_to_leader = false
+	leader.stress_system.state = STATES.MoraleState.PINNED
+	link.compute_connectivity(observer, leader)
+	_check(CommandConnectivity.contact_method_for(observer) == "Sight" and link.command_link_strength > 0.0 and CommandConnectivity.contact_state_for(observer) == CommandConnectivity.ContactState.LIMITED, "HQ suppression reduces sight contact effectiveness without removing the sight channel")
+	leader.stress_system.state = STATES.MoraleState.NORMAL
+	leader.current_cube = observer.current_cube
+	leader.current_hex = observer.current_hex
+	LOSHelper.los_lookup = {}
+	link.compute_connectivity(observer, leader)
+	_check(link.los_to_leader and CommandConnectivity.contact_method_for(observer) == "Voice + sight", "Squads in the HQ's own hex have sight contact despite the omitted self-LOS entry")
+	LOSHelper.ground_layer = saved_ground
+	LOSHelper.los_lookup = saved_lookup
+	for unit: Unit in [observer, leader]:
+		units.erase(unit)
+		unit.squad_fire.calc.free()
+		unit.free()
+	ground.free()
+	renderer.refresh(0.0)
 
 
 func _render_preview() -> void:

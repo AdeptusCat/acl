@@ -4,6 +4,8 @@ class_name CommandConnectivity
 enum ContactState { CONNECTED, LIMITED, LOST }
 
 const RELIABLE_LINK_STRENGTH: float = 0.75
+const SIGHT_RANGE_HEXES: int = 3
+const MAX_SIGHT_HINDRANCE: int = 1
 
 var _los_to_leader: bool = false
 var _voice_range_to_leader: bool = false
@@ -68,6 +70,8 @@ static func contact_method_for(unit: Unit) -> String:
 		return "Radio"
 	if link.los_to_leader and link.voice_range_to_leader:
 		return "Voice + sight"
+	if link.los_to_leader:
+		return "Sight"
 	if link.runner_chain_to_leader:
 		return "Runner"
 	if link.voice_range_to_leader:
@@ -131,17 +135,14 @@ func update_command_link_strength() -> void:
 
 	if _radio_link_to_leader == true:
 		strength = 1.0
-	else:
-		if _los_to_leader == true and _voice_range_to_leader == true:
-			strength = 0.9
-		else:
-			if _runner_chain_to_leader == true:
-				strength = 0.6
-			else:
-				if _voice_range_to_leader == true:
-					strength = 0.4
-				else:
-					strength = 0.0
+	elif _los_to_leader and _voice_range_to_leader:
+		strength = 0.9
+	elif _los_to_leader:
+		strength = 0.8
+	elif _runner_chain_to_leader:
+		strength = 0.6
+	elif _voice_range_to_leader:
+		strength = 0.4
 	
 	var _state_mod: float = _state_mod_dict[_command_unit_state]
 	command_link_strength = strength * _state_mod
@@ -193,8 +194,13 @@ func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
 		var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, command_squad.current_cube)
 		
 		var unit_visible_hexes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
-		if unit_visible_hexes.has(command_squad.current_hex) and distance <= 3:
+		# The baked lookup omits blocked paths and the origin hex itself.
+		if distance == 0:
 			los_to_leader = true
+		elif distance <= SIGHT_RANGE_HEXES and unit_visible_hexes.has(command_squad.current_hex):
+			var sight_line: Dictionary = unit_visible_hexes[command_squad.current_hex]
+			var hindrance: int = int(sight_line.get("hindrance", 0))
+			los_to_leader = hindrance <= MAX_SIGHT_HINDRANCE
 		else:
 			los_to_leader = false
 		
