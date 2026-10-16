@@ -200,6 +200,7 @@ layout_mode = 0
 layout_mode = 1
 
 [node name="SquadRoster" parent="Control" unique_id=88355625 instance=ExtResource("32_roster")]
+visible = true
 layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0

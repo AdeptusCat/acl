@@ -28,6 +28,8 @@ func refresh() -> void:
 	strength.text = "%d/%d" % [remaining, unit.original_size]
 	strength_bar.value = float(remaining) / float(maxi(1, unit.original_size))
 	morale.text = unit.get_state_name(int(unit.stress_system.state))
+	if unit.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		morale.text = "Ineffective"
 	var morale_color: Color = Color(0.66, 0.8, 0.56)
 	match unit.stress_system.state:
 		STATES.MoraleState.CAUTIOUS:
@@ -50,16 +52,13 @@ func refresh() -> void:
 	if rout_available.visible:
 		tooltip_text += "\nRout available: select this squad, then right click for Rout.\nAn uncontrolled retreat; no escape route means surrender."
 	if isolation.visible:
-		tooltip_text += "\nIsolated: no communication link to an active headquarters"
+		tooltip_text += "\nNo contact: no effective command link to an active headquarters"
 	else:
-		if unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
-			tooltip_text += "\nIn contact with headquarters"
+		if CommandConnectivity.needs_command_contact(unit):
+			tooltip_text += "\n%s · %s" % [CommandConnectivity.contact_text(CommandConnectivity.contact_state_for(unit)), CommandConnectivity.contact_method_for(unit)]
+		else:
+			tooltip_text += "\nTop-level headquarters"
 
 
 func _is_isolated() -> bool:
-	if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
-		return false
-	if not is_instance_valid(unit.command_squad) or not unit.command_squad.is_active() or unit.command_squad.surrendered:
-		return true
-	var link: CommandConnectivity = unit.command_connectivity
-	return not (link.los_to_leader or link.voice_range_to_leader or link.runner_chain_to_leader or link.radio_link_to_leader)
+	return CommandConnectivity.needs_command_contact(unit) and CommandConnectivity.contact_state_for(unit) == CommandConnectivity.ContactState.LOST

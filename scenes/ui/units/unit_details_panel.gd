@@ -11,6 +11,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 
 @onready var unit_type_label: Label = $Summary/Identity
 @onready var formation_label: Label = $Summary/Formation
+@onready var command_label: Label = $Summary/Command
 @onready var strength_label: Label = $Summary/Status/Strength
 @onready var unit_status_label: Label = $Summary/Status/Morale
 @onready var order_label: Label = $Summary/Order
@@ -24,6 +25,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var roster_container: VBoxContainer = $Summary/Roster/Scroll/Rows
 @onready var casualty_shock: Label = $Summary/Details/Content/Stats/CasualtyShock
 @onready var leadership_bonus_label: Label = $Summary/Details/Content/Stats/LeadershipBonus
+@onready var leadership_presence_label: Label = $Summary/Details/Content/Stats/LeadershipPresence
 @onready var debug_actions: HFlowContainer = $Summary/Details/Content/DebugActions
 @onready var rout_button: RoutButton = $Summary/Rout
 @onready var rout_explanation: Label = $Summary/RoutExplanation
@@ -188,6 +190,7 @@ func _refresh_summary() -> void:
 	unit_type_label.tooltip_text = unit_type_label.text
 	formation_label.text = unit.get_formation_name()
 	formation_label.tooltip_text = formation_label.text
+	_refresh_command_summary()
 	strength_label.text = "Soldiers: %d/%d" % [unit.squad_fire.soldiers.size(), unit.original_size]
 	strength_label.tooltip_text = strength_label.text
 	_on_state_changed(unit.stress_system.state)
@@ -199,6 +202,25 @@ func _refresh_summary() -> void:
 	effectiveness.text = "%.0f%%" % (effectiveness_bar.value * 100.0)
 	casualty_shock.text = "%.0f%%" % (unit.combat_stats.recent_casualty_shock * 100.0)
 	_on_leadership_changed(unit.stress_system.leadership_bonus)
+
+
+func _refresh_command_summary() -> void:
+	var contact: CommandConnectivity.ContactState = CommandConnectivity.contact_state_for(unit)
+	command_label.text = "Contact: " + CommandConnectivity.contact_text(contact)
+	if not CommandConnectivity.needs_command_contact(unit):
+		command_label.text = "Command: Top-level HQ"
+	elif contact != CommandConnectivity.ContactState.LOST:
+		command_label.text += " · " + CommandConnectivity.contact_method_for(unit)
+	command_label.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
+	var commander_name: String = "Unavailable"
+	if is_instance_valid(unit.command_squad):
+		commander_name = unit.command_squad.get_hud_name() + " · " + unit.command_squad.get_formation_name()
+	var presence: float = 0.0
+	if CommandConnectivity.has_available_commander(unit):
+		presence = unit.command_connectivity.leader_presence_strength
+	leadership_presence_label.text = "%d%%" % roundi(clampf(presence, 0.0, 1.0) * 100.0)
+	leadership_presence_label.tooltip_text = "Nearby leadership support, separate from communication quality."
+	command_label.tooltip_text = "%s\nHQ: %s\nContact method: %s\nLeadership support: %s" % [command_label.text, commander_name, CommandConnectivity.contact_method_for(unit), leadership_presence_label.text]
 
 
 func _current_order_text() -> String:

@@ -87,12 +87,13 @@ func _run() -> void:
 	rifle.command_connectivity.clear_connectivity()
 	panel.refresh()
 	_check(rifle_row.isolation.visible, "Squads without a communication link are marked isolated")
+	rifle.command_connectivity.command_unit_state = STATES.MoraleState.NORMAL
 	rifle.command_connectivity.runner_chain_to_leader = true
 	panel.refresh()
 	_check(not rifle_row.isolation.visible, "An available runner link clears the isolation indicator")
 	rifle.command_connectivity.command_unit_state = STATES.MoraleState.PANIC
 	panel.refresh()
-	_check(not rifle_row.isolation.visible, "Leader morale does not falsely imply a missing communication link")
+	_check(rifle_row.isolation.visible, "An ineffective HQ command link agrees with the battlefield no-contact indicator")
 	for unit: Unit in players:
 		if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 			_check(not panel.rows[unit].isolation.visible, "Company headquarters does not need a higher headquarters link")

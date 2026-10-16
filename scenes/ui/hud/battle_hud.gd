@@ -106,7 +106,7 @@ func _layout_left_panels() -> void:
 	_left_layout_queued = false
 	if not is_node_ready() or is_queued_for_deletion():
 		return
-	var top: float = $Control/TryAgain.get_rect().end.y + 12.0
+	var top: float = 12.0 # $Control/TryAgain.get_rect().end.y +
 	var bottom: float = $Control.size.y - 12.0
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0

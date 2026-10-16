@@ -10,7 +10,7 @@ layout_mode = 0
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -264.0
+offset_left = -390.0
 offset_top = 12.0
 offset_right = -12.0
 offset_bottom = 42.0
@@ -28,6 +28,12 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
 
+[node name="CommandViewButton" type="Button" parent="Toolbar"]
+layout_mode = 2
+tooltip_text = "Show the full command hierarchy. Selected squad and HQ links remain visible when off.\nSolid: connected · Dashed: limited · Broken: no contact"
+toggle_mode = true
+text = "Command view"
+
 [node name="MuteButton" type="Button" parent="Toolbar"]
 custom_minimum_size = Vector2(36, 30)
 layout_mode = 2
@@ -38,7 +44,7 @@ icon_alignment = 1
 [node name="SettingsButton" type="Button" parent="Toolbar"]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "Audio volume and command link display"
+tooltip_text = "Audio volume and command view"
 toggle_mode = true
 text = "Settings"
 
@@ -102,7 +108,8 @@ layout_mode = 2
 
 [node name="ShowCmdConnectivity" type="CheckBox" parent="Menu/Content"]
 layout_mode = 2
-text = "Command links"
+tooltip_text = "Show all command links. Selection highlights remain available when off.\nSolid: connected · Dashed: limited · Broken: no contact"
+text = "Command view"
 
 [node name="Controls" type="PanelContainer" parent="."]
 visible = false

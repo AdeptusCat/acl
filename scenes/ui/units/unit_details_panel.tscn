@@ -60,6 +60,13 @@ theme_type_variation = &"HudSecondary"
 layout_mode = 2
 theme_override_constants/separation = 4
 
+[node name="Command" type="Label" parent="Summary"]
+layout_mode = 2
+mouse_filter = 1
+text = "Contact: Connected"
+text_overrun_behavior = 3
+clip_text = true
+
 [node name="Strength" type="Label" parent="Summary/Status"]
 layout_mode = 2
 mouse_filter = 1
@@ -175,6 +182,15 @@ layout_mode = 2
 mouse_filter = 1
 text = "None"
 script = ExtResource("7")
+
+[node name="LeadershipPresenceLabel" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+text = "Leadership support:"
+
+[node name="LeadershipPresence" type="Label" parent="Summary/Details/Content/Stats"]
+layout_mode = 2
+mouse_filter = 1
+text = "0%"
 
 [node name="DebugActions" type="HFlowContainer" parent="Summary/Details/Content"]
 visible = false

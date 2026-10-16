@@ -124,6 +124,8 @@ func setup() -> void:
 	var map_size : Vector2 = Vector2(ground_layer.tile_set.tile_size) * Vector2(LOSHelper.grid_size.x, LOSHelper.grid_size.y)
 	camera.set_camera_limit(map_size) 
 	
+	for unit: Unit in Globals.get_units():
+		unit._on_command_connectivity_timeout()
 	$CommandConnectivityRenderer.setup()
 	#for x in range(LOSHelper.grid_size.x):
 		#for y in range(LOSHelper.grid_size.y):

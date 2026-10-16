@@ -17,6 +17,7 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 @onready var mute_button: Button = $Toolbar/MuteButton
 @onready var settings_button: Button = $Toolbar/SettingsButton
 @onready var controls_button: Button = $Toolbar/ControlsButton
+@onready var command_view_button: Button = $Toolbar/CommandViewButton
 @onready var menu: PanelContainer = $Menu
 @onready var controls_panel: PanelContainer = $Controls
 @onready var s1: HSlider = $Menu/Content/VolumeSlider
@@ -39,7 +40,9 @@ func _ready() -> void:
 	s1.value_changed.connect(_on_volume_slider_value_changed)
 	s2.value_changed.connect(_on_volume_slider_2_value_changed)
 	command_links.toggled.connect(_on_check_box_toggled)
-	command_links.set_pressed_no_signal(SessionSettings.showCmdConnectivity)
+	command_view_button.toggled.connect(_on_check_box_toggled)
+	SessionSettings.command_view_changed.connect(_sync_command_view)
+	_sync_command_view(SessionSettings.showCmdConnectivity)
 	SessionAudio.sync_sliders([s1, s2])
 	_update_volume_labels()
 	_build_controls()
@@ -162,3 +165,8 @@ func _on_volume_slider_2_value_changed(value: float) -> void:
 
 func _on_check_box_toggled(toggled_on: bool) -> void:
 	SessionSettings.showCmdConnectivity = toggled_on
+
+
+func _sync_command_view(enabled: bool) -> void:
+	command_links.set_pressed_no_signal(enabled)
+	command_view_button.set_pressed_no_signal(enabled)

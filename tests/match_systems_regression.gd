@@ -97,28 +97,22 @@ func _test_link_visibility(world: Node) -> void:
 	var show_links: bool = SessionSettings.showCmdConnectivity
 	var show_enemy: bool = Debug.showEnemyCmdConnectivity
 	var checkbox_pressed: bool = checkbox.button_pressed
-	_check(renderer.is_visible_in_tree(), "The actual world renderer is visible with connectivity enabled at startup")
+	for unit: Unit in Globals.get_units():
+		unit.deselect()
 	for enemy_enabled: bool in [false, true]:
 		Debug.showEnemyCmdConnectivity = enemy_enabled
 		checkbox.button_pressed = false
 		renderer._process(0.1)
 		_check(not SessionSettings.showCmdConnectivity, "The settings checkbox disables command connectivity")
-		_check(not renderer.is_visible_in_tree(), "Disabled connectivity hides the renderer parent")
-		for line: MovingDottedDrawLine in renderer.get_children():
-			_check(not line.visible and not line.is_visible_in_tree(), "Disabled command connectivity hides every line, including enemy debug lines")
+		_check(renderer.displayed_links.is_empty(), "Command view off hides unselected hierarchy links, including enemy debug links")
 		checkbox.button_pressed = true
 		renderer._process(0.1)
 		_check(SessionSettings.showCmdConnectivity, "The settings checkbox enables command connectivity")
 		_check(renderer.is_visible_in_tree(), "Re-enabling connectivity shows the actual renderer parent")
-		var visible: int = 0
-		for line: MovingDottedDrawLine in renderer.get_children():
-			var eligible: bool = is_instance_valid(line.unit.command_squad)
-			if line.unit.team != Globals.team_player and not enemy_enabled:
-				eligible = false
-			_check(line.is_visible_in_tree() == eligible, "Effective line visibility respects command ownership and enemy debug settings")
-			if line.is_visible_in_tree():
-				visible += 1
-		_check(visible > 0, "Re-enabling command connectivity restores eligible lines in the scene tree")
+		for unit: Unit in renderer.displayed_links:
+			_check(unit.team == Globals.team_player or enemy_enabled, "The hierarchy respects command ownership and enemy debug settings")
+			_check(unit.is_visible_in_tree() and unit.command_squad.is_visible_in_tree(), "Command links never reveal hidden endpoint positions")
+		_check(not renderer.displayed_links.is_empty(), "Re-enabling command view restores eligible hierarchy links")
 	checkbox.button_pressed = checkbox_pressed
 	SessionSettings.showCmdConnectivity = show_links
 	Debug.showEnemyCmdConnectivity = show_enemy

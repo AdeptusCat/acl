@@ -1,6 +1,10 @@
 extends Node
 class_name CommandConnectivity
 
+enum ContactState { CONNECTED, LIMITED, LOST }
+
+const RELIABLE_LINK_STRENGTH: float = 0.75
+
 var _los_to_leader: bool = false
 var _voice_range_to_leader: bool = false
 var _runner_chain_to_leader: bool = false
@@ -17,6 +21,58 @@ var _command_unit_state: STATES.MoraleState
 
 var command_link_strength: float = 0.0
 var leader_presence_strength: float = 0.0
+
+
+static func needs_command_contact(unit: Unit) -> bool:
+	if is_instance_valid(unit.command_squad):
+		return true
+	return unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and unit.squad_type != Globals.SquadType.PLATOON_HEADQUARTERS
+
+
+static func has_available_commander(unit: Unit) -> bool:
+	var commander: Unit = unit.command_squad
+	return is_instance_valid(commander) and commander != unit and commander.team == unit.team and commander.is_active() and not commander.surrendered
+
+
+static func contact_state_for(unit: Unit) -> ContactState:
+	if not needs_command_contact(unit):
+		return ContactState.CONNECTED
+	if not has_available_commander(unit) or not is_instance_valid(unit.command_connectivity):
+		return ContactState.LOST
+	var strength: float = unit.command_connectivity.command_link_strength
+	if strength >= RELIABLE_LINK_STRENGTH:
+		return ContactState.CONNECTED
+	if strength > 0.0:
+		return ContactState.LIMITED
+	return ContactState.LOST
+
+
+static func contact_text(state: ContactState) -> String:
+	match state:
+		ContactState.CONNECTED:
+			return "Connected"
+		ContactState.LIMITED:
+			return "Limited"
+	return "No contact"
+
+
+static func contact_method_for(unit: Unit) -> String:
+	if not needs_command_contact(unit):
+		return "Top-level HQ"
+	if not has_available_commander(unit):
+		return "HQ unavailable"
+	var link: CommandConnectivity = unit.command_connectivity
+	if not is_instance_valid(link) or link.command_link_strength <= 0.0:
+		return "No contact"
+	if link.radio_link_to_leader:
+		return "Radio"
+	if link.los_to_leader and link.voice_range_to_leader:
+		return "Voice + sight"
+	if link.runner_chain_to_leader:
+		return "Runner"
+	if link.voice_range_to_leader:
+		return "Voice"
+	return "No contact"
 
 
 var command_unit_state: STATES.MoraleState:
@@ -129,7 +185,7 @@ func clear_connectivity() -> void:
 
 
 func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
-	if not is_instance_valid(command_squad) or not command_squad.is_active():
+	if not is_instance_valid(command_squad) or not command_squad.is_active() or command_squad.surrendered or command_squad == unit or command_squad.team != unit.team:
 		clear_connectivity()
 		return
 	if is_instance_valid(command_squad):

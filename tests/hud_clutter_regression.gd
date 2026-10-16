@@ -76,6 +76,7 @@ func _run() -> void:
 	_check(SessionAudio.master_linear > 0.65 and SessionAudio.master_linear < 0.85 and is_equal_approx(SessionAudio.music_linear, 0.42), "An actual slider click changes only master volume")
 	settings.command_links.button_pressed = not links_before
 	_check(SessionSettings.showCmdConnectivity != links_before, "Command links remain configurable from the menu")
+	_check(settings.command_view_button.button_pressed == SessionSettings.showCmdConnectivity, "The toolbar reflects the command view setting")
 	settings.command_links.button_pressed = links_before
 	var zoom_before: int = zoom_events
 	_pointer_event(settings.menu.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
