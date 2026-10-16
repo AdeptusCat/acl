@@ -2,6 +2,9 @@
 extends Control
 class_name UnitUi
 
+const PROJECTILE_EFFECTS: Script = preload("res://scenes/game/effects/battlefield_effects.gd")
+const TRACER: Script = preload("res://scenes/game/effects/tracer.gd")
+
 const MEDIUM_INFLUENCE_RATE: float = 0.5
 const STRONG_INFLUENCE_RATE: float = 1.5
 
@@ -12,7 +15,6 @@ var detail_ui: UnitUi = null
 @export var morale_popup_scene: PackedScene
 @export var morale_flash_scene: PackedScene
 @export var tracer_scene: PackedScene
-@export var tracer_texture: Texture
 @export var cover_icon_scene: PackedScene
 @export var cautious_texture: Texture
 @export var pinned_texture: Texture
@@ -366,84 +368,37 @@ func _spawn_flash(type: String) -> void:
 		detail_ui._spawn_flash(type)
 
 func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	if _exited:
-		return
-	var tracer: Node2D = tracer_scene.instantiate() as Node2D
-	tracer.speed = weapon.projectile_speed
-	tracer.tracer_texture = tracer_texture
-	get_tree().current_scene.add_child(tracer)
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	shooting_texture_rect.visible = true
-	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
-	if _exited:
-		return
-	$Timer.start()
-	if detail_ui:
-		for child: Control in detail_ui.unit_status_control.get_children():
-			child.visible = false
-		detail_ui.shooting_texture_rect.visible = true
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.ROCKET)
 
 
 func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	if _exited:
-		return
-	var tracer: Node2D = tracer_scene.instantiate() as Node2D
-	tracer.speed = weapon.projectile_speed
-	tracer.tracer_texture = tracer_texture
-	get_tree().current_scene.add_child(tracer)
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	shooting_texture_rect.visible = true
-	await tracer.shoot_rocket_launcher(from_pos, to_pos, weapon)
-	if _exited:
-		return
-	$Timer.start()
-	if detail_ui:
-		for child: Control in detail_ui.unit_status_control.get_children():
-			child.visible = false
-		detail_ui.shooting_texture_rect.visible = true
-
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.MORTAR)
 
 
 func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	if _exited:
-		return
-	var tracer: Node2D = tracer_scene.instantiate() as Node2D
-	tracer.speed = weapon.projectile_speed
-	tracer.tracer_texture = tracer_texture
-	get_tree().current_scene.add_child(tracer)
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	shooting_texture_rect.visible = true
-	await tracer.shoot(from_pos, to_pos, weapon)
-	if _exited:
-		return
-	$Timer.start()
-	if detail_ui:
-		for child: Control in detail_ui.unit_status_control.get_children():
-			child.visible = false
-		detail_ui.shooting_texture_rect.visible = true
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.BULLET)
 
 
 func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.GRENADE)
+
+
+func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, kind: TRACER.Kind) -> void:
 	if _exited:
 		return
-	var tracer: Node2D = tracer_scene.instantiate() as Node2D
-	tracer.speed = weapon.riflegrenade_projectile_speed
-	tracer.tracer_texture = tracer_texture
-	get_tree().current_scene.add_child(tracer)
+	PROJECTILE_EFFECTS.for_scene(self).fire(from_pos, to_pos, weapon, kind, tracer_scene)
+	_show_shooting_status()
+	if is_instance_valid(detail_ui):
+		detail_ui._show_shooting_status()
+
+
+func _show_shooting_status() -> void:
+	if _exited:
+		return
 	for child: Control in unit_status_control.get_children():
 		child.visible = false
 	shooting_texture_rect.visible = true
-	await tracer.shoot(from_pos, to_pos, weapon, true)
-	if _exited:
-		return
 	$Timer.start()
-	if detail_ui:
-		for child: Control in detail_ui.unit_status_control.get_children():
-			child.visible = false
-		detail_ui.shooting_texture_rect.visible = true
 
 
 func riflegrenade_explosion(_target_pos: Vector2) -> void:

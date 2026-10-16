@@ -102,7 +102,6 @@
 [ext_resource type="Resource" path="res://resources/squads/united_states/anti_tank_team.tres" id="67_i1y2t"]
 [ext_resource type="Resource" path="res://resources/squads/united_states/lmg_squad.tres" id="67_mb8w1"]
 [ext_resource type="Resource" path="res://resources/squads/germany/anti_tank_team.tres" id="69_ghkdt"]
-[ext_resource type="PackedScene" path="res://scenes/game/effects/tracer.tscn" id="69_j3x8u"]
 [ext_resource type="Script" path="res://ai/platoon/phased/platoon_phase_controller.gd" id="69_vn2as"]
 [ext_resource type="Script" path="res://scenes/world/overlays/hex_inspection_overlay.gd" id="71_inspection"]
 [ext_resource type="Resource" path="res://resources/squads/germany/medium_mortar_squad.tres" id="71_s64j0"]
@@ -133,8 +132,6 @@
 [ext_resource type="Script" path="res://ai/platoon/defense/defense_mission_director.gd" id="124_5vtr0"]
 [ext_resource type="Script" path="res://ai/platoon/platoon_ai_controller.gd" id="126_xmq5n"]
 [ext_resource type="Script" path="res://scenes/game/audio/audio_pool.gd" id="130_1e8o5"]
-[ext_resource type="Script" path="res://scenes/game/effects/tracer.gd" id="133_k0giv"]
-[ext_resource type="Texture2D" path="res://assets/effects/tracer - Kopie.png" id="134_ladsi"]
 
 [sub_resource type="Resource" id="Resource_kngxi"]
 script = ExtResource("50_hph6x")
@@ -2888,22 +2885,6 @@ glow_levels/7 = 1.0
 glow_normalized = true
 glow_intensity = 1.0
 
-[sub_resource type="Curve" id="Curve_njtwl"]
-_limits = [-200.0, 200.0, 0.0, 1.0]
-_data = [Vector2(0.006172836, -1.9728699), 0.0, 0.0, 0, 0, Vector2(0.2685185, -37.237976), 0.0, 0.0, 0, 0, Vector2(1, 4.438965), 0.0, 0.0, 0, 0]
-point_count = 3
-
-[sub_resource type="Curve" id="Curve_oxgep"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.99999, 0.006165147), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
-point_count = 3
-
-[sub_resource type="Gradient" id="Gradient_njtwl"]
-offsets = PackedFloat32Array(0.45637584, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="Curve" id="Curve_c6nyu"]
-_data = [Vector2(0.015432097, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
-point_count = 2
 
 [node name="World" type="Node2D" unique_id=154406966]
 script = ExtResource("1_6hctx")
@@ -4473,60 +4454,6 @@ bus = &"Music"
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=46817316]
 environment = SubResource("Environment_tj3jo")
 
-[node name="Tracer" parent="." unique_id=1698380409 instance=ExtResource("69_j3x8u")]
-visible = false
-position = Vector2(1252, 1808)
-script = ExtResource("133_k0giv")
-tracer_texture = ExtResource("134_ladsi")
-
-[node name="CPUParticles2D" parent="Tracer" index="0" unique_id=430471733]
-modulate = Color(18.031, 11.303, 6.597, 1)
-emitting = false
-amount = 1
-texture = ExtResource("134_ladsi")
-lifetime = 10.0
-one_shot = true
-randomness = 1.0
-emission_shape = 1
-emission_sphere_radius = 20.0
-spread = 0.0
-gravity = Vector2(0, 0)
-initial_velocity_min = 600.0
-initial_velocity_max = 600.0
-
-[node name="CPUParticles2D2" parent="Tracer" index="1" unique_id=554603097]
-modulate = Color(5.854, 1.659, 0, 1)
-emitting = false
-amount = 50
-lifetime = 0.7
-one_shot = true
-explosiveness = 1.0
-spread = 180.0
-gravity = Vector2(0, 0)
-initial_velocity_min = 15.78
-initial_velocity_max = 94.22
-linear_accel_min = 3.63
-linear_accel_max = 27.91
-linear_accel_curve = SubResource("Curve_njtwl")
-scale_amount_max = 3.0
-scale_amount_curve = SubResource("Curve_oxgep")
-color_ramp = SubResource("Gradient_njtwl")
-
-[node name="RocketExhaust" parent="Tracer" index="2" unique_id=1675854690]
-emitting = false
-amount = 32
-lifetime = 0.5
-one_shot = true
-direction = Vector2(-1, 0)
-spread = 5.0
-gravity = Vector2(0, 0)
-initial_velocity_min = 100.0
-initial_velocity_max = 100.0
-scale_amount_min = 3.0
-scale_amount_max = 3.0
-scale_amount_curve = SubResource("Curve_c6nyu")
-color = Color(15.303791, 2.6870396, 3.3018296, 1)
-
 [connection signal="key_space_pressed" from="InputManager" to="GameController" method="_on_key_space_pressed"]
 [connection signal="mouse_button_left_pressed" from="InputManager" to="GameController" method="_on_mouse_button_left_pressed"]
 [connection signal="mouse_button_right_pressed" from="InputManager" to="GameController" method="_on_mouse_button_right_pressed"]
@@ -4553,4 +4480,3 @@ color = Color(15.303791, 2.6870396, 3.3018296, 1)
 [editable path="Maps/DefaultMap/Scenarios/PunchThrough"]
 [editable path="Maps/DefaultMap/Scenarios/Debug"]
 [editable path="Maps/DefaultMap/Scenarios/Debug2"]
-[editable path="Tracer"]

@@ -678,7 +678,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			s.rounds_in_mag = s.weapon.mag_capacity
 		#return 0 # TODO figure out why this was in place? this just prohibits that damage is done
 	
-	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
+	var dist: float = unit.global_position.distance_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(_target_hex)))
 	
 	var life: float = dist / s.weapon.projectile_speed      # seconds
 	if riflegrenade:
