@@ -147,6 +147,9 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 	for candidate: Unit in candidates:
 		if candidate.current_hex == stack_hex:
 			units.append(candidate)
+	if units.size() > 1 and controller.has_method("open_stack_roster"):
+		if controller.open_stack_roster(stack_hex):
+			return
 	if units.is_empty():
 		if is_instance_valid(controller.selected_unit):
 			controller._deselect_unit(controller.selected_unit)

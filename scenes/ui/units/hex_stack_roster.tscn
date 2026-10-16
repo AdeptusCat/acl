@@ -1,0 +1,45 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/units/hex_stack_roster.gd" id="script"]
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="theme"]
+
+[node name="HexStackRoster" type="PanelContainer"]
+visible = false
+z_index = 30
+mouse_force_pass_scroll_events = false
+theme = ExtResource("theme")
+theme_type_variation = &"HudCompactPanel"
+script = ExtResource("script")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Heading" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Content/Heading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Squads in hex"
+theme_type_variation = &"HudHeading"
+
+[node name="Close" type="Button" parent="Content/Heading"]
+layout_mode = 2
+text = "Close"
+
+[node name="Hex" type="Label" parent="Content"]
+layout_mode = 2
+text = "Hex (0, 0)"
+theme_type_variation = &"HudSecondary"
+
+[node name="Scroll" type="ScrollContainer" parent="Content"]
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4

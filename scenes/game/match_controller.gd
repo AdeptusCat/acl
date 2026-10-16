@@ -1,5 +1,7 @@
 extends Node2D
 
+const STACK_PRESENTATION: Script = preload("res://scenes/world/overlays/battlefield_stacks.gd")
+
 @onready var unit_container: Node2D = $UnitContainer
 @onready var los_renderer: Node2D = $LOSRenderer
 @onready var camera: Camera2D = $Camera2D
@@ -27,6 +29,7 @@ extends Node2D
 var timer_running: bool = false
 
 var selected_unit: Unit = null
+var stack_presenter: BattlefieldStacks
 
 
 signal update_timer_label(time_left_seconds: float)
@@ -126,6 +129,9 @@ func setup() -> void:
 	
 	for unit: Unit in Globals.get_units():
 		unit._on_command_connectivity_timeout()
+	stack_presenter = STACK_PRESENTATION.new() as BattlefieldStacks
+	add_child(stack_presenter)
+	stack_presenter.setup(self, get_parent().ui.get_node("Control") as Control)
 	$CommandConnectivityRenderer.setup()
 	#for x in range(LOSHelper.grid_size.x):
 		#for y in range(LOSHelper.grid_size.y):
@@ -381,6 +387,14 @@ func _on_key_space_pressed(_event_pos: Vector2) -> void:
 
 func _select_unit(unit: Unit) -> void:
 	MatchInteractionHandler.select_unit(self, unit)
+	if is_instance_valid(stack_presenter):
+		stack_presenter.refresh()
+
+
+func open_stack_roster(cell: Vector2i) -> bool:
+	if is_instance_valid(stack_presenter):
+		return stack_presenter.open_roster(cell)
+	return false
 
 
 func select_and_center_unit(unit: Unit) -> void:
