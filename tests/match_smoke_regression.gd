@@ -209,7 +209,7 @@ func _test_all_defenders_suppression(planner: PlatoonAI) -> void:
 	LOSHelper.los_lookup[observer.current_hex] = saved_los
 
 
-func _on_attack_mg_fired(_weapon: WeaponSpec, _hex: Vector2i) -> void:
+func _on_attack_mg_fired(_weapon: WeaponSpec, _hex: Vector2i, _origin: Vector2, _impact: Vector2) -> void:
 	attack_mg_shots += 1
 
 

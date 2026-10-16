@@ -367,26 +367,29 @@ func _spawn_flash(type: String) -> void:
 	if detail_ui:
 		detail_ui._spawn_flash(type)
 
-func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.ROCKET)
+func shoot_rocket_launcher(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.ROCKET, spawn_offset, impact_offset)
 
 
-func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.MORTAR)
+func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.MORTAR, spawn_offset, impact_offset)
 
 
-func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.BULLET)
+func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.BULLET, spawn_offset, impact_offset)
 
 
-func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
-	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.GRENADE)
+func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:
+	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.GRENADE, spawn_offset, impact_offset)
 
 
-func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, kind: TRACER.Kind) -> void:
+func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, kind: TRACER.Kind, spawn_offset: Vector2, impact_offset: Vector2) -> void:
 	if _exited:
 		return
-	PROJECTILE_EFFECTS.for_scene(self).fire(from_pos, to_pos, weapon, kind, tracer_scene)
+	var offset: Vector2 = spawn_offset
+	if not offset.is_finite():
+		offset = TRACER.sample_spawn_offset()
+	PROJECTILE_EFFECTS.for_scene(self).fire(from_pos, to_pos, weapon, kind, tracer_scene, offset, impact_offset)
 	_show_shooting_status()
 	if is_instance_valid(detail_ui):
 		detail_ui._show_shooting_status()

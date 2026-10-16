@@ -249,7 +249,7 @@ func _on_death(_unit: Unit) -> void:
 	deaths += 1
 
 
-func _on_shot(_weapon: WeaponSpec, _hex: Vector2i) -> void:
+func _on_shot(_weapon: WeaponSpec, _hex: Vector2i, _origin: Vector2, _impact: Vector2) -> void:
 	shots += 1
 
 

@@ -344,20 +344,27 @@ func is_good_order() -> bool:
 		return true 
 
 
-func _on_fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i) -> void:
-	# Use the burst's captured destination even after sight loss clears the target.
+func _on_fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i, shot_origin: Vector2 = Vector2.INF, shot_impact: Vector2 = Vector2.INF) -> void:
+	# Preserve the burst's muzzle, target hex and ordered cosmetic impact point.
+	var impact_offset: Vector2 = Vector2.INF
+	if shot_impact.is_finite():
+		var center: Vector2 = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(shot_target_hex))
+		impact_offset = shot_impact - center
+	var spawn_offset: Vector2 = Vector2.INF
+	if shot_origin.is_finite():
+		spawn_offset = shot_origin - global_position
 	if weapon.family != WeaponSpec.Family.MORTAR:
 		var pos: Vector2 = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(shot_target_hex))
 		match weapon.family: 
 			WeaponSpec.Family.SMALL_ARM:
-				ui.shoot(global_position, pos, weapon)
+				ui.shoot(global_position, pos, weapon, spawn_offset, impact_offset)
 			WeaponSpec.Family.ROCKET_LAUNCHER:
-				ui.shoot_rocket_launcher(global_position, pos, weapon)
+				ui.shoot_rocket_launcher(global_position, pos, weapon, spawn_offset, impact_offset)
 	if weapon.family == WeaponSpec.Family.MORTAR:
 		var pos: Vector2 = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(shot_target_hex))
 		if weapon.family == WeaponSpec.Family.MORTAR:
 				ui.set_ammunition_left(weapon.ammunition)
-				ui.shoot_mortar(global_position, pos, weapon)
+				ui.shoot_mortar(global_position, pos, weapon, spawn_offset, impact_offset)
 		#match weapon.family: 
 			#WeaponSpec.Family.SMALL_ARM:
 				#ui.shoot(global_position, squad_fire.target_unit.global_position, weapon)

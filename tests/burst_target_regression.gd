@@ -7,15 +7,21 @@ class VisualProbe extends UnitUi:
 	var destinations: Array[Vector2] = []
 	var families: Array[WeaponSpec.Family] = []
 
-	func shoot(_from: Vector2, to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot(_from: Vector2, to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
+		if _impact_offset.is_finite():
+			to += _impact_offset
 		destinations.append(to)
 		families.append(WeaponSpec.Family.SMALL_ARM)
 
-	func shoot_rocket_launcher(_from: Vector2, to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot_rocket_launcher(_from: Vector2, to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
+		if _impact_offset.is_finite():
+			to += _impact_offset
 		destinations.append(to)
 		families.append(WeaponSpec.Family.ROCKET_LAUNCHER)
 
-	func shoot_mortar(_from: Vector2, to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot_mortar(_from: Vector2, to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
+		if _impact_offset.is_finite():
+			to += _impact_offset
 		destinations.append(to)
 		families.append(WeaponSpec.Family.MORTAR)
 
@@ -205,10 +211,10 @@ func _set_hex(unit: Unit, hex: Vector2i) -> void:
 
 
 func _check_destinations(hexes: Array[Vector2i], message: String) -> void:
-	var expected: Array[Vector2] = []
-	for hex: Vector2i in hexes:
-		expected.append(LOSHelper.ground_layer.map_to_local(hex))
-	_check(visual.destinations == expected, "%s: expected %s, got %s" % [message, expected, visual.destinations])
+	var actual: Array[Vector2i] = []
+	for point: Vector2 in visual.destinations:
+		actual.append(LOSHelper.ground_layer.local_to_map(LOSHelper.ground_layer.to_local(point)))
+	_check(actual == hexes, "%s: expected %s, got %s" % [message, hexes, actual])
 
 
 func _freeze(node: Node) -> void:

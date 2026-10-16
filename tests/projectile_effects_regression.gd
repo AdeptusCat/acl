@@ -3,6 +3,7 @@ extends Node
 # Run this scene headlessly for logic checks; add -- --render with a display for HDR previews.
 const Effects: Script = preload("res://scenes/game/effects/battlefield_effects.gd")
 const Tracer: Script = preload("res://scenes/game/effects/tracer.gd")
+const IMPACT_PATTERN: Script = preload("res://scenes/game/effects/burst_impact_pattern.gd")
 const TRACER_SCENE: PackedScene = preload("res://scenes/game/effects/tracer.tscn")
 
 class ImpactAudio extends AudioPool:
@@ -16,15 +17,37 @@ class ImpactAudio extends AudioPool:
 
 class ViewProbe extends UnitUi:
 	var endpoint: Vector2 = Vector2.ZERO
+	var origins: Array[Vector2] = []
+	var weapons: Array[WeaponSpec] = []
+	var impacts: Array[Vector2] = []
 
-	func shoot(_from: Vector2, to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot(_from: Vector2, to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
 		endpoint = to
+		if _spawn_offset.is_finite():
+			origins.append(_from + _spawn_offset)
+		else:
+			origins.append(_from)
+		weapons.append(_weapon)
+		var impact: Vector2 = to
+		if _impact_offset.is_finite():
+			impact += _impact_offset
+		impacts.append(impact)
+
+
+class SweepGuide extends Node2D:
+	var points: PackedVector2Array = PackedVector2Array()
+
+	func _draw() -> void:
+		draw_polyline(points, Color(0.9, 0.75, 0.3, 0.25), 1.0, true)
+		for point: Vector2 in points:
+			draw_circle(point, 1.5, Color(1.8, 1.0, 0.3))
 
 
 var failures: int = 0
 var checks: int = 0
 var arrivals: int = 0
 var audio: ImpactAudio
+var _completed_bursts: int = 0
 
 
 func _ready() -> void:
@@ -87,6 +110,24 @@ func _test_flight() -> void:
 	tracer.launch(Vector2.ZERO, end, weapon, Tracer.Kind.BULLET, Tracer.Surface.GROUND, false)
 	tracer.advance(0.21)
 	_check(tracer.has_arrived, "Unlit bullets keep their muzzle and impact timing")
+	var offset: Vector2 = Vector2(-15.0, 9.0)
+	tracer.launch(Vector2.ZERO, end, weapon, Tracer.Kind.BULLET, Tracer.Surface.GROUND, true, offset)
+	_check(tracer.head == offset and is_equal_approx(tracer.flight_time, 0.2), "Spawn variation keeps the gameplay arrival time")
+	tracer.advance(0.1)
+	_check(tracer.head.is_equal_approx(offset.lerp(end, 0.5)), "Offset shots travel from their muzzle toward the actual target")
+	_check(tracer.head.distance_to(tracer.trail_start()) >= 48.0, "Bullet streaks retain a longer visible body")
+	_check(tracer.head.distance_to(tracer.trail_start(0.5)) >= 64.0, "Zooming out preserves a readable tracer length")
+	tracer.advance(0.1)
+	_check(tracer.head == end and tracer.has_arrived, "Offset shots hit the exact destination on time")
+	var impact_offset: Vector2 = Vector2(20.0, -12.0)
+	tracer.launch(Vector2.ZERO, end, weapon, Tracer.Kind.BULLET, Tracer.Surface.GROUND, true, offset, impact_offset)
+	tracer.advance(0.1)
+	_check(tracer.head.is_equal_approx(offset.lerp(end + impact_offset, 0.5)), "Bullets fly straight toward their individual impact points")
+	tracer.advance(0.1)
+	_check(tracer.destination == end + impact_offset and tracer.head == tracer.destination, "The tracer and impact share the varied destination")
+	_check(is_equal_approx(tracer.flight_time, 0.2), "Impact variation preserves nominal shot timing")
+	for sample: int in range(32):
+		_check(Tracer.sample_spawn_offset().length() <= Tracer.SPAWN_RADIUS + 0.001, "Random spawn points stay within the unit's firing area")
 	tracer.free()
 
 
@@ -161,6 +202,8 @@ func _test_map_integration() -> void:
 	LOSHelper.road_layer = roads
 	var effects: Effects = Effects.for_scene(self)
 	_check(Effects.for_scene(self) == effects, "All units share one scene-owned pool")
+	_test_impact_patterns(ground)
+	await _test_burst_origins()
 	for index: int in range(2):
 		var cell: Vector2i = Vector2i(index, 0)
 		buildings.set_cell(cell, 0, Vector2i(index, 0))
@@ -189,6 +232,15 @@ func _test_map_integration() -> void:
 	add_child(ui)
 	ui.shoot(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
 	_check(effects._all.size() == 1 and effects._all[0].active, "The actual battlefield UI launches a pooled projectile")
+	var target_cell: Vector2i = ground.local_to_map(ground.to_local(Vector2(320.0, 80.0)))
+	_check(ground.local_to_map(ground.to_local(effects._all[0].destination)) == target_cell, "Independent shots randomize the hit point inside the intended target hex")
+	var first_impact: Vector2 = effects._all[0].destination
+	var first_origin: Vector2 = effects._all[0].origin
+	_check(first_origin.distance_to(Vector2(80.0, 80.0)) <= Tracer.SPAWN_RADIUS, "Individual shots randomize their muzzle within the firing area")
+	effects.clear()
+	ui.shoot(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
+	_check(effects._all[0].origin != first_origin, "Separate individual shots use fresh spawn positions")
+	_check(effects._all[0].destination != first_impact, "Separate individual shots use fresh impact positions")
 	ui.shoot_rocket_launcher(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
 	ui.shoot_riflegrenade(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
 	ui.shoot_mortar(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
@@ -204,6 +256,103 @@ func _test_map_integration() -> void:
 	for layer: HexagonTileMapLayer in [ground, buildings, terrain, roads]:
 		layer.free()
 	effects.free()
+
+
+func _test_burst_origins() -> void:
+	var unit: Unit = Unit.new()
+	var view: ViewProbe = ViewProbe.new()
+	unit.ui = view
+	unit.position = Vector2(200.0, 200.0)
+	var controller: SquadFireController = SquadFireController.new()
+	controller.unit = unit
+	add_child(controller)
+	controller.set_process(false)
+	var first_weapon: WeaponSpec = WeaponSpec.new()
+	first_weapon.type = WeaponSpec.WeaponType.MG
+	var second_weapon: WeaponSpec = first_weapon.duplicate() as WeaponSpec
+	var first: Soldier = Soldier.new(901, "First MG", RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, first_weapon, unit, unit.team)
+	var second: Soldier = Soldier.new(902, "Second MG", RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, second_weapon, unit, unit.team)
+	controller.fire_shot.connect(unit._on_fire_shot)
+	controller.fire_shot.connect(func(_weapon: WeaponSpec, _hex: Vector2i, _origin: Vector2, _impact: Vector2) -> void:
+		if view.origins.size() == 1:
+			unit.position += Vector2(70.0, 0.0)
+	)
+	_completed_bursts = 0
+	_fire_burst(controller, first)
+	_fire_burst(controller, second)
+	var deadline: int = Time.get_ticks_msec() + 4000
+	while _completed_bursts < 2 and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+	_check(_completed_bursts == 2 and view.origins.size() == 6, "Overlapping MG bursts finish through the real shot signal")
+	var first_origins: Array[Vector2] = []
+	var second_origins: Array[Vector2] = []
+	var first_impacts: PackedVector2Array = PackedVector2Array()
+	var second_impacts: PackedVector2Array = PackedVector2Array()
+	for index: int in range(view.origins.size()):
+		if view.weapons[index] == first_weapon:
+			first_origins.append(view.origins[index])
+			first_impacts.append(view.impacts[index])
+		else:
+			second_origins.append(view.origins[index])
+			second_impacts.append(view.impacts[index])
+	_check(first_origins.size() == 3 and first_origins[0] == first_origins[1] and first_origins[0] == first_origins[2], "One MG burst keeps one world origin even if the unit moves")
+	_check(second_origins.size() == 3 and second_origins[0] == second_origins[1] and second_origins[0] == second_origins[2], "Another gun's overlapping burst keeps its own origin")
+	_check(first_origins[0] != second_origins[0], "Separate guns do not share a burst origin")
+	_check_sweep(LOSHelper.ground_layer, Vector2i.ZERO, first_impacts)
+	_check_sweep(LOSHelper.ground_layer, Vector2i.ZERO, second_impacts)
+	_check(first_impacts != second_impacts, "Overlapping bursts keep independent impact patterns")
+	unit.position = Vector2(200.0, 200.0)
+	await _fire_burst(controller, first)
+	_check(view.origins[-1] != first_origins[0], "A new burst samples a new muzzle position")
+	controller.calc.free()
+	controller.free()
+	unit.free()
+	view.free()
+
+
+func _test_impact_patterns(ground: HexagonTileMapLayer) -> void:
+	var original_transform: Transform2D = ground.transform
+	var original_size: Vector2i = ground.tile_set.tile_size
+	var original_axis: TileSet.TileOffsetAxis = ground.tile_set.tile_offset_axis
+	ground.position = Vector2(72.0, 43.0)
+	ground.rotation = 0.37
+	ground.scale = Vector2(1.2, 0.85)
+	for axis: TileSet.TileOffsetAxis in [TileSet.TILE_OFFSET_AXIS_HORIZONTAL, TileSet.TILE_OFFSET_AXIS_VERTICAL]:
+		ground.tile_set.tile_offset_axis = axis
+		for size: Vector2i in [Vector2i(64, 64), Vector2i(128, 128), Vector2i(160, 96)]:
+			ground.tile_set.tile_size = size
+			for cell: Vector2i in [Vector2i.ZERO, Vector2i(-3, 2), Vector2i(5, -4)]:
+				var origin: Vector2 = ground.to_global(ground.map_to_local(cell) + Vector2(-500.0, -300.0))
+				for rounds: int in [1, 3, 8, 24]:
+					var impacts: PackedVector2Array = IMPACT_PATTERN.create(ground, cell, origin, rounds)
+					_check(impacts.size() == rounds, "Every burst round receives an impact point")
+					_check_sweep(ground, cell, impacts)
+	ground.tile_set.tile_size = original_size
+	ground.tile_set.tile_offset_axis = original_axis
+	ground.transform = original_transform
+	_check(IMPACT_PATTERN.bezier_point(Vector2(-20.0, 0.0), Vector2.ZERO, Vector2(20.0, 0.0), 0.5) == Vector2.ZERO, "A straight sweep interpolates along its center line")
+	_check(IMPACT_PATTERN.bezier_point(Vector2(-20.0, 0.0), Vector2(0.0, 12.0), Vector2(20.0, 0.0), 0.5) == Vector2(0.0, 6.0), "A curved sweep bends smoothly between its endpoints")
+
+
+func _check_sweep(ground: HexagonTileMapLayer, cell: Vector2i, impacts: PackedVector2Array) -> void:
+	var seen: Dictionary[Vector2, bool] = {}
+	var tile_size: Vector2 = Vector2(ground.tile_set.tile_size)
+	var start: Vector2 = ground.to_local(impacts[0]) / tile_size
+	var end: Vector2 = ground.to_local(impacts[-1]) / tile_size
+	var direction: Vector2 = (end - start).normalized()
+	var previous: float = -INF
+	for point: Vector2 in impacts:
+		_check(ground.local_to_map(ground.to_local(point)) == cell, "Every impact remains inside the captured target hex")
+		_check(not seen.has(point), "Each round has a different impact position")
+		seen[point] = true
+		var progress: float = (ground.to_local(point) / tile_size - start).dot(direction)
+		_check(progress > previous, "Burst impacts advance coherently along the sweep")
+		previous = progress
+
+
+func _fire_burst(controller: SquadFireController, soldier: Soldier) -> void:
+	await controller.fire_shots(soldier, 3, 6000.0, false, Vector2i.ZERO)
+	_completed_bursts += 1
 
 
 func _render_preview() -> void:
@@ -298,7 +447,84 @@ func _render_preview() -> void:
 	camera.zoom = Vector2.ONE
 	await get_tree().process_frame
 	await _render_dense(viewport)
+	await _render_mortar_contrast(viewport, camera)
+	await _render_burst_sweeps(viewport, camera, ground)
 	viewport.free()
+
+
+func _render_burst_sweeps(viewport: SubViewport, camera: Camera2D, ground: TileMapLayer) -> void:
+	for child: Node in viewport.get_children():
+		if child is Label:
+			child.queue_free()
+	var cells: Array[Vector2i] = [Vector2i(5, 1), Vector2i(5, 3)]
+	var first_center: Vector2 = ground.to_global(ground.map_to_local(cells[0]))
+	var second_center: Vector2 = ground.to_global(ground.map_to_local(cells[1]))
+	camera.position = first_center.lerp(second_center, 0.5) - Vector2(100.0, 0.0)
+	camera.zoom = Vector2(1.5, 1.5)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	for index: int in range(cells.size()):
+		var center: Vector2 = ground.to_global(ground.map_to_local(cells[index]))
+		var origin: Vector2 = center - Vector2(310.0, 0.0)
+		var points: PackedVector2Array = IMPACT_PATTERN.create(ground, cells[index], origin, 7)
+		var guide: SweepGuide = SweepGuide.new()
+		guide.points = points
+		viewport.add_child(guide)
+		for shot: int in range(points.size()):
+			var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+			viewport.add_child(tracer)
+			tracer.launch(origin, center, weapon, Tracer.Kind.BULLET, Tracer.Surface.GROUND, true, Vector2.ZERO, points[shot] - center)
+			_seek(tracer, tracer.flight_time + 0.02 + float(shot) * 0.005)
+			tracer.set_process(false)
+			var label: Label = Label.new()
+			label.text = str(shot + 1)
+			label.position = points[shot] + Vector2(-3.0, -14.0)
+			label.add_theme_font_size_override("font_size", 8)
+			viewport.add_child(label)
+		var caption: Label = Label.new()
+		caption.text = "One muzzle / ordered impacts inside one hex"
+		caption.position = center - Vector2(195.0, 65.0)
+		caption.add_theme_font_size_override("font_size", 11)
+		viewport.add_child(caption)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	var preview: Image = viewport.get_texture().get_image()
+	_check(preview.save_png("/tmp/acl-burst-impact-sweeps.png") == OK, "Render ordered impact sweeps inside their target hexes")
+
+
+func _render_mortar_contrast(viewport: SubViewport, camera: Camera2D) -> void:
+	var background: ColorRect = ColorRect.new()
+	background.size = Vector2(960.0, 640.0)
+	viewport.add_child(background)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	weapon.projectile_speed = 200
+	var shell: Tracer = TRACER_SCENE.instantiate() as Tracer
+	viewport.add_child(shell)
+	shell.launch(Vector2(420.0, 320.0), Vector2(540.0, 320.0), weapon, Tracer.Kind.MORTAR, Tracer.Surface.GROUND, true)
+	_seek(shell, shell.flight_time * 0.5)
+	shell.set_process(false)
+	for color: Color in [Color(0.24, 0.35, 0.15), Color(0.37, 0.23, 0.10), Color(0.65, 0.65, 0.62)]:
+		background.color = color
+		for zoom: float in [0.5, 1.0, 2.0]:
+			camera.zoom = Vector2(zoom, zoom)
+			shell.hide()
+			await get_tree().process_frame
+			RenderingServer.force_draw(false)
+			var baseline: Image = viewport.get_texture().get_image()
+			shell.show()
+			await get_tree().process_frame
+			RenderingServer.force_draw(false)
+			var visible: Image = viewport.get_texture().get_image()
+			var contrasting_pixels: int = 0
+			for x: int in range(470, 491):
+				for y: int in range(310, 331):
+					var before: Color = baseline.get_pixel(x, y)
+					var after: Color = visible.get_pixel(x, y)
+					if Vector3(before.r - after.r, before.g - after.g, before.b - after.b).length() > 0.15:
+						contrasting_pixels += 1
+			_check(contrasting_pixels >= 12, "Mortar bodies remain visible over grass, wood and stone colors at zoom " + str(zoom))
+	shell.free()
+	background.free()
 
 
 func _render_dense(viewport: SubViewport) -> void:

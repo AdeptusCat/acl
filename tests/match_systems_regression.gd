@@ -35,10 +35,10 @@ class VisualProbe extends UnitUi:
 	var rifle_shots: int = 0
 	var mortar_shots: int = 0
 
-	func shoot(_from: Vector2, _to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot(_from: Vector2, _to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
 		rifle_shots += 1
 
-	func shoot_mortar(_from: Vector2, _to: Vector2, _weapon: WeaponSpec) -> void:
+	func shoot_mortar(_from: Vector2, _to: Vector2, _weapon: WeaponSpec, _spawn_offset: Vector2 = Vector2.INF, _impact_offset: Vector2 = Vector2.INF) -> void:
 		mortar_shots += 1
 
 	func set_ammunition_left(_ammo: int) -> void:

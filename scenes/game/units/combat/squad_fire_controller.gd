@@ -2,6 +2,9 @@
 extends Node
 class_name SquadFireController
 
+const PROJECTILE_TRACER: Script = preload("res://scenes/game/effects/tracer.gd")
+const IMPACT_PATTERN: Script = preload("res://scenes/game/effects/burst_impact_pattern.gd")
+
 
 
 
@@ -98,7 +101,7 @@ var mission_support_fire: bool = false
 #var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
-signal fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i)
+signal fire_shot(weapon: WeaponSpec, shot_target_hex: Vector2i, shot_origin: Vector2, shot_impact: Vector2)
 signal fire_riflegrenade
 signal draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i)
 signal shooting(unit: Unit)
@@ -772,12 +775,18 @@ func aim_delay() -> void:
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target_hex: Vector2i) -> void:
 	var interval: float = 60.0 / rpm
 	var support_burst: bool = mission_support_fire
+	# Capture once per gun burst; overlapping bursts keep separate local origins.
+	var shot_origin: Vector2 = unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()
+	var impacts: PackedVector2Array = IMPACT_PATTERN.create(LOSHelper.ground_layer, shot_target_hex, shot_origin, shots)
 	for shot: int in range(shots):
 		if not unit.is_active():
 			return
 		if support_burst and not _has_safe_support_target(shot_target_hex):
 			return
-		fire_shot.emit(s.weapon, shot_target_hex)
+		var impact: Vector2 = Vector2.INF
+		if shot < impacts.size():
+			impact = impacts[shot]
+		fire_shot.emit(s.weapon, shot_target_hex, shot_origin, impact)
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
 	if auto_fire and unit.is_active():

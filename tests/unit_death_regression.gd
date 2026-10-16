@@ -224,7 +224,7 @@ func _freeze_simulation(node: Node) -> void:
 		_freeze_simulation(child)
 
 
-func _on_shot(_weapon: WeaponSpec, _hex: Vector2i) -> void:
+func _on_shot(_weapon: WeaponSpec, _hex: Vector2i, _origin: Vector2, _impact: Vector2) -> void:
 	shots += 1
 
 

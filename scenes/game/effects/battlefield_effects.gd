@@ -2,6 +2,7 @@ class_name BattlefieldEffects
 extends Node2D
 
 const Tracer: Script = preload("res://scenes/game/effects/tracer.gd")
+const IMPACT_PATTERN: Script = preload("res://scenes/game/effects/burst_impact_pattern.gd")
 const POOL_NAME: String = "BattlefieldEffects"
 const MAX_EFFECTS: int = 192
 
@@ -50,7 +51,7 @@ func clear() -> void:
 	_visibility_frame = -1
 
 
-func fire(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Tracer.Kind, scene: PackedScene) -> Tracer:
+func fire(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Tracer.Kind, scene: PackedScene, spawn_offset: Vector2 = Vector2.ZERO, impact_offset: Vector2 = Vector2.INF) -> Tracer:
 	if _ground != LOSHelper.ground_layer:
 		clear()
 		_ground = LOSHelper.ground_layer
@@ -70,7 +71,15 @@ func fire(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Tracer.Kind
 	var draw_streak: bool = true
 	if shot_kind == Tracer.Kind.BULLET:
 		draw_streak = _next_streak(weapon.type)
-	tracer.launch(from, to, weapon, shot_kind, surface_at(to), draw_streak)
+	var offset: Vector2 = impact_offset
+	if not offset.is_finite():
+		offset = Vector2.ZERO
+		if is_instance_valid(_ground):
+			var cell: Vector2i = _ground.local_to_map(_ground.to_local(to))
+			var points: PackedVector2Array = IMPACT_PATTERN.create(_ground, cell, from + spawn_offset, 1)
+			if not points.is_empty():
+				offset = points[0] - to
+	tracer.launch(from, to, weapon, shot_kind, surface_at(to + offset), draw_streak, spawn_offset, offset)
 	return tracer
 
 

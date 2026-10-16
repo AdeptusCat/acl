@@ -5,7 +5,11 @@ enum Kind { BULLET, ROCKET, GRENADE, MORTAR }
 enum Surface { GROUND, WOOD, STONE, WATER, FOLIAGE, ROAD }
 
 const MUZZLE_SECONDS: float = 0.045
-const ARRIVAL_FADE_SECONDS: float = 0.045
+const ARRIVAL_FADE_SECONDS: float = 0.075
+const SPAWN_RADIUS: float = 20.0
+
+static var _spawn_random: RandomNumberGenerator = RandomNumberGenerator.new()
+static var _spawn_seeded: bool = false
 
 @export var speed: float = 1200.0
 
@@ -26,7 +30,6 @@ var destination: Vector2 = Vector2.ZERO
 var head: Vector2 = Vector2.ZERO
 
 var _direction: Vector2 = Vector2.RIGHT
-var _distance: float = 0.0
 var _frame_seconds: float = 1.0 / 60.0
 var _weapon: WeaponSpec
 var _audio_pool: AudioPool
@@ -39,12 +42,11 @@ func _ready() -> void:
 	hide()
 
 
-func launch(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Kind, impact_surface: Surface, tracer_visible: bool) -> void:
-	origin = from
-	destination = to
-	head = from
-	_direction = (to - from).normalized()
-	_distance = from.distance_to(to)
+func launch(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Kind, impact_surface: Surface, tracer_visible: bool, spawn_offset: Vector2 = Vector2.ZERO, impact_offset: Vector2 = Vector2.ZERO) -> void:
+	origin = from + spawn_offset
+	destination = to + impact_offset
+	head = origin
+	_direction = (destination - origin).normalized()
 	_weapon = weapon
 	kind = shot_kind
 	surface = impact_surface
@@ -53,7 +55,8 @@ func launch(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Kind, imp
 	if kind == Kind.GRENADE:
 		speed = float(weapon.riflegrenade_projectile_speed)
 	speed = maxf(speed, 1.0)
-	flight_time = _distance / speed
+	# Cosmetic muzzle and impact variation keep the nominal gameplay arrival time.
+	flight_time = from.distance_to(to) / speed
 	elapsed = 0.0
 	_frame_seconds = 1.0 / 60.0
 	has_arrived = false
@@ -84,7 +87,7 @@ func advance(delta: float) -> void:
 	if elapsed >= flight_time:
 		head = destination
 	else:
-		head = origin + _direction * minf(elapsed * speed, _distance)
+		head = origin.lerp(destination, elapsed / flight_time)
 	if not has_arrived and elapsed >= flight_time:
 		head = destination
 		has_arrived = true
@@ -135,28 +138,34 @@ func _draw_muzzle(size_scale: float) -> void:
 	draw_line(origin - _direction * radius * 0.4, origin + _direction * radius * 2.0, Color(2.2, 1.9, 1.2, fade), maxf(radius * 0.4, 0.7), true)
 
 
-func trail_start() -> Vector2:
-	var length: float = maxf(18.0, speed * _frame_seconds)
+func trail_start(zoom: float = 1.0) -> Vector2:
+	var length: float = maxf(48.0, maxf(speed * _frame_seconds, 32.0 / maxf(zoom, 0.05)))
 	if kind == Kind.ROCKET:
 		length = 24.0
-	elif kind == Kind.GRENADE or kind == Kind.MORTAR:
+	elif kind == Kind.MORTAR:
+		length = maxf(18.0, 18.0 / maxf(zoom, 0.05))
+	elif kind == Kind.GRENADE:
 		length = 6.0
-	length = minf(length, 72.0)
+	length = minf(length, 128.0)
 	return head - _direction * minf(length, origin.distance_to(head))
 
 
 func _draw_flight(zoom: float) -> void:
-	var tail: Vector2 = trail_start()
+	var tail: Vector2 = trail_start(zoom)
 	var fade: float = 1.0
 	if has_arrived:
 		fade = clampf(1.0 - (elapsed - flight_time) / ARRIVAL_FADE_SECONDS, 0.0, 1.0)
-	var width: float = clampf(1.2 / zoom, 0.7, 3.0)
+	var width: float = clampf(2.4 / zoom, 1.2, 8.0)
 	var tail_color: Color = Color(1.25, 0.70, 0.22, fade)
 	var head_color: Color = Color(2.1, 1.75, 1.0, fade)
 	if kind != Kind.BULLET:
 		tail_color = Color(0.48, 0.44, 0.34, fade)
 		head_color = tail_color
-		width *= 1.5
+		width = clampf(1.8 / zoom, 1.05, 4.5)
+	if kind == Kind.MORTAR:
+		width = clampf(3.0 / zoom, 1.5, 10.0)
+		tail_color = Color(0.65, 0.76, 0.80, fade * 0.35)
+		head_color = Color(1.6, 1.75, 1.8, fade)
 	# Short segments prevent a visible head from exposing a tail inside hidden hexes.
 	var steps: int = maxi(1, ceili(tail.distance_to(head) / 6.0))
 	for index: int in range(steps):
@@ -168,12 +177,15 @@ func _draw_flight(zoom: float) -> void:
 		var end_fraction: float = float(index + 1) / float(steps)
 		var start_color: Color = tail_color.lerp(head_color, start_fraction)
 		var end_color: Color = tail_color.lerp(head_color, end_fraction)
-		start_color.a *= start_fraction * start_fraction
-		end_color.a *= end_fraction * end_fraction
+		start_color.a *= start_fraction
+		end_color.a *= end_fraction
 		if kind == Kind.BULLET or kind == Kind.ROCKET:
 			_draw_segment(a, b, width * 3.5, Color(1.0, 0.48, 0.12, start_color.a * 0.10), Color(1.0, 0.48, 0.12, end_color.a * 0.10))
 		_draw_segment(a, b, width, start_color, end_color)
 	if _can_draw_at(head):
+		if kind == Kind.MORTAR:
+			_draw_mortar_shell(zoom, width, fade)
+			return
 		var tip: Color = Color(2.3, 2.0, 1.35, fade)
 		if kind != Kind.BULLET:
 			tip = Color(0.25, 0.26, 0.22, fade)
@@ -185,7 +197,20 @@ func _draw_flight(zoom: float) -> void:
 		_draw_exhaust(tail, width, fade)
 
 
+func _draw_mortar_shell(zoom: float, width: float, fade: float) -> void:
+	var half_length: float = clampf(5.0 / zoom, 2.5, 16.0)
+	var rear: Vector2 = head - _direction * half_length
+	var nose: Vector2 = head + _direction * half_length * 0.6
+	if not _can_draw_at(rear) or not _can_draw_at(nose):
+		return
+	draw_line(rear, nose, Color(0.08, 0.10, 0.12, fade), width * 1.8, true)
+	draw_line(rear, nose, Color(1.7, 1.85, 1.8, fade), width, true)
+	draw_circle(nose, width * 0.4, Color(2.2, 2.2, 1.9, fade))
+
+
 func _draw_segment(a: Vector2, b: Vector2, width: float, start_color: Color, end_color: Color) -> void:
+	if a.is_equal_approx(b):
+		return
 	var normal: Vector2 = _direction.orthogonal() * width * 0.5
 	draw_polygon(PackedVector2Array([a - normal, b - normal, b + normal, a + normal]), PackedColorArray([start_color, end_color, end_color, start_color]))
 
@@ -255,3 +280,10 @@ func _play_impact_sound() -> void:
 
 static func predict_end_position(from: Vector2, to: Vector2, projectile_speed: float, lifetime: float) -> Vector2:
 	return from.move_toward(to, maxf(0.0, projectile_speed * lifetime))
+
+
+static func sample_spawn_offset() -> Vector2:
+	if not _spawn_seeded:
+		_spawn_random.randomize()
+		_spawn_seeded = true
+	return Vector2.from_angle(_spawn_random.randf_range(0.0, TAU)) * sqrt(_spawn_random.randf()) * SPAWN_RADIUS
