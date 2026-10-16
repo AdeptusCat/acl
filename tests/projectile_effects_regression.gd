@@ -5,6 +5,8 @@ const Effects: Script = preload("res://scenes/game/effects/battlefield_effects.g
 const Tracer: Script = preload("res://scenes/game/effects/tracer.gd")
 const IMPACT_PATTERN: Script = preload("res://scenes/game/effects/burst_impact_pattern.gd")
 const TRACER_SCENE: PackedScene = preload("res://scenes/game/effects/tracer.tscn")
+const CASUALTY_FEEDBACK: Script = preload("res://scenes/game/effects/casualty_feedback.gd")
+const UNIT_UI_SCENE: PackedScene = preload("res://scenes/game/units/presentation/unit_battlefield_view.tscn")
 
 class ImpactAudio extends AudioPool:
 	var hits: int = 0
@@ -67,10 +69,80 @@ func _run() -> void:
 	_test_flight()
 	_test_pool_and_frequency()
 	await _test_map_integration()
+	_test_casualty_feedback()
 	if OS.get_cmdline_user_args().has("--render"):
 		await _render_preview()
 	print("Projectile effects checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_casualty_feedback() -> void:
+	var ui: UnitUi = UNIT_UI_SCENE.instantiate() as UnitUi
+	add_child(ui)
+	ui.set_members_alive(8)
+	ui.set_members_alive(5)
+	ui.show_casualty(0)
+	ui.show_casualty(-1)
+	_check(ui.get_node_or_null("CasualtyFeedback") == null, "Roster initialization and non-loss events do not create casualty feedback")
+	ui.show_casualty(1)
+	var feedback: CASUALTY_FEEDBACK = ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
+	_check(feedback.active and feedback.casualty_count == 1, "A real loss starts a visible casualty cue")
+	feedback.advance(0.2)
+	ui.show_casualty(2)
+	_check(feedback.casualty_count == 3 and is_zero_approx(feedback.elapsed), "Rapid casualties combine in one refreshed count")
+	_check(ui.find_children("CasualtyFeedback", "", false, false).size() == 1, "Rapid losses reuse one feedback node")
+	feedback.advance(0.8)
+	_check(feedback.active, "The casualty count stays readable beyond the old half-second popup")
+	feedback.advance(1.0)
+	_check(not feedback.active and feedback.casualty_count == 0 and not feedback.is_processing(), "Expired feedback clears its count and stops processing")
+	ui.hide()
+	ui.show_casualty(3)
+	ui.show()
+	_check(not feedback.active, "Losses suffered while hidden are not revealed later")
+	ui.show_casualty(1)
+	ui.hide()
+	feedback.advance(0.01)
+	ui.show()
+	_check(not feedback.active, "Hiding a unit clears an in-progress casualty cue")
+	ui.show_casualty(1)
+	ui.die()
+	_check(feedback.active and feedback.is_visible_in_tree(), "The final casualty remains visible over the dead unit marker")
+	ui.mark_exited()
+	_check(not feedback.active, "Leaving the battlefield clears casualty feedback")
+	ui.show_casualty(1)
+	_check(not feedback.active, "Exited units cannot display new losses")
+	ui.free()
+
+	# Exercise actual casualty resolution and death without loading a scenario or LOS cache.
+	var history: CasualtyHistory = Globals.casualty_history
+	Globals.casualty_history = CasualtyHistory.new()
+	for direct_death: bool in [false, true]:
+		var unit: Unit = (load("res://scenes/game/units/unit.tscn") as PackedScene).instantiate() as Unit
+		add_child(unit)
+		unit.movement.unit = unit
+		unit.action_controller.init(unit, unit.movement, unit.squad_fire, unit.stress_system, unit.ui)
+		unit._setup_runtime_soldiers(unit.squad_loadout)
+		var starting_members: int = unit.members_alive
+		_check(starting_members > 1, "Casualty integration fixture has a runtime roster")
+		if direct_death:
+			unit.die()
+		else:
+			unit._on_incoming_fire_effect(0, 0.0, 0.0, null)
+			_check(unit.ui.get_node_or_null("CasualtyFeedback") == null, "Suppression without casualties produces no loss cue")
+			unit._on_incoming_fire_effect(1, 0.0, 0.0, null)
+			var first_loss: CASUALTY_FEEDBACK = unit.ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
+			_check(first_loss.casualty_count == 1, "Incoming fire reports one actual loss exactly once")
+			unit._on_incoming_fire_effect(999, 0.0, 0.0, null)
+		var final_feedback: CASUALTY_FEEDBACK = unit.ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
+		_check(not unit.alive and unit.members_alive == 0, "Actual elimination empties the roster")
+		_check(final_feedback.casualty_count == starting_members, "Ranged and direct elimination display the actual total, without duplicate final losses")
+		_check(final_feedback.can_process() and final_feedback.is_visible_in_tree(), "Unit death preserves the casualty animation")
+		unit.die()
+		_check(final_feedback.casualty_count == starting_members, "Repeated death does not duplicate the loss count")
+		# The existing fire calculator is allocated outside the unit's scene tree.
+		unit.squad_fire.calc.free()
+		unit.free()
+	Globals.casualty_history = history
 
 
 func _test_flight() -> void:
@@ -448,8 +520,111 @@ func _render_preview() -> void:
 	await get_tree().process_frame
 	await _render_dense(viewport)
 	await _render_mortar_contrast(viewport, camera)
+	await _render_impact_contrast(viewport, camera)
 	await _render_burst_sweeps(viewport, camera, ground)
+	await _render_combat_feedback(viewport, camera)
 	viewport.free()
+
+
+func _render_combat_feedback(viewport: SubViewport, camera: Camera2D) -> void:
+	for child: Node in viewport.get_children():
+		if child is Tracer or child is Label or child is SweepGuide:
+			child.queue_free()
+	await get_tree().process_frame
+	camera.position = Vector2(480.0, 320.0)
+	camera.zoom = Vector2.ONE
+	var heading: Label = Label.new()
+	heading.text = "LARGER IMPACTS / CONFIRMED CASUALTIES"
+	heading.position = Vector2(28.0, 24.0)
+	viewport.add_child(heading)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	var surface_names: Array[String] = ["Ground", "Wood", "Stone", "Water", "Foliage", "Road"]
+	for index: int in range(6):
+		var end: Vector2 = Vector2(95.0 + float(index) * 152.0, 150.0)
+		var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+		viewport.add_child(tracer)
+		tracer.launch(end - Vector2(120.0, 0.0), end, weapon, Tracer.Kind.BULLET, index as Tracer.Surface, false)
+		tracer.advance(tracer.flight_time + 0.1)
+		tracer.set_process(false)
+		var label: Label = Label.new()
+		label.text = surface_names[index]
+		label.position = end + Vector2(-25.0, 32.0)
+		viewport.add_child(label)
+	var kinds: Array[Tracer.Kind] = [Tracer.Kind.ROCKET, Tracer.Kind.GRENADE, Tracer.Kind.MORTAR]
+	var kind_names: Array[String] = ["Rocket impact", "Grenade impact", "Mortar impact"]
+	for index: int in range(3):
+		var end: Vector2 = Vector2(175.0 + float(index) * 300.0, 305.0)
+		var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+		viewport.add_child(tracer)
+		tracer.launch(end - Vector2(120.0, 0.0), end, weapon, kinds[index], Tracer.Surface.GROUND, false)
+		tracer.advance(tracer.flight_time + 0.09)
+		tracer.set_process(false)
+		var label: Label = Label.new()
+		label.text = kind_names[index]
+		label.position = end + Vector2(-55.0, 42.0)
+		viewport.add_child(label)
+	var loss_counts: Array[int] = [1, 3, 1]
+	var loss_names: Array[String] = ["One soldier lost", "Rapid losses combine", "Final casualty"]
+	for index: int in range(3):
+		var ui: UnitUi = UNIT_UI_SCENE.instantiate() as UnitUi
+		ui.position = Vector2(111.0 + float(index) * 300.0, 464.0)
+		ui.scale = Vector2(2.0, 2.0)
+		viewport.add_child(ui)
+		ui.show_casualty(loss_counts[index])
+		var feedback: CASUALTY_FEEDBACK = ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
+		feedback.advance(0.12)
+		feedback.set_process(false)
+		if index == 2:
+			ui.die()
+		var label: Label = Label.new()
+		label.text = loss_names[index]
+		label.position = ui.position + Vector2(-6.0, 140.0)
+		viewport.add_child(label)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	_check(viewport.get_texture().get_image().save_png("/tmp/acl-combat-feedback.png") == OK, "Render enlarged impacts and casualty feedback using actual unit sprites")
+	for zoom: float in [0.5, 2.0]:
+		camera.zoom = Vector2(zoom, zoom)
+		await get_tree().process_frame
+		RenderingServer.force_draw(false)
+		_check(viewport.get_texture().get_image().save_png("/tmp/acl-combat-feedback-" + str(zoom) + ".png") == OK, "Render casualty feedback at zoom " + str(zoom))
+
+
+func _render_impact_contrast(viewport: SubViewport, camera: Camera2D) -> void:
+	var background: ColorRect = ColorRect.new()
+	background.size = Vector2(960.0, 640.0)
+	viewport.add_child(background)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+	viewport.add_child(tracer)
+	var surfaces: Array[Tracer.Surface] = [Tracer.Surface.GROUND, Tracer.Surface.WOOD, Tracer.Surface.STONE]
+	var backgrounds: Array[Color] = [Color(0.24, 0.35, 0.15), Color(0.37, 0.23, 0.10), Color(0.65, 0.65, 0.62)]
+	for index: int in range(surfaces.size()):
+		background.color = backgrounds[index]
+		tracer.launch(Vector2(360.0, 320.0), Vector2(480.0, 320.0), weapon, Tracer.Kind.BULLET, surfaces[index], false)
+		tracer.advance(tracer.flight_time + 0.1)
+		tracer.set_process(false)
+		for zoom: float in [0.5, 1.0, 2.0]:
+			camera.zoom = Vector2(zoom, zoom)
+			tracer.hide()
+			await get_tree().process_frame
+			RenderingServer.force_draw(false)
+			var baseline: Image = viewport.get_texture().get_image()
+			tracer.show()
+			await get_tree().process_frame
+			RenderingServer.force_draw(false)
+			var visible: Image = viewport.get_texture().get_image()
+			var contrasting_pixels: int = 0
+			for x: int in range(440, 521):
+				for y: int in range(280, 361):
+					var before: Color = baseline.get_pixel(x, y)
+					var after: Color = visible.get_pixel(x, y)
+					if Vector3(before.r - after.r, before.g - after.g, before.b - after.b).length() > 0.15:
+						contrasting_pixels += 1
+			_check(contrasting_pixels >= 40, "Bullet debris remains readable on its terrain at zoom " + str(zoom))
+	tracer.free()
+	background.free()
 
 
 func _render_burst_sweeps(viewport: SubViewport, camera: Camera2D, ground: TileMapLayer) -> void:

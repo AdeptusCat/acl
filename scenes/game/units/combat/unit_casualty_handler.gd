@@ -44,6 +44,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 			
 			unit.stress_system.on_casualty_event(1, leader_down)
 			unit.ui.set_members_alive(unit.members_alive)
+			unit.ui.show_casualty(1)
 
 			if members_alive_before == unit.members_alive:
 				pass
@@ -72,7 +73,6 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 			# emit signals as needed
 			# emit_signal("casualties_taken", original_size - members_alive)
 			
-			unit.ui.show_casualty()
 			unit.soldiers_changed.emit()
 			# FIXME stress through casualty from close combat or other particular event should not be fixed value
 			unit.stress_system.apply_stress(10.0, 10.0)
@@ -158,6 +158,7 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 	
 	unit.stress_system.on_casualty_event(casualty_count, leader_down)
 	unit.ui.set_members_alive(unit.members_alive)
+	unit.ui.show_casualty(casualties.size())
 	
 	if members_alive_before == unit.members_alive:
 		pass

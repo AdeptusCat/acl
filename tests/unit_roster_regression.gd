@@ -12,13 +12,15 @@ class UnitUnderTest extends Unit:
 class RosterUiUnderTest extends UnitUi:
 	var displayed_members: int = -1
 	var events: Array[String] = []
+	var displayed_losses: Array[int] = []
 
 	func set_members_alive(count: int) -> void:
 		displayed_members = count
 		events.append("members:%d" % count)
 
-	func show_casualty() -> void:
+	func show_casualty(count: int = 1) -> void:
 		events.append("casualty")
+		displayed_losses.append(count)
 
 	func set_loadout(_soldiers: Array[Soldier]) -> void:
 		events.append("loadout:%d" % _soldiers.size())
@@ -104,13 +106,17 @@ func _test_casualty_bounds() -> void:
 	_check_strength(unit, 3, "Zero and negative casualty requests do nothing")
 	_check(unit.casualties_taken == 0, "No-op requests do not record losses")
 	_check(is_zero_approx(unit.combat_stats.recent_casualty_shock), "No-op requests do not cause casualty shock")
+	var ui: RosterUiUnderTest = unit.ui as RosterUiUnderTest
+	_check(ui.displayed_losses.is_empty(), "No-op requests do not show a casualty cue")
 	unit._apply_casualties(99)
 	_check_strength(unit, 0, "Oversized request removes only the available soldiers")
 	_check(unit.casualties_taken == 3, "Oversized request records actual losses")
 	_check(is_equal_approx(unit.combat_stats.recent_casualty_shock, 0.36), "Casualty shock uses actual losses")
 	_check(unit.elimination_count == 1, "Final casualty eliminates the unit once")
+	_check(ui.displayed_losses == [3], "Elimination shows only the actual number lost, once")
 	unit._apply_casualties(1)
 	_check(unit.elimination_count == 1 and unit.casualties_taken == 3, "Empty roster does not receive another casualty or elimination")
+	_check(ui.displayed_losses == [3], "An empty roster cannot show another casualty cue")
 
 
 func _test_specific_and_ranged_casualties() -> void:
@@ -125,10 +131,13 @@ func _test_specific_and_ranged_casualties() -> void:
 	var shock_before: float = unit.combat_stats.recent_casualty_shock
 	_check(not unit.apply_specific_casualty(casualty), "Repeated specific casualty is ignored")
 	_check(unit.casualties_taken == 2 and unit.combat_stats.recent_casualty_shock == shock_before, "Repeated casualty does not duplicate loss accounting")
+	var ui: RosterUiUnderTest = unit.ui as RosterUiUnderTest
+	_check(ui.displayed_losses == [1, 1], "Specific and ranged losses each show one cue without duplicates")
 	var last: UnitUnderTest = _create_unit(1, 12)
 	_check(last.apply_specific_casualty(last.squad_fire.soldiers[0]), "Last specific casualty reports elimination to the caller")
 	_check_strength(last, 0, "Last specific casualty leaves zero strength")
 	_check(last.casualties_taken == 1, "Last specific casualty remains accounted for")
+	_check((last.ui as RosterUiUnderTest).displayed_losses == [1], "The final specific casualty still displays a loss cue")
 
 
 func _test_runtime_leader_lookup() -> void:

@@ -4,6 +4,7 @@ class_name UnitUi
 
 const PROJECTILE_EFFECTS: Script = preload("res://scenes/game/effects/battlefield_effects.gd")
 const TRACER: Script = preload("res://scenes/game/effects/tracer.gd")
+const CASUALTY_FEEDBACK: Script = preload("res://scenes/game/effects/casualty_feedback.gd")
 
 const MEDIUM_INFLUENCE_RATE: float = 0.5
 const STRONG_INFLUENCE_RATE: float = 1.5
@@ -59,6 +60,7 @@ var _exited: bool = false
 var _pressure: float = 0.0
 var _formation_color: Color = UnitHudStyle.SUPPORT_COLOR
 var _formation_key: Vector3i = Vector3i(-1, -1, -1)
+var _casualty_feedback: CASUALTY_FEEDBACK
 
 signal debug_kill_soldier
 
@@ -312,8 +314,16 @@ func _on_cover_updated(cover_value: int) -> void:
 		detail_ui._on_cover_updated(cover_value)
 
 
-func show_casualty() -> void:
-	_spawn_popup("casualty")
+func show_casualty(count: int = 1) -> void:
+	if count <= 0 or _exited or not is_visible_in_tree():
+		return
+	if not is_instance_valid(_casualty_feedback):
+		_casualty_feedback = CASUALTY_FEEDBACK.new()
+		_casualty_feedback.name = "CasualtyFeedback"
+		add_child(_casualty_feedback)
+	_casualty_feedback.show_losses(count)
+	if is_instance_valid(detail_ui):
+		detail_ui.show_casualty(count)
 
 
 func show_broken() -> void:
@@ -421,6 +431,8 @@ func surrender() -> void:
 
 func mark_exited() -> void:
 	_exited = true
+	if is_instance_valid(_casualty_feedback):
+		_casualty_feedback.clear()
 	_set_debug_text_visible(false)
 	for child: Control in unit_status_control.get_children():
 		child.hide()

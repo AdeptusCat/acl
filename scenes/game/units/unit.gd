@@ -748,7 +748,6 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 		return
 	if casualties > 0:
 		_apply_casualties(casualties)
-		ui.show_casualty()
 		soldiers_changed.emit()
 	if not alive:
 		return
@@ -990,6 +989,7 @@ func die() -> void:
 		return
 	alive = false
 	# Direct elimination must retain the remaining men and equipment as casualties.
+	var remaining_members: int = squad_fire.soldiers.size()
 	for soldier: Soldier in squad_fire.soldiers:
 		_record_casualty(soldier)
 		if not squad_fire.casualties.has(soldier):
@@ -998,6 +998,8 @@ func die() -> void:
 	members_alive = 0
 	casualties_taken = squad_fire.casualties.size()
 	ui.set_members_alive(0)
+	if remaining_members > 0:
+		ui.show_casualty(remaining_members)
 	is_moving = false
 	movement.is_moving = false
 	action_controller.clear_orders()
@@ -1082,7 +1084,6 @@ func _on_state_changed(prev:int, next:int) -> void:
 
 func _on_unit_ui_debug_kill_soldier() -> void:
 	_apply_casualties(1)
-	ui.show_casualty()
 	soldiers_changed.emit()
 	# FIXME stress through casualty from debug kill should not be fixed value
 	stress_system.apply_stress(10.0, 10.0)

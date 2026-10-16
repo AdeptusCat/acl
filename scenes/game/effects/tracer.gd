@@ -34,6 +34,7 @@ var _frame_seconds: float = 1.0 / 60.0
 var _weapon: WeaponSpec
 var _audio_pool: AudioPool
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
+var _impact_phase: float = 0.0
 
 
 func _ready() -> void:
@@ -60,6 +61,7 @@ func launch(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Kind, imp
 	elapsed = 0.0
 	_frame_seconds = 1.0 / 60.0
 	has_arrived = false
+	_impact_phase = _random.randf_range(0.0, TAU)
 	active = true
 	_audio_pool = get_node_or_null("/root/Main/World/AudioPool") as AudioPool
 	show()
@@ -103,8 +105,8 @@ func advance(delta: float) -> void:
 
 func impact_duration() -> float:
 	if kind == Kind.BULLET:
-		return 0.28
-	return 0.65
+		return 0.42
+	return 0.85
 
 
 func _can_draw_at(point: Vector2) -> bool:
@@ -230,38 +232,49 @@ func _draw_impact(size_scale: float) -> void:
 	var age: float = maxf(0.0, elapsed - flight_time)
 	var progress: float = clampf(age / impact_duration(), 0.0, 1.0)
 	var fade: float = (1.0 - progress) * (1.0 - progress)
-	var color: Color = Color(0.60, 0.49, 0.32, fade * 0.65)
+	var color: Color = Color(0.74, 0.63, 0.44, fade)
 	match surface:
 		Surface.WOOD:
-			color = Color(0.64, 0.39, 0.18, fade)
+			color = Color(0.85, 0.63, 0.36, fade)
 		Surface.STONE, Surface.ROAD:
-			color = Color(0.72, 0.71, 0.64, fade)
+			color = Color(0.86, 0.84, 0.76, fade)
 		Surface.WATER:
 			color = Color(0.67, 0.85, 0.90, fade * 0.85)
 		Surface.FOLIAGE:
-			color = Color(0.40, 0.52, 0.19, fade)
-	var radius: float = (2.0 + progress * 11.0) * size_scale
-	var fragments: int = 6
+			color = Color(0.62, 0.73, 0.29, fade)
+	var radius: float = (5.0 + progress * 25.0) * size_scale
+	var fragments: int = 8
 	if kind != Kind.BULLET:
 		radius *= 2.5
-		fragments = 12
-		if age < 0.12:
-			var flash: float = 1.0 - age / 0.12
-			draw_circle(destination, (7.0 + age * 70.0) * size_scale, Color(2.6, 1.1, 0.20, flash * 0.85))
+		fragments = 14
+		if age < 0.16:
+			var flash: float = 1.0 - age / 0.16
+			draw_circle(destination, (12.0 + age * 100.0) * size_scale, Color(2.6, 1.1, 0.20, flash * 0.85))
+			draw_circle(destination, (5.0 + age * 40.0) * size_scale, Color(3.0, 2.4, 1.4, flash))
 	if surface == Surface.WATER:
-		draw_arc(destination, radius, 0.0, TAU, 20, color, size_scale, true)
+		draw_arc(destination, radius, 0.0, TAU, 24, color, 1.8 * size_scale, true)
+		draw_arc(destination, radius * 0.6, 0.0, TAU, 20, Color(color.r, color.g, color.b, color.a * 0.6), size_scale, true)
 	else:
-		draw_circle(destination, radius * 0.7, Color(color.r, color.g, color.b, fade * 0.10))
+		# A dark contact point and a short pale flash read against both grass and roofs.
+		draw_circle(destination, 3.0 * size_scale, Color(0.12, 0.10, 0.07, fade * 0.65))
+		if kind == Kind.BULLET and age < 0.075:
+			var flash: float = 1.0 - age / 0.075
+			draw_circle(destination, 6.0 * size_scale * (0.5 + flash * 0.5), Color(1.8, 1.6, 1.05, flash * 0.85))
+		for puff: int in range(3):
+			var angle: float = _impact_phase + float(puff) * TAU / 3.0
+			var point: Vector2 = destination + Vector2.from_angle(angle) * radius * 0.3 + Vector2.UP * progress * 6.0 * size_scale
+			if _can_draw_at(point):
+				draw_circle(point, radius * (0.45 + float(puff) * 0.08), Color(color.r, color.g, color.b, fade * 0.19))
 	for index: int in range(fragments):
-		var angle: float = float(index) * 2.399963 + _direction.angle()
+		var angle: float = float(index) * 2.399963 + _impact_phase
 		var spread: Vector2 = Vector2.from_angle(angle) * radius * (0.45 + float(index % 3) * 0.2)
 		var point: Vector2 = destination + spread
 		if not _can_draw_at(point):
 			continue
 		if surface == Surface.WOOD or surface == Surface.FOLIAGE:
-			draw_line(point, point + Vector2.from_angle(angle) * 3.0 * size_scale, color, size_scale, true)
+			draw_line(point, point + Vector2.from_angle(angle) * 5.0 * size_scale, color, 1.7 * size_scale, true)
 		else:
-			draw_circle(point, maxf(0.7, size_scale * (1.0 - progress)), color)
+			draw_circle(point, maxf(1.0, size_scale * (2.2 - progress)), color)
 
 
 func _play_impact_sound() -> void:
