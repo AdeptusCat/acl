@@ -128,6 +128,8 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 
 
 static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2) -> void:
+	if not is_instance_valid(controller.ground_layer):
+		return
 	var ground: HexagonTileMapLayer = controller.ground_layer
 	var local_point: Vector2 = ground.get_global_transform_with_canvas().affine_inverse() * event_pos
 	var map_hex: Vector2i = ground.local_to_map(local_point)
@@ -192,12 +194,15 @@ static func _counter_under_pointer(candidates: Array[Unit], screen_point: Vector
 
 static func handle_mouse_event_position_changed(controller: Node2D, event_pos: Vector2) -> void:
 	controller.mouse_event_position_changed.emit(event_pos)
-	refresh_target_preview(controller, controller.ground_layer.get_local_mouse_position(), controller.get_viewport().get_mouse_position())
+	var local_point: Vector2 = Vector2.ZERO
+	if is_instance_valid(controller.ground_layer):
+		local_point = controller.ground_layer.get_local_mouse_position()
+	refresh_target_preview(controller, local_point, controller.get_viewport().get_mouse_position())
 
 
 static func refresh_target_preview(controller: Node2D, local_point: Vector2, screen_point: Vector2) -> void:
 	var world: Node2D = controller.get_parent() as Node2D
-	if controller.end_game_handled or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
+	if not is_instance_valid(controller.ground_layer) or controller.end_game_handled or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return

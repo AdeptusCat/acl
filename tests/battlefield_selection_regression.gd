@@ -3,14 +3,27 @@ extends Node
 const UI_SCENE: PackedScene = preload("res://scenes/game/units/presentation/unit_battlefield_view.tscn")
 const UNIT_SCENE: PackedScene = preload("res://scenes/game/units/unit.tscn")
 
+class PreviewHudProbe extends Node:
+	var hide_calls: int = 0
+
+	func hide_target_hex_cover_distance() -> void:
+		hide_calls += 1
+
+
+class PreviewWorldProbe extends Node2D:
+	var ui: PreviewHudProbe
+
+
 class ControllerProbe extends Node2D:
 	var ground_layer: HexagonTileMapLayer
 	var selected_unit: Unit
 	var previous_selected_hex: Vector2i = Vector2i(-999, -999)
 	var selected_hex_index: int = 0
+	var end_game_handled: bool = false
 	signal hex_selected(cell: Vector2i, point: Vector2)
 	signal show_unit_details_in_ui(unit: Unit)
 	signal hide_unit_details_in_ui
+	signal mouse_event_position_changed(point: Vector2)
 
 	func _select_unit(unit: Unit) -> void:
 		if is_instance_valid(selected_unit):
@@ -58,6 +71,7 @@ func _run() -> void:
 	input.mouse_button_left_pressed.connect(func(_point: Vector2) -> void: map_clicks += 1)
 	input.zoom_in.connect(func() -> void: zooms += 1)
 	input.right_button_pressed.connect(func() -> void: right_clicks += 1)
+	_test_unavailable_map()
 	await _test_passive_controls()
 	_test_stack_selection()
 	await _test_pointer_stack_input(input)
@@ -68,6 +82,45 @@ func _run() -> void:
 	controller.free()
 	print("Battlefield selection checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_unavailable_map() -> void:
+	var world: PreviewWorldProbe = PreviewWorldProbe.new()
+	world.ui = PreviewHudProbe.new()
+	world.add_child(world.ui)
+	var pending: ControllerProbe = ControllerProbe.new()
+	world.add_child(pending)
+	add_child(world)
+	var motions: Array[Vector2] = []
+	var clicks: Array[Vector2i] = []
+	pending.mouse_event_position_changed.connect(func(point: Vector2) -> void: motions.append(point))
+	pending.hex_selected.connect(func(cell: Vector2i, _point: Vector2) -> void: clicks.append(cell))
+	LOSHelper.los_lines.append({})
+	MatchInteractionHandler.handle_mouse_event_position_changed(pending, Vector2(10.0, 20.0))
+	pending.click(Vector2(10.0, 20.0))
+	_check(world.ui.hide_calls == 1 and LOSHelper.los_lines.is_empty(), "Mouse movement before map assignment clears targeting feedback without accessing a map")
+	_check(clicks.is_empty() and motions == [Vector2(10.0, 20.0)], "Before setup, clicks are ignored while mouse-position notifications continue")
+	var ground: HexagonTileMapLayer = HexagonTileMapLayer.new()
+	ground.tile_set = TileSet.new()
+	ground.tile_set.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ground.tile_set.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+	ground.tile_set.tile_size = Vector2i(128, 128)
+	ground.pathfinding_enabled = false
+	pending.add_child(ground)
+	pending.ground_layer = ground
+	ground.free()
+	# A selected squad can remain referenced while a map is being removed.
+	var selected: Unit = Unit.new()
+	pending.selected_unit = selected
+	LOSHelper.los_lines.append({})
+	MatchInteractionHandler.handle_mouse_event_position_changed(pending, Vector2(30.0, 40.0))
+	pending.click(Vector2(30.0, 40.0))
+	_check(world.ui.hide_calls == 2 and LOSHelper.los_lines.is_empty(), "Mouse movement after map deletion clears stale targeting feedback")
+	MatchInteractionHandler.refresh_target_preview(pending, Vector2.ZERO, Vector2.ZERO)
+	_check(world.ui.hide_calls == 3, "Direct targeting-preview refresh also handles a freed map")
+	_check(clicks.is_empty() and motions.size() == 2 and pending.selected_unit == selected, "Map cleanup cannot interpret clicks or change selection through an invalid layer")
+	selected.free()
+	world.free()
 
 
 func _test_passive_controls() -> void:
