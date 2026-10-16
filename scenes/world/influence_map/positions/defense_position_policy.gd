@@ -153,6 +153,49 @@ static func _can_cover(query: PositionQuery, unit: Unit, from: Vector2i, target:
 	return query.snapshot.los.get(from, {}).has(target) and query.firepower_at_range(unit, LOSHelper.get_hex_distance(from, target)) > 0.0
 
 
+static func deployment_features(query: PositionQuery, cell: Vector2i) -> Dictionary:
+	if query.formation_features.has(cell):
+		return query.formation_features[cell]
+	var crowding: float = 0.0
+	var mutual_support: float = 0.0
+	for friendly: Unit in query.snapshot.positions:
+		if friendly == query.unit or query.snapshot.teams[friendly] != query.team or not TacticalPositionExecutor.is_active_defender(friendly):
+			continue
+		if HqSupportPositionPolicy.is_headquarters(friendly) or friendly.squad_type == Globals.SquadType.MORTAR:
+			continue
+		var planned: Vector2i = query.reservations.get(friendly, query.snapshot.positions[friendly])
+		var separation: int = LOSHelper.get_hex_distance(cell, planned)
+		if separation == 0:
+			crowding += 1.0
+		elif separation == 1:
+			crowding += 0.5
+		elif separation == 2:
+			crowding += 0.15
+		# A future reservation affects spacing, but cannot provide established support.
+		if not DefenseReadinessJob.established(friendly, query) or not friendly.is_good_order():
+			continue
+		var origin: Vector2i = query.snapshot.positions[friendly]
+		var distance: int = LOSHelper.get_hex_distance(cell, origin)
+		if distance > 0 and distance <= query.defense_radius and _can_cover(query, friendly, origin, cell) and _can_cover(query, query.unit, cell, origin):
+			mutual_support = maxf(mutual_support, 1.0 / (1.0 + float(distance) * 0.2))
+	var forward_depth: float = 0.0
+	if query.defense_area != null:
+		for approach: Dictionary in query.defense_approaches:
+			if query.assigned_branch != "" and DefenseAreaAssessment.duty_key(approach) != query.assigned_branch:
+				continue
+			if query.assigned_sector >= 0 and approach["id"] != query.assigned_sector:
+				continue
+			if query.assigned_sector < 0 and query.defense_area.duty_priority(approach) < query.defense_area.max_duty_priority() * 0.4:
+				continue
+			var source: Vector2i = approach["source"]
+			var advance: int = LOSHelper.get_hex_distance(query.objective_hex, source) - LOSHelper.get_hex_distance(cell, source)
+			var reach: int = maxi(1, mini(query.defense_radius, InfluenceUnitQuery.get_unit_range(query.unit)))
+			forward_depth = maxf(forward_depth, clampf(float(advance) / float(reach), 0.0, 1.0))
+	var features: Dictionary = {"formation_crowding": minf(crowding, 2.5), "mutual_support": mutual_support, "forward_depth": forward_depth}
+	query.formation_features[cell] = features
+	return features
+
+
 static func _approach_coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictionary) -> float:
 	if query.defense_area != null:
 		return query.defense_area.coverage(query, unit, cell, approach)["coverage"]
@@ -286,6 +329,8 @@ static func _prepare_handoff(query: PositionQuery) -> void:
 
 
 static func _loses_objective_guard(query: PositionQuery) -> bool:
+	if not query.objective_guard_required:
+		return false
 	if not DefenseReadinessJob.established(query.unit, query) or LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex) > 1 or not _can_cover(query, query.unit, query.unit.current_hex, query.objective_hex):
 		return false
 	var imminent: bool = false

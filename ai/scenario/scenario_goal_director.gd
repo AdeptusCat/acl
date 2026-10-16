@@ -173,6 +173,7 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 				best_cost = cost
 		if blocked != null:
 			_add_denial_tasks(blocked, planner)
+	_merge_occupation_duties()
 	for task: ScenarioGoalTask in tasks:
 		if task.kind != ScenarioGoalTask.Kind.EXIT:
 			continue
@@ -185,6 +186,19 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 			task.urgent = true
 			task.reason += "; breach the weakest defended corridor at " + str(breach.hex)
 	tasks.sort_custom(_prefer_task)
+
+
+func _merge_occupation_duties() -> void:
+	# One garrison can satisfy our occupation and deny occupation by the opponent.
+	for occupation: ScenarioGoalTask in tasks.duplicate():
+		if occupation.kind != ScenarioGoalTask.Kind.OCCUPY:
+			continue
+		for denial: ScenarioGoalTask in tasks.duplicate():
+			if denial.kind != ScenarioGoalTask.Kind.DENY_OCCUPATION or denial.hex != occupation.hex:
+				continue
+			occupation.priority = maxf(occupation.priority, denial.priority)
+			occupation.urgent = occupation.urgent or denial.urgent
+			tasks.erase(denial)
 
 
 func _counter_exit_deferred(state: VictoryConditionProgress, progress: Array[VictoryConditionProgress]) -> bool:
@@ -636,6 +650,8 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 	var selected: Unit
 	var score: float = -INF
 	for unit: Unit in available:
+		if task.kind == ScenarioGoalTask.Kind.HUNT and not PositionQueryService.can_assault(unit):
+			continue
 		if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 			continue
 		if not unit.is_good_order() or (unit.current_hex != task.hex and not PositionQueryService.can_follow_intent(unit)):

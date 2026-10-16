@@ -98,5 +98,16 @@ func _get_known_enemy_threat_axes() -> Array[ThreatAxis]:
 
 		if axis.is_valid_axis():
 			axes.append(axis)
+	# The authored entry marker is scenario knowledge, independent of hidden units.
+	if axes.is_empty() and platoon_ai != null and Globals.scenario_chosen != null:
+		var source: Vector2i = Globals.scenario_chosen.start_hex.get(Globals.get_enemy_team(platoon_ai.team), Vector2i.ZERO)
+		if source != Vector2i.ZERO and source != objective_hex:
+			var axis: ThreatAxis = ThreatAxis.new()
+			axis.axis_name = "Scenario approach"
+			axis.axis_type = ThreatAxis.AxisType.SCRIPTED
+			axis.source_hex = source
+			axis.target_hex = objective_hex
+			axis.confidence = 0.35
+			axes.append(axis)
 
 	return axes

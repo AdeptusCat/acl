@@ -114,6 +114,7 @@ func advance(deadline_usec: int) -> void:
 			# Releasing every flood field/candidate cache in the publication frame causes a spike.
 			var query: PositionQuery = queries[cleanup_index]
 			query.destination_features.clear()
+			query.formation_features.clear()
 			query.sector_features.clear()
 			query.route_field = null
 			query.support_fire_by_branch.clear()

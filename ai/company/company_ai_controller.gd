@@ -238,6 +238,8 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 func _eligible_for_goal(unit: Unit, task: ScenarioGoalTask) -> bool:
 	if not TacticalPositionExecutor.is_active_defender(unit) or not unit.is_good_order():
 		return false
+	if task.kind == ScenarioGoalTask.Kind.HUNT and not PositionQueryService.can_assault(unit):
+		return false
 	if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal:
 		return not ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit)
 	return true
@@ -278,6 +280,8 @@ func _assign_roles() -> void:
 		if owner.goal_director != null and owner.goal_director.manual_override:
 			formation.task = null
 		formation.objective = owner.current_order.objective_hex
+		if owner.current_order.position_mode == PositionProfile.Mode.DEFEND and formation.task == null and formation.support_firepower() <= 0.0:
+			formation.objective = formation.anchor()
 		if formation.task != null:
 			formation.objective = formation.task.hex
 			if formation.task.breach_required:
@@ -321,8 +325,18 @@ func _assign_roles() -> void:
 				formation.support = support
 			formation.reason = "Company %s: platoon %d %s at %s" % [Unit.COMPANY_NAMES[formation.company], formation.number, CompanyPlatoon.Role.keys()[formation.role].to_lower(), formation.objective]
 			diagnostics.append(formation.reason)
-		if not attack and members.size() > 1:
-			_assign_defense_sectors(key, members)
+	# Defensive neighbors coordinate even when they protect different objectives.
+	var defenders: Dictionary[int, Array] = {}
+	for formation: CompanyPlatoon in platoons.values():
+		if formation.role != CompanyPlatoon.Role.DEFEND or formation.support_firepower() <= 0.0:
+			continue
+		if not defenders.has(formation.company):
+			defenders[formation.company] = []
+		defenders[formation.company].append(formation)
+	for company: int in defenders:
+		var members: Array[CompanyPlatoon] = []
+		members.assign(defenders[company])
+		_assign_defense_sectors(str(company), members)
 
 
 func _needs_attack(formation: CompanyPlatoon) -> bool:
@@ -334,11 +348,14 @@ func _needs_attack(formation: CompanyPlatoon) -> bool:
 		return true
 	if formation.task == null:
 		return false
-	if formation.task.is_destination_goal() or formation.task.kind == ScenarioGoalTask.Kind.HUNT:
+	if formation.task.kind == ScenarioGoalTask.Kind.EXIT:
 		return true
+	if formation.task.kind == ScenarioGoalTask.Kind.HUNT:
+		return formation.can_maneuver()
+	# An occupation requirement describes a garrison, not an assault mission.
 	if owner.influence_map_controller.snapshot != null:
 		for contact: InfluenceContact in owner.influence_map_controller.snapshot.get_contacts(owner.team):
-			if contact.observed and contact.hex == formation.objective and TacticalPositionExecutor.is_active_defender(contact.unit):
+			if contact.observed and contact.hex == formation.objective and TacticalPositionExecutor.is_active_defender(contact.unit) and contact.unit.is_good_order() and formation.can_maneuver():
 				return true
 	return false
 
@@ -414,23 +431,36 @@ func _assign_defense_sectors(key: String, members: Array[CompanyPlatoon]) -> voi
 			front.append(formation)
 	if front.size() < 2 or owner.influence_map_controller.snapshot == null:
 		return
-	var context: String = key + str(front.map(func(formation: CompanyPlatoon) -> int: return formation.number))
+	var identities: Array = []
+	for formation: CompanyPlatoon in front:
+		identities.append([formation.number, formation.objective, formation.combat_units().size()])
+	var context: String = str([key, owner.current_order.defense_radius, owner.current_order.defense_area_radius, identities])
 	if not _sector_cache.has(context):
 		var sectors: Dictionary[int, Array] = {}
+		var anchors: Dictionary[CompanyPlatoon, Vector2i] = {}
+		var radii: Dictionary[CompanyPlatoon, int] = {}
 		for formation: CompanyPlatoon in front:
 			sectors[formation.number] = []
+			anchors[formation] = formation.anchor()
+			radii[formation] = mini(owner.current_order.defense_area_radius, maxi(owner.current_order.defense_radius, formation.combat_units().size() * 2 + 2))
 		var map: InfluenceMap = owner.influence_map_controller.snapshot.maps[owner.team]
 		for cell: Vector2i in map.playable_cells:
-			if LOSHelper.get_hex_distance(cell, front[0].objective) > owner.current_order.defense_area_radius:
-				continue
-			var selected: CompanyPlatoon = front[0]
-			var distance: int = 2147483647
+			var selected: CompanyPlatoon
+			var distance: float = INF
 			for formation: CompanyPlatoon in front:
-				var candidate: int = LOSHelper.get_hex_distance(cell, formation.anchor())
+				var objective_distance: int = LOSHelper.get_hex_distance(cell, formation.objective)
+				if objective_distance > radii[formation]:
+					continue
+				var candidate: float = float(objective_distance) + float(LOSHelper.get_hex_distance(cell, anchors[formation])) * 0.25
+				if cell == formation.objective:
+					candidate -= 1000.0
 				if candidate < distance:
 					selected = formation
 					distance = candidate
-			sectors[selected.number].append(cell)
+			if selected != null:
+				sectors[selected.number].append(cell)
+		if _sector_cache.size() >= 8:
+			_sector_cache.clear()
 		_sector_cache[context] = sectors
 	for formation: CompanyPlatoon in front:
 		formation.sector_cells.assign(_sector_cache[context][formation.number])

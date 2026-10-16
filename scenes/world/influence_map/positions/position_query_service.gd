@@ -295,11 +295,12 @@ static func _prefer_connected_cover(query: PositionQuery, best: PositionCandidat
 		# A squad starting outside that cover can still deploy into the objective's woods.
 		if starts_connected and candidate.features.get("open_crossing_seconds", 0.0) > best.features.get("open_crossing_seconds", 0.0) + 0.000001:
 			continue
-		var margin: float = maxf(query.profile.connected_cover_improvement_absolute, absf(candidate.score) * query.profile.connected_cover_improvement_relative)
-		if best.score <= candidate.score + margin:
+		# Spacing and depth do not justify leaving useful connected cover on their own.
+		var connected_score: float = candidate.score - query.profile.defensive_deployment_score(candidate.features)
+		var detached_score: float = best.score - query.profile.defensive_deployment_score(best.features)
+		var margin: float = maxf(query.profile.connected_cover_improvement_absolute, absf(connected_score) * query.profile.connected_cover_improvement_relative)
+		if detached_score <= connected_score + margin:
 			return candidate
-		# Candidates are sorted by utility; weaker connected positions cannot justify this preference.
-		return best
 	return best
 
 
@@ -317,6 +318,20 @@ static func rapid_candidate_score(query: PositionQuery, index: int) -> float:
 	var destination_distance: int = LOSHelper.get_hex_distance(cell, target)
 	var travel: int = LOSHelper.get_hex_distance(query.origin_hex, cell)
 	var score: float = cover * 2.0 - float(travel) * 0.35 - float(destination_distance)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and query.defense_area != null:
+		# Shortlist firing positions for the assigned approach, not a ring around the flag.
+		var coverage: float = 0.0
+		for approach: Dictionary in query.defense_approaches:
+			if query.assigned_branch != "" and DefenseAreaAssessment.duty_key(approach) != query.assigned_branch:
+				continue
+			if query.assigned_sector >= 0 and approach["id"] != query.assigned_sector:
+				continue
+			if query.assigned_sector < 0 and query.defense_area.duty_priority(approach) < query.defense_area.max_duty_priority() * 0.4:
+				continue
+			coverage = maxf(coverage, query.defense_area.coverage(query, query.unit, cell, approach)["coverage"])
+		var formation: Dictionary = DefensePositionPolicy.deployment_features(query, cell)
+		score = cover * 2.0 + coverage * 5.0 - float(travel) * 0.15 - float(destination_distance) * 0.05
+		score += formation["mutual_support"] * query.profile.mutual_support_weight + formation["forward_depth"] * query.profile.forward_depth_weight - formation["formation_crowding"] * query.profile.formation_spacing_weight
 	score -= PositionFeatureEvaluator.risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)) * 4.0
 	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null and query.defense_area.geometry["return_open_costs"].get(cell, INF) <= 0.000001:
 		score += 2.0
@@ -330,6 +345,10 @@ static func rapid_position_fulfils_role(query: PositionQuery, candidate: Positio
 		return query.support_targets.is_empty() or candidate.features.get("support_priority_covered", false)
 	if DefensePositionPolicy.needs_interception(query, candidate.features):
 		return false
+	if query.initial_deployment:
+		return false
+	if query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and candidate.features.get("assigned_sector", -1) >= 0:
+		return candidate.features.get("assigned_coverage", 0.0) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
 	return candidate.features.get("responsibility", "") != ""
 
 

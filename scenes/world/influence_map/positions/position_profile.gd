@@ -42,6 +42,9 @@ var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 @export var establishment_seconds: float = 3.0
 @export var open_crossing_time_weight: float = 0.35
 @export var objective_return_open_weight: float = 0.75
+@export var formation_spacing_weight: float = 1.0
+@export var mutual_support_weight: float = 0.8
+@export var forward_depth_weight: float = 1.0
 @export var connected_cover_improvement_absolute: float = 0.75
 @export var connected_cover_improvement_relative: float = 0.2
 
@@ -144,6 +147,7 @@ func score(features: Dictionary, unit: Unit) -> float:
 			area_bonus *= 1.3
 		elif unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 			area_bonus = 0.0
+		area_bonus += defensive_deployment_score(features)
 		if features.get("responsibility") == "reserve":
 			area_bonus = features["reserve_readiness"] * reserve_readiness_weight
 			position_weight = 0.0
@@ -178,3 +182,9 @@ func score(features: Dictionary, unit: Unit) -> float:
 		+ features.get("interposition", 0.0) * position_weight + features.get("blocking", 0.0) * coverage_weight + area_bonus
 		- features.get("contact_pressure", 0.0) * proximity_weight
 		+ features["progress"] * progress_weight + features.get("support_advance", 0.0) * support_advance_weight)
+
+
+func defensive_deployment_score(features: Dictionary) -> float:
+	if not features.get("approach_duty", false):
+		return 0.0
+	return features.get("mutual_support", 0.0) * mutual_support_weight + features.get("forward_depth", 0.0) * forward_depth_weight - features.get("formation_crowding", 0.0) * formation_spacing_weight

@@ -352,8 +352,10 @@ func _capture_planning_baseline() -> Dictionary[Unit, Vector2i]:
 
 func _prepare_readiness(budgeted: bool) -> void:
 	var available: Array[Unit] = _combat_units(_planning_available)
+	for unit: Unit in goal_assignments:
+		available.erase(unit)
 	var reserve: Unit = null
-	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and not _has_objective_goal_duty() and available.size() >= 2:
 		available.erase(_select_guard_squad(available))
 	if _can_keep_reserve(_planning_available):
 		reserve = _select_reserve_squad(available)
@@ -375,9 +377,18 @@ func _can_keep_reserve(available: Array[Unit]) -> bool:
 		return false
 	var combat_count: int = 0
 	for unit: Unit in available:
-		if DefenseSectorAllocator.combat_reserve_capable(unit):
+		if not goal_assignments.has(unit) and DefenseSectorAllocator.combat_reserve_capable(unit):
 			combat_count += 1
+	# Readiness decides whether a capable reserve can cover gaps or must deploy.
 	return combat_count >= 3
+
+
+func _has_objective_goal_duty() -> bool:
+	for unit: Unit in goal_assignments:
+		var task: ScenarioGoalTask = goal_assignments[unit]
+		if task.hex == current_order.objective_hex and task.kind in [ScenarioGoalTask.Kind.OCCUPY, ScenarioGoalTask.Kind.DENY_OCCUPATION, ScenarioGoalTask.Kind.BLOCK_EXIT] and TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order():
+			return true
+	return false
 
 
 func _clear_reserve() -> void:
@@ -432,6 +443,8 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	config.geography = PositionQuery.Geography.OBJECTIVE_RADIUS
 	config.defense_responsibility = PositionQuery.Responsibility.AUTO
 	var advancing: bool = task.is_destination_goal() or task.kind == ScenarioGoalTask.Kind.HUNT
+	if task.kind == ScenarioGoalTask.Kind.OCCUPY and unit.current_hex == task.hex:
+		advancing = false
 	if task.kind == ScenarioGoalTask.Kind.DENY_OCCUPATION:
 		for contact: InfluenceContact in _planning_snapshot.get_contacts(team):
 			if contact.observed and contact.hex == task.hex and TacticalPositionExecutor.is_active_defender(contact.unit) and contact.unit.is_good_order():
@@ -441,6 +454,17 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		config.defense_radius = 2
 		config.withdrawal_requested = true
 	config.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	if task.kind == ScenarioGoalTask.Kind.OCCUPY and not advancing:
+		config.defense_responsibility = PositionQuery.Responsibility.OCCUPY
+		config.profile.minimum_cover = 0.0
+	elif task.kind in [ScenarioGoalTask.Kind.DENY_OCCUPATION, ScenarioGoalTask.Kind.BLOCK_EXIT] and not advancing:
+		config.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+		config.geography = current_order.geography
+		config.sector_cells = current_order.sector_cells.duplicate()
+		if defense_area != null and defense_area.objective_hex == combat_hex and config.geography == PositionQuery.Geography.OBJECTIVE_OR_SECTOR:
+			for cell: Vector2i in defense_area.covered_positions:
+				if not config.sector_cells.has(cell):
+					config.sector_cells.append(cell)
 	if advancing:
 		config.profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
 		config.profile.progress_weight = 12.0
@@ -492,6 +516,10 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		# A deliberate exit duty overrides the default HQ support profile.
 		query.profile = config.profile
 	query.snapshot = _planning_snapshot
+	if not advancing and defense_area != null and defense_area.objective_hex == combat_hex:
+		query.defense_area = defense_area
+		query.departure_baseline = _planning_baseline
+		query.has_departure_baseline = true
 	if task.breach_required and query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 		query.has_support_anchor = true
 		query.support_anchor_hex = combat_hex
@@ -688,9 +716,9 @@ func _build_combat_sector_requests(available: Array[Unit]) -> void:
 			_add_sector_request(unit, "guard_objective", -1, current_order.defense_responsibility)
 		return
 	var reserve: Unit = null
-	var has_guard: bool = false
+	var has_guard: bool = _has_objective_goal_duty()
 	var can_reserve: bool = _can_keep_reserve(available)
-	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and available.size() >= 2:
+	if current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and not has_guard and available.size() >= 2:
 		var guard: Unit = _select_guard_squad(available)
 		available.erase(guard)
 		_add_sector_request(guard, "guard_objective", -1, PositionQuery.Responsibility.GUARD)
@@ -1140,8 +1168,15 @@ func _configure_position_stability(query: PositionQuery) -> void:
 	query.deliberate_movement = current_order.position_mode == PositionProfile.Mode.ASSAULT and query.profile.mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]
 	if current_order.position_mode != PositionProfile.Mode.DEFEND:
 		return
+	if goal_director != null and not goal_director.manual_override and not goal_director.conditions.is_empty():
+		query.objective_guard_required = false
+		for task: ScenarioGoalTask in goal_director.tasks:
+			if task.kind == ScenarioGoalTask.Kind.OCCUPY and task.hex == query.objective_hex:
+				query.objective_guard_required = true
+				break
 	query.rapid_response = true
 	query.optimize_position = false
+	query.initial_deployment = not accepted_positions.has(query.unit) and query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
 	query.response_priority = 1
 	if accepted_positions.has(query.unit):
 		query.response_priority = 0

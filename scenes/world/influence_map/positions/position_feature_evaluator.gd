@@ -130,6 +130,8 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 			# Capture protection is a duty; distance alone adds no firing value.
 			features["objective_coverage"] = float(cell == query.objective_hex or (objective_distance <= 1 and coverage > 0.0))
 		features.merge(DefensePositionPolicy.evaluate(query, cell))
+		if query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH:
+			features.merge(DefensePositionPolicy.deployment_features(query, cell))
 		features["holding_under_pressure"] = incoming > 0.0 and DefensePositionPolicy.can_hold_under_pressure(query, cell, features)
 		features["contact_pressure"] = _contact_pressure(query, contacts, cell, cover)
 		features["exposure_budget_seconds"] = query.profile.max_exposure_seconds

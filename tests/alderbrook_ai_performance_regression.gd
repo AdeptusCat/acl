@@ -92,7 +92,13 @@ func _run() -> void:
 	measuring = false
 	samples.sort()
 	_check(generations.size() >= 3, "AI is profiled across repeated cold and warm snapshot generations")
-	_check(objectives_requested.size() >= 3, "Live platoon and mortar queries exercise multiple alternate objectives")
+	var defended_objectives: Dictionary[Vector2i, bool] = {}
+	for formation: CompanyPlatoon in planner.company_command.platoons.values():
+		if formation.support_firepower() > 0.0:
+			defended_objectives[formation.objective] = true
+	_check(defended_objectives.size() == 3, "Live defensive platoons retain all three district objectives")
+	# The mortar no longer invents a fourth geographic mission by hunting enemy infantry.
+	_check(objectives_requested.size() >= defended_objectives.size() - 1, "Live defensive queries exercise every alternate district objective")
 	_check(controller.forecast_cache.builds >= 3 and controller.forecast_cache.hits > 0, "Cold forecasts finish and compatible later snapshots reuse them")
 	_check(max_query_usec < MAX_QUERY_USEC, "Forecast work respects the tactical query slice limit")
 	_check(samples[-1] < MAX_FRAME_USEC, "Stationary AI simulation has no large periodic CPU stalls")

@@ -208,7 +208,7 @@ func _test_exact_destinations() -> void:
 	var map: InfluenceMap = snapshot.maps[planner.team]
 	map.clear_layer(InfluenceMap.Layer.THREAT)
 	map.clear_layer(InfluenceMap.Layer.FORECAST_THREAT)
-	snapshot._forecasts.clear()
+	snapshot._forecast_jobs.clear()
 	var unit: Unit = rifles[2]
 	var target: Vector2i = _adjacent_empty(snapshot, unit)
 	_check(target != Vector2i(-999, -999), "A reachable empty destination exists for the exact-entry check")
