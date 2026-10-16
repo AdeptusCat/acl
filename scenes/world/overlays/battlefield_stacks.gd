@@ -47,7 +47,7 @@ func refresh() -> void:
 		_units_by_hex[unit.current_hex].append(unit)
 	if roster.visible:
 		var members: Array[Unit] = _members_at(roster.cell)
-		if members.size() < 2:
+		if members.size() < 2 or not _has_selected_member(members):
 			roster.close()
 		else:
 			roster.refresh_members(members)
@@ -64,19 +64,19 @@ func _members_at(cell: Vector2i) -> Array[Unit]:
 func open_roster(cell: Vector2i) -> bool:
 	refresh()
 	var members: Array[Unit] = _members_at(cell)
-	if members.size() < 2:
+	if members.size() < 2 or not _has_selected_member(members):
 		return false
 	roster.open(cell, members)
 	_fit_roster(members)
-	if is_instance_valid(controller.selected_unit) and members.has(controller.selected_unit):
-		roster.reveal_unit(controller.selected_unit)
+	roster.reveal_unit(controller.selected_unit)
 	return true
 
 
 func cycle_roster(cell: Vector2i, picked: Unit = null) -> bool:
-	if not open_roster(cell):
-		return false
+	refresh()
 	var members: Array[Unit] = _members_at(cell)
+	if members.size() < 2:
+		return false
 	var index: int = -1
 	if is_instance_valid(controller.selected_unit):
 		index = members.find(controller.selected_unit)
@@ -84,8 +84,15 @@ func cycle_roster(cell: Vector2i, picked: Unit = null) -> bool:
 		index = (index + 1) % members.size()
 	else:
 		index = maxi(0, members.find(picked))
-	_on_unit_selected(members[index])
-	return true
+	# A stack click selects its member before requesting that stack's roster.
+	controller._select_unit(members[index])
+	controller.show_unit_details_in_ui.emit(members[index])
+	LOSHelper.clear_los()
+	return open_roster(cell)
+
+
+func _has_selected_member(members: Array[Unit]) -> bool:
+	return is_instance_valid(controller.selected_unit) and members.has(controller.selected_unit)
 
 
 func _on_unit_entered_hex(unit: Unit, cell: Vector2i) -> void:

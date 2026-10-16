@@ -121,6 +121,7 @@ func _run() -> void:
 	commands.set_process(false)
 	await _settle()
 	_test_preserved_stack()
+	_test_selection_gate()
 	await _test_arrival_popup()
 	_test_enemy_visibility()
 	await _test_pointer_and_selection()
@@ -168,6 +169,22 @@ func _test_preserved_stack() -> void:
 	_test_model_positions()
 
 
+func _test_selection_gate() -> void:
+	_check(not stacks.open_roster(stack_cell) and not stacks.roster.visible, "A stack roster cannot open without a selected squad")
+	controller._select_unit(single)
+	_check(not stacks.open_roster(stack_cell) and not stacks.roster.visible, "A selected squad outside the stack cannot open its roster")
+	controller._select_unit(second)
+	_check(stacks.open_roster(stack_cell) and stacks.roster.rows[second.get_instance_id()].button_pressed, "A selected member permits its own stack roster")
+	controller._select_unit(single)
+	stacks.refresh()
+	_check(not stacks.roster.visible, "Selecting a squad outside the stack closes the open roster")
+	controller._select_unit(second)
+	stacks.open_roster(stack_cell)
+	controller._deselect_unit(second)
+	stacks.refresh()
+	_check(not stacks.roster.visible, "Clearing selection closes the stack roster")
+
+
 func _test_arrival_popup() -> void:
 	var mover: Unit = _unit(Vector2i(1, 4), 7, Globals.SquadType.Rifle)
 	stacks.refresh()
@@ -176,8 +193,13 @@ func _test_arrival_popup() -> void:
 	_check(not stacks.roster.visible, "Moving into an empty hex does not open a roster")
 	_move_to(mover, headquarters.current_hex)
 	await _settle()
-	_check(stacks.roster.visible and stacks.roster.cell == headquarters.current_hex and stacks.roster.rows.size() == 2, "A real movement entry into a friendly squad's hex opens the two-squad roster")
-	_check(controller.selected_unit == second and mover.current_hex == headquarters.current_hex and mover.current_cube == headquarters.current_cube, "An arrival popup preserves selection and the movement system's occupied hex")
+	_check(not stacks.roster.visible, "An unrelated friendly stack forming cannot open a roster")
+	_check(controller.selected_unit == second and mover.current_hex == headquarters.current_hex and mover.current_cube == headquarters.current_cube, "An unrelated arrival preserves selection and the movement system's occupied hex")
+	_move_to(mover, Vector2i(1, 5))
+	controller._select_unit(mover)
+	_move_to(mover, headquarters.current_hex)
+	await _settle()
+	_check(stacks.roster.visible and stacks.roster.cell == headquarters.current_hex and stacks.roster.rows.size() == 2 and stacks.roster.rows[mover.get_instance_id()].button_pressed, "A selected squad entering an occupied hex opens that stack's roster")
 	_check(mover.global_position.is_equal_approx(controller.ground_layer.to_global(controller.ground_layer.map_to_local(mover.current_hex))), "Opening the arrival roster leaves the movement endpoint unchanged")
 	stacks.roster.close()
 	for frame: int in range(3):
@@ -187,7 +209,18 @@ func _test_arrival_popup() -> void:
 	_check(not stacks.roster.visible, "Dismissing an arrival roster keeps it closed through refresh and same-hex recentering")
 	_move_to(mover, stack_cell)
 	await _settle()
-	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 4 and stacks.roster.rows[second.get_instance_id()].button_pressed, "A later entry into a larger stack reopens its roster with the existing selection highlighted")
+	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 4 and stacks.roster.rows[mover.get_instance_id()].button_pressed, "A selected squad entering a larger stack reopens its roster with the existing selection highlighted")
+	controller._select_unit(second)
+	_move_to(mover, headquarters.current_hex)
+	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 3, "Unrelated movement cannot replace the selected stack's open roster")
+	controller._deselect_unit(second)
+	stacks.refresh()
+	_move_to(mover, stack_cell)
+	_check(not stacks.roster.visible, "Movement into an occupied hex cannot open a roster when nothing is selected")
+	_move_to(mover, headquarters.current_hex)
+	controller._select_unit(second)
+	_move_to(mover, stack_cell)
+	_check(stacks.roster.visible and stacks.roster.rows[second.get_instance_id()].button_pressed, "Another squad joining the selected squad's hex opens the selected stack's roster")
 	stacks.roster.close()
 	var enemy: Unit = _unit(Vector2i(1, 4), 8, Globals.SquadType.Rifle)
 	enemy.team = Globals.get_enemy_team(Globals.team_player)
@@ -203,8 +236,9 @@ func _test_arrival_popup() -> void:
 	mover.unit_entered_hex.emit(mover, stack_cell)
 	_check(not stacks.roster.visible, "Exited units cannot open an arrival roster")
 	mover.exited = false
-	controller.end_game_handled = true
 	_move_to(mover, headquarters.current_hex)
+	controller.end_game_handled = true
+	_move_to(mover, stack_cell)
 	_check(not stacks.roster.visible, "Movement after the match ends cannot open a roster")
 	controller.end_game_handled = false
 	for unit: Unit in [mover, enemy, hidden]:
@@ -280,12 +314,14 @@ func _test_pointer_and_selection() -> void:
 func _test_enemy_visibility() -> void:
 	var enemy: Unit = _unit(stack_cell, 8, Globals.SquadType.Rifle)
 	enemy.team = Globals.get_enemy_team(Globals.team_player)
+	controller._select_unit(second)
 	stacks.open_roster(stack_cell)
 	_check(stacks.roster.rows.size() == 3 and not stacks.roster.rows.has(enemy.get_instance_id()), "Friendly stack rosters never include enemy squads")
 	enemy.hide()
 	stacks.refresh()
 	_check(stacks.roster.rows.size() == 3 and not enemy.is_visible_in_tree(), "Opening the roster never reveals hidden enemy counters")
 	stacks.roster.close()
+	controller._deselect_unit(second)
 	units.erase(enemy)
 	enemy.squad_fire.calc.free()
 	enemy.free()
@@ -397,16 +433,18 @@ func _test_removal_and_cleanup() -> void:
 	first.alive = false
 	first.ui.die()
 	stacks.refresh()
-	_check(first.ui.modulate.a == 1.0 and not stacks.roster.rows.has(first.get_instance_id()), "Eliminated squads retain their own corpse and fade presentation")
+	_check(first.ui.modulate.a == 1.0 and not stacks.roster.visible, "Losing the selected squad closes the roster and preserves its corpse presentation")
+	controller._select_unit(second)
 	stacks.open_roster(stack_cell)
 	var doomed: Unit = units.back()
 	var doomed_id: int = doomed.get_instance_id()
 	controller._select_unit(doomed)
+	stacks.refresh()
 	units.erase(doomed)
 	doomed.squad_fire.calc.free()
 	doomed.free()
 	stacks.refresh()
-	_check(not stacks.roster.rows.has(doomed_id), "Freed squads disappear from open rosters without stale Node keys")
+	_check(not stacks.roster.visible and not stacks.roster.rows.has(doomed_id), "Freeing the selected squad closes the roster without stale Node keys")
 	_click(BattlefieldStacks.counter_rect(second).get_center())
 	_check(is_instance_valid(controller.selected_unit) and controller.selected_unit.is_active() and stacks.roster.rows[controller.selected_unit.get_instance_id()].button_pressed, "Cycling skips removed squads and recovers from a freed current selection")
 	for unit: Unit in units:
