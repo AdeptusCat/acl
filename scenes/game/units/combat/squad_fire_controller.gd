@@ -681,7 +681,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var dist: float = unit.position.distance_to(LOSHelper.ground_layer.map_to_local(_target_hex))
 	
 	var life: float = dist / s.weapon.projectile_speed      # seconds
-	if s.weapon.can_fire_riflegrenades:
+	if riflegrenade:
 		life = dist / s.weapon.riflegrenade_projectile_speed
 	await get_tree().create_timer(life).timeout
 	

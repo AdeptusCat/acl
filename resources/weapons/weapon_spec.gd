@@ -47,7 +47,7 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var aim_s: float = 0.5     # acquire/sight picture
 @export var setup_s: float = 0.0     # setup weapon
 
-@export var projectile_speed: int = 600
+@export var projectile_speed: int = 1200
 
 @export var can_fire_riflegrenades: bool = false
 @export var riflegrenade_loaded: bool = false
@@ -72,7 +72,7 @@ enum FireMode { SINGLE, BURST, MANUAL }
 
 @export var riflegrenade_shot: AudioStream = null
 @export var riflegrenade_hit: AudioStream = null     
-@export var riflegrenade_projectile_speed: int = 200
+@export var riflegrenade_projectile_speed: int = 400
 
 
 func create_runtime() -> WeaponSpec:
