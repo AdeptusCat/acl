@@ -146,6 +146,7 @@ func _run() -> void:
 	_test_defense_area()
 	_test_corridor_evidence()
 	_test_objective_connected_defense()
+	_test_forward_screen_and_fallback()
 	_test_local_interception()
 	_test_complementary_defense()
 	_test_loadout_stationary_roles()
@@ -3156,6 +3157,30 @@ func _test_corridor_evidence() -> void:
 			branch_in_corridor = branch_in_corridor or approach["cells"].has(cell)
 	_check(excluded_branches > 0 and not branch_in_corridor, "A close attacker cannot generate the former cheap corridor branches behind the objective")
 	stale_enemy.free()
+
+
+func _test_forward_screen_and_fallback() -> void:
+	var query: PositionQuery = _defense_fixture()
+	query.objective_hex = Vector2i(4, 3)
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.minimum_forward_progress = 2
+	query.protect_garrison_hex = true
+	query.axis = ThreatAxis.new()
+	query.axis.source_hex = Vector2i(8, 3)
+	query.axis.target_hex = query.objective_hex
+	query.sector_cells = [query.objective_hex, Vector2i(3, 3), Vector2i(7, 3)]
+	var forward: PositionResult = PositionQueryService.query_positions(query)
+	_check(forward.is_valid() and forward.features.get("forward_progress", 0) >= 2 and not forward.features.get("screen_fallback", true), "A screen occupies a forward firing position instead of treating the garrison as its front")
+	query.sector_cells = [query.objective_hex, Vector2i(3, 3)]
+	var fallback: PositionResult = PositionQueryService.query_positions(query)
+	_check(fallback.is_valid() and fallback.target_hex == Vector2i(3, 3) and fallback.features.get("screen_fallback", false), "An infeasible forward screen gets an explicit covered fallback without occupying its garrison")
+	_check(fallback.features["important_approaches_covered"] > 0 and fallback.features["exposure_seconds"] <= query.profile.max_exposure_seconds, "A screen fallback retains approach coverage and route safety")
+	query.sector_cells.append(Vector2i(7, 3))
+	var retried: PositionResult = PositionQueryService.query_positions(query)
+	_check(retried.is_valid() and retried.features.get("forward_progress", 0) >= 2 and not retried.features.get("screen_fallback", true), "A later forward opportunity is not suppressed by an earlier fallback")
+	query.minimum_forward_progress = 0
+	query.sector_cells = [query.objective_hex]
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A covering squad cannot block the objective reserved for the required garrison")
 
 
 func _test_objective_connected_defense() -> void:

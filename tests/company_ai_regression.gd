@@ -74,6 +74,7 @@ func _run() -> void:
 		unit.movement._process_movement(100.0)
 		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
 	controller.influence_map_controller.create_maps(0.0)
+	_test_defensive_reserve_budget()
 	_test_support_gate()
 	_test_destination_conflict()
 	_test_objective_cohesion()
@@ -168,6 +169,56 @@ func _test_defense_positions() -> void:
 			_check(not sectors.has(cell), "Live defensive platoons receive distinct terrain sectors")
 			sectors[cell] = true
 	_check(not sectors.is_empty(), "Real company defense allocates sectors on the village terrain")
+
+
+func _test_defensive_reserve_budget() -> void:
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.current_order = MissionOrder.new()
+	var fixture: CompanyAI = CompanyAI.new()
+	fixture.configure(planner)
+	var members: Array[CompanyPlatoon] = []
+	var capable: Array[Unit] = []
+	for key: Vector2i in command.platoons:
+		var original: CompanyPlatoon = command.platoons[key]
+		var formation: CompanyPlatoon = CompanyPlatoon.new()
+		formation.company = original.company
+		formation.number = original.number
+		formation.squads = original.squads.duplicate()
+		formation.objective = formation.anchor()
+		fixture.platoons[key] = formation
+		members.append(formation)
+		for unit: Unit in formation.combat_units():
+			if DefenseSectorAllocator.combat_reserve_capable(unit):
+				capable.append(unit)
+		var duty: ScenarioGoalTask = ScenarioGoalTask.new()
+		duty.kind = ScenarioGoalTask.Kind.OCCUPY
+		duty.hex = formation.objective
+		planner.goal_assignments[formation.combat_units()[0]] = duty
+	_check(capable.size() >= 6 and capable.size() < 12, "Reserve fixture has enough capable company strength for one reserve")
+	fixture._assign_defense_reserves(members)
+	var selected: CompanyPlatoon
+	var count: int = 0
+	for formation: CompanyPlatoon in members:
+		if formation.provides_reserve:
+			selected = formation
+			count += 1
+	_check(count == 1, "Separate objective platoons collectively retain one reserve after allocating their garrisons")
+	fixture._assign_defense_reserves(members)
+	_check(selected != null and selected.provides_reserve, "Quiet reassessment preserves the selected reserve owner")
+	for index: int in range(5, capable.size()):
+		capable[index].broken = true
+	fixture._assign_defense_reserves(members)
+	for formation: CompanyPlatoon in members:
+		_check(not formation.provides_reserve, "A depleted company releases its squad reserve instead of counting incapable squads")
+	for index: int in range(5, capable.size()):
+		capable[index].broken = false
+	members[0].role = CompanyPlatoon.Role.RESERVE
+	var defenders: Array[CompanyPlatoon] = members.duplicate()
+	defenders.remove_at(0)
+	fixture._assign_defense_reserves(defenders)
+	for formation: CompanyPlatoon in defenders:
+		_check(not formation.provides_reserve, "A whole reserve platoon already consumes the company reserve budget")
+	planner.free()
 
 
 func _test_support_gate() -> void:

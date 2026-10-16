@@ -130,6 +130,12 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 		responsibility = ""
 	elif query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and not approach_covered:
 		responsibility = ""
+	var progress: int = forward_progress(query, cell)
+	var screen_fallback: bool = query.minimum_forward_progress > 0 and progress < query.minimum_forward_progress
+	if screen_fallback and not query.allow_screen_fallback:
+		responsibility = ""
+	if query.protect_garrison_hex and cell == query.objective_hex:
+		responsibility = ""
 	var crossing: float = 1.0
 	if query.required_crossing_branch != "" and query.defense_area != null:
 		var branch: Dictionary = query.defense_area.branch_for_key(query.required_crossing_branch)
@@ -141,6 +147,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 			if crossing < DefenseAreaAssessment.MIN_CROSSING_COVERAGE or query.defense_area.geometry["return_open_costs"].get(cell, INF) > 0.000001:
 				responsibility = ""
 	return {"responsibility": responsibility, "blocking": blocking, "interposition": interposition,
+		"forward_progress": progress, "screen_fallback": screen_fallback,
 		"required_crossing_branch": query.required_crossing_branch, "crossing_coverage": crossing,
 		"covered_approaches": covered_approaches, "approach_count": query.defense_approaches.size(),
 		"important_approaches_covered": important_covered, "important_approach_count": important_count,
@@ -178,22 +185,25 @@ static func deployment_features(query: PositionQuery, cell: Vector2i) -> Diction
 		var distance: int = LOSHelper.get_hex_distance(cell, origin)
 		if distance > 0 and distance <= query.defense_radius and _can_cover(query, friendly, origin, cell) and _can_cover(query, query.unit, cell, origin):
 			mutual_support = maxf(mutual_support, 1.0 / (1.0 + float(distance) * 0.2))
-	var forward_depth: float = 0.0
-	if query.defense_area != null:
-		for approach: Dictionary in query.defense_approaches:
-			if query.assigned_branch != "" and DefenseAreaAssessment.duty_key(approach) != query.assigned_branch:
-				continue
-			if query.assigned_sector >= 0 and approach["id"] != query.assigned_sector:
-				continue
-			if query.assigned_sector < 0 and query.defense_area.duty_priority(approach) < query.defense_area.max_duty_priority() * 0.4:
-				continue
-			var source: Vector2i = approach["source"]
-			var advance: int = LOSHelper.get_hex_distance(query.objective_hex, source) - LOSHelper.get_hex_distance(cell, source)
-			var reach: int = maxi(1, mini(query.defense_radius, InfluenceUnitQuery.get_unit_range(query.unit)))
-			forward_depth = maxf(forward_depth, clampf(float(advance) / float(reach), 0.0, 1.0))
+	var reach: int = maxi(1, mini(query.defense_radius, InfluenceUnitQuery.get_unit_range(query.unit)))
+	var forward_depth: float = clampf(float(forward_progress(query, cell)) / float(reach), 0.0, 1.0)
 	var features: Dictionary = {"formation_crowding": minf(crowding, 2.5), "mutual_support": mutual_support, "forward_depth": forward_depth}
 	query.formation_features[cell] = features
 	return features
+
+
+static func forward_progress(query: PositionQuery, cell: Vector2i) -> int:
+	var progress: int = 0
+	for approach: Dictionary in query.defense_approaches:
+		if query.assigned_branch != "" and DefenseAreaAssessment.duty_key(approach) != query.assigned_branch:
+			continue
+		if query.assigned_sector >= 0 and approach.get("id", -1) != query.assigned_sector:
+			continue
+		if query.defense_area != null and query.assigned_sector < 0 and query.defense_area.duty_priority(approach) < query.defense_area.max_duty_priority() * 0.4:
+			continue
+		var source: Vector2i = approach["source"]
+		progress = maxi(progress, LOSHelper.get_hex_distance(query.objective_hex, source) - LOSHelper.get_hex_distance(cell, source))
+	return progress
 
 
 static func _approach_coverage(query: PositionQuery, unit: Unit, cell: Vector2i, approach: Dictionary) -> float:

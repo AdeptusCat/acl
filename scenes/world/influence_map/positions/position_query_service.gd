@@ -101,6 +101,10 @@ static func finish_accepted_order(query: PositionQuery, result: PositionResult) 
 		return false
 	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
 		return false
+	if query.stable_order.features.get("screen_fallback", false):
+		# Finish a safe accepted fallback bound before trying the forward screen again.
+		query.allow_screen_fallback = true
+		query.destination_features.clear()
 	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, target, path)
 	if features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
 		return false
@@ -277,6 +281,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 			result.reason = "Moving closer to the forward support squad; leadership range not yet reached"
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
 		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
+	if result.features.get("screen_fallback", false):
+		result.reason += "; no safe forward screen position is currently available"
 	if query.stability_reason != "" and result.status == PositionResult.Status.RETAINED:
 		result.reason = query.stability_reason
 	if query.goal_reason != "":
@@ -465,8 +471,12 @@ static func press_attack_path_is_safe(snapshot: InfluenceSnapshot, team: int, or
 static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 		return HqSupportPositionPolicy.in_geography(query, cell)
+	if query.protect_garrison_hex and cell == query.objective_hex:
+		return false
 	if fallback:
 		return query.fallback_hexes.has(cell)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.minimum_forward_progress > 0 and not query.allow_screen_fallback and DefensePositionPolicy.forward_progress(query, cell) < query.minimum_forward_progress:
+		return false
 	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
 	if query.profile.mode == PositionProfile.Mode.DEFEND or query.profile.mode == PositionProfile.Mode.LEGACY_DEFENSE:
 		if query.geography == PositionQuery.Geography.SECTOR_ONLY:

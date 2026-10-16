@@ -57,6 +57,11 @@ The platoon does not allocate an additional automatic guard when a scenario duty
 already protects its objective. Squads remaining after scenario allocation cover
 approaches. Small forces retain all needed combat squads; larger forces can keep
 a capable reserve, with the existing readiness checks deploying it when needed.
+Company command budgets one mobile reserve squad per six capable combat squads
+across its objectives. A platoon can supply that squad only after retaining its
+garrison and a front squad. Every capable squad in an existing whole-platoon
+reserve counts against this budget.
+Reserve ownership stays stable while the force and mission remain suitable.
 
 The shared platoon planner uses covered terrain, approach corridors, weapon range
 and LOS for both company and single-platoon defense. When no manual threat axis
@@ -71,11 +76,22 @@ garrisons. Its bonus cannot by itself justify abandoning useful connected cover.
 Only established squads contribute mutual support; destination reservations
 influence spacing without promising future covering fire.
 
+For a platoon with at least three capable combat squads, an approach squad with
+more than two hexes of weapon range must make at least two hexes of progress
+toward its assigned threat source. Merely seeing the approach from beside the
+objective no longer fulfils that screen duty.
+Smaller outposts keep compact positions without this stand-off requirement.
+If the complete forward search finds no safe position, the planner searches for
+a closer fallback with the same coverage, exposure and handoff checks. Advice
+marks this case as `screen_fallback`; subsequent planning retries the forward
+screen after any accepted movement and setup finish.
+
 The existing exposure limits, screen preservation, safe handoffs and position
 commitments remain in force. An occupation duty retains objective protection;
 denial-only defense can intercept farther forward without inventing a physical
 garrison requirement. Advice exposes `approach_duty`, `assigned_coverage`,
-`formation_crowding`, `mutual_support` and `forward_depth` for inspection.
+`formation_crowding`, `mutual_support`, `forward_depth`, `forward_progress` and
+`screen_fallback` for inspection.
 
 ## Validation
 
@@ -91,3 +107,12 @@ debug scenario. These checks keep the authored victory conditions active, run
 real movement, and verify garrison capacity, distinct sectors, approach coverage,
 forward deployment, safe routes and the difference between holding and attacking.
 Combat damage is disabled to isolate positional decisions.
+
+Run `godot --headless --path . --fixed-fps 60 tests/defensive_idle_match_regression.tscn`
+for three simulated minutes of Battle for Alderbrook with normal movement,
+combat and morale while the player receives no orders. It checks actual settled
+positions, friendly support, minimum physical garrisons and the company reserve
+repeatedly after the opening. The `-- --outpost` and `-- --single` variants run
+their authored smaller scenarios for two minutes and respect explicit hold-to-exit
+policies. Coverage expectations account for surviving capable squads remaining
+after scenario duties; a squad routed by combat cannot count as a screen.

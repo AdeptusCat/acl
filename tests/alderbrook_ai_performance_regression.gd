@@ -14,6 +14,7 @@ var checks: int = 0
 var failures: int = 0
 var main: Node
 var controller: InfluenceMapController
+var planner: PlatoonAI
 var measuring: bool = false
 var skip_setup_frame: bool = true
 var frame_started: int = 0
@@ -47,9 +48,20 @@ func _process(_delta: float) -> void:
 	if controller.snapshot == null:
 		return
 	generations[controller.snapshot.version] = true
-	for team: int in controller.snapshot._forecast_jobs:
-		for objective: Vector2i in controller.snapshot._forecast_jobs[team]:
-			if controller.snapshot.objectives.get(team) != objective:
+	_record_forecasts(controller.snapshot)
+	# Budgeted planners can still use an older snapshot after a new one is published.
+	for formation: CompanyPlatoon in planner.company_command.platoons.values():
+		_record_forecasts(formation.planner._planning_snapshot)
+	for job: PositionQueryJob in controller.position_jobs:
+		_record_forecasts(job.query.snapshot)
+
+
+func _record_forecasts(snapshot: InfluenceSnapshot) -> void:
+	if snapshot == null:
+		return
+	for team: int in snapshot._forecast_jobs:
+		for objective: Vector2i in snapshot._forecast_jobs[team]:
+			if snapshot.objectives.get(team) != objective:
 				objectives_requested[Vector3i(team, objective.x, objective.y)] = true
 
 
@@ -84,7 +96,7 @@ func _run() -> void:
 		unit.squad_fire.set_process(false)
 		unit.stress_system.set_process(false)
 	_check(units.size() == 31, "The benchmark includes the complete Alderbrook force")
-	var planner: PlatoonAI = world.game_controller.platoon_ai
+	planner = world.game_controller.platoon_ai
 	_check(planner.active and planner.company_command.uses_hierarchy(), "Company AI stays enabled throughout profiling")
 	measuring = true
 	while samples.size() < FRAME_COUNT:

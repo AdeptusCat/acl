@@ -151,7 +151,15 @@ func advance(deadline_usec: int) -> void:
 					cursor += 1
 				else:
 					phase = Phase.FINISH
-					if candidates.is_empty() and not fallback and not query.fallback_hexes.is_empty():
+					if candidates.is_empty() and query.minimum_forward_progress > 0 and not query.allow_screen_fallback:
+						# Keep every route, cover and firing-duty check when the forward screen is infeasible.
+						query.allow_screen_fallback = true
+						query.destination_features.clear()
+						query.route_field = null
+						cursor = 0
+						indices.clear()
+						phase = Phase.FILTER
+					elif candidates.is_empty() and not fallback and not query.fallback_hexes.is_empty():
 						fallback = true
 						cursor = 0
 						indices.clear()

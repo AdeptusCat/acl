@@ -17,6 +17,7 @@ var mission_key: String = ""
 var reason: String = ""
 var staging_hex: Vector2i
 var sector_cells: Array[Vector2i] = []
+var provides_reserve: bool = false
 
 
 func combat_units() -> Array[Unit]:

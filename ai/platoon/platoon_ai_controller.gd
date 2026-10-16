@@ -15,6 +15,7 @@ var company_support_squads: Array[Unit] = []
 var company_maneuver_squads: Array[Unit] = []
 var company_requires_support: bool = false
 var company_defensive_posture: bool = false
+var company_reserve_capacity: int = -1
 var goal_assignments: Dictionary[Unit, ScenarioGoalTask] = {}
 var current_order: MissionOrder = null
 var squad_assignments: Dictionary = {}
@@ -371,6 +372,8 @@ func _prepare_readiness(budgeted: bool) -> void:
 
 
 func _can_keep_reserve(available: Array[Unit]) -> bool:
+	if company_reserve_capacity == 0:
+		return false
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.NONE:
 		return false
 	if current_order.reserve_policy == MissionOrder.ReservePolicy.KEEP_HQ_NEAR_OBJECTIVE:
@@ -380,6 +383,8 @@ func _can_keep_reserve(available: Array[Unit]) -> bool:
 		if not goal_assignments.has(unit) and DefenseSectorAllocator.combat_reserve_capable(unit):
 			combat_count += 1
 	# Readiness decides whether a capable reserve can cover gaps or must deploy.
+	if company_reserve_capacity > 0:
+		return combat_count >= 2
 	return combat_count >= 3
 
 
@@ -1173,9 +1178,17 @@ func _configure_position_stability(query: PositionQuery) -> void:
 		for task: ScenarioGoalTask in goal_director.tasks:
 			if task.kind == ScenarioGoalTask.Kind.OCCUPY and task.hex == query.objective_hex:
 				query.objective_guard_required = true
+				query.protect_garrison_hex = query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
 				break
 	query.rapid_response = true
 	query.optimize_position = false
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and not query.reserve_position and InfluenceUnitQuery.get_unit_range(query.unit) > 2:
+		var screen_strength: int = 0
+		for unit: Unit in squads:
+			if DefenseSectorAllocator.combat_reserve_capable(unit):
+				screen_strength += 1
+		if screen_strength >= 3:
+			query.minimum_forward_progress = 2
 	query.initial_deployment = not accepted_positions.has(query.unit) and query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
 	query.response_priority = 1
 	if accepted_positions.has(query.unit):

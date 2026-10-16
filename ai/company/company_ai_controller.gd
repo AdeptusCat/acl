@@ -133,6 +133,7 @@ func reset_mission() -> void:
 	for formation: CompanyPlatoon in platoons.values():
 		formation.task = null
 		formation.reserve_deployed = false
+		formation.provides_reserve = false
 		formation.quiet_since = -INF
 	_elapsed = 0.0
 
@@ -337,6 +338,47 @@ func _assign_roles() -> void:
 		var members: Array[CompanyPlatoon] = []
 		members.assign(defenders[company])
 		_assign_defense_sectors(str(company), members)
+		_assign_defense_reserves(members)
+
+
+func _assign_defense_reserves(members: Array[CompanyPlatoon]) -> void:
+	var combat_count: int = 0
+	var whole_reserve_squads: int = 0
+	for formation: CompanyPlatoon in platoons.values():
+		if formation.company != members[0].company:
+			continue
+		for unit: Unit in formation.combat_units():
+			if DefenseSectorAllocator.combat_reserve_capable(unit):
+				combat_count += 1
+				if formation.role == CompanyPlatoon.Role.RESERVE:
+					whole_reserve_squads += 1
+	var budget: int = maxi(0, floori(float(combat_count) / 6.0) - whole_reserve_squads)
+	var eligible: Array[CompanyPlatoon] = []
+	var priorities: Dictionary[CompanyPlatoon, float] = {}
+	for formation: CompanyPlatoon in members:
+		var free: int = 0
+		var has_objective_duty: bool = false
+		for unit: Unit in formation.combat_units():
+			if owner.goal_assignments.has(unit):
+				var task: ScenarioGoalTask = owner.goal_assignments[unit]
+				if task.hex == formation.objective and task.kind in [ScenarioGoalTask.Kind.OCCUPY, ScenarioGoalTask.Kind.DENY_OCCUPATION, ScenarioGoalTask.Kind.BLOCK_EXIT]:
+					has_objective_duty = true
+			elif DefenseSectorAllocator.combat_reserve_capable(unit):
+				free += 1
+		if not has_objective_duty and owner.current_order.defense_responsibility == PositionQuery.Responsibility.AUTO and (formation.sector_cells.is_empty() or formation.sector_cells.has(formation.objective)):
+			free -= 1
+		if free >= 2:
+			var priority: float = formation.effectiveness() * 10.0
+			for other: CompanyPlatoon in members:
+				priority -= float(LOSHelper.get_hex_distance(formation.anchor(), other.objective))
+			if formation.provides_reserve:
+				priority += 50.0
+			priorities[formation] = priority
+			eligible.append(formation)
+		formation.provides_reserve = false
+	eligible.sort_custom(func(a: CompanyPlatoon, b: CompanyPlatoon) -> bool: return priorities[a] > priorities[b])
+	for index: int in range(mini(budget, eligible.size())):
+		eligible[index].provides_reserve = true
 
 
 func _needs_attack(formation: CompanyPlatoon) -> bool:
@@ -470,6 +512,9 @@ func _dispatch(formation: CompanyPlatoon) -> void:
 	var planner: PlatoonAI = formation.planner
 	planner.goal_director = owner.goal_director
 	planner.company_defensive_posture = owner.current_order.position_mode == PositionProfile.Mode.DEFEND
+	planner.company_reserve_capacity = 0
+	if formation.role == CompanyPlatoon.Role.DEFEND and formation.provides_reserve:
+		planner.company_reserve_capacity = 1
 	if not planner.active:
 		planner.set_active(true)
 	planner.company_support_squads.clear()
@@ -514,7 +559,7 @@ func _dispatch(formation: CompanyPlatoon) -> void:
 		order.mission_type = MissionOrder.MissionType.HOLD
 		order.position_mode = PositionProfile.Mode.DEFEND
 		order.execution_intent = TacticalPositionExecutor.Intent.FROM_PROFILE
-	var mission: String = str([formation.role, order.objective_hex, order.position_mode, order.sector_cells, order.defense_responsibility])
+	var mission: String = str([formation.role, order.objective_hex, order.position_mode, order.sector_cells, order.defense_responsibility, planner.company_reserve_capacity])
 	if formation.mission_key != mission or planner.current_order == null:
 		planner.receive_mission_order(order)
 		formation.mission_key = mission
