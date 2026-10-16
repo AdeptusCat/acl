@@ -5,6 +5,7 @@ class_name UnitUi
 const PROJECTILE_EFFECTS: Script = preload("res://scenes/game/effects/battlefield_effects.gd")
 const TRACER: Script = preload("res://scenes/game/effects/tracer.gd")
 const CASUALTY_FEEDBACK: Script = preload("res://scenes/game/effects/casualty_feedback.gd")
+const STATE_FEEDBACK: Script = preload("res://scenes/game/effects/unit_state_feedback.gd")
 
 const MEDIUM_INFLUENCE_RATE: float = 0.5
 const STRONG_INFLUENCE_RATE: float = 1.5
@@ -57,10 +58,13 @@ var detail_ui: UnitUi = null
 
 var _surrendered: bool = false
 var _exited: bool = false
+var _dead: bool = false
+var _morale_state: int = STATES.MoraleState.NORMAL
 var _pressure: float = 0.0
 var _formation_color: Color = UnitHudStyle.SUPPORT_COLOR
 var _formation_key: Vector3i = Vector3i(-1, -1, -1)
 var _casualty_feedback: CASUALTY_FEEDBACK
+var _state_feedback: STATE_FEEDBACK
 
 signal debug_kill_soldier
 
@@ -154,6 +158,10 @@ func deselect() -> void:
 
 
 func state_changed(next:int) -> void:
+	if _dead or _exited or _surrendered:
+		return
+	var was_pinned: bool = _morale_state == STATES.MoraleState.PINNED
+	_morale_state = next
 	match next:
 		STATES.MoraleState.NORMAL:
 			$UnitStates/StateTexture.hide()
@@ -161,14 +169,55 @@ func state_changed(next:int) -> void:
 			$UnitStates/StateTexture.show()
 			$UnitStates/StateTexture.texture = cautious_texture
 		STATES.MoraleState.PINNED:
-			$UnitStates/StateTexture.show()
-			$UnitStates/StateTexture.texture = pinned_texture
+			$UnitStates/StateTexture.hide()
 		STATES.MoraleState.PANIC:
 			$UnitStates/StateTexture.show()
 			$UnitStates/StateTexture.texture = panic_texture
 		STATES.MoraleState.COMBAT_INEFFECTIVE:
 			$UnitStates/StateTexture.show()
 			$UnitStates/StateTexture.texture = combat_ineffective_texture
+	if next == STATES.MoraleState.PINNED:
+		_set_state_feedback(STATE_FEEDBACK.State.PINNED)
+		$Timer.stop()
+		_show_status(pinned_texture_rect)
+	else:
+		_set_state_feedback(STATE_FEEDBACK.State.NONE)
+		if was_pinned:
+			$Timer.stop()
+			if next == STATES.MoraleState.PANIC:
+				_show_status(broken_texture_rect)
+			else:
+				_show_status(idle_texture_rect)
+	if is_instance_valid(detail_ui):
+		detail_ui.state_changed(next)
+
+
+func _set_state_feedback(state: STATE_FEEDBACK.State) -> void:
+	if not is_instance_valid(_state_feedback):
+		if state == STATE_FEEDBACK.State.NONE:
+			return
+		_state_feedback = STATE_FEEDBACK.new()
+		_state_feedback.name = "StateFeedback"
+		add_child(_state_feedback)
+	_state_feedback.set_state(state, is_visible_in_tree())
+
+
+func _show_status(status: TextureRect) -> void:
+	for child: Control in unit_status_control.get_children():
+		child.hide()
+	status.show()
+
+
+func _restore_restricted_pose() -> bool:
+	if _dead or _exited:
+		return true
+	if _surrendered:
+		_show_status(surrendered_texture_rect)
+		return true
+	if _morale_state == STATES.MoraleState.PINNED:
+		_show_status(pinned_texture_rect)
+		return true
+	return false
 
 
 func update_team_sprite(team : int, _squad_type: Globals.SquadType) -> void:
@@ -224,12 +273,11 @@ func _on_unit_arrived_at_hex(_hex: Vector2i) -> void:
 
 func started_moving(broken: bool, surrendered: bool) -> void:
 	$Timer.stop()
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	if broken:
-		routing_texture_rect.visible = true
-	else:
-		moving_texture_rect.visible = true
+	if not _restore_restricted_pose():
+		if broken:
+			_show_status(routing_texture_rect)
+		else:
+			_show_status(moving_texture_rect)
 	
 	if detail_ui:
 		detail_ui.started_moving(broken, surrendered)
@@ -237,21 +285,18 @@ func started_moving(broken: bool, surrendered: bool) -> void:
 
 func stopped_moving(broken: bool, surrendered: bool) -> void:
 	$Timer.stop()
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	if broken == true:
-		broken_texture_rect.visible = true
-	else:
-		idle_texture_rect.visible = true
-	if _surrendered:
-		idle_texture_rect.visible = false
-		broken_texture_rect.visible = false
-		surrendered_texture_rect.visible = true
+	if not _restore_restricted_pose():
+		if broken:
+			_show_status(broken_texture_rect)
+		else:
+			_show_status(idle_texture_rect)
 	if detail_ui:
 		detail_ui.stopped_moving(broken, surrendered)
 
 
 func _on_morale_breaks() -> void:
+	if _dead or _exited or _surrendered:
+		return
 	$Timer.stop()
 	#broken_label.visible = true
 	show_broken()
@@ -263,6 +308,8 @@ func _on_morale_breaks() -> void:
 
 
 func _on_morale_recovered() -> void:
+	if _dead or _exited or _surrendered:
+		return
 	#broken_label.visible = false
 	show_success()
 	for child: Control in unit_status_control.get_children():
@@ -331,10 +378,7 @@ func show_broken() -> void:
 
 
 func show_pinned() -> void:
-	_spawn_popup("pinned")
-	#_spawn_flash("failure")
-	#if detail_ui:
-		#detail_ui.show_failure()
+	state_changed(STATES.MoraleState.PINNED)
 
 
 func show_success() -> void:
@@ -394,7 +438,7 @@ func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, 
 
 
 func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, kind: TRACER.Kind, spawn_offset: Vector2, impact_offset: Vector2) -> void:
-	if _exited:
+	if _exited or _dead or _surrendered:
 		return
 	var offset: Vector2 = spawn_offset
 	if not offset.is_finite():
@@ -406,7 +450,7 @@ func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, k
 
 
 func _show_shooting_status() -> void:
-	if _exited:
+	if _restore_restricted_pose():
 		return
 	for child: Control in unit_status_control.get_children():
 		child.visible = false
@@ -419,20 +463,22 @@ func riflegrenade_explosion(_target_pos: Vector2) -> void:
 
 
 func surrender() -> void:
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	surrendered_texture_rect.visible = true
+	if _dead or _exited or _surrendered:
+		return
 	_surrendered = true
-	if detail_ui:
-		for child: Control in detail_ui.unit_status_control.get_children():
-			child.visible = false
-		detail_ui.surrendered_texture_rect.visible = true
+	$Timer.stop()
+	$UnitStates.hide()
+	_show_status(surrendered_texture_rect)
+	_set_state_feedback(STATE_FEEDBACK.State.SURRENDERED)
+	if is_instance_valid(detail_ui):
+		detail_ui.surrender()
 
 
 func mark_exited() -> void:
 	_exited = true
 	if is_instance_valid(_casualty_feedback):
 		_casualty_feedback.clear()
+	_set_state_feedback(STATE_FEEDBACK.State.NONE)
 	_set_debug_text_visible(false)
 	for child: Control in unit_status_control.get_children():
 		child.hide()
@@ -452,7 +498,17 @@ func mark_exited() -> void:
 
 
 func die() -> void:
+	if _dead or _exited:
+		return
+	_dead = true
+	$Timer.stop()
 	dead.show()
+	unit_status_control.hide()
+	$UnitStates.hide()
+	cover_container.hide()
+	rank_texture_rect.hide()
+	broken_label.hide()
+	_set_state_feedback(STATE_FEEDBACK.State.ELIMINATED)
 	_set_debug_text_visible(false)
 	$StressLevel.hide()
 	$MoraleBar.hide()
@@ -461,15 +517,13 @@ func die() -> void:
 	$LeadershipBonus.hide()
 	$Sprite2D.hide()
 	$UnitSelectedSprite.hide()
-	pass
-	#var tween = create_tween()
-	#tween.tween_property(sprite_node.material, "shader_parameter/dissolve_amount", 1.0, 0.6)
-	#await tween.finished
-	#if detail_ui:
-		#detail_ui.queue_free()
+	if is_instance_valid(detail_ui):
+		detail_ui.die()
 
 
 func _on_timer_timeout() -> void:
+	if _restore_restricted_pose():
+		return
 	if surrendered_texture_rect.visible == true or broken_texture_rect.visible or routing_texture_rect.visible:
 		return
 	for child: Control in unit_status_control.get_children():
