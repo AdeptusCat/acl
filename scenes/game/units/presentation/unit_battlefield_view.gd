@@ -9,6 +9,9 @@ const STATE_FEEDBACK: Script = preload("res://scenes/game/effects/unit_state_fee
 
 const MEDIUM_INFLUENCE_RATE: float = 0.5
 const STRONG_INFLUENCE_RATE: float = 1.5
+const ELIMINATION_HOLD_SECONDS: float = 3.0
+const ELIMINATION_FADE_SECONDS: float = 5.0
+const ELIMINATION_REST_COLOR: Color = Color(0.60, 0.60, 0.60, 0.24)
 
 var detail_ui: UnitUi = null
 
@@ -65,6 +68,7 @@ var _formation_color: Color = UnitHudStyle.SUPPORT_COLOR
 var _formation_key: Vector3i = Vector3i(-1, -1, -1)
 var _casualty_feedback: CASUALTY_FEEDBACK
 var _state_feedback: STATE_FEEDBACK
+var _elimination_fade: Tween
 
 signal debug_kill_soldier
 
@@ -206,6 +210,17 @@ func _show_status(status: TextureRect) -> void:
 	for child: Control in unit_status_control.get_children():
 		child.hide()
 	status.show()
+
+
+func contains_battlefield_point(screen_point: Vector2) -> bool:
+	if _dead or _exited or not is_visible_in_tree():
+		return false
+	var sprite_point: Vector2 = sprite_node.get_global_transform_with_canvas().affine_inverse() * screen_point
+	if sprite_node.is_visible_in_tree() and Rect2(Vector2.ZERO, sprite_node.size).has_point(sprite_point):
+		return true
+	if is_instance_valid(_state_feedback):
+		return _state_feedback.contains_screen_point(screen_point)
+	return false
 
 
 func _restore_restricted_pose() -> bool:
@@ -476,6 +491,8 @@ func surrender() -> void:
 
 func mark_exited() -> void:
 	_exited = true
+	if _elimination_fade != null and _elimination_fade.is_valid():
+		_elimination_fade.kill()
 	if is_instance_valid(_casualty_feedback):
 		_casualty_feedback.clear()
 	_set_state_feedback(STATE_FEEDBACK.State.NONE)
@@ -517,6 +534,10 @@ func die() -> void:
 	$LeadershipBonus.hide()
 	$Sprite2D.hide()
 	$UnitSelectedSprite.hide()
+	# Keep the loss conspicuous briefly, then leave a quiet battlefield remnant.
+	_elimination_fade = create_tween()
+	_elimination_fade.tween_interval(ELIMINATION_HOLD_SECONDS)
+	_elimination_fade.tween_property(self, "modulate", ELIMINATION_REST_COLOR, ELIMINATION_FADE_SECONDS).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	if is_instance_valid(detail_ui):
 		detail_ui.die()
 

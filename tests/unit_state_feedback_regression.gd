@@ -26,6 +26,7 @@ func _run() -> void:
 	world.add_child(audio)
 	_test_pinned_and_recovery()
 	_test_terminal_states()
+	_test_elimination_fade()
 	_test_visibility_and_details()
 	_test_unit_events()
 	if OS.get_cmdline_user_args().has("--render"):
@@ -131,6 +132,28 @@ func _test_visibility_and_details() -> void:
 	detail.free()
 
 
+func _test_elimination_fade() -> void:
+	for fps: int in [30, 60, 144]:
+		var ui: UnitUi = UI_SCENE.instantiate() as UnitUi
+		add_child(ui)
+		ui.die()
+		ui._elimination_fade.pause()
+		var step: float = 1.0 / float(fps)
+		for frame: int in range(3 * fps):
+			ui._elimination_fade.custom_step(step)
+		_check(ui.modulate.is_equal_approx(Color.WHITE), "Elimination stays prominent for the first three seconds at %d FPS" % fps)
+		for frame: int in range(ceili(2.5 * float(fps))):
+			ui._elimination_fade.custom_step(step)
+		_check(ui.modulate.a < 0.9 and ui.modulate.a > UnitUi.ELIMINATION_REST_COLOR.a, "The whole corpse marker gradually fades at %d FPS" % fps)
+		ui.hide()
+		ui._elimination_fade.custom_step(3.0)
+		ui.show()
+		_check(ui.modulate.is_equal_approx(UnitUi.ELIMINATION_REST_COLOR), "A dim remnant remains after eight seconds, including time hidden")
+		ui.die()
+		_check(ui.modulate.is_equal_approx(UnitUi.ELIMINATION_REST_COLOR), "Repeated death callbacks do not brighten old corpses")
+		ui.free()
+
+
 func _test_unit_events() -> void:
 	var history: CasualtyHistory = Globals.casualty_history
 	var destroyed: UnitsCollection = Globals.units_destroyed
@@ -208,7 +231,36 @@ func _render_preview() -> void:
 		await get_tree().process_frame
 		RenderingServer.force_draw(false)
 		_check(viewport.get_texture().get_image().save_png("/tmp/acl-unit-states-" + str(zoom) + ".png") == OK, "Render state cues at zoom " + str(zoom))
+	await _render_elimination_fade(viewport, camera)
 	viewport.free()
+
+
+func _render_elimination_fade(viewport: SubViewport, camera: Camera2D) -> void:
+	for child: Node in viewport.get_children():
+		if child is UnitUi or child is Label:
+			child.queue_free()
+	await get_tree().process_frame
+	camera.zoom = Vector2.ONE
+	_caption(viewport, "ELIMINATED UNITS FADE OVER TIME", Vector2(28.0, 24.0), 20)
+	_caption(viewport, "Full emphasis for 3 seconds / fade over 5 seconds / dim remnant remains", Vector2(28.0, 64.0), 14)
+	var ages: Array[float] = [0.0, 5.5, 8.0]
+	var captions: Array[String] = ["Just eliminated", "Fading: 5.5 seconds", "Subdued: 8 seconds"]
+	for index: int in range(3):
+		var ui: UnitUi = UI_SCENE.instantiate() as UnitUi
+		ui.position = Vector2(118.0 + float(index) * 300.0, 240.0)
+		ui.scale = Vector2(2.0, 2.0)
+		viewport.add_child(ui)
+		ui.die()
+		ui._elimination_fade.pause()
+		ui._elimination_fade.custom_step(ages[index])
+		var marker: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
+		marker.advance(maxf(0.12, ages[index]))
+		marker.set_process(false)
+		_caption(viewport, captions[index], ui.position + Vector2(-12.0, 186.0), 14)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	_check(viewport.get_texture().get_image().save_png("/tmp/acl-elimination-fade.png") == OK, "Render fresh, fading and subdued corpse markers")
 
 
 func _caption(parent: Node, text: String, point: Vector2, font_size: int) -> void:

@@ -4,6 +4,8 @@ enum State { NONE, PINNED, SURRENDERED, ELIMINATED }
 
 const TRANSITION_SECONDS: float = 1.1
 const SKULL: Texture2D = preload("res://assets/effects/skull.png")
+const FRAME_RECT: Rect2 = Rect2(-2.0, -3.0, 68.0, 66.0)
+const RIBBON_RECT: Rect2 = Rect2(-10.0, 65.0, 84.0, 17.0)
 
 var state: State = State.NONE
 var elapsed: float = TRANSITION_SECONDS
@@ -56,6 +58,13 @@ func advance(delta: float) -> void:
 	queue_redraw()
 
 
+func contains_screen_point(screen_point: Vector2) -> bool:
+	if state == State.NONE or not is_visible_in_tree():
+		return false
+	var local_point: Vector2 = get_global_transform_with_canvas().affine_inverse() * screen_point
+	return FRAME_RECT.has_point(local_point) or RIBBON_RECT.has_point(local_point)
+
+
 func _draw() -> void:
 	if state == State.NONE:
 		return
@@ -70,7 +79,7 @@ func _draw() -> void:
 			caption = "ELIMINATED"
 	var pulse: float = clampf(1.0 - elapsed / TRANSITION_SECONDS, 0.0, 1.0)
 	var pulse_alpha: float = pulse * (0.65 + 0.35 * cos(elapsed * TAU / 0.32))
-	var frame: Rect2 = Rect2(-2.0, -3.0, 68.0, 66.0)
+	var frame: Rect2 = FRAME_RECT
 	if pulse > 0.0:
 		draw_rect(frame, Color(accent.r, accent.g, accent.b, pulse_alpha * 0.20))
 		draw_arc(Vector2(32.0, 29.0), 37.0 + elapsed * 18.0, 0.0, TAU, 48, Color(accent.r, accent.g, accent.b, pulse * 0.7), 2.0, true)
@@ -91,7 +100,7 @@ func _draw() -> void:
 			draw_texture_rect(SKULL, Rect2(17.0, 10.0, 30.0, 34.0), false, Color(1.0, 0.94, 0.80))
 
 	# The state ribbon sits below the counter; casualty counts float above it.
-	var badge: Rect2 = Rect2(-10.0, 65.0, 84.0, 17.0)
+	var badge: Rect2 = RIBBON_RECT
 	draw_rect(badge.grow(1.0), Color(0.03, 0.02, 0.01))
 	draw_rect(badge, Color(accent.r * 0.16, accent.g * 0.12, accent.b * 0.09, 0.96))
 	draw_rect(badge, accent, false, 1.0 + pulse * 0.5)

@@ -128,33 +128,63 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 
 
 static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2) -> void:
-	event_pos = controller.get_global_transform_with_canvas().affine_inverse() * event_pos
-	var map_hex: Vector2i = controller.ground_layer.local_to_map(event_pos)
-	controller.hex_selected.emit(map_hex, event_pos)
-	if controller.previous_selected_hex == map_hex:
-		controller.selected_hex_index += 1
-	else:
-		controller.previous_selected_hex = map_hex
-		controller.selected_hex_index = 0
-	var units: Array[Unit] = LOSHelper.find_units_at(map_hex)
+	var ground: HexagonTileMapLayer = controller.ground_layer
+	var local_point: Vector2 = ground.get_global_transform_with_canvas().affine_inverse() * event_pos
+	var map_hex: Vector2i = ground.local_to_map(local_point)
+	controller.hex_selected.emit(map_hex, local_point)
+	var candidates: Array[Unit] = []
+	for candidate: Unit in Globals.get_units():
+		if candidate.is_active() and candidate.is_visible_in_tree() and (candidate.team == Globals.team_player or Debug.enemy_selectable):
+			candidates.append(candidate)
+	# Stacked and moving counters can extend into the neighboring hex on screen.
+	var picked: Unit = _counter_under_pointer(candidates, event_pos)
+	var stack_hex: Vector2i = map_hex
+	if picked != null:
+		stack_hex = picked.current_hex
+	var units: Array[Unit] = []
+	for candidate: Unit in candidates:
+		if candidate.current_hex == stack_hex:
+			units.append(candidate)
 	if units.is_empty():
-		if not controller.selected_unit == null:
+		if is_instance_valid(controller.selected_unit):
 			controller._deselect_unit(controller.selected_unit)
 			controller.hide_unit_details_in_ui.emit()
-		return
-	if controller.selected_hex_index >= units.size():
+		controller.previous_selected_hex = stack_hex
 		controller.selected_hex_index = 0
+		return
+	var selected_index: int = units.find(controller.selected_unit)
+	if controller.previous_selected_hex == stack_hex and selected_index >= 0:
+		controller.selected_hex_index = (selected_index + 1) % units.size()
+	else:
+		controller.selected_hex_index = maxi(0, units.find(picked))
+	controller.previous_selected_hex = stack_hex
 	var unit: Unit = units[controller.selected_hex_index]
-	if unit: # and not unit.broken  and not unit.surrendered
-		if not unit.team == Globals.team_player and not Debug.enemy_selectable:
-			return
-		if unit == controller.selected_unit:
-			controller._deselect_unit(unit)
-			controller.hide_unit_details_in_ui.emit()
-		else:
-			controller._select_unit(unit)
-			controller.show_unit_details_in_ui.emit(unit)
-			LOSHelper.clear_los()
+	if unit == controller.selected_unit:
+		controller._deselect_unit(unit)
+		controller.hide_unit_details_in_ui.emit()
+	else:
+		controller._select_unit(unit)
+		controller.show_unit_details_in_ui.emit(unit)
+		LOSHelper.clear_los()
+
+
+static func _counter_under_pointer(candidates: Array[Unit], screen_point: Vector2) -> Unit:
+	var picked: Unit = null
+	var picked_z: int = -4097
+	for candidate: Unit in candidates:
+		if not is_instance_valid(candidate.ui) or not candidate.ui.contains_battlefield_point(screen_point):
+			continue
+		var effective_z: int = 0
+		var item: CanvasItem = candidate
+		while item != null:
+			effective_z += item.z_index
+			if not item.z_as_relative:
+				break
+			item = item.get_parent() as CanvasItem
+		if picked == null or effective_z >= picked_z:
+			picked = candidate
+			picked_z = effective_z
+	return picked
 
 
 # Nullable tile coordinates: Vector2i when present, null when cleared.
@@ -162,7 +192,7 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 
 static func handle_mouse_event_position_changed(controller: Node2D, event_pos: Vector2) -> void:
 	controller.mouse_event_position_changed.emit(event_pos)
-	refresh_target_preview(controller, controller.get_local_mouse_position(), controller.get_viewport().get_mouse_position())
+	refresh_target_preview(controller, controller.ground_layer.get_local_mouse_position(), controller.get_viewport().get_mouse_position())
 
 
 static func refresh_target_preview(controller: Node2D, local_point: Vector2, screen_point: Vector2) -> void:

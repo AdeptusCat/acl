@@ -370,7 +370,7 @@ func _on_input_manager_right_button_pressed() -> void:
 	if get_viewport().gui_get_hovered_control() != null:
 		return
 	var mouse_screen_pos: Vector2 = input_manager.pointer_position
-	var event_pos: Vector2 = game_controller.get_global_transform_with_canvas().affine_inverse() * mouse_screen_pos
+	var event_pos: Vector2 = ground_layer.get_global_transform_with_canvas().affine_inverse() * mouse_screen_pos
 	selected_map_hex = ground_layer.local_to_map(event_pos)
 	if ground_layer.get_cell_source_id(selected_map_hex) == -1:
 		return

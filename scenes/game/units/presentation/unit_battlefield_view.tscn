@@ -379,11 +379,13 @@ mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#1" unique_id=69416909]
 layout_mode = 2
+mouse_filter = 2
 color = Color(0.67058825, 0.2784314, 0.043137256, 1)
 
 [node name="TextureRect" type="TextureRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#1" unique_id=1182376006]
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
+mouse_filter = 2
 texture = ExtResource("33_eilf2")
 expand_mode = 1
 stretch_mode = 4
@@ -395,11 +397,13 @@ mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#2" unique_id=2084385121]
 layout_mode = 2
+mouse_filter = 2
 color = Color(0.67058825, 0.2784314, 0.043137256, 1)
 
 [node name="TextureRect" type="TextureRect" parent="SupportWeapons/VBoxContainer/SupportWeapon#2" unique_id=2042743672]
 custom_minimum_size = Vector2(10, 10)
 layout_mode = 2
+mouse_filter = 2
 texture = ExtResource("33_eilf2")
 expand_mode = 1
 stretch_mode = 4
@@ -474,6 +478,7 @@ offset_left = 11.0
 offset_top = 10.0
 offset_right = 51.0
 offset_bottom = 50.0
+mouse_filter = 2
 texture = ExtResource("54_k7h5o")
 expand_mode = 1
 
