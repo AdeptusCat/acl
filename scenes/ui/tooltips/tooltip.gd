@@ -17,9 +17,17 @@ func _input(event: InputEvent) -> void:
 	if visible and event is InputEventMouseMotion:
 		_update_follow_position()
 
+func _process(_delta: float) -> void:
+	if is_visible_in_tree():
+		_update_follow_position()
+
 func _update_follow_position() -> void:
-	var vp_size: Vector2 = get_viewport().get_visible_rect().size
-	var mouse: Vector2 = get_global_mouse_position()
+	place_at(get_viewport().get_mouse_position())
+
+func place_at(screen_point: Vector2) -> void:
+	var hud: Control = get_parent() as Control
+	var vp_size: Vector2 = hud.size
+	var mouse: Vector2 = hud.get_global_transform_with_canvas().affine_inverse() * screen_point
 
 	var panel_size: Vector2 = size
 	if panel_size.x <= 0.0 or panel_size.y <= 0.0:
@@ -41,7 +49,7 @@ func _update_follow_position() -> void:
 	if y + panel_size.y > vp_size.y:
 		y = vp_size.y - panel_size.y
 
-	global_position = Vector2(x, y)
+	position = Vector2(maxf(0.0, x), maxf(0.0, y))
 
 func toggle_on(tooltip: TooltipSignals.Tooltip) -> void:
 	var header: String = ""
@@ -75,6 +83,7 @@ func toggle_on(tooltip: TooltipSignals.Tooltip) -> void:
 	tween_opacity(1.0)
 	await get_tree().process_frame
 	reset_size()
+	_update_follow_position()
 
 func toggle_off() -> void:
 	await tween_opacity(0.0).finished

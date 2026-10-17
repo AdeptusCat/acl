@@ -8,22 +8,32 @@ const ACTIVE_COLOR: Color = Color(0.9, 0.87, 0.77)
 const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 
 @onready var section: FoldableContainer = $Objectives
-@onready var rows: VBoxContainer = $Objectives/Rows
+@onready var scroll: ScrollContainer = $Objectives/Scroll
+@onready var rows: VBoxContainer = $Objectives/Scroll/Rows
 
 var conditions: Array[VictoryCondition] = []
 var time_left_seconds: float = 0.0
 var _refresh_elapsed_s: float = 0.0
+var _height_limit: float = 200.0
 
 
 func _ready() -> void:
 	minimum_size_changed.connect(_fit_height)
+	rows.minimum_size_changed.connect(_fit_height)
 	section.folding_changed.connect(_on_folding_changed)
 	set_process(false)
 	hide()
 
 
 func _fit_height() -> void:
+	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
+	scroll.custom_minimum_size.y = minf(rows.get_combined_minimum_size().y, maxf(0.0, _height_limit - overhead))
 	size.y = get_combined_minimum_size().y
+
+
+func fit_available_height(height: float) -> void:
+	_height_limit = height
+	_fit_height()
 
 
 func _on_folding_changed(_folded: bool) -> void:

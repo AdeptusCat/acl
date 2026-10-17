@@ -20,12 +20,17 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 @onready var command_view_button: Button = $Toolbar/CommandViewButton
 @onready var menu: PanelContainer = $Menu
 @onready var controls_panel: PanelContainer = $Controls
-@onready var s1: HSlider = $Menu/Content/VolumeSlider
-@onready var s2: HSlider = $Menu/Content/VolumeSlider2
-@onready var master_label: Label = $Menu/Content/MasterLabel
-@onready var music_label: Label = $Menu/Content/MusicLabel
-@onready var command_links: CheckBox = $Menu/Content/ShowCmdConnectivity
-@onready var control_rows: VBoxContainer = $Controls/Content/Rows
+@onready var menu_scroll: ScrollContainer = $Menu/Scroll
+@onready var controls_scroll: ScrollContainer = $Controls/Scroll
+@onready var s1: HSlider = $Menu/Scroll/Content/VolumeSlider
+@onready var s2: HSlider = $Menu/Scroll/Content/VolumeSlider2
+@onready var master_label: Label = $Menu/Scroll/Content/MasterLabel
+@onready var music_label: Label = $Menu/Scroll/Content/MusicLabel
+@onready var command_links: CheckBox = $Menu/Scroll/Content/ShowCmdConnectivity
+@onready var control_rows: VBoxContainer = $Controls/Scroll/Content/Rows
+@onready var mode_selector: OptionButton = $Menu/Scroll/Content/WindowMode
+@onready var resolution_selector: OptionButton = $Menu/Scroll/Content/WindowSize
+@onready var scale_selector: OptionButton = $Menu/Scroll/Content/UIScale
 @onready var hud_control: Control = get_parent() as Control
 
 
@@ -35,8 +40,8 @@ func _ready() -> void:
 	_on_master_mute_changed(SessionAudio.master_muted)
 	settings_button.toggled.connect(_on_settings_toggled)
 	controls_button.toggled.connect(_on_controls_toggled)
-	$Menu/Content/Heading/Close.pressed.connect(close_panels)
-	$Controls/Content/Heading/Close.pressed.connect(close_panels)
+	$Menu/Scroll/Content/Heading/Close.pressed.connect(close_panels)
+	$Controls/Scroll/Content/Heading/Close.pressed.connect(close_panels)
 	s1.value_changed.connect(_on_volume_slider_value_changed)
 	s2.value_changed.connect(_on_volume_slider_2_value_changed)
 	command_links.toggled.connect(_on_check_box_toggled)
@@ -46,6 +51,7 @@ func _ready() -> void:
 	SessionAudio.sync_sliders([s1, s2])
 	_update_volume_labels()
 	_build_controls()
+	_build_display_settings()
 	menu.minimum_size_changed.connect(_queue_fit)
 	controls_panel.minimum_size_changed.connect(_queue_fit)
 	hud_control.resized.connect(_queue_fit)
@@ -60,17 +66,21 @@ func _input(event: InputEvent) -> void:
 		close_panels()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed:
-		var point: Vector2 = event.position
 		var open_panel: Control = menu
 		if controls_panel.visible:
 			open_panel = controls_panel
-		if not $Toolbar.get_global_rect().has_point(point) and not open_panel.get_global_rect().has_point(point):
+		var toolbar: Control = $Toolbar
+		var toolbar_point: Vector2 = toolbar.get_global_transform_with_canvas().affine_inverse() * event.position
+		var panel_point: Vector2 = open_panel.get_global_transform_with_canvas().affine_inverse() * event.position
+		if not Rect2(Vector2.ZERO, toolbar.size).has_point(toolbar_point) and not Rect2(Vector2.ZERO, open_panel.size).has_point(panel_point):
 			close_panels()
 
 
 func close_panels() -> void:
 	menu.hide()
 	controls_panel.hide()
+	for selector: OptionButton in [mode_selector, resolution_selector, scale_selector]:
+		selector.get_popup().hide()
 	settings_button.set_pressed_no_signal(false)
 	controls_button.set_pressed_no_signal(false)
 
@@ -135,12 +145,63 @@ func _fit_panels() -> void:
 	if not is_node_ready() or is_queued_for_deletion():
 		return
 	for panel: PanelContainer in [menu, controls_panel]:
-		var width: float = 260.0
+		var width: float = 344.0
+		var scroll: ScrollContainer = menu_scroll
 		if panel == controls_panel:
 			width = 452.0
+			scroll = controls_scroll
 		panel.custom_minimum_size.x = minf(width, hud_control.size.x - 24.0)
+		var margins: Vector2 = panel.get_theme_stylebox("panel").get_minimum_size()
+		var content: Control = scroll.get_child(0) as Control
+		var available_height: float = maxf(0.0, hud_control.size.y - position.y - size.y - 20.0 - margins.y)
+		scroll.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, minf(available_height, hud_control.size.y * 0.65))
 		panel.size = Vector2(panel.custom_minimum_size.x, panel.get_combined_minimum_size().y)
 		panel.position = Vector2(size.x - panel.size.x, size.y + 8.0)
+
+
+func _build_display_settings() -> void:
+	mode_selector.add_item("Windowed", Window.MODE_WINDOWED)
+	mode_selector.add_item("Fullscreen", Window.MODE_FULLSCREEN)
+	for preset: Vector2i in DisplaySettings.WINDOW_PRESETS:
+		resolution_selector.add_item("%d × %d" % [preset.x, preset.y])
+	resolution_selector.add_item("Custom window size")
+	for value: float in DisplaySettings.UI_SCALES:
+		scale_selector.add_item("%d%%" % roundi(value * 100.0))
+	mode_selector.item_selected.connect(_on_window_mode_selected)
+	resolution_selector.item_selected.connect(_on_window_size_selected)
+	scale_selector.item_selected.connect(_on_ui_scale_selected)
+	DisplaySettings.settings_changed.connect(_sync_display_settings)
+	_sync_display_settings()
+
+
+func _sync_display_settings() -> void:
+	mode_selector.select(mode_selector.get_item_index(DisplaySettings.window_mode))
+	var preset_index: int = DisplaySettings.WINDOW_PRESETS.find(DisplaySettings.windowed_size)
+	if preset_index < 0:
+		preset_index = DisplaySettings.WINDOW_PRESETS.size()
+	resolution_selector.set_item_text(DisplaySettings.WINDOW_PRESETS.size(), "%d × %d (custom)" % [DisplaySettings.windowed_size.x, DisplaySettings.windowed_size.y])
+	resolution_selector.set_item_disabled(DisplaySettings.WINDOW_PRESETS.size(), true)
+	resolution_selector.select(preset_index)
+	resolution_selector.disabled = DisplaySettings.window_mode != Window.MODE_WINDOWED
+	var usable: Rect2i = DisplayServer.screen_get_usable_rect(get_window().current_screen)
+	for index: int in range(DisplaySettings.WINDOW_PRESETS.size()):
+		var preset: Vector2i = DisplaySettings.WINDOW_PRESETS[index]
+		resolution_selector.set_item_disabled(index, usable.has_area() and (preset.x > usable.size.x or preset.y > usable.size.y))
+	scale_selector.select(DisplaySettings.UI_SCALES.find(DisplaySettings.ui_scale))
+	_queue_fit()
+
+
+func _on_window_mode_selected(index: int) -> void:
+	DisplaySettings.set_window_mode(mode_selector.get_item_id(index) as Window.Mode)
+
+
+func _on_window_size_selected(index: int) -> void:
+	if index < DisplaySettings.WINDOW_PRESETS.size():
+		DisplaySettings.set_windowed_size(DisplaySettings.WINDOW_PRESETS[index])
+
+
+func _on_ui_scale_selected(index: int) -> void:
+	DisplaySettings.set_ui_scale(DisplaySettings.UI_SCALES[index])
 
 
 func _update_volume_labels() -> void:

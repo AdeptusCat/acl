@@ -40,16 +40,17 @@ func _fit_panel() -> void:
 	if not is_node_ready() or is_queued_for_deletion() or not visible:
 		return
 	size = Vector2(240.0, get_combined_minimum_size().y)
-	var candidates: Array[Vector2] = [anchor_point + Vector2(18.0, 12.0), anchor_point + Vector2(-size.x - 18.0, 12.0), anchor_point + Vector2(18.0, -size.y - 12.0), anchor_point - size - Vector2(18.0, 12.0)]
+	var point: Vector2 = hud_control.get_global_transform_with_canvas().affine_inverse() * anchor_point
+	var candidates: Array[Vector2] = [point + Vector2(18.0, 12.0), point + Vector2(-size.x - 18.0, 12.0), point + Vector2(18.0, -size.y - 12.0), point - size - Vector2(18.0, 12.0)]
 	var blockers: Array[Rect2] = []
 	for path: String in HUD_PANELS:
 		var panel: Control = hud_control.get_node_or_null(path) as Control
 		if panel == null or not panel.is_visible_in_tree():
 			continue
-		var rect: Rect2 = panel.get_global_rect()
+		var rect: Rect2 = hud_control.get_global_transform().affine_inverse() * panel.get_global_rect()
 		blockers.append(rect)
-		candidates.append(Vector2(anchor_point.x - size.x - 18.0, rect.position.y - size.y - 12.0))
-		candidates.append(Vector2(rect.position.x - size.x - 12.0, anchor_point.y + 12.0))
+		candidates.append(Vector2(point.x - size.x - 18.0, rect.position.y - size.y - 12.0))
+		candidates.append(Vector2(rect.position.x - size.x - 12.0, point.y + 12.0))
 	var best_overlap: float = INF
 	for candidate: Vector2 in candidates:
 		candidate.x = clampf(candidate.x, 12.0, maxf(12.0, hud_control.size.x - size.x - 12.0))

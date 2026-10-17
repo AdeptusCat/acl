@@ -44,7 +44,7 @@ icon_alignment = 1
 [node name="SettingsButton" type="Button" parent="Toolbar"]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "Audio volume and command view"
+tooltip_text = "Display, interface size, audio and command view"
 toggle_mode = true
 text = "Settings"
 
@@ -60,28 +60,33 @@ visible = false
 layout_mode = 0
 mouse_force_pass_scroll_events = false
 
-[node name="Content" type="VBoxContainer" parent="Menu"]
+[node name="Scroll" type="ScrollContainer" parent="Menu"]
 layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Menu/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Heading" type="HBoxContainer" parent="Menu/Content"]
+[node name="Heading" type="HBoxContainer" parent="Menu/Scroll/Content"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Menu/Content/Heading"]
+[node name="Title" type="Label" parent="Menu/Scroll/Content/Heading"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Settings"
 theme_type_variation = &"HudHeading"
 
-[node name="Close" type="Button" parent="Menu/Content/Heading"]
+[node name="Close" type="Button" parent="Menu/Scroll/Content/Heading"]
 layout_mode = 2
 text = "Close"
 
-[node name="MasterLabel" type="Label" parent="Menu/Content"]
+[node name="MasterLabel" type="Label" parent="Menu/Scroll/Content"]
 layout_mode = 2
 text = "Master volume · 100%"
 
-[node name="VolumeSlider" type="HSlider" parent="Menu/Content"]
+[node name="VolumeSlider" type="HSlider" parent="Menu/Scroll/Content"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 tooltip_text = "Master volume"
@@ -90,11 +95,11 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="MusicLabel" type="Label" parent="Menu/Content"]
+[node name="MusicLabel" type="Label" parent="Menu/Scroll/Content"]
 layout_mode = 2
 text = "Music volume · 100%"
 
-[node name="VolumeSlider2" type="HSlider" parent="Menu/Content"]
+[node name="VolumeSlider2" type="HSlider" parent="Menu/Scroll/Content"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 tooltip_text = "Music volume"
@@ -103,10 +108,10 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="Separator" type="HSeparator" parent="Menu/Content"]
+[node name="Separator" type="HSeparator" parent="Menu/Scroll/Content"]
 layout_mode = 2
 
-[node name="ShowCmdConnectivity" type="CheckBox" parent="Menu/Content"]
+[node name="ShowCmdConnectivity" type="CheckBox" parent="Menu/Scroll/Content"]
 layout_mode = 2
 tooltip_text = "Show all command links. Selection highlights remain available when off.\nSolid: connected · Dashed: limited · Broken: no contact"
 text = "Command view"
@@ -116,24 +121,60 @@ visible = false
 layout_mode = 0
 mouse_force_pass_scroll_events = false
 
-[node name="Content" type="VBoxContainer" parent="Controls"]
+[node name="Scroll" type="ScrollContainer" parent="Controls"]
 layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Controls/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="Heading" type="HBoxContainer" parent="Controls/Content"]
+[node name="Heading" type="HBoxContainer" parent="Controls/Scroll/Content"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="Controls/Content/Heading"]
+[node name="Title" type="Label" parent="Controls/Scroll/Content/Heading"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Battlefield controls"
 theme_type_variation = &"HudHeading"
 
-[node name="Close" type="Button" parent="Controls/Content/Heading"]
+[node name="Close" type="Button" parent="Controls/Scroll/Content/Heading"]
 layout_mode = 2
 text = "Close"
 
-[node name="Rows" type="VBoxContainer" parent="Controls/Content"]
+[node name="Rows" type="VBoxContainer" parent="Controls/Scroll/Content"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
+
+[node name="DisplaySeparator" type="HSeparator" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="DisplayHeading" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Display"
+
+[node name="ModeLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Window mode"
+
+[node name="WindowMode" type="OptionButton" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="SizeLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Window size"
+
+[node name="WindowSize" type="OptionButton" parent="Menu/Scroll/Content"]
+layout_mode = 2
+tooltip_text = "Windowed presets. Drag the window border for a custom size. Fullscreen uses the desktop resolution."
+
+[node name="ScaleLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Interface size"
+
+[node name="UIScale" type="OptionButton" parent="Menu/Scroll/Content"]
+layout_mode = 2
+tooltip_text = "Scale the HUD. Use the mouse wheel to zoom the battlefield separately."

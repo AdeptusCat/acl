@@ -20,6 +20,7 @@ extends CanvasLayer
 
 var _left_layout_queued: bool = false
 var _top_layout_queued: bool = false
+var _compact_layout: bool = false
 
 signal try_again
 
@@ -74,6 +75,14 @@ func _layout_top_bar() -> void:
 	_top_layout_queued = false
 	if not is_node_ready() or is_queued_for_deletion():
 		return
+	var compact: bool = $Control.size.x < 1100.0 or $Control.size.y < 620.0
+	if compact and not _compact_layout:
+		mission_objectives.section.fold()
+		tile_details.details.fold()
+		debug_panel.section.fold()
+		unit_details.details_section.fold()
+		unit_details.roster_section.fold()
+	_compact_layout = compact
 	var retry_minimum: Vector2 = retry_panel.get_combined_minimum_size()
 	var timer_minimum: Vector2 = countdown_panel_container.get_combined_minimum_size()
 	var height: float = maxf(30.0, maxf(retry_minimum.y, timer_minimum.y))
@@ -165,6 +174,8 @@ func _on_debug_folding_changed(folded: bool) -> void:
 
 func show_mission_objectives(conditions: Array[VictoryCondition], player_team: Globals.Team, time_left_seconds: float) -> void:
 	mission_objectives.setup(conditions, player_team, time_left_seconds)
+	if _compact_layout:
+		mission_objectives.section.fold()
 	_layout_mission_objectives()
 
 
@@ -180,6 +191,7 @@ func _layout_mission_objectives() -> void:
 		if rect.end.x > left and rect.position.x < left + panel_width:
 			top = maxf(top, rect.end.y + 6.0)
 	mission_objectives.position = Vector2(left, top)
+	mission_objectives.fit_available_height(minf(200.0, maxf(48.0, ($Control.size.y - top - 24.0) * 0.4)))
 
 
 func setup() -> void:

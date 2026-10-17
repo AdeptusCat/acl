@@ -87,9 +87,9 @@ func _fit_panel() -> void:
 		for path: String in ["MissionObjectives", "OrderFeedback", "Countdown", "TryAgain", "Settings", "Settings/Menu", "Settings/Controls"]:
 			var panel: Control = hud_control.get_node_or_null(path) as Control
 			if panel != null and panel.is_visible_in_tree():
-				var rect: Rect2 = panel.get_global_rect()
+				var rect: Rect2 = hud_control.get_global_transform().affine_inverse() * panel.get_global_rect()
 				if rect.end.x > column_left:
-					top = maxf(top, rect.end.y - hud_control.global_position.y + HUD_MARGIN)
+					top = maxf(top, rect.end.y + HUD_MARGIN)
 	var margins: float = get_theme_stylebox("panel").get_minimum_size().y
 	summary_scroll.custom_minimum_size.y = minf(summary.get_combined_minimum_size().y, maxf(0.0, hud_size.y - top - HUD_MARGIN - margins))
 	size = Vector2(panel_width, get_combined_minimum_size().y)

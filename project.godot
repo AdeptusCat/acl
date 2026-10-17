@@ -29,6 +29,7 @@ RankGrades="*res://autoloads/rank_grades.gd"
 TooltipSignals="*res://autoloads/tooltip_signals.gd"
 SessionAudio="*res://autoloads/session_audio.gd"
 SessionSettings="*res://autoloads/session_settings.gd"
+DisplaySettings="*res://autoloads/display_settings.gd"
 Debug="*res://autoloads/debug_settings.gd"
 MovementSystem="*uid://dla50r83yg10r"
 LOS="*uid://bkkx84cy8adyu"
@@ -36,6 +37,10 @@ ThreatMap="*uid://smksvypix41r"
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

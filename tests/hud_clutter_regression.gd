@@ -118,7 +118,7 @@ func _run() -> void:
 	_check(not settings.menu.visible, "Clicking outside the active menu closes it even inside the hidden controls panel's bounds")
 	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
-	_pointer_event(settings.get_node("Menu/Content/Heading/Close").get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(settings.get_node("Menu/Scroll/Content/Heading/Close").get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not settings.menu.visible, "The explicit Close button closes Settings")
 	debug.section.expand()
 	await _settle()

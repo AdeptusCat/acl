@@ -22,6 +22,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/tiles/hex_hint_panel.tscn" id="36_hint"]
 [ext_resource type="Texture2D" uid="uid://5c46ui0ehlo5" path="res://assets/ui/hud/rout.svg" id="37_rout"]
 
+[ext_resource type="Script" path="res://scenes/ui/hud/hud_root.gd" id="hud_root"]
+
 [sub_resource type="StyleBoxEmpty" id="RetryPanel"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
@@ -74,6 +76,8 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("3_mgwkc")
 
+script = ExtResource("hud_root")
+
 [node name="Countdown" type="PanelContainer" parent="Control" unique_id=192447120]
 layout_mode = 1
 anchors_preset = 5
@@ -120,8 +124,13 @@ layout_mode = 2
 mouse_force_pass_scroll_events = false
 title = "Objectives"
 
-[node name="Rows" type="VBoxContainer" parent="Control/MissionObjectives/Objectives" unique_id=665202199]
+[node name="Scroll" type="ScrollContainer" parent="Control/MissionObjectives/Objectives"]
 layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Control/MissionObjectives/Objectives/Scroll" unique_id=665202199]
+layout_mode = 2
+size_flags_horizontal = 3
 mouse_filter = 2
 theme_override_constants/separation = 8
 
