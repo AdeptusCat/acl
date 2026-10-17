@@ -16,7 +16,6 @@ func setup(match_controller: Node2D, hud_control: Control) -> void:
 	controller = match_controller
 	roster = ROSTER_SCENE.instantiate() as HexStackRoster
 	hud_control.add_child(roster)
-	roster.unit_selected.connect(_on_unit_selected)
 	set_process(true)
 	refresh()
 
@@ -121,16 +120,6 @@ func _fit_roster(members: Array[Unit]) -> void:
 			if commander.is_visible_in_tree() and is_instance_valid(commander.ui) and commander.ui.is_visible_in_tree():
 				command_rect = counter_rect(unit).merge(counter_rect(commander)).grow(12.0)
 	roster.fit_to_anchor(anchor, command_rect)
-
-
-func _on_unit_selected(unit: Unit) -> void:
-	if not is_instance_valid(unit) or not unit.is_active() or unit.team != Globals.team_player or not roster.visible or unit.current_hex != roster.cell:
-		return
-	controller._select_unit(unit)
-	controller.show_unit_details_in_ui.emit(unit)
-	LOSHelper.clear_los()
-	refresh()
-	roster.reveal_unit(unit)
 
 
 static func _formation_less(a: Unit, b: Unit) -> bool:

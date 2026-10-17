@@ -31,7 +31,8 @@ size with:
 
 Checks cover panel bounds and separation, central battlefield space, scrollable
 objectives, tooltips at all four corners, target hints, command wheel sectors,
-stacked-unit picking, exact roster selection, settings input, and saved
+stacked-unit picking, selection by cycling hex occupants, pointer clearance,
+roster mouse passthrough, settings input, and saved
 preferences. Slider checks exercise mouse dragging, keyboard adjustment, saved
 intermediate percentages, legacy preference conversion, and range validation.
 Headless runs do not load or
@@ -54,8 +55,8 @@ the actual game's detailed battlefield art and native high-DPI output on target
 hardware. The automated fixture uses a small battlefield and does not simulate
 monitor DPI changes.
 
-Validation on 2026-10-17: 45 headless combinations passed 2,854 checks; 25 native
-combinations plus native window controls passed 1,602 checks. The local desktop
+Validation on 2026-10-17: 45 headless combinations passed 2,944 checks. Native
+window checks cover the desktop-supported resolutions. The local desktop
 capped 2560×1440, 3840×2160, 2560×1600, and 3440×1440 to 2560×1382. HUD, command,
 squad-roster, unit-summary, and terrain-inspection input fixtures convert their
 coordinates through the scaled canvas. All 293 scripts passed parsing and

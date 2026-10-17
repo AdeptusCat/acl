@@ -7,6 +7,7 @@
 visible = false
 z_index = 30
 mouse_force_pass_scroll_events = false
+mouse_filter = 2
 theme = ExtResource("theme")
 theme_type_variation = &"HudCompactPanel"
 script = ExtResource("script")
@@ -23,10 +24,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Squads in hex"
 theme_type_variation = &"HudHeading"
-
-[node name="Close" type="Button" parent="Content/Heading"]
-layout_mode = 2
-text = "Close"
 
 [node name="Scroll" type="ScrollContainer" parent="Content"]
 layout_mode = 2

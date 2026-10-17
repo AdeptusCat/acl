@@ -125,6 +125,7 @@ func _run() -> void:
 	await _test_arrival_popup()
 	_test_enemy_visibility()
 	await _test_pointer_and_selection()
+	await _test_pointer_clearance()
 	await _test_outside_hud_click()
 	await _test_hud_overlap()
 	await _test_shared_hq()
@@ -284,12 +285,14 @@ func _test_pointer_and_selection() -> void:
 		_check(row.identity.text.contains("/1/2") and row.identity.text.contains("MG") and row.strength.text == "%d/%d" % [second.squad_fire.soldiers.size(), second.original_size], "Stack rows show squad identity, type and strength on one line")
 		_check(row.size.y <= 32.0 and not row.get_node("Content/Status").visible and not row.strength_bar.visible, "Stack rows remain compact without extra status rows or strength bars")
 		_check(not stacks.roster.has_node("Content/Hex") and not row.has_node("Content/Command") and not row.tooltip_text.contains("contact"), "The hex roster omits hex coordinates and command connections, including tooltips")
-		_click(row.get_global_transform_with_canvas() * (row.size * 0.5))
+		_click(point)
+		_click(point)
 		await _settle()
 		stacks.refresh()
+		row = stacks.roster.rows[second.get_instance_id()]
 		commands.refresh(0.0)
-		_check(controller.selected_unit == second and second.selected and not first.selected and not third.selected, "A roster row selects the exact squad at zoom %.1f" % zoom)
-		_check(commands.displayed_links == [second] and commands.highlighted_units.has(headquarters.get_instance_id()), "Exact stack selection highlights its commanding HQ")
+		_check(controller.selected_unit == second and second.selected and not first.selected and not third.selected and row.button_pressed, "Hex clicks select the exact squad and highlight its passive roster row at zoom %.1f" % zoom)
+		_check(commands.displayed_links == [second] and commands.highlighted_units.has(headquarters.get_instance_id()), "Hex selection highlights its commanding HQ")
 		_check(commands.counter_rect(second).is_equal_approx(BattlefieldStacks.counter_rect(second)), "Command links retain the selected squad's original counter origin")
 		_check(Rect2(Vector2.ZERO, hud.size).encloses(stacks.roster.get_rect()), "The roster stays within the HUD after pan and zoom")
 		_check(not stacks.roster.get_rect().intersects(commands.counter_rect(second)) and not stacks.roster.get_rect().intersects(commands.counter_rect(headquarters)), "The roster keeps the selected counter and its HQ visible at zoom %.1f" % zoom)
@@ -315,6 +318,46 @@ func _test_pointer_and_selection() -> void:
 		_check(not stacks.roster.visible, "Escape closes the stack roster")
 	get_viewport().canvas_transform = Transform2D.IDENTITY
 	stacks.refresh()
+
+
+func _test_pointer_clearance() -> void:
+	controller._select_unit(second)
+	var anchor: Rect2 = BattlefieldStacks.counter_rect(second)
+	var members: Array[Unit] = [first, second, third]
+	var bounds: Vector2 = hud.size
+	for point: Vector2 in [anchor.get_center(), Vector2(1.0, 1.0), bounds - Vector2.ONE, Vector2(bounds.x - 1.0, 1.0), Vector2(1.0, bounds.y - 1.0)]:
+		stacks.roster.close()
+		_motion(point)
+		stacks.roster.open(stack_cell, members)
+		stacks.roster.fit_to_anchor(Rect2(point - Vector2.ONE * 16.0, Vector2.ONE * 32.0))
+		await _settle()
+		stacks.roster.fit_to_anchor(Rect2(point - Vector2.ONE * 16.0, Vector2.ONE * 32.0))
+		var rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
+		var clearance: Rect2 = Rect2(point - Vector2.ONE * 24.0, Vector2.ONE * 48.0)
+		_check(not rect.intersects(clearance) and Rect2(Vector2.ZERO, bounds).encloses(rect), "Roster opens clear of the pointer and stays onscreen near %s" % point)
+	stacks.roster.close()
+	_motion(anchor.get_center())
+	stacks.open_roster(stack_cell)
+	await _settle()
+	stacks.refresh()
+	var row: SquadRosterRow = stacks.roster.rows[second.get_instance_id()]
+	var target: Vector2 = row.get_global_transform_with_canvas() * (row.size * 0.5)
+	var start: Vector2 = anchor.get_center()
+	for step: int in range(1, 21):
+		_motion(start.lerp(target, float(step) / 20.0))
+		stacks.refresh()
+		await _settle()
+		var rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
+		var pointer: Vector2 = start.lerp(target, float(step) / 20.0)
+		_check(not rect.intersects(Rect2(pointer - Vector2.ONE * 24.0, Vector2.ONE * 48.0)), "The passive roster moves out of the way as the pointer approaches")
+	_check(stacks.roster.mouse_filter == Control.MOUSE_FILTER_IGNORE and row.mouse_filter == Control.MOUSE_FILTER_IGNORE and stacks.roster.scroll.get_v_scroll_bar().mouse_filter == Control.MOUSE_FILTER_IGNORE, "The roster, rows and internal scrollbar all pass through mouse input")
+	var covered_point: Vector2 = stacks.roster.get_global_transform_with_canvas() * (stacks.roster.size * 0.5)
+	var clicks_before: int = controller.map_clicks
+	_click(covered_point)
+	await _settle()
+	_check(controller.map_clicks == clicks_before + 1, "Even a click before the roster can move reaches the battlefield")
+	controller._select_unit(second)
+	stacks.roster.close()
 
 
 func _test_enemy_visibility() -> void:
@@ -428,7 +471,7 @@ func _test_live_updates_and_large_stacks() -> void:
 	var before: int = zooms
 	_mouse(scroll_point, MouseButton.MOUSE_BUTTON_WHEEL_UP, true)
 	_mouse(scroll_point, MouseButton.MOUSE_BUTTON_WHEEL_UP, false)
-	_check(zooms == before, "Scrolling the roster never zooms the battlefield")
+	_check(zooms == before + 1 and stacks.roster.visible, "The passive roster passes wheel input through to battlefield zoom without closing")
 	for window_size: Vector2i in [Vector2i(800, 600), Vector2i(708, 639)]:
 		get_tree().root.size = window_size
 		await _settle()
@@ -499,16 +542,20 @@ func _click(point: Vector2) -> void:
 
 
 func _mouse(point: Vector2, button: MouseButton, pressed: bool) -> void:
-	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
-	motion.position = point
-	motion.global_position = point
-	get_viewport().push_input(motion, true)
+	_motion(point)
 	var event: InputEventMouseButton = InputEventMouseButton.new()
 	event.position = point
 	event.global_position = point
 	event.button_index = button
 	event.pressed = pressed
 	get_viewport().push_input(event, true)
+
+
+func _motion(point: Vector2) -> void:
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	get_viewport().push_input(motion, true)
 
 
 func _freeze(node: Node) -> void:
