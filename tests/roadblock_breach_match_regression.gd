@@ -97,6 +97,7 @@ func _run() -> void:
 			supporter.order(Globals.UnitCmd.FIRE_AT_UNIT, weak)
 			_check(TacticalPositionExecutor.select_support_target(supporter, weak.current_hex) == weak, "Covering fire prioritizes the selected breach defender")
 			_check(maneuver.planner._has_company_support(), "Established fire on the breach releases the company support gate")
+	_test_clear_exit(planner, rifles, snapshot, exit_task)
 	for row: int in [6, 7, 8, 9]:
 		_check(controller._is_exit_hex(Globals.Team.AXIS, Vector2i(0, row)), "The road and neighboring western bypass hexes are exits")
 	_check(not controller._is_exit_hex(Globals.Team.AXIS, Vector2i(1, 8)), "Leaving the map requires reaching the western boundary")
@@ -116,6 +117,42 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("RoadBlock breach match regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_clear_exit(planner: PlatoonAI, rifles: Array[Unit], snapshot: InfluenceSnapshot, blocked_task: ScenarioGoalTask) -> void:
+	if blocked_task == null:
+		return
+	var task: ScenarioGoalTask = ScenarioGoalTask.new()
+	task.kind = ScenarioGoalTask.Kind.EXIT
+	task.hex = Vector2i(0, 8)
+	task.condition = blocked_task.condition
+	task.required_units = 3
+	task.key = "clear_exit"
+	var front: Unit = rifles[0]
+	_set_hex(front, Vector2i(2, 8))
+	snapshot.positions[front] = front.current_hex
+	snapshot.contacts[planner.team] = []
+	snapshot.defensive_contacts[planner.team] = []
+	for unit: Unit in planner.squads:
+		Globals.unit_visible_enemies[unit] = []
+	planner.goal_assignments = {front: task}
+	planner.company_requires_support = true
+	planner.company_support_squads.clear()
+	planner._planning_snapshot = snapshot
+	planner._planning_requests.clear()
+	planner._planning_reservations.clear()
+	planner._add_goal_request(front, task)
+	var query: PositionQuery = planner._planning_requests[0]["query"]
+	_check(query.profile.mode == PositionProfile.Mode.ADVANCE and query.goal_destination_required, "A clear exit advances without waiting for rear units to provide covering fire")
+	var result: PositionResult = PositionQueryService.query_positions(query)
+	_check(result.is_valid() and result.should_move and result.target_hex == task.hex, "A squad near the western edge exits instead of returning to the rear formation")
+	planner.squad_assignments[front] = {"result": result}
+	planner._issue_order(front)
+	_check(front.movement.is_moving and front.movement.target_hex == task.hex, "Execution preserves the clear exit order without company covering fire")
+	_set_hex(front, Vector2i(2, 8))
+	for formation: CompanyPlatoon in planner.company_command.platoons.values():
+		formation.task = task
+		_check(not planner.company_command._needs_attack(formation), "A clear exit does not request a company assault or support role")
 
 
 func _set_hex(unit: Unit, cell: Vector2i) -> void:

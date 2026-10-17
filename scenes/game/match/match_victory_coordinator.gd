@@ -135,9 +135,60 @@ static func can_finish_after_enemy_departure() -> bool:
 	return has_capture_objective
 
 
+static func _occupation_pending_only(conditions: Array[VictoryCondition]) -> bool:
+	var has_occupation: bool = false
+	for condition: VictoryCondition in conditions:
+		if condition is OccupyObjectiveCondition:
+			has_occupation = true
+			break
+	if not has_occupation:
+		return false
+	var pending: bool = false
+	for condition: VictoryCondition in conditions:
+		if condition.is_condition_met():
+			continue
+		if not condition is OccupyObjectiveCondition:
+			return false
+		var occupation: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
+		if not VictoryConditionProgress.read(occupation).valid:
+			return false
+		for hex: Vector2i in occupation.state.hexes:
+			if occupation.state.required_times_reached_s.get(hex, 0.0) <= 0.0:
+				return false
+		pending = true
+	return pending
+
+
+static func _continue_overtime(controller: Node2D) -> bool:
+	if not controller.overtime_active:
+		# Only victory packages already being secured at the deadline qualify.
+		for team: Globals.Team in Globals.victory_conditions:
+			for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
+				var package: VictoryConditionCollection = VictoryConditionCollection.new()
+				for condition: VictoryCondition in Globals.victory_conditions[team].victory_conditions:
+					if condition.outcome_level == level:
+						package.victory_conditions.append(condition)
+				if _occupation_pending_only(package.victory_conditions):
+					controller.overtime_packages.append(package)
+	else:
+		for package: VictoryConditionCollection in controller.overtime_packages.duplicate():
+			var first: VictoryCondition = package.victory_conditions[0]
+			if VictoryConditionProgress.outcome_complete(package.victory_conditions, first.team, first.outcome_level, true):
+				controller.overtime_packages.clear()
+				return false
+			if not _occupation_pending_only(package.victory_conditions):
+				controller.overtime_packages.erase(package)
+	return not controller.overtime_packages.is_empty()
+
+
 static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	if controller.end_game_handled:
 		return
+	if controller.time_left_seconds <= 0.0:
+		controller.overtime_active = _continue_overtime(controller)
+		if controller.overtime_active:
+			controller.timer_running = true
+			return
 	var at_end: bool = controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
 	
 	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {

@@ -9,27 +9,29 @@ const REFRESH_INTERVAL_S: float = 0.1
 
 enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 
-@onready var unit_type_label: Label = $Summary/Identity
-@onready var formation_label: Label = $Summary/Formation
-@onready var command_label: Label = $Summary/Command
-@onready var strength_label: Label = $Summary/Status/Strength
-@onready var unit_status_label: Label = $Summary/Status/Morale
-@onready var order_label: Label = $Summary/Order
-@onready var cohesion: Label = $Summary/Stats/Cohesion
-@onready var effectiveness: Label = $Summary/Stats/Effectiveness
-@onready var cohesion_bar: ProgressBar = $Summary/Stats/CohesionBar
-@onready var effectiveness_bar: ProgressBar = $Summary/Stats/EffectivenessBar
-@onready var details_section: FoldableContainer = $Summary/Details
-@onready var roster_section: FoldableContainer = $Summary/Roster
-@onready var roster_scroll: ScrollContainer = $Summary/Roster/Scroll
-@onready var roster_container: VBoxContainer = $Summary/Roster/Scroll/Rows
-@onready var casualty_shock: Label = $Summary/Details/Content/Stats/CasualtyShock
-@onready var leadership_bonus_label: Label = $Summary/Details/Content/Stats/LeadershipBonus
-@onready var leadership_presence_label: Label = $Summary/Details/Content/Stats/LeadershipPresence
-@onready var debug_actions: HFlowContainer = $Summary/Details/Content/DebugActions
-@onready var rout_button: RoutButton = $Summary/Rout
-@onready var rout_explanation: Label = $Summary/RoutExplanation
+@onready var unit_type_label: Label = $Scroll/Summary/Identity
+@onready var formation_label: Label = $Scroll/Summary/Formation
+@onready var command_label: Label = $Scroll/Summary/Command
+@onready var strength_label: Label = $Scroll/Summary/Status/Strength
+@onready var unit_status_label: Label = $Scroll/Summary/Status/Morale
+@onready var order_label: Label = $Scroll/Summary/Order
+@onready var cohesion: Label = $Scroll/Summary/Details/Content/Readiness/Cohesion
+@onready var effectiveness: Label = $Scroll/Summary/Details/Content/Readiness/Effectiveness
+@onready var cohesion_bar: ProgressBar = $Scroll/Summary/Details/Content/Readiness/CohesionBar
+@onready var effectiveness_bar: ProgressBar = $Scroll/Summary/Details/Content/Readiness/EffectivenessBar
+@onready var details_section: FoldableContainer = $Scroll/Summary/Details
+@onready var roster_section: FoldableContainer = $Scroll/Summary/Roster
+@onready var roster_scroll: ScrollContainer = $Scroll/Summary/Roster/Scroll
+@onready var roster_container: VBoxContainer = $Scroll/Summary/Roster/Scroll/Rows
+@onready var casualty_shock: Label = $Scroll/Summary/Details/Content/Stats/CasualtyShock
+@onready var leadership_bonus_label: Label = $Scroll/Summary/Details/Content/Stats/LeadershipBonus
+@onready var leadership_presence_label: Label = $Scroll/Summary/Details/Content/Stats/LeadershipPresence
+@onready var debug_actions: HFlowContainer = $Scroll/Summary/Details/Content/DebugActions
+@onready var rout_button: RoutButton = $Scroll/Summary/Rout
+@onready var rout_explanation: Label = $Scroll/Summary/RoutExplanation
 @onready var hud_control: Control = get_parent() as Control
+@onready var summary_scroll: ScrollContainer = $Scroll
+@onready var summary: VBoxContainer = $Scroll/Summary
 
 var unit: Unit
 var soldiers: Array[Soldier] = []
@@ -44,8 +46,14 @@ var _refresh_elapsed_s: float = 0.0
 
 func _ready() -> void:
 	minimum_size_changed.connect(_queue_fit)
+	summary.minimum_size_changed.connect(_queue_fit)
 	if hud_control != null:
 		hud_control.resized.connect(_fit_panel)
+		for path: String in ["MissionObjectives", "OrderFeedback", "Settings", "Settings/Menu", "Settings/Controls"]:
+			var panel: Control = hud_control.get_node_or_null(path) as Control
+			if panel != null:
+				panel.item_rect_changed.connect(_queue_fit)
+				panel.visibility_changed.connect(_queue_fit)
 	else:
 		get_viewport().size_changed.connect(_fit_panel)
 	details_section.folding_changed.connect(_on_details_folding_changed)
@@ -73,6 +81,17 @@ func _fit_panel() -> void:
 	var panel_width: float = minf(PANEL_WIDTH, maxf(0.0, hud_size.x - HUD_MARGIN * 2.0))
 	roster_scroll.custom_minimum_size.y = minf(ROSTER_HEIGHT, maxf(48.0, hud_size.y * 0.25))
 	custom_minimum_size.x = panel_width
+	var top: float = HUD_MARGIN
+	if hud_control != null:
+		var column_left: float = hud_size.x - panel_width - HUD_MARGIN
+		for path: String in ["MissionObjectives", "OrderFeedback", "Countdown", "TryAgain", "Settings", "Settings/Menu", "Settings/Controls"]:
+			var panel: Control = hud_control.get_node_or_null(path) as Control
+			if panel != null and panel.is_visible_in_tree():
+				var rect: Rect2 = panel.get_global_rect()
+				if rect.end.x > column_left:
+					top = maxf(top, rect.end.y - hud_control.global_position.y + HUD_MARGIN)
+	var margins: float = get_theme_stylebox("panel").get_minimum_size().y
+	summary_scroll.custom_minimum_size.y = minf(summary.get_combined_minimum_size().y, maxf(0.0, hud_size.y - top - HUD_MARGIN - margins))
 	size = Vector2(panel_width, get_combined_minimum_size().y)
 	position = hud_size - size - Vector2(HUD_MARGIN, HUD_MARGIN)
 
@@ -191,7 +210,7 @@ func _refresh_summary() -> void:
 	formation_label.text = unit.get_formation_name()
 	formation_label.tooltip_text = formation_label.text
 	_refresh_command_summary()
-	strength_label.text = "Soldiers: %d/%d" % [unit.squad_fire.soldiers.size(), unit.original_size]
+	strength_label.text = "%d/%d soldiers" % [unit.squad_fire.soldiers.size(), unit.original_size]
 	strength_label.tooltip_text = strength_label.text
 	_on_state_changed(unit.stress_system.state)
 	order_label.text = "Order: " + _current_order_text()
@@ -209,8 +228,6 @@ func _refresh_command_summary() -> void:
 	command_label.text = "Contact: " + CommandConnectivity.contact_text(contact)
 	if not CommandConnectivity.needs_command_contact(unit):
 		command_label.text = "Command: Top-level HQ"
-	elif contact != CommandConnectivity.ContactState.LOST:
-		command_label.text += " · " + CommandConnectivity.contact_method_for(unit)
 	command_label.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
 	var commander_name: String = "Unavailable"
 	if is_instance_valid(unit.command_squad):
@@ -313,9 +330,9 @@ func _on_soldiers_changed() -> void:
 func _on_state_changed(state: int) -> void:
 	if not is_instance_valid(unit):
 		return
-	unit_status_label.text = "Morale: " + unit.get_state_name(state)
+	unit_status_label.text = unit.get_state_name(state)
 	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
-		unit_status_label.text = "Morale: Ineffective"
+		unit_status_label.text = "Ineffective"
 	unit_status_label.tooltip_text = "%s\nStress: %.2f/%.0f\nIncoming stress: +%.2f/s\nRecovery capacity: %.2f/s\nActual recovery: -%.2f/s\nNet stress change: %+.2f/s\nAveraged over the last %.2f s." % [unit_status_label.text, unit.stress_system.S_eff, unit.stress_system.S_CAP, unit.stress_system.incoming_stress_rate, unit.stress_system.recovery_capacity_rate, unit.stress_system.stress_recovery_rate, unit.stress_system.net_stress_rate, unit.stress_system.balance_sample_duration_s]
 	var color: Color = Color(0.65, 0.85, 0.55)
 	match state:
@@ -332,7 +349,7 @@ func _on_state_changed(state: int) -> void:
 	if rout_button.disabled == rout_available:
 		rout_button.set_rout_available(rout_available)
 	rout_explanation.visible = state == STATES.MoraleState.PINNED and not unit.surrendered
-	rout_explanation.text = RoutButton.ROUT_EXPLANATION
+	rout_explanation.text = "Pinned: normal movement blocked.\nRout risks surrender."
 	if unit.in_close_combat:
 		rout_explanation.text = "Pinned in close combat.\nRout is unavailable during this fight."
 

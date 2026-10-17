@@ -163,11 +163,14 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("settings-compact")
 	settings.close_panels()
+	await _settle()
+	await _check_unit_readability(world, squad, summary)
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("battle-compact")
 	get_tree().root.size = Vector2i(708, 639)
 	await _settle()
 	_check_top_layout(world, settings)
+	await _check_unit_readability(world, squad, summary)
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("battle-narrow")
 	SessionAudio.set_master_linear(master_before)
@@ -177,6 +180,23 @@ func _run() -> void:
 	await _settle()
 	print("HUD clutter checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _check_unit_readability(world: Node, squad: Unit, summary: PanelContainer) -> void:
+	_check(_inside_hud(summary, world) and not summary.get_rect().intersects(world.ui.mission_objectives.get_rect()), "Selected squad information stays below objectives and inside the viewport")
+	_check(not summary.cohesion_bar.is_visible_in_tree() and not summary.effectiveness_bar.is_visible_in_tree(), "Detailed combat statistics stay collapsed during normal selection")
+	for label: Label in [summary.strength_label, summary.unit_status_label, summary.command_label, summary.order_label]:
+		_check(_text_fits(label), "Primary squad text remains fully readable: " + label.text)
+	var ui: UnitUi = squad.ui
+	_check(not ui.stress_arrows.get_rect().intersects(ui.morale_bar.get_rect()) and not ui.recovery_arrows.get_rect().intersects(ui.morale_bar.get_rect()), "Stress and recovery text have their own row above the morale bar")
+	for row: SquadRosterRow in world.ui.squad_roster.rows.values():
+		_check(row.get_node("Content").get_rect().end.y <= row.size.y, "Roster row height includes every visible text line")
+	world.ui.show_order_feedback(true, "Move", "Squad moving to its destination")
+	await _settle()
+	var feedback: Control = world.ui.get_node("Control/OrderFeedback")
+	_check(not feedback.get_rect().intersects(world.ui.mission_objectives.get_rect()) and not feedback.get_rect().intersects(summary.get_rect()), "Order feedback leaves objectives and squad text unobstructed")
+	world.ui.hide_order_feedback()
+	await _settle()
 
 
 func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:

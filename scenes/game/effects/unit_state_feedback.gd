@@ -83,14 +83,8 @@ func _draw() -> void:
 	if pulse > 0.0:
 		draw_rect(frame, Color(accent.r, accent.g, accent.b, pulse_alpha * 0.20))
 		draw_arc(Vector2(32.0, 29.0), 37.0 + elapsed * 18.0, 0.0, TAU, 48, Color(accent.r, accent.g, accent.b, pulse * 0.7), 2.0, true)
-	draw_rect(frame, Color(0.06, 0.04, 0.02, 0.85), false, 3.0)
-	draw_rect(frame, Color(accent.r, accent.g, accent.b, 0.45 + pulse_alpha * 0.55), false, 1.5)
 
 	match state:
-		State.PINNED:
-			_draw_pin(Vector2(7.0, 5.0), 1.3, accent)
-		State.SURRENDERED:
-			_draw_flag(Vector2(50.0, 2.0), 1.5, accent)
 		State.ELIMINATED:
 			draw_circle(Vector2(32.0, 28.0), 28.0, Color(0.10, 0.025, 0.02, 0.94))
 			draw_line(Vector2(8.0, 4.0), Vector2(56.0, 52.0), Color(0.03, 0.02, 0.01), 5.0, true)
@@ -103,7 +97,6 @@ func _draw() -> void:
 	var badge: Rect2 = RIBBON_RECT
 	draw_rect(badge.grow(1.0), Color(0.03, 0.02, 0.01))
 	draw_rect(badge, Color(accent.r * 0.16, accent.g * 0.12, accent.b * 0.09, 0.96))
-	draw_rect(badge, accent, false, 1.0 + pulse * 0.5)
 	match state:
 		State.PINNED:
 			_draw_pin(Vector2(-4.0, 69.0), 0.65, accent)

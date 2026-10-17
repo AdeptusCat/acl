@@ -48,6 +48,7 @@ func _ready() -> void:
 	$Control.resized.connect(_layout_order_feedback)
 	countdown_panel_container.item_rect_changed.connect(_layout_order_feedback)
 	$Control/OrderFeedback.minimum_size_changed.connect(_layout_order_feedback)
+	mission_objectives.item_rect_changed.connect(_layout_order_feedback)
 	$Control/OrderFeedback/HideTimer.timeout.connect($Control/OrderFeedback.hide)
 	get_window().size_changed.connect(_layout_mission_objectives)
 	$Control.resized.connect(_queue_left_layout)
@@ -106,7 +107,9 @@ func _layout_left_panels() -> void:
 	_left_layout_queued = false
 	if not is_node_ready() or is_queued_for_deletion():
 		return
-	var top: float = 12.0 # $Control/TryAgain.get_rect().end.y +
+	var top: float = 12.0
+	for header: Control in [retry_panel, countdown_panel_container, $Control/Settings]:
+		top = maxf(top, header.get_rect().end.y + 12.0)
 	var bottom: float = $Control.size.y - 12.0
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0
@@ -229,7 +232,13 @@ func _layout_order_feedback() -> void:
 	var panel: PanelContainer = $Control/OrderFeedback
 	panel.custom_minimum_size.x = 320.0
 	panel.size = Vector2(320.0, panel.get_combined_minimum_size().y)
-	panel.position = Vector2(($Control.size.x - panel.size.x) * 0.5, countdown_panel_container.get_rect().end.y + 12.0)
+	var left: float = ($Control.size.x - panel.size.x) * 0.5
+	if squad_roster.visible:
+		left = maxf(left, squad_roster.get_rect().end.x + 12.0)
+	left = minf(left, $Control.size.x - panel.size.x - 12.0)
+	panel.position = Vector2(left, countdown_panel_container.get_rect().end.y + 12.0)
+	if mission_objectives.visible and panel.get_rect().intersects(mission_objectives.get_rect()):
+		panel.position.y = mission_objectives.get_rect().end.y + 12.0
 
 
 func show_hex_edge_hint(direction: int, cover: int, point: Vector2) -> void:
@@ -258,6 +267,10 @@ func _on_game_started_through_moving_unit() -> void:
 func _on_update_timer_label(time_left_seconds : float) -> void:
 	countdown_panel_container.update_timer_label(time_left_seconds)
 	mission_objectives.update_time(time_left_seconds)
+
+
+func _on_update_overtime_label(elapsed_seconds: float) -> void:
+	countdown_panel_container.update_overtime_label(elapsed_seconds)
 
 
 func mouse_event_position_changed(_event_pos: Vector2) -> void:

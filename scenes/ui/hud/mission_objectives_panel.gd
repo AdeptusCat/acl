@@ -33,12 +33,12 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 	for condition: VictoryCondition in scenario_conditions:
 		if condition.team == player_team and condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
 			conditions.append(condition)
-	heading.text = "MISSION · PRIMARY OBJECTIVES"
+	heading.text = "OBJECTIVES"
 	if conditions.is_empty():
 		for condition: VictoryCondition in scenario_conditions:
 			if condition.team == player_team:
 				conditions.append(condition)
-		heading.text = "MISSION · OBJECTIVES"
+		heading.text = "OBJECTIVES"
 	for condition: VictoryCondition in conditions:
 		var label: Label = Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

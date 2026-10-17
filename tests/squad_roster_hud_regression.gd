@@ -63,7 +63,7 @@ func _run() -> void:
 	_check((rifle.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color == platoon_color, "The morale fill identifies the squad's platoon")
 	_check(rifle.ui.morale_bar.fill_mode == ProgressBar.FILL_BEGIN_TO_END and rifle.ui.morale_bar.size.x > rifle.ui.morale_bar.size.y, "Morale uses a single horizontal gauge")
 	var gauge_rect: Rect2 = rifle.ui.morale_bar.get_global_rect()
-	_check(not gauge_rect.intersects(rifle.ui.idle_texture_rect.get_global_rect()) and gauge_rect.encloses(rifle.ui.stress_arrows.get_global_rect()) and gauge_rect.encloses(rifle.ui.recovery_arrows.get_global_rect()), "The morale strip contains both influence arrows and leaves the figure unobstructed")
+	_check(not gauge_rect.intersects(rifle.ui.idle_texture_rect.get_global_rect()) and rifle.ui.stress_arrows.get_global_rect().end.y <= gauge_rect.position.y and rifle.ui.recovery_arrows.get_global_rect().end.y <= gauge_rect.position.y, "Influence arrows sit above the morale strip and leave the figure unobstructed")
 	_check(not rifle.ui.get_node("ColorRect").visible and not rifle.ui.get_node("MoraleBarDefault").visible, "Counters draw a single morale strip without a separate arrow background")
 	_check(not rifle_row.rout_available.visible, "Fresh squads have no retreat availability icon")
 	var morale_position: Vector2 = rifle_row.morale.position

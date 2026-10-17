@@ -155,12 +155,20 @@ func _test_elimination_fade() -> void:
 
 
 func _test_unit_events() -> void:
+	var previous_ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var ground: HexagonTileMapLayer = HexagonTileMapLayer.new()
+	ground.pathfinding_enabled = false
+	ground.tile_set = TileSet.new()
+	ground.tile_set.tile_size = Vector2i(128, 128)
+	add_child(ground)
+	LOSHelper.ground_layer = ground
 	var history: CasualtyHistory = Globals.casualty_history
 	var destroyed: UnitsCollection = Globals.units_destroyed
 	Globals.casualty_history = CasualtyHistory.new()
 	Globals.units_destroyed = UnitsCollection.new()
 	var unit: Unit = UNIT_SCENE.instantiate() as Unit
 	add_child(unit)
+	unit.position = ground.map_to_local(unit.current_hex)
 	unit.movement.unit = unit
 	unit.action_controller.init(unit, unit.movement, unit.squad_fire, unit.stress_system, unit.ui)
 	unit._setup_runtime_soldiers(unit.squad_loadout)
@@ -178,6 +186,8 @@ func _test_unit_events() -> void:
 	unit.free()
 	Globals.casualty_history = history
 	Globals.units_destroyed = destroyed
+	LOSHelper.ground_layer = previous_ground
+	ground.free()
 
 
 func _render_preview() -> void:

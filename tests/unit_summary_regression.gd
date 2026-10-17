@@ -35,7 +35,7 @@ func _run() -> void:
 	_check(panel.is_visible_in_tree(), "Selecting a squad displays its summary")
 	_check(panel.details_section.folded and panel.roster_section.folded, "Extra information starts collapsed")
 	_check(panel.unit_type_label.text.contains(selected.ui.unit_designation_label.text) and panel.formation_label.text.contains("Company"), "Identity includes the map designation and formation")
-	_check(panel.strength_label.text == "Soldiers: %d/%d" % [selected.squad_fire.soldiers.size(), selected.original_size], "Strength uses the live roster and its initial size")
+	_check(panel.strength_label.text == "%d/%d soldiers" % [selected.squad_fire.soldiers.size(), selected.original_size], "Strength uses the live roster and its initial size")
 	_check(is_equal_approx(panel.size.x, 300.0) and panel.size.y <= 244.0, "The summary including command contact is compact and has a stable width")
 	_check(panel.command_label.is_visible_in_tree() and panel.command_label.tooltip_text.contains("HQ:") and panel.command_label.tooltip_text.contains("Leadership support:"), "Selection shows readable contact status and distinguishes HQ contact from leadership support")
 	selected.combat_stats.cohesion_current = 0.64
@@ -107,7 +107,7 @@ func _run() -> void:
 	var casualty: Soldier = selected.squad_fire.soldiers[0]
 	selected.apply_specific_casualty(casualty)
 	panel._process(0.0)
-	_check(panel.strength_label.text == "Soldiers: 19/20", "A casualty immediately updates remaining soldiers")
+	_check(panel.strength_label.text == "19/20 soldiers", "A casualty immediately updates remaining soldiers")
 	_check(panel.casualty_entries_by_casualty.has(casualty) and not panel.soldier_entries_by_soldier.has(casualty), "The roster moves casualties out of the active soldier list")
 	var casualty_task: Label = panel.casualty_entries_by_casualty[casualty][DETAILS_SCRIPT.Entry.TASK]
 	_check(casualty_task.text == "Incapacitated", "Casualties remain identifiable in the roster")

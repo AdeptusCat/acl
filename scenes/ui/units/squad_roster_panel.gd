@@ -6,7 +6,7 @@ signal layout_requested
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/units/squad_roster_row.tscn")
 const PANEL_WIDTH: float = 252.0
-const SCROLL_HEIGHT: float = 168.0
+const SCROLL_HEIGHT: float = 160.0
 const REFRESH_INTERVAL_S: float = 0.25
 
 @onready var section: FoldableContainer = $Roster

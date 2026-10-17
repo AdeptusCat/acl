@@ -27,12 +27,16 @@ const STACK_PRESENTATION: Script = preload("res://scenes/world/overlays/battlefi
 
 @export var time_left_seconds: float = 120.0  
 var timer_running: bool = false
+var overtime_active: bool = false
+var overtime_elapsed_seconds: float = 0.0
+var overtime_packages: Array[VictoryConditionCollection] = []
 
 var selected_unit: Unit = null
 var stack_presenter: BattlefieldStacks
 
 
 signal update_timer_label(time_left_seconds: float)
+signal update_overtime_label(elapsed_seconds: float)
 signal show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool)
 signal set_objective_text(hex: String)
 signal mouse_event_position_changed(event_pos: Vector2)
@@ -498,6 +502,9 @@ func erase_freed_objects_key_from_dict(dict: Dictionary) -> void:
 func start_game(team: Globals.Team, time: float) -> void:
 	
 	time_left_seconds = time * 60.0 # * 60.0
+	overtime_active = false
+	overtime_elapsed_seconds = 0.0
+	overtime_packages.clear()
 	Globals.team_player = team
 	if team == Globals.Team.AXIS:
 		Globals.team_enemy = Globals.Team.ALLIES
@@ -712,6 +719,9 @@ var time_left_seconds_test: int = 2
 func _process(delta: float) -> void:
 	if timer_running:
 		var elapsed: float = minf(delta, maxf(time_left_seconds, 0.0))
+		if overtime_active:
+			elapsed = delta
+			overtime_elapsed_seconds += elapsed
 		if elapsed > 0.0 and not end_game_handled:
 			for unit: Unit in Globals.get_units():
 				if unit.is_active() and not unit.surrendered and _is_exit_hex(unit.team, unit.current_hex):
@@ -722,9 +732,10 @@ func _process(delta: float) -> void:
 		time_left_seconds -= delta
 		if time_left_seconds <= 0:
 			time_left_seconds = 0
-			timer_running = false
 			_on_win_condition_timer_timeout()
 		update_timer_label.emit(time_left_seconds)
+		if overtime_active:
+			update_overtime_label.emit(overtime_elapsed_seconds)
 	if not end_game_handled:
 		var now: float = float(Engine.get_physics_frames()) / float(Engine.physics_ticks_per_second)
 		for owner: Globals.Team in _ai_goal_directors:

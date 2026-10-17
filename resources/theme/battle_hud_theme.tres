@@ -1,6 +1,5 @@
 [gd_resource type="Theme" format=3 uid="uid://g173hug4jpgu"]
 
-[ext_resource type="FontFile" uid="uid://cx2ft8so378yw" path="res://assets/fonts/courier_prime/Courier Prime.ttf" id="1"]
 [ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="2"]
 [ext_resource type="Texture2D" uid="uid://onrh6umkr0be" path="res://assets/ui/hud/checkbox_unchecked.svg" id="3"]
 
@@ -64,10 +63,6 @@ content_margin_top = 8.0
 content_margin_right = 10.0
 content_margin_bottom = 8.0
 bg_color = Color(0.09, 0.1, 0.085, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
 border_color = Color(0.53, 0.54, 0.43, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -89,7 +84,7 @@ border_color = Color(0.85, 0.74, 0.5, 1)
 [sub_resource type="StyleBoxFlat" id="Row"]
 content_margin_left = 6.0
 content_margin_right = 6.0
-bg_color = Color(0.13, 0.14, 0.115, 1)
+bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="Panel"]
 content_margin_left = 12.0
@@ -97,10 +92,6 @@ content_margin_top = 10.0
 content_margin_right = 12.0
 content_margin_bottom = 10.0
 bg_color = Color(0.09, 0.1, 0.085, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
 border_color = Color(0.53, 0.54, 0.43, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -108,8 +99,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [resource]
-default_font = ExtResource("1")
-default_font_size = 14
+default_font_size = 16
 Button/colors/font_color = Color(0.93, 0.91, 0.82, 1)
 Button/colors/font_disabled_color = Color(0.65, 0.66, 0.59, 1)
 Button/constants/outline_size = 0
@@ -140,7 +130,7 @@ HudHeading/colors/font_color = Color(0.86, 0.77, 0.56, 1)
 HudHeading/font_sizes/font_size = 16
 HudSecondary/base_type = &"Label"
 HudSecondary/colors/font_color = Color(0.78, 0.79, 0.7, 1)
-HudSecondary/font_sizes/font_size = 12
+HudSecondary/font_sizes/font_size = 14
 HudSquadRow/base_type = &"Button"
 HudSquadRow/styles/hover = SubResource("RowHover")
 HudSquadRow/styles/hover_pressed = SubResource("RowSelected")

@@ -124,17 +124,36 @@ func fit_to_anchor(screen_rect: Rect2, command_rect: Rect2 = Rect2()) -> void:
 		Vector2(anchor.position.x - size.x - MARGIN, anchor.end.y + MARGIN),
 		Vector2(anchor.position.x - size.x - MARGIN, anchor.position.y - size.y - MARGIN),
 	]
+	var blockers: Array[Rect2] = []
+	for path: String in ["SquadRoster", "UnitDetails", "MissionObjectives", "Countdown", "TryAgain", "Debug", "TileDetails", "OrderFeedback", "Settings", "Settings/Menu", "Settings/Controls"]:
+		var panel: Control = hud.get_node_or_null(path) as Control
+		if panel == null or not panel.is_visible_in_tree():
+			continue
+		var blocker: Rect2 = hud.get_global_transform().affine_inverse() * panel.get_global_rect()
+		blockers.append(blocker)
+		candidates.append(Vector2(blocker.end.x + MARGIN, anchor.position.y))
+		candidates.append(Vector2(blocker.position.x - size.x - MARGIN, anchor.position.y))
+		candidates.append(Vector2(anchor.position.x, blocker.end.y + MARGIN))
+		candidates.append(Vector2(anchor.position.x, blocker.position.y - size.y - MARGIN))
+	var best_panel_overlap: float = INF
 	var best_counter_overlap: float = INF
 	var best_command_overlap: float = INF
 	for candidate: Vector2 in candidates:
 		candidate.x = clampf(candidate.x, MARGIN, maxf(MARGIN, hud.size.x - size.x - MARGIN))
 		candidate.y = clampf(candidate.y, MARGIN, maxf(MARGIN, hud.size.y - size.y - MARGIN))
 		var rect: Rect2 = Rect2(candidate, size)
+		var panel_overlap: float = 0.0
+		for blocker: Rect2 in blockers:
+			panel_overlap += rect.intersection(blocker).get_area()
 		var counter_overlap: float = rect.intersection(anchor).get_area()
 		var command_overlap: float = 0.0
 		if command_rect.has_area():
 			command_overlap = rect.intersection(avoid).get_area()
-		if counter_overlap < best_counter_overlap or (is_equal_approx(counter_overlap, best_counter_overlap) and command_overlap < best_command_overlap):
+		var better: bool = panel_overlap < best_panel_overlap
+		if is_equal_approx(panel_overlap, best_panel_overlap):
+			better = counter_overlap < best_counter_overlap or (is_equal_approx(counter_overlap, best_counter_overlap) and command_overlap < best_command_overlap)
+		if better:
+			best_panel_overlap = panel_overlap
 			best_counter_overlap = counter_overlap
 			best_command_overlap = command_overlap
 			position = candidate

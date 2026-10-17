@@ -159,6 +159,7 @@ one_shot = true
 layout_mode = 1
 
 [node name="Settings" parent="Control" unique_id=1578816844 instance=ExtResource("33_settings")]
+z_index = 10
 layout_mode = 1
 
 [node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
@@ -200,7 +201,7 @@ layout_mode = 0
 layout_mode = 1
 
 [node name="SquadRoster" parent="Control" unique_id=88355625 instance=ExtResource("32_roster")]
-visible = true
+visible = false
 layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0
@@ -208,6 +209,7 @@ offset_right = 252.0
 offset_bottom = 236.0
 
 [node name="Tooltip" type="PanelContainer" parent="Control" unique_id=784359479]
+z_index = 20
 layout_mode = 0
 offset_left = 45.0
 offset_top = 70.0
@@ -251,6 +253,7 @@ fit_content = true
 autowrap_mode = 2
 
 [node name="Debug" type="PanelContainer" parent="Control" unique_id=367192536]
+theme_type_variation = &"HudCompactPanel"
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 1
 anchors_preset = 2

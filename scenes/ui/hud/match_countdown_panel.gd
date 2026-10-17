@@ -15,11 +15,20 @@ func set_countdown(is_started: bool) -> void:
 
 
 func update_timer_label(time_left_seconds: float) -> void:
+	$HBoxContainer/Label2.text = "Time left: "
 	_time_left_seconds = maxf(0.0, time_left_seconds)
 	var minutes: int = int(_time_left_seconds / 60.0)
 	var seconds: int = int(_time_left_seconds) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
 	_update_alert()
+
+
+func update_overtime_label(elapsed_seconds: float) -> void:
+	_stop_alert_tween()
+	var seconds: int = maxi(0, int(elapsed_seconds))
+	$HBoxContainer/Label2.text = "Overtime: "
+	timer_label.text = "+%02d:%02d" % [seconds / 60, seconds % 60]
+	timer_label.modulate = Color(0.96, 0.68, 0.32)
 
 
 func _update_alert() -> void:

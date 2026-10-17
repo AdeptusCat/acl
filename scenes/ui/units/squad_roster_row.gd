@@ -14,8 +14,14 @@ var stack_row: bool = false
 
 
 func _ready() -> void:
+	$Content.minimum_size_changed.connect(_fit_content)
+	_fit_content()
 	if is_instance_valid(unit):
 		unit.stress_system.state_changed.connect(_on_morale_state_changed)
+
+
+func _fit_content() -> void:
+	custom_minimum_size.y = maxf(44.0, $Content.get_combined_minimum_size().y + 6.0)
 
 
 func _on_morale_state_changed(_previous: int, _next: int) -> void:

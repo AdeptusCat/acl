@@ -36,11 +36,17 @@ theme = ExtResource("hud_theme")
 script = ExtResource("1")
 soldier_detail_row_scene = ExtResource("2")
 
-[node name="Summary" type="VBoxContainer" parent="."]
+[node name="Scroll" type="ScrollContainer" parent="."]
 layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="Summary" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="Identity" type="Label" parent="Summary"]
+[node name="Identity" type="Label" parent="Scroll/Summary"]
 layout_mode = 2
 mouse_filter = 1
 text = "1st Squad · Rifle"
@@ -49,58 +55,84 @@ clip_text = true
 script = ExtResource("5")
 theme_type_variation = &"HudHeading"
 
-[node name="Formation" type="Label" parent="Summary"]
+[node name="Formation" type="Label" parent="Scroll/Summary"]
 layout_mode = 2
 text = "Company A · Platoon 1"
 text_overrun_behavior = 3
 clip_text = true
 theme_type_variation = &"HudSecondary"
 
-[node name="Status" type="VBoxContainer" parent="Summary"]
+[node name="Status" type="HBoxContainer" parent="Scroll/Summary"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 8
 
-[node name="Command" type="Label" parent="Summary"]
+[node name="Command" type="Label" parent="Scroll/Summary"]
 layout_mode = 2
 mouse_filter = 1
 text = "Contact: Connected"
+theme_type_variation = &"HudSecondary"
 text_overrun_behavior = 3
 clip_text = true
 
-[node name="Strength" type="Label" parent="Summary/Status"]
-layout_mode = 2
-mouse_filter = 1
-text = "Soldiers: 12/12"
-clip_text = true
-
-[node name="Morale" type="Label" parent="Summary/Status"]
+[node name="Strength" type="Label" parent="Scroll/Summary/Status"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
-text = "Morale: Ok"
+text = "12/12 soldiers"
+clip_text = true
+
+[node name="Morale" type="Label" parent="Scroll/Summary/Status"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+text = "Ok"
+horizontal_alignment = 2
 text_overrun_behavior = 3
 clip_text = true
 
-[node name="Order" type="Label" parent="Summary"]
+[node name="Order" type="Label" parent="Scroll/Summary"]
 layout_mode = 2
 mouse_filter = 1
 text = "Order: Hold position"
 text_overrun_behavior = 3
 clip_text = true
 
-[node name="Stats" type="GridContainer" parent="Summary"]
+[node name="Rout" type="Button" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+disabled = true
+text = "Rout"
+script = ExtResource("3")
+
+[node name="RoutExplanation" type="Label" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.74, 0.59, 1)
+autowrap_mode = 2
+theme_type_variation = &"HudSecondary"
+
+[node name="Details" type="FoldableContainer" parent="Scroll/Summary"]
+layout_mode = 2
+folded = true
+title = "Combat details"
+
+[node name="Content" type="VBoxContainer" parent="Scroll/Summary/Details"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Readiness" type="GridContainer" parent="Scroll/Summary/Details/Content"]
 layout_mode = 2
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 3
 columns = 3
 
-[node name="CohesionLabel" type="Label" parent="Summary/Stats"]
+[node name="CohesionLabel" type="Label" parent="Scroll/Summary/Details/Content/Readiness"]
 layout_mode = 2
 text = "Cohesion"
 theme_type_variation = &"HudSecondary"
 custom_minimum_size = Vector2(96, 0)
 
-[node name="CohesionBar" type="ProgressBar" parent="Summary/Stats"]
+[node name="CohesionBar" type="ProgressBar" parent="Scroll/Summary/Details/Content/Readiness"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -111,18 +143,18 @@ max_value = 1.0
 step = 0.001
 show_percentage = false
 
-[node name="Cohesion" type="Label" parent="Summary/Stats"]
+[node name="Cohesion" type="Label" parent="Scroll/Summary/Details/Content/Readiness"]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="EffectivenessLabel" type="Label" parent="Summary/Stats"]
+[node name="EffectivenessLabel" type="Label" parent="Scroll/Summary/Details/Content/Readiness"]
 layout_mode = 2
 text = "Effectiveness"
 theme_type_variation = &"HudSecondary"
 
-[node name="EffectivenessBar" type="ProgressBar" parent="Summary/Stats"]
+[node name="EffectivenessBar" type="ProgressBar" parent="Scroll/Summary/Details/Content/Readiness"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -133,102 +165,79 @@ max_value = 1.0
 step = 0.001
 show_percentage = false
 
-[node name="Effectiveness" type="Label" parent="Summary/Stats"]
+[node name="Effectiveness" type="Label" parent="Scroll/Summary/Details/Content/Readiness"]
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Rout" type="Button" parent="Summary"]
-visible = false
-layout_mode = 2
-disabled = true
-text = "Rout"
-script = ExtResource("3")
-
-[node name="RoutExplanation" type="Label" parent="Summary"]
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.74, 0.59, 1)
-autowrap_mode = 2
-theme_type_variation = &"HudSecondary"
-
-[node name="Details" type="FoldableContainer" parent="Summary"]
-layout_mode = 2
-folded = true
-title = "Details"
-
-[node name="Content" type="VBoxContainer" parent="Summary/Details"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Stats" type="GridContainer" parent="Summary/Details/Content"]
+[node name="Stats" type="GridContainer" parent="Scroll/Summary/Details/Content"]
 layout_mode = 2
 columns = 2
 
-[node name="CasualtyShockLabel" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="CasualtyShockLabel" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 text = "Casualty shock:"
 
-[node name="CasualtyShock" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="CasualtyShock" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 text = "0%"
 
-[node name="LeadershipLabel" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="LeadershipLabel" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 text = "Leadership:"
 
-[node name="LeadershipBonus" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="LeadershipBonus" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 mouse_filter = 1
 text = "None"
 script = ExtResource("7")
 
-[node name="LeadershipPresenceLabel" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="LeadershipPresenceLabel" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 text = "Leadership support:"
 
-[node name="LeadershipPresence" type="Label" parent="Summary/Details/Content/Stats"]
+[node name="LeadershipPresence" type="Label" parent="Scroll/Summary/Details/Content/Stats"]
 layout_mode = 2
 mouse_filter = 1
 text = "0%"
 
-[node name="DebugActions" type="HFlowContainer" parent="Summary/Details/Content"]
+[node name="DebugActions" type="HFlowContainer" parent="Scroll/Summary/Details/Content"]
 visible = false
 layout_mode = 2
 
-[node name="Kill" type="Button" parent="Summary/Details/Content/DebugActions"]
+[node name="Kill" type="Button" parent="Scroll/Summary/Details/Content/DebugActions"]
 layout_mode = 2
 text = "Kill unit"
 
-[node name="KillSoldier" type="Button" parent="Summary/Details/Content/DebugActions"]
+[node name="KillSoldier" type="Button" parent="Scroll/Summary/Details/Content/DebugActions"]
 layout_mode = 2
 text = "Kill soldier"
 
-[node name="Surrender" type="Button" parent="Summary/Details/Content/DebugActions"]
+[node name="Surrender" type="Button" parent="Scroll/Summary/Details/Content/DebugActions"]
 layout_mode = 2
 text = "Surrender"
 
-[node name="Roster" type="FoldableContainer" parent="Summary"]
+[node name="Roster" type="FoldableContainer" parent="Scroll/Summary"]
 layout_mode = 2
 folded = true
 title = "Soldier roster"
 
-[node name="Scroll" type="ScrollContainer" parent="Summary/Roster"]
+[node name="Scroll" type="ScrollContainer" parent="Scroll/Summary/Roster"]
 custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 mouse_force_pass_scroll_events = false
 horizontal_scroll_mode = 0
 
-[node name="Rows" type="VBoxContainer" parent="Summary/Roster/Scroll"]
+[node name="Rows" type="VBoxContainer" parent="Scroll/Summary/Roster/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[connection signal="mouse_entered" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Summary/Identity" to="Summary/Identity" method="_on_mouse_exited"]
-[connection signal="mouse_entered" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="Summary/Details/Content/Stats/LeadershipBonus" to="Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_exited"]
-[connection signal="pressed" from="Summary/Details/Content/DebugActions/Kill" to="." method="_on_kill_pressed"]
-[connection signal="pressed" from="Summary/Details/Content/DebugActions/KillSoldier" to="." method="_on_kill_soldier_pressed"]
-[connection signal="pressed" from="Summary/Details/Content/DebugActions/Surrender" to="." method="_on_surrender_pressed"]
-[connection signal="pressed" from="Summary/Rout" to="." method="_on_rout_pressed"]
+[connection signal="mouse_entered" from="Scroll/Summary/Identity" to="Scroll/Summary/Identity" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Scroll/Summary/Identity" to="Scroll/Summary/Identity" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="Scroll/Summary/Details/Content/Stats/LeadershipBonus" to="Scroll/Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Scroll/Summary/Details/Content/Stats/LeadershipBonus" to="Scroll/Summary/Details/Content/Stats/LeadershipBonus" method="_on_mouse_exited"]
+[connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/Kill" to="." method="_on_kill_pressed"]
+[connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/KillSoldier" to="." method="_on_kill_soldier_pressed"]
+[connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/Surrender" to="." method="_on_surrender_pressed"]
+[connection signal="pressed" from="Scroll/Summary/Rout" to="." method="_on_rout_pressed"]

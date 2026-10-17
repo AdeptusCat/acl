@@ -126,6 +126,7 @@ func _run() -> void:
 	_test_enemy_visibility()
 	await _test_pointer_and_selection()
 	await _test_outside_hud_click()
+	await _test_hud_overlap()
 	await _test_shared_hq()
 	await _test_live_updates_and_large_stacks()
 	_test_model_positions()
@@ -341,6 +342,22 @@ func _test_outside_hud_click() -> void:
 	await _settle()
 	_check(not stacks.roster.visible and presses[0] == 1 and controller.map_clicks == before, "An outside HUD click closes the roster and activates that same control")
 	button.free()
+
+
+func _test_hud_overlap() -> void:
+	controller._select_unit(second)
+	stacks.open_roster(stack_cell)
+	await _settle()
+	var panel: PanelContainer = PanelContainer.new()
+	panel.name = "MissionObjectives"
+	panel.position = stacks.roster.position
+	panel.size = stacks.roster.size
+	hud.add_child(panel)
+	stacks.refresh()
+	await _settle()
+	_check(not stacks.roster.get_rect().intersects(panel.get_rect()), "Stack information moves clear of visible HUD text panels")
+	panel.free()
+	stacks.roster.close()
 
 
 func _test_shared_hq() -> void:

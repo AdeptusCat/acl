@@ -20,6 +20,14 @@ func _run() -> void:
 	scenario.player_team = Globals.Team.ALLIES
 	scenario.axis_ai_status = Scenario.AIStatus.OFF
 	scenario.allies_ai_status = Scenario.AIStatus.OFF
+	# Keep this single-marker fixture independent of the default map's authored objectives.
+	var kept_objective: bool = false
+	for hex: Vector2i in scenario.allied_objectives_tile_map_layer.get_used_cells():
+		var tile: TileData = scenario.allied_objectives_tile_map_layer.get_cell_tile_data(hex)
+		if tile != null and tile.get_custom_data("objective_id") == OccupyObjectiveCondition.ObjectiveId.A:
+			if kept_objective:
+				scenario.allied_objectives_tile_map_layer.erase_cell(hex)
+			kept_objective = true
 	scenario.axis_objectives_tile_map_layer.set_cell(Vector2i(10, 12), 3, Vector2i.ZERO)
 	var occupy: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
 	occupy.team = Globals.Team.ALLIES

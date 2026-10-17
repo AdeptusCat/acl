@@ -439,6 +439,7 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 
 
 func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
+	var clear_exit: bool = task.kind == ScenarioGoalTask.Kind.EXIT and not task.breach_required
 	var combat_hex: Vector2i = task.hex
 	if task.breach_required:
 		combat_hex = task.breach_hex
@@ -497,7 +498,7 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 			ready = false
 		if task.kind == ScenarioGoalTask.Kind.OCCUPY and unit.current_hex == task.hex:
 			ready = true
-		if company_requires_support and not task.withdrawal and unit.current_hex != task.hex and not _has_company_support():
+		if company_requires_support and not clear_exit and not task.withdrawal and unit.current_hex != task.hex and not _has_company_support():
 			ready = false
 		if not ready:
 			config.profile = PositionProfile.for_mode(PositionProfile.Mode.SUPPORT_BY_FIRE)
@@ -1557,7 +1558,8 @@ func _issue_order(squad: Unit) -> void:
 			result.reason = "Position occupied or claimed by another platoon"
 			time_until_reconsider = 0.0
 			return
-	if result.is_valid() and company_requires_support and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_company_support():
+	var clear_exit: bool = goal_assignments.has(squad) and goal_assignments[squad].kind == ScenarioGoalTask.Kind.EXIT and not goal_assignments[squad].breach_required
+	if result.is_valid() and company_requires_support and not clear_exit and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_company_support():
 		executor.cancel(squad, true)
 		position_stability.forget(squad)
 		accepted_positions.erase(squad)

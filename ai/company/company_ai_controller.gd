@@ -384,14 +384,14 @@ func _assign_defense_reserves(members: Array[CompanyPlatoon]) -> void:
 func _needs_attack(formation: CompanyPlatoon) -> bool:
 	if formation.task != null and formation.task.withdrawal:
 		return false
+	if formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT:
+		return formation.task.breach_required
 	if owner.goal_director != null and not owner.goal_director.manual_override and owner.goal_director.primary == null and not owner.goal_director.conditions.is_empty():
 		return false
 	if owner.current_order.position_mode == PositionProfile.Mode.ASSAULT:
 		return true
 	if formation.task == null:
 		return false
-	if formation.task.kind == ScenarioGoalTask.Kind.EXIT:
-		return true
 	if formation.task.kind == ScenarioGoalTask.Kind.HUNT:
 		return formation.can_maneuver()
 	# An occupation requirement describes a garrison, not an assault mission.
