@@ -142,15 +142,25 @@ func _run() -> void:
 	_check(MatchInteractionHandler.command_restriction(controller, destination, WheelOption.Option.FIRE_AT).is_empty(), "Indirect fire remains available without direct line of sight")
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
 	_check(hint.visible and hint.heading.text == "Indirect fire", "The preview distinguishes indirect fire from blocked direct fire")
+	var mortar_cover: int = LOSHelper.is_sample_point_in_building(ground.map_to_local(destination))
+	var mortar_power: float = InfluenceUnitQuery.get_firepower_at_range(unit, controller.distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
+	var mortar_multiplier: float = SquadFireMath.cover_multiplier_exp(float(mortar_cover))
+	if mortar_cover == 1:
+		mortar_multiplier = 2.0
+	_check(controller.targetCover == mortar_cover and is_equal_approx(controller.firepower, mortar_power * mortar_multiplier) and not hint.detail.text.contains("unknown"), "Blocked indirect-fire previews use the same target terrain cover as mortar impacts")
+	LOSHelper.los_lookup[unit.current_hex][destination] = {"target_cover": 5}
+	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
+	_check(controller.targetCover == mortar_cover and is_equal_approx(controller.firepower, mortar_power * mortar_multiplier), "Mortar previews ignore directional wall cover even with clear line of sight")
 	unit.squad_type = original_type
 	LOSHelper.los_lookup[unit.current_hex][destination] = {"target_cover": 2}
+	_test_cover_firepower(world, unit, destination, target_point)
 	var far_target: Vector2i = _far_hex(unit, ground)
 	LOSHelper.los_lookup[unit.current_hex][far_target] = {"target_cover": 1}
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(far_target), target_point)
 	_check(hint.visible and hint.heading.text == "Out of range" and controller.firepower == 0.0, "Out-of-range targets keep a visible preview with zero effective firepower")
 	_check(not controller.order_via_option_wheel(far_target, WheelOption.Option.FIRE_AT) and str(feedback.back()["explanation"]).contains("Out of range"), "Fire orders beyond the live weapon ranges are rejected explicitly")
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
-	var expected: float = InfluenceUnitQuery.get_firepower_at_range(unit, controller.distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
+	var expected: float = InfluenceUnitQuery.get_firepower_at_range(unit, controller.distance) * InfluenceUnitQuery.get_unit_effectiveness(unit) * 0.4
 	_check(hint.detail.text.contains("Distance:") and hint.detail.text.contains("Cover: 2") and hint.extra.text.contains("Effective firepower:") and is_equal_approx(controller.firepower, expected), "The preview labels distance and directional cover and uses live effective firepower")
 	_check(controller.order_via_option_wheel(destination, WheelOption.Option.FIRE_AT) and unit.squad_fire.has_target_hex and unit.squad_fire.target_hex == destination, "Valid fire is accepted and actually assigns the intended target")
 	_check(_feedback_title(world).contains("Order accepted · Fire"), "Accepted fire is distinguished from rejection")
@@ -188,6 +198,24 @@ func _run() -> void:
 	await _settle()
 	print("Command interaction checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_cover_firepower(world: Node, unit: Unit, destination: Vector2i, target_point: Vector2) -> void:
+	var controller: Node2D = world.game_controller
+	var ground: HexagonTileMapLayer = world.ground_layer
+	var distance: int = ground.cube_distance(unit.current_cube, ground.map_to_cube(destination))
+	var raw_power: float = InfluenceUnitQuery.get_firepower_at_range(unit, distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
+	_check(raw_power > 0.0, "The cover preview fixture has usable firepower")
+	var multipliers: Array[float] = [1.5, 0.5, 0.4, 0.3, 0.1, 0.05, 0.001]
+	var previous_power: float = INF
+	for cover: int in range(multipliers.size()):
+		LOSHelper.los_lookup[unit.current_hex][destination] = {"target_cover": cover}
+		MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
+		var power: float = raw_power * multipliers[cover]
+		_check(is_equal_approx(controller.firepower, power) and controller.firepower < previous_power and world.ui.target_cover_distance.extra.text == "Effective firepower: %s" % String.num(power, 2), "Cover %d reduces displayed firepower using the combat multiplier" % cover)
+		previous_power = controller.firepower
+	LOSHelper.los_lookup[unit.current_hex][destination] = {"target_cover": 2}
+	_check(SquadFireMath.hit_cover_multiplier(1.0, true) == 2.0 and SquadFireMath.hit_cover_multiplier(2.0, true) == 0.4, "Mortar terrain exceptions share the hit resolver's cover calculation")
 
 
 func _check_rout(world: Node, unit: Unit, other: Unit) -> void:

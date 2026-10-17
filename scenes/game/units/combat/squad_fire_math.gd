@@ -36,6 +36,12 @@ static func get_mean_change_to_hit(chance_to_hit_per_target: Array, n_targets: i
 	return mean_p_hit
 
 
+static func hit_cover_multiplier(cover_pts: float, mortar: bool = false) -> float:
+	if mortar and cover_pts == 1.0:
+		return 2.0
+	return cover_multiplier_exp(cover_pts)
+
+
 static func cover_multiplier_exp(cover_pts: float) -> float:
 	match cover_pts:
 		0.0:

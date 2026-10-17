@@ -69,11 +69,7 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	var to_hit_distance_mod: float = float(target_distance) / float(weapon.range_hexes)
 	to_hit_distance_mod = clamp(1.0 - to_hit_distance_mod, 0.0, 1.0)
 	
-	var cover_mod: float = controller.cover_multiplier_exp(terrain_defense_bonus)
-	
-	# handle air bursts in woods
-	if weapon.family == WeaponSpec.Family.MORTAR and terrain_defense_bonus == 1:
-		cover_mod = 2.0
+	var cover_mod: float = SquadFireMath.hit_cover_multiplier(terrain_defense_bonus, weapon.family == WeaponSpec.Family.MORTAR)
 	
 	var is_point_blank: bool = target_distance == 1
 	

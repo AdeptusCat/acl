@@ -67,8 +67,12 @@ static func target_feedback(controller: Node2D, target: Vector2i) -> Dictionary:
 	if sight_clear:
 		cover = int(cover_map[target].get("target_cover", 0))
 	var indirect: bool = unit.squad_type == Globals.SquadType.MORTAR
+	if indirect:
+		# Mortar impacts use the target hex's terrain, independent of LOS edge cover.
+		cover = LOSHelper.is_sample_point_in_building(controller.ground_layer.map_to_local(target))
 	var in_range: bool = distance <= InfluenceUnitQuery.get_unit_range(unit)
 	var power: float = InfluenceUnitQuery.get_firepower_at_range(unit, distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
+	power *= SquadFireMath.hit_cover_multiplier(float(cover), indirect)
 	if not sight_clear and not indirect:
 		power = 0.0
 	return {"distance": distance, "cover": cover, "sight_clear": sight_clear, "indirect": indirect, "in_range": in_range, "firepower": power}

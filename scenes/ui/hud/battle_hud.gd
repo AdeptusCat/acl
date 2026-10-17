@@ -206,13 +206,13 @@ func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance:
 	var sight: String = "Line of sight clear"
 	var cover: String = "Cover: %d" % target_cover
 	var color: Color = Color(0.65, 0.85, 0.55)
-	if not sight_clear:
+	if indirect:
+		sight = "Indirect fire"
+		color = Color(0.86, 0.73, 0.5)
+	elif not sight_clear:
 		sight = "Line of sight blocked"
 		cover = "Cover: unknown (blocked sight)"
 		color = Color(0.96, 0.55, 0.4)
-		if indirect:
-			sight = "Indirect fire"
-			color = Color(0.86, 0.73, 0.5)
 	if not in_range:
 		sight = "Out of range"
 		color = Color(0.96, 0.55, 0.4)
