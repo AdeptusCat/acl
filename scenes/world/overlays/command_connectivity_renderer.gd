@@ -104,6 +104,8 @@ func _can_display(unit: Unit) -> bool:
 func _is_subordinate_of(unit: Unit, commander: Unit) -> bool:
 	if not is_instance_valid(commander) or unit == commander or unit.team != commander.team:
 		return false
+	if commander.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+		return unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS and unit.command_squad == commander and CommandConnectivity.has_available_commander(unit)
 	var seen: Array[Unit] = [unit]
 	var current: Unit = unit
 	while CommandConnectivity.has_available_commander(current):

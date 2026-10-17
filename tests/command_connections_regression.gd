@@ -123,7 +123,11 @@ func _test_selection() -> void:
 	headquarters.deselect()
 	company.select()
 	renderer.refresh(0.0)
-	_check(renderer.displayed_links.size() == 4 and renderer.displayed_links.has(rifle), "Company HQ selection follows the whole subordinate hierarchy")
+	_check(renderer.displayed_links == [headquarters], "Company HQ selection shows only its direct platoon HQ connections")
+	_check(renderer.highlighted_units.size() == 1 and renderer.highlighted_units.has(headquarters.get_instance_id()), "Company HQ selection highlights platoon leaders without highlighting their squads")
+	SessionSettings.showCmdConnectivity = true
+	renderer.refresh(0.0)
+	_check(renderer.displayed_links.size() == 4 and renderer.highlighted_units.size() == 1 and renderer.highlighted_units.has(headquarters.get_instance_id()), "Full command view preserves the company selection's platoon-only highlights")
 	company.deselect()
 	SessionSettings.showCmdConnectivity = true
 	renderer.refresh(0.0)

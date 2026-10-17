@@ -943,7 +943,7 @@ squad_type = 3
 [node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=472568943]
 
 [node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1654170501]
-tile_map_data = PackedByteArray("AAAZAAgAAQAAAAAAAAAQAA8ABQAAAAAAAAAZAA0AAQAAAAAAAAAWAAkACQAAAAAAAAAVAAoABAAAAAAAAAAOAAYAAwAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAZAAgAAQAAAAAAAAAZAA0AAQAAAAAAAAAWAAkACQAAAAAAAAAVAAoABAAAAAAAAAAOAAYAAwAAAAAAAAAPAA4ABQAAAAAAAAAQAAoABQAAAAAAAAA=")
 tile_set = SubResource("TileSet_0jm0n")
 script = ExtResource("4_7tw40")
 
