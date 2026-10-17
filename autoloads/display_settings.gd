@@ -4,8 +4,9 @@ signal ui_scale_changed(value: float)
 signal settings_changed
 
 const DESIGN_SIZE: Vector2i = Vector2i(1280, 720)
-const MIN_UI_SCALE: float = 0.5
-const MAX_UI_SCALE: float = 1.5
+const BASE_UI_SCALE: float = 0.75
+const MIN_UI_SCALE: float = 0.75
+const MAX_UI_SCALE: float = 1.25
 const UI_SCALE_STEP: float = 0.01
 const WINDOW_PRESETS: Array[Vector2i] = [
 	Vector2i(1280, 720), Vector2i(1366, 768), Vector2i(1920, 1080),
@@ -53,6 +54,10 @@ func set_ui_scale(value: float) -> void:
 
 func _normalize_ui_scale(value: float) -> float:
 	return snappedf(clampf(value, MIN_UI_SCALE, MAX_UI_SCALE), UI_SCALE_STEP)
+
+
+func get_hud_scale() -> float:
+	return BASE_UI_SCALE * ui_scale
 
 
 func set_window_mode(value: Window.Mode) -> void:
@@ -109,9 +114,12 @@ func load_preferences() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	if config.load(preferences_path) != OK:
 		return
-	var saved_scale: Variant = config.get_value("display", "ui_scale", 1.0)
+	var saved_scale: Variant = config.get_value("display", "ui_scale", "")
+	# Older preferences store the absolute scale; preserve their displayed size.
+	var saved_base: Variant = config.get_value("display", "ui_scale_base", 1.0)
 	if (saved_scale is float or saved_scale is int) and is_finite(float(saved_scale)):
-		ui_scale = _normalize_ui_scale(float(saved_scale))
+		if (saved_base is float or saved_base is int) and is_finite(float(saved_base)) and float(saved_base) > 0.0:
+			ui_scale = _normalize_ui_scale(float(saved_scale) * float(saved_base) / BASE_UI_SCALE)
 	var saved_size: Variant = config.get_value("display", "windowed_size", DESIGN_SIZE)
 	if saved_size is Vector2i:
 		windowed_size = saved_size.max(DESIGN_SIZE)
@@ -128,6 +136,7 @@ func save_preferences() -> void:
 		return
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("display", "ui_scale", ui_scale)
+	config.set_value("display", "ui_scale_base", BASE_UI_SCALE)
 	config.set_value("display", "windowed_size", windowed_size)
 	config.set_value("display", "fullscreen", window_mode == Window.MODE_FULLSCREEN)
 	var error: Error = config.save(preferences_path)

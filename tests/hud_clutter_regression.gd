@@ -41,13 +41,13 @@ func _run() -> void:
 	var objectives: MissionObjectivesPanel = world.ui.mission_objectives
 	var expanded_height: float = objectives.size.y
 	var clicks_before_fold: int = map_clicks
-	_pointer_event(objectives.section.get_global_rect().position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(objectives.section).position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(objectives.section.folded and not objectives.rows.is_visible_in_tree() and objectives.size.y < expanded_height, "Clicking the objectives header folds it to its title bar")
 	_check(map_clicks == clicks_before_fold, "Folding objectives does not select or order a battlefield unit")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("objectives-folded")
-	_pointer_event(objectives.section.get_global_rect().position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(objectives.section).position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(not objectives.section.folded and objectives.rows.is_visible_in_tree(), "Clicking the objectives header again restores its rows")
 	var master_before: float = SessionAudio.master_linear
@@ -55,10 +55,10 @@ func _run() -> void:
 	SessionAudio.set_master_muted(false)
 	var speaker_icon: Texture2D = settings.mute_button.icon
 	_check(settings.mute_button.get_global_rect().end.x < settings.settings_button.get_global_rect().position.x and settings.mute_button.size.x <= 36.0, "The compact speaker button sits immediately left of Settings")
-	_pointer_event(settings.mute_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.mute_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(SessionAudio.master_muted and AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")) and settings.mute_button.button_pressed and settings.mute_button.icon != speaker_icon, "Clicking the speaker mutes all sound and displays the crossed-out icon")
 	_check(is_equal_approx(SessionAudio.master_linear, master_before) and is_equal_approx(SessionAudio.music_linear, music_before) and map_clicks == 0 and not settings.menu.visible, "Muting preserves volume levels and consumes the click without opening a menu")
-	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.settings_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(settings.menu.visible and settings.settings_button.button_pressed and not settings.controls_panel.visible, "The Settings button opens the audio menu")
 	_check(map_clicks == 0, "Opening the menu does not select a battlefield hex")
@@ -71,7 +71,7 @@ func _run() -> void:
 	_check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "Changing volume while muted keeps the master bus muted")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("muted-settings")
-	_pointer_event(settings.mute_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.mute_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not SessionAudio.master_muted and not AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")) and not settings.mute_button.button_pressed and settings.mute_button.icon == speaker_icon, "Clicking the crossed-out speaker restores sound and the normal icon")
 	_check(settings.menu.visible and is_equal_approx(SessionAudio.master_linear, 0.35) and is_equal_approx(SessionAudio.music_linear, 0.42), "Unmuting restores the chosen volume levels and leaves Settings open")
 	SessionAudio.set_master_muted(true)
@@ -84,16 +84,16 @@ func _run() -> void:
 	SessionAudio.set_master_muted(false)
 	_check(not settings.mute_button.button_pressed and settings.mute_button.tooltip_text == "Mute sound", "Session mute changes keep the existing toolbar synchronized")
 	var slider: HSlider = settings.s1
-	_pointer_event(slider.get_global_rect().position + Vector2(slider.size.x * 0.75, slider.size.y * 0.5), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(slider.get_global_transform_with_canvas() * Vector2(slider.size.x * 0.75, slider.size.y * 0.5), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(SessionAudio.master_linear > 0.65 and SessionAudio.master_linear < 0.85 and is_equal_approx(SessionAudio.music_linear, 0.42), "An actual slider click changes only master volume")
 	settings.command_links.button_pressed = not links_before
 	_check(SessionSettings.showCmdConnectivity != links_before, "Command links remain configurable from the menu")
 	_check(settings.command_view_button.button_pressed == SessionSettings.showCmdConnectivity, "The toolbar reflects the command view setting")
 	settings.command_links.button_pressed = links_before
 	var zoom_before: int = zoom_events
-	_pointer_event(settings.menu.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+	_pointer_event(_screen_rect(settings.menu).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(zoom_events == zoom_before, "Menu input does not zoom the battlefield")
-	_pointer_event(settings.controls_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.controls_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(settings.controls_panel.visible and not settings.menu.visible and not settings.settings_button.button_pressed, "Controls opens separately and closes Settings")
 	_check(settings.control_rows.get_child_count() == 8, "The controls panel describes selection, roster, orders, cancellation, camera, zoom and closing")
@@ -110,15 +110,15 @@ func _run() -> void:
 	escape.pressed = true
 	get_viewport().push_input(escape, true)
 	_check(not settings.controls_panel.visible and not settings.controls_button.button_pressed, "Escape closes the open controls panel")
-	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.settings_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(is_equal_approx(settings.s2.value, 0.42), "Closing and reopening the menu preserves volume settings")
-	var outside: Vector2 = settings.menu.get_global_rect().position + Vector2(-20.0, 10.0)
+	var outside: Vector2 = _screen_rect(settings.menu).position + Vector2(-20.0, 10.0)
 	_pointer_event(outside, MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not settings.menu.visible, "Clicking outside the active menu closes it even inside the hidden controls panel's bounds")
-	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.settings_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
-	_pointer_event(settings.get_node("Menu/Scroll/Content/Heading/Close").get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.get_node("Menu/Scroll/Content/Heading/Close")).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not settings.menu.visible, "The explicit Close button closes Settings")
 	debug.section.expand()
 	await _settle()
@@ -165,12 +165,12 @@ func _run() -> void:
 	get_tree().root.size = Vector2i(800, 600)
 	await _settle()
 	_check_top_layout(world, settings)
-	_pointer_event(settings.controls_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.controls_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(_inside_hud(settings.controls_panel, world), "The controls panel stays inside the small viewport")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("controls-compact")
-	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(settings.settings_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(_inside_hud(settings.menu, world) and not settings.controls_panel.visible, "The audio menu remains contained on a small window")
 	if OS.get_cmdline_user_args().has("--capture"):
@@ -244,7 +244,7 @@ func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
 			break
 	var order_id: int = squad.action_controller.action_order_id
 	var assigned: PositionResult = squad.position_advice
-	_pointer_event(panel.ai_placement.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(panel.ai_placement).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_finish_placement_inspection(influence, draw)
 	_check(Debug.show_ai_placement and draw.visible and draw.debug_enabled and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE and draw.position_advice != null and panel.placement_options.visible, "The debug-menu checkbox enables placement inspection for the already selected squad")
@@ -264,16 +264,16 @@ func _test_debug_overlays(world: Node, panel: PanelContainer) -> void:
 	_finish_placement_inspection(influence, draw)
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("placement-debug")
-	_pointer_event(panel.ai_placement.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(panel.ai_placement).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(not draw.visible and not draw.debug_enabled and not draw.is_processing() and draw.position_advice == null and influence.inspection_jobs.is_empty() and influence.inspection_results.is_empty(), "Disabling the checkbox hides every AI overlay and cancels inspection work immediately")
 	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
 	world.game_controller._select_unit(squad)
 	_check(not draw.visible and draw.position_advice == null, "Layer changes and later selections cannot bypass the disabled debug toggle")
-	_pointer_event(panel.debug_text.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(panel.debug_text).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(Debug.show_debug_text and draw.draw_cell_values and draw.draw_layer_access_text and squad.ui.get_node("AmmunitionLeft").visible and not draw.visible, "Debug text has a separate explicit toggle and does not enable influence overlays")
 	_check_morale_markers(squad, "Debug text enabled")
-	_pointer_event(panel.debug_text.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(panel.debug_text).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not Debug.show_debug_text and not squad.ui.get_node("AmmunitionLeft").visible, "Turning debug text off hides numeric counters")
 	_check_morale_markers(squad, "Both debug toggles disabled again")
 	if OS.get_cmdline_user_args().has("--capture"):
@@ -380,3 +380,7 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _screen_rect(control: Control) -> Rect2:
+	return control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)

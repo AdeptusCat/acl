@@ -3,7 +3,7 @@ extends Node
 const UNIT_SCENE: PackedScene = preload("res://scenes/game/units/unit.tscn")
 const HUD_SCENE: PackedScene = preload("res://scenes/ui/hud/battle_hud.tscn")
 const STACK_CELL: Vector2i = Vector2i(3, 2)
-const TEST_UI_SCALES: Array[float] = [0.5, 0.75, 0.83, 1.0, 1.25, 1.5]
+const TEST_UI_SCALES: Array[float] = [0.75, 0.83, 1.0, 1.13, 1.25]
 
 class ControllerProbe extends Node2D:
 	var ground_layer: HexagonTileMapLayer
@@ -86,6 +86,20 @@ func _test_preferences() -> void:
 	DisplaySettings.load_preferences()
 	_check(DisplaySettings.windowed_size == Vector2i(1472, 856) and DisplaySettings.window_mode == Window.MODE_FULLSCREEN and is_equal_approx(DisplaySettings.ui_scale, 0.83), "Display preferences retain arbitrary slider percentages and a manually sized window")
 	var config: ConfigFile = ConfigFile.new()
+	config.set_value("display", "ui_scale", 0.75)
+	config.save(path)
+	DisplaySettings.load_preferences()
+	_check(DisplaySettings.ui_scale == 1.0 and DisplaySettings.get_hud_scale() == 0.75, "The previous 75% preference migrates to the new 100% at the same physical size")
+	DisplaySettings.save_preferences()
+	DisplaySettings.ui_scale = 1.25
+	DisplaySettings.load_preferences()
+	_check(DisplaySettings.ui_scale == 1.0, "Reloading a migrated preference cannot rebase it twice")
+	config.clear()
+	config.set_value("display", "fullscreen", false)
+	config.save(path)
+	DisplaySettings.load_preferences()
+	_check(DisplaySettings.ui_scale == 1.0, "A missing scale preference retains the new 100% default")
+	config.clear()
 	config.set_value("display", "windowed_size", Vector2i(-2, 200))
 	config.set_value("display", "ui_scale", "invalid")
 	config.set_value("display", "fullscreen", "invalid")
@@ -101,18 +115,19 @@ func _test_preferences() -> void:
 func _test_scale_slider() -> void:
 	var settings: Control = root_control.get_node("Settings")
 	var slider: HSlider = settings.scale_slider
-	_check(slider.min_value == 50.0 and slider.max_value == 150.0 and slider.step == 1.0, "Interface-size slider covers 50–150% in 1% increments")
-	for percent: float in [50.0, 75.0, 83.0, 100.0]:
+	_check(slider.min_value == 75.0 and slider.max_value == 125.0 and slider.step == 1.0, "Interface-size slider covers 75–125% in 1% increments")
+	_check(DisplaySettings.get_hud_scale() == 0.75 and hud.scale == Vector2.ONE * 0.75, "The new 100% renders at the former 75% HUD size")
+	for percent: float in [75.0, 83.0, 100.0, 125.0]:
 		slider.value = percent
 		await _settle()
 		_check(is_equal_approx(DisplaySettings.ui_scale, percent / 100.0) and settings.scale_label.text.ends_with("%d%%" % roundi(percent)), "Slider applies %d%% and displays its percentage" % roundi(percent))
 	DisplaySettings.set_ui_scale(-1.0)
-	_check(DisplaySettings.ui_scale == 0.5 and slider.value == 50.0, "Scale values below the supported range clamp to 50%")
+	_check(DisplaySettings.ui_scale == 0.75 and slider.value == 75.0 and DisplaySettings.get_hud_scale() == 0.5625, "The new 75% minimum renders at the former 56.25% size")
 	DisplaySettings.set_ui_scale(4.0)
-	_check(DisplaySettings.ui_scale == 1.5 and slider.value == 150.0, "Scale values above the supported range clamp to 150%")
+	_check(DisplaySettings.ui_scale == 1.25 and slider.value == 125.0 and DisplaySettings.get_hud_scale() == 0.9375, "The new 125% maximum renders at the former 93.75% size")
 	DisplaySettings.set_ui_scale(NAN)
 	DisplaySettings.set_ui_scale(INF)
-	_check(DisplaySettings.ui_scale == 1.5, "Non-finite scales cannot corrupt the HUD transform")
+	_check(DisplaySettings.ui_scale == 1.25, "Non-finite scales cannot corrupt the HUD transform")
 	DisplaySettings.set_ui_scale(1.0)
 	settings.settings_button.button_pressed = true
 	await _settle()
@@ -261,7 +276,7 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	var context: String = "%s at %d%%" % [resolution, roundi(value * 100.0)]
 	_check(get_window().size == resolution, context + ": output uses the requested resolution")
 	_check(camera.zoom == zoom_before and get_window().content_scale_factor == 1.0, context + ": UI scale leaves battlefield zoom and root stretch unchanged")
-	_check((root_control.size * value).is_equal_approx(get_viewport().get_visible_rect().size), context + ": HUD fills the logical viewport")
+	_check((root_control.size * value * 0.75).is_equal_approx(get_viewport().get_visible_rect().size), context + ": rebased HUD fills the logical viewport")
 	camera.position = controller.ground_layer.to_global(controller.ground_layer.map_to_local(STACK_CELL))
 	camera.zoom = Vector2.ONE * 0.8
 	camera.force_update_scroll()
@@ -319,11 +334,11 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	_mouse(settings.menu.get_global_transform_with_canvas() * (settings.menu.size * 0.5), MOUSE_BUTTON_WHEEL_UP, true)
 	_check(zoom_events == zoom_count and settings.menu.visible, context + ": scrolling settings keeps the menu open and cannot zoom the battlefield")
 	_check(is_equal_approx(settings.scale_slider.value, value * 100.0) and settings.scale_label.text.ends_with("%d%%" % roundi(value * 100.0)), context + ": display controls reflect the chosen UI size")
-	if OS.get_cmdline_user_args().has("--capture") and resolution == DisplaySettings.DESIGN_SIZE and value == 1.5:
+	if OS.get_cmdline_user_args().has("--capture") and resolution == DisplaySettings.DESIGN_SIZE and value == 1.25:
 		settings.menu_scroll.ensure_control_visible(settings.scale_slider)
 		await _settle()
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("/tmp/acl-display-settings-150.png")
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-display-settings-125.png")
 	settings.close_panels()
 	hud.show_order_feedback(true, "Move", "Squad moving to its destination")
 	await _settle()

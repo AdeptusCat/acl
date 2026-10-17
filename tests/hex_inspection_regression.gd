@@ -37,7 +37,8 @@ func _run() -> void:
 	overlay.set_process(false)
 	await _settle()
 	_check(card.visible and world.has_inspected_hex and card.inspected_hex == hex, "Selecting a hex opens its own terrain data rather than the mouse's previous hex")
-	_check(is_equal_approx(card.size.x, 240.0) and card.size.y >= 70.0 and card.size.y <= 110.0, "The terrain summary fits a compact fixed-width card with readable type: %s" % card.size)
+	var summary_height: float = _screen_rect(card).size.y
+	_check(is_equal_approx(card.size.x, 240.0) and summary_height >= 70.0 and summary_height <= 110.0, "The terrain summary fits a compact fixed-width card with readable type: %s" % _screen_rect(card).size)
 	_check(card.details.folded and not card.has_node("FoldableContainer/VBoxContainer/Tile"), "Detailed information starts collapsed and the duplicate tile preview is removed")
 	var style: StyleBoxFlat = card.get_theme_stylebox("panel") as StyleBoxFlat
 	_check(is_equal_approx(style.bg_color.a, 1.0), "The card has an opaque readable background")
@@ -58,7 +59,7 @@ func _run() -> void:
 	await _settle()
 	_check(card.features.text.contains("Blocks sight: Yes") and card.features.text.contains("Obscures sight: Yes"), "Expanded details retain both blocking and obscuring effects")
 	_check(card.edge_values[0].text == "Cover 1" and card.edge_values[1].text == "Cover 2" and card.edge_values[2].text == "None", "The full breakdown labels protected and unprotected sides")
-	_check(card.size.y <= 350.0 and _inside(card, world), "The expanded breakdown remains bounded inside the viewport: %s" % card.size)
+	_check(_screen_rect(card).size.y <= 350.0 and _inside(card, world), "The expanded breakdown remains bounded inside the viewport: %s" % _screen_rect(card).size)
 	var first: Dictionary = overlay.segments[0]
 	var midpoint: Vector2 = (first["start"] + first["end"]) * 0.5
 	var screen_point: Vector2 = overlay.get_global_transform_with_canvas() * midpoint
@@ -83,7 +84,7 @@ func _run() -> void:
 	await _settle()
 	_check(card.terrain_name.text == "Open ground" and card.sight_label.text.contains("clear") and card.details.folded, "Changing hex resets the compact view and clears old terrain properties")
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
-	_pointer_event(card.get_node("Content/Heading/Close").get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(card.get_node("Content/Heading/Close")).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not card.visible and not overlay.visible and not world.has_inspected_hex and map_clicks == 0, "The Close button clears the card, map markings and inspection without clicking the map")
 	world._on_hex_selected(hex, Vector2.ZERO)
 	world._on_hex_selected(hex, Vector2.ZERO)
@@ -124,7 +125,7 @@ func _run() -> void:
 	_check(not LOSHelper.los_lines.is_empty(), "Returning to the same target after closing inspection restores its sight line")
 	_check(aim.detail.text.contains("Cover: %d" % int(visible_targets[clear_target]["target_cover"])), "Aiming uses cover from the actual firing direction")
 	_check(aim.detail.text.contains("Distance:") and aim.extra.text.contains("Effective firepower:"), "Distance and effective firepower remain readable in the target hint")
-	_pointer_event(settings.settings_button.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_UP)
+	_pointer_event(_screen_rect(settings.settings_button).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_UP)
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(clear_target), Vector2(800, 300))
 	_check(not aim.visible and LOSHelper.los_lines.is_empty(), "Hovering HUD controls clears aiming feedback and its battlefield line")
 	_pointer_event(Vector2(600, 300), MouseButton.MOUSE_BUTTON_WHEEL_UP)
@@ -241,3 +242,7 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _screen_rect(control: Control) -> Rect2:
+	return control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)

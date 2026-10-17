@@ -46,35 +46,35 @@ func _run() -> void:
 	_check(wheel.options.size() == 5 and wheel.options[0].option == WheelOption.Option.MOVE_NORMAL and wheel.options[1].option == WheelOption.Option.FIRE_AT and wheel.options[2].option == WheelOption.Option.STOP and wheel.options[3].option == WheelOption.Option.NONE and wheel.options[4].option == WheelOption.Option.ROUT, "Rout joins the wheel while Move stays in the center")
 	_check(wheel.get_option_point(0) == Vector2.ZERO and is_zero_approx(wheel.get_option_point(1).x) and wheel.get_option_point(1).y < 0.0 and wheel.get_option_point(2).x < 0.0 and is_zero_approx(wheel.get_option_point(2).y) and is_zero_approx(wheel.get_option_point(3).x) and wheel.get_option_point(3).y > 0.0 and wheel.get_option_point(4).x > 0.0, "Move is centered, with Fire above, Stop left, Cancel below and Rout right")
 	for index: int in range(1, wheel.options.size()):
-		_motion(wheel.position + wheel.get_option_point(index))
+		_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(index))
 		_check(wheel.selected_label.text.begins_with(WheelOption.COMMAND_NAMES[wheel.options[index].option]), "Pointing at each outer command selects its displayed label")
 	_check(wheel.selected_label.text == "Rout · attempt escape" and wheel.restriction_label.text == "Available while pinned.", "Rout remains visible with its restriction for a fresh squad")
-	_motion(wheel.position + wheel.get_option_point(0))
+	_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
 	_check(wheel.selected_label.text == "Move", "Pointing at Move displays the command prominently")
 	var escape: InputEventKey = InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.pressed = true
 	get_viewport().push_input(escape, true)
-	_right_release(wheel.position)
+	_right_release(wheel.get_global_transform_with_canvas().origin)
 	_check(not wheel.is_open() and unit.action_controller.action_order_id == order_before and feedback.is_empty(), "Escape cancels the wheel and releasing right click cannot issue a stale command")
 	_right_open(target_point)
 	await _settle()
-	_motion(wheel.position + wheel.get_option_point(0))
-	_mouse(wheel.position, MouseButton.MOUSE_BUTTON_LEFT, true)
-	_mouse(wheel.position, MouseButton.MOUSE_BUTTON_LEFT, false)
-	_right_release(wheel.position)
+	_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
+	_mouse(wheel.get_global_transform_with_canvas().origin, MouseButton.MOUSE_BUTTON_LEFT, true)
+	_mouse(wheel.get_global_transform_with_canvas().origin, MouseButton.MOUSE_BUTTON_LEFT, false)
+	_right_release(wheel.get_global_transform_with_canvas().origin)
 	_check(not wheel.is_open() and unit.action_controller.action_order_id == order_before and map_clicks == 0, "Left click cancels without selecting a battlefield hex")
 	_right_open(target_point)
 	await _settle()
-	_right_release(wheel.position + wheel.get_option_point(3))
+	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(3))
 	_check(unit.action_controller.action_order_id == order_before and feedback.is_empty(), "Releasing in the Cancel sector preserves existing orders")
 	_right_open(target_point)
 	await _settle()
-	_right_release(wheel.position + Vector2(220.0, 0.0))
+	_right_release(wheel.get_global_transform_with_canvas() * Vector2(220.0, 0.0))
 	_check(unit.action_controller.action_order_id == order_before, "Releasing outside the wheel cancels instead of choosing a sector")
 	_right_open(target_point)
 	await _settle()
-	var move_point: Vector2 = wheel.position + wheel.get_option_point(0)
+	var move_point: Vector2 = wheel.get_global_transform_with_canvas() * wheel.get_option_point(0)
 	_motion(move_point)
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("move")
@@ -83,7 +83,7 @@ func _run() -> void:
 	_check(bool(feedback.back()["accepted"]) and _feedback_title(world).contains("Order accepted · Move"), "Accepted movement gets explicit positive feedback")
 	_right_open(target_point)
 	await _settle()
-	_right_release(wheel.position + wheel.get_option_point(2))
+	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(2))
 	_check(unit.action_controller.action_state == SquadActionController.SquadActionState.NO_ORDER and not unit.movement.is_moving, "Stop clears the pending movement order")
 	_check(_feedback_title(world).contains("Order accepted · Stop"), "Stop reports acceptance")
 	unit.movement._process_movement(0.1)
@@ -105,7 +105,7 @@ func _run() -> void:
 	order_before = unit.action_controller.action_order_id
 	_right_open(target_point)
 	await _settle()
-	move_point = wheel.position + wheel.get_option_point(0)
+	move_point = wheel.get_global_transform_with_canvas() * wheel.get_option_point(0)
 	_motion(move_point)
 	_check(wheel.restriction_label.text == "Pinned: use Rout to attempt escape.", "Pinned movement points the player to Rout")
 	if OS.get_cmdline_user_args().has("--capture"):
@@ -116,7 +116,7 @@ func _run() -> void:
 	_check(_feedback_title(world).contains("Order rejected · Move") and controller.get_child_count() <= children_before, "Rejection gets an explicit message and no success glow")
 	_right_open(target_point)
 	await _settle()
-	_motion(wheel.position + wheel.get_option_point(4))
+	_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(4))
 	var rout_position: Vector2 = wheel.get_option_point(4)
 	_check(wheel.restriction_label.text.contains("surrender") and wheel.selected_label.get_theme_color("font_color").is_equal_approx(wheel.ROUT_COLOR), "Eligible Rout is amber and explains the failed-escape outcome")
 	unit.stress_system._set_state(STATES.MoraleState.CAUTIOUS)
@@ -127,7 +127,7 @@ func _run() -> void:
 		await _capture("rout")
 	unit.stress_system._set_state(STATES.MoraleState.CAUTIOUS)
 	order_before = unit.action_controller.action_order_id
-	_right_release(wheel.position + rout_position)
+	_right_release(wheel.get_global_transform_with_canvas() * rout_position)
 	_check(not bool(feedback.back()["accepted"]) and feedback.back()["explanation"] == "Available while pinned." and unit.action_controller.action_order_id == order_before and unit.stress_system.state == STATES.MoraleState.CAUTIOUS, "Releasing Rout after recovery rejects the attempt without changing the squad")
 	unit.stress_system._set_state(STATES.MoraleState.NORMAL)
 	var original_los: Dictionary = LOSHelper.los_lookup[unit.current_hex].duplicate(true)
@@ -164,16 +164,16 @@ func _run() -> void:
 	_check(wheel.is_open(), "The command wheel opens before changing squads")
 	controller.select_and_center_unit(other)
 	_check(controller.selected_unit == other and other != unit, "The fixture changes to a different active squad")
-	_right_release(wheel.position + wheel.get_option_point(0))
+	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
 	_check(not bool(feedback.back()["accepted"]) and str(feedback.back()["explanation"]).contains("selection changed"), "Changing squads while the wheel is open cannot redirect its order to another squad: %s" % feedback.back())
 	controller.select_and_center_unit(unit)
 	unit.in_close_combat = true
 	_check(not controller.order_via_option_wheel(destination, WheelOption.Option.STOP) and str(feedback.back()["explanation"]).contains("close combat"), "Close combat restrictions also produce clear rejection feedback")
 	unit.in_close_combat = false
 	var settings: Control = world.ui.get_node("Control/Settings")
-	_right_open(settings.settings_button.get_global_rect().get_center())
+	_right_open(_screen_rect(settings.settings_button).get_center())
 	_check(not wheel.is_open(), "Right clicking a HUD control does not open a battlefield command wheel")
-	_right_release(settings.settings_button.get_global_rect().get_center())
+	_right_release(_screen_rect(settings.settings_button).get_center())
 	for point: Vector2 in [Vector2(1.0, 1.0), Vector2(1151.0, 1.0), Vector2(1.0, 647.0), Vector2(1151.0, 647.0), Vector2(576.0, 1.0), Vector2(576.0, 647.0), Vector2(1.0, 324.0), Vector2(1151.0, 324.0)]:
 		wheel.open(point)
 		_check(wheel.get_global_transform_with_canvas().origin.is_equal_approx(point), "The wheel opens centered on the original pointer near %s" % point)
@@ -203,7 +203,7 @@ func _check_rout(world: Node, unit: Unit, other: Unit) -> void:
 	_right_open(point)
 	await _settle()
 	_check(wheel.is_open(), "The pinned squad can open its command wheel")
-	_right_release(wheel.position + wheel.get_option_point(4))
+	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(4))
 	_check(bool(feedback.back()["accepted"]) and _feedback_title(world).contains("Order accepted · Rout") and unit.stress_system.state == STATES.MoraleState.PANIC and unit.movement.retreating, "The wheel starts the existing uncontrolled retreat and reports acceptance")
 	_check(not unit.can_rout() and not unit.request_rout(), "A squad already routing cannot start another rout")
 	controller.select_and_center_unit(other)
@@ -304,3 +304,7 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _screen_rect(control: Control) -> Rect2:
+	return control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)

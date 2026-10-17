@@ -6,8 +6,12 @@ uses `canvas_items`, `expand`, fractional scaling, and high-DPI support.
 `user://display.cfg`. UI scaling applies to the battle HUD's CanvasLayer; camera
 zoom remains independent. Secondary sections fold when the available HUD space
 falls below 1100 units wide or 620 units tall. They can still be expanded.
-The interface-size slider supports 50–150% in 1% increments and shows the current
-percentage. Mouse drags preview the percentage and apply it on release, keeping
+The interface-size slider supports 75–125% in 1% increments and defaults to 100%.
+The new 100% uses the former 75% HUD size; the endpoints correspond to the former
+56.25% and 93.75% sizes. Saved preferences from the old scale are converted to
+the new percentages and clamped to the supported range. Each saved value now
+records its base scale so later loads do not convert it twice.
+Mouse drags preview the percentage and apply it on release, keeping
 the slider stationary during the drag. Keyboard and wheel changes apply directly.
 
 Run the automated matrix:
@@ -16,7 +20,7 @@ Run the automated matrix:
 godot --headless --path . res://tests/display_layout_regression.tscn
 ```
 
-The matrix covers all combinations of 50%, 75%, 83%, 100%, 125%, and 150% interface
+The matrix covers all combinations of 75%, 83%, 100%, 113%, and 125% interface
 size with:
 
 | Shape | Output sizes |
@@ -29,7 +33,8 @@ Checks cover panel bounds and separation, central battlefield space, scrollable
 objectives, tooltips at all four corners, target hints, command wheel sectors,
 stacked-unit picking, exact roster selection, settings input, and saved
 preferences. Slider checks exercise mouse dragging, keyboard adjustment, saved
-intermediate percentages, and range validation. Headless runs do not load or
+intermediate percentages, legacy preference conversion, and range validation.
+Headless runs do not load or
 overwrite player display preferences.
 
 For rendered checks, use an isolated preferences directory:
@@ -49,9 +54,10 @@ the actual game's detailed battlefield art and native high-DPI output on target
 hardware. The automated fixture uses a small battlefield and does not simulate
 monitor DPI changes.
 
-Validation on 2026-10-17: 54 headless combinations passed 3,417 checks; 30 native
-combinations plus native window controls passed 1,913 checks. The local desktop
-capped 2560×1440, 3840×2160, 2560×1600, and 3440×1440 to 2560×1382. The HUD
-regression passed 106 checks, and all 293 scripts passed parsing and convention
-checks. The existing full-match fixture still reports resource leaks during
-shutdown.
+Validation on 2026-10-17: 45 headless combinations passed 2,854 checks; 25 native
+combinations plus native window controls passed 1,602 checks. The local desktop
+capped 2560×1440, 3840×2160, 2560×1600, and 3440×1440 to 2560×1382. HUD, command,
+squad-roster, unit-summary, and terrain-inspection input fixtures convert their
+coordinates through the scaled canvas. All 293 scripts passed parsing and
+convention checks. Existing full-match fixtures still report resource leaks
+during shutdown.

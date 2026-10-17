@@ -41,7 +41,7 @@ func _run() -> void:
 	world.input_manager.zoom_in.connect(_on_zoom)
 	world.input_manager.zoom_out.connect(_on_zoom)
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
-	_pointer_event(row.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(row).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(world.game_controller.selected_unit == selected and selected.selected, "Clicking an actual roster row selects that squad")
 	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(selected.current_hex), "Clicking a row centers the camera on that squad")
@@ -49,7 +49,7 @@ func _run() -> void:
 	_check(map_clicks == 0, "A roster click does not also select a battlefield hex")
 	_check(row.button_pressed, "The selected row is highlighted")
 	world.game_controller.camera.position += Vector2(200.0, 100.0)
-	_pointer_event(row.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	_pointer_event(_screen_rect(row).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(selected.selected and row.button_pressed and world.game_controller.camera.position == world.ground_layer.map_to_local(selected.current_hex), "Clicking the selected row keeps it selected and recenters the camera")
 	var rifle: Unit
@@ -138,7 +138,7 @@ func _run() -> void:
 	var scrollbar: VScrollBar = panel.scroll.get_v_scroll_bar()
 	_check(scrollbar.max_value > scrollbar.page, "Long platoon lists scroll inside the compact panel")
 	panel.scroll.scroll_vertical = 0
-	_pointer_event(panel.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+	_pointer_event(_screen_rect(panel.scroll).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Scrolling the roster moves the list without zooming the battlefield")
 	panel.scroll.scroll_vertical = 0
 	var offscreen: Unit = players[players.size() - 1]
@@ -283,7 +283,7 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	if window_size.x == 1152:
 		var scrollbar: VScrollBar = terrain.scroll.get_v_scroll_bar()
 		_check(scrollbar.max_value > scrollbar.page, "Terrain details scroll when the left column runs out of space")
-		_pointer_event(terrain.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+		_pointer_event(_screen_rect(terrain.scroll).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 		_check(terrain.scroll.scroll_vertical > 0 and zoom_events == 0, "Scrolling terrain details does not zoom the battlefield")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("terrain-%d" % window_size.x)
@@ -293,7 +293,7 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded development controls fit below the stationary roster at %s" % window_size)
 	_check(debug_panel.axis_ai_status.is_visible_in_tree() and not debug_panel.axis_ai_status.disabled, "The compact development panel preserves usable AI controls")
 	debug_panel.scroll.scroll_vertical = 0
-	_pointer_event(debug_panel.scroll.get_global_rect().get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
+	_pointer_event(_screen_rect(debug_panel.scroll).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(debug_panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Development controls scroll without zooming the battlefield")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("debug-%d" % window_size.x)
@@ -376,3 +376,7 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _screen_rect(control: Control) -> Rect2:
+	return control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)

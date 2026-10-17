@@ -14,6 +14,7 @@ func _on_ui_scale_changed(_value: float) -> void:
 
 func _fit_hud() -> void:
 	var layer: CanvasLayer = get_parent() as CanvasLayer
-	layer.scale = Vector2.ONE * DisplaySettings.ui_scale
+	var hud_scale: float = DisplaySettings.get_hud_scale()
+	layer.scale = Vector2.ONE * hud_scale
 	position = Vector2.ZERO
-	size = get_viewport_rect().size / DisplaySettings.ui_scale
+	size = get_viewport_rect().size / hud_scale

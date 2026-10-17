@@ -89,7 +89,7 @@ func _run() -> void:
 	_check(panel.roster_scroll.scroll_vertical > 0, "The roster can scroll beyond its first rows")
 	world.input_manager.zoom_in.connect(_on_zoom)
 	world.input_manager.zoom_out.connect(_on_zoom)
-	var scroll_position: Vector2 = panel.roster_scroll.get_global_rect().get_center()
+	var scroll_position: Vector2 = _screen_rect(panel.roster_scroll).get_center()
 	var scroll_before: int = panel.roster_scroll.scroll_vertical
 	_scroll_at(scroll_position, MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(zoom_events == 0 and panel.roster_scroll.scroll_vertical > scroll_before, "Scrolling the roster moves its rows without zooming the battlefield: %d events, %d -> %d" % [zoom_events, scroll_before, panel.roster_scroll.scroll_vertical])
@@ -204,3 +204,7 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _screen_rect(control: Control) -> Rect2:
+	return control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)
