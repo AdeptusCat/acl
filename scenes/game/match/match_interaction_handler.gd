@@ -73,6 +73,7 @@ static func target_feedback(controller: Node2D, target: Vector2i) -> Dictionary:
 	var in_range: bool = distance <= InfluenceUnitQuery.get_unit_range(unit)
 	var power: float = InfluenceUnitQuery.get_firepower_at_range(unit, distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
 	power *= SquadFireMath.hit_cover_multiplier(float(cover), indirect)
+	power *= SquadFireMath.point_blank_hit_multiplier(distance)
 	if not sight_clear and not indirect:
 		power = 0.0
 	return {"distance": distance, "cover": cover, "sight_clear": sight_clear, "indirect": indirect, "in_range": in_range, "firepower": power}

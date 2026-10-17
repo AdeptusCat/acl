@@ -18,6 +18,8 @@ var active_fallback: HoldToExitFallbackPolicy
 var fallback_reason: String = ""
 var _fallback_pending_since: Dictionary[HoldToExitFallbackPolicy, float] = {}
 var _secured_holds: Dictionary[OccupyObjectiveCondition, bool] = {}
+var _lost_objectives: Dictionary[Vector2i, bool] = {}
+var _initial_combat_personnel: int = -1
 var _policy_diagnostics: PackedStringArray = []
 var _next_update: float = -INF
 var _primary_since: float = -INF
@@ -36,6 +38,8 @@ func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition]
 	fallback_reason = ""
 	_fallback_pending_since.clear()
 	_secured_holds.clear()
+	_lost_objectives.clear()
+	_initial_combat_personnel = -1
 	for policy: HoldToExitFallbackPolicy in policies:
 		if policy == null or not policy.enabled:
 			continue
@@ -141,6 +145,7 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 		progress.append(state)
 		if not state.valid:
 			diagnostics.append(state.diagnostic)
+	_update_objective_control(progress, planner)
 	_evaluate_fallbacks(progress, planner, seconds_left, now)
 	var own_level: int = _choose_own_outcome(progress, planner, seconds_left)
 	for state: VictoryConditionProgress in progress:
@@ -174,6 +179,7 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 		if blocked != null:
 			_add_denial_tasks(blocked, planner)
 	_merge_occupation_duties()
+	_prioritize_garrisons(planner)
 	for task: ScenarioGoalTask in tasks:
 		if task.kind != ScenarioGoalTask.Kind.EXIT:
 			continue
@@ -226,6 +232,83 @@ func _policy_has_markers(policy: HoldToExitFallbackPolicy, progress: Array[Victo
 	return hold != null and hold.valid and exit != null and exit.valid
 
 
+func _hold_hexes(progress: Array[VictoryConditionProgress], level: int = -1) -> Array[Vector2i]:
+	var hexes: Array[Vector2i] = []
+	for state: VictoryConditionProgress in progress:
+		if state.team != team or state.kind != VictoryConditionProgress.Kind.OCCUPY or not state.valid or (level >= 0 and state.outcome != level):
+			continue
+		for hex: Vector2i in state.hexes:
+			if not hexes.has(hex):
+				hexes.append(hex)
+	return hexes
+
+
+func _friendly_on_objective(planner: PlatoonAI, hex: Vector2i) -> bool:
+	for unit: Unit in planner.squads:
+		if unit.current_hex == hex and TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order():
+			return true
+	return false
+
+
+func _update_objective_control(progress: Array[VictoryConditionProgress], planner: PlatoonAI) -> void:
+	if _initial_combat_personnel < 0:
+		_initial_combat_personnel = 0
+		for unit: Unit in planner.squads:
+			if TacticalPositionExecutor.is_active_defender(unit) and not HqSupportPositionPolicy.is_headquarters(unit):
+				_initial_combat_personnel += unit.members_alive
+	for hex: Vector2i in _hold_hexes(progress):
+		var enemy_present: bool = false
+		for contact: InfluenceContact in _contacts(planner):
+			if contact.observed and contact.hex == hex and TacticalPositionExecutor.is_active_defender(contact.unit) and contact.unit.is_good_order():
+				enemy_present = true
+				break
+		var friendly_present: bool = _friendly_on_objective(planner, hex)
+		if enemy_present and not friendly_present:
+			_lost_objectives[hex] = true
+		elif friendly_present and not enemy_present:
+			# Recover control immediately; the victory hold timer can finish later.
+			_lost_objectives.erase(hex)
+		# Remember an observed capture until retaken. Empty or initially unsecured
+		# markers and hidden live enemy positions are not evidence of a capture.
+
+
+func _prioritize_garrisons(planner: PlatoonAI) -> void:
+	if posture != PositionProfile.Mode.DEFEND:
+		return
+	var objectives: Array[Vector2i] = []
+	for task: ScenarioGoalTask in tasks:
+		if task.kind == ScenarioGoalTask.Kind.OCCUPY and not objectives.has(task.hex):
+			objectives.append(task.hex)
+	if objectives.size() < 2:
+		return
+	for task: ScenarioGoalTask in tasks:
+		if task.kind == ScenarioGoalTask.Kind.OCCUPY and _friendly_on_objective(planner, task.hex):
+			# Allocate intact garrisons before sending local forces to recapture a
+			# lost objective, including urgent enemy occupation-denial duties.
+			task.priority = maxf(task.priority, 130.0)
+
+
+func _multi_objective_failure_reason(policy: HoldToExitFallbackPolicy, hexes: Array[Vector2i], planner: PlatoonAI) -> String:
+	var lost: int = 0
+	for hex: Vector2i in hexes:
+		if _lost_objectives.has(hex):
+			lost += 1
+	if lost < policy.minimum_lost_objectives:
+		return ""
+	var fighters: int = 0
+	var personnel: int = 0
+	for unit: Unit in planner.squads:
+		if TacticalPositionExecutor.is_active_defender(unit) and unit.is_good_order() and not HqSupportPositionPolicy.is_headquarters(unit):
+			fighters += 1
+			personnel += unit.members_alive
+	var depleted: bool = policy.minimum_combat_squads > 0 and fighters < policy.minimum_combat_squads
+	if _initial_combat_personnel > 0 and float(personnel) / float(_initial_combat_personnel) < policy.withdrawal_strength_ratio:
+		depleted = true
+	if not depleted:
+		return ""
+	return "%d/%d objectives lost; combat squads remaining: %d; ready combat personnel: %d/%d" % [lost, hexes.size(), fighters, personnel, _initial_combat_personnel]
+
+
 func _evaluate_fallbacks(progress: Array[VictoryConditionProgress], planner: PlatoonAI, seconds_left: float, now: float) -> void:
 	if active_fallback != null:
 		diagnostics.append("Committed hold-to-exit fallback: " + fallback_reason)
@@ -239,13 +322,18 @@ func _evaluate_fallbacks(progress: Array[VictoryConditionProgress], planner: Pla
 		var exit: VictoryConditionProgress = _progress_for(policy.exit_condition, progress)
 		if hold.complete:
 			_secured_holds[policy.hold_condition] = true
-		var reason: String = _hold_failure_reason(hold, planner, seconds_left, policy.minimum_combat_squads)
-		var travel: float = _estimate_exit_seconds(exit, planner, policy.withdraw_entire_force)
-		# Reserve the exit window only while the linked hold is unsecured. A
-		# successfully held objective remains the higher victory priority.
-		if not hold.complete and is_finite(travel) and seconds_left <= travel + policy.withdrawal_margin_seconds:
-			_activate_fallback(policy, "Unsecured objective: %.1f seconds left; %.1f seconds reserved for exit" % [seconds_left, travel + policy.withdrawal_margin_seconds])
-			return
+		var hexes: Array[Vector2i] = _hold_hexes(progress, hold.outcome)
+		var reason: String = ""
+		if hexes.size() > 1:
+			# A setback at one district is a local defense problem. Neither the
+			# linked hold timer nor the exit deadline can bypass both loss gates.
+			reason = _multi_objective_failure_reason(policy, hexes, planner)
+		else:
+			reason = _hold_failure_reason(hold, planner, seconds_left, policy.minimum_combat_squads)
+			var travel: float = _estimate_exit_seconds(exit, planner, policy.withdraw_entire_force)
+			if not hold.complete and is_finite(travel) and seconds_left <= travel + policy.withdrawal_margin_seconds:
+				_activate_fallback(policy, "Unsecured objective: %.1f seconds left; %.1f seconds reserved for exit" % [seconds_left, travel + policy.withdrawal_margin_seconds])
+				return
 		if reason == "":
 			_fallback_pending_since.erase(policy)
 			continue

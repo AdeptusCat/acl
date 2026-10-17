@@ -329,12 +329,72 @@ func _test_match(index: int) -> void:
 		_check(planner.goal_director.active_fallback == null, "The final defense begins with its hold mission")
 		_check(planner.goal_director.diagnostics.has("Exit to deny enemy victory deferred until the linked hold-to-exit fallback activates"), "Enemy escape is deferred until the town defense fails")
 		_test_mortar_support_selection(planner.company_command)
+		_test_final_defense_losses(planner)
 	world._on_game_controller_show_winner(scenario.player_team, VictoryCondition.OutcomeLevel.MAJOR, false)
 	var path: String = "user://matches/" + scenario.get_save_id() + ".tres"
 	var saved: MatchSaveData = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as MatchSaveData
 	_check(saved != null and saved.match_id == scenario.get_save_id() and saved.scenario_id == scenario.scenario_id, "The real result handler saves stable campaign identifiers")
 	if index + 1 < campaign_maps.size():
 		_check(world.start_screen.get_lock_reason(campaign_maps[index + 1].get_scenario(0)).is_empty(), "A real saved match result unlocks the next mission")
+
+
+func _test_final_defense_losses(planner: PlatoonAI) -> void:
+	var goals: ScenarioGoalDirector = planner.goal_director
+	var snapshot: InfluenceSnapshot = planner.influence_map_controller.snapshot
+	var contacts_before: Array[InfluenceContact] = snapshot.get_defensive_contacts(planner.team)
+	var holds: Array[OccupyObjectiveCondition] = []
+	for condition: VictoryCondition in goals.conditions:
+		if condition is OccupyObjectiveCondition and condition.team == planner.team:
+			holds.append(condition as OccupyObjectiveCondition)
+	_check(holds.size() == 3, "The final withdrawal policy covers all three authored town objectives")
+	var positions: Dictionary[Unit, Vector2i] = {}
+	var alive_before: Dictionary[Unit, bool] = {}
+	var survivor: Unit
+	for formation: CompanyPlatoon in planner.company_command.platoons.values():
+		formation.planner.executor.cancel_all(true)
+		formation.planner.position_stability.clear()
+	for unit: Unit in planner.squads:
+		positions[unit] = unit.current_hex
+		alive_before[unit] = unit.alive
+		unit.give_hold_order()
+		unit.current_hex = holds[2].state.hexes[0]
+		unit.current_cube = LOSHelper.ground_layer.map_to_cube(unit.current_hex)
+		unit.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		if unit.squad_type == Globals.SquadType.Rifle:
+			survivor = unit
+	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.get_enemy_team(planner.team))
+	var first: InfluenceContact = InfluenceContact.new()
+	first.unit = enemies[0]
+	first.hex = holds[0].state.hexes[0]
+	first.observed = true
+	snapshot.defensive_contacts[planner.team] = [first]
+	goals.update(planner, 10000.0, 1000.0)
+	goals.update(planner, 10000.0, 1007.0)
+	_check(goals.active_fallback == null, "Capturing Alderbrook's linked objective does not send the whole enemy company to the exit")
+	var second: InfluenceContact = InfluenceContact.new()
+	second.unit = enemies[1]
+	second.hex = holds[1].state.hexes[0]
+	second.observed = true
+	snapshot.defensive_contacts[planner.team] = [first, second]
+	goals.update(planner, 0.0, 1008.0)
+	goals.update(planner, 0.0, 1015.0)
+	_check(goals.active_fallback == null, "Two captured town objectives still do not release a healthy defending company")
+	for unit: Unit in planner.squads:
+		if unit != survivor and not HqSupportPositionPolicy.is_headquarters(unit):
+			unit.alive = false
+	goals.update(planner, 10000.0, 1016.0)
+	goals.update(planner, 10000.0, 1021.0)
+	_check(goals.active_fallback == null, "Alderbrook's authored six-second confirmation applies to combined losses and depletion")
+	goals.update(planner, 10000.0, 1022.0)
+	_check(goals.active_fallback != null and goals.fallback_reason.contains("2/3 objectives lost"), "The real Alderbrook company withdraws after two objective losses and low strength persist")
+	_check(goals.assignments.has(survivor) and goals.assignments[survivor].withdrawal, "The surviving town defender receives the actual exit mission")
+	for unit: Unit in positions:
+		unit.alive = alive_before[unit]
+		unit.current_hex = positions[unit]
+		unit.current_cube = LOSHelper.ground_layer.map_to_cube(unit.current_hex)
+		unit.position = LOSHelper.ground_layer.map_to_local(unit.current_hex)
+	snapshot.defensive_contacts[planner.team] = contacts_before
 
 
 func _test_mortar_support_selection(command: CompanyAI) -> void:

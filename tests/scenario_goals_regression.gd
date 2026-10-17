@@ -91,6 +91,7 @@ func _run() -> void:
 	_test_hold_to_exit_fallback()
 	_test_counter_exit_fallback_gate()
 	_test_fallback_minimum_force()
+	_test_multi_objective_fallback()
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -696,6 +697,114 @@ func _test_fallback_minimum_force() -> void:
 	_check(policy.configuration_error([hold, exit]) != "", "A negative minimum-force threshold is rejected")
 	for unit: Unit in alive_before:
 		unit.alive = alive_before[unit]
+
+
+func _test_multi_objective_fallback() -> void:
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	var contacts_before: Array[InfluenceContact] = snapshot.get_defensive_contacts(planner.team)
+	var alive_before: Dictionary[Unit, bool] = {}
+	var personnel_before: Dictionary[Unit, int] = {}
+	for unit: Unit in planner.squads:
+		alive_before[unit] = unit.alive
+		personnel_before[unit] = unit.members_alive
+		unit.give_hold_order()
+		_set_hex(unit, unit.current_hex)
+		unit.stress_system.state = UnitStates.MoraleState.NORMAL
+	planner.executor.cancel_all(true)
+	planner.position_stability.clear()
+	var second_hex: Vector2i = rifles[1].current_hex
+	var first: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	var second: OccupyObjectiveCondition = _occupy([second_hex])
+	var third: OccupyObjectiveCondition = _occupy([_adjacent_empty(snapshot, rifles[2])])
+	var duplicate: OccupyObjectiveCondition = _occupy(first.state.hexes)
+	var exit: ExitUnitsCondition = _fallback_exit(third.state.hexes[0])
+	var policy: HoldToExitFallbackPolicy = HoldToExitFallbackPolicy.new()
+	policy.hold_condition = third
+	policy.exit_condition = exit
+	policy.minimum_combat_squads = 2
+	var conditions: Array[VictoryCondition] = [first, second, third, duplicate, exit]
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	snapshot.defensive_contacts[planner.team] = []
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 0.0))
+	goals.update(planner, 0.0, 500.0)
+	goals.update(planner, 0.0, 506.0)
+	_check(goals.active_fallback == null, "Initially unsecured objectives and a missed hold deadline are not captured objectives")
+	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.get_enemy_team(planner.team))
+	var capture: InfluenceContact = InfluenceContact.new()
+	capture.unit = enemies[0]
+	capture.hex = third.state.hexes[0]
+	capture.observed = true
+	third.state.victory_conditions_met[capture.hex] = true
+	goals.update(planner, 10000.0, 507.0)
+	third.state.victory_conditions_met[capture.hex] = false
+	snapshot.defensive_contacts[planner.team] = [capture]
+	goals.update(planner, 10000.0, 508.0)
+	goals.update(planner, 10000.0, 514.0)
+	_check(goals.active_fallback == null, "Losing a previously secured linked objective does not abandon a multi-objective defense")
+	_check(goals.assignments.has(rifles[0]) and goals.assignments[rifles[0]].hex == first.state.hexes[0] and goals.assignments.has(rifles[1]) and goals.assignments[rifles[1]].hex == second_hex, "Intact objective garrisons are allocated before the local recapture duty")
+	_check(goals.assignments.has(rifles[2]) and goals.assignments[rifles[2]].hex == capture.hex, "A nearby free rifle receives the counterattack duty while other objectives remain garrisoned")
+	for unit: Unit in planner.squads:
+		if unit != rifles[0] and not HqSupportPositionPolicy.is_headquarters(unit):
+			unit.alive = false
+	goals.update(planner, 0.0, 515.0)
+	goals.update(planner, 0.0, 521.0)
+	_check(goals.active_fallback == null, "Low strength and an expired exit window cannot bypass the two-objective loss requirement")
+	for unit: Unit in alive_before:
+		unit.alive = alive_before[unit]
+	_set_hex(rifles[1], rifles[2].current_hex)
+	var second_capture: InfluenceContact = InfluenceContact.new()
+	second_capture.unit = enemies[1]
+	second_capture.hex = second_hex
+	second_capture.observed = true
+	snapshot.defensive_contacts[planner.team] = [capture, second_capture]
+	goals.update(planner, 0.0, 522.0)
+	goals.update(planner, 0.0, 528.0)
+	_check(goals.active_fallback == null, "Two captured objectives do not cause a healthy force to flee, even at the deadline")
+	for unit: Unit in planner.squads:
+		if unit != rifles[0] and not HqSupportPositionPolicy.is_headquarters(unit):
+			unit.alive = false
+	goals.update(planner, 10000.0, 529.0)
+	goals.update(planner, 10000.0, 533.0)
+	_check(goals.active_fallback == null, "Combined objective losses and low strength still require continuous confirmation")
+	rifles[1].alive = true
+	_set_hex(rifles[1], second_hex)
+	snapshot.defensive_contacts[planner.team] = [capture]
+	goals.update(planner, 10000.0, 534.0)
+	_check(goals.active_fallback == null and goals._fallback_pending_since.is_empty(), "Recapturing an objective resets withdrawal confirmation before its victory hold timer completes")
+	rifles[1].alive = false
+	snapshot.defensive_contacts[planner.team] = [capture, second_capture]
+	goals.update(planner, 10000.0, 535.0)
+	# Loss of sight does not erase a confirmed enemy capture.
+	snapshot.defensive_contacts[planner.team] = []
+	goals.update(planner, 10000.0, 539.0)
+	_check(goals.active_fallback == null, "A fresh pair of losses starts a fresh confirmation period")
+	goals.update(planner, 10000.0, 540.0)
+	_check(goals.active_fallback == policy and goals.fallback_reason.contains("2/3 objectives lost"), "Two distinct captured objectives plus sustained low strength release whole-force withdrawal")
+	_check(goals.assignments.has(rifles[0]) and goals.assignments[rifles[0]].withdrawal, "The surviving garrison receives an authorized exit duty after the defense breaks")
+	for unit: Unit in alive_before:
+		unit.alive = alive_before[unit]
+	policy.minimum_combat_squads = 0
+	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
+	snapshot.defensive_contacts[planner.team] = []
+	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
+	_set_hex(rifles[1], rifles[2].current_hex)
+	snapshot.defensive_contacts[planner.team] = [capture, second_capture]
+	for unit: Unit in planner.squads:
+		if not HqSupportPositionPolicy.is_headquarters(unit):
+			unit.members_alive = 1
+	goals.update(planner, 10000.0, 550.0)
+	goals.update(planner, 10000.0, 555.0)
+	_check(goals.active_fallback == policy, "Relative personnel losses can break the defense even when the number of surviving squads is unchanged")
+	for unit: Unit in personnel_before:
+		unit.members_alive = personnel_before[unit]
+	_set_hex(rifles[1], second_hex)
+	snapshot.defensive_contacts[planner.team] = contacts_before
+	policy.minimum_lost_objectives = 1
+	_check(policy.configuration_error(conditions) != "", "Multi-objective withdrawal cannot be configured to flee after a single capture")
+	policy.minimum_lost_objectives = 2
+	policy.withdrawal_strength_ratio = NAN
+	_check(policy.configuration_error(conditions) != "", "Invalid relative strength thresholds are rejected")
 
 
 func _adjacent_empty(snapshot: InfluenceSnapshot, unit: Unit) -> Vector2i:

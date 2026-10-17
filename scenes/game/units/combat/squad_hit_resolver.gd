@@ -71,8 +71,6 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	
 	var cover_mod: float = SquadFireMath.hit_cover_multiplier(terrain_defense_bonus, weapon.family == WeaponSpec.Family.MORTAR)
 	
-	var is_point_blank: bool = target_distance == 1
-	
 	var shooter_stress: float = 0.0
 	if controller.unit and "stress_system" in controller.unit:
 		shooter_stress = float(controller.unit.stress_system.S_eff)
@@ -83,10 +81,7 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	chance_to_hit *= to_hit_distance_mod
 	chance_to_hit *= cover_mod
 	chance_to_hit *= shooter_stress_mod
-	if is_point_blank:
-		chance_to_hit *= 2.0
-	else:
-		chance_to_hit *= 1.0
+	chance_to_hit *= SquadFireMath.point_blank_hit_multiplier(target_distance)
 	if riflegrenade == true:
 		if target_distance <= weapon.riflegrenade_range:
 			chance_to_hit *= 4

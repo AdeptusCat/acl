@@ -79,6 +79,7 @@ func _run() -> void:
 	_test_destination_conflict()
 	_test_objective_cohesion()
 	_test_scenario_goal_dispatch()
+	_test_local_counterattack()
 	_test_withdrawal()
 	_test_reserve()
 	_test_controls()
@@ -369,6 +370,94 @@ func _test_scenario_goal_dispatch() -> void:
 		platoon_ids[key] = true
 		_check(command.platoons[key].planner.goal_assignments.has(unit), "Scenario duties reach the responsible subordinate planner")
 	_check(platoon_ids.size() == 2, "Scenario occupation objectives retain separate platoon ownership")
+	commander.goal_director = original_director
+	commander.receive_mission_order(original_order)
+
+
+func _test_local_counterattack() -> void:
+	var original_director: ScenarioGoalDirector = commander.goal_director
+	var original_order: MissionOrder = commander.current_order
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	var contacts_before: Array[InfluenceContact] = snapshot.get_contacts(commander.team)
+	var defensive_before: Array[InfluenceContact] = snapshot.get_defensive_contacts(commander.team)
+	var local: CompanyPlatoon = command.platoons[Vector2i(0, 3)]
+	var attacker: Unit
+	for unit: Unit in local.combat_units():
+		if unit.squad_type == Globals.SquadType.Rifle:
+			attacker = unit
+			break
+	var target_hex: Vector2i = Vector2i(-999, -999)
+	for hex: Vector2i in LOSHelper.ground_layer.get_surrounding_cells(attacker.current_hex):
+		if LOSHelper.find_units_at(hex).is_empty() and snapshot.get_path(commander.team, attacker.current_hex, hex).size() == 2:
+			target_hex = hex
+			break
+	_check(target_hex != Vector2i(-999, -999), "Counterattack fixture has an adjacent reachable objective")
+	if target_hex == Vector2i(-999, -999):
+		return
+	for formation: CompanyPlatoon in command.platoons.values():
+		formation.planner.executor.cancel_all(true)
+		formation.planner.position_stability.clear()
+	for unit: Unit in commander.squads:
+		unit.give_hold_order()
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(commander.team))[0]
+	var enemy_hex: Vector2i = enemy.current_hex
+	var enemy_stress: float = enemy.stress_system.S_eff
+	var enemy_state: UnitStates.MoraleState = enemy.stress_system.state
+	enemy.current_hex = target_hex
+	enemy.stress_system.state = UnitStates.MoraleState.NORMAL
+	enemy.stress_system.S_eff = 0.0
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = enemy.current_hex
+	contact.observed = true
+	snapshot.contacts[commander.team] = [contact]
+	snapshot.defensive_contacts[commander.team] = [contact]
+	var occupation: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+	occupation.team = commander.team
+	occupation.state = OccupyObjectiveState.new()
+	occupation.state.hexes = [command.platoons[Vector2i(0, 1)].anchor(), command.platoons[Vector2i(0, 2)].anchor(), enemy.current_hex]
+	for hex: Vector2i in occupation.state.hexes:
+		occupation.state.required_times_reached_s[hex] = 0.0
+		occupation.state.victory_conditions_met[hex] = false
+		occupation.state.units_in_objectives[hex] = UnitsCollection.new()
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(commander.team, [occupation], PositionProfile.Mode.DEFEND)
+	commander.goal_director = goals
+	var order: MissionOrder = original_order.copy()
+	order.position_mode = PositionProfile.Mode.DEFEND
+	commander.receive_mission_order(goals.initial_order(commander, order, 300.0))
+	goals.update(commander, 300.0, 20.0)
+	_check(local.task != null and local.objective == enemy.current_hex and local.role == CompanyPlatoon.Role.MANEUVER, "The nearby platoon receives a local counterattack instead of moving the entire company")
+	for number: int in [1, 2]:
+		var guard: CompanyPlatoon = command.platoons[Vector2i(0, number)]
+		_check(guard.task != null and guard.task.hex == occupation.state.hexes[number - 1] and guard.role == CompanyPlatoon.Role.DEFEND, "The other objective retains its defensive platoon during the counterattack")
+	if local.task != null:
+		var planner: PlatoonAI = local.planner
+		var assigned: Unit
+		for unit: Unit in planner.goal_assignments:
+			assigned = unit
+			break
+		_check(assigned != null, "The counterattack duty reaches a local squad")
+		if assigned != null:
+			planner._planning_snapshot = snapshot
+			planner._planning_reservations = {}
+			planner._planning_requests.clear()
+			planner._add_goal_request(assigned, local.task)
+			var query: PositionQuery = planner._planning_requests[0]["query"]
+			_check(query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE, "An unsuppressed defender is engaged from support positions before the local counterattack advances")
+			enemy.stress_system.state = UnitStates.MoraleState.PINNED
+			enemy.stress_system.S_eff = enemy.stress_system.S_CAP * 0.9
+			planner._planning_requests.clear()
+			planner._add_goal_request(assigned, local.task)
+			query = planner._planning_requests[0]["query"]
+			_check(query.profile.mode == PositionProfile.Mode.ASSAULT and query.profile.enter_suppressed_enemy_hex, "Favorable suppression releases the adjacent counterattack through the real squad planner")
+			planner._cancel_plan()
+	enemy.current_hex = enemy_hex
+	enemy.stress_system.S_eff = enemy_stress
+	enemy.stress_system.state = enemy_state
+	snapshot.contacts[commander.team] = contacts_before
+	snapshot.defensive_contacts[commander.team] = defensive_before
 	commander.goal_director = original_director
 	commander.receive_mission_order(original_order)
 
