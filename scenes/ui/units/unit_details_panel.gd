@@ -3,7 +3,6 @@ extends PanelContainer
 @export var soldier_detail_row_scene: PackedScene
 
 const PANEL_WIDTH: float = 300.0
-const ROSTER_HEIGHT: float = 140.0
 const HUD_MARGIN: float = 12.0
 const REFRESH_INTERVAL_S: float = 0.1
 
@@ -79,7 +78,6 @@ func _fit_panel() -> void:
 	if hud_control != null:
 		hud_size = hud_control.size
 	var panel_width: float = minf(PANEL_WIDTH, maxf(0.0, hud_size.x - HUD_MARGIN * 2.0))
-	roster_scroll.custom_minimum_size.y = minf(ROSTER_HEIGHT, maxf(48.0, hud_size.y * 0.25))
 	custom_minimum_size.x = panel_width
 	var top: float = HUD_MARGIN
 	if hud_control != null:
@@ -91,7 +89,11 @@ func _fit_panel() -> void:
 				if rect.end.x > column_left:
 					top = maxf(top, rect.end.y + HUD_MARGIN)
 	var margins: float = get_theme_stylebox("panel").get_minimum_size().y
-	summary_scroll.custom_minimum_size.y = minf(summary.get_combined_minimum_size().y, maxf(0.0, hud_size.y - top - HUD_MARGIN - margins))
+	var height_limit: float = floorf(minf(hud_size.y / 3.0, maxf(0.0, hud_size.y - top - HUD_MARGIN)))
+	if not roster_section.folded:
+		var summary_overhead: float = maxf(0.0, summary.get_combined_minimum_size().y - roster_scroll.get_combined_minimum_size().y)
+		roster_scroll.custom_minimum_size.y = minf(roster_container.get_combined_minimum_size().y, maxf(48.0, height_limit - margins - summary_overhead))
+	summary_scroll.custom_minimum_size.y = minf(summary.get_combined_minimum_size().y, maxf(0.0, height_limit - margins))
 	size = Vector2(panel_width, get_combined_minimum_size().y)
 	position = hud_size - size - Vector2(HUD_MARGIN, HUD_MARGIN)
 

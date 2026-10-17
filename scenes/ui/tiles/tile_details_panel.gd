@@ -4,7 +4,6 @@ signal inspection_closed
 signal layout_requested
 
 const PANEL_WIDTH: float = 240.0
-const SCROLL_HEIGHT: float = 216.0
 const EDGE_KEYS: Array[String] = ["cover_n", "cover_ne", "cover_se", "cover_s", "cover_sw", "cover_nw"]
 const EDGE_NAMES: Array[String] = ["North", "Northeast", "Southeast", "South", "Southwest", "Northwest"]
 
@@ -107,12 +106,12 @@ func get_minimum_height() -> float:
 func get_preferred_height() -> float:
 	if details.folded:
 		return get_minimum_height()
-	return get_minimum_height() + minf(SCROLL_HEIGHT, breakdown.get_combined_minimum_size().y)
+	return get_minimum_height() + breakdown.get_combined_minimum_size().y
 
 
 func fit_panel(panel_position: Vector2, max_height: float) -> void:
 	if not details.folded:
-		scroll.custom_minimum_size.y = minf(SCROLL_HEIGHT, maxf(0.0, max_height - get_minimum_height()))
+		scroll.custom_minimum_size.y = minf(breakdown.get_combined_minimum_size().y, maxf(0.0, max_height - get_minimum_height()))
 	custom_minimum_size.x = PANEL_WIDTH
 	size = Vector2(PANEL_WIDTH, get_combined_minimum_size().y)
 	position = panel_position

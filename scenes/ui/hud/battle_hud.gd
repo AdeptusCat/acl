@@ -126,12 +126,15 @@ func _layout_left_panels() -> void:
 		if rect.position.x < 12.0 + SquadRosterPanel.PANEL_WIDTH and rect.end.x > 12.0:
 			top = maxf(top, rect.end.y + 6.0)
 	var bottom: float = $Control.size.y - 12.0
+	# HUD coordinates compensate for UI scale. Whole pixels keep container
+	# minimum sizes stable while the visible height stays one-third of the screen.
+	var panel_height_limit: float = floorf($Control.size.y / 3.0)
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0
 	var support_minimum: float = 0.0
 	var panel_count: int = int(squad_roster.visible)
 	if tile_details.visible:
-		terrain_height = tile_details.get_preferred_height()
+		terrain_height = minf(tile_details.get_preferred_height(), panel_height_limit)
 		support_minimum += tile_details.get_minimum_height()
 		panel_count += 1
 	if debug_panel.visible:
@@ -142,7 +145,7 @@ func _layout_left_panels() -> void:
 	var available_height: float = maxf(0.0, bottom - top - gaps)
 	var roster_height: float = 0.0
 	if squad_roster.visible:
-		roster_height = minf(squad_roster.get_preferred_height(), maxf(squad_roster.get_minimum_height(), available_height - support_minimum))
+		roster_height = minf(minf(squad_roster.get_preferred_height(), panel_height_limit), maxf(squad_roster.get_minimum_height(), available_height - support_minimum))
 	var support_height: float = maxf(0.0, available_height - roster_height)
 	# Keep the roster in its column; only the expanded support content shrinks.
 	if tile_details.visible and not tile_details.details.folded:
@@ -191,7 +194,7 @@ func _layout_mission_objectives() -> void:
 		if rect.end.x > left and rect.position.x < left + panel_width:
 			top = maxf(top, rect.end.y + 6.0)
 	mission_objectives.position = Vector2(left, top)
-	mission_objectives.fit_available_height(minf(200.0, maxf(48.0, ($Control.size.y - top - 24.0) * 0.4)))
+	mission_objectives.fit_available_height(floorf(minf($Control.size.y / 3.0, maxf(0.0, $Control.size.y - top - 12.0))))
 
 
 func setup() -> void:

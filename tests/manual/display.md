@@ -38,6 +38,12 @@ intermediate percentages, legacy preference conversion, and range validation.
 Headless runs do not load or
 overwrite player display preferences.
 
+Squad roster, hex details, squad details, and objectives can each grow to one-third
+of the visible window height. This fraction stays the same at every interface
+scale; smaller contents keep their natural height and overflow scrolls. The matrix
+expands all four panels with long content at every resolution and scale to check
+their rendered height, separation, and scrolling.
+
 For rendered checks, use an isolated preferences directory:
 
 ```sh
@@ -55,8 +61,8 @@ the actual game's detailed battlefield art and native high-DPI output on target
 hardware. The automated fixture uses a small battlefield and does not simulate
 monitor DPI changes.
 
-Validation on 2026-10-17: 45 headless combinations passed 2,944 checks. Native
-window checks cover the desktop-supported resolutions. The local desktop
+Validation on 2026-10-17: 45 headless combinations passed 3,754 checks. Rendered
+checks passed 2,102 checks across 25 desktop-supported layouts. The local desktop
 capped 2560×1440, 3840×2160, 2560×1600, and 3440×1440 to 2560×1382. HUD, command,
 squad-roster, unit-summary, and terrain-inspection input fixtures convert their
 coordinates through the scaled canvas. All 293 scripts passed parsing and

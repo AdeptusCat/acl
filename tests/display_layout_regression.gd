@@ -247,7 +247,7 @@ func _build_fixture() -> void:
 	controller.stacks.set_process(false)
 	controller.show_unit_details_in_ui.connect(hud._on_show_unit_details)
 	var conditions: Array[VictoryCondition] = []
-	for index: int in range(12):
+	for index: int in range(24):
 		var condition: DestroyUnitsCondition = DestroyUnitsCondition.new()
 		condition.team = Globals.Team.AXIS
 		conditions.append(condition)
@@ -293,6 +293,7 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	hud.mission_objectives.section.expand()
 	await _settle()
 	_check(hud.mission_objectives.scroll.size.y < hud.mission_objectives.rows.size.y and _inside(hud.mission_objectives), context + ": long objective lists scroll within their bound")
+	await _test_panel_height_limits(context)
 	if root_control.size.x < 1100.0 or root_control.size.y < 620.0:
 		hud.mission_objectives.section.fold()
 	await _settle()
@@ -349,6 +350,40 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	if OS.get_cmdline_user_args().has("--capture"):
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/acl-display-%dx%d-%d.png" % [resolution.x, resolution.y, roundi(value * 100.0)])
+
+
+func _test_panel_height_limits(context: String) -> void:
+	var sections: Array[FoldableContainer] = [hud.squad_roster.section, hud.tile_details.details, hud.unit_details.details_section, hud.unit_details.roster_section, hud.mission_objectives.section]
+	var folded_before: Dictionary[FoldableContainer, bool] = {}
+	for section: FoldableContainer in sections:
+		folded_before[section] = section.folded
+		section.expand()
+	var spacers: Array[Control] = []
+	for content: Control in [hud.squad_roster.groups, hud.tile_details.breakdown, hud.unit_details.summary, hud.mission_objectives.rows]:
+		# Force overflow so every panel must use its full allowance at every scale.
+		var spacer: Control = Control.new()
+		spacer.custom_minimum_size.y = root_control.size.y
+		content.add_child(spacer)
+		spacers.append(spacer)
+	await _settle()
+	var panels: Array[Control] = [hud.squad_roster, hud.tile_details, hud.unit_details, hud.mission_objectives]
+	var expected_height: float = get_viewport().get_visible_rect().size.y / 3.0
+	for panel: Control in panels:
+		var rendered: Rect2 = panel.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, panel.size)
+		_check(absf(rendered.size.y - expected_height) <= 2.0, context + ": expanded " + panel.name + " uses one-third of the screen independently of HUD scale: " + str(rendered.size.y))
+		_check(_inside(panel), context + ": expanded " + panel.name + " stays onscreen")
+	for index: int in range(panels.size()):
+		for other: int in range(index + 1, panels.size()):
+			_check(not panels[index].get_rect().intersects(panels[other].get_rect()), context + ": expanded " + panels[index].name + " avoids " + panels[other].name)
+	for scroll: ScrollContainer in [hud.squad_roster.scroll, hud.tile_details.scroll, hud.unit_details.summary_scroll, hud.mission_objectives.scroll]:
+		_check(scroll.get_v_scroll_bar().max_value > scroll.get_v_scroll_bar().page, context + ": excess panel content remains scrollable")
+	for spacer: Control in spacers:
+		spacer.get_parent().remove_child(spacer)
+		spacer.queue_free()
+	for section: FoldableContainer in sections:
+		if folded_before[section]:
+			section.fold()
+	await _settle()
 
 
 func _inside(panel: Control) -> bool:

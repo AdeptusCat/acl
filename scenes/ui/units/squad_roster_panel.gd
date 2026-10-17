@@ -6,7 +6,6 @@ signal layout_requested
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/units/squad_roster_row.tscn")
 const PANEL_WIDTH: float = 252.0
-const SCROLL_HEIGHT: float = 160.0
 const REFRESH_INTERVAL_S: float = 0.25
 
 @onready var section: FoldableContainer = $Roster
@@ -97,7 +96,7 @@ func get_preferred_height() -> float:
 	if section.folded:
 		return get_combined_minimum_size().y
 	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
-	return overhead + minf(SCROLL_HEIGHT, groups.get_combined_minimum_size().y)
+	return overhead + groups.get_combined_minimum_size().y
 
 
 func fit_panel(panel_position: Vector2, max_height: float) -> void:
@@ -105,7 +104,7 @@ func fit_panel(panel_position: Vector2, max_height: float) -> void:
 		var content_height: float = groups.get_combined_minimum_size().y
 		# Reserve the actual title, column labels and margins; only the rows scroll.
 		var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
-		var scroll_height: float = minf(SCROLL_HEIGHT, maxf(32.0, max_height - overhead))
+		var scroll_height: float = maxf(0.0, max_height - overhead)
 		scroll.custom_minimum_size.y = minf(scroll_height, content_height)
 	custom_minimum_size.x = PANEL_WIDTH
 	size = Vector2(PANEL_WIDTH, get_combined_minimum_size().y)

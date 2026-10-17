@@ -32,7 +32,7 @@ func _run() -> void:
 	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.team_enemy)
 	_check(panel.visible and panel.rows.size() == players.size(), "Starting the battle lists every active friendly squad")
 	_check(not panel.rows.has(enemies[0]), "Enemy squads do not appear in the player's roster")
-	_check(is_equal_approx(panel.size.x, 252.0) and panel.size.y <= 240.0, "The roster has a compact fixed width and bounded height: %s" % panel.size)
+	_check(is_equal_approx(panel.size.x, 252.0) and panel.size.y <= world.ui.get_node("Control").size.y / 3.0 + 1.0, "The roster has a compact fixed width and uses at most one-third of the viewport height: %s" % panel.size)
 	_check(_clear_of_hud(world), "The roster does not overlap the timer, mission, retry, debug, or selected squad panels")
 	var selected: Unit = panel.rows.keys()[0]
 	var row: SquadRosterRow = panel.rows[selected]
@@ -134,7 +134,7 @@ func _run() -> void:
 		players.append(extra)
 	panel.refresh()
 	await _settle()
-	_check(panel.rows.size() == players.size() and panel.size.y <= 240.0, "Many platoons keep the same bounded panel size: %s" % panel.size)
+	_check(panel.rows.size() == players.size() and panel.size.y <= world.ui.get_node("Control").size.y / 3.0 + 1.0, "Many platoons keep the roster within one-third of the viewport height: %s" % panel.size)
 	var scrollbar: VScrollBar = panel.scroll.get_v_scroll_bar()
 	_check(scrollbar.max_value > scrollbar.page, "Long platoon lists scroll inside the compact panel")
 	panel.scroll.scroll_vertical = 0
@@ -279,7 +279,7 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	await _settle()
 	_check(debug_panel.section.folded and not terrain.details.folded, "Expanding terrain keeps development controls folded")
 	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded terrain fits below the stationary roster at %s" % window_size)
-	_check(terrain.scroll.size.y <= terrain.SCROLL_HEIGHT and roster.scroll.size.y >= 32.0, "Terrain overflow preserves a usable squad list")
+	_check(terrain.size.y <= hud.get_node("Control").size.y / 3.0 + 1.0 and roster.scroll.size.y >= 32.0, "Terrain overflow stays within one-third of the viewport and preserves a usable squad list")
 	if window_size.x == 1152:
 		var scrollbar: VScrollBar = terrain.scroll.get_v_scroll_bar()
 		_check(scrollbar.max_value > scrollbar.page, "Terrain details scroll when the left column runs out of space")
