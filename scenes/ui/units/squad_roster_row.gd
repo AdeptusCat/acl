@@ -7,7 +7,6 @@ class_name SquadRosterRow
 @onready var morale: Label = $Content/Status/Morale
 @onready var rout_available: TextureRect = $Content/Status/RoutSlot/RoutAvailable
 @onready var isolation: Label = $Content/Status/Isolation
-@onready var command_status: Label = $Content/Command
 
 var unit: Unit
 var stack_row: bool = false
@@ -15,13 +14,18 @@ var stack_row: bool = false
 
 func _ready() -> void:
 	$Content.minimum_size_changed.connect(_fit_content)
+	$Content/Status.visible = not stack_row
+	strength_bar.visible = not stack_row
 	_fit_content()
 	if is_instance_valid(unit):
 		unit.stress_system.state_changed.connect(_on_morale_state_changed)
 
 
 func _fit_content() -> void:
-	custom_minimum_size.y = maxf(44.0, $Content.get_combined_minimum_size().y + 6.0)
+	var minimum_height: float = 44.0
+	if stack_row:
+		minimum_height = 28.0
+	custom_minimum_size.y = maxf(minimum_height, $Content.get_combined_minimum_size().y + 6.0)
 
 
 func _on_morale_state_changed(_previous: int, _next: int) -> void:
@@ -37,6 +41,10 @@ func refresh() -> void:
 	var remaining: int = unit.squad_fire.soldiers.size()
 	strength.text = "%d/%d" % [remaining, unit.original_size]
 	strength_bar.value = float(remaining) / float(maxi(1, unit.original_size))
+	set_pressed_no_signal(unit.selected)
+	if stack_row:
+		tooltip_text = "%s\n%s" % [unit.get_hud_name(), unit.get_formation_name()]
+		return
 	morale.text = unit.get_state_name(int(unit.stress_system.state))
 	if unit.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		morale.text = "Ineffective"
@@ -57,20 +65,7 @@ func refresh() -> void:
 	morale.add_theme_color_override("font_color", morale_color)
 	rout_available.visible = unit.can_rout()
 	isolation.visible = _is_isolated()
-	command_status.visible = stack_row
-	if stack_row:
-		isolation.hide()
-		var contact: CommandConnectivity.ContactState = CommandConnectivity.contact_state_for(unit)
-		command_status.text = "Contact: " + CommandConnectivity.contact_text(contact)
-		if not CommandConnectivity.needs_command_contact(unit):
-			command_status.text = "Command: Top-level HQ"
-		elif contact != CommandConnectivity.ContactState.LOST:
-			command_status.text += " · " + CommandConnectivity.contact_method_for(unit)
-		command_status.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
-	set_pressed_no_signal(unit.selected)
 	tooltip_text = "%s\n%s\nStrength: %d/%d · Morale: %s\nClick to select and center" % [identity.text, unit.get_formation_name(), remaining, unit.original_size, morale.text]
-	if stack_row:
-		tooltip_text = "%s\n%s\nStrength: %d/%d · Morale: %s\n%s\nClick to select this squad" % [unit.get_hud_name(), unit.get_formation_name(), remaining, unit.original_size, morale.text, command_status.text]
 	if rout_available.visible:
 		tooltip_text += "\nRout available: select this squad, then right click for Rout.\nAn uncontrolled retreat; no escape route means surrender."
 	if _is_isolated():

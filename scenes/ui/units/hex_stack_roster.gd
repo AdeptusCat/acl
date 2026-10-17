@@ -4,11 +4,10 @@ class_name HexStackRoster
 signal unit_selected(unit: Unit)
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/units/squad_roster_row.tscn")
-const PANEL_WIDTH: float = 340.0
+const PANEL_WIDTH: float = 280.0
 const MARGIN: float = 12.0
 
 @onready var heading: Label = $Content/Heading/Title
-@onready var hex_label: Label = $Content/Hex
 @onready var scroll: ScrollContainer = $Content/Scroll
 @onready var row_container: VBoxContainer = $Content/Scroll/Rows
 
@@ -40,7 +39,6 @@ func open(hex: Vector2i, members: Array[Unit]) -> void:
 	if not visible or cell != hex:
 		scroll.scroll_vertical = 0
 	cell = hex
-	hex_label.text = "Hex (%d, %d)" % [cell.x, cell.y]
 	show()
 	refresh_members(members)
 
@@ -66,7 +64,6 @@ func refresh_members(members: Array[Unit]) -> void:
 			var row: SquadRosterRow = ROW_SCENE.instantiate() as SquadRosterRow
 			row.unit = unit
 			row.stack_row = true
-			row.custom_minimum_size.y = 64.0
 			row_container.add_child(row)
 			rows[unit.get_instance_id()] = row
 			row.pressed.connect(_on_row_pressed.bind(row))
@@ -109,7 +106,7 @@ func fit_to_anchor(screen_rect: Rect2, command_rect: Rect2 = Rect2()) -> void:
 	var available: Vector2 = hud.size - Vector2(MARGIN, MARGIN) * 2.0
 	custom_minimum_size.x = minf(PANEL_WIDTH, maxf(0.0, available.x))
 	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
-	scroll.custom_minimum_size.y = minf(row_container.get_combined_minimum_size().y, maxf(32.0, minf(330.0, available.y - overhead)))
+	scroll.custom_minimum_size.y = minf(row_container.get_combined_minimum_size().y, maxf(32.0, minf(240.0, available.y - overhead)))
 	size = Vector2(custom_minimum_size.x, get_combined_minimum_size().y)
 	var screen_to_hud: Transform2D = hud.get_global_transform_with_canvas().affine_inverse()
 	var anchor: Rect2 = screen_to_hud * screen_rect

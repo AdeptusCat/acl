@@ -281,7 +281,9 @@ func _test_pointer_and_selection() -> void:
 			_check(stacks.roster.visible and controller.selected_unit == expected and stacks.roster.rows[expected.get_instance_id()].button_pressed, "Repeated clicks cycle through every squad and wrap the roster selection at zoom %.1f" % zoom)
 			_check(commands.displayed_links == [expected] and commands.highlighted_units.has(headquarters.get_instance_id()), "Every cycle step updates the selected squad's HQ connection")
 		var row: SquadRosterRow = stacks.roster.rows[second.get_instance_id()]
-		_check(row.identity.text.contains("/1/2") and row.identity.text.contains("MG") and row.command_status.visible, "Stack rows show unique formation identifiers, type and command status")
+		_check(row.identity.text.contains("/1/2") and row.identity.text.contains("MG") and row.strength.text == "%d/%d" % [second.squad_fire.soldiers.size(), second.original_size], "Stack rows show squad identity, type and strength on one line")
+		_check(row.size.y <= 32.0 and not row.get_node("Content/Status").visible and not row.strength_bar.visible, "Stack rows remain compact without extra status rows or strength bars")
+		_check(not stacks.roster.has_node("Content/Hex") and not row.has_node("Content/Command") and not row.tooltip_text.contains("contact"), "The hex roster omits hex coordinates and command connections, including tooltips")
 		_click(row.get_global_transform_with_canvas() * (row.size * 0.5))
 		await _settle()
 		stacks.refresh()
@@ -293,8 +295,11 @@ func _test_pointer_and_selection() -> void:
 		_check(not stacks.roster.get_rect().intersects(commands.counter_rect(second)) and not stacks.roster.get_rect().intersects(commands.counter_rect(headquarters)), "The roster keeps the selected counter and its HQ visible at zoom %.1f" % zoom)
 		if OS.get_cmdline_user_args().has("--render"):
 			await _capture("zoom-" + str(zoom))
-		# The same click must close the popup and select a different map squad.
-		var single_point: Vector2 = BattlefieldStacks.counter_rect(single).get_center()
+		# Use the exposed top of the counter; the compact popup can cover its center.
+		var single_rect: Rect2 = BattlefieldStacks.counter_rect(single)
+		var single_point: Vector2 = single_rect.position + Vector2(single_rect.size.x * 0.5, 1.0)
+		var popup_rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
+		_check(not popup_rect.has_point(single_point), "The outside-selection fixture uses an exposed battlefield counter")
 		var before: int = controller.map_clicks
 		_click(single_point)
 		await _settle()
@@ -396,7 +401,7 @@ func _test_live_updates_and_large_stacks() -> void:
 	stacks.refresh()
 	await _settle()
 	var row: SquadRosterRow = stacks.roster.rows[first.get_instance_id()]
-	_check(row.strength.text.begins_with(str(old_strength - 1) + "/") and row.morale.text == "Pinned" and row.command_status.text == "Contact: No contact", "An open roster updates casualties, morale and communication without changing its membership")
+	_check(row.strength.text.begins_with(str(old_strength - 1) + "/") and not row.morale.is_visible_in_tree() and not row.isolation.is_visible_in_tree(), "An open roster updates strength while morale and command changes cannot add extra information")
 	controller._select_unit(second)
 	stacks.refresh()
 	first.ui.show_casualty(1)
