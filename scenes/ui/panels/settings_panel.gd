@@ -30,8 +30,11 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 @onready var control_rows: VBoxContainer = $Controls/Scroll/Content/Rows
 @onready var mode_selector: OptionButton = $Menu/Scroll/Content/WindowMode
 @onready var resolution_selector: OptionButton = $Menu/Scroll/Content/WindowSize
-@onready var scale_selector: OptionButton = $Menu/Scroll/Content/UIScale
+@onready var scale_label: Label = $Menu/Scroll/Content/ScaleLabel
+@onready var scale_slider: HSlider = $Menu/Scroll/Content/UIScale
 @onready var hud_control: Control = get_parent() as Control
+
+var _scale_dragging: bool = false
 
 
 func _ready() -> void:
@@ -77,9 +80,11 @@ func _input(event: InputEvent) -> void:
 
 
 func close_panels() -> void:
+	_scale_dragging = false
+	_sync_ui_scale()
 	menu.hide()
 	controls_panel.hide()
-	for selector: OptionButton in [mode_selector, resolution_selector, scale_selector]:
+	for selector: OptionButton in [mode_selector, resolution_selector]:
 		selector.get_popup().hide()
 	settings_button.set_pressed_no_signal(false)
 	controls_button.set_pressed_no_signal(false)
@@ -165,11 +170,14 @@ func _build_display_settings() -> void:
 	for preset: Vector2i in DisplaySettings.WINDOW_PRESETS:
 		resolution_selector.add_item("%d × %d" % [preset.x, preset.y])
 	resolution_selector.add_item("Custom window size")
-	for value: float in DisplaySettings.UI_SCALES:
-		scale_selector.add_item("%d%%" % roundi(value * 100.0))
+	scale_slider.min_value = DisplaySettings.MIN_UI_SCALE * 100.0
+	scale_slider.max_value = DisplaySettings.MAX_UI_SCALE * 100.0
+	scale_slider.step = DisplaySettings.UI_SCALE_STEP * 100.0
 	mode_selector.item_selected.connect(_on_window_mode_selected)
 	resolution_selector.item_selected.connect(_on_window_size_selected)
-	scale_selector.item_selected.connect(_on_ui_scale_selected)
+	scale_slider.value_changed.connect(_on_ui_scale_value_changed)
+	scale_slider.drag_started.connect(_on_ui_scale_drag_started)
+	scale_slider.drag_ended.connect(_on_ui_scale_drag_ended)
 	DisplaySettings.settings_changed.connect(_sync_display_settings)
 	_sync_display_settings()
 
@@ -187,8 +195,14 @@ func _sync_display_settings() -> void:
 	for index: int in range(DisplaySettings.WINDOW_PRESETS.size()):
 		var preset: Vector2i = DisplaySettings.WINDOW_PRESETS[index]
 		resolution_selector.set_item_disabled(index, usable.has_area() and (preset.x > usable.size.x or preset.y > usable.size.y))
-	scale_selector.select(DisplaySettings.UI_SCALES.find(DisplaySettings.ui_scale))
+	if not _scale_dragging:
+		_sync_ui_scale()
 	_queue_fit()
+
+
+func _sync_ui_scale() -> void:
+	scale_slider.set_value_no_signal(DisplaySettings.ui_scale * 100.0)
+	scale_label.text = "Interface size · %d%%" % roundi(scale_slider.value)
 
 
 func _on_window_mode_selected(index: int) -> void:
@@ -200,8 +214,24 @@ func _on_window_size_selected(index: int) -> void:
 		DisplaySettings.set_windowed_size(DisplaySettings.WINDOW_PRESETS[index])
 
 
-func _on_ui_scale_selected(index: int) -> void:
-	DisplaySettings.set_ui_scale(DisplaySettings.UI_SCALES[index])
+func _on_ui_scale_value_changed(value: float) -> void:
+	scale_label.text = "Interface size · %d%%" % roundi(value)
+	# Apply after mouse input starts a drag, so the HUD stays still until release.
+	_apply_ui_scale.call_deferred()
+
+
+func _apply_ui_scale() -> void:
+	if not _scale_dragging:
+		DisplaySettings.set_ui_scale(scale_slider.value / 100.0)
+
+
+func _on_ui_scale_drag_started() -> void:
+	_scale_dragging = true
+
+
+func _on_ui_scale_drag_ended(_value_changed: bool) -> void:
+	_scale_dragging = false
+	_apply_ui_scale()
 
 
 func _update_volume_labels() -> void:

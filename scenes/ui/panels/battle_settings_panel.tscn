@@ -173,8 +173,15 @@ tooltip_text = "Windowed presets. Drag the window border for a custom size. Full
 
 [node name="ScaleLabel" type="Label" parent="Menu/Scroll/Content"]
 layout_mode = 2
-text = "Interface size"
+text = "Interface size · 100%"
 
-[node name="UIScale" type="OptionButton" parent="Menu/Scroll/Content"]
+[node name="UIScale" type="HSlider" parent="Menu/Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-tooltip_text = "Scale the HUD. Use the mouse wheel to zoom the battlefield separately."
+tooltip_text = "Scale the HUD from 50% to 150%. Release the slider to apply. Use the mouse wheel over the battlefield to zoom."
+mouse_force_pass_scroll_events = false
+min_value = 50.0
+max_value = 150.0
+step = 1.0
+value = 100.0
+tick_count = 5

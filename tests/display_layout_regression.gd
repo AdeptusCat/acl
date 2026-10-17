@@ -3,6 +3,7 @@ extends Node
 const UNIT_SCENE: PackedScene = preload("res://scenes/game/units/unit.tscn")
 const HUD_SCENE: PackedScene = preload("res://scenes/ui/hud/battle_hud.tscn")
 const STACK_CELL: Vector2i = Vector2i(3, 2)
+const TEST_UI_SCALES: Array[float] = [0.5, 0.75, 0.83, 1.0, 1.25, 1.5]
 
 class ControllerProbe extends Node2D:
 	var ground_layer: HexagonTileMapLayer
@@ -55,13 +56,14 @@ func _run() -> void:
 	_test_preferences()
 	_build_fixture()
 	await _settle()
+	await _test_scale_slider()
 	for resolution: Vector2i in DisplaySettings.WINDOW_PRESETS:
 		get_window().size = resolution
 		await _settle()
 		if DisplayServer.get_name() != "headless" and get_window().size != resolution:
 			print("Native render skipped: ", resolution, " capped by desktop to ", get_window().size, "; covered by headless matrix")
 			continue
-		for value: float in DisplaySettings.UI_SCALES:
+		for value: float in TEST_UI_SCALES:
 			await _test_layout(resolution, value)
 	if DisplayServer.get_name() != "headless":
 		await _test_window_controls()
@@ -77,12 +79,12 @@ func _test_preferences() -> void:
 	DisplaySettings.preferences_path = path
 	DisplaySettings.windowed_size = Vector2i(1472, 856)
 	DisplaySettings.window_mode = Window.MODE_FULLSCREEN
-	DisplaySettings.set_ui_scale(1.25)
+	DisplaySettings.set_ui_scale(0.83)
 	DisplaySettings.windowed_size = DisplaySettings.DESIGN_SIZE
 	DisplaySettings.window_mode = Window.MODE_WINDOWED
 	DisplaySettings.ui_scale = 1.0
 	DisplaySettings.load_preferences()
-	_check(DisplaySettings.windowed_size == Vector2i(1472, 856) and DisplaySettings.window_mode == Window.MODE_FULLSCREEN and DisplaySettings.ui_scale == 1.25, "Display preferences survive reload, including a manually sized window")
+	_check(DisplaySettings.windowed_size == Vector2i(1472, 856) and DisplaySettings.window_mode == Window.MODE_FULLSCREEN and is_equal_approx(DisplaySettings.ui_scale, 0.83), "Display preferences retain arbitrary slider percentages and a manually sized window")
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("display", "windowed_size", Vector2i(-2, 200))
 	config.set_value("display", "ui_scale", "invalid")
@@ -94,6 +96,63 @@ func _test_preferences() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	DisplaySettings.preferences_path = ""
 	DisplaySettings.set_ui_scale(1.0)
+
+
+func _test_scale_slider() -> void:
+	var settings: Control = root_control.get_node("Settings")
+	var slider: HSlider = settings.scale_slider
+	_check(slider.min_value == 50.0 and slider.max_value == 150.0 and slider.step == 1.0, "Interface-size slider covers 50–150% in 1% increments")
+	for percent: float in [50.0, 75.0, 83.0, 100.0]:
+		slider.value = percent
+		await _settle()
+		_check(is_equal_approx(DisplaySettings.ui_scale, percent / 100.0) and settings.scale_label.text.ends_with("%d%%" % roundi(percent)), "Slider applies %d%% and displays its percentage" % roundi(percent))
+	DisplaySettings.set_ui_scale(-1.0)
+	_check(DisplaySettings.ui_scale == 0.5 and slider.value == 50.0, "Scale values below the supported range clamp to 50%")
+	DisplaySettings.set_ui_scale(4.0)
+	_check(DisplaySettings.ui_scale == 1.5 and slider.value == 150.0, "Scale values above the supported range clamp to 150%")
+	DisplaySettings.set_ui_scale(NAN)
+	DisplaySettings.set_ui_scale(INF)
+	_check(DisplaySettings.ui_scale == 1.5, "Non-finite scales cannot corrupt the HUD transform")
+	DisplaySettings.set_ui_scale(1.0)
+	settings.settings_button.button_pressed = true
+	await _settle()
+	settings.menu_scroll.ensure_control_visible(slider)
+	await _settle()
+	var zoom_before: Vector2 = camera.zoom
+	var start: Vector2 = slider.get_global_transform_with_canvas() * (slider.size * 0.5)
+	_mouse(start, MOUSE_BUTTON_LEFT, true)
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = slider.get_global_transform_with_canvas() * Vector2(slider.size.x * 0.25, slider.size.y * 0.5)
+	motion.global_position = motion.position
+	motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+	get_viewport().push_input(motion, true)
+	await _settle()
+	_check(slider.value < 100.0 and DisplaySettings.ui_scale == 1.0 and settings.menu.visible, "Dragging previews a smaller percentage while keeping the HUD and slider stationary")
+	_mouse(motion.position, MOUSE_BUTTON_LEFT, false)
+	await _settle()
+	_check(is_equal_approx(DisplaySettings.ui_scale, slider.value / 100.0) and DisplaySettings.ui_scale < 1.0 and camera.zoom == zoom_before, "Releasing the slider applies its percentage independently of camera zoom")
+	slider.grab_focus()
+	var key: InputEventKey = InputEventKey.new()
+	key.keycode = KEY_RIGHT
+	key.pressed = true
+	var before: float = slider.value
+	get_viewport().push_input(key, true)
+	await _settle()
+	_check(slider.value == before + 1.0 and is_equal_approx(DisplaySettings.ui_scale, slider.value / 100.0), "Keyboard input adjusts and applies the interface size in 1% steps")
+	key.pressed = false
+	get_viewport().push_input(key, true)
+	slider.release_focus()
+	var scale_before_close: float = DisplaySettings.ui_scale
+	_mouse(slider.get_global_transform_with_canvas() * (slider.size * 0.5), MOUSE_BUTTON_LEFT, true)
+	settings.close_panels()
+	_mouse(motion.position, MOUSE_BUTTON_LEFT, false)
+	await _settle()
+	_check(is_equal_approx(DisplaySettings.ui_scale, scale_before_close) and not settings._scale_dragging, "Closing settings during a drag cancels its preview and clears the drag state")
+	slider.value = 83.0
+	await _settle()
+	_check(is_equal_approx(DisplaySettings.ui_scale, 0.83), "The slider remains usable after a cancelled drag")
+	DisplaySettings.set_ui_scale(1.0)
+	await _settle()
 
 
 func _test_window_controls() -> void:
@@ -117,8 +176,9 @@ func _test_window_controls() -> void:
 	var config: ConfigFile = ConfigFile.new()
 	config.load(DisplaySettings.preferences_path)
 	_check(DisplaySettings.windowed_size == Vector2i(1500, 900) and config.get_value("display", "windowed_size") == Vector2i(1500, 900), "Manual native resizing updates the saved window preference")
-	settings.scale_selector.item_selected.emit(1)
-	_check(DisplaySettings.ui_scale == 1.25, "The interface-size selector applies its setting")
+	settings.scale_slider.value = 75.0
+	await _settle()
+	_check(DisplaySettings.ui_scale == 0.75, "The interface-size slider applies its setting")
 	DisplaySettings.preferences_path = ""
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://display-regression.cfg"))
 
@@ -258,9 +318,9 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	var zoom_count: int = zoom_events
 	_mouse(settings.menu.get_global_transform_with_canvas() * (settings.menu.size * 0.5), MOUSE_BUTTON_WHEEL_UP, true)
 	_check(zoom_events == zoom_count and settings.menu.visible, context + ": scrolling settings keeps the menu open and cannot zoom the battlefield")
-	_check(settings.scale_selector.selected == DisplaySettings.UI_SCALES.find(value), context + ": display controls reflect the chosen UI size")
+	_check(is_equal_approx(settings.scale_slider.value, value * 100.0) and settings.scale_label.text.ends_with("%d%%" % roundi(value * 100.0)), context + ": display controls reflect the chosen UI size")
 	if OS.get_cmdline_user_args().has("--capture") and resolution == DisplaySettings.DESIGN_SIZE and value == 1.5:
-		settings.menu_scroll.ensure_control_visible(settings.scale_selector)
+		settings.menu_scroll.ensure_control_visible(settings.scale_slider)
 		await _settle()
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/acl-display-settings-150.png")

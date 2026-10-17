@@ -4,7 +4,9 @@ signal ui_scale_changed(value: float)
 signal settings_changed
 
 const DESIGN_SIZE: Vector2i = Vector2i(1280, 720)
-const UI_SCALES: Array[float] = [1.0, 1.25, 1.5]
+const MIN_UI_SCALE: float = 0.5
+const MAX_UI_SCALE: float = 1.5
+const UI_SCALE_STEP: float = 0.01
 const WINDOW_PRESETS: Array[Vector2i] = [
 	Vector2i(1280, 720), Vector2i(1366, 768), Vector2i(1920, 1080),
 	Vector2i(2560, 1440), Vector2i(3840, 2160), Vector2i(1920, 1200),
@@ -38,12 +40,19 @@ func _ready() -> void:
 
 
 func set_ui_scale(value: float) -> void:
-	if not UI_SCALES.has(value) or is_equal_approx(ui_scale, value):
+	if not is_finite(value):
 		return
-	ui_scale = value
+	var next_scale: float = _normalize_ui_scale(value)
+	if is_equal_approx(ui_scale, next_scale):
+		return
+	ui_scale = next_scale
 	ui_scale_changed.emit(ui_scale)
 	settings_changed.emit()
 	save_preferences()
+
+
+func _normalize_ui_scale(value: float) -> float:
+	return snappedf(clampf(value, MIN_UI_SCALE, MAX_UI_SCALE), UI_SCALE_STEP)
 
 
 func set_window_mode(value: Window.Mode) -> void:
@@ -101,8 +110,8 @@ func load_preferences() -> void:
 	if config.load(preferences_path) != OK:
 		return
 	var saved_scale: Variant = config.get_value("display", "ui_scale", 1.0)
-	if (saved_scale is float or saved_scale is int) and UI_SCALES.has(float(saved_scale)):
-		ui_scale = float(saved_scale)
+	if (saved_scale is float or saved_scale is int) and is_finite(float(saved_scale)):
+		ui_scale = _normalize_ui_scale(float(saved_scale))
 	var saved_size: Variant = config.get_value("display", "windowed_size", DESIGN_SIZE)
 	if saved_size is Vector2i:
 		windowed_size = saved_size.max(DESIGN_SIZE)
