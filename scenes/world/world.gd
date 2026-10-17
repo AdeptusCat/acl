@@ -45,11 +45,11 @@ func _exit_tree() -> void:
 
 func _ready() -> void:
 	Globals.reset()
-	ALDERBROOK_CAMPAIGN.install(maps)
-	maps.add_child(WESTERN_APPROACH.instantiate())
+	var _maps: Array[Map] = ALDERBROOK_CAMPAIGN.install(maps)
+	if OS.is_debug_build():
+		maps.add_child(WESTERN_APPROACH.instantiate())
+		_maps.assign(maps.get_children())
 	maps.hide()
-	var _maps: Array[Map] = []
-	_maps.assign(maps.get_children())
 	start_screen.setup_map_options(_maps)
 	
 	

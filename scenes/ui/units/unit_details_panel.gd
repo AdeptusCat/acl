@@ -89,7 +89,7 @@ func _fit_panel() -> void:
 				if rect.end.x > column_left:
 					top = maxf(top, rect.end.y + HUD_MARGIN)
 	var margins: float = get_theme_stylebox("panel").get_minimum_size().y
-	var height_limit: float = floorf(minf(hud_size.y / 3.0, maxf(0.0, hud_size.y - top - HUD_MARGIN)))
+	var height_limit: float = floorf(minf(hud_size.y / 2.0, maxf(0.0, hud_size.y - top - HUD_MARGIN)))
 	if not roster_section.folded:
 		var summary_overhead: float = maxf(0.0, summary.get_combined_minimum_size().y - roster_scroll.get_combined_minimum_size().y)
 		roster_scroll.custom_minimum_size.y = minf(roster_container.get_combined_minimum_size().y, maxf(48.0, height_limit - margins - summary_overhead))

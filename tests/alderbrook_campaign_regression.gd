@@ -20,13 +20,14 @@ func _run() -> void:
 		if map.campaign_name == "Road to Alderbrook":
 			campaign_maps.append(map)
 	_check(campaign_maps.size() == 5, "The normal mission menu installs all five campaign maps")
+	_test_mission_catalog()
 	var mission: int = 0
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--mission="):
 			mission = argument.trim_prefix("--mission=").to_int()
 	if mission > 0:
 		await _test_match(mission - 1)
-	else:
+	elif not OS.get_cmdline_user_args().has("--catalog-only"):
 		_test_content()
 		_test_progression()
 		_test_bridges()
@@ -37,6 +38,27 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("Alderbrook campaign checks: ", checks, "; failures: ", failures, "; mission: ", mission)
 	get_tree().quit(failures)
+
+
+func _test_mission_catalog() -> void:
+	var expected: Array[Scenario] = []
+	for map: Map in world.maps.get_children():
+		if OS.is_debug_build() or campaign_maps.has(map):
+			expected.append_array(map.get_scenarios())
+	_check(world.start_screen.scenario_buttons.size() == expected.size(), "The mission catalog contains exactly the missions available in this build")
+	for scenario: Scenario in expected:
+		_check(world.start_screen.scenario_buttons.has(scenario), "Available missions appear in the actual selection screen: " + scenario.scenario_name)
+	if OS.is_debug_build():
+		_check(expected.size() > 5 and world.start_screen.scenario_buttons.has(world.maps.get_node("DefaultMap").get_scenario(0)), "Debug builds retain the development maps alongside Alderbrook")
+	else:
+		_check(expected.size() == 5, "Release builds expose only the five Alderbrook campaign missions")
+		var headings: Array[String] = []
+		for child: Node in world.start_screen.maps_v_box_container.get_children():
+			if child is Label:
+				headings.append((child as Label).text)
+		_check(headings == ["Road to Alderbrook"], "Release builds do not show headings for standalone or development maps")
+		for scenario: Scenario in world.start_screen.scenario_buttons:
+			_check(scenario.campaign_id == "road_to_alderbrook", "Every selectable release mission belongs to the Alderbrook campaign")
 
 
 func _test_content() -> void:

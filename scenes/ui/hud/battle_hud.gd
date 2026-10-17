@@ -128,7 +128,7 @@ func _layout_left_panels() -> void:
 	var bottom: float = $Control.size.y - 12.0
 	# HUD coordinates compensate for UI scale. Whole pixels keep container
 	# minimum sizes stable while the visible height stays one-third of the screen.
-	var panel_height_limit: float = floorf($Control.size.y / 3.0)
+	var panel_height_limit: float = floorf($Control.size.y / 2.5)
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0
 	var support_minimum: float = 0.0
@@ -194,7 +194,7 @@ func _layout_mission_objectives() -> void:
 		if rect.end.x > left and rect.position.x < left + panel_width:
 			top = maxf(top, rect.end.y + 6.0)
 	mission_objectives.position = Vector2(left, top)
-	mission_objectives.fit_available_height(floorf(minf($Control.size.y / 3.0, maxf(0.0, $Control.size.y - top - 12.0))))
+	mission_objectives.fit_available_height(floorf(minf($Control.size.y / 2.5, maxf(0.0, $Control.size.y - top - 12.0))))
 
 
 func setup() -> void:
