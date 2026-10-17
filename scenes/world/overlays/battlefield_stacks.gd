@@ -120,9 +120,6 @@ func _fit_roster(members: Array[Unit]) -> void:
 			var commander: Unit = unit.command_squad
 			if commander.is_visible_in_tree() and is_instance_valid(commander.ui) and commander.ui.is_visible_in_tree():
 				command_rect = counter_rect(unit).merge(counter_rect(commander)).grow(12.0)
-				if unit.current_hex == commander.current_hex:
-					# Leave space for the renderer's local command loop.
-					command_rect.size.x += 70.0
 	roster.fit_to_anchor(anchor, command_rect)
 
 

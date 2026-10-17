@@ -149,14 +149,7 @@ func link_points(unit: Unit) -> PackedVector2Array:
 	var start: Vector2 = origin.get_center()
 	var finish: Vector2 = target.get_center()
 	if origin.grow(8.0).intersects(target):
-		# A short loop remains visible when the HQ and squad share a hex.
-		start = Vector2(origin.end.x + 3.0, origin.get_center().y - 12.0)
-		finish = Vector2(target.end.x + 3.0, target.get_center().y + 12.0)
-		var control_x: float = maxf(start.x, finish.x) + 70.0
-		var curve: PackedVector2Array = PackedVector2Array()
-		for step: int in range(25):
-			curve.append(start.bezier_interpolate(Vector2(control_x, start.y - 30.0), Vector2(control_x, finish.y + 30.0), finish, float(step) / 24.0))
-		return curve
+		return PackedVector2Array([start, finish])
 	return PackedVector2Array([_edge_port(origin, finish), _edge_port(target, start)])
 
 

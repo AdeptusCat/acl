@@ -372,7 +372,8 @@ func _test_shared_hq() -> void:
 	commands.refresh(0.0)
 	stacks.open_roster(stack_cell)
 	_check(stacks.roster.rows.size() == 4 and commands.badge_text(headquarters).begins_with("HQ"), "The selected squad's HQ stays identified when it shares the stack")
-	_check(commands.link_points(second).size() > 2, "An HQ in the same stack retains its local command loop")
+	var points: PackedVector2Array = commands.link_points(second)
+	_check(points.size() == 2 and points[0].is_equal_approx(commands.counter_rect(second).get_center()) and points[1].is_equal_approx(commands.counter_rect(headquarters).get_center()), "An HQ in the same stack uses a straight command link between the counters")
 	if OS.get_cmdline_user_args().has("--render"):
 		stacks.open_roster(stack_cell)
 		await _settle()

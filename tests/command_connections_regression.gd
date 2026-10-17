@@ -199,10 +199,12 @@ func _test_visibility_and_lifecycle() -> void:
 func _test_geometry() -> void:
 	rifle.select()
 	var saved: Vector2 = rifle.position
-	rifle.position = headquarters.position
-	renderer.refresh(0.0)
-	var points: PackedVector2Array = renderer.link_points(rifle)
-	_check(points.size() > 2 and points[0].distance_to(points[points.size() / 2]) > 20.0, "A shared-hex link bends outside the stacked counters instead of disappearing")
+	var points: PackedVector2Array
+	for offset: Vector2 in [Vector2.ZERO, Vector2(0.0, 32.0), Vector2(128.0, 0.0)]:
+		rifle.position = headquarters.position + offset
+		renderer.refresh(0.0)
+		points = renderer.link_points(rifle)
+		_check(points.size() == 2 and points[0].is_equal_approx(renderer.counter_rect(rifle).get_center()) and points[1].is_equal_approx(renderer.counter_rect(headquarters).get_center()), "Stacked and nearby units use a straight center-to-center command link at offset %s" % offset)
 	rifle.position = saved
 	points = renderer.link_points(rifle)
 	_check(not renderer.counter_rect(rifle).has_point(points[0]) and not renderer.counter_rect(headquarters).has_point(points[1]), "Link endpoints stop outside the actual visible counter bounds")
