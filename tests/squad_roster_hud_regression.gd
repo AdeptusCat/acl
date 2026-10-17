@@ -274,7 +274,7 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	terrain.show_tile_data({"hex": Vector2i(9, 11), "tile_name": "Open ground", "cover_ne": 2})
 	await _settle()
 	var roster_position: Vector2 = roster.position
-	_check(is_equal_approx(roster_position.x, 12.0) and is_equal_approx(roster_position.y, hud.get_node("Control/TryAgain").get_rect().end.y + 12.0), "The roster stays below Try Again in its left column at %s" % window_size)
+	_check(is_equal_approx(roster_position.x, 12.0) and is_equal_approx(roster_position.y, 6.0), "The roster stays close to the top-left edge at %s" % window_size)
 	terrain.details.expand()
 	await _settle()
 	_check(debug_panel.section.folded and not terrain.details.folded, "Expanding terrain keeps development controls folded")

@@ -35,9 +35,21 @@ func _run() -> void:
 	world.input_manager.zoom_in.connect(_on_zoom)
 	world.input_manager.zoom_out.connect(_on_zoom)
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
-	_pointer_event(Vector2(1000, 100), MouseButton.MOUSE_BUTTON_WHEEL_UP)
+	_pointer_event(Vector2(1000, 300), MouseButton.MOUSE_BUTTON_WHEEL_UP)
 	_check(zoom_events == 1, "Closed settings do not block zoom over their former HUD area")
 	_check_top_layout(world, settings)
+	var objectives: MissionObjectivesPanel = world.ui.mission_objectives
+	var expanded_height: float = objectives.size.y
+	var clicks_before_fold: int = map_clicks
+	_pointer_event(objectives.section.get_global_rect().position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_check(objectives.section.folded and not objectives.rows.is_visible_in_tree() and objectives.size.y < expanded_height, "Clicking the objectives header folds it to its title bar")
+	_check(map_clicks == clicks_before_fold, "Folding objectives does not select or order a battlefield unit")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await _capture("objectives-folded")
+	_pointer_event(objectives.section.get_global_rect().position + Vector2(40.0, 12.0), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_check(not objectives.section.folded and objectives.rows.is_visible_in_tree(), "Clicking the objectives header again restores its rows")
 	var master_before: float = SessionAudio.master_linear
 	var music_before: float = SessionAudio.music_linear
 	SessionAudio.set_master_muted(false)
@@ -112,7 +124,8 @@ func _run() -> void:
 	await _settle()
 	_check(debug.axis_ai_status.is_visible_in_tree() and not debug.axis_ai_status.disabled, "Expanding debug reveals the existing functional AI controls")
 	_check(not debug.get_rect().intersects(world.ui.squad_roster.get_rect()), "Expanded debug does not cover the squad roster")
-	_check(not debug.get_rect().intersects(world.ui.mission_objectives.get_rect()) and not debug.get_rect().intersects(world.ui.tile_details.get_rect()), "Expanded debug avoids mission objectives and tile details")
+	var terrain_clear: bool = not world.ui.tile_details.visible or not debug.get_rect().intersects(world.ui.tile_details.get_rect())
+	_check(not debug.get_rect().intersects(world.ui.mission_objectives.get_rect()) and terrain_clear, "Expanded debug avoids visible mission objectives and tile details")
 	await _test_debug_overlays(world, debug)
 	debug.section.fold()
 	await _settle()
@@ -163,6 +176,7 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("settings-compact")
 	settings.close_panels()
+	objectives.section.expand()
 	await _settle()
 	await _check_unit_readability(world, squad, summary)
 	if OS.get_cmdline_user_args().has("--capture"):
@@ -305,6 +319,7 @@ func _check_top_layout(world: Node, settings: Control) -> void:
 	_check(is_equal_approx(header_rect.get_center().x, hud_width * 0.5) and is_equal_approx(retry_rect.position.y, timer_rect.position.y) and is_equal_approx(timer_rect.position.x - retry_rect.end.x, 8.0), "Try Again and Time Left form a centered adjacent row at width %d" % int(hud_width))
 	_check(_inside_hud(retry, world) and _inside_hud(countdown, world) and not header_rect.intersects(settings.get_rect()), "The centered header stays onscreen without overlapping the speaker and settings buttons")
 	_check(not header_rect.intersects(world.ui.mission_objectives.get_rect()) and not header_rect.intersects(world.ui.squad_roster.get_rect()), "The header leaves objectives and the squad roster clear")
+	_check(is_equal_approx(retry_rect.position.y, 6.0) and is_equal_approx(timer_rect.position.y, 6.0) and is_equal_approx(world.ui.squad_roster.position.y, 6.0), "Main Menu, Time Left, and the squad roster stay close to the top edge")
 
 
 func _inside_hud(panel: Control, world: Node) -> bool:

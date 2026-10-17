@@ -8,9 +8,9 @@
 visible = false
 custom_minimum_size = Vector2(252, 0)
 offset_left = 12.0
-offset_top = 80.0
+offset_top = 6.0
 offset_right = 264.0
-offset_bottom = 316.0
+offset_bottom = 242.0
 mouse_force_pass_scroll_events = false
 theme_type_variation = &"HudCompactPanel"
 theme = ExtResource("hud_theme")

@@ -40,6 +40,7 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 func _ready() -> void:
 	$Control.resized.connect(_queue_top_layout)
 	$Control/Settings.item_rect_changed.connect(_queue_top_layout)
+	squad_roster.visibility_changed.connect(_queue_top_layout)
 	countdown_panel_container.minimum_size_changed.connect(_queue_top_layout)
 	retry_panel.minimum_size_changed.connect(_queue_top_layout)
 	$Control.resized.connect(_layout_mission_objectives)
@@ -80,10 +81,13 @@ func _layout_top_bar() -> void:
 	countdown_panel_container.size = Vector2(maxf(230.0, timer_minimum.x), height)
 	var width: float = retry_panel.size.x + 8.0 + countdown_panel_container.size.x
 	var left: float = ($Control.size.x - width) * 0.5
-	var top: float = 12.0
+	if squad_roster.visible:
+		left = maxf(left, 12.0 + SquadRosterPanel.PANEL_WIDTH + 6.0)
+	left = minf(left, $Control.size.x - width - 12.0)
+	var top: float = 6.0
 	var toolbar_rect: Rect2 = $Control/Settings.get_rect()
-	if left + width + 12.0 > toolbar_rect.position.x:
-		top = toolbar_rect.end.y + 8.0
+	if left + width + 6.0 > toolbar_rect.position.x:
+		top = toolbar_rect.end.y + 6.0
 	retry_panel.position = Vector2(left, top)
 	countdown_panel_container.position = Vector2(left + retry_panel.size.x + 8.0, top)
 	_layout_mission_objectives()
@@ -107,9 +111,11 @@ func _layout_left_panels() -> void:
 	_left_layout_queued = false
 	if not is_node_ready() or is_queued_for_deletion():
 		return
-	var top: float = 12.0
+	var top: float = 6.0
 	for header: Control in [retry_panel, countdown_panel_container, $Control/Settings]:
-		top = maxf(top, header.get_rect().end.y + 12.0)
+		var rect: Rect2 = header.get_rect()
+		if rect.position.x < 12.0 + SquadRosterPanel.PANEL_WIDTH and rect.end.x > 12.0:
+			top = maxf(top, rect.end.y + 6.0)
 	var bottom: float = $Control.size.y - 12.0
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0
@@ -167,9 +173,13 @@ func _layout_mission_objectives() -> void:
 	var panel_width: float = minf(320.0, maxf(0.0, viewport_width - 280.0 - 36.0))
 	mission_objectives.custom_minimum_size.x = panel_width
 	mission_objectives.size.x = panel_width
-	var toolbar: Control = $Control/Settings
-	var top: float = maxf(toolbar.get_rect().end.y, countdown_panel_container.get_rect().end.y) + 12.0
-	mission_objectives.position = Vector2(viewport_width - panel_width - 12.0, top)
+	var left: float = viewport_width - panel_width - 12.0
+	var top: float = 6.0
+	for header: Control in [retry_panel, countdown_panel_container, $Control/Settings]:
+		var rect: Rect2 = header.get_rect()
+		if rect.end.x > left and rect.position.x < left + panel_width:
+			top = maxf(top, rect.end.y + 6.0)
+	mission_objectives.position = Vector2(left, top)
 
 
 func setup() -> void:

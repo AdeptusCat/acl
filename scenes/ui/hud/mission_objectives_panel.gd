@@ -7,7 +7,7 @@ const FAILED_COLOR: Color = Color(1.0, 0.55, 0.45)
 const ACTIVE_COLOR: Color = Color(0.9, 0.87, 0.77)
 const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 
-@onready var heading: Label = $Objectives/Heading
+@onready var section: FoldableContainer = $Objectives
 @onready var rows: VBoxContainer = $Objectives/Rows
 
 var conditions: Array[VictoryCondition] = []
@@ -17,12 +17,17 @@ var _refresh_elapsed_s: float = 0.0
 
 func _ready() -> void:
 	minimum_size_changed.connect(_fit_height)
+	section.folding_changed.connect(_on_folding_changed)
 	set_process(false)
 	hide()
 
 
 func _fit_height() -> void:
 	size.y = get_combined_minimum_size().y
+
+
+func _on_folding_changed(_folded: bool) -> void:
+	_fit_height.call_deferred()
 
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
@@ -33,12 +38,10 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 	for condition: VictoryCondition in scenario_conditions:
 		if condition.team == player_team and condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
 			conditions.append(condition)
-	heading.text = "OBJECTIVES"
 	if conditions.is_empty():
 		for condition: VictoryCondition in scenario_conditions:
 			if condition.team == player_team:
 				conditions.append(condition)
-		heading.text = "OBJECTIVES"
 	for condition: VictoryCondition in conditions:
 		var label: Label = Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -46,6 +49,7 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 		rows.add_child(label)
 	time_left_seconds = remaining_seconds
 	_refresh_elapsed_s = 0.0
+	section.expand()
 	visible = not conditions.is_empty()
 	set_process(visible)
 	refresh()

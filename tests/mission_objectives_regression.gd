@@ -54,6 +54,13 @@ func _run() -> void:
 	_freeze(main)
 	_check(panel.is_visible_in_tree(), "Starting a battle displays its mission panel")
 	_check(panel.conditions.size() == 4 and not panel.conditions.has(enemy_objective) and not panel.conditions.has(minor), "Only the player's primary objectives are displayed")
+	for frame: int in range(6):
+		await get_tree().process_frame
+	var expanded_height: float = panel.size.y
+	panel.section.fold()
+	for frame: int in range(6):
+		await get_tree().process_frame
+	_check(panel.section.folded and not panel.rows.is_visible_in_tree() and panel.size.y < expanded_height, "Objectives fold into a compact title bar")
 	var friends: Array[Unit] = Globals.get_units_for_team(Globals.Team.ALLIES)
 	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.Team.AXIS)
 	_check(friends.size() >= 3 and enemies.size() >= 2, "Fixture supplies squads for capture, exits, and losses")
@@ -64,6 +71,11 @@ func _run() -> void:
 	occupy.advance_time(0.5)
 	panel.refresh()
 	_check(_row(panel, 0).contains("enemy controlled"), "Enemy occupation is shown explicitly")
+	_check(panel.section.folded, "Objective updates preserve the player's collapsed panel")
+	panel.section.expand()
+	for frame: int in range(6):
+		await get_tree().process_frame
+	_check(panel.rows.is_visible_in_tree() and _row(panel, 0).contains("enemy controlled"), "Expanding objectives reveals progress updated while folded")
 	friends[0].current_hex = objective_hex
 	occupy.advance_time(0.5)
 	panel.refresh()
@@ -146,8 +158,7 @@ func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size:
 	var retry_panel: Control = hud.get_node("Control/TryAgain")
 	_check(not panel_rect.intersects(retry_panel.get_rect()), "Mission panel never overlaps the restart control")
 	var toolbar: Control = hud.get_node("Control/Settings")
-	var header_bottom: float = maxf(toolbar.get_rect().end.y, timer_rect.end.y)
-	_check(is_equal_approx(panel_rect.end.x, canvas_size.x - 12.0) and is_equal_approx(panel_rect.position.y, header_bottom + 12.0), "Objectives stay on the right below the top HUD controls")
+	_check(is_equal_approx(panel_rect.end.x, canvas_size.x - 12.0) and is_equal_approx(panel_rect.position.y, toolbar.get_rect().end.y + 6.0), "Objectives sit directly below the top-right toolbar")
 	_check(not panel_rect.intersects(hud.squad_roster.get_rect()), "Objectives leave the roster column clear")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await RenderingServer.frame_post_draw
