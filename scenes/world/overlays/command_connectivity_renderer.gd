@@ -196,24 +196,7 @@ func _draw() -> void:
 		return
 	# Viewport coordinates keep widths, patterns and labels stable through zoom.
 	draw_set_transform_matrix(get_global_transform_with_canvas().affine_inverse())
-	for cached: Variant in displayed_links:
-		if not is_instance_valid(cached):
-			continue
-		var unit: Unit = cached as Unit
-		if unit != _selected:
-			continue
-		if not _can_display(unit) or not CommandConnectivity.has_available_commander(unit) or not _can_display(unit.command_squad):
-			continue
-		var state: CommandConnectivity.ContactState = CommandConnectivity.contact_state_for(unit)
-		var points: PackedVector2Array = link_points(unit)
-		if unit == _selected:
-			var midpoint: Vector2 = points[points.size() / 2]
-			if points.size() == 2:
-				midpoint = (points[0] + points[1]) * 0.5
-			var text: String = CommandConnectivity.contact_text(state)
-			if state != CommandConnectivity.ContactState.LOST:
-				text += " · " + CommandConnectivity.contact_method_for(unit)
-			_draw_badge(midpoint - Vector2(0.0, 18.0), text, contact_color(state))
+	# Contact details live in the squad panel; midpoint labels obscure nearby counters.
 	for unit_id: int in highlighted_units:
 		if not is_instance_id_valid(unit_id):
 			continue
@@ -307,7 +290,7 @@ func badge_text(unit: Unit) -> String:
 	var unit_id: int = unit.get_instance_id()
 	var cue: ContactCue = _cues[unit_id]
 	var caption: String = highlighted_units.get(unit_id, "")
-	if CommandConnectivity.needs_command_contact(unit) and (cue.state == CommandConnectivity.ContactState.LOST or cue.elapsed < PULSE_SECONDS or highlighted_units.has(unit_id)):
+	if CommandConnectivity.needs_command_contact(unit) and (cue.state == CommandConnectivity.ContactState.LOST or cue.elapsed < PULSE_SECONDS):
 		if not caption.is_empty():
 			caption += " · "
 		caption += CommandConnectivity.contact_text(cue.state)

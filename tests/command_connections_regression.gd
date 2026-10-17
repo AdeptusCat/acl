@@ -113,11 +113,13 @@ func _test_selection() -> void:
 	renderer.refresh(0.0)
 	_check(renderer.displayed_links == [rifle], "Selecting a squad reveals only its immediate command link")
 	_check(renderer.highlighted_units.has(headquarters.get_instance_id()) and renderer.highlighted_units[headquarters.get_instance_id()] == "HQ", "Squad selection highlights its actual commanding HQ")
+	_check(renderer.badge_text(headquarters) == "HQ" and renderer.badge_text(rifle).is_empty(), "A stable selected link identifies the HQ without persistent contact text over nearby counters")
 	rifle.deselect()
 	headquarters.select()
 	renderer.refresh(0.0)
 	_check(renderer.displayed_links.size() == 4 and renderer.displayed_links.has(rifle) and renderer.displayed_links.has(isolated), "Selecting a platoon HQ reveals its squads and its own superior")
 	_check(renderer.highlighted_units.has(rifle.get_instance_id()) and renderer.highlighted_units.has(machine_gun.get_instance_id()), "HQ selection highlights subordinate counters")
+	_check(renderer.badge_text(rifle).is_empty() and renderer.badge_text(machine_gun).is_empty(), "Selecting an HQ leaves its connected subordinates free of contact labels")
 	headquarters.deselect()
 	company.select()
 	renderer.refresh(0.0)
@@ -372,6 +374,20 @@ func _render_preview() -> void:
 					if pixel.g > 0.65 and pixel.r > 0.5 and pixel.b > 0.5:
 						width += 1
 				_check(width >= 2 and width <= 4, "Rendered link stays three screen pixels wide at zoom %.1f (measured %d)" % [zoom, width])
+	camera.zoom = Vector2.ONE
+	rifle.position = Vector2(370.0, 300.0)
+	rifle.command_connectivity.voice_range_to_leader = true
+	rifle.command_connectivity.los_to_leader = true
+	_set_contact(rifle, 0.9, 0.25)
+	var nearby_offsets: Dictionary[String, Vector2] = {"adjacent": Vector2(128.0, 0.0), "diagonal": Vector2(64.0, -112.0), "shared-hex": Vector2(0.0, -32.0)}
+	for arrangement: String in nearby_offsets:
+		headquarters.position = rifle.position + nearby_offsets[arrangement]
+		renderer.refresh(3.0)
+		renderer.refresh(3.0)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		RenderingServer.force_draw(false)
+		_check(viewport.get_texture().get_image().save_png("/tmp/acl-command-%s.png" % arrangement) == OK, "Capture nearby HQ without an overlapping connection label: " + arrangement)
 
 
 func _freeze(node: Node) -> void:
