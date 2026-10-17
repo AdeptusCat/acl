@@ -196,28 +196,11 @@ func _place_pond(map: Map) -> void:
 	# Water remains impassable; this pond does not divide the board.
 	var water: HexagonTileMapLayer = map.get_node("TileMapLayers/WaterTileMapLayer") as HexagonTileMapLayer
 	var cells: Array[Vector2i] = [Vector2i(6, 15), Vector2i(7, 14), Vector2i(7, 15), Vector2i(8, 15)]
-	var svg: String = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="128"><defs><clipPath id="hex"><path d="M32 0H96L128 64 96 128H32L0 64Z"/></clipPath></defs>'
-	for index: int in range(cells.size()):
-		var cell: Vector2i = cells[index]
-		svg += '<g transform="translate(%d 0)" clip-path="url(#hex)"><rect width="128" height="128" fill="#527d88"/>' % (index * 128)
-		for side: int in range(6):
-			if cells.has(water.get_neighbor_cell(cell, ConnectedWalls.SIDES[side])):
-				continue
-			var start: Vector2 = ConnectedWalls.VERTICES[side] + Vector2(64, 64)
-			var end: Vector2 = ConnectedWalls.VERTICES[(side + 1) % 6] + Vector2(64, 64)
-			svg += '<path d="M%f %fL%f %f" fill="none" stroke="#94a078" stroke-width="12" stroke-linecap="round"/>' % [start.x, start.y, end.x, end.y]
-			svg += '<path d="M%f %fL%f %f" fill="none" stroke="#b9ad84" stroke-width="4" stroke-linecap="round"/>' % [start.x, start.y, end.x, end.y]
-		# Quiet water ripples are sparse and do not outline internal hex joins.
-		for row: int in range(3):
-			var y: int = 30 + row * 32
-			var x: int = 28 + posmod(cell.x * 13 + row * 19, 30)
-			svg += '<path d="M%d %dQ%d %d %d %d" fill="none" stroke="#9db8b7" opacity=".28" stroke-width="1.5"/>' % [x, y, x + 13, y + 3, x + 26, y]
-		svg += '</g>'
-	svg += '</svg>'
+	# The atlas shares one curved shoreline across all four cells. Keep the authored
+	# artwork independent of map generation so rebuilding cannot restore hex edges.
 	var path: String = "res://assets/tiles/campaign/alderbrook_pond.svg"
-	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
-	file.store_string(svg)
-	file.close()
+	var svg: String = FileAccess.get_file_as_string(path)
+	assert(not svg.is_empty())
 	var image: Image = Image.new()
 	assert(image.load_svg_from_string(svg) == OK)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://docs/art/water/rasters/"))
