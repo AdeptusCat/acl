@@ -563,7 +563,13 @@ scenario_name = "5. Battle for Alderbrook"
 scenario_id = "alderbrook_05_battle_for_alderbrook"
 campaign_id = "road_to_alderbrook"
 campaign_mission = 5
-scenario_description = "Road to Alderbrook - mission 5 of 5.Your company attacks from farmland into Alderbrook. Hedges divide the fields, an orchard screens the northern estate, and scattered timber farms lead toward denser town blocks. Branching roads and garden lanes connect the approaches. A small pond lies off the southern flank; there is no river crossing.[b]A - Orchard estate:[/b] clear the orchard edge and take the stone estate house. Its garden walls give the defenders covered positions, with openings toward the lanes.[b]B - Market hall:[/b] the main road bends into the town center. Houses and workshop courts break the sight lines. Use a flank street to reach the hall rather than sending the company down the open road.[b]C - Timber yard:[/b] barns, sheds and hedged gardens form the southern approach. Capture the large workshop, then move through the connecting streets toward the market.Three rifle platoons, machine-gun teams, company headquarters and a light mortar support the attack. Establish covering fire and keep a reserve able to switch between districts. Enemy survivors may withdraw through the eastern roads after their defense breaks.[b]Major Victory:[/b] hold A, B and C for 45 seconds each, destroy six enemy units, and allow no more than four enemy exit. Victory is assessed at the deadline, or earlier once no active enemy remains and A, B and C have each been held for 45 seconds.[b]Minor Victory:[/b] hold B for 45 seconds and destroy three enemy units at the deadline."
+scenario_description = "Road to Alderbrook - mission 5 of 5.
+
+Three platoons with machine-gun teams and a light mortar must take Alderbrook. Advance through the fields and gardens to secure the orchard estate at A, market hall at B and timber yard at C. Use covering fire and keep a reserve to cut off enemy withdrawals to the east.
+
+[b]Major Victory:[/b] hold A, B and C for 45 seconds each, destroy six enemy units and allow no more than four enemy exits by the deadline. The battle can end early once no active enemy remains and all three objectives are secured.
+
+[b]Minor Victory:[/b] hold B for 45 seconds and destroy three enemy units by the deadline."
 duration_s = 900.0
 use_authored_duration = true
 end_when_objectives_secured_and_enemy_gone = true
