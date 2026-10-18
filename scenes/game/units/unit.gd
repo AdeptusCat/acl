@@ -921,6 +921,9 @@ func surrender() -> void:
 	surrendered = true
 	#alive = false
 	broken = false
+	for candidate: Unit in Globals.get_units():
+		if candidate != self and candidate.command_squad == self:
+			candidate._on_command_connectivity_timeout()
 	emit_signal("unit_surrendered", self)
 	ui.surrender()
 

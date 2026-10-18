@@ -335,6 +335,13 @@ func _test_sight_range() -> void:
 	LOSHelper.los_lookup = {}
 	link.compute_connectivity(observer, leader)
 	_check(link.los_to_leader and CommandConnectivity.contact_method_for(observer) == "Voice + sight", "Squads in the HQ's own hex have sight contact despite the omitted self-LOS entry")
+	observer._on_command_connectivity_timeout()
+	_check(observer.stress_system.leader_presence_strength > 0.0, "Living HQ supplies morale presence before surrender")
+	leader.movement.unit = leader
+	leader.position = ground.map_to_local(leader.current_hex)
+	leader.surrender()
+	_check(CommandConnectivity.contact_state_for(observer) == CommandConnectivity.ContactState.LOST and is_zero_approx(link.command_link_strength), "HQ surrender immediately clears subordinate command contact without a timer tick")
+	_check(is_zero_approx(link.leader_presence_strength) and is_zero_approx(observer.stress_system.leader_presence_strength), "HQ surrender immediately removes cached command presence and morale support")
 	LOSHelper.ground_layer = saved_ground
 	LOSHelper.los_lookup = saved_lookup
 	for unit: Unit in [observer, leader]:
