@@ -1,0 +1,76 @@
+[gd_resource type="Resource" script_class="MatchSaveData" format=3]
+
+[ext_resource type="Script" path="res://resources/casualties/casualty_record.gd" id="1_qeobv"]
+[ext_resource type="Script" path="res://unit_save_data.gd" id="2_c4nt1"]
+[ext_resource type="Script" path="res://scenes/game/units/soldier_loadout.gd" id="3_mmfhe"]
+[ext_resource type="Script" path="res://squad_loadout_spec.gd" id="4_t17lo"]
+[ext_resource type="Script" path="res://resources/weapons/weapon_spec.gd" id="5_58sct"]
+[ext_resource type="Script" path="res://match_save_data.gd" id="6_uykq3"]
+
+[sub_resource type="Resource" id="Resource_13vds"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 0"
+weapon_resource_path = "res://resources/weapons/m1_garand.tres"
+
+[sub_resource type="Resource" id="Resource_3hwjk"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 1"
+weapon_resource_path = "res://resources/weapons/mp40.tres"
+
+[sub_resource type="Resource" id="Resource_5gp2n"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 2"
+role = 1
+weapon_resource_path = "res://resources/weapons/mg34.tres"
+
+[sub_resource type="Resource" id="Resource_l2iim"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 3"
+weapon_resource_path = "res://resources/weapons/m2_60mm_mortar.tres"
+
+[sub_resource type="Resource" id="Resource_w3277"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 4"
+role = 1
+weapon_resource_path = "res://resources/weapons/m1a1_bazooka.tres"
+
+[sub_resource type="Resource" id="Resource_gog00"]
+script = ExtResource("3_mmfhe")
+nickname = "Weapon 5"
+weapon_resource_path = "res://resources/weapons/m1_garand.tres"
+
+[sub_resource type="Resource" id="Resource_6rv7t"]
+script = ExtResource("4_t17lo")
+soldiers = Array[ExtResource("3_mmfhe")]([SubResource("Resource_13vds"), SubResource("Resource_3hwjk"), SubResource("Resource_5gp2n"), SubResource("Resource_l2iim"), SubResource("Resource_w3277"), SubResource("Resource_gog00")])
+
+[sub_resource type="Resource" id="Resource_p5c58"]
+script = ExtResource("2_c4nt1")
+unit_scene_path = "res://scenes/game/units/unit.tscn"
+squad_loadout = SubResource("Resource_6rv7t")
+
+[sub_resource type="Resource" id="Resource_jfdvt"]
+script = ExtResource("5_58sct")
+name = "Embedded prototype weapon"
+range_hexes = 9
+type = 2
+ammunition_start = 73
+ammunition = 73
+
+[sub_resource type="Resource" id="Resource_xpod0"]
+script = ExtResource("3_mmfhe")
+nickname = "Custom weapon"
+weapon = SubResource("Resource_jfdvt")
+
+[sub_resource type="Resource" id="Resource_tkpv1"]
+script = ExtResource("4_t17lo")
+soldiers = Array[ExtResource("3_mmfhe")]([SubResource("Resource_xpod0")])
+
+[sub_resource type="Resource" id="Resource_oekm7"]
+script = ExtResource("2_c4nt1")
+unit_scene_path = "res://scenes/game/units/unit.tscn"
+squad_loadout = SubResource("Resource_tkpv1")
+
+[resource]
+script = ExtResource("6_uykq3")
+match_id = "tests/weapon_reference_regression"
+player_units = Array[ExtResource("2_c4nt1")]([SubResource("Resource_p5c58"), SubResource("Resource_oekm7")])

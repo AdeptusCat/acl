@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/pixel_terrain_los_regression.gd" id="1"]
+
+[node name="PixelTerrainLosRegression" type="Node"]
+script = ExtResource("1")

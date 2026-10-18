@@ -1,0 +1,195 @@
+@tool
+extends RefCounted
+class_name GodotAgentAgent
+
+const Settings := preload("res://addons/godot_agent/core/settings.gd")
+const Conversation := preload("res://addons/godot_agent/core/conversation.gd")
+const ConversationStore := preload("res://addons/godot_agent/core/conversation_store.gd")
+const AgentLogger := preload("res://addons/godot_agent/core/logger.gd")
+const ToolSchemas := preload("res://addons/godot_agent/tools/tool_schemas.gd")
+const ToolRegistry := preload("res://addons/godot_agent/tools/tool_registry.gd")
+const ProviderFactory := preload("res://addons/godot_agent/providers/provider_factory.gd")
+
+signal message_appended(role: String, text: String)
+signal tool_started(name: String, input: Dictionary)
+signal tool_finished(name: String, result: Dictionary)
+signal turn_started
+signal turn_finished(reason: String)
+signal error_occurred(message: String)
+signal conversation_loaded  # emitted when a different conversation becomes active (new or loaded)
+signal history_changed      # emitted when a save occurred, so the history UI can refresh
+
+var conversation: Conversation
+var logger: AgentLogger
+var parent_node: Node  # required for HTTPRequest child nodes
+
+var _busy: bool = false
+
+
+func _init(parent: Node) -> void:
+	parent_node = parent
+	conversation = Conversation.new()
+	conversation.set_system_prompt(Settings.system_prompt())
+	conversation.changed.connect(_on_conversation_changed)
+	logger = AgentLogger.new()
+
+
+func _on_conversation_changed() -> void:
+	# Autosave the current conversation to disk. Skipped internally when empty.
+	var r: Dictionary = ConversationStore.save(conversation)
+	if r.get("ok", false) and not r.get("skipped", false):
+		history_changed.emit()
+
+
+func is_busy() -> bool:
+	return _busy
+
+
+func send_user_message(text: String, attachments: Array = []) -> void:
+	if _busy:
+		logger.warn("agent busy, ignoring message")
+		return
+	if text.strip_edges() == "" and attachments.is_empty():
+		return
+
+	if attachments.is_empty():
+		conversation.add_user_text(text)
+	else:
+		conversation.add_user_message(text, attachments)
+	message_appended.emit("user", text)
+	await _run_loop()
+
+
+func retry_last() -> Dictionary:
+	# Re-run the model against the current conversation state. Only valid when we
+	# have at least one turn already, aren't currently busy, and the last recorded
+	# message is a user message (either the original prompt or a tool_result batch)
+	# so the model has something to respond to.
+	if _busy:
+		return {"ok": false, "error": "agent is busy"}
+	var msgs := conversation.messages()
+	if msgs.is_empty():
+		return {"ok": false, "error": "nothing to retry"}
+	var last: Dictionary = msgs[msgs.size() - 1]
+	if last.get("role", "") != "user":
+		return {"ok": false, "error": "last message is not a user message"}
+	await _run_loop()
+	return {"ok": true}
+
+
+func _run_loop() -> void:
+	_busy = true
+	turn_started.emit()
+
+	var provider_name := Settings.provider()
+	var provider = ProviderFactory.create(provider_name)
+	if provider == null:
+		_finish("error", "no provider available")
+		return
+	if Settings.api_key(provider_name) == "":
+		_finish("error", "no API key set for provider '%s'. Open Settings and paste one." % provider_name)
+		return
+
+	var tools := ToolSchemas.all()
+	var web := Settings.web_enabled()
+	var max_turns := Settings.max_tool_turns()
+
+	for turn_i in max_turns:
+		var resp: Dictionary = await provider.send_conversation(
+			parent_node,
+			conversation.system_prompt(),
+			conversation.messages(),
+			tools,
+			web,
+		)
+		if not resp.get("ok", false):
+			_finish("error", str(resp.get("error", "unknown error")))
+			return
+
+		var assistant_content: Array = resp.assistant_content
+		conversation.add_assistant(assistant_content, provider_name, Settings.model_for(provider_name))
+		var usage_variant: Variant = resp.get("usage", {})
+		if typeof(usage_variant) == TYPE_DICTIONARY:
+			conversation.add_usage(provider_name, usage_variant)
+		if resp.text != "":
+			message_appended.emit("assistant", resp.text)
+
+		var tool_calls: Array = resp.tool_calls
+		if tool_calls.is_empty():
+			_finish(resp.stop_reason, "")
+			return
+
+		var results: Array = []
+		for call in tool_calls:
+			tool_started.emit(call.name, call.input)
+			logger.info("tool %s(%s)" % [call.name, JSON.stringify(call.input)])
+			var tool_result: Dictionary = await ToolRegistry.dispatch(parent_node, call.name, call.input)
+			tool_finished.emit(call.name, tool_result)
+
+			# If the tool produced an inline image (e.g. screenshot_game), lift
+			# it into the tool_result so the model can actually see the pixels.
+			# The rest of the dict is serialised to JSON for the textual content.
+			var display_result: Dictionary = tool_result.duplicate(true)
+			var image_content: Variant = display_result.get("image_content", null)
+			if typeof(image_content) == TYPE_DICTIONARY:
+				display_result.erase("image_content")
+			var content_str: String = JSON.stringify(display_result)
+			var is_err := not bool(tool_result.get("ok", true))
+			var result_entry: Dictionary = {
+				"tool_use_id": call.id,
+				"content": content_str,
+				"is_error": is_err,
+			}
+			if typeof(image_content) == TYPE_DICTIONARY:
+				result_entry["image_content"] = image_content
+			results.append(result_entry)
+
+		# Feed tool results back as a canonical user message; each provider converts.
+		conversation.add_tool_results(results)
+
+	_finish("max_turns", "hit the tool-turn cap (%d). Ask the assistant to continue if needed." % max_turns)
+
+
+func _finish(reason: String, extra: String) -> void:
+	_busy = false
+	if reason == "error":
+		error_occurred.emit(extra)
+		logger.error(extra)
+	turn_finished.emit(reason)
+
+
+func reset() -> void:
+	if _busy:
+		return
+	# Replace with a fresh Conversation so it gets a new id/timestamps.
+	var new_convo := Conversation.new()
+	new_convo.set_system_prompt(Settings.system_prompt())
+	new_convo.changed.connect(_on_conversation_changed)
+	conversation = new_convo
+	conversation_loaded.emit()
+
+
+func load_conversation(id: String) -> Dictionary:
+	if _busy:
+		return {"ok": false, "error": "agent is busy"}
+	var r: Dictionary = ConversationStore.load_by_id(id)
+	if not r.get("ok", false):
+		return r
+	var loaded := Conversation.new()
+	loaded.load_from_dict(r.data)
+	# Keep the system prompt that was captured when this chat was originally started.
+	loaded.changed.connect(_on_conversation_changed)
+	conversation = loaded
+	conversation_loaded.emit()
+	return {"ok": true, "id": id, "title": loaded.title}
+
+
+func list_conversations() -> Array:
+	return ConversationStore.list_summaries()
+
+
+func delete_conversation(id: String) -> Dictionary:
+	var r: Dictionary = ConversationStore.delete_by_id(id)
+	if r.get("ok", false):
+		history_changed.emit()
+	return r

@@ -1,0 +1,30 @@
+[
+  {
+    "angle": 300,
+    "source": "/home/blight/Downloads/exec-09864b4b-6df8-4284-92bd-1b8e00c410f0.png",
+    "fit": false,
+    "error": "The generated view cannot cover every center inside its three hexes; regenerate the view"
+  },
+  {
+    "angle": 60,
+    "source": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 02_44_37 PM.png",
+    "fit": false,
+    "error": "The generated view cannot cover every center inside its three hexes; regenerate the view"
+  },
+  {
+    "scale": 0.22546161321671526,
+    "image_position": [
+      75,
+      96
+    ],
+    "center_alpha": [
+      253,
+      253,
+      253
+    ],
+    "angle": 240,
+    "source": "/home/blight/Downloads/ChatGPT Image Oct 15, 2026, 02_44_18 PM.png",
+    "world_length": 296.0,
+    "fit": true
+  }
+]

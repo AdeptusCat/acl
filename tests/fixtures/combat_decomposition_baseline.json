@@ -1,0 +1,1421 @@
+{
+	"impacts": {
+		"0/false/0": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 4,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 1,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				]
+			],
+			"fire_recent": 1.0,
+			"pressure": [
+				30.0,
+				30.0,
+				30.0
+			],
+			"rng_tail": 0.519817113876343
+		},
+		"0/false/77": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 5,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 1,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				]
+			],
+			"fire_recent": 1.0,
+			"pressure": [
+				30.0,
+				30.0,
+				30.0
+			],
+			"rng_tail": 0.0281502734869719
+		},
+		"0/true/0": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 5,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 1,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				]
+			],
+			"fire_recent": 1.0,
+			"pressure": [
+				30.0,
+				30.0,
+				30.0
+			],
+			"rng_tail": 0.58963006734848
+		},
+		"0/true/77": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 5,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 1,
+						"fast": 100.0,
+						"original_source": true,
+						"slow": 100.0
+					}
+				]
+			],
+			"fire_recent": 1.0,
+			"pressure": [
+				30.0,
+				30.0,
+				30.0
+			],
+			"rng_tail": 0.517764627933502
+		},
+		"1/false/0": {
+			"events": [
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.137978076934814
+		},
+		"1/false/77": {
+			"events": [
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 4.044978,
+						"original_source": true,
+						"slow": 1.8
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.717557489871979
+		},
+		"1/true/0": {
+			"events": [
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.137978076934814
+		},
+		"1/true/77": {
+			"events": [
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				],
+				[
+					{
+						"cover": 3
+					},
+					{
+						"received": 3.0
+					},
+					{
+						"casualties": 0,
+						"fast": 6.137208,
+						"original_source": true,
+						"slow": 1.8
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.717557489871979
+		},
+		"2/false/0": {
+			"events": [
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.0988532975316048
+		},
+		"2/false/77": {
+			"events": [
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.999768733978271
+		},
+		"2/true/0": {
+			"events": [
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.0988532975316048
+		},
+		"2/true/77": {
+			"events": [
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				],
+				[
+					{
+						"cover": 7
+					},
+					{
+						"received": 7.0
+					},
+					{
+						"casualties": 0,
+						"fast": 0.000001,
+						"original_source": true,
+						"slow": 0.002
+					}
+				]
+			],
+			"fire_recent": 0.8,
+			"pressure": [
+				8.0,
+				8.0,
+				8.0
+			],
+			"rng_tail": 0.999768733978271
+		},
+		"3/false/0": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 0,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				]
+			],
+			"fire_recent": 0.3,
+			"pressure": [
+				3.0,
+				3.0,
+				3.0
+			],
+			"rng_tail": 0.814048409461975
+		},
+		"3/false/77": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 0,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				]
+			],
+			"fire_recent": 0.3,
+			"pressure": [
+				3.0,
+				3.0,
+				3.0
+			],
+			"rng_tail": 0.788113951683044
+		},
+		"3/true/0": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 5,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 0,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				]
+			],
+			"fire_recent": 0.3,
+			"pressure": [
+				3.0,
+				3.0,
+				3.0
+			],
+			"rng_tail": 0.814048409461975
+		},
+		"3/true/77": {
+			"events": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 4,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 3,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"received": 0.0
+					},
+					{
+						"casualties": 0,
+						"fast": 82.23,
+						"original_source": true,
+						"slow": 82.23
+					}
+				]
+			],
+			"fire_recent": 0.3,
+			"pressure": [
+				3.0,
+				3.0,
+				3.0
+			],
+			"rng_tail": 0.788113951683044
+		},
+		"4/false/0": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 56.4447,
+						"original_source": true,
+						"slow": 41.4447
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 3,
+						"fast": 56.4447,
+						"original_source": true,
+						"slow": 41.4447
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 56.4447,
+						"original_source": true,
+						"slow": 41.4447
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.00524322502315044
+		},
+		"4/false/77": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 41.4447,
+						"original_source": true,
+						"slow": 31.4447
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 41.4447,
+						"original_source": true,
+						"slow": 31.4447
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 41.4447,
+						"original_source": true,
+						"slow": 31.4447
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.177691727876663
+		},
+		"4/true/0": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 4,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.814048409461975
+		},
+		"4/true/77": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.788113951683044
+		},
+		"5/false/0": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 64.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 3,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 64.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 64.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.814048409461975
+		},
+		"5/false/77": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.788113951683044
+		},
+		"5/true/0": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 4,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 74.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.814048409461975
+		},
+		"5/true/77": {
+			"events": [
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 2,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"received": 1.0
+					},
+					{
+						"casualties": 0,
+						"fast": 74.82,
+						"original_source": true,
+						"slow": 54.82
+					}
+				]
+			],
+			"fire_recent": 0.4,
+			"pressure": [
+				4.0,
+				4.0,
+				4.0
+			],
+			"rng_tail": 0.788113951683044
+		}
+	},
+	"math": {
+		"cover": [
+			0.001,
+			1.5,
+			0.5,
+			0.001,
+			0.4,
+			0.3,
+			0.1,
+			0.05,
+			0.001
+		],
+		"mean": 0.4,
+		"support": [
+			1.0,
+			0.5,
+			0.75,
+			1.0,
+			1.0
+		]
+	},
+	"targeting": {
+		"clear_invalid": {
+			"cover_effects": [
+				[],
+				[],
+				[]
+			],
+			"orders": [
+				"cleared"
+			],
+			"timer": -0.1
+		},
+		"dead_target": {
+			"cover_effects": [
+				[],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"cover": 1
+					}
+				],
+				[]
+			],
+			"orders": [
+				"Target1"
+			],
+			"timer": 0.75
+		},
+		"friendly_blocks": {
+			"cover_effects": [
+				[],
+				[
+					{
+						"cover": 1
+					},
+					{
+						"cover": 1
+					}
+				],
+				[]
+			],
+			"orders": [
+				"Target1"
+			],
+			"timer": 0.75
+		},
+		"out_of_range": {
+			"cover_effects": [
+				[],
+				[],
+				[]
+			],
+			"orders": [],
+			"timer": -0.1
+		},
+		"prisoner_allows": {
+			"cover_effects": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"cover": 0
+					}
+				],
+				[
+					{
+						"cover": 1
+					}
+				],
+				[]
+			],
+			"orders": [
+				"Target0"
+			],
+			"timer": 0.75
+		},
+		"ranking": {
+			"cover_effects": [
+				[
+					{
+						"cover": 0
+					},
+					{
+						"cover": 0
+					}
+				],
+				[
+					{
+						"cover": 1
+					}
+				],
+				[]
+			],
+			"orders": [
+				"Target0"
+			],
+			"timer": 0.75
+		},
+		"tie": {
+			"cover_effects": [
+				[
+					{
+						"cover": 0
+					}
+				],
+				[
+					{
+						"cover": 0
+					},
+					{
+						"cover": 0
+					}
+				],
+				[]
+			],
+			"orders": [
+				"Target1"
+			],
+			"timer": 0.75
+		}
+	}
+}

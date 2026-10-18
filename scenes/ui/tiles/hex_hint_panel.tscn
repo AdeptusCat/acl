@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="hud_theme"]
+
+[ext_resource type="Script" path="res://scenes/ui/tiles/hex_hint_panel.gd" id="1"]
+
+[node name="HexHint" type="PanelContainer"]
+visible = false
+z_index = 5
+custom_minimum_size = Vector2(240, 0)
+mouse_filter = 2
+theme_type_variation = &"HudCompactPanel"
+theme = ExtResource("hud_theme")
+script = ExtResource("1")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="Heading" type="Label" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+autowrap_mode = 3
+theme_type_variation = &"HudHeading"
+
+[node name="Detail" type="Label" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+autowrap_mode = 2
+
+[node name="Extra" type="Label" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+clip_text = true
+theme_type_variation = &"HudSecondary"

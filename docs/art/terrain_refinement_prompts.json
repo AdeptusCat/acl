@@ -1,0 +1,25 @@
+{
+  "tool": "Built-in image_gen",
+  "prompts": [
+    {
+      "name": "tree_crowns",
+      "prompt": "Use case: stylized-concept. Asset type: transparent sprite sheet for a top-down WWII European hex tactics game. Reference image shows the game's illustrated green foliage style; it is a style reference only. Render four distinct COMPLETE isolated broadleaf deciduous tree crowns in a 2 by 2 grid with very wide fully transparent gutters. Strict bird's-eye orthographic overhead view, no visible trunks. Each crown a naturally irregular rounded canopy of many tiny green leaves, muted olive and forest green with small yellow-green highlights, subtle soft leafy outer edges and tight shadow under foliage. Four compact crowns of similar scale; one oak, one rounded beech, one slightly elongated canopy, one smaller irregular sapling. Whole intact silhouettes, none touch any frame edge. These sprites will be reduced to 24-44 pixels wide and clustered into seamless woods, so clear masses and naturally feathered leaf silhouettes are essential. No square or hexagonal canopy shapes, no backdrop, no ground, no labels, no text, no grid lines. Genuine transparent background.",
+      "referenced_image_paths": [
+        "/home/blight/Documents/godot/Projects/acl/assets/tiles/connected/source/woods.png"
+      ]
+    },
+    {
+      "name": "wheat_clump",
+      "prompt": "Use case: stylized-concept. Asset type: one small transparent plant stamp for top-down WWII European strategy map fields. Render a single compact clump of ripe golden wheat viewed STRICTLY from overhead at a distant map scale. It should read as a little mottled tuft with many tiny stalk tips, straw-gold and muted ochre, not a close-up side-view illustration of a wheat ear. Irregular small rounded silhouette, fine tiny plant texture, tight soft shadow within tuft. Centered with broad fully transparent padding. Illustrated natural game terrain art. Will be reduced to only 6 pixels across and repeated hundreds of times in field rows; avoid large ears, large leaves, perspective, soil, ground, symbols, hexagons, borders, or text. Genuine transparent background."
+    },
+    {
+      "name": "crop_clump",
+      "prompt": "Use case: stylized-concept. Asset type: one small transparent leafy crop plant stamp for a top-down WWII European strategy map field. Render a single compact green crop clump viewed STRICTLY from overhead at a distant map scale. Small rosette of tiny muted olive-green leaves with earthy green shadows and subdued yellow-green highlights, naturally irregular rounded silhouette and soft fine leaf edges. Centered with broad fully transparent padding. Illustrated natural game terrain art. Will be reduced to only 6 pixels across and repeated hundreds of times in field rows. Avoid huge leaves or macro close-ups, perspective, soil, ground, symbols, hexagons, borders, or text. Genuine transparent background."
+    }
+  ],
+  "outputs": {
+    "sources": "assets/tiles/connected/source",
+    "stamps": "assets/tiles/connected/stamps",
+    "map_atlases": "assets/tiles/connected/maps"
+  }
+}

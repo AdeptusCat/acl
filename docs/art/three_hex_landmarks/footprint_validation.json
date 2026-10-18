@@ -1,0 +1,438 @@
+{
+  "maximum_outside_pixels": 0,
+  "minimum_inset": 3,
+  "views": [
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3694,
+        7000,
+        3843
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3696,
+        6222,
+        4518
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3702,
+        6217,
+        4520
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3694,
+        7000,
+        3843
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3696,
+        6222,
+        4518
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_sawmill_factory_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3702,
+        6217,
+        4520
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3751,
+        6911,
+        5696
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5220,
+        6281,
+        4981
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5150,
+        6275,
+        5052
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3751,
+        6911,
+        5696
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5220,
+        6281,
+        4981
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_granary_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5150,
+        6275,
+        5052
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6110,
+        6328,
+        4847
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6541,
+        6800,
+        3892
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6586,
+        6654,
+        3980
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6110,
+        6328,
+        4847
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6541,
+        6800,
+        3892
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_wood_craft_hall_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6586,
+        6654,
+        3980
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3034,
+        6743,
+        4106
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3375,
+        6105,
+        4504
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3882,
+        6121,
+        3972
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3034,
+        6743,
+        4106
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3375,
+        6105,
+        4504
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_textile_factory_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        3882,
+        6121,
+        3972
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        4705,
+        4264,
+        3709
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        4450,
+        5113,
+        3053
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5203,
+        5469,
+        1949
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        4705,
+        4264,
+        3709
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        4450,
+        5113,
+        3053
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_church_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        5203,
+        5469,
+        1949
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 0,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6006,
+        5986,
+        4988
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 60,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6278,
+        6718,
+        3948
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 120,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6281,
+        6841,
+        3813
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 180,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6006,
+        5986,
+        4988
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 240,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6278,
+        6718,
+        3948
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    },
+    {
+      "id": "building_stone_guildhall_3hex",
+      "angle": 300,
+      "outside_pixels": 0,
+      "roof_pixels_per_hex": [
+        6281,
+        6841,
+        3813
+      ],
+      "minimum_inset": 3,
+      "canvas_cropped_pixels": 0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "angles_installed": [
+    60,
+    240,
+    300
+  ],
+  "unchanged_angles": [
+    0,
+    120,
+    180
+  ],
+  "unchanged_atlas_columns_verified": true,
+  "other_building_art_unchanged": true,
+  "previous_raw_art_unchanged": true,
+  "source_hashes_verified": 36,
+  "outside_pixels": 0,
+  "cropped_pixels": 0,
+  "minimum_center_alpha": 183,
+  "minimum_inset_pixels": 1,
+  "godot_checks": 7171,
+  "placement_and_los_checks": 28286,
+  "engine": "Godot 4.7.2",
+  "godot_visible_pixel_placements_checked": 2777228,
+  "godot_failures": 0,
+  "placement_and_los_failures": 0,
+  "perspective_review": "Visual review: independently redrawn 60 and 300 degree projections, retained supplied 240 degree view; upright chimneys, no final bitmap rotation."
+}

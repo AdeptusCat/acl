@@ -1,0 +1,31 @@
+{
+  "tool": "Built-in image_gen",
+  "prompts": [
+    {
+      "name": "wheat_stand",
+      "prompt": "Use case: stylized-concept. Asset type: transparent terrain stamp for a strictly top-down WWII European hex tactics game. Reference image is a palette/style reference only, NOT the composition. Render a dense natural stand of ripe golden wheat, a compact broad patch made of MANY small upright plants seen directly from above. Pale straw-yellow and harvest-gold highlights with ochre shadows. Fine woven canopy texture from many tiny seed heads; all plants packed into continuous unbroken vegetation, irregular soft leafy perimeter with alpha transparency outside. This patch will be scaled to 32 pixels wide, then overlapped densely with neighbors to make an entire hand-sown field. It needs readable fine grain, not a giant single ear or a radial decorative bouquet. No planted rows, no stripes, no straight lanes, no machinery tracks, no soil or grassy ground, no lettering, no hex border. Strict overhead view matching illustrated woodland/building terrain. Whole patch centered with generous transparent padding; true transparent background.",
+      "referenced_image_paths": [
+        "/home/blight/Documents/godot/Projects/acl/assets/tiles/connected/source/wheat_clump.png"
+      ]
+    },
+    {
+      "name": "crop_stand",
+      "prompt": "Use case: stylized-concept. Asset type: transparent terrain stamp for a strictly top-down WWII European hex tactics game. Reference image is a foliage style reference only, NOT the composition. Render a dense natural stand of many small green crop plants seen directly from above. A compact broad patch with fine small olive-green and summer-green leaves, muted yellow-green highlights, tight dark green canopy shadows. Plants tightly interwoven as continuous vegetation, no isolated regularly spaced dots. Soft irregular leafy perimeter, transparent outside. This patch will be reduced to 32 pixels wide then overlapped with neighboring patches to create a full hand-worked European field. Keep individual leaves fine in scale relative to full tree crowns and roofs. No organized stripes or rows, no tractor tire lanes, no furrows, no grass or soil background, no letters, no hex outline. Whole patch centered with broad transparent padding; genuine transparent background.",
+      "referenced_image_paths": [
+        "/home/blight/Documents/godot/Projects/acl/assets/tiles/connected/source/crop_clump.png"
+      ]
+    },
+    {
+      "name": "fruit_crowns",
+      "prompt": "Use case: stylized-concept. Asset type: transparent sprite sheet of four fruit-tree crowns for a strictly top-down WWII European hex tactics game orchard. Reference image shows the existing woodland canopy illustration style and its scale; retain that style. Render FOUR separate COMPLETE fruit-tree crowns centered in an exact two-column two-row grid with extremely wide transparent gutters. Each has lush irregular rounded foliage, mature green leaves and fine twig shadows; small natural red apples, golden pears, dark red cherries, and yellow-green apples respectively add subtle lively fruit accents. Fruit stays very small relative to each canopy, no giant fruit icons. Summer foliage with varied muted green and warm sunlit highlights; occasional tiny pale blossoms only. Strict bird's-eye overhead orthographic view, no trunks visible, no side perspective. These whole tree sprites will be used at 30-40 pixels across, close to woodland crown size and smaller than farmhouse roofs. Clear leafy silhouettes with soft natural fringes. All four trees completely inside separate equal square cells with broad blank alpha margins on all sides. No ground, no grass, no rows depicted in the sheet itself, no square or hex outline, no labels. Genuine transparent background.",
+      "referenced_image_paths": [
+        "/home/blight/Documents/godot/Projects/acl/assets/tiles/connected/source/tree_crowns.png"
+      ]
+    }
+  ],
+  "outputs": {
+    "sources": "assets/tiles/connected/source",
+    "stamps": "assets/tiles/connected/stamps",
+    "map_atlases": "assets/tiles/connected/maps"
+  }
+}

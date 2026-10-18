@@ -1,0 +1,234 @@
+{
+  "name": "Base-tile terrain palette",
+  "status": "Applied to Road to Alderbrook through terrain color materials; source artwork and transparency are preserved",
+  "intent": "Use the reference grass green as the main open-ground color. Woods use the approved olive-and-dark-brown color study; fruit-tree foliage keeps its lighter highlights and material accents.",
+  "families": [
+    {
+      "id": "open_ground",
+      "label": "Open ground",
+      "character": "Reference grass green; main color sampled from the tile",
+      "colors": [
+        "#253D0A",
+        "#35570D",
+        "#427012",
+        "#6A912D",
+        "#A1B45D"
+      ],
+      "assets": "Open-ground and base ground tiles"
+    },
+    {
+      "id": "woods",
+      "label": "Woods",
+      "character": "Muted olive foliage with earthy dark brown shadows",
+      "colors": [
+        "#1F1D0E",
+        "#2C2A16",
+        "#555F2D",
+        "#677037",
+        "#7B8347"
+      ],
+      "assets": "Woodland crowns, woods tiles and woodland cover"
+    },
+    {
+      "id": "orchard",
+      "label": "Orchard foliage",
+      "character": "Warmer olive foliage; brighter fruit-tree highlights",
+      "colors": [
+        "#3C4221",
+        "#58662C",
+        "#87933D",
+        "#B5AE55",
+        "#D1BE78"
+      ],
+      "assets": "Fruit-tree foliage; fruit and blossoms use accent colors"
+    },
+    {
+      "id": "fruit_blossom",
+      "label": "Fruit and blossoms",
+      "character": "Crimson apples, amber pears, pale blossoms",
+      "roles": [
+        "Cherry shadow",
+        "Ripe apple",
+        "Pear shadow",
+        "Ripe pear",
+        "Blossom"
+      ],
+      "colors": [
+        "#6E263A",
+        "#C94D3F",
+        "#AA712C",
+        "#E8B950",
+        "#F3DDD0"
+      ],
+      "assets": "Existing fruit and blossom pixels"
+    },
+    {
+      "id": "wheat",
+      "label": "Wheat fields",
+      "character": "Harvest gold; luminous straw highlights",
+      "colors": [
+        "#674822",
+        "#9C6B27",
+        "#CB9838",
+        "#E4BF67",
+        "#F2DFAC"
+      ],
+      "assets": "Continuous wheat stands and field tiles"
+    },
+    {
+      "id": "green_crops",
+      "label": "Green crop fields",
+      "character": "Fresh leafy greens related to the reference grass",
+      "colors": [
+        "#233B16",
+        "#3D5F24",
+        "#5B8632",
+        "#85AC49",
+        "#B3CD76"
+      ],
+      "assets": "Continuous green crop stands and field tiles"
+    },
+    {
+      "id": "stubble",
+      "label": "Stubble fields",
+      "character": "Dry ochre, cut straw and earthy shadows",
+      "colors": [
+        "#57442C",
+        "#85673D",
+        "#B29158",
+        "#CFB67D",
+        "#E8D4A3"
+      ],
+      "assets": "Field stubble tiles"
+    },
+    {
+      "id": "ploughed",
+      "label": "Ploughed soil",
+      "character": "Rich umber and warm terracotta earth",
+      "colors": [
+        "#3B2923",
+        "#66432F",
+        "#98613C",
+        "#C38A5A",
+        "#DEB081"
+      ],
+      "assets": "Ploughed field tiles and visible soil"
+    },
+    {
+      "id": "roads",
+      "label": "Dirt roads",
+      "character": "Warm sandstone; lighter than surrounding soil",
+      "colors": [
+        "#625242",
+        "#8C7658",
+        "#B39C73",
+        "#D0BD94",
+        "#E8DABD"
+      ],
+      "assets": "Curved road and legacy road tiles"
+    },
+    {
+      "id": "water",
+      "label": "River water",
+      "character": "Natural blue; silver-blue surface highlights",
+      "colors": [
+        "#1B3545",
+        "#2D586E",
+        "#477E99",
+        "#79ADC0",
+        "#C7DDE3"
+      ],
+      "assets": "River tiles"
+    },
+    {
+      "id": "timber",
+      "label": "Timber and bridges",
+      "character": "Weathered chestnut and honey wood grain",
+      "colors": [
+        "#382B27",
+        "#654B36",
+        "#946B48",
+        "#BE976C",
+        "#DFC5A0"
+      ],
+      "assets": "Wooden buildings, wooden roofs and bridges"
+    },
+    {
+      "id": "stone",
+      "label": "Stone buildings and walls",
+      "character": "Cool stone shadows; warm limestone light",
+      "colors": [
+        "#3F4140",
+        "#666D66",
+        "#969B89",
+        "#C1C2AC",
+        "#E0DCC5"
+      ],
+      "assets": "Stone walls and building masonry"
+    },
+    {
+      "id": "clay_roofs",
+      "label": "Clay and brick roofs",
+      "character": "Burnt sienna and rich terracotta",
+      "colors": [
+        "#4F2D28",
+        "#854331",
+        "#B76243",
+        "#D78D63",
+        "#E9B590"
+      ],
+      "assets": "Existing warm clay roof pixels"
+    },
+    {
+      "id": "slate_roofs",
+      "label": "Slate roofs",
+      "character": "Blue-grey slate; clear separation from timber",
+      "colors": [
+        "#293541",
+        "#4B5966",
+        "#7A8790",
+        "#AAB4B5",
+        "#D5D8D0"
+      ],
+      "assets": "Existing grey/slate roof pixels"
+    },
+    {
+      "id": "hedges",
+      "label": "Hedges",
+      "character": "Dense leaf greens with restrained warm highlights",
+      "colors": [
+        "#1B3017",
+        "#304D20",
+        "#4B6D2B",
+        "#75913F",
+        "#A5B565"
+      ],
+      "assets": "Hedge wall tiles"
+    },
+    {
+      "id": "grid_fog",
+      "label": "Grid and fog overlay",
+      "character": "Quiet neutral colors supporting terrain readability",
+      "roles": [
+        "Grid ink",
+        "Edge shadow",
+        "Fog shadow",
+        "Fog body",
+        "Fog light"
+      ],
+      "colors": [
+        "#38392E",
+        "#59604C",
+        "#747D79",
+        "#A2AAA1",
+        "#D3D7CA"
+      ],
+      "assets": "Existing hex outlines and fog tint; keep current transparency"
+    }
+  ],
+  "reference": {
+    "image": "assets/tiles/ground/base_tile.png",
+    "base_color": "#427012",
+    "sampling": "Median RGB of opaque green pixels in the central third of the tile"
+  }
+}

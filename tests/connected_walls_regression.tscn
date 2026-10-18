@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/connected_walls_regression.gd" id="1"]
+
+[node name="ConnectedWallsRegression" type="Node"]
+script = ExtResource("1")

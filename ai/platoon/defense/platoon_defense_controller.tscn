@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cnb64giumafy8"]
+
+[ext_resource type="Script" path="res://ai/platoon/defense/platoon_defense_controller.gd" id="1_yq5ga"]
+
+[node name="PlatoonAi" type="Node" unique_id=1445759041]
+script = ExtResource("1_yq5ga")

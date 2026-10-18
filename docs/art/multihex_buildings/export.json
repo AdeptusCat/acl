@@ -1,0 +1,4290 @@
+{
+  "tile_size": 128,
+  "orientation_count": 6,
+  "buildings": [
+    {
+      "id": "building_wood_01_2hex_a",
+      "label": "Wood Building 01 - two hexes A",
+      "material": "wood",
+      "parent": "building_wood_01",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_01_2hex_a.png",
+      "scale": 0.49553047404063205,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_01_2hex_b",
+      "label": "Wood Building 01 - two hexes B",
+      "material": "wood",
+      "parent": "building_wood_01",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_01_2hex_b.png",
+      "scale": 0.48566371681415926,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_01_3hex",
+      "label": "Wood Building 01 - three hexes",
+      "material": "wood",
+      "parent": "building_wood_01",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_01_3hex.png",
+      "scale": 0.632954128440367,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_02_2hex_a",
+      "label": "Wood Building 02 - two hexes A",
+      "material": "wood",
+      "parent": "building_wood_02",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_02_2hex_a.png",
+      "scale": 0.42215384615384616,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_02_2hex_b",
+      "label": "Wood Building 02 - two hexes B",
+      "material": "wood",
+      "parent": "building_wood_02",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_02_2hex_b.png",
+      "scale": 0.48566371681415926,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_02_3hex",
+      "label": "Wood Building 02 - three hexes",
+      "material": "wood",
+      "parent": "building_wood_02",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_02_3hex.png",
+      "scale": 0.7339574468085106,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_03_2hex_a",
+      "label": "Wood Building 03 - two hexes A",
+      "material": "wood",
+      "parent": "building_wood_03",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_03_2hex_a.png",
+      "scale": 0.43555555555555553,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_03_2hex_b",
+      "label": "Wood Building 03 - two hexes B",
+      "material": "wood",
+      "parent": "building_wood_03",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_03_2hex_b.png",
+      "scale": 0.48566371681415926,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_wood_03_3hex",
+      "label": "Wood Building 03 - three hexes",
+      "material": "wood",
+      "parent": "building_wood_03",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_wood_03_3hex.png",
+      "scale": 0.632954128440367,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_01_2hex_a",
+      "label": "Stone Building 01 - two hexes A",
+      "material": "stone",
+      "parent": "building_stone_01",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_01_2hex_a.png",
+      "scale": 0.4085081024787019,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_01_2hex_b",
+      "label": "Stone Building 01 - two hexes B",
+      "material": "stone",
+      "parent": "building_stone_01",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_01_2hex_b.png",
+      "scale": 0.4933842590482623,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_01_3hex",
+      "label": "Stone Building 01 - three hexes",
+      "material": "stone",
+      "parent": "building_stone_01",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_01_3hex.png",
+      "scale": 0.8393187347931873,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_02_2hex_a",
+      "label": "Stone Building 02 - two hexes A",
+      "material": "stone",
+      "parent": "building_stone_02",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_02_2hex_a.png",
+      "scale": 0.44056451495763854,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_02_2hex_b",
+      "label": "Stone Building 02 - two hexes B",
+      "material": "stone",
+      "parent": "building_stone_02",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_02_2hex_b.png",
+      "scale": 0.4072727272727273,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_02_3hex",
+      "label": "Stone Building 02 - three hexes",
+      "material": "stone",
+      "parent": "building_stone_02",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_02_3hex.png",
+      "scale": 0.6672340425531914,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_03_2hex_a",
+      "label": "Stone Building 03 - two hexes A",
+      "material": "stone",
+      "parent": "building_stone_03",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_03_2hex_a.png",
+      "scale": 0.42460348162475825,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_03_2hex_b",
+      "label": "Stone Building 03 - two hexes B",
+      "material": "stone",
+      "parent": "building_stone_03",
+      "hexes": 2,
+      "region_size": 256,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_03_2hex_b.png",
+      "scale": 0.4259158251381319,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                64
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -48,
+                32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                -32
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -48,
+                -32
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                48,
+                32
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building_stone_03_3hex",
+      "label": "Stone Building 03 - three hexes",
+      "material": "stone",
+      "parent": "building_stone_03",
+      "hexes": 3,
+      "region_size": 384,
+      "texture": "res://assets/tiles/buildings/multihex/building_stone_03_3hex.png",
+      "scale": 0.6294890510948905,
+      "views": [
+        {
+          "angle": 0,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 60,
+          "parts": [
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 120,
+          "parts": [
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 180,
+          "parts": [
+            {
+              "cell": [
+                0,
+                2
+              ],
+              "center": [
+                64.0,
+                320.0
+              ],
+              "texture_origin": [
+                0,
+                128
+              ]
+            },
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                0,
+                -128
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 240,
+          "parts": [
+            {
+              "cell": [
+                0,
+                1
+              ],
+              "center": [
+                64.0,
+                192.0
+              ],
+              "texture_origin": [
+                -96,
+                64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                0
+              ],
+              "center": [
+                256.0,
+                64.0
+              ],
+              "texture_origin": [
+                96,
+                -64
+              ]
+            }
+          ]
+        },
+        {
+          "angle": 300,
+          "parts": [
+            {
+              "cell": [
+                0,
+                0
+              ],
+              "center": [
+                64.0,
+                64.0
+              ],
+              "texture_origin": [
+                -96,
+                -64
+              ]
+            },
+            {
+              "cell": [
+                1,
+                0
+              ],
+              "center": [
+                160.0,
+                128.0
+              ],
+              "texture_origin": [
+                0,
+                0
+              ]
+            },
+            {
+              "cell": [
+                2,
+                1
+              ],
+              "center": [
+                256.0,
+                192.0
+              ],
+              "texture_origin": [
+                96,
+                64
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

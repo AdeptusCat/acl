@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cf17qriycv82p"]
+
+[ext_resource type="Script" uid="uid://bwg04iyl3m5dd" path="res://scenes/world/overlays/tactical_lines_overlay.gd" id="1_f8nx0"]
+
+[node name="LOSRenderer" type="Node2D" unique_id=1213272880]
+z_index = 120
+script = ExtResource("1_f8nx0")

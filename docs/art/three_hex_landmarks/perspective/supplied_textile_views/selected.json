@@ -1,0 +1,64 @@
+{
+  "provider": "user-supplied art; built-in image_gen for two projection corrections",
+  "unchanged_angles": [
+    0,
+    120,
+    180
+  ],
+  "views": [
+    {
+      "scale": 0.20603907637655416,
+      "image_position": [
+        75,
+        98
+      ],
+      "center_alpha": [
+        253,
+        253,
+        253
+      ],
+      "angle": 60,
+      "source": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-209be315-3900-495a-8071-513b40feb215.png",
+      "fit": true,
+      "world_length": 296.0,
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/60.png",
+      "source_sha256": "b386ce9d6738700c3dfc0b3a881c54085ae9ccdeae23dbf56403da5576e1a196"
+    },
+    {
+      "scale": 0.1968225948808473,
+      "image_position": [
+        82,
+        97
+      ],
+      "center_alpha": [
+        254,
+        253,
+        253
+      ],
+      "angle": 300,
+      "source": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-4c5635f1-2463-4b4b-b89d-a7cbf8cbef80.png",
+      "fit": true,
+      "world_length": 296.5,
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/300.png",
+      "source_sha256": "b1b61f55731050131fdab9a68404951740058726a5c290948251d35032cfacf9"
+    },
+    {
+      "scale": 0.22546161321671526,
+      "image_position": [
+        75,
+        96
+      ],
+      "center_alpha": [
+        253,
+        253,
+        253
+      ],
+      "angle": 240,
+      "source": "docs/art/three_hex_landmarks/perspective/supplied_textile_views/supplied_240.png",
+      "fit": true,
+      "world_length": 296.0,
+      "saved_source": "assets/tiles/buildings/multihex/three_hex_landmarks/source/supplied_textile_views/240.png",
+      "source_sha256": "2bb2d4d60f8da1ba5e9d408b8c74178ff454785f1791552b8fcb8aa576a9496b"
+    }
+  ]
+}

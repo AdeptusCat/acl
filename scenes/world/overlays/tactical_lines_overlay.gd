@@ -1,0 +1,257 @@
+extends Node2D
+
+var lines: Array[Dictionary] = []  # {from, to, timer, duration}
+var los_enemy_lines: Array = []
+var los_to_target: Array = []
+var movement_path: Array = []
+var chain_of_command: Array = []
+var command_link_strength: Array = []
+var leader_presence_strength: Dictionary[Globals.Team, Array] = {
+	Globals.Team.AXIS: [],
+	Globals.Team.ALLIES: [],
+}
+
+
+func _on_draw_command_link_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+
+	command_link_strength.append({
+		"from": from_pos,
+		"to": to_pos,
+		"timer": 0.0,
+		"duration": 1.0,  # Line fades out over 2 seconds
+		"strength": strength
+	})
+
+	queue_redraw()
+
+
+func _on_draw_leader_presence_strength(team: Globals.Team, from_hex: Vector2i, to_hex: Vector2i, strength: float) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+	
+	leader_presence_strength[team].append({
+		"from": from_pos,
+		"to": to_pos,
+		"timer": 0.0,
+		"duration": 1.0,  # Line fades out over 2 seconds
+		"strength": strength
+	})
+
+	queue_redraw()
+
+
+func _on_draw_chain_of_command(from_hex: Vector2i, path: Array[Vector2i]) -> void:
+	var i: int = 0
+	for hex: Vector2i in path:
+		if path.size() <= i + 1:
+			return
+		var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i])
+		var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i+1])
+
+		chain_of_command.append({
+			"from": from_pos,
+			"to": to_pos,
+			"timer": 0.0,
+			"duration": 2.0  # Line fades out over 2 seconds
+		})
+
+		queue_redraw()
+		
+		i += 1
+
+
+func _on_draw_draw_movement_path(from_hex: Vector2i, path: Array[Vector2i]) -> void:
+	var i: int = 0
+	for hex: Vector2i in path:
+		if path.size() <= i + 1:
+			return
+		var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i])
+		var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(path[i+1])
+
+		movement_path.append({
+			"from": from_pos,
+			"to": to_pos,
+			"timer": 0.0,
+			"duration": 2.0  # Line fades out over 2 seconds
+		})
+
+		queue_redraw()
+		
+		i += 1
+
+
+func _on_draw_los_to_target_unit(from_hex: Vector2i, to_hex: Vector2i) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+	var crossings: PackedVector2Array = PackedVector2Array()
+	if Debug.show_los_lines:
+		crossings = LOSHelper.get_hindrance_crossings(from_pos, to_pos)
+
+	los_to_target.append({
+		"from": from_pos,
+		"to": to_pos,
+		"hindrance_points": crossings,
+		"timer": 0.0,
+		"duration": 2.0  # Line fades out over 2 seconds
+	})
+
+	queue_redraw()
+
+
+func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
+	var from_pos: Vector2 = LOSHelper.ground_layer.map_to_local(from_hex)
+	var to_pos: Vector2 = LOSHelper.ground_layer.map_to_local(to_hex)
+	var crossings: PackedVector2Array = PackedVector2Array()
+	if Debug.show_los_lines:
+		crossings = LOSHelper.get_hindrance_crossings(from_pos, to_pos)
+
+	los_enemy_lines.append({
+		"from": from_pos,
+		"to": to_pos,
+		"hindrance_points": crossings,
+		"timer": 0.0,
+		"duration": 2.0  # Line fades out over 2 seconds
+	})
+
+	queue_redraw()
+
+
+func _draw() -> void:
+	_draw_player_routes()
+	if Debug.show_los_lines:
+		for los_data: Dictionary in los_enemy_lines:
+			_draw_sight_line(los_data, 0.55)
+		for los_data: Dictionary in los_to_target:
+			_draw_sight_line(los_data, 0.9)
+	if Debug.show_movement_lines:
+		for los_data: Dictionary in movement_path:
+			draw_line(los_data["from"], los_data["to"], Color(0.044, 0.0, 0.953, 1.0), 2.0)
+	for los_data: Dictionary in chain_of_command:
+		draw_line(los_data["from"], los_data["to"], Color(0.0, 0.391, 0.122, 1.0), 2.0)
+	#if SessionSettings.showCmdConnectivity:
+		#if Debug.showEnemyCmdConnectivity:
+			#for connection in leader_presence_strength[Globals.team_enemy]:
+				#draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+		#for connection in leader_presence_strength[Globals.team_player]:
+			#draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+	#if SessionSettings.showCmdConnectivity:
+		#if Debug.showEnemyCmdConnectivity:
+			#for connection in leader_presence_strength[Globals.team_enemy]:
+				#var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
+				#add_child(aim_line)
+				#aim_line.set_line(
+					#connection["from"],
+					#connection["to"]
+				#)
+				##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+		#for connection in leader_presence_strength[Globals.team_player]:
+			#var aim_line: MovingDottedDrawLine = MovingDottedDrawLine.new()
+			#add_child(aim_line)
+			#aim_line.set_line(
+				#connection["from"],
+				#connection["to"]
+				#)
+				##draw_line(connection["from"], connection["to"], strength_to_color_hsv(connection["strength"]), clamp(connection["strength"] * 10, 1.0, 10.0))
+
+func _draw_sight_line(data: Dictionary, opacity: float) -> void:
+	if not is_instance_valid(LOSHelper.ground_layer):
+		return
+	var origin: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["from"]))
+	var target: Vector2 = to_local(LOSHelper.ground_layer.to_global(data["to"]))
+	var crossings: PackedVector2Array = PackedVector2Array()
+	for point: Vector2 in data["hindrance_points"]:
+		crossings.append(to_local(LOSHelper.ground_layer.to_global(point)))
+	SightLineGraphic.draw(self, origin, target, false, origin, false, opacity, crossings)
+
+
+func _draw_player_routes() -> void:
+	if not is_instance_valid(LOSHelper.ground_layer):
+		return
+	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
+		if not unit.is_active() or unit.movement == null:
+			continue
+		var waypoints: Array[Vector2i] = unit.movement.remaining_waypoints()
+		if waypoints.is_empty():
+			continue
+		var color: Color = Color(0.45, 0.85, 1.0, 0.8)
+		var width: float = 2.5
+		if unit.selected:
+			color = Color(1.0, 0.87, 0.24, 1.0)
+			width = 4.0
+		var previous: Vector2 = to_local(unit.global_position)
+		for index: int in range(waypoints.size()):
+			var point: Vector2 = to_local(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(waypoints[index])))
+			draw_line(previous, point, Color(0.05, 0.08, 0.05, 0.85), width + 3.0, true)
+			draw_line(previous, point, color, width, true)
+			draw_circle(point, 4.0, color)
+			if index == waypoints.size() - 1:
+				draw_arc(point, 10.0, 0.0, TAU, 32, Color(0.05, 0.08, 0.05, 0.9), width + 3.0, true)
+				draw_arc(point, 10.0, 0.0, TAU, 32, color, width, true)
+			previous = point
+
+func strength_to_color_hsv(strength: float) -> Color:
+	var s: float = strength
+
+	if s < 0.0:
+		s = 0.0
+	else:
+		if s > 1.0:
+			s = 1.0
+
+	var hue: float = 0.33 * s   # 0.0 → 0.33 (red → green)
+	return Color.from_hsv(hue, 1.0, 1.0, 1.0)
+
+func _process(delta: float) -> void:
+	for line: Dictionary in command_link_strength:
+		line["timer"] += delta
+	command_link_strength = command_link_strength.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+
+	for line: Dictionary in los_enemy_lines:
+		line["timer"] += delta
+	# Remove fully expired lines
+	los_enemy_lines = los_enemy_lines.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+	
+	
+	
+	for line: Dictionary in los_to_target:
+		line["timer"] += delta
+	# Remove fully expired lines
+	los_to_target = los_to_target.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+	
+	
+	for line: Dictionary in movement_path:
+		line["timer"] += delta
+	# Remove fully expired lines
+	movement_path = movement_path.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+	
+	
+	for line: Dictionary in movement_path:
+		line["timer"] += delta
+	# Remove fully expired lines
+	movement_path = movement_path.filter(func(line: Dictionary) -> bool:
+		return line["timer"] < line["duration"]
+	)
+	
+	
+	for team: Array in leader_presence_strength.values():
+		for line: Dictionary in team:
+			line["timer"] += delta
+	# Remove fully expired lines
+	for team: Globals.Team in leader_presence_strength:
+		leader_presence_strength[team] = leader_presence_strength[team].filter(func(line: Dictionary) -> bool:
+			return line["timer"] < line["duration"]
+		)
+	
+	
+
+	queue_redraw()  # Always request redraw if lines change

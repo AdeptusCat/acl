@@ -1,0 +1,629 @@
+class_name PositionQueryService
+extends RefCounted
+
+
+static func query_positions(query: PositionQuery) -> PositionResult:
+	var job: PositionQueryJob = PositionQueryJob.new()
+	job.query = query
+	job.advance(-1)
+	return job.result
+
+
+static func initialize(query: PositionQuery, result: PositionResult, prepare_forecast: bool = true) -> bool:
+	result.unit = query.unit
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.snapshot != null:
+		HqSupportPositionPolicy.prepare(query)
+	result.context = query.context_key()
+	result.objective_hex = query.objective_hex
+	result.profile_mode = query.profile.mode
+	result.position_profile = query.profile
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
+	if query.snapshot == null or not query.snapshot.maps.has(query.team):
+		result.reason = "No completed influence snapshot"
+		return false
+	result.snapshot_version = query.snapshot.version
+	result.status = PositionResult.Status.NO_CANDIDATE
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	result.cell_states.resize(map.cell_count)
+	result.cell_states.fill(PositionResult.CellState.REJECTED)
+	result.rejection_reasons.resize(map.cell_count)
+	result.rejection_reasons.fill("unit_unavailable")
+	if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.team != query.team:
+		result.reason = "Unit is outside the query's ownership"
+		return false
+	if query.unit.members_alive <= 0 or query.unit.surrendered or not can_follow_intent(query.unit):
+		result.reason = "Unit cannot execute tactical movement"
+		return false
+	if query.unit.action_controller != null:
+		query.movement_order_id = query.unit.action_controller.action_order_id
+	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
+		result.reason = "Unit is not fit for an assault"
+		return false
+	if query.reserve_response_context != "" and query.reserve_response_context != DefenseReadinessJob.capability_key(query.unit):
+		result.reason = "Reserve capability changed; response assessment needs rebuilding"
+		return false
+	result.cell_states.fill(PositionResult.CellState.UNEVALUATED)
+	result.rejection_reasons.fill("")
+	if prepare_forecast:
+		query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
+	query.reset_evaluation()
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		DefensePositionPolicy.prepare(query)
+		if DefensePositionPolicy.needs_withdrawal(query):
+			result.decision = PositionResult.Decision.WITHDRAW
+	if query.include_score_map:
+		result.score_map.resize(map.cell_count)
+		result.score_map.fill(0.0)
+	result.eligibility.resize(map.cell_count)
+	if query.defense_area != null:
+		result.features["assigned_sector"] = query.assigned_sector
+		result.features["assigned_branch"] = query.assigned_branch
+		result.features["reserve_reason"] = query.reserve_reason
+		var cells: Dictionary = {}
+		var remembered: Dictionary = {}
+		var inferred: Dictionary = {}
+		for approach: Dictionary in query.defense_area.approaches:
+			result.sector_priorities[approach["id"]] = approach["priority"]
+			result.approach_evidence[approach["id"]] = approach["evidence"]
+			result.approach_sources[approach["id"]] = approach["source"]
+		for approach: Dictionary in query.defense_area.duties():
+			var branch_key: String = DefenseAreaAssessment.duty_key(approach)
+			result.branch_sources[branch_key] = approach["source"]
+			result.branch_evidence[branch_key] = approach["evidence"]
+			if query.assigned_branch != "" and query.assigned_branch != branch_key:
+				continue
+			if query.assigned_sector >= 0 and query.assigned_sector != approach["id"]:
+				continue
+			if query.assigned_sector < 0 and query.defense_area.approach_for_sector(approach["id"]).get("priority", approach["priority"]) < query.defense_area.max_priority * 0.4:
+				continue
+			var destination: Dictionary = cells
+			if approach["evidence"] == "remembered":
+				destination = remembered
+			elif approach["evidence"] in ["inferred", "estimated"]:
+				destination = inferred
+			for cell: Vector2i in approach["cells"]:
+				destination[cell] = true
+		result.approach_cells.assign(cells.keys())
+		result.remembered_approach_cells.assign(remembered.keys())
+		result.inferred_approach_cells.assign(inferred.keys())
+	return true
+
+
+static func finish_accepted_order(query: PositionQuery, result: PositionResult) -> bool:
+	if not query.finish_accepted_order or query.stable_order == null:
+		return false
+	var path: Array[Vector2i] = [query.unit.current_hex]
+	if query.unit.movement.is_moving:
+		path = _remaining_path(query.unit)
+	var target: Vector2i = query.stable_order.target_hex
+	if not _valid_snapshot_path(query, path, target):
+		return false
+	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
+		return false
+	if query.stable_order.features.get("screen_fallback", false):
+		# Finish a safe accepted fallback bound before trying the forward screen again.
+		query.allow_screen_fallback = true
+		query.destination_features.clear()
+	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, target, path)
+	if features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
+		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and HqSupportPositionPolicy.rejection(query, features) != "":
+		return false
+	if query.profile.mode == PositionProfile.Mode.DEFEND and not DefensePositionPolicy.allows_route(query, features):
+		return false
+	if query.stable_order.features.get("press_attack", false) and not query.press_attack:
+		return false
+	result.status = PositionResult.Status.RETAINED
+	result.target_hex = target
+	result.proposed_hex = target
+	result.target_index = query.snapshot.maps[query.team].cell_to_index(target)
+	result.path = path
+	result.features = features
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
+	result.features["movement_kind"] = query.stable_order.features.get("movement_kind", "necessary")
+	result.features["finishing_accepted_order"] = true
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.features["open_support_position"] = features["cover"] < query.profile.minimum_cover
+	result.score = query.profile.score(features, query.unit)
+	result.previous_score = result.score
+	result.should_move = false
+	result.eligibility[result.target_index] = 1
+	result.cell_states[result.target_index] = PositionResult.CellState.AVAILABLE
+	result.rejection_reasons[result.target_index] = ""
+	result.reason = "Finishing the accepted movement and setup before reconsidering positions"
+	if query.goal_reason != "":
+		result.reason = query.goal_reason + " | " + result.reason
+	return true
+
+
+static func refresh_moving_origin(query: PositionQuery, result: PositionResult) -> bool:
+	var unit: Unit = query.unit
+	if not InfluenceUnitQuery.is_valid_living_unit(unit):
+		return false
+	if query.has_accepted_target and unit.action_controller != null and query.movement_order_id >= 0 and unit.action_controller.action_order_id != query.movement_order_id:
+		return false
+	if unit.current_hex == query.origin_hex and (not result.is_valid() or result.path.is_empty() or result.path[0] == unit.current_hex):
+		return true
+	if not result.is_valid() or not query.has_accepted_target or unit.movement == null or unit.action_controller == null:
+		return false
+	if unit.action_controller.action_order_id != query.movement_order_id or unit.movement.target_hex != query.accepted_target:
+		return false
+	var arrived: bool = not unit.movement.is_moving and unit.current_hex == query.accepted_target and result.target_hex == unit.current_hex
+	if not unit.movement.is_moving and not arrived:
+		return false
+	var offset: int = result.path.find(unit.current_hex)
+	if offset < 0:
+		return false
+	var remaining: Array[Vector2i] = result.path.slice(offset)
+	if not _valid_snapshot_path(query, remaining, result.target_hex):
+		return false
+	# Progress along an owned, checked route removes exposure; it does not authorize
+	# movement from an unrelated new origin or replace a player's intervening order.
+	query.origin_hex = unit.current_hex
+	result.path = remaining
+	if arrived or (unit.movement.target_hex == result.target_hex and _is_following_path(unit, remaining)):
+		result.should_move = false
+	return true
+
+
+static func finish(query: PositionQuery, result: PositionResult, candidates: Array[PositionCandidate]) -> void:
+	if candidates.is_empty():
+		result.reason = "No reachable position satisfies geography, capacity and risk limits"
+		if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+			result.reason = "Holding: no safe support position has a safe route near the platoon"
+		if query.profile.mode == PositionProfile.Mode.DEFEND:
+			result.reason = "No covered reachable position protects the objective within the exposure budget"
+			if result.rejections.has("screen_gap"):
+				result.reason = "Holding until relocation can preserve existing approach coverage"
+			if query.required_crossing_branch != "":
+				result.reason = "Holding: no safe connected position can close the threatened open crossing"
+			if result.rejections.has("reserve_gap"):
+				result.reason = "Holding until relocation can preserve timely reserve response to other approaches"
+			if result.cell_states.has(PositionResult.CellState.WAITING_HANDOFF):
+				result.reason = "Waiting until departure preserves objective and approach protection"
+		return
+	candidates.sort_custom(_prefer_candidate)
+	var best: PositionCandidate = candidates[0]
+	var required_destination: bool = false
+	if query.goal_destination_required:
+		for candidate: PositionCandidate in candidates:
+			if candidate.hex == query.objective_hex:
+				# Only feasible, checked candidates can fulfil a geographic victory goal.
+				best = candidate
+				required_destination = true
+				break
+	result.proposed_hex = best.hex
+	var protected_choice: PositionCandidate = _prefer_connected_cover(query, best, candidates)
+	var protected_preference: bool = protected_choice != best
+	best = protected_choice
+	var retained: PositionCandidate = null
+	var prior: Vector2i = query.unit.current_hex
+	if query.has_accepted_target and query.accepted_context == result.context:
+		prior = query.accepted_target
+	for candidate: PositionCandidate in candidates:
+		if query.include_score_map:
+			result.score_map[candidate.index] = candidate.score
+		if candidate.hex == prior:
+			retained = candidate
+		if result.alternatives.size() < query.max_alternatives:
+			result.alternatives.append(candidate)
+	result.status = PositionResult.Status.ACCEPTED
+	var committed: bool = false
+	if retained != null:
+		result.previous_score = retained.score
+		var margin: float = maxf(query.profile.improvement_absolute, absf(retained.score) * query.profile.improvement_relative)
+		committed = _maintains_commitment(query, retained.hex, result.context)
+		var holding_pressure: bool = retained.features.get("holding_under_pressure", false)
+		# A healthy front holds; an enemy that passed the screen can require a new interception.
+		if retained.features.get("responsibility") == "cover_approach" and best.features.get("interposition", 0.0) > retained.features.get("interposition", 0.0):
+			holding_pressure = false
+		committed = committed or holding_pressure
+		if query.stability == null and query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and best.features.get("support_priority_need", 0.0) >= 0.35 and not retained.features.get("support_priority_covered", false) and (best.features.get("support_priority_covered", false) or best.features.get("support_priority_progress", 0.0) > retained.features.get("support_priority_progress", 0.0)):
+			# New urgent support can interrupt a safe but unhelpful HQ commitment.
+			committed = false
+			margin = 0.0
+		var retain_position: bool = committed or best.score <= retained.score + margin
+		if query.stability != null:
+			retain_position = not query.stability.authorize(query, best, retained)
+			committed = query.stability.minimum_hold_active(query)
+		if required_destination and retained.hex != query.objective_hex:
+			retain_position = false
+			query.movement_kind = "goal"
+		if retain_position:
+			best = retained
+			result.status = PositionResult.Status.RETAINED
+	elif query.stability != null:
+		query.stability.authorize(query, best, null)
+	result.target_hex = best.hex
+	result.target_index = best.index
+	result.score = best.score
+	result.features = best.features
+	if query.goal_key != "":
+		result.features["scenario_goal"] = query.goal_key
+	result.features["movement_kind"] = query.movement_kind
+	result.features["connected_cover_preferred"] = protected_preference and best == protected_choice
+	result.path = best.path
+	if best.features.get("withdrawal", false):
+		result.decision = PositionResult.Decision.WITHDRAW
+	elif best.features.get("holding_under_pressure", false):
+		result.decision = PositionResult.Decision.HOLD_DEFENSE
+	result.should_move = best.hex != query.unit.current_hex
+	# Continuing an already accepted move should not restart the action every tick.
+	if query.has_accepted_target and query.accepted_context == result.context and best.hex == query.accepted_target and query.unit.movement != null and query.unit.movement.is_moving and query.unit.movement.target_hex == best.hex and _is_following_path(query.unit, best.path):
+		result.should_move = false
+	result.reason = "Accepted a feasible position"
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		result.reason = "Accepted defensive " + str(best.features["responsibility"]) + " position"
+		if query.assigned_sector >= 0:
+			result.reason += " for sector %d (coverage %.0f%%)" % [query.assigned_sector, best.features.get("assigned_coverage", 0.0) * 100.0]
+		if query.required_crossing_branch != "":
+			result.reason += "; covers threatened woodland entrance"
+	if result.status == PositionResult.Status.RETAINED:
+		result.reason = "Retained the feasible position within the improvement margin"
+		if committed:
+			result.reason = "Maintained a safe defensive position commitment"
+	if result.decision == PositionResult.Decision.HOLD_DEFENSE:
+		result.reason = "Holding covered defensive responsibility under pressure"
+		if query.assigned_sector >= 0:
+			result.reason += " in sector %d" % query.assigned_sector
+	elif result.decision == PositionResult.Decision.WITHDRAW:
+		result.reason = "Mission-constrained withdrawal preserves approach coverage"
+		if result.target_hex == query.unit.current_hex:
+			result.reason = "Holding defensive responsibility until a covered withdrawal is available"
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		result.features["open_support_position"] = best.features["cover"] < query.profile.minimum_cover
+		result.reason = "Supporting nearby squads from cover; priority need %.2f" % best.features["support_priority_need"]
+		if best.features["cover"] < query.profile.minimum_cover:
+			result.reason = "Supporting nearby squads in open ground outside known good-order enemy LOS; priority need %.2f" % best.features["support_priority_need"]
+		if not best.features["support_priority_covered"] and best.features.get("support_priority_progress", 0.0) > 0.0:
+			result.reason = "Moving closer to the forward support squad; leadership range not yet reached"
+	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:
+		result.reason += "; preferred useful connected cover over a marginal detached firing gain"
+	if result.features.get("screen_fallback", false):
+		result.reason += "; no safe forward screen position is currently available"
+	if query.stability_reason != "" and result.status == PositionResult.Status.RETAINED:
+		result.reason = query.stability_reason
+	if query.goal_reason != "":
+		result.reason = query.goal_reason + " | " + result.reason
+	return
+
+
+static func _prefer_connected_cover(query: PositionQuery, best: PositionCandidate, candidates: Array[PositionCandidate]) -> PositionCandidate:
+	if query.profile.mode != PositionProfile.Mode.DEFEND or query.defense_area == null or best.features.get("objective_connected_cover", false):
+		return best
+	var starts_connected: bool = query.defense_area.geometry["return_open_costs"].get(query.origin_hex, INF) <= 0.000001
+	for candidate: PositionCandidate in candidates:
+		if not candidate.features.get("objective_connected_cover", false):
+			continue
+		# An established defense must not make a longer excursion to obtain connected cover.
+		# A squad starting outside that cover can still deploy into the objective's woods.
+		if starts_connected and candidate.features.get("open_crossing_seconds", 0.0) > best.features.get("open_crossing_seconds", 0.0) + 0.000001:
+			continue
+		# Spacing and depth do not justify leaving useful connected cover on their own.
+		var connected_score: float = candidate.score - query.profile.defensive_deployment_score(candidate.features)
+		var detached_score: float = best.score - query.profile.defensive_deployment_score(best.features)
+		var margin: float = maxf(query.profile.connected_cover_improvement_absolute, absf(connected_score) * query.profile.connected_cover_improvement_relative)
+		if detached_score <= connected_score + margin:
+			return candidate
+	return best
+
+
+static func rapid_candidate_score(query: PositionQuery, index: int) -> float:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var cell: Vector2i = map.index_to_cell(index)
+	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0 or not _in_geography(query, cell, false):
+		return -INF
+	var cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and cover < query.profile.minimum_cover:
+		return -INF
+	var target: Vector2i = query.objective_hex
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.support_targets.has(query.support_priority_squad):
+		target = query.support_targets[query.support_priority_squad]["hex"]
+	var destination_distance: int = LOSHelper.get_hex_distance(cell, target)
+	var travel: int = LOSHelper.get_hex_distance(query.origin_hex, cell)
+	var score: float = cover * 2.0 - float(travel) * 0.35 - float(destination_distance)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and query.defense_area != null:
+		# Shortlist firing positions for the assigned approach, not a ring around the flag.
+		var coverage: float = 0.0
+		for approach: Dictionary in query.defense_approaches:
+			if query.assigned_branch != "" and DefenseAreaAssessment.duty_key(approach) != query.assigned_branch:
+				continue
+			if query.assigned_sector >= 0 and approach["id"] != query.assigned_sector:
+				continue
+			if query.assigned_sector < 0 and query.defense_area.duty_priority(approach) < query.defense_area.max_duty_priority() * 0.4:
+				continue
+			coverage = maxf(coverage, query.defense_area.coverage(query, query.unit, cell, approach)["coverage"])
+		var formation: Dictionary = DefensePositionPolicy.deployment_features(query, cell)
+		score = cover * 2.0 + coverage * 5.0 - float(travel) * 0.15 - float(destination_distance) * 0.05
+		score += formation["mutual_support"] * query.profile.mutual_support_weight + formation["forward_depth"] * query.profile.forward_depth_weight - formation["formation_crowding"] * query.profile.formation_spacing_weight
+	score -= PositionFeatureEvaluator.risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)) * 4.0
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_area != null and query.defense_area.geometry["return_open_costs"].get(cell, INF) <= 0.000001:
+		score += 2.0
+	return score
+
+
+static func rapid_position_fulfils_role(query: PositionQuery, candidate: PositionCandidate) -> bool:
+	if candidate == null or candidate.features.get("withdrawal", false):
+		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		return query.support_targets.is_empty() or candidate.features.get("support_priority_covered", false)
+	if DefensePositionPolicy.needs_interception(query, candidate.features):
+		return false
+	if query.initial_deployment:
+		return false
+	if query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and candidate.features.get("assigned_sector", -1) >= 0:
+		return candidate.features.get("assigned_coverage", 0.0) >= DefensePositionPolicy.MIN_APPROACH_COVERAGE
+	return candidate.features.get("responsibility", "") != ""
+
+
+static func prepare_candidate(query: PositionQuery, index: int, fallback: bool, diagnostics: PositionResult) -> bool:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var cell: Vector2i = map.index_to_cell(index)
+	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0:
+		_reject(diagnostics, "terrain", index)
+		return false
+	if not _in_geography(query, cell, fallback):
+		# A fallback search must not erase a completed primary-position diagnosis.
+		if not fallback or diagnostics.rejection_reasons[index] == "geography":
+			_reject(diagnostics, "geography", index)
+		return false
+	if _occupied(query, cell):
+		_reject(diagnostics, "capacity", index)
+		return false
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
+		var rejection: String = HqSupportPositionPolicy.rejection(query, features, false)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			return false
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, [])
+		if features["cover"] < query.profile.minimum_cover:
+			_reject(diagnostics, "cover", index)
+			return false
+		var rejection: String = DefensePositionPolicy.rejection(query, cell, features, false)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			return false
+	return true
+
+
+static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: PositionResult) -> PositionCandidate:
+	var cell: Vector2i = query.snapshot.maps[query.team].index_to_cell(index)
+	var path: Array[Vector2i] = _path_to_candidate(query, cell)
+	if path.is_empty():
+		_reject(diagnostics, "route", index)
+		return null
+	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
+		_reject(diagnostics, "unsuppressed_defender", index)
+		return null
+	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, path)
+	if features["cover"] < query.profile.minimum_cover and query.profile.mode != PositionProfile.Mode.HQ_SUPPORT:
+		_reject(diagnostics, "cover", index)
+		return null
+	if query.profile.mode == PositionProfile.Mode.DEFEND:
+		var rejection: String = DefensePositionPolicy.rejection(query, cell, features)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			if rejection == "handoff_wait":
+				diagnostics.cell_states[index] = PositionResult.CellState.WAITING_HANDOFF
+				if query.include_score_map:
+					diagnostics.score_map[index] = query.profile.score(features, query.unit)
+			return null
+	elif query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		var rejection: String = HqSupportPositionPolicy.rejection(query, features)
+		if rejection != "":
+			_reject(diagnostics, rejection, index)
+			return null
+	elif features["incoming"] > query.profile.max_incoming_risk or features["peak_exposure"] > query.profile.max_route_exposure:
+		_reject(diagnostics, "risk", index)
+		return null
+	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE and features["firing"] <= 0.0 and features.get("support_advance", 0.0) <= 0.0:
+		_reject(diagnostics, "firing", index)
+		return null
+	diagnostics.eligibility[index] = 1
+	diagnostics.cell_states[index] = PositionResult.CellState.AVAILABLE
+	diagnostics.rejection_reasons[index] = ""
+	var candidate: PositionCandidate = PositionCandidate.new()
+	candidate.hex = cell
+	candidate.index = index
+	candidate.features = features
+	candidate.path = path
+	candidate.score = query.profile.score(features, query.unit)
+	return candidate
+
+
+static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -> bool:
+	if path.is_empty():
+		return false
+	if query.press_attack and not press_attack_path_is_safe(query.snapshot, query.team, query.origin_hex, path):
+		return false
+	if path.size() == 2 and path[0] == query.origin_hex and LOSHelper.get_hex_distance(path[0], path[1]) == 1 and can_enter_suppressed_enemy_hex(query, path[1]):
+		# The supported final step enters close combat; ordinary approaches keep their separation.
+		return true
+	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
+		if not contact.observed or TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			continue
+		if not TacticalPositionExecutor.is_active_defender(contact.unit):
+			continue
+		if LOSHelper.get_hex_distance(path[-1], contact.hex) <= 1:
+			return false
+		for step: Vector2i in path:
+			if step != query.origin_hex and LOSHelper.get_hex_distance(step, contact.hex) <= 1:
+				return false
+	return true
+
+
+static func press_attack_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i]) -> bool:
+	if path.is_empty():
+		return false
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
+		if contact.observed and (not TacticalPositionExecutor.is_active_defender(contact.unit) or TacticalPositionExecutor.is_overwhelmed(contact.unit)):
+			continue
+		for step: Vector2i in path:
+			if step != origin and (LOSHelper.get_hex_distance(step, contact.hex) <= 1 or snapshot.los.get(contact.hex, {}).has(step)):
+				return false
+	return true
+
+
+static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:
+	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
+		return HqSupportPositionPolicy.in_geography(query, cell)
+	if query.protect_garrison_hex and cell == query.objective_hex:
+		return false
+	if fallback:
+		return query.fallback_hexes.has(cell)
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.minimum_forward_progress > 0 and not query.allow_screen_fallback and DefensePositionPolicy.forward_progress(query, cell) < query.minimum_forward_progress:
+		return false
+	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
+	if query.profile.mode == PositionProfile.Mode.DEFEND or query.profile.mode == PositionProfile.Mode.LEGACY_DEFENSE:
+		if query.geography == PositionQuery.Geography.SECTOR_ONLY:
+			return query.sector_cells.has(cell)
+		if query.geography == PositionQuery.Geography.OBJECTIVE_RADIUS:
+			return objective_distance <= query.defense_radius
+		return objective_distance <= query.defense_radius or query.sector_cells.has(cell)
+	if LOSHelper.get_hex_distance(query.unit.current_hex, cell) > query.movement_radius:
+		return false
+	if query.goal_destination_required and query.unit.current_hex == query.objective_hex:
+		return cell == query.objective_hex
+	if query.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+		if query.stability != null and query.stable_order != null and cell == query.unit.current_hex:
+			# Judge the held position by its useful live firing lane, even after fire priority shifts.
+			return true
+		if query.has_support_anchor and LOSHelper.get_hex_distance(cell, query.support_anchor_hex) < LOSHelper.get_hex_distance(query.origin_hex, query.support_anchor_hex):
+			return true
+		return objective_distance > 0 and objective_distance <= InfluenceUnitQuery.get_unit_range(query.unit)
+	if query.profile.mode == PositionProfile.Mode.ASSAULT:
+		if query.profile.enter_suppressed_enemy_hex:
+			return objective_distance == 0
+		return objective_distance <= 1
+	return objective_distance <= LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex)
+
+
+static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
+	if can_enter_suppressed_enemy_hex(query, cell):
+		return false
+	var shared_goal: bool = query.goal_capacity > 1 and cell == query.objective_hex
+	var occupants: Dictionary[Unit, bool] = {}
+	for other: Unit in query.reservations:
+		if other != query.unit and is_instance_valid(other) and other.alive and query.reservations[other] == cell:
+			if shared_goal:
+				occupants[other] = true
+			elif not HqSupportPositionPolicy.can_share_position(query.unit, other):
+				return true
+	for other: Unit in query.snapshot.positions:
+		if other != query.unit and query.snapshot.teams[other] == query.team and query.snapshot.positions[other] == cell:
+			if shared_goal:
+				occupants[other] = true
+			elif not HqSupportPositionPolicy.can_share_position(query.unit, other):
+				return true
+	if shared_goal and occupants.size() >= query.goal_capacity:
+		return true
+	# Cleared tactical memory must also release occupied-hex restrictions after a surrender.
+	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		if contact.hex == cell and (not contact.observed or TacticalPositionExecutor.is_active_defender(contact.unit)):
+			return true
+	return false
+
+
+static func can_enter_suppressed_enemy_hex(query: PositionQuery, cell: Vector2i) -> bool:
+	if query.profile.mode != PositionProfile.Mode.ASSAULT or not query.profile.enter_suppressed_enemy_hex or cell != query.objective_hex:
+		return false
+	var has_defender: bool = false
+	for contact: InfluenceContact in query.snapshot.get_contacts(query.team):
+		if contact.hex != cell:
+			continue
+		if not contact.observed or not TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+			return false
+		has_defender = true
+	return has_defender
+
+
+static func _prefer_candidate(a: PositionCandidate, b: PositionCandidate) -> bool:
+	if not is_equal_approx(a.score, b.score):
+		return a.score > b.score
+	if not is_equal_approx(a.features["travel"], b.features["travel"]):
+		return a.features["travel"] < b.features["travel"]
+	return a.index < b.index
+
+
+static func can_assault(unit: Unit) -> bool:
+	if InfluenceUnitQuery.get_unit_effectiveness(unit) < 0.6 or InfluenceUnitQuery.get_unit_firepower(unit) <= 0.0:
+		return false
+	if unit.stress_system != null and unit.stress_system.state != Unit.MoraleState.NORMAL and unit.stress_system.state != Unit.MoraleState.CAUTIOUS:
+		return false
+	return unit.squad_type != Globals.SquadType.PLATOON_HEADQUARTERS and unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and unit.squad_type != Globals.SquadType.MORTAR
+
+
+static func _reject(diagnostics: PositionResult, reason: String, index: int) -> void:
+	diagnostics.rejections[reason] = diagnostics.rejections.get(reason, 0) + 1
+	diagnostics.cell_states[index] = PositionResult.CellState.REJECTED
+	diagnostics.rejection_reasons[index] = reason
+
+
+static func _is_following_path(unit: Unit, recommended: Array[Vector2i]) -> bool:
+	return _remaining_path(unit) == recommended
+
+
+static func _remaining_path(unit: Unit) -> Array[Vector2i]:
+	var movement: UnitMovement = unit.movement
+	var remaining: Array[Vector2i] = [unit.current_hex]
+	for index: int in range(movement.path_index, movement.path_hexes.size()):
+		var cell: Vector2i = movement.path_hexes[index]
+		if remaining[-1] != cell:
+			remaining.append(cell)
+	if movement.attack_in_progress and not movement.in_exposed_phase:
+		for cell: Vector2i in movement.exposed_path_hexes:
+			if remaining[-1] != cell:
+				remaining.append(cell)
+	return remaining
+
+
+static func _maintains_commitment(query: PositionQuery, cell: Vector2i, context: String) -> bool:
+	if query.stability != null:
+		return query.stability.minimum_hold_active(query)
+	if query.profile.commitment_seconds <= 0.0 or not query.has_accepted_target or query.accepted_context != context or query.accepted_target != cell:
+		return false
+	return query.snapshot.captured_at - query.accepted_at < query.profile.commitment_seconds or _moving_to(query.unit, cell)
+
+
+static func _moving_to(unit: Unit, cell: Vector2i) -> bool:
+	return unit.movement != null and unit.movement.is_moving and unit.movement.target_hex == cell
+
+
+static func _path_to_candidate(query: PositionQuery, cell: Vector2i) -> Array[Vector2i]:
+	if query.profile.mode == PositionProfile.Mode.DEFEND and query.has_accepted_target and query.accepted_context == query.context_key() and cell == query.accepted_target and _moving_to(query.unit, cell):
+		var remaining: Array[Vector2i] = _remaining_path(query.unit)
+		if _valid_snapshot_path(query, remaining, cell):
+			var features: Dictionary = PositionFeatureEvaluator.evaluate(query, cell, remaining)
+			if DefensePositionPolicy.allows_route(query, features):
+				return remaining
+	if query.route_field != null:
+		return query.route_field.path_to(cell)
+	return query.snapshot.get_path(query.team, query.unit.current_hex, cell)
+
+
+static func _valid_snapshot_path(query: PositionQuery, path: Array[Vector2i], target: Vector2i) -> bool:
+	if path.is_empty() or path[-1] != target or not query.snapshot.routes.has(query.team):
+		return false
+	var graph: AStar2D = query.snapshot.routes[query.team]
+	var ids: Dictionary = query.snapshot.point_ids[query.team]
+	var previous: int = -1
+	for cell: Vector2i in path:
+		if not ids.has(cell) or graph.is_point_disabled(ids[cell]):
+			return false
+		var id: int = ids[cell]
+		if previous >= 0 and previous != id and not graph.are_points_connected(previous, id):
+			return false
+		previous = id
+	return true
+
+
+static func can_follow_intent(unit: Unit) -> bool:
+	if not unit.is_active() or unit.in_close_combat:
+		return false
+	if unit.stress_system == null:
+		return true
+	return unit.stress_system.state not in [Unit.MoraleState.PINNED, Unit.MoraleState.PANIC, Unit.MoraleState.COMBAT_INEFFECTIVE]

@@ -1,0 +1,444 @@
+[gd_scene format=3 uid="uid://jdf7ewo2axfy"]
+
+[ext_resource type="Script" uid="uid://b5vyf02rqgj4u" path="res://scenes/ui/hud/battle_hud.gd" id="1_u7n8c"]
+[ext_resource type="Theme" uid="uid://g173hug4jpgu" path="res://resources/theme/battle_hud_theme.tres" id="3_mgwkc"]
+[ext_resource type="PackedScene" uid="uid://drx5i53cecl3o" path="res://scenes/ui/units/unit_stats_summary.tscn" id="5_0dwhk"]
+[ext_resource type="Script" uid="uid://cug54uuykli2b" path="res://scenes/ui/hud/match_countdown_panel.gd" id="5_svq4k"]
+[ext_resource type="Script" uid="uid://duwe3tkqjv0bw" path="res://scenes/ui/tooltips/tooltip.gd" id="12_hl07w"]
+[ext_resource type="Texture2D" uid="uid://bqd13o05q3ngp" path="res://assets/status/idle.png" id="13_swkix"]
+[ext_resource type="StyleBox" uid="uid://dr6ppkwicbqat" path="res://resources/styles/tooltip_style.tres" id="15_mgwkc"]
+[ext_resource type="Script" uid="uid://ovp1t711br88" path="res://scenes/ui/panels/debug_panel.gd" id="24_fv78h"]
+[ext_resource type="PackedScene" uid="uid://0euyuvdqduxs" path="res://scenes/ui/orders/unit_command_wheel.tscn" id="25_fqqne"]
+[ext_resource type="PackedScene" uid="uid://c6xxmjtgtwwtj" path="res://scenes/ui/orders/move_fire_command_wheel.tscn" id="25_o71gb"]
+[ext_resource type="Script" uid="uid://jcslscqj1lw" path="res://scenes/ui/orders/unit_command_wheel_option.gd" id="26_vnqvi"]
+[ext_resource type="Texture2D" uid="uid://de0tm7x6agxul" path="res://assets/ui/option_wheel/moving_ger.png" id="27_7ygsn"]
+[ext_resource type="Texture2D" uid="uid://oke3eemypsxs" path="res://assets/ui/option_wheel/shooting_ger.png" id="28_272wc"]
+[ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="29_knhlc"]
+[ext_resource type="Script" uid="uid://csetsm3mvbeux" path="res://scenes/ui/hud/mission_objectives_panel.gd" id="30_mission"]
+[ext_resource type="PackedScene" path="res://scenes/ui/units/unit_details_panel.tscn" id="31_squad"]
+[ext_resource type="PackedScene" uid="uid://hfmqv1l4ns6q" path="res://scenes/ui/units/squad_roster_panel.tscn" id="32_roster"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/battle_settings_panel.tscn" id="33_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tiles/terrain_card.tscn" id="35_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tiles/hex_hint_panel.tscn" id="36_hint"]
+[ext_resource type="Texture2D" uid="uid://5c46ui0ehlo5" path="res://assets/ui/hud/rout.svg" id="37_rout"]
+
+[ext_resource type="Script" path="res://scenes/ui/hud/hud_root.gd" id="hud_root"]
+
+[sub_resource type="StyleBoxEmpty" id="RetryPanel"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
+atlas = ExtResource("27_7ygsn")
+region = Rect2(0, 0, 64, 64)
+script = ExtResource("26_vnqvi")
+option = 1
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fff2e"]
+atlas = ExtResource("28_272wc")
+region = Rect2(0, 0, 64, 64)
+script = ExtResource("26_vnqvi")
+option = 4
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ia5md"]
+atlas = ExtResource("29_knhlc")
+region = Rect2(0, 0, 1015, 1023)
+script = ExtResource("26_vnqvi")
+option = 6
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_o2sfg"]
+load_path = "res://.godot/imported/moving_ger.png-8a57d4315287c6a7a2caaedcab290ec2.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yy7ol"]
+atlas = SubResource("CompressedTexture2D_o2sfg")
+script = ExtResource("26_vnqvi")
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rout"]
+atlas = ExtResource("37_rout")
+region = Rect2(0, 0, 32, 32)
+script = ExtResource("26_vnqvi")
+option = 7
+metadata/_custom_type_script = "uid://jcslscqj1lw"
+
+[node name="Ui" type="CanvasLayer" unique_id=2069341874]
+script = ExtResource("1_u7n8c")
+unit_stats_details_scene = ExtResource("5_0dwhk")
+
+[node name="Control" type="Control" parent="." unique_id=1453572020]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("3_mgwkc")
+
+script = ExtResource("hud_root")
+
+[node name="Countdown" type="PanelContainer" parent="Control" unique_id=192447120]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -55.0
+offset_top = 6.0
+offset_right = 175.0
+offset_bottom = 44.0
+grow_horizontal = 2
+theme_override_styles/panel = ExtResource("15_mgwkc")
+script = ExtResource("5_svq4k")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Countdown" unique_id=1844887456]
+layout_mode = 2
+alignment = 1
+
+[node name="Label2" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=208135704]
+layout_mode = 2
+theme_type_variation = &"HudTimer"
+text = "Time left: "
+
+[node name="TimerLabel" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=898658969]
+layout_mode = 2
+theme_type_variation = &"HudTimer"
+text = "10:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Control/Countdown/HBoxContainer" unique_id=1821792669]
+visible = false
+layout_mode = 2
+text = "Minutes"
+
+[node name="MissionObjectives" type="PanelContainer" parent="Control" unique_id=1608121920]
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_force_pass_scroll_events = false
+script = ExtResource("30_mission")
+
+[node name="Objectives" type="FoldableContainer" parent="Control/MissionObjectives" unique_id=1217781514]
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+title = "Objectives"
+
+[node name="Scroll" type="ScrollContainer" parent="Control/MissionObjectives/Objectives"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Control/MissionObjectives/Objectives/Scroll" unique_id=665202199]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="OrderFeedback" type="PanelContainer" parent="Control" unique_id=1882773115]
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="Control/OrderFeedback" unique_id=1786721366]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Control/OrderFeedback/Content" unique_id=1067925969]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+horizontal_alignment = 1
+
+[node name="Explanation" type="Label" parent="Control/OrderFeedback/Content" unique_id=1099516385]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HideTimer" type="Timer" parent="Control/OrderFeedback" unique_id=402444352]
+wait_time = 3.0
+one_shot = true
+
+[node name="TileDetails" parent="Control" unique_id=200690569 instance=ExtResource("35_terrain")]
+layout_mode = 1
+
+[node name="Settings" parent="Control" unique_id=1578816844 instance=ExtResource("33_settings")]
+z_index = 10
+layout_mode = 1
+
+[node name="TryAgain" type="PanelContainer" parent="Control" unique_id=1575236921]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -175.0
+offset_top = 6.0
+offset_right = -63.0
+offset_bottom = 44.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("RetryPanel")
+
+[node name="ColorRect" type="ColorRect" parent="Control/TryAgain" unique_id=1726606033]
+visible = false
+layout_mode = 2
+color = Color(0.233925, 0.233925, 0.233925, 1)
+
+[node name="TryAgainButton" type="Button" parent="Control/TryAgain" unique_id=567185487]
+layout_mode = 2
+text = "Main Menu"
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/TryAgain" unique_id=2091473546]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TargetCoverDistance" parent="Control" unique_id=891986501 instance=ExtResource("36_hint")]
+layout_mode = 0
+
+[node name="HexEdgeHint" parent="Control" unique_id=1834052510 instance=ExtResource("36_hint")]
+layout_mode = 0
+
+[node name="UnitDetails" parent="Control" unique_id=429693124 instance=ExtResource("31_squad")]
+layout_mode = 1
+
+[node name="SquadRoster" parent="Control" unique_id=88355625 instance=ExtResource("32_roster")]
+visible = false
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 252.0
+offset_bottom = 236.0
+
+[node name="Tooltip" type="PanelContainer" parent="Control" unique_id=784359479]
+z_index = 20
+layout_mode = 0
+offset_left = 45.0
+offset_top = 70.0
+offset_right = 396.0
+offset_bottom = 167.0
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("15_mgwkc")
+script = ExtResource("12_hl07w")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Tooltip" unique_id=115991343]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Tooltip/VBoxContainer" unique_id=882565347]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Control/Tooltip/VBoxContainer/HBoxContainer" unique_id=1646175099]
+layout_mode = 2
+texture = ExtResource("13_swkix")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="TooltipHeader" type="Label" parent="Control/Tooltip/VBoxContainer/HBoxContainer" unique_id=1847268092]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Squad Status"
+
+[node name="TooltipText" type="Label" parent="Control/Tooltip/VBoxContainer" unique_id=1776387298]
+layout_mode = 2
+text = "The Moral Status of the selected Squad"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/Tooltip/VBoxContainer" unique_id=1501650455]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+text = "[b]Squad Status[/b]
+
+The Moral Status of the selected Squad"
+fit_content = true
+autowrap_mode = 2
+
+[node name="Debug" type="PanelContainer" parent="Control" unique_id=367192536]
+theme_type_variation = &"HudCompactPanel"
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -54.0
+offset_right = 292.0
+offset_bottom = -12.0
+grow_vertical = 0
+mouse_force_pass_scroll_events = false
+script = ExtResource("24_fv78h")
+
+[node name="FoldableContainer" type="FoldableContainer" parent="Control/Debug" unique_id=2132168822]
+layout_mode = 2
+folded = true
+title = "Debug controls"
+
+[node name="Scroll" type="ScrollContainer" parent="Control/Debug/FoldableContainer" unique_id=1684346561]
+visible = false
+custom_minimum_size = Vector2(0, 270)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Debug/FoldableContainer/Scroll" unique_id=593117933]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShowAIPlacement" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=1459576849]
+layout_mode = 2
+tooltip_text = "Show influence maps, suggested squad positions and approach corridors. Select a squad to inspect its placement."
+text = "AI placement overlays"
+
+[node name="AIPlacementOptions" type="VBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=114009586]
+visible = false
+layout_mode = 2
+
+[node name="LayerLabel" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions" unique_id=1723605684]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "Influence layer"
+
+[node name="Layer" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions" unique_id=1165752088]
+layout_mode = 2
+tooltip_text = "Choose the influence map or inspect the selected squad's placement."
+
+[node name="Team" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AIPlacementOptions" unique_id=1933263003]
+layout_mode = 2
+tooltip_text = "Team whose influence map is shown. Squad placement follows the selected squad's team."
+
+[node name="ShowDebugText" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=953674941]
+layout_mode = 2
+tooltip_text = "Show numeric influence values, AI diagnostics and squad ammunition counters. Morale arrows remain visible during normal play."
+text = "Debug text"
+
+[node name="EnemySelectable" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=139947713]
+layout_mode = 2
+text = "Enemy Selectable"
+
+[node name="NoDamage" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=252701230]
+layout_mode = 2
+text = "No Damage"
+
+[node name="AxisAI" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=807987063]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1322665241]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Axis AI"
+
+[node name="Status" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1965840446]
+layout_mode = 2
+tooltip_text = "Enable or disable automatic Axis orders."
+disabled = true
+selected = 0
+item_count = 2
+popup/item_0/text = "OFF"
+popup/item_0/id = 0
+popup/item_1/text = "ON"
+popup/item_1/id = 1
+
+[node name="Mode" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AxisAI" unique_id=1904751932]
+layout_mode = 2
+tooltip_text = "ATTACK the Axis objective or DEFEND the opponent's capture objective."
+disabled = true
+selected = 0
+item_count = 2
+popup/item_0/text = "DEFEND"
+popup/item_0/id = 1
+popup/item_1/text = "ATTACK"
+popup/item_1/id = 4
+
+[node name="AlliesAI" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=1248816649]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=450887293]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Allies AI"
+
+[node name="Status" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=1922700129]
+layout_mode = 2
+tooltip_text = "Enable or disable automatic Allied orders."
+disabled = true
+selected = 0
+item_count = 2
+popup/item_0/text = "OFF"
+popup/item_0/id = 0
+popup/item_1/text = "ON"
+popup/item_1/id = 1
+
+[node name="Mode" type="OptionButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/AlliesAI" unique_id=998108012]
+layout_mode = 2
+tooltip_text = "ATTACK the Allied objective or DEFEND the opponent's capture objective."
+disabled = true
+selected = 0
+item_count = 2
+popup/item_0/text = "DEFEND"
+popup/item_0/id = 1
+popup/item_1/text = "ATTACK"
+popup/item_1/id = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=1448464392]
+layout_mode = 2
+
+[node name="ThreadMap" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer" unique_id=1700656099]
+layout_mode = 2
+text = "Threat markers"
+
+[node name="EnemyTeam" type="CheckButton" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer" unique_id=258743114]
+layout_mode = 2
+text = "Enemy"
+
+[node name="ShowEnemyCmdConnectivity" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=911341287]
+layout_mode = 2
+text = "Enemy CMD Conn."
+
+[node name="DontFireWeapons" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=776047202]
+layout_mode = 2
+text = "Dont Fire Weapons"
+
+[node name="ShowLosLines" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=2004144681]
+layout_mode = 2
+text = "Show LOS Lines"
+
+[node name="ShowMovementLines" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=480014847]
+layout_mode = 2
+text = "Show Movement Lines"
+
+[node name="HideFogOfWar" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=409354570]
+layout_mode = 2
+text = "Hide Fog Of War"
+
+[node name="ShowEnemies" type="CheckBox" parent="Control/Debug/FoldableContainer/Scroll/VBoxContainer" unique_id=106533866]
+layout_mode = 2
+text = "Show Enemies"
+
+[node name="SelectionWheelAlt" parent="Control" unique_id=273686875 instance=ExtResource("25_fqqne")]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+grow_horizontal = 1
+grow_vertical = 1
+options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol"), SubResource("AtlasTexture_rout")])
+
+[node name="SelectionWheel" parent="Control" unique_id=266719107 instance=ExtResource("25_o71gb")]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+grow_horizontal = 1
+grow_vertical = 1
+
+[connection signal="pressed" from="Control/TryAgain/TryAgainButton" to="." method="_on_try_again_button_pressed"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/EnemySelectable" to="Control/Debug" method="_on_enemy_selectable_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/NoDamage" to="Control/Debug" method="_on_no_damage_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer/ThreadMap" to="Control/Debug" method="_on_thread_map_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HBoxContainer/EnemyTeam" to="Control/Debug" method="_on_enemy_team_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowEnemyCmdConnectivity" to="Control/Debug" method="_on_show_enemy_cmd_connectivity_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/DontFireWeapons" to="Control/Debug" method="_on_dont_fire_weapons_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowLosLines" to="Control/Debug" method="_on_show_los_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowMovementLines" to="Control/Debug" method="_on_show_movement_lines_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/HideFogOfWar" to="Control/Debug" method="_on_hide_fog_of_war_toggled"]
+[connection signal="toggled" from="Control/Debug/FoldableContainer/Scroll/VBoxContainer/ShowEnemies" to="Control/Debug" method="_on_show_enemies_toggled"]

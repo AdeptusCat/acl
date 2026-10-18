@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://hfmqv1l4ns6q"]
+
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="hud_theme"]
+
+[ext_resource type="Script" uid="uid://dyily6tl0tasi" path="res://scenes/ui/units/squad_roster_panel.gd" id="1"]
+
+[node name="SquadRoster" type="PanelContainer" unique_id=658569864]
+visible = false
+custom_minimum_size = Vector2(252, 0)
+offset_left = 12.0
+offset_top = 6.0
+offset_right = 264.0
+offset_bottom = 242.0
+mouse_force_pass_scroll_events = false
+theme_type_variation = &"HudCompactPanel"
+theme = ExtResource("hud_theme")
+script = ExtResource("1")
+
+[node name="Roster" type="FoldableContainer" parent="." unique_id=998437078]
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+title = "Squads"
+
+[node name="Content" type="VBoxContainer" parent="Roster" unique_id=2017387535]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Columns" type="HBoxContainer" parent="Roster/Content" unique_id=1280133857]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Squad" type="Label" parent="Roster/Content/Columns" unique_id=1143512562]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Squad / morale"
+theme_type_variation = &"HudSecondary"
+
+[node name="Strength" type="Label" parent="Roster/Content/Columns" unique_id=1453835028]
+layout_mode = 2
+text = "Strength"
+theme_type_variation = &"HudSecondary"
+
+[node name="Scroll" type="ScrollContainer" parent="Roster/Content" unique_id=51729640]
+custom_minimum_size = Vector2(0, 168)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_force_pass_scroll_events = false
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Groups" type="VBoxContainer" parent="Roster/Content/Scroll" unique_id=1587497807]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64">
+<defs><clipPath id="hex"><path d="M16 0H48L64 32 48 64H16L0 32Z"/></clipPath></defs>
+<g clip-path="url(#hex)" fill="none" stroke-linejoin="round">
+<path d="M-16 0L32 32 80 0" stroke="#6f725e" stroke-width="12"/>
+<path d="M-16 0L32 32 80 0" stroke="#b9b097" stroke-width="9"/>
+</g>
+</svg>

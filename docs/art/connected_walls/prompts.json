@@ -1,0 +1,15 @@
+{
+  "provider": "built-in imagegen",
+  "images": [
+    {
+      "style": "stone",
+      "source": "res://assets/tiles/walls/connected/source/stone.png",
+      "prompt": "Use case: stylized-concept. Asset type: reusable top-down stone masonry texture strip for a 128px hex-grid tactical game. Create ONE straight horizontal dry-stone garden wall, viewed from directly overhead, isolated on a genuinely transparent background. Long thin horizontal strip centered on the canvas, spanning 85% of canvas width and approximately 12% of its height, generous transparent margin. Grey irregular weathered limestone blocks with readable fitted mortar joints, slightly warm grey light capstones, dark sides, subtle tiny moss patches. Hand-painted detailed realistic 2D strategy-game sprite, matching medieval/rural wooden brown-roof houses and grey-roof stone houses. The wall must have constant thickness and uniform height, continuous masonry, no pillar, no gap, no taper, no plants/grass/ground/background, no border, no labels. Both end cut faces flat at right angles. Neutral soft overhead illumination with very subtle edge shading, no long cast shadow. Orthographic top-down, no perspective, no angled view. This will be cropped into a repeating stone material and mapped precisely along hex-grid connections; prioritize high-resolution material detail and even surface width."
+    },
+    {
+      "style": "hedge",
+      "source": "res://assets/tiles/walls/connected/source/hedge.png",
+      "prompt": "Use case: stylized-concept. Asset type: reusable top-down rural hedgerow texture strip for a 128px hex-grid tactical game. Create ONE straight horizontal dense living hedge, viewed from directly overhead, isolated on a genuinely transparent background. Long thin horizontal strip centered on the canvas, spanning 85% of canvas width and approximately 16% of its height, generous transparent margin. Fine small leaves and tightly interwoven rounded shrub crowns forming an unbroken thick hedgerow, rich muted natural green with olive highlights, dark green shadow depth, subtle occasional woody twigs. Hand-painted detailed realistic 2D strategy-game sprite matching rural wooden houses and grey limestone walls. Constant average width and continuous foliage, soft irregular leafy edges but no gaps. No trees or trunks, no individual isolated bushes, no grass/ground/background, no border, no labels. Both ends flat/fully filled to permit seamless repeat. Neutral soft overhead illumination, no long cast shadow. Orthographic top-down, no perspective, no angled view. This will be cropped into a repeating foliage material and mapped precisely along hex-grid connections; prioritize high-resolution organic texture and even surface coverage."
+    }
+  ]
+}

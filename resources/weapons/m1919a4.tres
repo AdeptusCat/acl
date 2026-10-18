@@ -16,6 +16,7 @@ range_hexes = 12
 accuracy_base = 0.52
 kind = 1
 type = 1
+mount = 2
 fire_mode = 1
 crew_required = 2
 support_crew_optimal = 2

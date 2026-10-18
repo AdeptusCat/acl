@@ -1,0 +1,201 @@
+[gd_scene format=3 uid="uid://dry4o5rpga2ec"]
+
+[ext_resource type="Script" uid="uid://cu06jcpwigm47" path="res://scenes/ui/screens/scenario_selection_screen.gd" id="1"]
+[ext_resource type="Theme" uid="uid://g173hug4jpgu" path="res://resources/theme/battle_hud_theme.tres" id="2"]
+[ext_resource type="FontFile" uid="uid://br0f33pkoxrkr" path="res://assets/fonts/courier_prime/Courier Prime Bold.ttf" id="3_bold"]
+
+[node name="StartScreen" type="CanvasLayer" unique_id=944251599]
+layer = 2
+script = ExtResource("1")
+
+[node name="Control" type="Control" parent="." unique_id=1593971129]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+
+[node name="Backdrop" type="ColorRect" parent="Control" unique_id=1362393243]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.02, 0.88)
+
+[node name="Center" type="CenterContainer" parent="Control" unique_id=544851687]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Control/Center" unique_id=1831045825]
+custom_minimum_size = Vector2(960, 0)
+layout_mode = 2
+
+[node name="Content" type="VBoxContainer" parent="Control/Center/Panel" unique_id=1349924930]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Control/Center/Panel/Content" unique_id=118880055]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Control/Center/Panel/Content/Header" unique_id=2106418874]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudHeading"
+text = "Select mission"
+
+[node name="Time" type="HBoxContainer" parent="Control/Center/Panel/Content/Header" unique_id=60453629]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Control/Center/Panel/Content/Header/Time" unique_id=792592777]
+layout_mode = 2
+text = "Mission time"
+
+[node name="Minutes" type="SpinBox" parent="Control/Center/Panel/Content/Header/Time" unique_id=2107742937]
+layout_mode = 2
+min_value = 1.0
+max_value = 15.0
+value = 3.0
+
+[node name="Unit" type="Label" parent="Control/Center/Panel/Content/Header/Time" unique_id=1745767362]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "minutes"
+
+[node name="Body" type="HBoxContainer" parent="Control/Center/Panel/Content" unique_id=1472455081]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ScenarioScroll" type="ScrollContainer" parent="Control/Center/Panel/Content/Body" unique_id=589798293]
+custom_minimum_size = Vector2(260, 420)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Maps" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/ScenarioScroll" unique_id=539680857]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="BriefingScroll" type="ScrollContainer" parent="Control/Center/Panel/Content/Body" unique_id=1960863329]
+custom_minimum_size = Vector2(400, 420)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="Briefing" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll" unique_id=2018733174]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=1318761947]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Mission briefing"
+autowrap_mode = 3
+
+[node name="Availability" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=324840379]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.73, 0.45, 1)
+autowrap_mode = 3
+
+[node name="Faction" type="HBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=552777818]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Flag" type="TextureRect" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Faction" unique_id=424192176]
+visible = false
+custom_minimum_size = Vector2(60, 36)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Player" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Faction" unique_id=40120656]
+layout_mode = 2
+
+[node name="Description" type="RichTextLabel" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=194561682]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.93, 0.91, 0.82, 1)
+theme_override_fonts/bold_font = ExtResource("3_bold")
+bbcode_enabled = true
+text = "Select a scenario to read its briefing, then press Start mission."
+fit_content = true
+scroll_active = false
+
+[node name="Forces" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=122365906]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerHeading" type="HBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces" unique_id=1339368649]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerHeading" unique_id=1181460816]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudHeading"
+text = "Your force"
+
+[node name="Hint" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerHeading" unique_id=1520547090]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "Hover a squad for details"
+
+[node name="PlayerRoster" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces" unique_id=624499861]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EnemyHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces" unique_id=853661055]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Enemy assessment"
+
+[node name="EnemyAssessment" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces" unique_id=1653656388]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="MajorHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=1716918272]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Primary objectives"
+
+[node name="MajorObjectives" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=1161673014]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MinorHeading" type="Label" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=1386664008]
+visible = false
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Secondary objectives"
+
+[node name="MinorObjectives" type="VBoxContainer" parent="Control/Center/Panel/Content/Body/BriefingScroll/Briefing" unique_id=1877249721]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Footer" type="HBoxContainer" parent="Control/Center/Panel/Content" unique_id=1084972365]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Control/Center/Panel/Content/Footer" unique_id=1482622473]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HudSecondary"
+text = "Select a mission, read the briefing, then start."
+
+[node name="StartMission" type="Button" parent="Control/Center/Panel/Content/Footer" unique_id=965071164]
+layout_mode = 2
+disabled = true
+text = "Start mission"

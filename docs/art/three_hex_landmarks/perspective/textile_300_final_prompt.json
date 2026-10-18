@@ -1,0 +1,8 @@
+{
+  "provider": "built-in image_gen",
+  "id": "building_stone_textile_factory_3hex",
+  "angle": 300,
+  "input": "textile_300_final_edit_target.png",
+  "prompt": "Use case: precise-object-edit. Refine this ONE long narrow stone textile factory sprite without changing its footprint, long-axis angle, length, width or silhouette. Keep the main long axis at this EXACT shallow diagonal from upper left to lower right, horizontal run three units for vertical drop two; do not steepen the diagonal. Keep FOUR saw-tooth roof teeth with grey sloping planes and blue-grey steep glass faces, and the round chimney at the upper-left end. Correct the slightly compressed vertical relief: the chimney column is cylindrical, rises straight up the screen, and has its round elliptical opening above its base; render it naturally upright. Keep the roof tooth faces and tiny stone wall strips consistent with that SAME FIXED steep overhead orthographic camera. Repaint in the same crisp detailed tactical-game style while retaining these exact positions and narrow plan. No change of roof construction, no extra bays, no wider walls. Keep upper-left lighting and a genuinely transparent background; no glow, exterior shadow, text, hexes or other objects. Return only this one complete building with ample transparent margins.",
+  "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6d15d6d0-e028-4296-b8df-81c98cb0946d.png"
+}

@@ -1,5 +1,7 @@
 extends Node
 
+signal master_mute_changed(muted: bool)
+
 const MASTER_BUS: String = "Master"
 const MUSIC_BUS: String = "Music"
 
@@ -7,12 +9,14 @@ var master_db: float = 0.0
 var master_linear: float = 1.0
 var music_db: float = 0.0
 var music_linear: float = 1.0
+var master_muted: bool = false
 var updating_ui: bool = false
 
 func _ready() -> void:
 	var idx: int = AudioServer.get_bus_index(MASTER_BUS)
 	master_db = AudioServer.get_bus_volume_db(idx)
 	master_linear = db_to_linear(master_db)
+	master_muted = AudioServer.is_bus_mute(idx)
 	idx = AudioServer.get_bus_index(MUSIC_BUS)
 	music_db = AudioServer.get_bus_volume_db(idx)
 	music_linear = db_to_linear(music_db)
@@ -29,6 +33,15 @@ func set_master_linear(x: float) -> void:
 	master_db = linear_to_db(master_linear)
 	var idx: int = AudioServer.get_bus_index(MASTER_BUS)
 	AudioServer.set_bus_volume_db(idx, master_db)
+
+
+func set_master_muted(muted: bool) -> void:
+	var idx: int = AudioServer.get_bus_index(MASTER_BUS)
+	AudioServer.set_bus_mute(idx, muted)
+	if master_muted == muted:
+		return
+	master_muted = muted
+	master_mute_changed.emit(muted)
 
 
 func set_music_linear(x: float) -> void:

@@ -16,31 +16,37 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="AdvancedCompanyLeader"
 run/main_scene="uid://dbbh255dq65on"
-config/features=PackedStringArray("4.6", "Forward Plus")
-boot_splash/image="uid://dxadjck0dj44"
-config/icon="res://icon.svg"
+config/features=PackedStringArray("4.7", "Forward Plus")
+boot_splash/image="uid://bmkh8cn1uybj6"
+config/icon="res://assets/branding/lions_in_the_trenches_logo.png"
 
 [autoload]
 
-LOSHelper="*res://scenes/game/los/los_helper.tscn"
-Globals="*res://autoloads/globals.gd"
+LOSHelper="*res://autoloads/los_service.tscn"
+Globals="*res://autoloads/game_globals.gd"
 STATES="*res://autoloads/unit_states.gd"
 RankGrades="*res://autoloads/rank_grades.gd"
 TooltipSignals="*res://autoloads/tooltip_signals.gd"
 SessionAudio="*res://autoloads/session_audio.gd"
 SessionSettings="*res://autoloads/session_settings.gd"
-Debug="*res://autoloads/debug.gd"
+DisplaySettings="*res://autoloads/display_settings.gd"
+Debug="*res://autoloads/debug_settings.gd"
 MovementSystem="*uid://dla50r83yg10r"
 LOS="*uid://bkkx84cy8adyu"
+ThreatMap="*uid://smksvypix41r"
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/faction_resource_compatibility/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hex_edge_barriers/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
 
 [input]
 

@@ -1,0 +1,107 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/units/squad_roster_row.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/rout.svg" id="2_rout"]
+
+[sub_resource type="StyleBoxFlat" id="BarBackground"]
+bg_color = Color(0.2, 0.2, 0.17, 1)
+
+[sub_resource type="StyleBoxFlat" id="BarFill"]
+bg_color = Color(0.49, 0.67, 0.4, 1)
+
+[node name="SquadRow" type="Button"]
+theme_type_variation = &"HudSquadRow"
+custom_minimum_size = Vector2(0, 44)
+mouse_force_pass_scroll_events = true
+toggle_mode = true
+script = ExtResource("1")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 3.0
+offset_right = -6.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="Top" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Identity" type="Label" parent="Content/Top"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+text = "1st Squad · Rifle"
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="Strength" type="VBoxContainer" parent="Content/Top"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Count" type="Label" parent="Content/Top/Strength"]
+layout_mode = 2
+mouse_filter = 2
+text = "12/12"
+horizontal_alignment = 2
+
+[node name="Bar" type="ProgressBar" parent="Content/Top/Strength"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("BarBackground")
+theme_override_styles/fill = SubResource("BarFill")
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="Status" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="RoutSlot" type="Control" parent="Content/Status"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="RoutAvailable" type="TextureRect" parent="Content/Status/RoutSlot"]
+visible = false
+modulate = Color(0.95, 0.65, 0.35, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_rout")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Morale" type="Label" parent="Content/Status"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+text = "Ok"
+text_overrun_behavior = 3
+clip_text = true
+theme_type_variation = &"HudSecondary"
+
+[node name="Isolation" type="Label" parent="Content/Status"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.73, 0.45, 1)
+text = "No contact"
+theme_type_variation = &"HudSecondary"

@@ -1,0 +1,117 @@
+{
+  "mode": "built-in image_gen",
+  "selected": [
+    {
+      "id": "building_wood_01_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_01_2hex_a.png",
+      "imagegen_output": "exec-414ac51c-5bfb-4154-96bb-3fa3cb1e7dea.png"
+    },
+    {
+      "id": "building_wood_01_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_01_2hex_b.png",
+      "imagegen_output": "exec-e3b0f63a-230d-4263-9a3d-bbd00b0cc74c.png"
+    },
+    {
+      "id": "building_wood_01_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_01_3hex.png",
+      "imagegen_output": "exec-c98fcb1f-f67f-464b-82af-2180eb382bcf.png"
+    },
+    {
+      "id": "building_wood_02_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_02_2hex_a.png",
+      "imagegen_output": "exec-2c218d50-00d0-4bb3-aa74-87fe52d11cbe.png"
+    },
+    {
+      "id": "building_wood_02_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_02_3hex.png",
+      "imagegen_output": "exec-ab62edbf-6c59-4161-a738-62392a3810e5.png"
+    },
+    {
+      "id": "building_wood_02_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_02_2hex_b.png",
+      "imagegen_output": "exec-0ece799d-062b-4264-824e-6f2088cbe3d1.png"
+    },
+    {
+      "id": "building_wood_03_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_03_2hex_a.png",
+      "imagegen_output": "exec-746dfa30-3cbe-4cbf-b110-83bbad3a0b12.png"
+    },
+    {
+      "id": "building_wood_03_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_03_2hex_b.png",
+      "imagegen_output": "exec-2220f69c-a17a-4df9-bf92-83adf16fff87.png"
+    },
+    {
+      "id": "building_stone_01_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_01_2hex_a.png",
+      "imagegen_output": "exec-9ddcab86-a8b9-40d8-839a-9655676d00ee.png"
+    },
+    {
+      "id": "building_stone_01_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_01_2hex_b.png",
+      "imagegen_output": "exec-73248f1f-de66-490c-9b3a-a9ff40788d9c.png"
+    },
+    {
+      "id": "building_stone_01_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_01_3hex.png",
+      "imagegen_output": "exec-0ad523e3-c30f-4dde-957a-b7e7f394ea7d.png"
+    },
+    {
+      "id": "building_wood_03_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_wood_03_3hex.png",
+      "imagegen_output": "exec-af5e65ae-8953-4ed2-b71b-eade92b573ee.png"
+    },
+    {
+      "id": "building_stone_02_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_02_2hex_a.png",
+      "imagegen_output": "exec-e9c87860-393e-4953-9100-866ff43adce0.png"
+    },
+    {
+      "id": "building_stone_02_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_02_2hex_b.png",
+      "imagegen_output": "exec-57b6d836-50fd-481d-b960-067cc25dda19.png"
+    },
+    {
+      "id": "building_stone_03_2hex_a",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_03_2hex_a.png",
+      "imagegen_output": "exec-7cf8eaee-0e6c-4e63-8481-21fc8f2c89fe.png"
+    },
+    {
+      "id": "building_stone_02_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_02_3hex.png",
+      "imagegen_output": "exec-2f84b669-5d63-467b-8406-de0a427e28c4.png"
+    },
+    {
+      "id": "building_stone_03_2hex_b",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_03_2hex_b.png",
+      "imagegen_output": "exec-680260bb-9956-47c1-a1c7-e6747ddf0dc0.png"
+    },
+    {
+      "id": "building_stone_03_3hex",
+      "source": "res://assets/tiles/buildings/multihex/source/building_stone_03_3hex.png",
+      "imagegen_output": "exec-d6a87d1c-34aa-4360-8175-659c96d5188f.png"
+    }
+  ],
+  "refinements": [
+    {
+      "id": "building_wood_01_2hex_b",
+      "prompt": "Precise sprite-sheet correction. Preserve this exact brown-roof timber building design and the first FIVE views. Change ONLY the bottom-right sixth view: it must be the same building at 300 degrees, with its long axis sloping from UPPER LEFT to LOWER RIGHT (a backslash), not upper right to lower left like the bottom-middle view. The corrected sixth view should be the exact 180-degree counterpart of the top-right view. Keep all details, size, scale, roof colours, positions, other five sprites and the 3-column by 2-row layout. Transparent background, no text, no ground or halo.",
+      "reference_image": "exec-452a3b2b-4b9f-4c3e-a61d-a97fc8188909.png"
+    },
+    {
+      "id": "building_wood_03_3hex",
+      "prompt": "Precise sprite-sheet correction. Preserve this exact long brown-roof building and the first FIVE views. Change ONLY the bottom-right sixth view: it must be the same building at 300 degrees, with its long axis sloping from UPPER LEFT to LOWER RIGHT (a backslash). The current bottom-right repeats the bottom-middle diagonal; replace it with the exact 180-degree counterpart of the TOP-RIGHT view, with the same three roof volumes, cross gables, chimney and extensions. Keep the other five views, positions, colours, scale and 3-column by 2-row layout. Transparent background, no text, no ground or halo.",
+      "reference_image": "exec-cb6695cd-7ca1-4b61-8315-d70cc08dbd95.png"
+    },
+    {
+      "id": "building_stone_01_3hex",
+      "prompt": "Reformat this exact six-view transparent stone building sprite sheet so no sprite touches the outer canvas or another cell. Preserve the exact grey-roof building designs, six orientations, stone walls, chimneys and roof textures. Uniformly shrink ALL six building views by 20 percent and center each in its own equally sized square cell in a 3-column by 2-row sheet. Keep all silhouettes complete with at least 30 transparent pixels around every building, including the top-right view which currently touches the right edge. No redesign, no text, no background, no ground or halo; fully transparent empty gaps.",
+      "reference_image": "exec-52414bad-fbe8-47bb-b4e9-d1878e3b9ed1.png"
+    },
+    {
+      "id": "building_stone_03_2hex_b",
+      "prompt": "Precise transparent sprite-sheet correction. Preserve this grey-roof masonry building design and the first FIVE sprites exactly. Change ONLY the bottom-right sixth sprite. It currently repeats the bottom-middle rising diagonal. Make the sixth sprite slope from UPPER LEFT to LOWER RIGHT (a backslash), as the exact 180-degree rotated counterpart of the TOP-RIGHT sprite. Keep the long joined roof volumes, large cross gables, two pale chimneys, side porches and cool grey roofs. Preserve the 3-column by 2-row layout and all other sprites. Keep complete silhouettes and generous transparent margins. Fully transparent background, no text, no floor or glow.",
+      "reference_image": "exec-b0edfed8-aee7-488a-95e2-fa3acd81af21.png"
+    }
+  ]
+}

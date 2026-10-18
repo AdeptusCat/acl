@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/squad_roster_hud_regression.gd" id="1"]
+
+[node name="SquadRosterHudRegression" type="Node"]
+script = ExtResource("1")

@@ -1,0 +1,119 @@
+{
+  "provider": "built-in image_gen",
+  "views": [
+    {
+      "angle": 60,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d76e3578-3d7f-43db-ab0d-63e1cae10929.png"
+    },
+    {
+      "angle": 120,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-9dfe9cbd-f09d-4a5a-ac7f-c61fb5be9ab2.png"
+    },
+    {
+      "angle": 180,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b6e07ada-a831-4dab-8f6b-3bcd45bc00db.png"
+    },
+    {
+      "angle": 240,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6c2246eb-db24-49ac-bddb-e781aa1b7316.png"
+    },
+    {
+      "angle": 300,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-beddafca-11ab-4a63-8502-837ac6699588.png"
+    }
+  ],
+  "geometry_checks": [
+    {
+      "angle": 60,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-d76e3578-3d7f-43db-ab0d-63e1cae10929.png",
+      "fit": true,
+      "placement": {
+        "scale": 0.1797752808988764,
+        "image_position": [
+          74,
+          111
+        ],
+        "center_alpha": [
+          252,
+          253,
+          253
+        ]
+      },
+      "world_length": 295.5
+    },
+    {
+      "angle": 120,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-9dfe9cbd-f09d-4a5a-ac7f-c61fb5be9ab2.png",
+      "fit": true,
+      "placement": {
+        "scale": 0.20726306465899025,
+        "image_position": [
+          74,
+          99
+        ],
+        "center_alpha": [
+          253,
+          253,
+          253
+        ]
+      },
+      "world_length": 296.5
+    },
+    {
+      "angle": 180,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-b6e07ada-a831-4dab-8f6b-3bcd45bc00db.png",
+      "fit": true,
+      "placement": {
+        "scale": 0.25583405358686256,
+        "image_position": [
+          167,
+          37
+        ],
+        "center_alpha": [
+          253,
+          253,
+          253
+        ]
+      },
+      "world_length": 296.0
+    },
+    {
+      "angle": 240,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-6c2246eb-db24-49ac-bddb-e781aa1b7316.png",
+      "fit": true,
+      "placement": {
+        "scale": 0.19829059829059828,
+        "image_position": [
+          75,
+          99
+        ],
+        "center_alpha": [
+          253,
+          252,
+          253
+        ]
+      },
+      "world_length": 296.0
+    },
+    {
+      "angle": 300,
+      "tool_output": "/home/blight/.codex/generated_images/01a13a2d-25da-76d2-ac1c-663a95a54183/exec-beddafca-11ab-4a63-8502-837ac6699588.png",
+      "fit": true,
+      "placement": {
+        "scale": 0.21803127874885003,
+        "image_position": [
+          71,
+          101
+        ],
+        "center_alpha": [
+          253,
+          253,
+          253
+        ]
+      },
+      "world_length": 296.0
+    }
+  ],
+  "zero_source_unchanged": true,
+  "approved_zero_world_length": 296.0
+}

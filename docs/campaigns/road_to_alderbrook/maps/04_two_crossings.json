@@ -1,0 +1,11493 @@
+{
+	"allied_markers": [
+		[
+			1,
+			13,
+			4
+		],
+		[
+			2,
+			13,
+			10
+		],
+		[
+			0,
+			22,
+			4
+		],
+		[
+			0,
+			22,
+			10
+		],
+		[
+			4,
+			2,
+			7
+		]
+	],
+	"axis_markers": [
+		[
+			1,
+			13,
+			4
+		],
+		[
+			4,
+			17,
+			7
+		]
+	],
+	"enemy": [
+		[
+			1,
+			"hq",
+			17,
+			4
+		],
+		[
+			1,
+			"rifle",
+			14,
+			3
+		],
+		[
+			1,
+			"rifle",
+			14,
+			5
+		],
+		[
+			1,
+			"mg",
+			16,
+			4
+		],
+		[
+			2,
+			"hq",
+			17,
+			10
+		],
+		[
+			2,
+			"rifle",
+			14,
+			9
+		],
+		[
+			2,
+			"rifle",
+			14,
+			11
+		],
+		[
+			2,
+			"mg",
+			16,
+			10
+		],
+		[
+			0,
+			"company_hq",
+			20,
+			7
+		]
+	],
+	"id": "04_two_crossings",
+	"layers": [
+		{
+			"cells": [
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						0
+					],
+					"position": [
+						64.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						160.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						256.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						352.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						256.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						160.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						1
+					],
+					"position": [
+						64.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						2
+					],
+					"position": [
+						64.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						2
+					],
+					"position": [
+						160.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						2
+					],
+					"position": [
+						256.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						2
+					],
+					"position": [
+						352.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						3
+					],
+					"position": [
+						64.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						3
+					],
+					"position": [
+						160.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						3
+					],
+					"position": [
+						256.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						3
+					],
+					"position": [
+						352.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						352.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						0
+					],
+					"position": [
+						448.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						544.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						544.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						4
+					],
+					"position": [
+						352.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						4
+					],
+					"position": [
+						256.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						4
+					],
+					"position": [
+						160.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						4
+					],
+					"position": [
+						64.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						64.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						5
+					],
+					"position": [
+						160.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						256.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						5
+					],
+					"position": [
+						448.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						6
+					],
+					"position": [
+						64.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						6
+					],
+					"position": [
+						160.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						6
+					],
+					"position": [
+						256.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						6
+					],
+					"position": [
+						352.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						6
+					],
+					"position": [
+						448.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						640.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						544.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						5
+					],
+					"position": [
+						544.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						640.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						640.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						640.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						640.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						640.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						640.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						544.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						736.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						736.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						352.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						4
+					],
+					"position": [
+						448.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						544.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						2
+					],
+					"position": [
+						544.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						3
+					],
+					"position": [
+						448.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						2
+					],
+					"position": [
+						448.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						1
+					],
+					"position": [
+						448.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						0
+					],
+					"position": [
+						832.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						736.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						2
+					],
+					"position": [
+						832.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						3
+					],
+					"position": [
+						736.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						3
+					],
+					"position": [
+						832.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						832.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						5
+					],
+					"position": [
+						832.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						1
+					],
+					"position": [
+						832.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						736.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						5
+					],
+					"position": [
+						736.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						6
+					],
+					"position": [
+						832.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						7
+					],
+					"position": [
+						832.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						8
+					],
+					"position": [
+						832.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						8
+					],
+					"position": [
+						736.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						8
+					],
+					"position": [
+						640.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						8
+					],
+					"position": [
+						544.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						8
+					],
+					"position": [
+						448.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						8
+					],
+					"position": [
+						352.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						8
+					],
+					"position": [
+						256.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						8
+					],
+					"position": [
+						160.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						8
+					],
+					"position": [
+						64.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						7
+					],
+					"position": [
+						64.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						7
+					],
+					"position": [
+						160.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						7
+					],
+					"position": [
+						256.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						7
+					],
+					"position": [
+						352.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						7
+					],
+					"position": [
+						448.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						544.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						640.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						7
+					],
+					"position": [
+						736.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						736.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						928.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						1024.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						1312.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						1408.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						1504.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						1
+					],
+					"position": [
+						1600.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						1696.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						0
+					],
+					"position": [
+						1600.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						0
+					],
+					"position": [
+						1792.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						0
+					],
+					"position": [
+						1888.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						0
+					],
+					"position": [
+						1984.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						0
+					],
+					"position": [
+						2080.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						0
+					],
+					"position": [
+						2176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						1
+					],
+					"position": [
+						2176.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						0
+					],
+					"position": [
+						2272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						2
+					],
+					"position": [
+						2176.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						3
+					],
+					"position": [
+						2176.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						4
+					],
+					"position": [
+						2176.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						5
+					],
+					"position": [
+						2176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						6
+					],
+					"position": [
+						2176.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						2
+					],
+					"position": [
+						1024.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						928.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						2
+					],
+					"position": [
+						1312.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						1312.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						1408.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						1504.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						2
+					],
+					"position": [
+						1408.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						2
+					],
+					"position": [
+						928.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						928.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						3
+					],
+					"position": [
+						1024.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						3
+					],
+					"position": [
+						1312.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						3
+					],
+					"position": [
+						1408.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						1024.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						4
+					],
+					"position": [
+						1120.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						4
+					],
+					"position": [
+						1216.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						1408.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						4
+					],
+					"position": [
+						1312.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						5
+					],
+					"position": [
+						1024.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						928.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						5
+					],
+					"position": [
+						1312.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						928.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						6
+					],
+					"position": [
+						1024.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						6
+					],
+					"position": [
+						1312.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						7
+					],
+					"position": [
+						1024.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						7
+					],
+					"position": [
+						928.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						8
+					],
+					"position": [
+						1024.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						9
+					],
+					"position": [
+						64.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						9
+					],
+					"position": [
+						256.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						9
+					],
+					"position": [
+						448.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						9
+					],
+					"position": [
+						544.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						9
+					],
+					"position": [
+						352.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						9
+					],
+					"position": [
+						160.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						9
+					],
+					"position": [
+						640.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						9
+					],
+					"position": [
+						736.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						9
+					],
+					"position": [
+						832.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						9
+					],
+					"position": [
+						928.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						9
+					],
+					"position": [
+						1024.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						8
+					],
+					"position": [
+						928.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						9
+					],
+					"position": [
+						1312.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						9
+					],
+					"position": [
+						1408.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						9
+					],
+					"position": [
+						1504.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						9
+					],
+					"position": [
+						1600.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						9
+					],
+					"position": [
+						1696.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						9
+					],
+					"position": [
+						1792.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						9
+					],
+					"position": [
+						1888.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						9
+					],
+					"position": [
+						1984.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						9
+					],
+					"position": [
+						2080.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						9
+					],
+					"position": [
+						2176.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						9
+					],
+					"position": [
+						2272.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						8
+					],
+					"position": [
+						2272.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						7
+					],
+					"position": [
+						2272.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						6
+					],
+					"position": [
+						2272.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						5
+					],
+					"position": [
+						2272.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						4
+					],
+					"position": [
+						2272.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						3
+					],
+					"position": [
+						2272.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						2
+					],
+					"position": [
+						2272.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						1
+					],
+					"position": [
+						2272.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						7
+					],
+					"position": [
+						2176.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						7
+					],
+					"position": [
+						2080.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						8
+					],
+					"position": [
+						2176.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						8
+					],
+					"position": [
+						2080.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						8
+					],
+					"position": [
+						1984.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						8
+					],
+					"position": [
+						1888.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						8
+					],
+					"position": [
+						1792.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						8
+					],
+					"position": [
+						1696.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						8
+					],
+					"position": [
+						1600.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						8
+					],
+					"position": [
+						1504.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						8
+					],
+					"position": [
+						1408.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						8
+					],
+					"position": [
+						1312.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						7
+					],
+					"position": [
+						1696.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						7
+					],
+					"position": [
+						1504.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						7
+					],
+					"position": [
+						1408.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						7
+					],
+					"position": [
+						1312.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						7
+					],
+					"position": [
+						1600.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						7
+					],
+					"position": [
+						1792.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						6
+					],
+					"position": [
+						1888.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						7
+					],
+					"position": [
+						1984.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"position": [
+						1696.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						1504.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						6
+					],
+					"position": [
+						1792.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						6
+					],
+					"position": [
+						1984.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						7
+					],
+					"position": [
+						1888.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						6
+					],
+					"position": [
+						2080.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						5
+					],
+					"position": [
+						2080.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						5
+					],
+					"position": [
+						1888.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						5
+					],
+					"position": [
+						1984.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						5
+					],
+					"position": [
+						1792.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						5
+					],
+					"position": [
+						1696.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						4
+					],
+					"position": [
+						1888.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						4
+					],
+					"position": [
+						1696.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						4
+					],
+					"position": [
+						1600.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						4
+					],
+					"position": [
+						1504.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						5
+					],
+					"position": [
+						1408.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						6
+					],
+					"position": [
+						1408.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						5
+					],
+					"position": [
+						1504.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						6
+					],
+					"position": [
+						1600.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						5
+					],
+					"position": [
+						1600.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						4
+					],
+					"position": [
+						1792.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						3
+					],
+					"position": [
+						1888.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						3
+					],
+					"position": [
+						1696.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						3
+					],
+					"position": [
+						1504.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						3
+					],
+					"position": [
+						1792.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						2
+					],
+					"position": [
+						1696.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						3
+					],
+					"position": [
+						1600.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						2
+					],
+					"position": [
+						1504.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						2
+					],
+					"position": [
+						1888.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						2
+					],
+					"position": [
+						1984.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						1
+					],
+					"position": [
+						1888.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						2
+					],
+					"position": [
+						1792.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						1696.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						2
+					],
+					"position": [
+						1600.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						1
+					],
+					"position": [
+						1792.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						1
+					],
+					"position": [
+						2080.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						1
+					],
+					"position": [
+						1984.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						2
+					],
+					"position": [
+						2080.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						3
+					],
+					"position": [
+						2080.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						4
+					],
+					"position": [
+						1984.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						4
+					],
+					"position": [
+						2080.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						3
+					],
+					"position": [
+						1984.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						10
+					],
+					"position": [
+						64.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						11
+					],
+					"position": [
+						64.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						12
+					],
+					"position": [
+						64.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						13
+					],
+					"position": [
+						64.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						14
+					],
+					"position": [
+						64.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						15
+					],
+					"position": [
+						64.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						10
+					],
+					"position": [
+						160.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						160.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						12
+					],
+					"position": [
+						160.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						13
+					],
+					"position": [
+						160.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						14
+					],
+					"position": [
+						160.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						15
+					],
+					"position": [
+						160.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						10
+					],
+					"position": [
+						256.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						256.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						12
+					],
+					"position": [
+						256.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						13
+					],
+					"position": [
+						256.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						14
+					],
+					"position": [
+						256.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						15
+					],
+					"position": [
+						256.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						352.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						352.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						12
+					],
+					"position": [
+						352.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						13
+					],
+					"position": [
+						352.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						14
+					],
+					"position": [
+						352.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						15
+					],
+					"position": [
+						352.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						10
+					],
+					"position": [
+						448.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						11
+					],
+					"position": [
+						448.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						12
+					],
+					"position": [
+						448.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						13
+					],
+					"position": [
+						448.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						14
+					],
+					"position": [
+						448.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						15
+					],
+					"position": [
+						448.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						544.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						544.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						12
+					],
+					"position": [
+						544.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						13
+					],
+					"position": [
+						544.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						14
+					],
+					"position": [
+						544.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						15
+					],
+					"position": [
+						544.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						640.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						640.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						12
+					],
+					"position": [
+						640.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						13
+					],
+					"position": [
+						640.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						14
+					],
+					"position": [
+						640.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						15
+					],
+					"position": [
+						640.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						736.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						11
+					],
+					"position": [
+						736.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						12
+					],
+					"position": [
+						736.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						13
+					],
+					"position": [
+						736.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						14
+					],
+					"position": [
+						736.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						15
+					],
+					"position": [
+						736.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						10
+					],
+					"position": [
+						832.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						11
+					],
+					"position": [
+						832.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						12
+					],
+					"position": [
+						832.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						13
+					],
+					"position": [
+						832.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						14
+					],
+					"position": [
+						832.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						15
+					],
+					"position": [
+						832.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						928.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						928.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						12
+					],
+					"position": [
+						928.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						13
+					],
+					"position": [
+						928.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						14
+					],
+					"position": [
+						928.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						15
+					],
+					"position": [
+						928.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						1024.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						11
+					],
+					"position": [
+						1024.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						12
+					],
+					"position": [
+						1024.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						13
+					],
+					"position": [
+						1024.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						14
+					],
+					"position": [
+						1024.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						15
+					],
+					"position": [
+						1024.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						10
+					],
+					"position": [
+						1120.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						10
+					],
+					"position": [
+						1216.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						1312.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						11
+					],
+					"position": [
+						1312.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						12
+					],
+					"position": [
+						1312.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						13
+					],
+					"position": [
+						1312.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						14
+					],
+					"position": [
+						1312.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						15
+					],
+					"position": [
+						1312.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						1408.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						11
+					],
+					"position": [
+						1408.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						12
+					],
+					"position": [
+						1408.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						13
+					],
+					"position": [
+						1408.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						14
+					],
+					"position": [
+						1408.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						15
+					],
+					"position": [
+						1408.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						1504.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						11
+					],
+					"position": [
+						1504.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						12
+					],
+					"position": [
+						1504.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						13
+					],
+					"position": [
+						1504.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						14
+					],
+					"position": [
+						1504.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						15
+					],
+					"position": [
+						1504.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						10
+					],
+					"position": [
+						1600.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						11
+					],
+					"position": [
+						1600.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						12
+					],
+					"position": [
+						1600.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						13
+					],
+					"position": [
+						1600.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						14
+					],
+					"position": [
+						1600.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						15
+					],
+					"position": [
+						1600.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						10
+					],
+					"position": [
+						1696.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						11
+					],
+					"position": [
+						1696.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						12
+					],
+					"position": [
+						1696.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						13
+					],
+					"position": [
+						1696.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						14
+					],
+					"position": [
+						1696.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						15
+					],
+					"position": [
+						1696.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						10
+					],
+					"position": [
+						1792.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						11
+					],
+					"position": [
+						1792.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						12
+					],
+					"position": [
+						1792.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						13
+					],
+					"position": [
+						1792.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						14
+					],
+					"position": [
+						1792.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						15
+					],
+					"position": [
+						1792.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						10
+					],
+					"position": [
+						1888.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						11
+					],
+					"position": [
+						1888.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						12
+					],
+					"position": [
+						1888.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						13
+					],
+					"position": [
+						1888.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						14
+					],
+					"position": [
+						1888.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						15
+					],
+					"position": [
+						1888.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						10
+					],
+					"position": [
+						1984.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						11
+					],
+					"position": [
+						1984.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						12
+					],
+					"position": [
+						1984.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						13
+					],
+					"position": [
+						1984.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						14
+					],
+					"position": [
+						1984.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						15
+					],
+					"position": [
+						1984.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						10
+					],
+					"position": [
+						2080.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						11
+					],
+					"position": [
+						2080.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						12
+					],
+					"position": [
+						2080.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_02.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						13
+					],
+					"position": [
+						2080.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						14
+					],
+					"position": [
+						2080.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						15
+					],
+					"position": [
+						2080.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						10
+					],
+					"position": [
+						2176.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						11
+					],
+					"position": [
+						2176.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						12
+					],
+					"position": [
+						2176.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						13
+					],
+					"position": [
+						2176.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						14
+					],
+					"position": [
+						2176.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						15
+					],
+					"position": [
+						2176.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						10
+					],
+					"position": [
+						2272.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_01.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						11
+					],
+					"position": [
+						2272.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						12
+					],
+					"position": [
+						2272.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						13
+					],
+					"position": [
+						2272.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						14
+					],
+					"position": [
+						2272.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						15
+					],
+					"position": [
+						2272.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/vegetation/open_ground_green_03.png"
+				}
+			],
+			"name": "GroundTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						0
+					],
+					"position": [
+						1120.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						1
+					],
+					"position": [
+						1120.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						2
+					],
+					"position": [
+						1120.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						3
+					],
+					"position": [
+						1120.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						4
+					],
+					"position": [
+						1120.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/bridge.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						5
+					],
+					"position": [
+						1120.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						6
+					],
+					"position": [
+						1120.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						7
+					],
+					"position": [
+						1120.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						8
+					],
+					"position": [
+						1120.0,
+						1152.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						9
+					],
+					"position": [
+						1120.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						10
+					],
+					"position": [
+						1120.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/bridge.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						11
+					],
+					"position": [
+						1120.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						12
+					],
+					"position": [
+						1120.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						13
+					],
+					"position": [
+						1120.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						14
+					],
+					"position": [
+						1120.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						11,
+						15
+					],
+					"position": [
+						1120.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						0
+					],
+					"position": [
+						1216.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						1
+					],
+					"position": [
+						1216.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						2
+					],
+					"position": [
+						1216.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						3
+					],
+					"position": [
+						1216.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						12,
+						4
+					],
+					"position": [
+						1216.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/bridge.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						5
+					],
+					"position": [
+						1216.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						6
+					],
+					"position": [
+						1216.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						7
+					],
+					"position": [
+						1216.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						8
+					],
+					"position": [
+						1216.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						9
+					],
+					"position": [
+						1216.0,
+						1216.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": true,
+					"hex": [
+						12,
+						10
+					],
+					"position": [
+						1216.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/bridge.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						11
+					],
+					"position": [
+						1216.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						12
+					],
+					"position": [
+						1216.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						13
+					],
+					"position": [
+						1216.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						14
+					],
+					"position": [
+						1216.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				},
+				{
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						12,
+						15
+					],
+					"position": [
+						1216.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/campaign/river.svg"
+				}
+			],
+			"name": "WaterTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						160.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						160.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						14
+					],
+					"position": [
+						160.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						15
+					],
+					"position": [
+						160.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						256.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						256.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						14
+					],
+					"position": [
+						256.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						15
+					],
+					"position": [
+						256.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						352.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						352.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						14
+					],
+					"position": [
+						352.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						15
+					],
+					"position": [
+						352.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						544.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						544.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						14
+					],
+					"position": [
+						544.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						15
+					],
+					"position": [
+						544.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						640.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						640.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						14
+					],
+					"position": [
+						640.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						15
+					],
+					"position": [
+						640.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						736.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						736.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						14
+					],
+					"position": [
+						736.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						15
+					],
+					"position": [
+						736.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						928.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						928.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						14
+					],
+					"position": [
+						928.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						15
+					],
+					"position": [
+						928.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						1024.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						14
+					],
+					"position": [
+						1024.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						15
+					],
+					"position": [
+						1024.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						1312.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						1312.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						14
+					],
+					"position": [
+						1312.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						15
+					],
+					"position": [
+						1312.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						1408.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						1408.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						14
+					],
+					"position": [
+						1408.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						15
+					],
+					"position": [
+						1408.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						1504.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						1504.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						14
+					],
+					"position": [
+						1504.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						15
+					],
+					"position": [
+						1504.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						1696.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						1696.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						14
+					],
+					"position": [
+						1696.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						15
+					],
+					"position": [
+						1696.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						0
+					],
+					"position": [
+						1792.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						1
+					],
+					"position": [
+						1792.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						14
+					],
+					"position": [
+						1792.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						15
+					],
+					"position": [
+						1792.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						0
+					],
+					"position": [
+						1888.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						1
+					],
+					"position": [
+						1888.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						14
+					],
+					"position": [
+						1888.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						15
+					],
+					"position": [
+						1888.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						0
+					],
+					"position": [
+						2080.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						1
+					],
+					"position": [
+						2080.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						14
+					],
+					"position": [
+						2080.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						15
+					],
+					"position": [
+						2080.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						0
+					],
+					"position": [
+						2176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						1
+					],
+					"position": [
+						2176.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						14
+					],
+					"position": [
+						2176.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1792,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						15
+					],
+					"position": [
+						2176.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1920,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						0
+					],
+					"position": [
+						2272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1920,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						1
+					],
+					"position": [
+						2272.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1920,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						14
+					],
+					"position": [
+						2272.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1920,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						15
+					],
+					"position": [
+						2272.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1920,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						2
+					],
+					"position": [
+						928.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						928.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						928.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						928.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						12
+					],
+					"position": [
+						928.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						13
+					],
+					"position": [
+						928.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						6
+					],
+					"position": [
+						1696.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						7
+					],
+					"position": [
+						1696.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						6
+					],
+					"position": [
+						1792.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						7
+					],
+					"position": [
+						1792.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						6
+					],
+					"position": [
+						1888.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "orchard",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						7
+					],
+					"position": [
+						1888.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1664,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						2
+					],
+					"position": [
+						544.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						3
+					],
+					"position": [
+						544.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						2
+					],
+					"position": [
+						640.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						3
+					],
+					"position": [
+						640.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						2
+					],
+					"position": [
+						736.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						3
+					],
+					"position": [
+						736.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						2
+					],
+					"position": [
+						832.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						3
+					],
+					"position": [
+						832.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						2
+					],
+					"position": [
+						1504.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						3
+					],
+					"position": [
+						1504.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						2
+					],
+					"position": [
+						1600.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						3
+					],
+					"position": [
+						1600.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						2
+					],
+					"position": [
+						1696.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						3
+					],
+					"position": [
+						1696.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						2
+					],
+					"position": [
+						1792.0,
+						320.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						3
+					],
+					"position": [
+						1792.0,
+						448.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						6
+					],
+					"position": [
+						544.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						7
+					],
+					"position": [
+						544.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						6
+					],
+					"position": [
+						640.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						7
+					],
+					"position": [
+						640.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						6
+					],
+					"position": [
+						736.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						7
+					],
+					"position": [
+						736.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						6
+					],
+					"position": [
+						832.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						7
+					],
+					"position": [
+						832.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						6
+					],
+					"position": [
+						1504.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						7
+					],
+					"position": [
+						1504.0,
+						1024.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						6
+					],
+					"position": [
+						1600.0,
+						832.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						7
+					],
+					"position": [
+						1600.0,
+						960.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						12
+					],
+					"position": [
+						544.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						13
+					],
+					"position": [
+						544.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						12
+					],
+					"position": [
+						640.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						512,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						13
+					],
+					"position": [
+						640.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						12
+					],
+					"position": [
+						736.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						13
+					],
+					"position": [
+						736.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						12
+					],
+					"position": [
+						832.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "wheat",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						13
+					],
+					"position": [
+						832.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						12
+					],
+					"position": [
+						1504.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						13
+					],
+					"position": [
+						1504.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						12
+					],
+					"position": [
+						1600.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						13
+					],
+					"position": [
+						1600.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1280,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						12
+					],
+					"position": [
+						1696.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						640,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						13
+					],
+					"position": [
+						1696.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						768,
+						1408,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						12
+					],
+					"position": [
+						1792.0,
+						1600.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						896,
+						1536,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "crops",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						13
+					],
+					"position": [
+						1792.0,
+						1728.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_terrain.png",
+					"texture_region": [
+						0,
+						1664,
+						128,
+						128
+					]
+				}
+			],
+			"name": "TerrainTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						4
+					],
+					"position": [
+						928.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						10
+					],
+					"position": [
+						928.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						5
+					],
+					"position": [
+						64.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						0,
+						11
+					],
+					"position": [
+						64.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						5
+					],
+					"position": [
+						160.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						11
+					],
+					"position": [
+						160.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						5
+					],
+					"position": [
+						256.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						11
+					],
+					"position": [
+						256.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						5
+					],
+					"position": [
+						352.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						10
+					],
+					"position": [
+						352.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						11
+					],
+					"position": [
+						352.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						5
+					],
+					"position": [
+						448.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						4,
+						11
+					],
+					"position": [
+						448.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						4
+					],
+					"position": [
+						544.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						10
+					],
+					"position": [
+						544.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						11
+					],
+					"position": [
+						544.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						4
+					],
+					"position": [
+						640.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						5
+					],
+					"position": [
+						640.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						10
+					],
+					"position": [
+						640.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						11
+					],
+					"position": [
+						640.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						4
+					],
+					"position": [
+						736.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						10
+					],
+					"position": [
+						736.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						4
+					],
+					"position": [
+						832.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						8,
+						10
+					],
+					"position": [
+						832.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						4
+					],
+					"position": [
+						1024.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						10
+					],
+					"position": [
+						1024.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						4
+					],
+					"position": [
+						1312.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						10
+					],
+					"position": [
+						1312.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						4
+					],
+					"position": [
+						1408.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						10
+					],
+					"position": [
+						1408.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						4
+					],
+					"position": [
+						1504.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						9
+					],
+					"position": [
+						1504.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						10
+					],
+					"position": [
+						1504.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						4
+					],
+					"position": [
+						1600.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						5
+					],
+					"position": [
+						1600.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						16,
+						10
+					],
+					"position": [
+						1600.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						4
+					],
+					"position": [
+						1696.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						9
+					],
+					"position": [
+						1696.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						5
+					],
+					"position": [
+						1792.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						10
+					],
+					"position": [
+						1792.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						4
+					],
+					"position": [
+						1888.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						9
+					],
+					"position": [
+						1888.0,
+						1280.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						10
+					],
+					"position": [
+						1888.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						5
+					],
+					"position": [
+						1984.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						20,
+						10
+					],
+					"position": [
+						1984.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						4
+					],
+					"position": [
+						2080.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						10
+					],
+					"position": [
+						2080.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						4
+					],
+					"position": [
+						2176.0,
+						576.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						384,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						5
+					],
+					"position": [
+						2176.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						512,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						10
+					],
+					"position": [
+						2176.0,
+						1344.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						11
+					],
+					"position": [
+						2176.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						768,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						4
+					],
+					"position": [
+						2272.0,
+						640.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						10
+					],
+					"position": [
+						2272.0,
+						1408.0
+					],
+					"texture": "res://assets/tiles/campaign/roads/road_04_two_crossings.svg",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				}
+			],
+			"name": "RoadTileMapLayer"
+		},
+		{
+			"cells": [],
+			"name": "WallTileMapLayer"
+		},
+		{
+			"cells": [
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						0
+					],
+					"position": [
+						160.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						1
+					],
+					"position": [
+						160.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						14
+					],
+					"position": [
+						160.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						1,
+						15
+					],
+					"position": [
+						160.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						0
+					],
+					"position": [
+						256.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						1
+					],
+					"position": [
+						256.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						14
+					],
+					"position": [
+						256.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						2,
+						15
+					],
+					"position": [
+						256.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						0
+					],
+					"position": [
+						352.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						1
+					],
+					"position": [
+						352.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						14
+					],
+					"position": [
+						352.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						3,
+						15
+					],
+					"position": [
+						352.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						0
+					],
+					"position": [
+						544.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						1
+					],
+					"position": [
+						544.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						14
+					],
+					"position": [
+						544.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						5,
+						15
+					],
+					"position": [
+						544.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						128,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						0
+					],
+					"position": [
+						640.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						1
+					],
+					"position": [
+						640.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						14
+					],
+					"position": [
+						640.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						6,
+						15
+					],
+					"position": [
+						640.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						0
+					],
+					"position": [
+						736.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						1
+					],
+					"position": [
+						736.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						14
+					],
+					"position": [
+						736.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						7,
+						15
+					],
+					"position": [
+						736.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						256,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						0
+					],
+					"position": [
+						928.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						1
+					],
+					"position": [
+						928.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						14
+					],
+					"position": [
+						928.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						15
+					],
+					"position": [
+						928.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						0
+					],
+					"position": [
+						1024.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						1
+					],
+					"position": [
+						1024.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						14
+					],
+					"position": [
+						1024.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						10,
+						15
+					],
+					"position": [
+						1024.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						0
+					],
+					"position": [
+						1312.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						1
+					],
+					"position": [
+						1312.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						14
+					],
+					"position": [
+						1312.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						13,
+						15
+					],
+					"position": [
+						1312.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						0
+					],
+					"position": [
+						1408.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						1
+					],
+					"position": [
+						1408.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						14
+					],
+					"position": [
+						1408.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						15
+					],
+					"position": [
+						1408.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						0
+					],
+					"position": [
+						1504.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						640,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						1
+					],
+					"position": [
+						1504.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						14
+					],
+					"position": [
+						1504.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						15,
+						15
+					],
+					"position": [
+						1504.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						0
+					],
+					"position": [
+						1696.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						1
+					],
+					"position": [
+						1696.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						14
+					],
+					"position": [
+						1696.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						17,
+						15
+					],
+					"position": [
+						1696.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						0
+					],
+					"position": [
+						1792.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						768,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						1
+					],
+					"position": [
+						1792.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						14
+					],
+					"position": [
+						1792.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						15
+					],
+					"position": [
+						1792.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						0
+					],
+					"position": [
+						1888.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						1
+					],
+					"position": [
+						1888.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						14
+					],
+					"position": [
+						1888.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						19,
+						15
+					],
+					"position": [
+						1888.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						0
+					],
+					"position": [
+						2080.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						896,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						1
+					],
+					"position": [
+						2080.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						14
+					],
+					"position": [
+						2080.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						21,
+						15
+					],
+					"position": [
+						2080.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						0
+					],
+					"position": [
+						2176.0,
+						64.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						1
+					],
+					"position": [
+						2176.0,
+						192.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						14
+					],
+					"position": [
+						2176.0,
+						1856.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						22,
+						15
+					],
+					"position": [
+						2176.0,
+						1984.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						0
+					],
+					"position": [
+						2272.0,
+						128.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						1024,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						1
+					],
+					"position": [
+						2272.0,
+						256.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						14
+					],
+					"position": [
+						2272.0,
+						1920.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						128,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						23,
+						15
+					],
+					"position": [
+						2272.0,
+						2048.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						1152,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						2
+					],
+					"position": [
+						928.0,
+						384.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						256,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						3
+					],
+					"position": [
+						928.0,
+						512.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						384,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						5
+					],
+					"position": [
+						928.0,
+						768.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						512,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						6
+					],
+					"position": [
+						928.0,
+						896.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						640,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						11
+					],
+					"position": [
+						928.0,
+						1536.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						768,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						12
+					],
+					"position": [
+						928.0,
+						1664.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						896,
+						384,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "woods",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						9,
+						13
+					],
+					"position": [
+						928.0,
+						1792.0
+					],
+					"texture": "res://assets/tiles/connected/maps/04_two_crossings_woods.png",
+					"texture_region": [
+						0,
+						512,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						5
+					],
+					"position": [
+						1408.0,
+						704.0
+					],
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						14,
+						11
+					],
+					"position": [
+						1408.0,
+						1472.0
+					],
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						256,
+						0,
+						128,
+						128
+					]
+				},
+				{
+					"art_family": "",
+					"flip_h": false,
+					"flip_v": false,
+					"hex": [
+						18,
+						8
+					],
+					"position": [
+						1792.0,
+						1088.0
+					],
+					"texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+					"texture_region": [
+						0,
+						0,
+						128,
+						128
+					]
+				}
+			],
+			"name": "BuildingTileMapLayer"
+		}
+	],
+	"player": [
+		[
+			1,
+			"hq",
+			2,
+			4
+		],
+		[
+			1,
+			"rifle",
+			3,
+			3
+		],
+		[
+			1,
+			"rifle",
+			3,
+			4
+		],
+		[
+			1,
+			"rifle",
+			3,
+			5
+		],
+		[
+			1,
+			"mg",
+			2,
+			6
+		],
+		[
+			2,
+			"hq",
+			2,
+			10
+		],
+		[
+			2,
+			"rifle",
+			3,
+			9
+		],
+		[
+			2,
+			"rifle",
+			3,
+			10
+		],
+		[
+			2,
+			"rifle",
+			3,
+			11
+		],
+		[
+			2,
+			"mg",
+			2,
+			12
+		],
+		[
+			0,
+			"company_hq",
+			1,
+			7
+		]
+	],
+	"road_centerlines": [
+		[
+			[
+				-32.0,
+				748.799987792969
+			],
+			[
+				76.0,
+				749.0400390625
+			],
+			[
+				130.0,
+				748.799926757812
+			],
+			[
+				184.0,
+				747.840026855469
+			],
+			[
+				211.0,
+				746.977416992188
+			],
+			[
+				238.0,
+				745.799987792969
+			],
+			[
+				265.0,
+				744.262451171875
+			],
+			[
+				292.0,
+				742.319946289062
+			],
+			[
+				319.0,
+				739.927490234375
+			],
+			[
+				332.5,
+				738.548400878906
+			],
+			[
+				346.0,
+				737.039978027344
+			],
+			[
+				359.5,
+				735.396545410156
+			],
+			[
+				373.0,
+				733.612487792969
+			],
+			[
+				386.5,
+				731.68212890625
+			],
+			[
+				400.0,
+				729.599975585938
+			],
+			[
+				402.625,
+				729.162109375
+			],
+			[
+				405.25,
+				728.688598632812
+			],
+			[
+				407.875,
+				728.180358886719
+			],
+			[
+				410.5,
+				727.637817382812
+			],
+			[
+				413.125,
+				727.061645507812
+			],
+			[
+				415.75,
+				726.452392578125
+			],
+			[
+				418.375,
+				725.810852050781
+			],
+			[
+				421.0,
+				725.137512207031
+			],
+			[
+				423.625,
+				724.432922363281
+			],
+			[
+				426.25,
+				723.697814941406
+			],
+			[
+				428.875,
+				722.932800292969
+			],
+			[
+				431.5,
+				722.138427734375
+			],
+			[
+				434.125,
+				721.315307617188
+			],
+			[
+				436.75,
+				720.464233398438
+			],
+			[
+				439.375,
+				719.585510253906
+			],
+			[
+				442.0,
+				718.679931640625
+			],
+			[
+				447.25,
+				716.790832519531
+			],
+			[
+				452.5,
+				714.801513671875
+			],
+			[
+				457.75,
+				712.717163085938
+			],
+			[
+				463.0,
+				710.542541503906
+			],
+			[
+				468.25,
+				708.282470703125
+			],
+			[
+				473.5,
+				705.942199707031
+			],
+			[
+				478.75,
+				703.5263671875
+			],
+			[
+				484.0,
+				701.039978027344
+			],
+			[
+				489.25,
+				698.488037109375
+			],
+			[
+				494.5,
+				695.875244140625
+			],
+			[
+				505.0,
+				690.487487792969
+			],
+			[
+				515.5,
+				684.915954589844
+			],
+			[
+				526.0,
+				679.200012207031
+			],
+			[
+				568.0,
+				655.680053710938
+			],
+			[
+				589.0,
+				644.077453613281
+			],
+			[
+				599.5,
+				638.453491210938
+			],
+			[
+				610.0,
+				633.0
+			],
+			[
+				615.25,
+				630.349548339844
+			],
+			[
+				620.5,
+				627.756591796875
+			],
+			[
+				625.75,
+				625.225952148438
+			],
+			[
+				631.0,
+				622.762512207031
+			],
+			[
+				636.25,
+				620.371337890625
+			],
+			[
+				641.5,
+				618.057189941406
+			],
+			[
+				646.75,
+				615.825134277344
+			],
+			[
+				652.0,
+				613.680053710938
+			],
+			[
+				657.25,
+				611.626770019531
+			],
+			[
+				662.5,
+				609.670288085938
+			],
+			[
+				665.125,
+				608.72998046875
+			],
+			[
+				667.75,
+				607.815612792969
+			],
+			[
+				670.375,
+				606.927856445312
+			],
+			[
+				673.0,
+				606.067504882812
+			],
+			[
+				675.625,
+				605.234985351562
+			],
+			[
+				678.25,
+				604.431030273438
+			],
+			[
+				680.875,
+				603.656066894531
+			],
+			[
+				683.5,
+				602.910949707031
+			],
+			[
+				686.125,
+				602.196166992188
+			],
+			[
+				688.75,
+				601.512329101562
+			],
+			[
+				691.375,
+				600.860107421875
+			],
+			[
+				694.0,
+				600.239990234375
+			],
+			[
+				696.625,
+				599.652770996094
+			],
+			[
+				699.25,
+				599.098937988281
+			],
+			[
+				701.875,
+				598.579223632812
+			],
+			[
+				704.5,
+				598.094055175781
+			],
+			[
+				707.125,
+				597.644226074219
+			],
+			[
+				709.75,
+				597.230285644531
+			],
+			[
+				712.375,
+				596.852844238281
+			],
+			[
+				715.0,
+				596.512512207031
+			],
+			[
+				717.625,
+				596.2099609375
+			],
+			[
+				720.25,
+				595.945678710938
+			],
+			[
+				722.875,
+				595.720397949219
+			],
+			[
+				725.5,
+				595.534729003906
+			],
+			[
+				728.125,
+				595.38916015625
+			],
+			[
+				730.75,
+				595.284545898438
+			],
+			[
+				733.375,
+				595.221252441406
+			],
+			[
+				736.0,
+				595.200012207031
+			],
+			[
+				743.5,
+				595.236755371094
+			],
+			[
+				751.0,
+				595.34375
+			],
+			[
+				766.0,
+				595.75
+			],
+			[
+				781.0,
+				596.381225585938
+			],
+			[
+				796.0,
+				597.200012207031
+			],
+			[
+				826.0,
+				599.25
+			],
+			[
+				886.0,
+				603.950012207031
+			],
+			[
+				916.0,
+				606.0
+			],
+			[
+				931.0,
+				606.818725585938
+			],
+			[
+				946.0,
+				607.450012207031
+			],
+			[
+				961.0,
+				607.856262207031
+			],
+			[
+				968.5,
+				607.963256835938
+			],
+			[
+				976.0,
+				608.0
+			],
+			[
+				1360.0,
+				608.0
+			],
+			[
+				1362.625,
+				608.011596679688
+			],
+			[
+				1365.25012207031,
+				608.04638671875
+			],
+			[
+				1370.5,
+				608.18359375
+			],
+			[
+				1375.74987792969,
+				608.40869140625
+			],
+			[
+				1381.0,
+				608.71875
+			],
+			[
+				1386.25012207031,
+				609.11083984375
+			],
+			[
+				1391.5,
+				609.58203125
+			],
+			[
+				1396.74987792969,
+				610.12939453125
+			],
+			[
+				1402.0,
+				610.75
+			],
+			[
+				1407.25012207031,
+				611.44091796875
+			],
+			[
+				1412.5,
+				612.19921875
+			],
+			[
+				1417.74987792969,
+				613.02197265625
+			],
+			[
+				1423.0,
+				613.90625
+			],
+			[
+				1428.25012207031,
+				614.84912109375
+			],
+			[
+				1433.5,
+				615.84765625
+			],
+			[
+				1438.74987792969,
+				616.89892578125
+			],
+			[
+				1444.0,
+				618.0
+			],
+			[
+				1454.5,
+				620.33984375
+			],
+			[
+				1465.0,
+				622.84375
+			],
+			[
+				1475.5,
+				625.48828125
+			],
+			[
+				1486.0,
+				628.25
+			],
+			[
+				1570.0,
+				651.75
+			],
+			[
+				1580.5,
+				654.51171875
+			],
+			[
+				1591.0,
+				657.15625
+			],
+			[
+				1601.5,
+				659.66015625
+			],
+			[
+				1612.0,
+				662.0
+			],
+			[
+				1617.25,
+				663.10107421875
+			],
+			[
+				1622.5,
+				664.15234375
+			],
+			[
+				1627.75,
+				665.15087890625
+			],
+			[
+				1633.0,
+				666.09375
+			],
+			[
+				1638.25,
+				666.97802734375
+			],
+			[
+				1643.5,
+				667.80078125
+			],
+			[
+				1648.75,
+				668.55908203125
+			],
+			[
+				1654.0,
+				669.25
+			],
+			[
+				1659.25,
+				669.87060546875
+			],
+			[
+				1664.5,
+				670.41796875
+			],
+			[
+				1669.75,
+				670.88916015625
+			],
+			[
+				1675.0,
+				671.28125
+			],
+			[
+				1680.25,
+				671.59130859375
+			],
+			[
+				1685.5,
+				671.81640625
+			],
+			[
+				1690.75,
+				671.95361328125
+			],
+			[
+				1693.375,
+				671.988342285156
+			],
+			[
+				1696.0,
+				672.0
+			],
+			[
+				1738.0,
+				671.706237792969
+			],
+			[
+				1780.0,
+				670.869995117188
+			],
+			[
+				1822.0,
+				669.558776855469
+			],
+			[
+				1864.0,
+				667.839965820312
+			],
+			[
+				1948.0,
+				663.450012207031
+			],
+			[
+				2032.0,
+				658.239990234375
+			],
+			[
+				2200.0,
+				647.52001953125
+			],
+			[
+				2284.0,
+				643.089965820312
+			],
+			[
+				2326.0,
+				641.34375
+			],
+			[
+				2368.0,
+				640.0
+			]
+		],
+		[
+			[
+				-32.0,
+				1491.19995117188
+			],
+			[
+				208.0,
+				1491.19995117188
+			],
+			[
+				268.0,
+				1489.94995117188
+			],
+			[
+				298.0,
+				1488.93127441406
+			],
+			[
+				328.0,
+				1487.60009765625
+			],
+			[
+				358.0,
+				1485.91870117188
+			],
+			[
+				388.0,
+				1483.85009765625
+			],
+			[
+				418.0,
+				1481.35620117188
+			],
+			[
+				448.0,
+				1478.40002441406
+			],
+			[
+				453.25,
+				1477.80102539062
+			],
+			[
+				458.5,
+				1477.12573242188
+			],
+			[
+				463.75,
+				1476.37670898438
+			],
+			[
+				469.0,
+				1475.55627441406
+			],
+			[
+				474.25,
+				1474.6669921875
+			],
+			[
+				479.5,
+				1473.71105957031
+			],
+			[
+				484.75,
+				1472.69128417969
+			],
+			[
+				490.0,
+				1471.61010742188
+			],
+			[
+				495.25,
+				1470.4697265625
+			],
+			[
+				500.5,
+				1469.27270507812
+			],
+			[
+				505.75,
+				1468.021484375
+			],
+			[
+				511.0,
+				1466.71862792969
+			],
+			[
+				521.5,
+				1463.96801757812
+			],
+			[
+				532.0,
+				1461.0400390625
+			],
+			[
+				542.5,
+				1457.95458984375
+			],
+			[
+				553.0,
+				1454.73132324219
+			],
+			[
+				574.0,
+				1447.9501953125
+			],
+			[
+				658.0,
+				1419.25
+			],
+			[
+				679.0,
+				1412.46875
+			],
+			[
+				689.5,
+				1409.24560546875
+			],
+			[
+				700.0,
+				1406.16015625
+			],
+			[
+				710.5,
+				1403.23205566406
+			],
+			[
+				721.0,
+				1400.4814453125
+			],
+			[
+				726.25,
+				1399.17846679688
+			],
+			[
+				731.5,
+				1397.92736816406
+			],
+			[
+				736.75,
+				1396.73046875
+			],
+			[
+				742.0,
+				1395.58996582031
+			],
+			[
+				747.25,
+				1394.5087890625
+			],
+			[
+				752.5,
+				1393.48901367188
+			],
+			[
+				757.75,
+				1392.533203125
+			],
+			[
+				763.0,
+				1391.64379882812
+			],
+			[
+				768.25,
+				1390.82336425781
+			],
+			[
+				773.5,
+				1390.07434082031
+			],
+			[
+				778.75,
+				1389.39892578125
+			],
+			[
+				784.0,
+				1388.80004882812
+			],
+			[
+				832.0,
+				1383.92004394531
+			],
+			[
+				856.0,
+				1381.75
+			],
+			[
+				880.0,
+				1379.83996582031
+			],
+			[
+				904.0,
+				1378.25
+			],
+			[
+				928.0,
+				1377.0400390625
+			],
+			[
+				940.0,
+				1376.59619140625
+			],
+			[
+				952.0,
+				1376.27001953125
+			],
+			[
+				964.0,
+				1376.06872558594
+			],
+			[
+				976.0,
+				1376.0
+			],
+			[
+				1360.0,
+				1376.0
+			],
+			[
+				1365.25012207031,
+				1375.962890625
+			],
+			[
+				1370.5,
+				1375.85314941406
+			],
+			[
+				1375.74987792969,
+				1375.67309570312
+			],
+			[
+				1381.0,
+				1375.42504882812
+			],
+			[
+				1386.25012207031,
+				1375.111328125
+			],
+			[
+				1391.5,
+				1374.734375
+			],
+			[
+				1396.74987792969,
+				1374.29650878906
+			],
+			[
+				1402.0,
+				1373.80004882812
+			],
+			[
+				1407.25012207031,
+				1373.24731445312
+			],
+			[
+				1412.5,
+				1372.640625
+			],
+			[
+				1417.74987792969,
+				1371.982421875
+			],
+			[
+				1423.0,
+				1371.27502441406
+			],
+			[
+				1433.5,
+				1369.72192382812
+			],
+			[
+				1444.0,
+				1368.0
+			],
+			[
+				1454.5,
+				1366.12817382812
+			],
+			[
+				1465.0,
+				1364.125
+			],
+			[
+				1486.0,
+				1359.80004882812
+			],
+			[
+				1570.0,
+				1341.0
+			],
+			[
+				1591.0,
+				1336.67504882812
+			],
+			[
+				1601.5,
+				1334.671875
+			],
+			[
+				1612.0,
+				1332.80004882812
+			],
+			[
+				1622.5,
+				1331.078125
+			],
+			[
+				1633.0,
+				1329.52514648438
+			],
+			[
+				1638.25,
+				1328.81762695312
+			],
+			[
+				1643.5,
+				1328.15942382812
+			],
+			[
+				1648.75,
+				1327.552734375
+			],
+			[
+				1654.0,
+				1327.0
+			],
+			[
+				1659.25,
+				1326.50354003906
+			],
+			[
+				1664.5,
+				1326.06567382812
+			],
+			[
+				1669.75,
+				1325.68872070312
+			],
+			[
+				1675.0,
+				1325.375
+			],
+			[
+				1680.25,
+				1325.12707519531
+			],
+			[
+				1685.5,
+				1324.94702148438
+			],
+			[
+				1690.75,
+				1324.83715820312
+			],
+			[
+				1696.0,
+				1324.80004882812
+			],
+			[
+				1706.5,
+				1324.87951660156
+			],
+			[
+				1717.0,
+				1325.11511230469
+			],
+			[
+				1727.5,
+				1325.50158691406
+			],
+			[
+				1738.0,
+				1326.03442382812
+			],
+			[
+				1748.5,
+				1326.708984375
+			],
+			[
+				1759.0,
+				1327.52038574219
+			],
+			[
+				1769.5,
+				1328.46411132812
+			],
+			[
+				1780.0,
+				1329.53491210938
+			],
+			[
+				1790.5,
+				1330.72875976562
+			],
+			[
+				1801.0,
+				1332.04028320312
+			],
+			[
+				1811.5,
+				1333.46496582031
+			],
+			[
+				1822.0,
+				1334.99816894531
+			],
+			[
+				1832.5,
+				1336.63488769531
+			],
+			[
+				1843.0,
+				1338.37072753906
+			],
+			[
+				1864.0,
+				1342.11999511719
+			],
+			[
+				1885.0,
+				1346.2080078125
+			],
+			[
+				1906.0,
+				1350.59692382812
+			],
+			[
+				1927.0,
+				1355.24853515625
+			],
+			[
+				1948.0,
+				1360.125
+			],
+			[
+				1990.0,
+				1370.40063476562
+			],
+			[
+				2032.0,
+				1381.1201171875
+			],
+			[
+				2116.0,
+				1402.67504882812
+			],
+			[
+				2158.0,
+				1412.90307617188
+			],
+			[
+				2179.0,
+				1417.7470703125
+			],
+			[
+				2200.0,
+				1422.36010742188
+			],
+			[
+				2221.0,
+				1426.70434570312
+			],
+			[
+				2242.0,
+				1430.74194335938
+			],
+			[
+				2263.0,
+				1434.43481445312
+			],
+			[
+				2273.5,
+				1436.14013671875
+			],
+			[
+				2284.0,
+				1437.7451171875
+			],
+			[
+				2294.5,
+				1439.24475097656
+			],
+			[
+				2305.0,
+				1440.634765625
+			],
+			[
+				2315.5,
+				1441.90991210938
+			],
+			[
+				2326.0,
+				1443.06567382812
+			],
+			[
+				2336.5,
+				1444.09729003906
+			],
+			[
+				2347.0,
+				1445.00012207031
+			],
+			[
+				2357.5,
+				1445.76928710938
+			],
+			[
+				2368.0,
+				1446.40002441406
+			]
+		]
+	],
+	"seconds": 720.0,
+	"size": [
+		24,
+		16
+	],
+	"title": "4. Two Crossings"
+}

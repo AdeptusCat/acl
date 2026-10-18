@@ -1,0 +1,351 @@
+extends Node
+
+var failures: int = 0
+var checks: int = 0
+
+
+func _ready() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	seed(6049)
+	var main: Node = load("res://scenes/main.tscn").instantiate()
+	get_tree().root.add_child(main)
+	var world: Node = main.world
+	var map_index: int = 1
+	if OS.get_cmdline_user_args().has("--default-map"):
+		map_index = 0
+	var map: Map = world.maps.get_child(map_index)
+	var scenario: Scenario = map.get_scenario(0)
+	Globals.map_chosen = map
+	Globals.scenario_chosen = scenario
+	world.start_screen.hide()
+	var player_team: Globals.Team = scenario.player_team
+	if OS.get_cmdline_user_args().has("--axis"):
+		player_team = Globals.Team.AXIS
+		scenario.axis_ai_status = Scenario.AIStatus.OFF
+		scenario.allies_ai_status = Scenario.AIStatus.ON
+	var extra: Unit = null
+	if OS.get_cmdline_user_args().has("--extra-squad"):
+		extra = _add_scenario_squad(map, scenario, Globals.get_enemy_team(player_team))
+		_check(extra != null, "A new enemy squad can be authored without an AI roster reference")
+	var authored: Array[Unit] = []
+	for child: Node in scenario.get_units():
+		var unit: Unit = child as Unit
+		if unit != null:
+			authored.append(unit)
+	await world._on_game_started(map, scenario, player_team, Globals.GameMode.ATTACK)
+	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	var planners: Array[PlatoonAI] = [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]
+	var manual_orders: Dictionary[Unit, int] = {}
+	for planner: PlatoonAI in planners:
+		var expected: Array[Unit] = []
+		for unit: Unit in authored:
+			if unit.team == planner.team:
+				expected.append(unit)
+		_check(planner.squads.size() == expected.size(), "Startup automatically registers every selected-scenario unit for its team, including headquarters")
+		for unit: Unit in planner.squads:
+			_check(expected.has(unit) and unit.get_parent() == world.game_controller.unit_container, "Registration never imports units from another map or inactive scenario")
+		if planner.team == player_team:
+			_check(not planner.active and planner.current_order == null and planner.squad_assignments.is_empty(), "Player platoon receives no automatic mission at startup")
+			for unit: Unit in planner.squads:
+				_check(not unit.squad_ai_controller.defensive_mission_controlled, "Automatically registered player squads retain manual movement ownership")
+				unit.give_hold_order()
+				manual_orders[unit] = unit.action_controller.action_order_id
+			# Direct director updates and reconsideration must also respect player control.
+			var director: DefenseDirector = world.game_controller.defense_director
+			if planner.team == Globals.Team.ALLIES:
+				director = world.game_controller.get_node("DefenseDirector2")
+			director.assign_order_to_platoon()
+			planner.reconsider_assignments()
+			_check(planner.current_order == null and planner.squad_assignments.is_empty() and planner.executor.pending.is_empty(), "Player planner rejects automatic mission updates")
+		else:
+			_check(planner.active and planner.current_order != null, "Enemy platoon retains its automatic mission")
+	_check(not manual_orders.is_empty(), "Scenario includes player squads previously controlled by the planner")
+	# Initial advice is published as a complete budgeted batch; expanded rosters need more slices.
+	var initial_plan_completed: bool = false
+	for frame: int in range(1800):
+		for planner: PlatoonAI in planners:
+			if planner.team != player_team and not planner.squad_assignments.is_empty():
+				initial_plan_completed = true
+		if initial_plan_completed:
+			break
+		await get_tree().process_frame
+	_check(initial_plan_completed, "The initial budgeted enemy batch completes before match observation")
+	var samples: Array[Dictionary] = []
+	for frame: int in range(600):
+		await get_tree().process_frame
+		if frame % 60 == 59:
+			for planner: PlatoonAI in planners:
+				if planner.team == player_team:
+					_check(planner.current_order == null and planner.squad_assignments.is_empty() and planner.executor.pending.is_empty(), "Player remains outside automatic planning across tactical ticks")
+					for unit: Unit in manual_orders:
+						_check(unit.action_controller.action_order_id == manual_orders[unit] and not unit.movement.is_moving, "Player hold commands survive automatic reconsideration")
+				var targets: Array[String] = []
+				var diagnostics: Array[Dictionary] = []
+				var claimed: Dictionary[Unit, Vector2i] = {}
+				for owned: Unit in planner.squad_assignments:
+					_check(Globals.get_units().has(owned) and owned.team == planner.team and planner.squads.has(owned), "Match orders remain inside active platoon ownership")
+					var advice: PositionResult = planner.squad_assignments[owned]["result"]
+					diagnostics.append({"unit": str(owned.name), "reason": advice.reason, "rejections": advice.rejections, "sector": advice.features.get("assigned_sector", -1)})
+					if advice.is_valid():
+						for previous: Unit in claimed:
+							_check(claimed[previous] != advice.target_hex or HqSupportPositionPolicy.can_share_position(owned, previous), "Shared destinations contain headquarters support rather than competing combat duties")
+						claimed[owned] = advice.target_hex
+						targets.append("%s:%s" % [owned.name, advice.target_hex])
+				samples.append({"frame": frame + 1, "team": planner.team, "targets": targets, "diagnostics": diagnostics})
+	for planner: PlatoonAI in planners:
+		if planner.team != player_team:
+			_check(planner.active and not planner.squad_assignments.is_empty(), "Enemy continues to allocate positions during the match")
+			if extra != null:
+				_check(planner.squads.has(extra) and planner.squad_assignments.has(extra) and extra.squad_ai_controller.defensive_mission_controlled, "The newly authored enemy squad participates in real tactical planning without manual registration")
+	_check(controller.snapshot != null and controller.snapshot.maps.size() == 2, "Active match publishes both teams")
+	# Freeze execution while comparing policies over exactly the same match snapshot.
+	main.process_mode = Node.PROCESS_MODE_DISABLED
+	_test_position_inspection(world, player_team)
+	var observations: Array[Dictionary] = []
+	var covered_teams: int = 0
+	var valid_offense: int = 0
+	var exercised: Array[int] = []
+	var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+	for team: int in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		var units: Array[Unit] = Globals.get_units_for_team(team)
+		var enemies: Array[Unit] = Globals.get_units_for_team(Globals.get_enemy_team(team))
+		var objective: Vector2i = controller.objectives_by_team[team]
+		var coverage: bool = false
+		for unit: Unit in units:
+			var query: PositionQuery = PositionQuery.new()
+			query.unit = unit
+			query.team = team
+			query.objective_hex = objective
+			query.snapshot = controller.snapshot
+			query.profile = PositionProfile.for_mode(PositionProfile.Mode.LEGACY_DEFENSE)
+			var legacy: PositionResult = PositionQueryService.query_positions(query)
+			query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+			var defense: PositionResult = PositionQueryService.query_positions(query)
+			if defense.is_valid():
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(defense.profile_mode == PositionProfile.Mode.HQ_SUPPORT, "Headquarters follows squad support geography")
+				else:
+					_check(LOSHelper.get_hex_distance(defense.target_hex, objective) <= query.defense_radius, "Defense stays within mission geography")
+				_check(not defense.path.is_empty() and defense.path[-1] == defense.target_hex, "Defense returns a valid route")
+				if not HqSupportPositionPolicy.is_headquarters(unit):
+					coverage = coverage or defense.features.get("responsibility", "") in ["occupy", "guard", "cover_approach"]
+				query.has_accepted_target = true
+				query.accepted_target = defense.target_hex
+				query.accepted_context = defense.context
+				var repeated: PositionResult = PositionQueryService.query_positions(query)
+				_check(repeated.target_hex == defense.target_hex, "Repeated snapshot retains a stable defensive position")
+			observations.append({"unit": str(unit.name), "team": team, "mode": "defend", "valid": defense.is_valid(), "target": str(defense.target_hex), "score": _finite_score(defense.score), "features": defense.features, "legacy_target": str(legacy.target_hex), "legacy_score": _finite_score(legacy.score)})
+			query.has_accepted_target = false
+			for mode: PositionProfile.Mode in [PositionProfile.Mode.SUPPORT_BY_FIRE, PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
+				if enemies.is_empty():
+					continue
+				query.objective_hex = enemies[0].current_hex
+				query.profile = PositionProfile.for_mode(mode)
+				var offense: PositionResult = PositionQueryService.query_positions(query)
+				if HqSupportPositionPolicy.is_headquarters(unit):
+					_check(offense.profile_mode == PositionProfile.Mode.HQ_SUPPORT and (not offense.is_valid() or offense.features["firing"] == 0.0), "Offensive advice keeps headquarters outside combat duties")
+					continue
+				if offense.is_valid():
+					valid_offense += 1
+					_check(not offense.path.is_empty(), "Offensive recommendation has a route")
+					if offense.should_move and not exercised.has(mode):
+						_check(executor.execute(offense), "Real unit action controller accepts offensive advice")
+						_check(unit.action_controller.objective_hex == offense.target_hex, "Execution uses the advised destination")
+						if mode == PositionProfile.Mode.ASSAULT:
+							_check(unit.action_controller.has_attack_flag, "Assault retains existing attack execution semantics")
+						exercised.append(mode)
+						executor.cancel(unit)
+						unit.action_controller.clear_orders()
+					if mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
+						_check(offense.features["firing"] > 0.0, "Support position can fire toward the target")
+					if mode == PositionProfile.Mode.ASSAULT:
+						_check(LOSHelper.get_hex_distance(offense.target_hex, query.objective_hex) <= 1, "Assault position is adjacent to the target")
+				observations.append({"unit": str(unit.name), "team": team, "mode": mode, "valid": offense.is_valid(), "target": str(offense.target_hex), "score": _finite_score(offense.score), "features": offense.features})
+		if coverage:
+			covered_teams += 1
+	_check(covered_teams == 2, "Both teams have combat positions occupying, guarding or intercepting approaches to their defensive objective")
+	_check(valid_offense > 0, "Authored map supports offensive position recommendations")
+	executor.cancel_all()
+	# Stress the same authored terrain with explicitly omniscient danger knowledge.
+	controller.knowledge_policy = InfluenceMapController.KnowledgePolicy.OMNISCIENT
+	_complete_rebuild(controller)
+	var danger_cases: int = 0
+	for team: int in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		_check(not controller.snapshot.get_contacts(team).is_empty(), "Explicit knowledge policy captures the enemy team")
+		for unit: Unit in Globals.get_units_for_team(team):
+			var query: PositionQuery = PositionQuery.new()
+			query.unit = unit
+			query.team = team
+			query.objective_hex = controller.objectives_by_team[team]
+			query.snapshot = controller.snapshot
+			var advice: PositionResult = PositionQueryService.query_positions(query)
+			if advice.is_valid():
+				_check(advice.features["incoming"] <= query.profile.max_incoming_risk and advice.features["peak_exposure"] <= query.profile.max_route_exposure, "Known-danger advice obeys destination and route limits")
+				danger_cases += 1
+			observations.append({"unit": str(unit.name), "team": team, "mode": "defend_known_danger", "valid": advice.is_valid(), "target": str(advice.target_hex), "score": _finite_score(advice.score), "features": advice.features, "reason": advice.reason})
+	_check(danger_cases > 0, "Representative map retains feasible positions under known danger")
+	_test_support_fire(controller)
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--report="):
+			var file: FileAccess = FileAccess.open(argument.trim_prefix("--report="), FileAccess.WRITE)
+			file.store_string(JSON.stringify({"map": str(map.name), "player_team": player_team, "checks": checks, "failures": failures, "snapshot_version": controller.snapshot.version, "observations": observations, "planning_samples": samples}, "  "))
+	var map_name: String = str(map.name)
+	main.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	print("Influence match checks: ", checks, "; failures: ", failures, "; map: ", map_name)
+	get_tree().quit(failures)
+
+
+func _check(condition: bool, message: String) -> void:
+	checks += 1
+	if not condition:
+		failures += 1
+		push_error(message)
+
+
+func _finite_score(score: float) -> Variant:
+	if is_finite(score):
+		return score
+	return null
+
+
+func _complete_rebuild(controller: InfluenceMapController) -> void:
+	# Finish a pending capture before creating a capture with the new policy.
+	for attempt: int in range(2):
+		controller.create_maps(0.0)
+		for step: int in range(1000):
+			controller._process_los_rebuild()
+			controller._process_budgeted_rebuild()
+			if not controller.rebuild_pending:
+				break
+	_check(not controller.rebuild_pending, "Completed snapshot publishes after policy change")
+
+
+func _test_support_fire(controller: InfluenceMapController) -> void:
+	var exercised: bool = false
+	for unit: Unit in Globals.get_units():
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			continue
+		for cell: Vector2i in controller.snapshot.los.get(unit.current_hex, {}):
+			if cell == unit.current_hex or InfluenceUnitQuery.get_firepower_at_range(unit, LOSHelper.get_hex_distance(unit.current_hex, cell)) <= 0.0:
+				continue
+			var occupied: bool = false
+			for friendly: Unit in Globals.get_units_for_team(unit.team):
+				occupied = occupied or friendly.current_hex == cell
+			if occupied:
+				continue
+			var enemy: Unit = null
+			for candidate: Unit in Globals.get_units_for_team(Globals.get_enemy_team(unit.team)):
+				if TacticalPositionExecutor.is_active_defender(candidate):
+					enemy = candidate
+					break
+			if enemy == null:
+				continue
+			# Support fire requires an active observed unit, not an empty objective.
+			var enemy_hex: Vector2i = enemy.current_hex
+			var enemy_position: Vector2 = enemy.position
+			var visible: Array = Globals.unit_visible_enemies.get(unit, [])
+			enemy.current_hex = cell
+			enemy.current_cube = LOSHelper.ground_layer.map_to_cube(cell)
+			enemy.position = LOSHelper.ground_layer.map_to_local(cell)
+			Globals.unit_visible_enemies[unit] = [enemy]
+			var query: PositionQuery = PositionQuery.new()
+			query.unit = unit
+			query.team = unit.team
+			query.objective_hex = cell
+			query.movement_radius = 0
+			query.profile = PositionProfile.for_mode(PositionProfile.Mode.SUPPORT_BY_FIRE)
+			query.snapshot = controller.snapshot
+			var advice: PositionResult = PositionQueryService.query_positions(query)
+			if not advice.is_valid():
+				enemy.current_hex = enemy_hex
+				enemy.current_cube = LOSHelper.ground_layer.map_to_cube(enemy_hex)
+				enemy.position = enemy_position
+				Globals.unit_visible_enemies[unit] = visible
+				continue
+			var executor: TacticalPositionExecutor = TacticalPositionExecutor.new()
+			_check(executor.execute(advice), "Support intent executes at an existing firing position")
+			_check(unit.attackState == Unit.AttackState.MANUAL_TRACK and unit.squad_fire.target_unit == enemy, "Real fire controller tracks the observed support target")
+			unit.setAttackState(Unit.AttackState.AUTO)
+			unit.squad_fire.clear_target()
+			_check(executor.execute(advice), "Completed support advice can resume its fire intent")
+			_check(unit.attackState == Unit.AttackState.MANUAL_TRACK and unit.squad_fire.target_unit == enemy, "Support fire resumes against the active observed target")
+			executor.cancel_all()
+			_check(unit.attackState == Unit.AttackState.AUTO and not unit.squad_fire.has_target_hex, "Canceling support intent releases its fire target")
+			enemy.current_hex = enemy_hex
+			enemy.current_cube = LOSHelper.ground_layer.map_to_cube(enemy_hex)
+			enemy.position = enemy_position
+			Globals.unit_visible_enemies[unit] = visible
+			exercised = true
+			break
+		if exercised:
+			break
+	_check(exercised, "Authored match exercises real support-by-fire execution")
+
+
+func _add_scenario_squad(map: Map, scenario: Scenario, team: Globals.Team) -> Unit:
+	var ground: HexagonTileMapLayer = map.get_ground_layer()
+	var units: Array[Node] = scenario.get_units()
+	for child: Node in units:
+		var base: Unit = child as Unit
+		if base == null or base.team != team:
+			continue
+		var origin: Vector2i = ground.local_to_map(ground.to_local(base.global_position))
+		for cell: Vector2i in ground.get_surrounding_cells(origin):
+			if ground.get_cell_source_id(cell) < 0:
+				continue
+			var occupied: bool = false
+			for other_child: Node in units:
+				var other: Unit = other_child as Unit
+				if other != null and ground.local_to_map(ground.to_local(other.global_position)) == cell:
+					occupied = true
+			if occupied:
+				continue
+			var added: Unit = load("res://scenes/game/units/unit.tscn").instantiate() as Unit
+			added.team = team
+			added.company = Unit.Company.F
+			added.platoon = 7
+			added.squad = 31
+			if team == Globals.Team.ALLIES:
+				added.squad_loadout = load("res://resources/squads/united_states/rifle_squad.tres") as SquadLoadoutSpec
+			scenario.units.add_child(added)
+			added.global_position = ground.to_global(ground.map_to_local(cell))
+			return added
+	return null
+
+
+func _test_position_inspection(world: Node, player_team: Globals.Team) -> void:
+	var draw: InfluenceMapDebugDraw = world.game_controller.influence_map_debug_draw
+	var controller: InfluenceMapController = world.game_controller.influence_map_controller
+	var panel: PanelContainer = world.ui.get_node("Control/Debug")
+	panel.ai_placement.button_pressed = true
+	draw.set_debug_view(InfluenceMapDebugDraw.DebugView.THREAT)
+	var valid_previews: int = 0
+	for unit: Unit in Globals.get_units_for_team(player_team):
+		var order_id: int = unit.action_controller.action_order_id
+		var tactical_advice: PositionResult = unit.position_advice
+		world.game_controller._select_unit(unit)
+		_check(draw.selected_unit == unit and draw.team == player_team and draw.debug_view == InfluenceMapDebugDraw.DebugView.POSITION_SCORE, "Click selection inspects player positions only after enabling the debug overlay")
+		var advice: PositionResult = draw.position_advice
+		_check(advice != null and advice.unit == unit and advice.snapshot_version == controller.snapshot.version, "Player inspection queries the completed snapshot without an AI mission")
+		_check(unit.action_controller.action_order_id == order_id and unit.position_advice == tactical_advice, "Player inspection neither issues orders nor replaces tactical advice")
+		if advice != null and advice.is_valid():
+			valid_previews += 1
+			_check(draw._should_draw_cell(controller.snapshot.maps[player_team], advice.target_hex), "The advised destination is visibly marked as a feasible candidate")
+		world.game_controller._deselect_unit(unit)
+		_check(draw.debug_view == InfluenceMapDebugDraw.DebugView.THREAT and draw.position_advice == null, "Deselecting returns to the previous layer")
+	_check(valid_previews > 0, "Manually controlled scenario units retain inspectable position candidates")
+	var planners: Array[PlatoonAI] = [world.game_controller.platoon_ai, world.game_controller.get_node("PlatoonAi2")]
+	for planner: PlatoonAI in planners:
+		if planner.team == player_team:
+			_check(not planner.active and planner.current_order == null and planner.executor.pending.is_empty(), "Inspection does not re-enable player AI")
+		else:
+			for unit: Unit in planner.squad_assignments:
+				world.game_controller._select_unit(unit)
+				_check(draw.position_advice == planner.squad_assignments[unit]["result"], "AI inspection preserves the exact assigned query and reservation diagnostics")
+				world.game_controller._deselect_unit(unit)
+	panel.ai_placement.button_pressed = false

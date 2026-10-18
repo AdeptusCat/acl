@@ -1,0 +1,430 @@
+{
+  "description": "Faction directory renames implemented on 6 October 2026. Original basenames, resource UIDs, and image bytes are preserved. Compatibility redirects retain old serialized resource paths.",
+  "directories": {
+    "resources/soldiers/us": "resources/soldiers/united_states",
+    "resources/squads/german": "resources/squads/germany",
+    "resources/squads/us": "resources/squads/united_states",
+    "assets/status/ger": "assets/status/germany",
+    "assets/status/us": "assets/status/united_states"
+  },
+  "files": [
+    {
+      "original": "resources/soldiers/us/assistant.tres",
+      "final": "resources/soldiers/united_states/assistant.tres",
+      "sha256_before": "769595646533fa92cb2c64b1df58a6788484d068e2ea9ae33d48593ac1f4de64",
+      "sha256_after": "769595646533fa92cb2c64b1df58a6788484d068e2ea9ae33d48593ac1f4de64",
+      "uid": "uid://cj1ie6lthyda0"
+    },
+    {
+      "original": "resources/soldiers/us/company_leader.tres",
+      "final": "resources/soldiers/united_states/company_leader.tres",
+      "sha256_before": "a087a65685f19a3f06eb54114aaaa066e61d5bb9e8e1a179707060b2893dc024",
+      "sha256_after": "a087a65685f19a3f06eb54114aaaa066e61d5bb9e8e1a179707060b2893dc024",
+      "uid": "uid://b7lhj4mfei3ky"
+    },
+    {
+      "original": "resources/soldiers/us/loader.tres",
+      "final": "resources/soldiers/united_states/loader.tres",
+      "sha256_before": "48f9ed2f12285d43976892c0df5235d8355b924df575f38a9330fc3d25e899c7",
+      "sha256_after": "48f9ed2f12285d43976892c0df5235d8355b924df575f38a9330fc3d25e899c7",
+      "uid": "uid://c0y74x6d2lnb6"
+    },
+    {
+      "original": "resources/soldiers/us/mg_gunner.tres",
+      "final": "resources/soldiers/united_states/mg_gunner.tres",
+      "sha256_before": "41f167c6ee753b93e65da6587c9c25d1730fc2af21e3e0bd5a8ce292619330dc",
+      "sha256_after": "41f167c6ee753b93e65da6587c9c25d1730fc2af21e3e0bd5a8ce292619330dc",
+      "uid": "uid://s5q86tvhibgt"
+    },
+    {
+      "original": "resources/soldiers/us/platoon_leader.tres",
+      "final": "resources/soldiers/united_states/platoon_leader.tres",
+      "sha256_before": "75c037dee5d4947861aa0ef219c79cfd1eac34845e3698b1fdd02971899286d5",
+      "sha256_after": "75c037dee5d4947861aa0ef219c79cfd1eac34845e3698b1fdd02971899286d5",
+      "uid": "uid://cntsjxepp043a"
+    },
+    {
+      "original": "resources/soldiers/us/rifle_grenadier.tres",
+      "final": "resources/soldiers/united_states/rifle_grenadier.tres",
+      "sha256_before": "ce75486b6b291f9ee4f51f5d307613835697b55c9374720dfccd46bfc07a07c4",
+      "sha256_after": "ce75486b6b291f9ee4f51f5d307613835697b55c9374720dfccd46bfc07a07c4",
+      "uid": "uid://cntlstwi5r5pp"
+    },
+    {
+      "original": "resources/soldiers/us/rifleman.tres",
+      "final": "resources/soldiers/united_states/rifleman.tres",
+      "sha256_before": "8d7a4f88f0097fe459a6dda6a83a4821201e4c6eba711ce2c1f96379b185a55c",
+      "sha256_after": "8d7a4f88f0097fe459a6dda6a83a4821201e4c6eba711ce2c1f96379b185a55c",
+      "uid": "uid://b0oftq0t3p8ak"
+    },
+    {
+      "original": "resources/soldiers/us/squad_leader.tres",
+      "final": "resources/soldiers/united_states/squad_leader.tres",
+      "sha256_before": "558cadfeba169eecbdf2a15c3050a8762615e75d099e4f66f5a0181d37b726dd",
+      "sha256_after": "558cadfeba169eecbdf2a15c3050a8762615e75d099e4f66f5a0181d37b726dd",
+      "uid": "uid://c2rwmfwb2346n"
+    },
+    {
+      "original": "resources/soldiers/us/squad_leader_assistant.tres",
+      "final": "resources/soldiers/united_states/squad_leader_assistant.tres",
+      "sha256_before": "f968c79779a937d58000bbd5abe5efc7578672c70c5ad9ce4d236bd105555222",
+      "sha256_after": "f968c79779a937d58000bbd5abe5efc7578672c70c5ad9ce4d236bd105555222",
+      "uid": "uid://etcou5wx4q3w"
+    },
+    {
+      "original": "resources/soldiers/us/team_leader.tres",
+      "final": "resources/soldiers/united_states/team_leader.tres",
+      "sha256_before": "959ce57a96c78d66427d8cb924cdef8fd9fa0b36e78643b34c90915738eb2f1b",
+      "sha256_after": "959ce57a96c78d66427d8cb924cdef8fd9fa0b36e78643b34c90915738eb2f1b",
+      "uid": "uid://cdyt4jn0s7bis"
+    },
+    {
+      "original": "resources/soldiers/us/team_leader_assistant.tres",
+      "final": "resources/soldiers/united_states/team_leader_assistant.tres",
+      "sha256_before": "442846163abdc6cd439cbfe66002a27d300e7619b0561c53553c9267cabb7d2f",
+      "sha256_after": "442846163abdc6cd439cbfe66002a27d300e7619b0561c53553c9267cabb7d2f",
+      "uid": "uid://c5qy1wb7wd8wx"
+    },
+    {
+      "original": "resources/squads/german/anti_tank_team.tres",
+      "final": "resources/squads/germany/anti_tank_team.tres",
+      "sha256_before": "1ead1432e40f98cd753a0d075dfaa6612c92c6bbf601e003a089c8a67b973f69",
+      "sha256_after": "1ead1432e40f98cd753a0d075dfaa6612c92c6bbf601e003a089c8a67b973f69",
+      "uid": "uid://dibkg1uf8xp1l"
+    },
+    {
+      "original": "resources/squads/german/company_hq.tres",
+      "final": "resources/squads/germany/company_hq.tres",
+      "sha256_before": "80dbe4fc274aa88c446032d68b826df64d3c7aadad557665886f35192f34870f",
+      "sha256_after": "80dbe4fc274aa88c446032d68b826df64d3c7aadad557665886f35192f34870f",
+      "uid": "uid://0yrwtv2ux2fi"
+    },
+    {
+      "original": "resources/squads/german/light_mortar_squad.tres",
+      "final": "resources/squads/germany/light_mortar_squad.tres",
+      "sha256_before": "d164e99399df43b04b690913b6305f26f102f2d6ee2fdd2ad6647c1fab6a1a80",
+      "sha256_after": "d164e99399df43b04b690913b6305f26f102f2d6ee2fdd2ad6647c1fab6a1a80",
+      "uid": "uid://d2fupy0rwq3aw"
+    },
+    {
+      "original": "resources/squads/german/lmg_squad.tres",
+      "final": "resources/squads/germany/lmg_squad.tres",
+      "sha256_before": "2ca8bacaefe73d40350640fa56060c6f0ef797f3807636ee559dc5df5eed7cdd",
+      "sha256_after": "2ca8bacaefe73d40350640fa56060c6f0ef797f3807636ee559dc5df5eed7cdd",
+      "uid": "uid://1vun3vkkv6cn"
+    },
+    {
+      "original": "resources/squads/german/medium_mortar_squad.tres",
+      "final": "resources/squads/germany/medium_mortar_squad.tres",
+      "sha256_before": "6d9ae1ecb50a9c80b9e12e81074b8caec4721b411f74f7030947945492a12a4b",
+      "sha256_after": "6d9ae1ecb50a9c80b9e12e81074b8caec4721b411f74f7030947945492a12a4b",
+      "uid": "uid://bgercl11nyflu"
+    },
+    {
+      "original": "resources/squads/german/platoon_hq.tres",
+      "final": "resources/squads/germany/platoon_hq.tres",
+      "sha256_before": "c0c4fb38e2bcbb507ad802d91749e8d9cf2f3a559e9111bd99155c244f50d1e1",
+      "sha256_after": "c0c4fb38e2bcbb507ad802d91749e8d9cf2f3a559e9111bd99155c244f50d1e1",
+      "uid": "uid://boephgpg2cfao"
+    },
+    {
+      "original": "resources/squads/german/rifle_squad.tres",
+      "final": "resources/squads/germany/rifle_squad.tres",
+      "sha256_before": "2252158b31695f63e540d65f3b5d0836328ad6f11340b14f8abc344c2b02f5b1",
+      "sha256_after": "2252158b31695f63e540d65f3b5d0836328ad6f11340b14f8abc344c2b02f5b1",
+      "uid": "uid://bwfw35mmy64ro"
+    },
+    {
+      "original": "resources/squads/german/squad_loadout_catalog.tres",
+      "final": "resources/squads/germany/squad_loadout_catalog.tres",
+      "sha256_before": "526fc22b05b8232bd3135ec91de2eb54fed2b3570d4a7930f8b63018d125406c",
+      "sha256_after": "db5a7826f6aece67a3fe9a114f0248438f0cad5d2c3d93f464c1f9aff1a4689c",
+      "uid": "uid://lp0f0dhp86jk"
+    },
+    {
+      "original": "resources/squads/us/anti_tank_team.tres",
+      "final": "resources/squads/united_states/anti_tank_team.tres",
+      "sha256_before": "8235e58a2a589251bdad84a6d7d2bfdf89e55a91ee42bc8e338b67d6b38dbe5d",
+      "sha256_after": "8235e58a2a589251bdad84a6d7d2bfdf89e55a91ee42bc8e338b67d6b38dbe5d",
+      "uid": "uid://3udaykaejivr"
+    },
+    {
+      "original": "resources/squads/us/company_hq.tres",
+      "final": "resources/squads/united_states/company_hq.tres",
+      "sha256_before": "83f66a42cb274ed3daf196365898d47b3a2dcbb56ecf9feb0f01c52bb6743f4b",
+      "sha256_after": "ebc4d761beeab3ab9bc8efa402479ae28b22d846ac9b6f52eb941bbe5e9704fa",
+      "uid": "uid://bsge266xsare4"
+    },
+    {
+      "original": "resources/squads/us/light_mortar_squad.tres",
+      "final": "resources/squads/united_states/light_mortar_squad.tres",
+      "sha256_before": "ec7375f573de7e71ad5db21193b8cb1726fd7a3a6d5c4d6de47c48a31ae4c68d",
+      "sha256_after": "c2d9102dc99ac38d1ca1ab0d0e61284ed349f8a0eac360f70138cc6ad46a4a46",
+      "uid": "uid://b47gq5wbijpgy"
+    },
+    {
+      "original": "resources/squads/us/lmg_squad.tres",
+      "final": "resources/squads/united_states/lmg_squad.tres",
+      "sha256_before": "eeeb1118fdbf1966a01f9b8d71486949029bab9f87a9dbc9b37fb8b6d2c32f66",
+      "sha256_after": "e57d4ee11bea5a20c66d1bb8c00fe7c555067ab83439d0fff8146dd43b4c35fc",
+      "uid": "uid://cgl1er7wt4ilg"
+    },
+    {
+      "original": "resources/squads/us/medium_mortar_squad.tres",
+      "final": "resources/squads/united_states/medium_mortar_squad.tres",
+      "sha256_before": "91841793769d685a06f52cc64390bf80fd6cb5c5197e834bdfd112383fcfac70",
+      "sha256_after": "d9b6cd2f3889800fab305d45f0b4dbe4bbc72973cbf0c95c31d398cc2458dafc",
+      "uid": "uid://b0rfy3y2g3mec"
+    },
+    {
+      "original": "resources/squads/us/platoon_hq.tres",
+      "final": "resources/squads/united_states/platoon_hq.tres",
+      "sha256_before": "918689e7732008c170df04abfad3916485f000b1789e9fa7aa34b3380393a982",
+      "sha256_after": "17364d09b2ac5bfd8445815fdfa47cb89fe1cfd98fd22a0cd12921b1f6d5d981",
+      "uid": "uid://cgfs6mgrk10ep"
+    },
+    {
+      "original": "resources/squads/us/rifle_squad.tres",
+      "final": "resources/squads/united_states/rifle_squad.tres",
+      "sha256_before": "e8813fc4e848fa479e9cd07f9842bb107588d39f35a21acd9d7a7a8f20025420",
+      "sha256_after": "85e57aced22c4f5bd412ebb42ef4e6489e5f80c6973a4c10231502bb4bc265a5",
+      "uid": "uid://c7l1c33tmr5ab"
+    },
+    {
+      "original": "resources/squads/us/squad_loadout_catalog.tres",
+      "final": "resources/squads/united_states/squad_loadout_catalog.tres",
+      "sha256_before": "309e681fe8d08d3ba88b99b2998122e0ab71bca49b6c5fd8463a10c0bdf5f4b8",
+      "sha256_after": "3d5819bf46d1d22ccd05706b915f7c98220fd0cbfbb659ea35e6794751c3e97d",
+      "uid": "uid://c3126its6x8x4"
+    },
+    {
+      "original": "assets/status/ger/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png",
+      "final": "assets/status/germany/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png",
+      "sha256_before": "11732d70bdab8e000b6b6ba3ecb5c43ba1028886a599daaa2d37c209b51de583",
+      "sha256_after": "11732d70bdab8e000b6b6ba3ecb5c43ba1028886a599daaa2d37c209b51de583"
+    },
+    {
+      "original": "assets/status/ger/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png.import",
+      "final": "assets/status/germany/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png.import",
+      "sha256_before": "be5f7d46042e42b5db5cf7b6930e266998d18619a05aa08cab9185bf265ff5aa",
+      "sha256_after": "6453dc09fc714d6b72a177fe8ae8caab7a01b4ed054a3e7d69bf82661db49ca6",
+      "uid": "uid://di4i1mfxju1xs"
+    },
+    {
+      "original": "assets/status/ger/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png",
+      "final": "assets/status/germany/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png",
+      "sha256_before": "b8095e3929dfa6f940bf240ac71b784357f9c0b817c4bf8cc3b677dbd48f9f0c",
+      "sha256_after": "b8095e3929dfa6f940bf240ac71b784357f9c0b817c4bf8cc3b677dbd48f9f0c"
+    },
+    {
+      "original": "assets/status/ger/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png.import",
+      "final": "assets/status/germany/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png.import",
+      "sha256_before": "294228261b70fdd70b2a4424b6d3a57c9e4d389af4f26cf6adc0926132f84718",
+      "sha256_after": "b115b5fbe1e9eb8a56c439c7d2c488a508ceb1d583a3b1cd96cdb28c22b2640e",
+      "uid": "uid://bfxfj31hvfo00"
+    },
+    {
+      "original": "assets/status/ger/infantry/mg/idle_ger.png",
+      "final": "assets/status/germany/infantry/mg/idle_ger.png",
+      "sha256_before": "f3b2bc107e55261e473663ca7b0eb9583ecbfae8e642bd50a2b839a97f96dd08",
+      "sha256_after": "f3b2bc107e55261e473663ca7b0eb9583ecbfae8e642bd50a2b839a97f96dd08"
+    },
+    {
+      "original": "assets/status/ger/infantry/mg/idle_ger.png.import",
+      "final": "assets/status/germany/infantry/mg/idle_ger.png.import",
+      "sha256_before": "292fcaab76a9e981dca481bb23da1674d0896e281bd3ab7ee4794df612fc20b0",
+      "sha256_after": "9ac206cfbde1e388c8c40521189eeeb1296147ab61d2d363013c33285e35f91f",
+      "uid": "uid://csetmwqg22cac"
+    },
+    {
+      "original": "assets/status/ger/infantry/mg/shooting_ger.png",
+      "final": "assets/status/germany/infantry/mg/shooting_ger.png",
+      "sha256_before": "ad91350a6447e36271f0e62e359fecc251d3e3eee0699f67634674cffc322ebd",
+      "sha256_after": "ad91350a6447e36271f0e62e359fecc251d3e3eee0699f67634674cffc322ebd"
+    },
+    {
+      "original": "assets/status/ger/infantry/mg/shooting_ger.png.import",
+      "final": "assets/status/germany/infantry/mg/shooting_ger.png.import",
+      "sha256_before": "8006e1b7a04591f6c6bd2b39e09199c7e3457749123fe99b317f254c5613635b",
+      "sha256_after": "8b02af6db1b5963e2dc41e5ded2a00c9a15bbfa166294995c84b51a4626a49ba",
+      "uid": "uid://cwi424itlgwij"
+    },
+    {
+      "original": "assets/status/ger/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png",
+      "final": "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png",
+      "sha256_before": "ccf634a07bc86d1623b76380670fa8f1d93b050402279b3344d28f154149c4b2",
+      "sha256_after": "ccf634a07bc86d1623b76380670fa8f1d93b050402279b3344d28f154149c4b2"
+    },
+    {
+      "original": "assets/status/ger/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png.import",
+      "final": "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png.import",
+      "sha256_before": "acead0c23bcc60c8026063cf6ec5df2a0603717ebddb37654cbb2829b403ed97",
+      "sha256_after": "8a06d7f034a7cc9630f1662eee90911554b49bca331e93abb25517a8de83ea9c",
+      "uid": "uid://bcx7evn6t805m"
+    },
+    {
+      "original": "assets/status/ger/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png",
+      "final": "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png",
+      "sha256_before": "c21e6875c7bb03e82b43bef22ff64e2e575308cd0b9d3b29177fc5d10f294767",
+      "sha256_after": "c21e6875c7bb03e82b43bef22ff64e2e575308cd0b9d3b29177fc5d10f294767"
+    },
+    {
+      "original": "assets/status/ger/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png.import",
+      "final": "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png.import",
+      "sha256_before": "08e0b8906c8f87f03545482e6901993c19b45cbddd1ea65625293c79d4b5d45b",
+      "sha256_after": "a9730863733abbd8951d3810d7dddabc61873d32ccfbfc24e4d98785662dda89",
+      "uid": "uid://dmsc6h87pf0km"
+    },
+    {
+      "original": "assets/status/ger/leader/leader_idle_ger.png",
+      "final": "assets/status/germany/leader/leader_idle_ger.png",
+      "sha256_before": "36f1499014b3ad03f9b77cdaff56b6af46f14a04dc83e061c85edec51994d190",
+      "sha256_after": "36f1499014b3ad03f9b77cdaff56b6af46f14a04dc83e061c85edec51994d190"
+    },
+    {
+      "original": "assets/status/ger/leader/leader_idle_ger.png.import",
+      "final": "assets/status/germany/leader/leader_idle_ger.png.import",
+      "sha256_before": "d50b4bfc98b47c22826073525b186d78ffdb2a4ab447491d7c2df9cfbd024ade",
+      "sha256_after": "cbbc46a11d2ec36bd0e499d6f103e2fab0647d4819ff9e7b4426d8300888e436",
+      "uid": "uid://cbfjsvqigymke"
+    },
+    {
+      "original": "assets/status/us/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png",
+      "final": "assets/status/united_states/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png",
+      "sha256_before": "0eb877077c6490e9a0a9db604272e1588336e2dfc4ff7f160eed97b06cf681c3",
+      "sha256_after": "0eb877077c6490e9a0a9db604272e1588336e2dfc4ff7f160eed97b06cf681c3"
+    },
+    {
+      "original": "assets/status/us/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png.import",
+      "final": "assets/status/united_states/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png.import",
+      "sha256_before": "b20401ffe5ab5af45075f59b1bc3d5e3103faf88d5ef2d192c16f09a3f647b68",
+      "sha256_after": "4b71516a1d78ce7d8ed2dd745586337ddcd702e0b4b0de602c2369756ce03780",
+      "uid": "uid://4l285jjrw0fv"
+    },
+    {
+      "original": "assets/status/us/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png",
+      "final": "assets/status/united_states/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png",
+      "sha256_before": "241622dbdd08ac6cd845b14420a1d4ed30c339707fb7ddefaee76311499c215d",
+      "sha256_after": "241622dbdd08ac6cd845b14420a1d4ed30c339707fb7ddefaee76311499c215d"
+    },
+    {
+      "original": "assets/status/us/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png.import",
+      "final": "assets/status/united_states/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png.import",
+      "sha256_before": "4f7319496d8bdba4cd907ca7ed452852bd4c5ba100082ce31c4ebaa02758b8e6",
+      "sha256_after": "e735bb127b50eec406707770bc87090bc58218afeaa520adf805428ecd53aa15",
+      "uid": "uid://bvhivdaoxde2"
+    },
+    {
+      "original": "assets/status/us/infantry/mg/idle_us.png",
+      "final": "assets/status/united_states/infantry/mg/idle_us.png",
+      "sha256_before": "03ae17df6fb299d52f863df9648fcbd544a6c1536553e8ae371edbd6e507b0b0",
+      "sha256_after": "03ae17df6fb299d52f863df9648fcbd544a6c1536553e8ae371edbd6e507b0b0"
+    },
+    {
+      "original": "assets/status/us/infantry/mg/idle_us.png.import",
+      "final": "assets/status/united_states/infantry/mg/idle_us.png.import",
+      "sha256_before": "7dada664c04f0af5141b7637453bc571f388a0f773394239adee9b96b5a982de",
+      "sha256_after": "e060ee37f3ae40a4dc4e5d7a5870a52979a9dda55ef9eff4d3502d12abf07b37",
+      "uid": "uid://dfe3g06je63w0"
+    },
+    {
+      "original": "assets/status/us/infantry/mg/shooting_us.png",
+      "final": "assets/status/united_states/infantry/mg/shooting_us.png",
+      "sha256_before": "a817fa8eb8d5a505c5845f9e93d004c5ceba93f8b530af7a0021e4a08e0dbbdf",
+      "sha256_after": "a817fa8eb8d5a505c5845f9e93d004c5ceba93f8b530af7a0021e4a08e0dbbdf"
+    },
+    {
+      "original": "assets/status/us/infantry/mg/shooting_us.png.import",
+      "final": "assets/status/united_states/infantry/mg/shooting_us.png.import",
+      "sha256_before": "84cbee02e803df0ea369ae6f6c4c073cd2382adafa9088f1105ac7d8d7a4bc52",
+      "sha256_after": "2e13191686ca868cc5b3099b3dfd79203b50fea4f43fe0b4e86848ae502abf11",
+      "uid": "uid://c6t15chhylcy4"
+    },
+    {
+      "original": "assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png",
+      "final": "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png",
+      "sha256_before": "dad76cf6f560831b984a2017c17f84a5cf28e2c30f1b953c159c74019ed135cb",
+      "sha256_after": "dad76cf6f560831b984a2017c17f84a5cf28e2c30f1b953c159c74019ed135cb"
+    },
+    {
+      "original": "assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png.import",
+      "final": "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png.import",
+      "sha256_before": "0c7100944c090c8f78a03c9e24f28e9559e3866dfa6c1efa8b94dec08e73b9d7",
+      "sha256_after": "213019c5b820d80d7c47b8750b62a6dc36a166e6ba29cf0176e9671e963110a7",
+      "uid": "uid://cbvuqskuudt86"
+    },
+    {
+      "original": "assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png",
+      "final": "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png",
+      "sha256_before": "a62d891ee9350dd645743a8934f535765869a6d7d4eed381107d2fa079f077d3",
+      "sha256_after": "a62d891ee9350dd645743a8934f535765869a6d7d4eed381107d2fa079f077d3"
+    },
+    {
+      "original": "assets/status/us/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png.import",
+      "final": "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png.import",
+      "sha256_before": "ab8f0c01c8a504af0bc9b8372a209cd3ad44d1fec9df4a64cd5b994e3f51e122",
+      "sha256_after": "3579afae6a92c7497268b05752dfd86503dc3f5af33e7f94168c0cef0aaf7c7a",
+      "uid": "uid://0dw3cwik3cou"
+    }
+  ],
+  "compatibility_resources": {
+    "resources/soldiers/us/assistant.tres": "resources/soldiers/united_states/assistant.tres",
+    "resources/soldiers/us/company_leader.tres": "resources/soldiers/united_states/company_leader.tres",
+    "resources/soldiers/us/loader.tres": "resources/soldiers/united_states/loader.tres",
+    "resources/soldiers/us/mg_gunner.tres": "resources/soldiers/united_states/mg_gunner.tres",
+    "resources/soldiers/us/platoon_leader.tres": "resources/soldiers/united_states/platoon_leader.tres",
+    "resources/soldiers/us/rifle_grenadier.tres": "resources/soldiers/united_states/rifle_grenadier.tres",
+    "resources/soldiers/us/rifleman.tres": "resources/soldiers/united_states/rifleman.tres",
+    "resources/soldiers/us/squad_leader.tres": "resources/soldiers/united_states/squad_leader.tres",
+    "resources/soldiers/us/squad_leader_assistant.tres": "resources/soldiers/united_states/squad_leader_assistant.tres",
+    "resources/soldiers/us/team_leader.tres": "resources/soldiers/united_states/team_leader.tres",
+    "resources/soldiers/us/team_leader_assistant.tres": "resources/soldiers/united_states/team_leader_assistant.tres",
+    "resources/squads/german/anti_tank_team.tres": "resources/squads/germany/anti_tank_team.tres",
+    "resources/squads/german/company_hq.tres": "resources/squads/germany/company_hq.tres",
+    "resources/squads/german/light_mortar_squad.tres": "resources/squads/germany/light_mortar_squad.tres",
+    "resources/squads/german/lmg_squad.tres": "resources/squads/germany/lmg_squad.tres",
+    "resources/squads/german/medium_mortar_squad.tres": "resources/squads/germany/medium_mortar_squad.tres",
+    "resources/squads/german/platoon_hq.tres": "resources/squads/germany/platoon_hq.tres",
+    "resources/squads/german/rifle_squad.tres": "resources/squads/germany/rifle_squad.tres",
+    "resources/squads/german/squad_loadout_catalog.tres": "resources/squads/germany/squad_loadout_catalog.tres",
+    "resources/squads/us/anti_tank_team.tres": "resources/squads/united_states/anti_tank_team.tres",
+    "resources/squads/us/company_hq.tres": "resources/squads/united_states/company_hq.tres",
+    "resources/squads/us/light_mortar_squad.tres": "resources/squads/united_states/light_mortar_squad.tres",
+    "resources/squads/us/lmg_squad.tres": "resources/squads/united_states/lmg_squad.tres",
+    "resources/squads/us/medium_mortar_squad.tres": "resources/squads/united_states/medium_mortar_squad.tres",
+    "resources/squads/us/platoon_hq.tres": "resources/squads/united_states/platoon_hq.tres",
+    "resources/squads/us/rifle_squad.tres": "resources/squads/united_states/rifle_squad.tres",
+    "resources/squads/us/squad_loadout_catalog.tres": "resources/squads/united_states/squad_loadout_catalog.tres"
+  },
+  "references_updated": [
+    "scenes/world/world.tscn",
+    "scenes/game/units/unit.tscn",
+    "scenes/game/units/presentation/unit_battlefield_view.tscn",
+    "resources/squads/team_squad_loadout_catalog.tres",
+    "resources/squads/germany/squad_loadout_catalog.tres",
+    "resources/squads/united_states/medium_mortar_squad.tres",
+    "resources/squads/united_states/rifle_squad.tres",
+    "resources/squads/united_states/lmg_squad.tres",
+    "resources/squads/united_states/light_mortar_squad.tres",
+    "resources/squads/united_states/platoon_hq.tres",
+    "resources/squads/united_states/company_hq.tres",
+    "resources/squads/united_states/squad_loadout_catalog.tres",
+    "assets/status/united_states/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png.import",
+    "assets/status/united_states/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png.import",
+    "assets/status/united_states/infantry/mg/idle_us.png.import",
+    "assets/status/united_states/infantry/mg/shooting_us.png.import",
+    "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_56_19.png.import",
+    "assets/status/united_states/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_48_50.png.import",
+    "assets/status/germany/leader/leader_idle_ger.png.import",
+    "assets/status/germany/infantry/antitank/0e6c91a7-ea19-4082-8711-68c1a4940368.png.import",
+    "assets/status/germany/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png.import",
+    "assets/status/germany/infantry/mg/shooting_ger.png.import",
+    "assets/status/germany/infantry/mg/idle_ger.png.import",
+    "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png.import",
+    "assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png.import"
+  ],
+  "export_compatibility": {
+    "plugin": "addons/faction_resource_compatibility/plugin.cfg",
+    "strategy": "Package the current canonical resource definitions at legacy resource paths; development loads use .tres.remap redirects."
+  }
+}

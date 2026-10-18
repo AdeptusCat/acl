@@ -1,0 +1,30 @@
+{
+  "tool": "Built-in image_gen",
+  "prompts": [
+    {
+      "name": "woods",
+      "prompt": "Use case: background-extraction. Asset type: top-down woodland canopy texture for a WWII hex strategy game, eventually 128 pixels per tile. Input image is the edit target and style reference. Remove all grassy ground/background from this texture and leave only realistic illustrated leafy green tree crowns and their tight crown shadows with genuinely transparent gaps and transparent outer background. Increase clarity and varied scalloped canopy shapes; preserve rich natural olive, green and yellow-green summer colors and overhead view. Arrange crowns as a broad square continuous woodland patch, several large tree crowns surrounded by smaller trees, with narrow winding transparent clearings between distinct crowns. Texture will be clipped to neighboring hex tiles, so crowns should reach all four sides, with detail across the whole square. No hex outline, no ground fill, no words, no border, no symbols.",
+      "ref": "/home/blight/Documents/godot/Projects/acl/assets/tiles/vegetation/source/woods_green_01.png"
+    },
+    {
+      "name": "wheat",
+      "prompt": "Use case: background-extraction. Asset type: top-down golden wheat crop texture for a WWII hex strategy game, eventually 128 pixels per tile. Input is edit target and style reference. Remove all soil, grass and ground between rows and around the crop; genuine transparency between distinct rows and outer background. Preserve illustrated golden ripe wheat detail and overhead view. Crop rows must be straight parallel northeast to southwest, cover a large square area to all four edges for clipping into connected neighboring hex tiles. Natural lightly ragged plant edges, strong readable detail, warm gold and straw colors. No hex outline, no soil backdrop, no words or borders.",
+      "ref": "/home/blight/Documents/godot/Projects/acl/assets/tiles/fields/source/field_wheat_01.png"
+    },
+    {
+      "name": "crops",
+      "prompt": "Use case: stylized-concept. Asset type: top-down green crop row texture for a WWII European hex strategy game, eventually 128 pixels per tile. Render richly illustrated young leafy green summer crops in straight dense parallel northeast to southwest rows over a square area. Genuine transparency in narrow lanes between all rows; no soil or grass background at all. Rows reach all four square edges for clipping to connected neighboring hex tiles. Palette earthy olive-green and yellow-green highlights, slight dark crop-only shadows. Readable overhead 2D game art with fine organic leaves. No hex outline, no writing, no border."
+    },
+    {
+      "name": "buildings",
+      "prompt": "Use case: historical-scene. Asset type: transparent sprite sheet of six top-down European 1940s rural buildings for a WWII hex strategy game, final buildings fit 128x128 cells. Six separated sprites arranged precisely in a 3-column by 2-row grid with wide transparent gutters. Top row: small stone farmhouse with weathered brown pitched roof; stone barn with grey tile roof; large stone manor farmhouse with joined L shaped roof. Bottom row: small timber farm shed with brown plank roof; long wooden barn with weathered reddish roof; wooden cottage with brown roof and chimney. Strict overhead orthographic view, richly illustrated natural muted colors, crisp roof textures, subtle small wall edges and tight shadows only. Each building centered in its own grid cell, similar consistent size, no surrounding ground, no vegetation, no roads. Genuinely transparent background. No text, no labels, no grid lines."
+    }
+  ],
+  "building_refinement": "Use case: background-extraction and precise-object-edit. Edit target: six building sprite sheet. Remove the entire brown/black backdrop and all ground completely, replace with genuine alpha transparency around each building. Change camera to strict bird's-eye overhead: visible roof plans only, chimneys visible from above, only very narrow wall/eave edges. Preserve six buildings, their roof shapes and weathered materials, muted natural colors, exact 3 columns by 2 rows positions. Six separate top-down WWII European building cutouts, all isolated with broad transparent margins. No backdrop, no gradients, no floor, no text, no isometric or frontal view.",
+  "outputs": {
+    "sprites": "assets/tiles",
+    "patterns": "assets/tiles/connected",
+    "sources": "assets/tiles/connected/source",
+    "map_atlases": "assets/tiles/connected/maps"
+  }
+}

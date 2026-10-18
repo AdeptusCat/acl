@@ -1,0 +1,37 @@
+{
+  "source": "res://assets/tiles/buildings/rotated/source/approved_roofs.png",
+  "tile_size": 128,
+  "orientation_count": 6,
+  "buildings": [
+    {
+      "name": "building_wood_01",
+      "texture": "res://assets/tiles/buildings/rotated/building_wood_01.png",
+      "scale": 0.5301204819277109
+    },
+    {
+      "name": "building_wood_02",
+      "texture": "res://assets/tiles/buildings/rotated/building_wood_02.png",
+      "scale": 0.464
+    },
+    {
+      "name": "building_wood_03",
+      "texture": "res://assets/tiles/buildings/rotated/building_wood_03.png",
+      "scale": 0.4888888888888889
+    },
+    {
+      "name": "building_stone_01",
+      "texture": "res://assets/tiles/buildings/rotated/building_stone_01.png",
+      "scale": 0.5
+    },
+    {
+      "name": "building_stone_02",
+      "texture": "res://assets/tiles/buildings/rotated/building_stone_02.png",
+      "scale": 0.4696969696969697
+    },
+    {
+      "name": "building_stone_03",
+      "texture": "res://assets/tiles/buildings/rotated/building_stone_03.png",
+      "scale": 0.45161290322580644
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="UnitSaveData" format=3]
+
+[ext_resource type="Script" path="res://resources/casualties/casualty_record.gd" id="1_xb87d"]
+[ext_resource type="Script" path="res://resources/casualties/casualty_equipment.gd" id="2_qwb5m"]
+[ext_resource type="Script" path="res://unit_save_data.gd" id="3_8hg1y"]
+[ext_resource type="Script" path="res://scenes/game/units/soldier_loadout.gd" id="4_rljc1"]
+
+[sub_resource type="Resource" id="Resource_wf4ip"]
+script = ExtResource("2_qwb5m")
+weapon_id = "b7b6f4282c14703dd787357fa9316b2c:-9223371939546921458"
+resource_path_at_death = "res://resources/weapons/m1_garand.tres"
+weapon_name = "Recorded rifle"
+rpm = 400.0
+range_hexes = 5
+mag_capacity = 8
+ammunition = 25
+rounds_in_mag = 2
+riflegrenade_loaded = true
+is_setup = true
+jammed = true
+
+[sub_resource type="Resource" id="Resource_rvgjc"]
+script = ExtResource("1_xb87d")
+record_id = "873caafa3040904b42c960b6f414dd3d"
+battle_id = "b7b6f4282c14703dd787357fa9316b2c"
+recorded_at_unix = 1791287472.908404
+unit_id = "b7b6f4282c14703dd787357fa9316b2c:97274299916"
+unit_name = "HistoryAlpha"
+company = 1
+platoon = 2
+squad = 3
+hex = Vector2i(11, 8)
+soldier_id = 7
+soldier_name = "Recorded soldier"
+equipment = SubResource("Resource_wf4ip")
+
+[resource]
+script = ExtResource("3_8hg1y")
+casualty_records = Array[ExtResource("1_xb87d")]([SubResource("Resource_rvgjc")])

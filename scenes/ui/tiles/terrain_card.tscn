@@ -1,0 +1,93 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="hud_theme"]
+
+[ext_resource type="Script" path="res://scenes/ui/tiles/tile_details_panel.gd" id="1"]
+
+[node name="TileDetails" type="PanelContainer"]
+visible = false
+custom_minimum_size = Vector2(240, 0)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -104.0
+offset_right = 252.0
+offset_bottom = -12.0
+grow_vertical = 0
+mouse_force_pass_scroll_events = false
+theme_type_variation = &"HudCompactPanel"
+theme = ExtResource("hud_theme")
+script = ExtResource("1")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Heading" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+
+[node name="Terrain" type="Label" parent="Content/Heading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Open ground"
+text_overrun_behavior = 3
+clip_text = true
+theme_type_variation = &"HudHeading"
+
+[node name="Close" type="Button" parent="Content/Heading"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+tooltip_text = "Close terrain inspection (Esc)"
+text = "×"
+
+[node name="Cover" type="Label" parent="Content"]
+layout_mode = 2
+tooltip_text = "Protection inside this hex. Edge cover only protects from the marked side."
+text = "Hex cover: none"
+
+[node name="Sight" type="Label" parent="Content"]
+layout_mode = 2
+text = "Sight: clear inside hex"
+autowrap_mode = 3
+
+[node name="Details" type="FoldableContainer" parent="Content"]
+layout_mode = 2
+folded = true
+title = "Terrain details"
+
+[node name="Scroll" type="ScrollContainer" parent="Content/Details"]
+visible = false
+custom_minimum_size = Vector2(0, 216)
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+horizontal_scroll_mode = 0
+
+[node name="Breakdown" type="VBoxContainer" parent="Content/Details/Scroll"]
+size_flags_horizontal = 3
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Coordinates" type="Label" parent="Content/Details/Scroll/Breakdown"]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+
+[node name="Features" type="Label" parent="Content/Details/Scroll/Breakdown"]
+layout_mode = 2
+
+[node name="Heading" type="Label" parent="Content/Details/Scroll/Breakdown"]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+theme_override_colors/font_color = Color(0.8, 0.65, 0.45, 1)
+text = "Protection from each side"
+
+[node name="Edges" type="GridContainer" parent="Content/Details/Scroll/Breakdown"]
+layout_mode = 2
+theme_override_constants/v_separation = 2
+columns = 2
+
+[node name="Explanation" type="Label" parent="Content/Details/Scroll/Breakdown"]
+layout_mode = 2
+text = "Marked edges protect from that side.\nTarget cover also depends on the firing direction."
+autowrap_mode = 2
+theme_type_variation = &"HudSecondary"

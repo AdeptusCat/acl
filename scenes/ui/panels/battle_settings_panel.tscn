@@ -1,0 +1,187 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://resources/theme/battle_hud_theme.tres" id="hud_theme"]
+
+[ext_resource type="Script" path="res://scenes/ui/panels/settings_panel.gd" id="1"]
+
+[node name="Settings" type="Control"]
+z_index = 10
+layout_mode = 0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -390.0
+offset_top = 6.0
+offset_right = -12.0
+offset_bottom = 36.0
+grow_horizontal = 0
+mouse_filter = 2
+theme = ExtResource("hud_theme")
+script = ExtResource("1")
+
+[node name="Toolbar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="CommandViewButton" type="Button" parent="Toolbar"]
+layout_mode = 2
+tooltip_text = "Show the full command hierarchy. Selected squad and HQ links remain visible when off.\nSolid: connected · Dashed: limited · Broken: no contact"
+toggle_mode = true
+text = "Command view"
+
+[node name="MuteButton" type="Button" parent="Toolbar"]
+custom_minimum_size = Vector2(36, 30)
+layout_mode = 2
+tooltip_text = "Mute sound"
+toggle_mode = true
+icon_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Display, interface size, audio and command view"
+toggle_mode = true
+text = "Settings"
+
+[node name="ControlsButton" type="Button" parent="Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Battlefield controls"
+toggle_mode = true
+text = "Controls"
+
+[node name="Menu" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 0
+mouse_force_pass_scroll_events = false
+
+[node name="Scroll" type="ScrollContainer" parent="Menu"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Menu/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Heading" type="HBoxContainer" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Menu/Scroll/Content/Heading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Settings"
+theme_type_variation = &"HudHeading"
+
+[node name="Close" type="Button" parent="Menu/Scroll/Content/Heading"]
+layout_mode = 2
+text = "Close"
+
+[node name="MasterLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Master volume · 100%"
+
+[node name="VolumeSlider" type="HSlider" parent="Menu/Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+tooltip_text = "Master volume"
+mouse_force_pass_scroll_events = false
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="MusicLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Music volume · 100%"
+
+[node name="VolumeSlider2" type="HSlider" parent="Menu/Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+tooltip_text = "Music volume"
+mouse_force_pass_scroll_events = false
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Separator" type="HSeparator" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="ShowCmdConnectivity" type="CheckBox" parent="Menu/Scroll/Content"]
+layout_mode = 2
+tooltip_text = "Show all command links. Selection highlights remain available when off.\nSolid: connected · Dashed: limited · Broken: no contact"
+text = "Command view"
+
+[node name="Controls" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 0
+mouse_force_pass_scroll_events = false
+
+[node name="Scroll" type="ScrollContainer" parent="Controls"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Controls/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Heading" type="HBoxContainer" parent="Controls/Scroll/Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Controls/Scroll/Content/Heading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Battlefield controls"
+theme_type_variation = &"HudHeading"
+
+[node name="Close" type="Button" parent="Controls/Scroll/Content/Heading"]
+layout_mode = 2
+text = "Close"
+
+[node name="Rows" type="VBoxContainer" parent="Controls/Scroll/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="DisplaySeparator" type="HSeparator" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="DisplayHeading" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Display"
+
+[node name="ModeLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Window mode"
+
+[node name="WindowMode" type="OptionButton" parent="Menu/Scroll/Content"]
+layout_mode = 2
+
+[node name="SizeLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Window size"
+
+[node name="WindowSize" type="OptionButton" parent="Menu/Scroll/Content"]
+layout_mode = 2
+tooltip_text = "Windowed presets. Drag the window border for a custom size. Fullscreen uses the desktop resolution."
+
+[node name="ScaleLabel" type="Label" parent="Menu/Scroll/Content"]
+layout_mode = 2
+text = "Interface size · 100%"
+
+[node name="UIScale" type="HSlider" parent="Menu/Scroll/Content"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+tooltip_text = "Scale the HUD from 75% to 125%. Release the slider to apply. Use the mouse wheel over the battlefield to zoom."
+mouse_force_pass_scroll_events = false
+min_value = 75.0
+max_value = 125.0
+step = 1.0
+value = 100.0
+tick_count = 5

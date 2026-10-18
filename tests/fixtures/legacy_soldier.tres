@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://soldier_save_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+soldier_id = 42
+soldier_name = "Legacy soldier"
+weapon_resource_path = "res://resources/weapons/m1_garand.tres"
+rounds_in_mag = 3
+jammed = true
+base_attack = 1.75
+base_defense = 1.25
