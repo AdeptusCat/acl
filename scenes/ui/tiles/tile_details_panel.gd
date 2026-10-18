@@ -80,7 +80,6 @@ func show_tile_data(result: Dictionary) -> void:
 
 func hide_inspection() -> void:
 	hide()
-	details.fold()
 
 
 func _on_close_pressed() -> void:
