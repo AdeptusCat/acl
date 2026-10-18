@@ -413,3 +413,11 @@ func _on_surrender_pressed() -> void:
 func _on_rout_pressed() -> void:
 	if is_instance_valid(unit):
 		unit.request_rout()
+
+
+func _on_debug_rout_pressed() -> void:
+	if not OS.is_debug_build() or not is_instance_valid(unit):
+		return
+	if not unit.is_active() or unit.surrendered or unit.broken or unit.movement.retreating:
+		return
+	unit.stress_system._set_state(STATES.MoraleState.PANIC)

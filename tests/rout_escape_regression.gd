@@ -68,9 +68,28 @@ func _ready() -> void:
 	Globals.astars[unit.team] = graph
 	var enemies: Array[Unit] = [enemy]
 	_check(ground.cube_distance(ground.map_to_cube(side), ground.map_to_cube(enemy.current_hex)) == 1, "Fixture starts with an escape step alongside an adjacent enemy")
-	_check(action.compute_retreat_hex(origin, enemies, 3) == escape, "A squad escapes through an adjacent step onto open ground without requiring a building")
+	_check(action.compute_retreat_hex(origin, enemies, 3) == origin, "A route beside an enemy is rejected even when it leads to safety")
+	Globals.unit_visible_enemies[unit] = enemies
+	action._start_rout()
+	_check(failed_routs == 1 and not movement.is_moving, "A squad fails its rout when its only escape passes beside an enemy")
+	failed_routs = 0
+	ground.erase_cell(enemy.current_hex)
+	enemy.current_hex = ground.cube_to_map(origin_cube - side_direction)
+	_check(action.compute_retreat_hex(origin, enemies, 3) == escape, "A squad can rout directly away from an adjacent enemy")
+	_check(not action._can_retreat_step(escape, side, enemies), "Retreat steps cannot decrease distance from an enemy")
+	var enemy_hex: Vector2i = enemy.current_hex
+	enemy.current_hex = ground.cube_to_map(origin_cube + direction * 3)
+	_check(not action._can_retreat_step(origin, side, enemies), "Sideways steps at the same enemy distance are rejected even outside adjacency")
+	enemy.current_hex = enemy_hex
+	var second_enemy: Unit = Unit.new()
+	second_enemy.current_hex = ground.cube_to_map(origin_cube + side_direction * 3)
+	var opposing_enemies: Array[Unit] = [enemy, second_enemy]
+	_check(action.compute_retreat_hex(origin, opposing_enemies, 3) == origin, "Moving away from one enemy cannot move closer to another")
+	second_enemy.free()
+	action.compute_retreat_hex(origin, enemies, 3)
 	var route: AStar2D = action.create_restricted_astar(action.allowed_hexes)
 	_check(route.get_id_path(0, 2).size() == 3, "The chosen escape has a connected movement path")
+	_check(not route.are_points_connected(2, 1, false), "The movement graph cannot shortcut backwards toward an enemy")
 	Globals.unit_visible_enemies[unit] = enemies
 	action._start_rout()
 	_check(failed_routs == 0 and movement.is_moving and movement.retreating and movement.target_hex == escape, "Routing starts movement instead of surrendering beside an enemy")
@@ -106,12 +125,31 @@ func _ready() -> void:
 	_check(action.compute_retreat_hex(origin, enemies, 3) == escape, "Seen open ground remains an escape of last resort")
 	LOSHelper.los_lookup = {}
 	Globals.unit_visible_enemies.erase(unit)
+	_test_debug_rout_button(unit)
 	movement.free()
 	action.free()
 	unit.free()
 	enemy.free()
 	print("Rout escape regression failures: ", failures)
 	get_tree().quit(failures)
+
+func _test_debug_rout_button(unit: Unit) -> void:
+	var panel: PanelContainer = preload("res://scenes/ui/units/unit_details_panel.tscn").instantiate()
+	add_child(panel)
+	var debug_actions: HFlowContainer = panel.get_node("Scroll/Summary/Details/Content/DebugActions")
+	var button: Button = debug_actions.get_node("Rout")
+	_check(debug_actions.visible == OS.is_debug_build(), "Force rout uses the same debug visibility as the other debug actions")
+	unit.stress_system = StressController.new()
+	unit.stress_system.state = STATES.MoraleState.NORMAL
+	unit.movement.retreating = false
+	panel.unit = unit
+	button.pressed.emit()
+	if OS.is_debug_build():
+		_check(unit.stress_system.state == STATES.MoraleState.PANIC, "Force rout triggers panic without requiring a pinned squad")
+	panel.unit = null
+	panel.free()
+	unit.stress_system.free()
+	unit.stress_system = null
 
 func _on_rout_failed() -> void:
 	failed_routs += 1

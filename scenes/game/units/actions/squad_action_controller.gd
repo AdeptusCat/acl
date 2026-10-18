@@ -403,10 +403,12 @@ func get_neighbor_hexes_not_closer_to_enemy(origin_cube: Vector3i, next_cube_to_
 	return neighbor_hexes
 
 var allowed_hexes: Array[Vector2i] = []
+var _retreat_known_enemies: Array[Unit] = []
 
 func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], max_steps: int) -> Vector2i:
 	allowed_hexes.clear()
 	allowed_hexes.append(origin_hex)
+	_retreat_known_enemies.assign(known_enemies)
 
 	var ground_layer: TileMapLayer = LOSHelper.ground_layer
 	var origin_cube: Vector3i = ground_layer.map_to_cube(origin_hex)
@@ -505,12 +507,10 @@ func _can_retreat_step(from_hex: Vector2i, to_hex: Vector2i, known_enemies: Arra
 		return false
 	for enemy: Unit in known_enemies:
 		var distance: int = ground.cube_distance(ground.map_to_cube(to_hex), ground.map_to_cube(enemy.current_hex))
-		if distance == 0:
+		if distance <= 1:
 			return false
-		# Allow escape alongside an already adjacent enemy, without entering
-		# the adjacency of another enemy or closing the distance to this one.
 		var previous_distance: int = ground.cube_distance(ground.map_to_cube(from_hex), ground.map_to_cube(enemy.current_hex))
-		if distance <= 1 and previous_distance > 1:
+		if distance <= previous_distance:
 			return false
 	return true
 
@@ -586,6 +586,9 @@ func _start_rout() -> void:
 	var from_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(unit.current_hex))
 	var to_id: int = restricted_astar.get_closest_point(LOSHelper.ground_layer.map_to_local(retreat_hex))
 	var id_path: PackedInt64Array = restricted_astar.get_id_path(from_id, to_id)
+	if id_path.size() < 2:
+		rout_failed.emit()
+		return
 	
 	var cube_path: Array[Vector3i] = []
 	var i: int = 0
@@ -620,8 +623,11 @@ func create_restricted_astar(retreat_hexes: Array[Vector2i]) -> AStar2D:
 		var j: int = 0
 		while j < connected_ids.size():
 			var conn_id: int = connected_ids[j]
-			if allowed_ids.has(conn_id) and new_astar.are_points_connected(id, conn_id) == false:
-				new_astar.connect_points(id, conn_id, false)
+			if allowed_ids.has(conn_id):
+				var from_hex: Vector2i = LOSHelper.ground_layer.local_to_map(original.get_point_position(id))
+				var to_hex: Vector2i = LOSHelper.ground_layer.local_to_map(original.get_point_position(conn_id))
+				if _can_retreat_step(from_hex, to_hex, _retreat_known_enemies):
+					new_astar.connect_points(id, conn_id, false)
 			j += 1
 	
 	return new_astar

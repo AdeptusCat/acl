@@ -217,6 +217,11 @@ text = "Kill soldier"
 layout_mode = 2
 text = "Surrender"
 
+[node name="Rout" type="Button" parent="Scroll/Summary/Details/Content/DebugActions"]
+layout_mode = 2
+tooltip_text = "Force this squad to rout, even when it is not pinned."
+text = "Force rout"
+
 [node name="Roster" type="FoldableContainer" parent="Scroll/Summary"]
 layout_mode = 2
 folded = true
@@ -240,4 +245,5 @@ theme_override_constants/separation = 6
 [connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/Kill" to="." method="_on_kill_pressed"]
 [connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/KillSoldier" to="." method="_on_kill_soldier_pressed"]
 [connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/Surrender" to="." method="_on_surrender_pressed"]
+[connection signal="pressed" from="Scroll/Summary/Details/Content/DebugActions/Rout" to="." method="_on_debug_rout_pressed"]
 [connection signal="pressed" from="Scroll/Summary/Rout" to="." method="_on_rout_pressed"]
