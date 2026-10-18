@@ -82,7 +82,7 @@ func _run() -> void:
 	sample["hindrance"] = false
 	card.show_tile_data(sample)
 	await _settle()
-	_check(card.terrain_name.text == "Open ground" and card.sight_label.text.contains("clear") and card.details.folded, "Changing hex resets the compact view and clears old terrain properties")
+	_check(card.terrain_name.text == "Open ground" and card.sight_label.text.contains("clear") and not card.details.folded, "Changing hex preserves expanded details and clears old terrain properties")
 	world.input_manager.mouse_button_left_pressed.connect(_on_map_click)
 	_pointer_event(_screen_rect(card.get_node("Content/Heading/Close")).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	_check(not card.visible and not overlay.visible and not world.has_inspected_hex and map_clicks == 0, "The Close button clears the card, map markings and inspection without clicking the map")

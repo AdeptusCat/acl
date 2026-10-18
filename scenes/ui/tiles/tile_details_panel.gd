@@ -44,8 +44,6 @@ func set_ground_layer(layer: HexagonTileMapLayer) -> void:
 
 func show_tile_data(result: Dictionary) -> void:
 	var hex: Vector2i = result.get("hex", Vector2i.ZERO)
-	if not visible or hex != inspected_hex:
-		details.fold()
 	inspected_hex = hex
 	var name_text: String = str(result.get("tile_name", ""))
 	if name_text.is_empty():

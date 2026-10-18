@@ -119,8 +119,6 @@ func show_unit_detail(selected_unit: Unit, tween_on: bool = true) -> void:
 		unit.unit_exited.connect(_on_unit_removed)
 		unit.stress_system.leadership_changed.connect(_on_leadership_changed)
 		unit.action_controller.action_state_changed.connect(_on_action_state_changed)
-		details_section.folded = true
-		roster_section.folded = true
 		roster_scroll.scroll_vertical = 0
 	_rebuild_roster()
 	_refresh_summary()

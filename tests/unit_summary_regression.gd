@@ -118,8 +118,13 @@ func _run() -> void:
 	var other: Unit = players[1]
 	panel.show_unit_detail(other, false)
 	await _settle()
-	_check(panel.unit == other and panel.details_section.folded and panel.roster_section.folded, "Switching squads restores the compact summary")
+	_check(panel.unit == other and not panel.details_section.folded and panel.roster_section.folded, "Switching squads preserves expanded details")
 	_check(not selected.soldiers_changed.is_connected(panel._on_soldiers_changed), "Switching squads releases the previous squad's UI subscriptions")
+	panel.roster_section.expand()
+	panel.show_unit_detail(selected, false)
+	await _settle()
+	_check(not panel.roster_section.folded and panel.details_section.folded, "Switching squads preserves the expanded roster")
+	panel.show_unit_detail(other, false)
 	panel.hide_unit_detail()
 	panel.show_unit_detail(other, false)
 	await get_tree().create_timer(0.2).timeout
