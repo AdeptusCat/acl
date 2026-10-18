@@ -409,30 +409,10 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], max_s
 	allowed_hexes.append(origin_hex)
 
 	var ground_layer: TileMapLayer = LOSHelper.ground_layer
-	var building_layer: TileMapLayer = LOSHelper.building_layer
 	var origin_cube: Vector3i = ground_layer.map_to_cube(origin_hex)
-
-	var found_retreat_hex: bool = false
 	var retreat_hex: Vector2i = origin_hex
-
-	var immediate_neighbors: Array[Vector2i] = get_neighbor_hexes_not_closer_to_enemy(
-		origin_cube,
-		origin_cube,
-		known_enemies
-	)
-
-	for neighbor_hex: Vector2i in immediate_neighbors:
-		if not _is_valid_retreat_candidate(neighbor_hex):
-			continue
-
-		if building_layer.get_cell_source_id(neighbor_hex) == -1:
-			continue
-
-		if _is_hex_visible_by_any_enemy(neighbor_hex, known_enemies):
-			continue
-
-		allowed_hexes.append(neighbor_hex)
-		return neighbor_hex
+	var best_priority: int = 5
+	var best_depth: int = 0
 
 	var visited: Dictionary = {}
 	var queue: Array[Vector2i] = []
@@ -464,29 +444,75 @@ func compute_retreat_hex(origin_hex: Vector2i, known_enemies: Array[Unit], max_s
 			if visited.has(neighbor):
 				continue
 
-			visited[neighbor] = true
-
 			if not _is_valid_retreat_candidate(neighbor):
 				continue
 
-			if _is_adjacent_to_any_enemy(neighbor, known_enemies):
+			if not _can_retreat_step(current, neighbor, known_enemies):
 				continue
 
+			visited[neighbor] = true
 			allowed_hexes.append(neighbor)
-
-			if building_layer.get_cell_source_id(neighbor) != -1:
-				if not _is_hex_visible_by_any_enemy(neighbor, known_enemies):
-					retreat_hex = neighbor
-					found_retreat_hex = true
-					break
+			var priority: int = _retreat_priority(neighbor, known_enemies)
+			var depth: int = current_depth + 1
+			# Search the entire reachable area so nearby lower-priority terrain
+			# cannot hide a better refuge farther away. Prefer nearby cover;
+			# on open ground, continue moving away instead of stopping early.
+			if priority < best_priority or (priority == best_priority and priority >= 3 and depth > best_depth):
+				best_priority = priority
+				best_depth = depth
+				retreat_hex = neighbor
 
 			queue.append(neighbor)
-			depth_queue.append(current_depth + 1)
-
-		if found_retreat_hex:
-			break
+			depth_queue.append(depth)
 
 	return retreat_hex
+
+
+func _retreat_priority(hex: Vector2i, known_enemies: Array[Unit]) -> int:
+	var woods: bool = false
+	for layer: HexagonTileMapLayer in [LOSHelper.building_layer, LOSHelper.terrain_layer]:
+		if not is_instance_valid(layer):
+			continue
+		var data: TileData = layer.get_cell_tile_data(hex)
+		if data == null:
+			continue
+		if data.has_custom_data("art_family") and str(data.get_custom_data("art_family")) == "woods":
+			woods = true
+		if data.has_custom_data("name") and str(data.get_custom_data("name")).to_lower() == "woods":
+			woods = true
+	var building: bool = not woods and LOSHelper.building_layer.get_cell_source_id(hex) != -1
+	var seen: bool = _is_hex_visible_by_any_enemy(hex, known_enemies)
+	if not seen:
+		if building:
+			return 0
+		if woods:
+			return 1
+	if building or woods:
+		return 2
+	if not seen:
+		return 3
+	return 4
+
+
+func _can_retreat_step(from_hex: Vector2i, to_hex: Vector2i, known_enemies: Array[Unit]) -> bool:
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var graph: AStar2D = Globals.astars[unit.team]
+	var from_id: int = ground.pathfinding_get_point_id(from_hex)
+	var to_id: int = ground.pathfinding_get_point_id(to_hex)
+	if not graph.has_point(from_id) or not graph.has_point(to_id):
+		return false
+	if graph.is_point_disabled(to_id) or not graph.are_points_connected(from_id, to_id, false):
+		return false
+	for enemy: Unit in known_enemies:
+		var distance: int = ground.cube_distance(ground.map_to_cube(to_hex), ground.map_to_cube(enemy.current_hex))
+		if distance == 0:
+			return false
+		# Allow escape alongside an already adjacent enemy, without entering
+		# the adjacency of another enemy or closing the distance to this one.
+		var previous_distance: int = ground.cube_distance(ground.map_to_cube(from_hex), ground.map_to_cube(enemy.current_hex))
+		if distance <= 1 and previous_distance > 1:
+			return false
+	return true
 
 
 func _is_valid_retreat_candidate(hex: Vector2i) -> bool:
@@ -547,7 +573,7 @@ func _start_rout() -> void:
 		#i += 1
 	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
 	for u: Unit in visible_enemies1: # unit.units:
-		if u.team != unit.team and u.surrendered == false:
+		if is_instance_valid(u) and u.is_active() and u.team != unit.team and not u.surrendered:
 			known_enemies.append(u)
 	
 	var retreat_distance: int = 3
@@ -575,14 +601,14 @@ func _start_rout() -> void:
 
 
 
-func create_restricted_astar(_allowed_hexes: Array[Vector2i]) -> AStar2D:
+func create_restricted_astar(retreat_hexes: Array[Vector2i]) -> AStar2D:
 	var new_astar: AStar2D = AStar2D.new()
 	var original: AStar2D = Globals.astars[unit.team]
 	
 	var allowed_ids: Array[int] = []
 	var i: int = 0
-	while i < allowed_hexes.size():
-		allowed_ids.append(LOSHelper.ground_layer.pathfinding_get_point_id(allowed_hexes[i]))
+	while i < retreat_hexes.size():
+		allowed_ids.append(LOSHelper.ground_layer.pathfinding_get_point_id(retreat_hexes[i]))
 		i += 1
 	
 	for id: int in allowed_ids:
