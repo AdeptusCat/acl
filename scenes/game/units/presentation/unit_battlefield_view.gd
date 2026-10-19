@@ -12,6 +12,7 @@ const STRONG_INFLUENCE_RATE: float = 1.5
 const ELIMINATION_HOLD_SECONDS: float = 3.0
 const ELIMINATION_FADE_SECONDS: float = 5.0
 const ELIMINATION_REST_COLOR: Color = Color(0.60, 0.60, 0.60, 0.24)
+const FACING_UPDATE_INTERVAL: float = 0.5
 
 var detail_ui: UnitUi = null
 
@@ -69,6 +70,7 @@ var _formation_key: Vector3i = Vector3i(-1, -1, -1)
 var _casualty_feedback: CASUALTY_FEEDBACK
 var _state_feedback: STATE_FEEDBACK
 var _elimination_fade: Tween
+var _facing_update_remaining: float = 0.0
 
 signal debug_kill_soldier
 
@@ -79,6 +81,65 @@ func _ready() -> void:
 	_set_debug_text_visible(Debug.show_debug_text)
 	_on_stress_balance_changed(0.0, 0.0, 0.0, 0.0)
 	update_formation_color()
+
+
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint() or _dead or _exited or _surrendered:
+		return
+	_facing_update_remaining -= delta
+	if _facing_update_remaining > 0.0:
+		return
+	_facing_update_remaining = FACING_UPDATE_INTERVAL
+	_update_facing()
+
+
+func _update_facing() -> void:
+	if _dead or _exited or _surrendered or shooting_texture_rect.visible:
+		return
+	var unit: Unit = get_parent() as Unit
+	if unit == null or not unit.is_active():
+		return
+	if unit.movement != null and unit.movement.is_moving:
+		var unit_container: Node2D = unit.get_parent() as Node2D
+		if unit_container != null:
+			_face_direction(unit_container.to_global(unit.movement.target_position) - unit.global_position)
+		return
+	if idle_texture_rect.visible:
+		_face_direction(_general_enemy_direction(unit))
+
+
+func _general_enemy_direction(unit: Unit) -> Vector2:
+	var enemy_position_sum: Vector2 = Vector2.ZERO
+	var enemy_count: int = 0
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
+	for enemy: Unit in visible_enemies:
+		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
+			continue
+		enemy_position_sum += enemy.global_position
+		enemy_count += 1
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	if is_instance_valid(ground):
+		var now: float = unit._now()
+		for enemy: Unit in unit.enemy_memory:
+			if not is_instance_valid(enemy) or visible_enemies.has(enemy):
+				continue
+			var memory: Dictionary = unit.enemy_memory[enemy]
+			var age: float = now - float(memory.get("last_seen_time", -INF))
+			if age < 0.0 or age > Unit.ENEMY_MEMORY_LIFETIME:
+				continue
+			var last_seen_hex: Vector2i = memory.get("last_seen_hex", Vector2i.ZERO)
+			enemy_position_sum += ground.to_global(ground.map_to_local(last_seen_hex))
+			enemy_count += 1
+	if enemy_count > 0:
+		return enemy_position_sum / float(enemy_count) - unit.global_position
+	# Before contact, use the authored enemy approach rather than hidden live units.
+	var scenario: Scenario = Globals.scenario_chosen
+	if is_instance_valid(scenario) and is_instance_valid(ground):
+		var enemy_team: Globals.Team = Globals.get_enemy_team(unit.team)
+		var enemy_start: Vector2i = scenario.start_hex[enemy_team]
+		if enemy_start != scenario.start_hex[unit.team]:
+			return ground.to_global(ground.map_to_local(enemy_start)) - unit.global_position
+	return Vector2.ZERO
 
 
 func _set_debug_text_visible(enabled: bool) -> void:
@@ -293,6 +354,7 @@ func started_moving(broken: bool, surrendered: bool) -> void:
 			_show_status(routing_texture_rect)
 		else:
 			_show_status(moving_texture_rect)
+	_update_facing()
 	
 	if detail_ui:
 		detail_ui.started_moving(broken, surrendered)
@@ -305,6 +367,7 @@ func stopped_moving(broken: bool, surrendered: bool) -> void:
 			_show_status(broken_texture_rect)
 		else:
 			_show_status(idle_texture_rect)
+	_update_facing()
 	if detail_ui:
 		detail_ui.stopped_moving(broken, surrendered)
 
@@ -455,6 +518,7 @@ func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, 
 func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, kind: TRACER.Kind, spawn_offset: Vector2, impact_offset: Vector2) -> void:
 	if _exited or _dead or _surrendered:
 		return
+	_face_direction(to_pos - from_pos)
 	var offset: Vector2 = spawn_offset
 	if not offset.is_finite():
 		offset = TRACER.sample_spawn_offset()
@@ -462,6 +526,16 @@ func _start_projectile(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, k
 	_show_shooting_status()
 	if is_instance_valid(detail_ui):
 		detail_ui._show_shooting_status()
+
+
+func _face_direction(direction: Vector2) -> void:
+	# Side-on artwork keeps its previous facing for straight up/down directions.
+	if is_zero_approx(direction.x):
+		return
+	for icon: TextureRect in unit_status_control.get_children():
+		icon.flip_h = direction.x < 0.0
+	if is_instance_valid(detail_ui):
+		detail_ui._face_direction(direction)
 
 
 func _show_shooting_status() -> void:
@@ -554,6 +628,7 @@ func _on_timer_timeout() -> void:
 		idle_texture_rect.visible = false
 		broken_texture_rect.visible = false
 		surrendered_texture_rect.visible = true
+	_update_facing()
 	if detail_ui:
 		detail_ui._on_timer_timeout()
 
