@@ -285,6 +285,8 @@ func badge_text(unit: Unit) -> String:
 	var unit_id: int = unit.get_instance_id()
 	var cue: ContactCue = _cues[unit_id]
 	var caption: String = highlighted_units.get(unit_id, "")
+	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS and cue.state == CommandConnectivity.ContactState.LOST:
+		return caption
 	if CommandConnectivity.needs_command_contact(unit) and (cue.state == CommandConnectivity.ContactState.LOST or cue.elapsed < PULSE_SECONDS):
 		if not caption.is_empty():
 			caption += " · "
