@@ -136,8 +136,13 @@ static func can_finish_after_enemy_departure() -> bool:
 
 
 static func can_finish_after_force_defeat() -> bool:
+	return not _defeated_teams().is_empty()
+
+
+static func _defeated_teams() -> Array[Globals.Team]:
+	var result: Array[Globals.Team] = []
 	if not is_instance_valid(Globals.scenario_chosen):
-		return false
+		return result
 	var represented: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
 	var surviving: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
 	var defeated: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
@@ -156,11 +161,11 @@ static func can_finish_after_force_defeat() -> bool:
 		else:
 			defeated[unit.team] = true
 	if not represented[Globals.Team.AXIS] or not represented[Globals.Team.ALLIES]:
-		return false
+		return result
 	for team: Globals.Team in represented:
 		if defeated[team] and not surviving[team]:
-			return true
-	return false
+			result.append(team)
+	return result
 
 
 static func _occupation_pending_only(conditions: Array[VictoryCondition]) -> bool:
@@ -212,14 +217,19 @@ static func _continue_overtime(controller: Node2D) -> bool:
 static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	if controller.end_game_handled:
 		return
-	var force_defeated: bool = can_finish_after_force_defeat()
+	var defeated_teams: Array[Globals.Team] = _defeated_teams()
+	var force_defeated: bool = not defeated_teams.is_empty()
 	if force_defeated:
 		controller.overtime_active = false
 		controller.overtime_packages.clear()
 		for collection: VictoryConditionCollection in Globals.victory_conditions.values():
 			for condition: VictoryCondition in collection.victory_conditions:
 				if condition is OccupyObjectiveCondition:
-					(condition as OccupyObjectiveCondition).refresh_control()
+					var occupation: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
+					if defeated_teams.has(Globals.get_enemy_team(occupation.team)):
+						occupation.complete_after_enemy_defeat()
+					else:
+						occupation.refresh_control()
 	elif controller.time_left_seconds <= 0.0:
 		controller.overtime_active = _continue_overtime(controller)
 		if controller.overtime_active:

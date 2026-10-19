@@ -71,9 +71,12 @@ and every rifle and headquarters must keep escaping through the western exits.
 
 Battles end when a side's last remaining units are destroyed or surrendered. Both sides'
 existing victory conditions are compared immediately, including conditions
-normally checked at the deadline. Unfinished occupation timers stay unfinished;
-elimination does not automatically award a victory. This also ends occupation
+normally checked at the deadline. Running occupation timers complete for the side
+whose enemy was defeated, provided enough good-order squads still occupy each
+hex. Unstarted, abandoned, or undermanned captures remain incomplete; objectives
+with several markers still require every marker. Other victory requirements
+remain unchanged. This also ends occupation
 overtime. Earlier exits remain credited and do not keep a defeated rear guard's
 battle running. A force that only exits retains its authored completion rules.
 Run `tests/force_defeat_regression.tscn` for death and surrender completion,
-major/minor outcomes, draws, player elimination, and overtime.
+major/minor outcomes, draws, player elimination, running captures, and overtime.

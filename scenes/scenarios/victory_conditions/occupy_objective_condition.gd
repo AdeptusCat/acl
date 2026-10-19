@@ -57,6 +57,18 @@ func refresh_control() -> void:
 	_update_control(0.0)
 
 
+func complete_after_enemy_defeat() -> void:
+	refresh_control()
+	if state == null or required_unit_count <= 0 or required_time_s < 0.0:
+		return
+	for hex: Vector2i in state.hexes:
+		var held_seconds: float = state.required_times_reached_s.get(hex, 0.0)
+		# Refresh drops abandoned or undermanned captures before awarding remaining time.
+		if held_seconds > 0.0:
+			state.required_times_reached_s[hex] = maxf(held_seconds, required_time_s)
+			state.victory_conditions_met[hex] = true
+
+
 func _update_control(delta: float) -> void:
 	if state == null:
 		return
