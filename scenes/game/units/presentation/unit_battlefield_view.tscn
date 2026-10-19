@@ -40,6 +40,7 @@
 [ext_resource type="Texture2D" uid="uid://crjhtiymtndlu" path="res://assets/ranks/2nd_lieutenant.png" id="35_755va"]
 [ext_resource type="Texture2D" uid="uid://csetmwqg22cac" path="res://assets/status/germany/infantry/mg/idle_ger.png" id="36_pjyrh"]
 [ext_resource type="Texture2D" uid="uid://cwi424itlgwij" path="res://assets/status/germany/infantry/mg/shooting_ger.png" id="37_eiylv"]
+[ext_resource type="Texture2D" uid="uid://c8ly066phjk8a" path="res://assets/status/germany/infantry/mg/moving_ger.png" id="38_mg_moving_ger"]
 [ext_resource type="Texture2D" uid="uid://bfxfj31hvfo00" path="res://assets/status/germany/infantry/antitank/11239e75-4f59-480d-9f54-532323fe51c6.png" id="38_n3nxe"]
 [ext_resource type="PackedScene" uid="uid://clkuf2ft36m7c" path="res://scenes/ui/units/soldier_details_row.tscn" id="38_qfgpo"]
 [ext_resource type="Texture2D" uid="uid://dfe3g06je63w0" path="res://assets/status/united_states/infantry/mg/idle_us.png" id="38_wb6dq"]
@@ -228,6 +229,7 @@ broken_us = ExtResource("15_pi8vb")
 surrendered_ger = ExtResource("16_8rtsn")
 surrendered_us = ExtResource("17_dlbli")
 idle_mg_ger = ExtResource("36_pjyrh")
+moving_mg_ger = ExtResource("38_mg_moving_ger")
 shooting_mg_ger = ExtResource("37_eiylv")
 idle_antitank_ger = ExtResource("38_n3nxe")
 shooting_antitank_ger = ExtResource("39_0fjve")
