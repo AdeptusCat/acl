@@ -220,6 +220,7 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	var defeated_teams: Array[Globals.Team] = _defeated_teams()
 	var force_defeated: bool = not defeated_teams.is_empty()
 	if force_defeated:
+		var capture_all: bool = controller.timer_running and controller.time_left_seconds > 0.0
 		controller.overtime_active = false
 		controller.overtime_packages.clear()
 		for collection: VictoryConditionCollection in Globals.victory_conditions.values():
@@ -227,7 +228,7 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 				if condition is OccupyObjectiveCondition:
 					var occupation: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
 					if defeated_teams.has(Globals.get_enemy_team(occupation.team)):
-						occupation.complete_after_enemy_defeat()
+						occupation.complete_after_enemy_defeat(capture_all and not defeated_teams.has(occupation.team))
 					else:
 						occupation.refresh_control()
 	elif controller.time_left_seconds <= 0.0:

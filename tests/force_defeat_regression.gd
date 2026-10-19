@@ -132,6 +132,7 @@ func _run() -> void:
 	_check(host.end_game_handled and not host.overtime_active and host.overtime_packages.is_empty(), "Elimination ends occupation overtime immediately")
 	_check(winners.size() == 1 and winners[0]["level"] == VictoryCondition.OutcomeLevel.MAJOR and occupation.is_condition_met(), "Eliminating the enemy completes an occupation already running during overtime")
 	await _test_running_occupation()
+	await _test_unoccupied_objectives()
 	for unit: Unit in [friends, enemies[0], enemies[1]]:
 		unit.squad_fire.calc.free()
 		unit.free()
@@ -181,7 +182,7 @@ func _test_running_occupation() -> void:
 	for unit: Unit in enemies:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
-	_check(not occupation.is_condition_met() and occupation.state.required_times_reached_s[Vector2i.ZERO] == 0.0 and winners[0]["level"] == VictoryCondition.OutcomeLevel.MINOR, "An abandoned objective cannot inherit completion from its stale capture timer")
+	_check(occupation.is_condition_met() and occupation.state.required_times_reached_s[Vector2i.ZERO] == occupation.required_time_s and winners[0]["level"] == VictoryCondition.OutcomeLevel.MAJOR, "Eliminating the enemy captures an abandoned objective before the deadline")
 	_reset()
 	occupation = _occupation(friends.team, [Vector2i.ZERO], 0.0)
 	Globals.victory_conditions[friends.team].victory_conditions.append(occupation)
@@ -189,7 +190,7 @@ func _test_running_occupation() -> void:
 	for unit: Unit in enemies:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
-	_check(not occupation.is_condition_met(), "An occupation timer that never started is not awarded at elimination")
+	_check(occupation.is_condition_met(), "Eliminating the enemy captures an objective whose hold timer never started")
 	_reset()
 	occupation = _occupation(friends.team)
 	occupation.required_unit_count = 2
@@ -198,7 +199,7 @@ func _test_running_occupation() -> void:
 	for unit: Unit in enemies:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
-	_check(not occupation.is_condition_met(), "Elimination still requires the authored number of occupying squads")
+	_check(occupation.is_condition_met(), "Eliminating the enemy captures objectives without requiring a garrison")
 	_reset()
 	occupation = _occupation(friends.team, [Vector2i.ZERO, Vector2i(1, 0)])
 	Globals.victory_conditions[friends.team].victory_conditions.append(occupation)
@@ -206,7 +207,7 @@ func _test_running_occupation() -> void:
 	for unit: Unit in enemies:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
-	_check(occupation.state.victory_conditions_met[Vector2i.ZERO] and not occupation.state.victory_conditions_met[Vector2i(1, 0)] and not occupation.is_condition_met(), "A capture across several markers only completes the markers still being occupied")
+	_check(occupation.state.victory_conditions_met[Vector2i.ZERO] and occupation.state.victory_conditions_met[Vector2i(1, 0)] and occupation.is_condition_met(), "Eliminating the enemy captures every marker of a multi-hex objective")
 	_reset()
 	occupation = _occupation(Globals.Team.AXIS)
 	Globals.victory_conditions[Globals.Team.AXIS].victory_conditions.append(occupation)
@@ -214,6 +215,50 @@ func _test_running_occupation() -> void:
 	Globals.units_destroyed.units_collection[Globals.Team.AXIS].units.append(friends)
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
 	_check(winners.size() == 1 and winners[0]["team"] == Globals.Team.AXIS and occupation.is_condition_met(), "Early capture completion applies equally when the player's force is eliminated")
+
+
+func _test_unoccupied_objectives() -> void:
+	_reset()
+	var occupation: OccupyObjectiveCondition = _occupation(friends.team, [Vector2i(4, 4)], 0.0)
+	var second: OccupyObjectiveCondition = _occupation(friends.team, [Vector2i(8, 8), Vector2i(8, 9)], 0.0)
+	second.objective_id = OccupyObjectiveCondition.ObjectiveId.B
+	Globals.victory_conditions[friends.team].victory_conditions.append_array([occupation, second])
+	enemies[1].current_hex = Vector2i(4, 4)
+	for unit: Unit in enemies:
+		unit.alive = false
+		unit.remove_from_group("units")
+		unit.add_to_group("dead_units")
+		host._on_unit_died(unit)
+	await get_tree().process_frame
+	_check(occupation.is_condition_met() and second.is_condition_met(), "The last enemy dying on an objective captures that hex and every other objective")
+	_check(VictoryConditionProgress.read(occupation).complete and VictoryConditionProgress.read(second).complete, "All automatically captured objectives are credited in mission progress and results")
+	_check(winners.size() == 1 and winners[0]["team"] == friends.team and winners[0]["level"] == VictoryCondition.OutcomeLevel.MAJOR and not winners[0]["timeout"] and not host.timer_running, "Unoccupied objectives are captured before final victory scoring stops the clock")
+	for remaining_time: float in [0.0, -1.0]:
+		_reset()
+		occupation = _occupation(friends.team, [Vector2i(4, 4)], 0.0)
+		Globals.victory_conditions[friends.team].victory_conditions.append(occupation)
+		host.time_left_seconds = remaining_time
+		destroy.required_unit_count = 0
+		for unit: Unit in enemies:
+			unit.surrendered = true
+		MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
+		_check(not occupation.is_condition_met(), "Enemy elimination at or after the deadline cannot award an unoccupied objective")
+	_reset()
+	occupation = _occupation(friends.team, [Vector2i(4, 4)], 0.0)
+	Globals.victory_conditions[friends.team].victory_conditions.append(occupation)
+	host.timer_running = false
+	for unit: Unit in enemies:
+		unit.surrendered = true
+	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
+	_check(not occupation.is_condition_met(), "A stopped battle clock cannot automatically capture unoccupied objectives")
+	_reset()
+	occupation = _occupation(friends.team, [Vector2i(4, 4)], 0.0)
+	Globals.victory_conditions[friends.team].victory_conditions.append(occupation)
+	friends.alive = false
+	for unit: Unit in enemies:
+		unit.surrendered = true
+	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
+	_check(not occupation.is_condition_met(), "A force with no surviving squads cannot automatically capture objectives")
 
 
 func _occupation(team: Globals.Team, hexes: Array[Vector2i] = [Vector2i.ZERO], held_seconds: float = 2.0) -> OccupyObjectiveCondition:
