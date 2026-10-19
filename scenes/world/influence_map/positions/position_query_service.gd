@@ -32,11 +32,14 @@ static func initialize(query: PositionQuery, result: PositionResult, prepare_for
 	if not InfluenceUnitQuery.is_valid_living_unit(query.unit) or query.unit.team != query.team:
 		result.reason = "Unit is outside the query's ownership"
 		return false
+	# An unavailable squad still belongs to a checked batch at its captured origin.
+	# Leaving the default origin here invalidates every healthy squad's new orders.
+	query.reset_evaluation()
+	if query.unit.action_controller != null:
+		query.movement_order_id = query.unit.action_controller.action_order_id
 	if query.unit.members_alive <= 0 or query.unit.surrendered or not can_follow_intent(query.unit):
 		result.reason = "Unit cannot execute tactical movement"
 		return false
-	if query.unit.action_controller != null:
-		query.movement_order_id = query.unit.action_controller.action_order_id
 	if query.profile.mode == PositionProfile.Mode.ASSAULT and not can_assault(query.unit):
 		result.reason = "Unit is not fit for an assault"
 		return false
@@ -47,7 +50,6 @@ static func initialize(query: PositionQuery, result: PositionResult, prepare_for
 	result.rejection_reasons.fill("")
 	if prepare_forecast:
 		query.forecast_data = query.snapshot.get_forecast_data(query.team, query.objective_hex)
-	query.reset_evaluation()
 	if query.profile.mode == PositionProfile.Mode.DEFEND:
 		DefensePositionPolicy.prepare(query)
 		if DefensePositionPolicy.needs_withdrawal(query):
@@ -476,7 +478,7 @@ static func escape_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: 
 		return false
 	if policy != null:
 		for step: Vector2i in path:
-			if step != origin and not EscapeCorridorPolicy.blockers(snapshot, team, step, policy).is_empty():
+			if step != origin and not EscapeCorridorPolicy.step_is_safe(snapshot, team, origin, step, policy):
 				return false
 		return true
 	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):

@@ -500,10 +500,10 @@ func _test_hold_to_exit_fallback() -> void:
 	goals.update(planner, 10000.0, 113.0)
 	_check(goals.active_fallback == policy and goals.primary.kind == ScenarioGoalTask.Kind.EXIT, "A recovered objective cannot reverse an accepted withdrawal")
 	var pinned: Unit = rifles[1]
-	pinned.stress_system.state = UnitStates.MoraleState.PINNED
+	pinned.stress_system._set_state(UnitStates.MoraleState.PINNED)
 	goals.update(planner, 10000.0, 114.0)
-	_check(not goals.assignments.has(pinned), "A pinned withdrawing squad receives no impossible movement assignment")
-	pinned.stress_system.state = UnitStates.MoraleState.NORMAL
+	_check_pinned_escape(goals, pinned)
+	pinned.stress_system._set_state(UnitStates.MoraleState.NORMAL)
 	goals.update(planner, 10000.0, 115.0)
 	_check(goals.assignments.has(pinned) and goals.assignments[pinned].kind == ScenarioGoalTask.Kind.EXIT, "A recovered squad joins the already committed withdrawal")
 	exit.state.units_exited.assign(planner.squads)
@@ -657,10 +657,10 @@ func _test_fallback_minimum_force() -> void:
 	_check(goals.active_fallback == policy and goals.fallback_reason.contains("remaining: 1"), "One combat squad plus HQ activates the minimum-force fallback even while the objective is secured")
 	_check(hold.is_condition_met() and hold.required_unit_count == 1, "Operational withdrawal does not alter the one-unit occupation victory requirement")
 	_check(goals.assignments.has(rifles[0]) and goals.assignments.has(headquarters) and goals.assignments[rifles[0]].kind == ScenarioGoalTask.Kind.EXIT and goals.assignments[headquarters].kind == ScenarioGoalTask.Kind.EXIT, "The surviving rifle and HQ both receive withdrawal duties")
-	rifles[0].stress_system.state = UnitStates.MoraleState.PINNED
+	rifles[0].stress_system._set_state(UnitStates.MoraleState.PINNED)
 	goals.update(planner, 10000.0, 413.0)
-	_check(not goals.assignments.has(rifles[0]), "A depletion-triggered withdrawal still cannot move a pinned survivor")
-	rifles[0].stress_system.state = UnitStates.MoraleState.NORMAL
+	_check_pinned_escape(goals, rifles[0])
+	rifles[0].stress_system._set_state(UnitStates.MoraleState.NORMAL)
 	goals.update(planner, 10000.0, 414.0)
 	_check(goals.assignments.has(rifles[0]) and goals.assignments[rifles[0]].kind == ScenarioGoalTask.Kind.EXIT, "The recovered survivor joins the committed withdrawal")
 	rifles[0].alive = false
@@ -825,6 +825,20 @@ func _set_hex(unit: Unit, hex: Vector2i) -> void:
 	unit.is_moving = false
 	unit.movement.target_hex = hex
 	unit.movement.target_position = unit.position
+
+
+func _check_pinned_escape(goals: ScenarioGoalDirector, unit: Unit) -> void:
+	var retained: bool = goals.assignments.has(unit) and goals.assignments[unit].kind == ScenarioGoalTask.Kind.EXIT
+	_check(retained, "A pinned withdrawing squad retains its escape mission while recovering")
+	if not retained:
+		return
+	planner._cancel_plan()
+	planner._planning_snapshot = controller.influence_map_controller.snapshot
+	planner._add_goal_request(unit, goals.assignments[unit])
+	var query: PositionQuery = planner._planning_requests[0]["query"]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(not advice.is_valid() and not planner.executor.execute(advice) and not unit.movement.is_moving, "Retaining an escape mission never authorizes movement while pinned")
+	planner._cancel_plan()
 
 
 func _freeze(node: Node) -> void:

@@ -240,7 +240,9 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 func _eligible_for_goal(unit: Unit, task: ScenarioGoalTask) -> bool:
 	if task.escape_policy != null and not task.escape_policy.allows(unit):
 		return false
-	if not TacticalPositionExecutor.is_active_defender(unit) or not unit.is_good_order():
+	if not TacticalPositionExecutor.is_active_defender(unit):
+		return false
+	if task.escape_policy == null and not unit.is_good_order():
 		return false
 	if task.kind == ScenarioGoalTask.Kind.HUNT and not PositionQueryService.can_assault(unit):
 		return false
@@ -263,7 +265,7 @@ func _select_platoon(task: ScenarioGoalTask, committed: Dictionary[Vector2i, Sce
 		for unit: Unit in formation.squads:
 			if not _eligible_for_goal(unit, task) or (HqSupportPositionPolicy.is_headquarters(unit) and not task.includes_headquarters()):
 				continue
-			if owner.goal_director._goal_travel_seconds(owner, unit, task) == INF:
+			if not task.recovering_units.has(unit) and owner.goal_director._goal_travel_seconds(owner, unit, task) == INF:
 				continue
 			eligible = true
 			if previous.has(unit) and previous[unit].key == task.key:
@@ -288,7 +290,7 @@ func _assign_roles() -> void:
 			formation.objective = formation.anchor()
 		if formation.task != null:
 			formation.objective = formation.task.hex
-			if formation.task.breach_required:
+			if _formation_requires_breach(formation):
 				formation.objective = formation.task.breach_hex
 		var key: String = str([formation.company, formation.objective])
 		if not groups.has(key):
@@ -320,7 +322,7 @@ func _assign_roles() -> void:
 				next_role = CompanyPlatoon.Role.RESERVE
 				if formation.reserve_deployed:
 					next_role = CompanyPlatoon.Role.REINFORCE
-			if formation.task != null and (formation.task.withdrawal or formation.task.escape_policy != null) and not formation.task.breach_required:
+			if formation.task != null and (formation.task.withdrawal or formation.task.escape_policy != null) and not _formation_requires_breach(formation):
 				next_role = CompanyPlatoon.Role.WITHDRAW
 			if next_role == CompanyPlatoon.Role.RESERVE and formation.role != CompanyPlatoon.Role.RESERVE:
 				formation.staging_hex = formation.anchor()
@@ -384,9 +386,20 @@ func _assign_defense_reserves(members: Array[CompanyPlatoon]) -> void:
 		eligible[index].provides_reserve = true
 
 
+func _formation_requires_breach(formation: CompanyPlatoon) -> bool:
+	if formation.task == null or not formation.task.breach_required:
+		return false
+	if formation.task.escape_policy != null:
+		for unit: Unit in formation.combat_units():
+			if formation.task.requires_breach(unit):
+				return true
+		return false
+	return true
+
+
 func _needs_attack(formation: CompanyPlatoon) -> bool:
 	if formation.task != null and formation.task.escape_policy != null:
-		return formation.task.breach_required
+		return _formation_requires_breach(formation)
 	if formation.task != null and formation.task.withdrawal:
 		return false
 	if formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT:
@@ -411,6 +424,8 @@ func _choose_maneuver(members: Array[CompanyPlatoon]) -> CompanyPlatoon:
 	var selected: CompanyPlatoon
 	var best: float = -INF
 	for formation: CompanyPlatoon in members:
+		if formation.task != null and formation.task.escape_policy != null and not _formation_requires_breach(formation):
+			continue
 		if not formation.can_maneuver() and (formation.role != CompanyPlatoon.Role.MANEUVER or formation.combat_units().is_empty()):
 			continue
 		var score: float = 10.0 * formation.effectiveness() - float(LOSHelper.get_hex_distance(formation.anchor(), formation.objective))
@@ -428,7 +443,7 @@ func _choose_support(members: Array[CompanyPlatoon], maneuver: CompanyPlatoon) -
 	var selected: CompanyPlatoon
 	var best: float = 0.0
 	for formation: CompanyPlatoon in members:
-		var shared_breach: bool = formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT and formation.task.breach_required and formation.objective == maneuver.objective
+		var shared_breach: bool = formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT and _formation_requires_breach(formation) and formation.objective == maneuver.objective
 		if formation == maneuver or (formation.task != null and not shared_breach) or formation.effectiveness() <= 0.0:
 			continue
 		var score: float = formation.support_firepower()

@@ -221,11 +221,17 @@ func set_scenario_goal_assignments(assignments: Dictionary[Unit, ScenarioGoalTas
 	for unit: Unit in affected:
 		var previous: ScenarioGoalTask = goal_assignments.get(unit)
 		var next: ScenarioGoalTask = assignments.get(unit)
+		var escape_phase_changed: bool = false
 		if previous != null and next != null and previous.key == next.key:
-			continue
+			escape_phase_changed = previous.escape_policy != null and next.escape_policy != null and previous.escape_duty(unit) != next.escape_duty(unit)
+			if not escape_phase_changed:
+				continue
 		if previous == null and next == null:
 			continue
 		changed = true
+		if escape_phase_changed:
+			# A new passage releases the fight immediately, including an accepted firing bound.
+			executor.cancel(unit, true)
 		position_stability.forget(unit)
 		accepted_positions.erase(unit)
 		_position_optimization_due.erase(unit)
@@ -440,11 +446,12 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 
 func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	if task.escape_policy != null:
-		if not task.breach_required:
-			_add_escape_request(unit, task)
-			return
-		if HqSupportPositionPolicy.is_headquarters(unit):
+		var duty: ScenarioGoalTask.EscapeDuty = task.escape_duty(unit)
+		if duty == ScenarioGoalTask.EscapeDuty.HEADQUARTERS_SUPPORT:
 			_add_escape_headquarters_request(unit, task)
+			return
+		if duty != ScenarioGoalTask.EscapeDuty.BREACH:
+			_add_escape_request(unit, task)
 			return
 	var clear_exit: bool = task.kind == ScenarioGoalTask.Kind.EXIT and not task.breach_required
 	var combat_hex: Vector2i = task.hex
@@ -607,6 +614,8 @@ func _add_escape_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	query.goal_key = task.key
 	query.goal_reason = task.reason
 	query.goal_capacity = task.exit_capacity()
+	if task.breach_required:
+		query.goal_reason = task.reason.get_slice("; open a passage at ", 0) + "; use an available escape corridor"
 	query.goal_destination_required = true
 	query.deliberate_movement = true
 	query.response_priority = 3
@@ -628,6 +637,8 @@ func _goal_support_ready(attacker: Unit, hex: Vector2i) -> bool:
 func _goal_maneuver(hex: Vector2i) -> Unit:
 	var selected: Unit
 	for unit: Unit in goal_assignments:
+		if goal_assignments[unit].escape_policy != null and not goal_assignments[unit].requires_breach(unit):
+			continue
 		var objective: Vector2i = goal_assignments[unit].hex
 		if goal_assignments[unit].breach_required:
 			objective = goal_assignments[unit].breach_hex
@@ -1622,7 +1633,7 @@ func _issue_order(squad: Unit) -> void:
 			result.reason = "Position occupied or claimed by another platoon"
 			time_until_reconsider = 0.0
 			return
-	var clear_exit: bool = goal_assignments.has(squad) and goal_assignments[squad].kind == ScenarioGoalTask.Kind.EXIT and not goal_assignments[squad].breach_required
+	var clear_exit: bool = goal_assignments.has(squad) and goal_assignments[squad].kind == ScenarioGoalTask.Kind.EXIT and not goal_assignments[squad].requires_breach(squad)
 	if result.is_valid() and company_requires_support and not clear_exit and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_company_support():
 		executor.cancel(squad, true)
 		position_stability.forget(squad)

@@ -9,8 +9,9 @@ extends Resource
 @export var include_headquarters: bool = true
 ## Compare routes by travel time plus time exposed to known or remembered fire.
 @export_range(0.0, 20.0, 0.5) var exposure_weight: float = 4.0
-## Bypass only weakly observed corridors; fight to clear lanes covered by effective fire.
+## Observation that can seal a guarded close gap or narrow terrain passage. Distant sightings only increase route cost.
 @export_range(0.0, 1.0, 0.05) var maximum_bypass_visibility: float = 0.25
+## Effective fire required, together with observation, to seal a guarded passage.
 @export_range(0.0, 1.0, 0.05) var maximum_bypass_risk: float = 0.4
 @export var enabled: bool = true
 

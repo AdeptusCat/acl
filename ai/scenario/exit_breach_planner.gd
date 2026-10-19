@@ -3,7 +3,8 @@ extends RefCounted
 
 
 # Search captured knowledge only. A safe opening takes precedence over a breach.
-static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: EscapeMissionPolicy = null) -> InfluenceContact:
+static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: EscapeMissionPolicy = null, bypass_units: Dictionary[Unit, bool] = {}) -> InfluenceContact:
+	bypass_units.clear()
 	var escape: bool = escape_policy != null
 	if planner.influence_map_controller == null or planner.influence_map_controller.snapshot == null:
 		return null
@@ -24,19 +25,26 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 		return null
 	var origins: Array[int] = []
 	var headquarters: Array[int] = []
+	var has_combat_units: bool = false
 	for unit: Unit in planner.squads:
 		if escape and not escape_policy.allows(unit):
 			continue
 		if (not escape and HqSupportPositionPolicy.is_headquarters(unit)) or not TacticalPositionExecutor.is_active_defender(unit) or not ids.has(unit.current_hex):
 			continue
 		var id: int = ids[unit.current_hex]
+		if escape:
+			if not HqSupportPositionPolicy.is_headquarters(unit):
+				has_combat_units = true
+			if not unit.is_good_order() or not PositionQueryService.can_follow_intent(unit):
+				# Immobility needs recovery, not a company assault on the unit's firing lane.
+				continue
 		if escape and HqSupportPositionPolicy.is_headquarters(unit):
 			if not graph.is_point_disabled(id) and not headquarters.has(id):
 				headquarters.append(id)
 			continue
 		if not graph.is_point_disabled(id) and not origins.has(id):
 			origins.append(id)
-	if escape and origins.is_empty():
+	if escape and origins.is_empty() and not has_combat_units:
 		origins = headquarters
 	var goals: Array[int] = []
 	for hex: Vector2i in exits:
@@ -88,10 +96,18 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 		if escape and not blockers[id].is_empty():
 			continue
 		for neighbor: int in graph.get_point_connections(id):
-			if not reached.has(neighbor) and not graph.is_point_disabled(neighbor) and (blockers[neighbor].is_empty() or (escape and origins.has(neighbor))):
+			if not reached.has(neighbor) and not graph.is_point_disabled(neighbor) and (blockers[neighbor].is_empty() or (escape and (origins.has(neighbor) or headquarters.has(neighbor)))):
 				reached[neighbor] = true
 				frontier.append(neighbor)
 	if escape:
+		# A watched starting position must not trap a unit that can disengage
+		# into a free corridor. Use the same origin-aware rule as route execution.
+		var starting_points: Array[int] = origins.duplicate()
+		starting_points.append_array(headquarters)
+		for id: int in starting_points:
+			if not reached.has(id) and _can_disengage(snapshot, planner.team, graph, id, goals, reached, blockers, escape_policy):
+				reached[id] = true
+		_capture_bypass_units(planner, reached, ids, bypass_units, escape_policy)
 		for id: int in origins.duplicate():
 			if reached.has(id):
 				origins.erase(id)
@@ -134,3 +150,47 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 				if not frontier.has(neighbor):
 					frontier.append(neighbor)
 	return null
+
+
+static func _can_disengage(snapshot: InfluenceSnapshot, team: int, graph: AStar2D, origin_id: int, goals: Array[int], reached: Dictionary[int, bool], blockers: Dictionary[int, Array], policy: EscapeMissionPolicy) -> bool:
+	var origin: Vector2i = LOSHelper.ground_layer.local_to_map(graph.get_point_position(origin_id))
+	var frontier: Array[int] = [origin_id]
+	var visited: Dictionary[int, bool] = {origin_id: true}
+	var cursor: int = 0
+	while cursor < frontier.size():
+		var id: int = frontier[cursor]
+		cursor += 1
+		for neighbor: int in graph.get_point_connections(id):
+			if visited.has(neighbor) or graph.is_point_disabled(neighbor):
+				continue
+			visited[neighbor] = true
+			var cell: Vector2i = LOSHelper.ground_layer.local_to_map(graph.get_point_position(neighbor))
+			if not EscapeCorridorPolicy.step_is_safe(snapshot, team, origin, cell, policy):
+				continue
+			if goals.has(neighbor) or (reached.has(neighbor) and blockers[neighbor].is_empty()):
+				return true
+			frontier.append(neighbor)
+	return false
+
+
+static func _capture_bypass_units(planner: PlatoonAI, reached: Dictionary[int, bool], ids: Dictionary, bypass_units: Dictionary[Unit, bool], policy: EscapeMissionPolicy) -> void:
+	var headquarters: Array[Unit] = []
+	for unit: Unit in planner.squads:
+		if not TacticalPositionExecutor.is_active_defender(unit) or not policy.allows(unit):
+			continue
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			headquarters.append(unit)
+		elif ids.has(unit.current_hex) and reached.has(ids[unit.current_hex]):
+			bypass_units[unit] = true
+	for unit: Unit in headquarters:
+		if not ids.has(unit.current_hex) or not reached.has(ids[unit.current_hex]):
+			continue
+		var ready: bool = true
+		for subordinate: Unit in planner.squads:
+			if HqSupportPositionPolicy.is_headquarters(subordinate) or not TacticalPositionExecutor.is_active_defender(subordinate):
+				continue
+			if subordinate.company == unit.company and (unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS or subordinate.platoon == unit.platoon) and not bypass_units.has(subordinate):
+				ready = false
+				break
+		if ready:
+			bypass_units[unit] = true

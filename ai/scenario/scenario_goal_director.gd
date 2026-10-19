@@ -248,6 +248,9 @@ func _add_escape_task(policy: EscapeMissionPolicy, planner: PlatoonAI) -> void:
 	# A different exit or a temporary breach must not become a different strategic mission.
 	task.key = str([state.condition.get_instance_id(), ScenarioGoalTask.Kind.EXIT, "escape"])
 	task.escape_policy = policy
+	for unit: Unit in planner.squads:
+		if TacticalPositionExecutor.is_active_defender(unit) and policy.allows(unit) and (not unit.is_good_order() or not PositionQueryService.can_follow_intent(unit)):
+			task.recovering_units[unit] = true
 	task.withdrawal = policy.withdraw_entire_force
 	task.required_units = demand
 	task.priority = 200.0
@@ -255,7 +258,7 @@ func _add_escape_task(policy: EscapeMissionPolicy, planner: PlatoonAI) -> void:
 	task.reason = "Escape to an exit: %d more distinct units required" % state.remaining_units
 	if active_fallback != null:
 		task.reason = "Withdraw to exit: " + fallback_reason
-	var breach: InfluenceContact = ExitBreachPlanner.select(planner, state.hexes, policy)
+	var breach: InfluenceContact = ExitBreachPlanner.select(planner, state.hexes, policy, task.bypass_units)
 	if breach != null:
 		task.breach_required = true
 		task.breach_hex = breach.hex
@@ -799,7 +802,7 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 			continue
 		if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
 			continue
-		if not unit.is_good_order() or (unit.current_hex != task.hex and not PositionQueryService.can_follow_intent(unit)):
+		if task.escape_policy == null and (not unit.is_good_order() or (unit.current_hex != task.hex and not PositionQueryService.can_follow_intent(unit))):
 			continue
 		var prior: ScenarioGoalTask = assignments.get(unit)
 		if PlatoonPositionStability.is_busy(unit):
@@ -807,6 +810,9 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 			if (prior == null or prior.key != task.key) and not already_establishing:
 				continue
 		var value: float = -float(LOSHelper.get_hex_distance(unit.current_hex, task.hex))
+		if task.recovering_units.has(unit):
+			# Keep the mission through recovery; mobile squads satisfy a limited quota first.
+			value -= 1000.0
 		if unit.squad_type == Globals.SquadType.Rifle:
 			value += 30.0
 		if prior != null and prior.key == task.key:

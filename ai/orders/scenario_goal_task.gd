@@ -2,6 +2,7 @@ class_name ScenarioGoalTask
 extends RefCounted
 
 enum Kind { OCCUPY, EXIT, DENY_OCCUPATION, BLOCK_EXIT, HUNT, PRESERVE }
+enum EscapeDuty { EXIT, RECOVER, HEADQUARTERS_SUPPORT, BREACH }
 
 var kind: Kind
 var key: String
@@ -12,6 +13,8 @@ var priority: float = 0.0
 var urgent: bool = false
 var withdrawal: bool = false
 var escape_policy: EscapeMissionPolicy
+var bypass_units: Dictionary[Unit, bool] = {}
+var recovering_units: Dictionary[Unit, bool] = {}
 var breach_required: bool = false
 var breach_hex: Vector2i
 var reason: String = ""
@@ -25,6 +28,28 @@ func includes_headquarters() -> bool:
 	if escape_policy != null:
 		return escape_policy.include_headquarters
 	return withdrawal
+
+
+func requires_breach(unit: Unit) -> bool:
+	return breach_required and (escape_policy == null or (not bypass_units.has(unit) and not recovering_units.has(unit)))
+
+
+func escape_duty(unit: Unit) -> EscapeDuty:
+	if recovering_units.has(unit):
+		return EscapeDuty.RECOVER
+	if HqSupportPositionPolicy.is_headquarters(unit):
+		for subordinate: Unit in recovering_units:
+			if not TacticalPositionExecutor.is_active_defender(subordinate) or HqSupportPositionPolicy.is_headquarters(subordinate):
+				continue
+			var belongs: bool = subordinate.command_squad == unit
+			belongs = belongs or (subordinate.company == unit.company and (unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS or subordinate.platoon == unit.platoon))
+			if belongs:
+				return EscapeDuty.HEADQUARTERS_SUPPORT
+		if requires_breach(unit):
+			return EscapeDuty.HEADQUARTERS_SUPPORT
+	elif requires_breach(unit):
+		return EscapeDuty.BREACH
+	return EscapeDuty.EXIT
 
 
 static func exit_state_for(source: VictoryCondition) -> ExitUnitsState:

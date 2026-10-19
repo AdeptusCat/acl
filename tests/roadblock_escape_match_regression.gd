@@ -23,7 +23,6 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.DEFEND)
 	var planner: PlatoonAI = world.game_controller._ai_director_for_team(Globals.Team.AXIS).platoon_ai
 	var exit: ExitUnitsCondition = scenario.ai_escape_policies[0].exit_condition
-	var saw_fight: bool = false
 	var saw_pinned: bool = false
 	var started: bool = false
 	var headquarters_origins: Dictionary[Unit, Vector2i] = {}
@@ -42,16 +41,13 @@ func _run() -> void:
 				_check(task.kind == ScenarioGoalTask.Kind.EXIT and task.escape_policy != null, "The column retains escape instead of contesting A")
 			for unit: Unit in planner.squads:
 				saw_pinned = saw_pinned or unit.stress_system.state == STATES.MoraleState.PINNED
-				var advice: PositionResult = unit.position_advice
-				if advice != null and advice.is_valid() and advice.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and unit.squad_fire.fire_recent > 0.0:
-					saw_fight = true
 		if exit.is_condition_met():
 			print("Roadblock column reached its exit quota after ", float(frame) / 60.0, " seconds")
 			break
 		if started and not Globals.game_started:
 			break
 		await get_tree().process_frame
-	_check(saw_fight, "The normal column engages the roadblock with actual covering fire")
+	_check(exit.is_condition_met(), "The normal column bypasses the roadblock and satisfies the authored escape quota under live fire")
 	_check(saw_pinned, "The live reproduction includes temporary pinning without abandoning escape")
 	_check(headquarters_origins.size() == 3 and headquarters_moved.size() == headquarters_origins.size(), "All three headquarters move with the column instead of waiting at their starting positions")
 	main.queue_free()
