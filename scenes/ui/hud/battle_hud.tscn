@@ -208,7 +208,7 @@ visible = false
 layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0
-offset_right = 252.0
+offset_right = 340.0
 offset_bottom = 236.0
 
 [node name="Tooltip" type="PanelContainer" parent="Control" unique_id=784359479]

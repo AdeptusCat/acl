@@ -126,8 +126,7 @@ func _layout_left_panels() -> void:
 		if rect.position.x < 12.0 + SquadRosterPanel.PANEL_WIDTH and rect.end.x > 12.0:
 			top = maxf(top, rect.end.y + 6.0)
 	var bottom: float = $Control.size.y - 12.0
-	# HUD coordinates compensate for UI scale. Whole pixels keep container
-	# minimum sizes stable while the visible height stays one-third of the screen.
+	# Use a compact default height, but allow the roster to show a whole platoon.
 	var panel_height_limit: float = floorf($Control.size.y / 2.5)
 	var terrain_height: float = 0.0
 	var debug_height: float = 0.0
@@ -145,7 +144,9 @@ func _layout_left_panels() -> void:
 	var available_height: float = maxf(0.0, bottom - top - gaps)
 	var roster_height: float = 0.0
 	if squad_roster.visible:
-		roster_height = minf(minf(squad_roster.get_preferred_height(), panel_height_limit), maxf(squad_roster.get_minimum_height(), available_height - support_minimum))
+		var roster_height_limit: float = maxf(panel_height_limit, squad_roster.get_minimum_height())
+		var roster_available_height: float = maxf(0.0, available_height - support_minimum)
+		roster_height = minf(squad_roster.get_preferred_height(), minf(roster_height_limit, roster_available_height))
 	var support_height: float = maxf(0.0, available_height - roster_height)
 	# Keep the roster in its column; only the expanded support content shrinks.
 	if tile_details.visible and not tile_details.details.folded:

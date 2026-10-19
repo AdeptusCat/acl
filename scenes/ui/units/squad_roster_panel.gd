@@ -5,7 +5,7 @@ signal unit_selected(unit: Unit)
 signal layout_requested
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/units/squad_roster_row.tscn")
-const PANEL_WIDTH: float = 252.0
+const PANEL_WIDTH: float = 340.0
 const REFRESH_INTERVAL_S: float = 0.25
 
 @onready var section: FoldableContainer = $Roster
@@ -14,7 +14,10 @@ const REFRESH_INTERVAL_S: float = 0.25
 
 var player_team: Globals.Team = Globals.Team.AXIS
 var rows: Dictionary[Unit, SquadRosterRow] = {}
+var company_branches: Dictionary[int, FoldableContainer] = {}
+var platoon_branches: Dictionary[Vector2i, FoldableContainer] = {}
 var _formation_signature: String = ""
+var _focused_unit_id: int = 0
 var _refresh_elapsed_s: float = 0.0
 var _pending_reveal: Unit
 var _reveal_queued: bool = false
@@ -23,12 +26,14 @@ var _reveal_queued: bool = false
 func _ready() -> void:
 	set_process(false)
 	section.folding_changed.connect(_on_folding_changed)
+	groups.minimum_size_changed.connect(_request_layout)
 	minimum_size_changed.connect(_request_layout)
 
 
 func setup(team: Globals.Team) -> void:
 	player_team = team
 	_formation_signature = ""
+	_focused_unit_id = 0
 	_refresh_elapsed_s = 0.0
 	section.expand()
 	refresh()
@@ -54,19 +59,33 @@ func refresh() -> void:
 	for unit: Unit in units:
 		var group: Vector2i = _group_key(unit)
 		signature += ":%d/%d/%d/%d" % [unit.get_instance_id(), group.x, group.y, unit.squad]
-	if signature != _formation_signature:
+	var rebuilt: bool = signature != _formation_signature
+	if rebuilt:
 		_formation_signature = signature
 		_rebuild_groups(units)
 	section.title = "Squads · %d" % units.size()
+	var selected: Unit
 	for unit: Unit in rows:
 		rows[unit].refresh()
+		if unit.selected:
+			selected = unit
+	if selected != null:
+		if rebuilt or selected.get_instance_id() != _focused_unit_id:
+			_expand_selected_branch(selected)
+	else:
+		_focused_unit_id = 0
 
 
 func get_minimum_height() -> float:
 	if section.folded:
 		return get_combined_minimum_size().y
 	var overhead: float = maxf(0.0, get_combined_minimum_size().y - scroll.get_combined_minimum_size().y)
-	return overhead + minf(32.0, groups.get_combined_minimum_size().y)
+	var content_height: float = 32.0
+	for group: Vector2i in platoon_branches:
+		var branch: FoldableContainer = platoon_branches[group]
+		if not branch.folded and not company_branches[group.x].folded:
+			content_height = maxf(content_height, branch.get_combined_minimum_size().y)
+	return overhead + minf(content_height, groups.get_combined_minimum_size().y)
 
 
 func focus_unit(unit: Unit) -> void:
@@ -75,6 +94,7 @@ func focus_unit(unit: Unit) -> void:
 	refresh()
 	if not rows.has(unit):
 		return
+	_expand_selected_branch(unit)
 	_pending_reveal = unit
 	section.expand()
 	if not _reveal_queued:
@@ -88,7 +108,13 @@ func _reveal_selected() -> void:
 	await get_tree().process_frame
 	_reveal_queued = false
 	if is_instance_valid(_pending_reveal) and _pending_reveal.selected and rows.has(_pending_reveal):
-		scroll.ensure_control_visible(rows[_pending_reveal])
+		var target: Control = rows[_pending_reveal]
+		var group: Vector2i = _group_key(_pending_reveal)
+		if _pending_reveal.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and platoon_branches.has(group):
+			var branch: FoldableContainer = platoon_branches[group]
+			if branch.size.y <= scroll.size.y:
+				target = branch
+		scroll.ensure_control_visible(target)
 	_pending_reveal = null
 
 
@@ -113,29 +139,38 @@ func fit_panel(panel_position: Vector2, max_height: float) -> void:
 
 func _rebuild_groups(units: Array[Unit]) -> void:
 	var scroll_position: int = scroll.scroll_vertical
+	var expanded_companies: Array[int] = []
+	var expanded_platoons: Array[Vector2i] = []
+	for company: int in company_branches:
+		if not company_branches[company].folded:
+			expanded_companies.append(company)
+	for group: Vector2i in platoon_branches:
+		if not platoon_branches[group].folded:
+			expanded_platoons.append(group)
 	rows.clear()
+	company_branches.clear()
+	platoon_branches.clear()
 	for child: Node in groups.get_children():
 		groups.remove_child(child)
 		child.queue_free()
-	var previous_group: Vector2i = Vector2i(-1, -1)
-	var platoon_rows: VBoxContainer
 	for unit: Unit in units:
 		var group: Vector2i = _group_key(unit)
-		if group != previous_group:
-			previous_group = group
-			platoon_rows = VBoxContainer.new()
-			platoon_rows.mouse_filter = Control.MOUSE_FILTER_PASS
-			platoon_rows.add_theme_constant_override("separation", 2)
-			groups.add_child(platoon_rows)
-			var heading: Label = Label.new()
-			heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			heading.add_theme_color_override("font_color", Color(0.8, 0.65, 0.45))
-			heading.theme_type_variation = &"HudSecondary"
-			heading.text = unit.get_formation_name()
-			platoon_rows.add_child(heading)
+		if not company_branches.has(group.x):
+			var company_branch: FoldableContainer = _create_branch("Company %s" % Unit.COMPANY_NAMES[unit.company], groups)
+			company_branch.folded = not expanded_companies.has(group.x)
+			company_branches[group.x] = company_branch
+			company_branch.folding_changed.connect(_on_company_folding_changed.bind(group.x))
+		var row_parent: VBoxContainer = company_branches[group.x].get_node("Indent/Content") as VBoxContainer
+		if unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
+			if not platoon_branches.has(group):
+				var platoon_branch: FoldableContainer = _create_branch("Platoon %d" % group.y, row_parent)
+				platoon_branch.folded = not expanded_platoons.has(group)
+				platoon_branches[group] = platoon_branch
+				platoon_branch.folding_changed.connect(_on_platoon_folding_changed.bind(group))
+			row_parent = platoon_branches[group].get_node("Indent/Content") as VBoxContainer
 		var row: SquadRosterRow = ROW_SCENE.instantiate() as SquadRosterRow
 		row.unit = unit
-		platoon_rows.add_child(row)
+		row_parent.add_child(row)
 		row.pressed.connect(_on_row_pressed.bind(row))
 		rows[unit] = row
 	if units.is_empty():
@@ -144,6 +179,56 @@ func _rebuild_groups(units: Array[Unit]) -> void:
 		empty.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		groups.add_child(empty)
 	scroll.set_deferred("scroll_vertical", scroll_position)
+	_request_layout()
+
+
+func _create_branch(title: String, parent: VBoxContainer) -> FoldableContainer:
+	var branch: FoldableContainer = FoldableContainer.new()
+	branch.title = title
+	branch.folded = true
+	branch.mouse_filter = Control.MOUSE_FILTER_STOP
+	branch.mouse_force_pass_scroll_events = true
+	branch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(branch)
+	var indent: MarginContainer = MarginContainer.new()
+	indent.name = "Indent"
+	indent.mouse_filter = Control.MOUSE_FILTER_PASS
+	indent.add_theme_constant_override("margin_left", 10)
+	branch.add_child(indent)
+	var content: VBoxContainer = VBoxContainer.new()
+	content.name = "Content"
+	content.mouse_filter = Control.MOUSE_FILTER_PASS
+	content.add_theme_constant_override("separation", 2)
+	indent.add_child(content)
+	return branch
+
+
+func _expand_selected_branch(unit: Unit) -> void:
+	_focused_unit_id = unit.get_instance_id()
+	var selected_group: Vector2i = _group_key(unit)
+	for company: int in company_branches:
+		company_branches[company].folded = company != selected_group.x
+	for group: Vector2i in platoon_branches:
+		platoon_branches[group].folded = group != selected_group or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS
+	_request_layout()
+
+
+func _on_company_folding_changed(folded: bool, company: int) -> void:
+	if not folded:
+		for other: int in company_branches:
+			if other != company:
+				company_branches[other].fold()
+	for group: Vector2i in platoon_branches:
+		if (group.x == company and folded) or (group.x != company and not folded):
+			platoon_branches[group].fold()
+	_request_layout()
+
+
+func _on_platoon_folding_changed(folded: bool, selected_group: Vector2i) -> void:
+	if not folded:
+		for group: Vector2i in platoon_branches:
+			if group != selected_group:
+				platoon_branches[group].fold()
 	_request_layout()
 
 

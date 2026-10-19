@@ -32,10 +32,19 @@ func _run() -> void:
 	var enemies: Array[Unit] = Globals.get_units_for_team(Globals.team_enemy)
 	_check(panel.visible and panel.rows.size() == players.size(), "Starting the battle lists every active friendly squad")
 	_check(not panel.rows.has(enemies[0]), "Enemy squads do not appear in the player's roster")
-	_check(is_equal_approx(panel.size.x, 252.0) and panel.size.y <= world.ui.get_node("Control").size.y / 3.0 + 1.0, "The roster has a compact fixed width and uses at most one-third of the viewport height: %s" % panel.size)
+	_check(is_equal_approx(panel.size.x, SquadRosterPanel.PANEL_WIDTH) and panel.size.y <= world.ui.get_node("Control").size.y * 0.4 + 1.0, "The roster has a compact fixed width and stays within the HUD height limit: %s" % panel.size)
 	_check(_clear_of_hud(world), "The roster does not overlap the timer, mission, retry, debug, or selected squad panels")
 	var selected: Unit = panel.rows.keys()[0]
 	var row: SquadRosterRow = panel.rows[selected]
+	_check(panel.company_branches[selected.company].folded and not row.is_visible_in_tree(), "Companies start collapsed before selecting or browsing a squad")
+	var company_branch: FoldableContainer = panel.company_branches[selected.company]
+	_pointer_event(_screen_rect(company_branch).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	if selected.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
+		var platoon_branch: FoldableContainer = panel.platoon_branches[Vector2i(selected.company, selected.platoon)]
+		_pointer_event(_screen_rect(platoon_branch).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+		await _settle()
+	_check(row.is_visible_in_tree(), "Company and platoon headings expand through pointer input")
 	_check(row.strength.text == "%d/%d" % [selected.squad_fire.soldiers.size(), selected.original_size], "Each row shows remaining and initial soldiers")
 	_check(_text_fits(row.identity) and _text_fits(row.strength), "Squad identity and strength fit the row")
 	world.input_manager.zoom_in.connect(_on_zoom)
@@ -48,6 +57,7 @@ func _run() -> void:
 	_check(world.ui.unit_details.unit == selected and world.ui.unit_details.visible, "Roster selection opens the existing squad summary")
 	_check(map_clicks == 0, "A roster click does not also select a battlefield hex")
 	_check(row.button_pressed, "The selected row is highlighted")
+	_check(_only_selected_branch_expanded(panel, selected), "Roster selection expands only the selected squad's company and platoon")
 	world.game_controller.camera.position += Vector2(200.0, 100.0)
 	_pointer_event(_screen_rect(row).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
@@ -58,6 +68,8 @@ func _run() -> void:
 			rifle = unit
 			break
 	var rifle_row: SquadRosterRow = panel.rows[rifle]
+	world.game_controller.select_and_center_unit(rifle)
+	await _settle()
 	_check(not rifle.ui.has_node("FormationMarker"), "Battlefield counters have no separate formation marker")
 	var platoon_color: Color = UnitHudStyle.formation_color(rifle)
 	_check((rifle.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color == platoon_color, "The morale fill identifies the squad's platoon")
@@ -134,12 +146,16 @@ func _run() -> void:
 		players.append(extra)
 	panel.refresh()
 	await _settle()
-	_check(panel.rows.size() == players.size() and panel.size.y <= world.ui.get_node("Control").size.y / 3.0 + 1.0, "Many platoons keep the roster within one-third of the viewport height: %s" % panel.size)
+	_pointer_event(_screen_rect(panel.rows[rifle]).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
+	await _settle()
+	_check(panel.rows.size() == players.size() and _clear_of_hud(world), "An expanded platoon grows the roster without overlapping other HUD panels: %s" % panel.size)
+	_check(world.game_controller.selected_unit == rifle and _platoon_fully_visible(panel, rifle), "Clicking a squad shows its platoon heading and every squad without manual scrolling")
+	_check(panel.size.y > world.ui.get_node("Control").size.y * 0.4, "A large platoon can expand beyond the compact roster height")
 	var scrollbar: VScrollBar = panel.scroll.get_v_scroll_bar()
-	_check(scrollbar.max_value > scrollbar.page, "Long platoon lists scroll inside the compact panel")
+	var can_scroll: bool = scrollbar.max_value > scrollbar.page
 	panel.scroll.scroll_vertical = 0
 	_pointer_event(_screen_rect(panel.scroll).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
-	_check(panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Scrolling the roster moves the list without zooming the battlefield")
+	_check((panel.scroll.scroll_vertical > 0 or not can_scroll) and zoom_events == 0, "Roster wheel input stays within the HUD without zooming the battlefield")
 	panel.scroll.scroll_vertical = 0
 	var offscreen: Unit = players[players.size() - 1]
 	var original_hex: Vector2i = offscreen.current_hex
@@ -155,10 +171,19 @@ func _run() -> void:
 	var battlefield_point: Vector2 = world.game_controller.get_global_transform_with_canvas() * offscreen.position
 	_pointer_event(battlefield_point, MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
-	_check(world.game_controller.selected_unit == offscreen and panel.scroll.scroll_vertical > 0 and panel.scroll.get_global_rect().encloses(panel.rows[offscreen].get_global_rect()), "Clicking a battlefield squad scrolls its complete offscreen roster row into view")
+	_check(world.game_controller.selected_unit == offscreen and _platoon_fully_visible(panel, offscreen), "Clicking a battlefield squad reveals its entire platoon rather than only the selected row")
+	_check(_only_selected_branch_expanded(panel, offscreen), "Battlefield selection opens its platoon and collapses sibling platoons")
+	panel.platoon_branches[Vector2i(offscreen.company, 1)].expand()
+	panel.refresh()
+	await _settle()
+	_check(panel.platoon_branches[Vector2i(offscreen.company, offscreen.platoon)].folded, "Browsing another platoon collapses its sibling and survives periodic refresh")
+	world.game_controller.select_and_center_unit(offscreen)
+	await _settle()
+	_check(_only_selected_branch_expanded(panel, offscreen), "Reselecting a squad restores its branch after manual browsing")
+	_check(_platoon_fully_visible(panel, offscreen), "Reselecting a squad restores full platoon visibility after manual browsing")
 	offscreen.current_hex = original_hex
 	offscreen.position = original_position
-	var manual_scroll: int = panel.scroll.scroll_vertical - 30
+	var manual_scroll: int = maxi(0, panel.scroll.scroll_vertical - 30)
 	panel.scroll.scroll_vertical = manual_scroll
 	panel.refresh()
 	await _settle()
@@ -168,12 +193,15 @@ func _run() -> void:
 	world.game_controller.show_unit_details_in_ui.emit(rifle)
 	await _settle()
 	_check(not panel.section.folded and panel.scroll.get_global_rect().encloses(panel.rows[rifle].get_global_rect()), "Selecting a squad expands a folded roster and reveals its row")
+	_check(_platoon_fully_visible(panel, rifle), "Opening a folded roster fits the whole selected platoon")
 	world.game_controller._select_unit(offscreen)
 	world.game_controller.show_unit_details_in_ui.emit(offscreen)
 	world.game_controller._select_unit(rifle)
 	world.game_controller.show_unit_details_in_ui.emit(rifle)
 	await _settle()
 	_check(panel.scroll.get_global_rect().encloses(panel.rows[rifle].get_global_rect()), "Rapid selections reveal the latest squad rather than an earlier queued selection")
+	_check(_only_selected_branch_expanded(panel, rifle), "Rapid selections leave only the latest squad's branch expanded")
+	_check(_platoon_fully_visible(panel, rifle), "Rapid selections leave every squad of the latest platoon visible")
 	rifle.ui.update_bar(60, 100)
 	_check(is_equal_approx(rifle.ui.morale_bar.value, 0.4) and rifle.ui.morale_bar.scale == Vector2.ONE, "Morale reserve falls with stress while the gauge keeps a fixed size")
 	_check((rifle.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color == platoon_color and (offscreen.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color != platoon_color, "Different platoons remain distinguishable while morale reserve falls")
@@ -203,8 +231,19 @@ func _run() -> void:
 	other.platoon = 2
 	panel.refresh()
 	await _settle()
-	var heading: Label = panel.rows[other].get_parent().get_child(0) as Label
-	_check(heading.text == "Company B · Platoon 2", "Changing formation moves a squad under its correct company and platoon")
+	var heading: FoldableContainer = panel.rows[other].get_parent().get_parent().get_parent() as FoldableContainer
+	_check(heading == panel.platoon_branches[Vector2i(other.company, other.platoon)] and heading.title == "Platoon 2" and panel.company_branches[other.company].title == "Company B", "Changing formation moves a squad under its correct company and platoon")
+	world.game_controller.select_and_center_unit(other)
+	await _settle()
+	_check(_only_selected_branch_expanded(panel, other) and panel.company_branches[rifle.company].folded, "Selecting a squad in another company collapses the previous company and its platoons")
+	_check(_platoon_fully_visible(panel, other), "Selecting another company keeps its entire selected platoon visible")
+	other.platoon = 3
+	panel.refresh()
+	await _settle()
+	_check(_only_selected_branch_expanded(panel, other) and panel.rows[other].is_visible_in_tree() and not panel.platoon_branches.has(Vector2i(other.company, 2)), "Moving the selected squad rebuilds and expands its new branch without stale platoons")
+	panel.company_branches[rifle.company].expand()
+	panel.refresh()
+	_check(panel.company_branches[other.company].folded and panel.platoon_branches[Vector2i(other.company, other.platoon)].folded, "Manually opening another company collapses the previous company and its platoons")
 	var changed_color: Color = UnitHudStyle.formation_color(other)
 	_check((other.ui.morale_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color == changed_color, "Changing platoon immediately updates the morale bar's color")
 	other.ui.update_bar(100, 100)
@@ -215,6 +254,12 @@ func _run() -> void:
 	panel.refresh()
 	_check(panel.rows.has(reinforcement) and panel.rows.size() == players.size() + 1, "New friendly squads join the live roster")
 	world.game_controller.select_and_center_unit(selected)
+	var original_squad_type: Globals.SquadType = selected.squad_type
+	selected.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+	panel.refresh()
+	_check(_only_selected_branch_expanded(panel, selected) and panel.rows[selected].get_parent().get_parent().get_parent() == panel.company_branches[selected.company], "Company headquarters sits directly under its company and keeps all platoons collapsed")
+	selected.squad_type = original_squad_type
+	panel.refresh()
 	selected.exit_map(false)
 	panel.refresh()
 	_check(not panel.rows.has(selected) and world.game_controller.selected_unit == null, "Exited squads leave the roster and release selection")
@@ -279,7 +324,8 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	await _settle()
 	_check(debug_panel.section.folded and not terrain.details.folded, "Expanding terrain keeps development controls folded")
 	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded terrain fits below the stationary roster at %s" % window_size)
-	_check(terrain.size.y <= hud.get_node("Control").size.y / 3.0 + 1.0 and roster.scroll.size.y >= 32.0, "Terrain overflow stays within one-third of the viewport and preserves a usable squad list")
+	_check(terrain.size.y <= hud.get_node("Control").size.y * 0.4 + 1.0 and roster.scroll.size.y >= 32.0, "Terrain overflow stays within the HUD height limit and preserves a usable squad list")
+	_check(_platoon_fully_visible(roster, world.game_controller.selected_unit), "The selected platoon remains fully visible beside expanded terrain at %s" % window_size)
 	if window_size.x == 1152:
 		var scrollbar: VScrollBar = terrain.scroll.get_v_scroll_bar()
 		_check(scrollbar.max_value > scrollbar.page, "Terrain details scroll when the left column runs out of space")
@@ -292,6 +338,7 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	_check(terrain.details.folded and not debug_panel.section.folded, "Opening development controls folds terrain details")
 	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world) and _support_panels_fit(hud), "Expanded development controls fit below the stationary roster at %s" % window_size)
 	_check(debug_panel.axis_ai_status.is_visible_in_tree() and not debug_panel.axis_ai_status.disabled, "The compact development panel preserves usable AI controls")
+	_check(_platoon_fully_visible(roster, world.game_controller.selected_unit), "The selected platoon remains fully visible beside expanded development controls at %s" % window_size)
 	debug_panel.scroll.scroll_vertical = 0
 	_pointer_event(_screen_rect(debug_panel.scroll).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_DOWN)
 	_check(debug_panel.scroll.scroll_vertical > 0 and zoom_events == 0, "Development controls scroll without zooming the battlefield")
@@ -304,6 +351,30 @@ func _check_support_layout(world: Node, window_size: Vector2i) -> void:
 	await _settle()
 	_check(roster.position.is_equal_approx(roster_position) and _clear_of_hud(world), "Closing inspection keeps the roster anchored")
 	debug_panel.section.fold()
+
+
+func _platoon_fully_visible(panel: SquadRosterPanel, unit: Unit) -> bool:
+	var group: Vector2i = Vector2i(unit.company, unit.platoon)
+	var branch: FoldableContainer = panel.platoon_branches[group]
+	var bounds: Rect2 = panel.scroll.get_global_rect()
+	if not branch.is_visible_in_tree() or not bounds.encloses(branch.get_global_rect()):
+		return false
+	for member: Unit in panel.rows:
+		if member.company == unit.company and member.platoon == unit.platoon and member.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
+			if not panel.rows[member].is_visible_in_tree() or not bounds.encloses(panel.rows[member].get_global_rect()):
+				return false
+	return true
+
+
+func _only_selected_branch_expanded(panel: SquadRosterPanel, unit: Unit) -> bool:
+	for company: int in panel.company_branches:
+		if panel.company_branches[company].folded != (company != unit.company):
+			return false
+	for group: Vector2i in panel.platoon_branches:
+		var should_fold: bool = group != Vector2i(unit.company, unit.platoon) or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS
+		if panel.platoon_branches[group].folded != should_fold:
+			return false
+	return true
 
 
 func _support_panels_fit(hud: CanvasLayer) -> bool:
