@@ -27,6 +27,7 @@ extends Control
 @export var shooting_mortar_ger: Texture2D
 
 @export var idle_mg_us: Texture2D
+@export var moving_mg_us: Texture2D
 @export var shooting_mg_us: Texture2D
 
 @export var idle_antitank_us: Texture2D
@@ -65,6 +66,7 @@ func set_status_image(team: Globals.Team, _squad_type: Globals.SquadType) -> voi
 		match _squad_type:
 			Globals.SquadType.MG:
 				$Idle.texture = idle_mg_us
+				$Moving.texture = moving_mg_us
 				$Shooting.texture = shooting_mg_us
 			Globals.SquadType.ANTITANK:
 				$Idle.texture = idle_antitank_us
