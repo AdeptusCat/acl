@@ -163,7 +163,9 @@ func _test_outcomes() -> void:
 	for condition: VictoryCondition in Globals.victory_conditions[Globals.team_player].victory_conditions:
 		if condition is PreventEnemyExitCondition:
 			prevention = condition as PreventEnemyExitCondition
-	prevention.state.units_exited.assign([enemy, destroyed[0]])
+	prevention.state.units_exited.assign([enemy])
+	for index: int in range(prevention.max_allowed_enemy_exits):
+		prevention.state.units_exited.append(destroyed[index])
 	host.end_game_handled = false
 	host.timer_running = true
 	winners.clear()

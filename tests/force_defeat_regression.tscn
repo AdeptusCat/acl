@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/force_defeat_regression.gd" id="1"]
+
+[node name="ForceDefeatRegression" type="Node"]
+script = ExtResource("1")

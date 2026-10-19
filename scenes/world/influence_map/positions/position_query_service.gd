@@ -448,7 +448,7 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 
 static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -> bool:
 	if query.escape_policy != null:
-		return escape_path_is_safe(query.snapshot, query.team, query.origin_hex, path)
+		return escape_path_is_safe(query.snapshot, query.team, query.origin_hex, path, query.escape_policy)
 	if path.is_empty():
 		return false
 	if query.press_attack and not press_attack_path_is_safe(query.snapshot, query.team, query.origin_hex, path):
@@ -469,9 +469,14 @@ static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -
 	return true
 
 
-static func escape_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i]) -> bool:
+static func escape_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i], policy: EscapeMissionPolicy = null) -> bool:
 	if path.is_empty():
 		return false
+	if policy != null:
+		for step: Vector2i in path:
+			if step != origin and not EscapeCorridorPolicy.blockers(snapshot, team, step, policy).is_empty():
+				return false
+		return true
 	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
 		if not contact.observed or not TacticalPositionExecutor.is_active_defender(contact.unit):
 			continue

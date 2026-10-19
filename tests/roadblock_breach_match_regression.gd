@@ -133,6 +133,7 @@ func _run() -> void:
 
 func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attackers: Array[Unit], controller: InfluenceMapController, scenario: Scenario) -> void:
 	for unit: Unit in attackers:
+		_set_hex(unit, Vector2i(15, 7))
 		Globals.unit_visible_enemies[unit] = defenders.duplicate()
 	controller.reset_for_match()
 	controller.create_maps(0.0)
@@ -140,15 +141,61 @@ func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attacker
 		controller._process_los_rebuild()
 		controller._process_budgeted_rebuild()
 	var director: ScenarioGoalDirector = planner.goal_director
+	var snapshot: InfluenceSnapshot = controller.snapshot
+	snapshot.los = snapshot.los.duplicate(true)
+	var overwatch: InfluenceContact
+	var rifle: Unit
+	for unit: Unit in attackers:
+		if unit.squad_type == Globals.SquadType.Rifle:
+			rifle = unit
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+		if contact.unit.squad_type == Globals.SquadType.MG:
+			overwatch = contact
+	overwatch.weapon_range = 40
+	overwatch.firepower = 4.0
+	snapshot.los[overwatch.hex] = {}
+	for cell: Vector2i in snapshot.point_ids[planner.team]:
+		snapshot.los[overwatch.hex][cell] = {"hindrance": 0.0, "target_cover": 0.0}
 	director._build_tasks(planner, scenario.duration_s)
-	_check(director.tasks.size() == 1 and director.tasks[0].escape_policy != null, "The authored Roadblock escape suppresses competing occupation-denial duties")
+	_check(director.tasks.size() == 1 and director.tasks[0].escape_policy != null, "The column retains its escape mission while preparing to fight")
 	var task: ScenarioGoalTask = director.tasks[0]
-	_check(not task.breach_required, "Authored woodland bypasses remain usable despite overlapping enemy fire")
+	_check(task.breach_required, "A physically open passage covered by machine-gun fire requires a deliberate fight")
+	planner._planning_snapshot = snapshot
+	planner._planning_reservations.clear()
+	planner._planning_requests.clear()
+	planner._add_goal_request(rifle, task)
+	_check(planner._planning_requests[0]["query"].profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE, "Combat squads establish covering fire instead of squeezing through an observed opening")
+	var headquarters_probe: Unit = attackers[0]
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+		snapshot.los.get(contact.hex, {}).erase(Vector2i(0, 6))
+	_set_hex(headquarters_probe, Vector2i(0, 6))
+	director._build_tasks(planner, scenario.duration_s)
+	_check(director.tasks[0].breach_required, "A forward headquarters at an unseen exit cannot release a column still covered by fire")
+	_set_hex(headquarters_probe, Vector2i(15, 7))
+	var probe: ScenarioGoalTask = ScenarioGoalTask.new()
+	probe.kind = ScenarioGoalTask.Kind.EXIT
+	probe.condition = task.condition
+	probe.hex = task.hex
+	probe.required_units = task.required_units
+	probe.withdrawal = true
+	probe.escape_policy = task.escape_policy.duplicate() as EscapeMissionPolicy
+	probe.escape_policy.maximum_bypass_visibility = 1.0
+	probe.escape_policy.maximum_bypass_risk = 1.0
+	planner._planning_requests.clear()
+	planner._add_escape_request(rifle, probe)
+	var exposed: PositionResult = PositionQueryService.query_positions(planner._planning_requests[0]["query"])
+	_check(exposed.is_valid(), "The observed gap has a physical route that avoids adjacent defenders")
+	_check(not PositionQueryService.escape_path_is_safe(snapshot, planner.team, rifle.current_hex, exposed.path, task.escape_policy), "Live route validation also refuses the observed gap")
+	# Leave one barely visible corridor while preserving enemy positions and the surrounding overwatch.
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+		for cell: Vector2i in exposed.path:
+			snapshot.los.get(contact.hex, {})[cell] = {"hindrance": 1000.0, "target_cover": 0.0}
+	director._build_tasks(planner, scenario.duration_s)
+	task = director.tasks[0]
+	_check(not task.breach_required, "A concealed corridor permits bypass without an unnecessary fight")
 	_check(task.required_units == attackers.size() and task.includes_headquarters(), "The column sends its headquarters and combat squads toward the exits")
 	planner._planning_snapshot = controller.snapshot
 	planner._planning_reservations.clear()
-	var crossed_fire: bool = false
-	var rifle: Unit
 	for unit: Unit in attackers:
 		if unit.squad_type != Globals.SquadType.Rifle and not HqSupportPositionPolicy.is_headquarters(unit):
 			continue
@@ -157,13 +204,11 @@ func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attacker
 		var query: PositionQuery = planner._planning_requests[0]["query"]
 		var result: PositionResult = PositionQueryService.query_positions(query)
 		_check(result.is_valid() and result.should_move and query.escape_hexes.has(result.target_hex), "Rifles and headquarters receive a complete route to a reachable western exit")
-		_check(PositionQueryService.escape_path_is_safe(controller.snapshot, planner.team, unit.current_hex, result.path), "The chosen corridor avoids occupied hexes and neighboring unsuppressed defenders")
+		_check(PositionQueryService.escape_path_is_safe(controller.snapshot, planner.team, unit.current_hex, result.path, task.escape_policy), "The chosen corridor avoids occupied hexes and neighboring unsuppressed defenders")
 		_check(result.features.get("escape", false) and result.profile_mode == PositionProfile.Mode.ADVANCE, "Escape advice preserves movement instead of seeking firing positions")
-		crossed_fire = crossed_fire or result.features.get("peak_exposure", 0.0) > 0.8
 		if unit.squad_type == Globals.SquadType.Rifle:
 			rifle = unit
 			unit.stress_system.state = STATES.MoraleState.PINNED
-	_check(crossed_fire, "The bypass fixture includes the high fire exposure that previously forced an assault")
 	director._build_tasks(planner, scenario.duration_s)
 	_check(director.tasks.size() == 1 and director._preferred_primary().kind == ScenarioGoalTask.Kind.EXIT, "Pinning every rifle cannot replace the escape mission with an attack on A")
 	director._allocate(planner)
@@ -187,6 +232,7 @@ func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attacker
 	planner._planning_requests.clear()
 	planner._add_goal_request(rifle, task)
 	var alternate_query: PositionQuery = planner._planning_requests[0]["query"]
+	alternate_query.escape_policy = probe.escape_policy
 	var alternate: PositionResult = PositionQueryService.query_positions(alternate_query)
 	_check(alternate.is_valid() and alternate.target_hex != Vector2i(0, 6) and alternate_query.escape_hexes.has(alternate.target_hex), "A defended exit redirects movement to another exit instead of rejecting the escape")
 	_check(PositionQueryService.escape_path_is_safe(controller.snapshot, planner.team, rifle.current_hex, alternate.path), "The alternate corridor preserves separation from the exit defender")

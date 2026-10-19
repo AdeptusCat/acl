@@ -135,6 +135,34 @@ static func can_finish_after_enemy_departure() -> bool:
 	return has_capture_objective
 
 
+static func can_finish_after_force_defeat() -> bool:
+	if not is_instance_valid(Globals.scenario_chosen):
+		return false
+	var represented: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
+	var surviving: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
+	var defeated: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
+	var roster: Array[Unit] = Globals.get_units()
+	roster.append_array(Globals.get_exited_units())
+	for node: Node in Globals.get_tree().get_nodes_in_group("dead_units"):
+		if node is Unit:
+			roster.append(node as Unit)
+	for unit: Unit in roster:
+		represented[unit.team] = true
+		# Earlier exits remain credited but cannot keep a destroyed rear guard's match running.
+		if unit.exited:
+			continue
+		if unit.alive and not unit.surrendered:
+			surviving[unit.team] = true
+		else:
+			defeated[unit.team] = true
+	if not represented[Globals.Team.AXIS] or not represented[Globals.Team.ALLIES]:
+		return false
+	for team: Globals.Team in represented:
+		if defeated[team] and not surviving[team]:
+			return true
+	return false
+
+
 static func _occupation_pending_only(conditions: Array[VictoryCondition]) -> bool:
 	var has_occupation: bool = false
 	for condition: VictoryCondition in conditions:
@@ -184,12 +212,20 @@ static func _continue_overtime(controller: Node2D) -> bool:
 static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 	if controller.end_game_handled:
 		return
-	if controller.time_left_seconds <= 0.0:
+	var force_defeated: bool = can_finish_after_force_defeat()
+	if force_defeated:
+		controller.overtime_active = false
+		controller.overtime_packages.clear()
+		for collection: VictoryConditionCollection in Globals.victory_conditions.values():
+			for condition: VictoryCondition in collection.victory_conditions:
+				if condition is OccupyObjectiveCondition:
+					(condition as OccupyObjectiveCondition).refresh_control()
+	elif controller.time_left_seconds <= 0.0:
 		controller.overtime_active = _continue_overtime(controller)
 		if controller.overtime_active:
 			controller.timer_running = true
 			return
-	var at_end: bool = controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
+	var at_end: bool = force_defeated or controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
 	
 	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
 		Globals.Team.AXIS: false,

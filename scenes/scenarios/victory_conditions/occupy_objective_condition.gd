@@ -47,7 +47,18 @@ func is_condition_met() -> bool:
 
 
 func advance_time(delta: float) -> void:
-	if state == null or delta <= 0.0:
+	if delta <= 0.0:
+		return
+	_update_control(delta)
+
+
+func refresh_control() -> void:
+	# Final scoring must drop dead or surrendered garrisons without adding hold time.
+	_update_control(0.0)
+
+
+func _update_control(delta: float) -> void:
+	if state == null:
 		return
 	for hex: Vector2i in state.hexes:
 		state.units_in_objectives[hex].units_collection[Globals.Team.AXIS].units.clear()

@@ -1614,7 +1614,10 @@ func _issue_order(squad: Unit) -> void:
 		check.press_attack = _can_attack_without_overwatch(squad, result.objective_hex)
 		var safe: bool = not result.features.get("press_attack", false) or check.press_attack
 		if result.features.get("escape", false):
-			safe = safe and PositionQueryService.escape_path_is_safe(check.snapshot, team, squad.current_hex, result.path)
+			var escape_policy: EscapeMissionPolicy = null
+			if goal_assignments.has(squad):
+				escape_policy = goal_assignments[squad].escape_policy
+			safe = safe and PositionQueryService.escape_path_is_safe(check.snapshot, team, squad.current_hex, result.path, escape_policy)
 		elif check.profile.avoid_unsuppressed_defenders:
 			safe = safe and PositionQueryService.approach_path_is_safe(check, result.path)
 		var requires_cover: bool = false

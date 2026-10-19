@@ -23,14 +23,21 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 	if contacts.is_empty():
 		return null
 	var origins: Array[int] = []
+	var headquarters: Array[int] = []
 	for unit: Unit in planner.squads:
 		if escape and not escape_policy.allows(unit):
 			continue
 		if (not escape and HqSupportPositionPolicy.is_headquarters(unit)) or not TacticalPositionExecutor.is_active_defender(unit) or not ids.has(unit.current_hex):
 			continue
 		var id: int = ids[unit.current_hex]
+		if escape and HqSupportPositionPolicy.is_headquarters(unit):
+			if not graph.is_point_disabled(id) and not headquarters.has(id):
+				headquarters.append(id)
+			continue
 		if not graph.is_point_disabled(id) and not origins.has(id):
 			origins.append(id)
+	if escape and origins.is_empty():
+		origins = headquarters
 	var goals: Array[int] = []
 	for hex: Vector2i in exits:
 		if ids.has(hex) and not graph.is_point_disabled(ids[hex]):
@@ -43,10 +50,12 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 		var cell: Vector2i = LOSHelper.ground_layer.local_to_map(graph.get_point_position(id))
 		var pressure: float = 0.0
 		blockers[id] = []
+		if escape:
+			blockers[id] = EscapeCorridorPolicy.blockers(snapshot, planner.team, cell, escape_policy)
 		for contact: InfluenceContact in contacts:
 			var distance: int = LOSHelper.get_hex_distance(cell, contact.hex)
 			var suppressed: bool = contact.observed and TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit)
-			if distance == 0 or (distance <= 1 and not suppressed):
+			if not escape and (distance == 0 or (distance <= 1 and not suppressed)):
 				blockers[id].append(contact)
 			if distance <= 1 or snapshot.los.get(contact.hex, {}).has(cell):
 				var strength: float = contact.confidence * contact.effectiveness * maxf(0.15, contact.firepower)
@@ -62,18 +71,32 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: Es
 	# Flood around enemy control before considering any contested route.
 	var reached: Dictionary[int, bool] = {}
 	var frontier: Array[int] = origins.duplicate()
-	for id: int in origins:
+	if escape:
+		# A forward HQ or one escaping squad cannot release the rest of a covered column.
+		frontier.clear()
+		for id: int in goals:
+			if blockers[id].is_empty():
+				frontier.append(id)
+	for id: int in frontier:
 		reached[id] = true
 	var cursor: int = 0
 	while cursor < frontier.size():
 		var id: int = frontier[cursor]
 		cursor += 1
-		if goals.has(id) and blockers[id].is_empty():
+		if not escape and goals.has(id) and blockers[id].is_empty():
 			return null
+		if escape and not blockers[id].is_empty():
+			continue
 		for neighbor: int in graph.get_point_connections(id):
-			if not reached.has(neighbor) and not graph.is_point_disabled(neighbor) and blockers[neighbor].is_empty():
+			if not reached.has(neighbor) and not graph.is_point_disabled(neighbor) and (blockers[neighbor].is_empty() or (escape and origins.has(neighbor))):
 				reached[neighbor] = true
 				frontier.append(neighbor)
+	if escape:
+		for id: int in origins.duplicate():
+			if reached.has(id):
+				origins.erase(id)
+		if origins.is_empty():
+			return null
 	# Weighted search compares the complete corridor, including overlapping defenders.
 	var distance: Dictionary[int, float] = {}
 	var parents: Dictionary[int, int] = {}

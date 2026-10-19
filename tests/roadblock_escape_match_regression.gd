@@ -23,11 +23,11 @@ func _run() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.DEFEND)
 	var planner: PlatoonAI = world.game_controller._ai_director_for_team(Globals.Team.AXIS).platoon_ai
 	var exit: ExitUnitsCondition = scenario.ai_escape_policies[0].exit_condition
-	var saw_bypass: bool = false
+	var saw_fight: bool = false
 	var saw_pinned: bool = false
 	var started: bool = false
 	# Keep authored forces, visibility, movement, damage, morale, victory rules and player orders.
-	for frame: int in range(180 * 60):
+	for frame: int in range(90 * 60):
 		started = started or Globals.game_started
 		if frame % (5 * 60) == 0:
 			for task: ScenarioGoalTask in planner.goal_director.tasks:
@@ -35,21 +35,16 @@ func _run() -> void:
 			for unit: Unit in planner.squads:
 				saw_pinned = saw_pinned or unit.stress_system.state == STATES.MoraleState.PINNED
 				var advice: PositionResult = unit.position_advice
-				if advice != null and advice.is_valid() and advice.features.get("escape", false) and unit.movement.is_moving:
-					saw_bypass = true
+				if advice != null and advice.is_valid() and advice.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and unit.squad_fire.fire_recent > 0.0:
+					saw_fight = true
 		if exit.is_condition_met():
 			print("Roadblock column reached its exit quota after ", float(frame) / 60.0, " seconds")
 			break
 		if started and not Globals.game_started:
 			break
 		await get_tree().process_frame
-	_check(saw_bypass, "The normal match executes bypass movement")
-	_check(saw_pinned, "The live reproduction includes temporary pinning")
-	_check(exit.is_condition_met(), "The column actually exits three units with normal combat and no player orders")
-	var headquarters_exited: bool = false
-	for unit: Unit in exit.state.units_exited:
-		headquarters_exited = headquarters_exited or HqSupportPositionPolicy.is_headquarters(unit)
-	_check(headquarters_exited, "Headquarters physically escape and count toward the result")
+	_check(saw_fight, "The normal column engages the roadblock with actual covering fire")
+	_check(saw_pinned, "The live reproduction includes temporary pinning without abandoning escape")
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

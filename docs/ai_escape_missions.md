@@ -13,17 +13,22 @@ Disable **Withdraw Entire Force** to assign only the remaining quota. Disable
 **Include Headquarters** to retain headquarters explicitly.
 
 Each squad searches complete corridors to all matching exits. Routes minimize
-travel time plus weighted exposure time and an open-ground cost. Enemy fire and
-remembered contacts increase cost rather than turning traversable ground into
-a wall. An observed enemy's hex remains blocked, as do neighboring hexes while
-that enemy is unsuppressed. Corridors can bend away from the exit and exceed
-ordinary tactical movement bounds. Execution follows the selected corridor and
-checks updated knowledge before retaining it.
+travel time plus weighted exposure time and an open-ground cost. A bypass must
+also stay below **Maximum Bypass Visibility** and **Maximum Bypass Risk**.
+Visibility accounts for distance, LOS hindrance and contact confidence. Known
+effective covering fire makes an otherwise open gap require a coordinated fight.
+A nearly unseen route can be taken immediately. Remembered contacts increase
+route cost without proving that the passage is still defended.
+An observed enemy's hex remains blocked, as do neighboring hexes while that
+enemy is unsuppressed. Corridors can bend away from the exit and exceed ordinary
+tactical movement bounds. Planning, route retention and execution use the same
+covering-fire checks.
 
-A completely sealed front still creates a coordinated breach. Suppressing the
-blocker enough to open a passage releases that breach and its covering-fire
-roles on reassessment. Headquarters wait for an exit corridor instead of
-receiving an assault duty. Safe exit movement does not require company support.
+A front covered by effective observation or fire creates a coordinated breach.
+Suppressing one blocker releases that breach only when the rest of the route
+is also usable. The check covers the combat column: a forward HQ cannot release
+rifles that are still cut off. Headquarters wait for an exit corridor instead
+of receiving an assault duty. Concealed exit movement needs no company support.
 
 Hold-to-exit fallbacks use the same corridor planning only after their existing
 withdrawal trigger activates. Their confirmation, strength, objective-loss and
@@ -33,4 +38,13 @@ ordinary attack, defense and goal-selection behavior.
 Run `tests/roadblock_breach_match_regression.tscn` for authored bypasses, HQ
 eligibility, pinning and recovery, sealed fronts, and release after suppression.
 Run `godot --headless --path . --fixed-fps 60 tests/roadblock_escape_match_regression.tscn`
-for a normal match with live combat, morale and no player orders.
+for a normal match that verifies actual covering fire, morale and no player orders.
+
+Battles end when a side's last remaining units are destroyed or surrendered. Both sides'
+existing victory conditions are compared immediately, including conditions
+normally checked at the deadline. Unfinished occupation timers stay unfinished;
+elimination does not automatically award a victory. This also ends occupation
+overtime. Earlier exits remain credited and do not keep a defeated rear guard's
+battle running. A force that only exits retains its authored completion rules.
+Run `tests/force_defeat_regression.tscn` for death and surrender completion,
+major/minor outcomes, draws, player elimination, and overtime.
