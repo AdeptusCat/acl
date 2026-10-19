@@ -51,8 +51,12 @@ func _process(delta: float) -> void:
 
 func refresh() -> void:
 	var units: Array[Unit] = []
-	for unit: Unit in Globals.get_units_for_team(player_team):
-		if unit.is_active() and not unit.is_queued_for_deletion():
+	var candidates: Array[Unit] = Globals.get_units()
+	for unit: Unit in get_tree().get_nodes_in_group("dead_units"):
+		if not candidates.has(unit):
+			candidates.append(unit)
+	for unit: Unit in candidates:
+		if is_instance_valid(unit) and unit.team == player_team and not unit.exited and not unit.is_queued_for_deletion():
 			units.append(unit)
 	units.sort_custom(_formation_less)
 	var signature: String = "empty"
@@ -175,7 +179,7 @@ func _rebuild_groups(units: Array[Unit]) -> void:
 		rows[unit] = row
 	if units.is_empty():
 		var empty: Label = Label.new()
-		empty.text = "No active squads"
+		empty.text = "No squads"
 		empty.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		groups.add_child(empty)
 	scroll.set_deferred("scroll_vertical", scroll_position)

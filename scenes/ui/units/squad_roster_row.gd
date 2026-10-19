@@ -35,15 +35,28 @@ func _on_morale_state_changed(_previous: int, _next: int) -> void:
 func refresh() -> void:
 	if not is_instance_valid(unit):
 		return
+	disabled = not unit.is_active()
+	modulate = Color.WHITE
+	if not unit.alive:
+		modulate = Color(0.65, 0.65, 0.65, 1.0)
 	identity.text = unit.get_hud_name()
 	if stack_row:
 		identity.text = "%s/%d/%d · %s" % [Unit.COMPANY_NAMES[unit.company], unit.platoon, unit.squad, Globals.SQUAD_TYPE_NAMES[unit.squad_type]]
 	var remaining: int = unit.squad_fire.soldiers.size()
+	if not unit.alive:
+		remaining = 0
 	strength.text = "%d/%d" % [remaining, unit.original_size]
 	strength_bar.value = float(remaining) / float(maxi(1, unit.original_size))
 	set_pressed_no_signal(unit.selected)
 	if stack_row:
 		tooltip_text = "%s\n%s" % [unit.get_hud_name(), unit.get_formation_name()]
+		return
+	if not unit.alive:
+		morale.text = "Eliminated"
+		morale.add_theme_color_override("font_color", Color(0.7, 0.67, 0.6))
+		rout_available.hide()
+		isolation.hide()
+		tooltip_text = "%s\n%s\nStrength: 0/%d · Eliminated" % [identity.text, unit.get_formation_name(), unit.original_size]
 		return
 	morale.text = unit.get_state_name(int(unit.stress_system.state))
 	if unit.stress_system.state == STATES.MoraleState.COMBAT_INEFFECTIVE:

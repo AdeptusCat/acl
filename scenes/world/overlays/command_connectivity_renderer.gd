@@ -4,6 +4,7 @@ class_name CommandConnectivityRenderer
 const LINK_WIDTH_PX: float = 3.0
 const OUTLINE_WIDTH_PX: float = 6.0
 const PULSE_SECONDS: float = 1.15
+const CONTACT_WARNING_SECONDS: float = 4.0
 const FONT_SIZE: int = 13
 const CONNECTED_COLOR: Color = Color("a9dfb5")
 const LIMITED_COLOR: Color = Color("ffd078")
@@ -14,6 +15,8 @@ const HIGHLIGHT: Color = Color("f3e6bb")
 class ContactCue extends RefCounted:
 	var state: CommandConnectivity.ContactState = CommandConnectivity.ContactState.CONNECTED
 	var elapsed: float = PULSE_SECONDS
+	var warning_elapsed: float = CONTACT_WARNING_SECONDS
+	var hq_lost: bool = false
 	var initialized: bool = false
 	var was_visible: bool = false
 	var commander_id: int = 0
@@ -124,16 +127,24 @@ func _update_cue(unit: Unit, cue: ContactCue, delta: float) -> void:
 	if shown:
 		shown = get_viewport_rect().intersects(counter_rect(unit).grow(26.0))
 	var commander_id: int = 0
+	var hq_lost: bool = false
 	if is_instance_valid(unit.command_squad):
 		commander_id = unit.command_squad.get_instance_id()
-	var changed: bool = cue.state != state or cue.commander_id != commander_id
+		hq_lost = not unit.command_squad.alive
+	var changed: bool = cue.state != state or cue.commander_id != commander_id or cue.hq_lost != hq_lost
 	if changed and cue.initialized and shown and cue.was_visible:
 		cue.elapsed = 0.0
 	else:
 		cue.elapsed = minf(PULSE_SECONDS, cue.elapsed + maxf(delta, 0.0))
+	if shown and state == CommandConnectivity.ContactState.LOST and (not cue.initialized or (changed and cue.was_visible)):
+		cue.warning_elapsed = 0.0
+	else:
+		cue.warning_elapsed = minf(CONTACT_WARNING_SECONDS, cue.warning_elapsed + maxf(delta, 0.0))
 	if not shown:
 		cue.elapsed = PULSE_SECONDS
+		cue.warning_elapsed = CONTACT_WARNING_SECONDS
 	cue.state = state
+	cue.hq_lost = hq_lost
 	cue.commander_id = commander_id
 	cue.initialized = true
 	cue.was_visible = shown
@@ -285,12 +296,16 @@ func badge_text(unit: Unit) -> String:
 	var unit_id: int = unit.get_instance_id()
 	var cue: ContactCue = _cues[unit_id]
 	var caption: String = highlighted_units.get(unit_id, "")
-	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS and cue.state == CommandConnectivity.ContactState.LOST:
-		return caption
-	if CommandConnectivity.needs_command_contact(unit) and (cue.state == CommandConnectivity.ContactState.LOST or cue.elapsed < PULSE_SECONDS):
+	var show_contact: bool = cue.elapsed < PULSE_SECONDS
+	if cue.state == CommandConnectivity.ContactState.LOST:
+		show_contact = unit.selected or cue.warning_elapsed < CONTACT_WARNING_SECONDS
+	if CommandConnectivity.needs_command_contact(unit) and show_contact:
 		if not caption.is_empty():
 			caption += " · "
-		caption += CommandConnectivity.contact_text(cue.state)
+		if cue.state == CommandConnectivity.ContactState.LOST and cue.hq_lost:
+			caption += "HQ lost"
+		else:
+			caption += CommandConnectivity.contact_text(cue.state)
 	return caption
 
 
