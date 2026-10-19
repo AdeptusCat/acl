@@ -691,7 +691,11 @@ func _conditions(index: int, scenario: Scenario) -> Array[VictoryCondition]:
 		1:
 			return [_occupy(player, a, 30.0, true, false), _destroy(player, 2, true, false), _occupy(player, b, 30.0, false, true), _occupy(enemy, a, 30.0, true, true), _destroy(enemy, 3, true, true)]
 		2:
-			return [_prevent(player, 0, true), _destroy(player, 2, true, true), _prevent(player, 2, false), _occupy(player, a, 30.0, false, true), _exit(enemy, 3, true, false)]
+			var escape_exit: ExitUnitsCondition = _exit(enemy, 3, true, false)
+			var escape: EscapeMissionPolicy = EscapeMissionPolicy.new()
+			escape.exit_condition = escape_exit
+			scenario.ai_escape_policies = [escape]
+			return [_prevent(player, 0, true), _destroy(player, 2, true, true), _prevent(player, 2, false), _occupy(player, a, 30.0, false, true), escape_exit]
 		3:
 			return [_occupy(player, a, 20.0, true, false), _occupy(player, b, 20.0, true, false), _exit(player, 3, true, false), _exit(player, 2, false, true), _occupy(enemy, a, 30.0, true, true), _prevent(enemy, 1, true)]
 		4:

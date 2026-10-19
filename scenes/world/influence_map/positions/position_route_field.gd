@@ -99,7 +99,7 @@ func _finish_bound() -> void:
 func advance(deadline_usec: int) -> void:
 	while not completed and (deadline_usec < 0 or Time.get_ticks_usec() < deadline_usec):
 		# Cheap searches finish directly; difficult searches rule out impossible remaining targets.
-		if _bound_mode < 0 and not _bounds_prepared and expanded_labels >= 256 and not _query.snapshot.get_defensive_contacts(_query.team).is_empty():
+		if _query.escape_policy == null and _bound_mode < 0 and not _bounds_prepared and expanded_labels >= 256 and not _query.snapshot.get_defensive_contacts(_query.team).is_empty():
 			_bounds_prepared = true
 			_saved_search = {"labels": labels, "labels_by_cell": labels_by_cell, "frontier": frontier, "settled": _settled, "requested": _requested}
 			_requested = _targets.duplicate()
@@ -210,7 +210,8 @@ func _add_label(label: Dictionary) -> void:
 
 
 func _dominates(first: Dictionary, second: Dictionary) -> bool:
-	if _bound_mode >= 0:
+	# Escape has no hard exposure budget; only the least costly label can improve a route.
+	if _bound_mode >= 0 or _query.escape_policy != null:
 		return first["cost"] <= second["cost"]
 	return first["cost"] <= second["cost"] + 0.000001 and first["exposure"] <= second["exposure"] + 0.000001 and first["open_exposure"] <= second["open_exposure"] + 0.000001
 

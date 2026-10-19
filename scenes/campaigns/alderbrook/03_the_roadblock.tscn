@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://2r06nvlqt1y8"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/road_tile_map_layer.tscn" id="SharedRoadLayer"]
+[ext_resource type="Script" path="res://scenes/scenarios/escape_mission_policy.gd" id="EscapePolicy"]
 [ext_resource type="Script" uid="uid://cvyaglqgbhyux" path="res://scenes/world/maps/map.gd" id="1_4ws82"]
 [ext_resource type="TileSet" uid="uid://dkjw7ktdpc7d7" path="res://resources/campaigns/alderbrook_water.tres" id="2_ebtmh"]
 [ext_resource type="Texture2D" uid="uid://bimngd6nfi4sc" path="res://assets/tiles/vegetation/open_ground_green_01.png" id="4_jesqg"]
@@ -132,6 +133,10 @@ test_at_scenario_end = true
 [sub_resource type="Resource" id="Resource_keh3t"]
 script = ExtResource("52_dlhca")
 required_unit_count = 3
+
+[sub_resource type="Resource" id="Resource_escape"]
+script = ExtResource("EscapePolicy")
+exit_condition = SubResource("Resource_keh3t")
 
 [sub_resource type="Resource" id="Resource_dlmmx"]
 script = ExtResource("23_jesqg")
@@ -419,6 +424,7 @@ use_authored_duration = true
 released = true
 player_team = 1
 victory_conditions = Array[ExtResource("48_j8kx4")]([SubResource("Resource_amcli"), SubResource("Resource_g5j48"), SubResource("Resource_xnv2l"), SubResource("Resource_w86wx"), SubResource("Resource_keh3t")])
+ai_escape_policies = Array[ExtResource("EscapePolicy")]([SubResource("Resource_escape")])
 axis_ai_status = 1
 axis_ai_mode = 0
 allies_ai_status = 0

@@ -11,6 +11,7 @@ var required_units: int = 1
 var priority: float = 0.0
 var urgent: bool = false
 var withdrawal: bool = false
+var escape_policy: EscapeMissionPolicy
 var breach_required: bool = false
 var breach_hex: Vector2i
 var reason: String = ""
@@ -18,6 +19,12 @@ var reason: String = ""
 
 func is_destination_goal() -> bool:
 	return kind in [Kind.OCCUPY, Kind.EXIT]
+
+
+func includes_headquarters() -> bool:
+	if escape_policy != null:
+		return escape_policy.include_headquarters
+	return withdrawal
 
 
 static func exit_state_for(source: VictoryCondition) -> ExitUnitsState:

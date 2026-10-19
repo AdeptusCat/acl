@@ -132,7 +132,7 @@ func advance(deadline_usec: int) -> void:
 				else:
 					cursor = 0
 					phase = Phase.EVALUATE
-					if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] and not indices.is_empty():
+					if (query.escape_policy != null or query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT]) and not indices.is_empty():
 						var targets: Array[Vector2i] = []
 						for index: int in indices:
 							targets.append(query.snapshot.maps[query.team].index_to_cell(index))

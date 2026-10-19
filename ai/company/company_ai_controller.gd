@@ -183,11 +183,12 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 	for unit: Unit in previous:
 		if not InfluenceUnitQuery.is_valid_living_unit(unit) or unit.surrendered or not PlatoonPositionStability.is_busy(unit):
 			continue
-		next[unit] = previous[unit]
+		var duty: ScenarioGoalTask = owner.goal_director._refresh_escape_task(previous[unit])
+		next[unit] = duty
 		var key: Vector2i = Vector2i(int(unit.company), unit.platoon)
 		if platoons.has(key):
-			committed[key] = previous[unit]
-			platoons[key].task = previous[unit]
+			committed[key] = duty
+			platoons[key].task = duty
 	for task: ScenarioGoalTask in tasks:
 		if task.kind == ScenarioGoalTask.Kind.PRESERVE:
 			continue
@@ -195,8 +196,8 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 		for unit: Unit in next:
 			if next[unit].key == task.key and _eligible_for_goal(unit, task):
 				demand -= 1
-		# Headquarters participate only in an explicitly authorized whole-force exit.
-		if task.withdrawal:
+		# Headquarters participate only when the mission explicitly includes them.
+		if task.includes_headquarters():
 			for unit: Unit in _headquarters:
 				if demand > 0 and not next.has(unit) and _eligible_for_goal(unit, task):
 					next[unit] = task
@@ -210,7 +211,7 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 			var key: Vector2i = Vector2i(int(formation.company), formation.number)
 			tried.append(key)
 			var available: Array[Unit] = formation.combat_units()
-			if task.withdrawal:
+			if task.includes_headquarters():
 				available = formation.squads.duplicate()
 			for unit: Unit in next:
 				available.erase(unit)
@@ -237,6 +238,8 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 
 
 func _eligible_for_goal(unit: Unit, task: ScenarioGoalTask) -> bool:
+	if task.escape_policy != null and not task.escape_policy.allows(unit):
+		return false
 	if not TacticalPositionExecutor.is_active_defender(unit) or not unit.is_good_order():
 		return false
 	if task.kind == ScenarioGoalTask.Kind.HUNT and not PositionQueryService.can_assault(unit):
@@ -258,9 +261,9 @@ func _select_platoon(task: ScenarioGoalTask, committed: Dictionary[Vector2i, Sce
 		var value: float = -float(LOSHelper.get_hex_distance(formation.anchor(), task.hex)) + 10.0 * formation.effectiveness()
 		var eligible: bool = false
 		for unit: Unit in formation.squads:
-			if not _eligible_for_goal(unit, task) or (HqSupportPositionPolicy.is_headquarters(unit) and not task.withdrawal):
+			if not _eligible_for_goal(unit, task) or (HqSupportPositionPolicy.is_headquarters(unit) and not task.includes_headquarters()):
 				continue
-			if owner.goal_director._unit_travel_seconds(owner, unit, task.hex) == INF:
+			if owner.goal_director._goal_travel_seconds(owner, unit, task) == INF:
 				continue
 			eligible = true
 			if previous.has(unit) and previous[unit].key == task.key:
@@ -317,7 +320,7 @@ func _assign_roles() -> void:
 				next_role = CompanyPlatoon.Role.RESERVE
 				if formation.reserve_deployed:
 					next_role = CompanyPlatoon.Role.REINFORCE
-			if formation.task != null and formation.task.withdrawal:
+			if formation.task != null and (formation.task.withdrawal or formation.task.escape_policy != null) and not formation.task.breach_required:
 				next_role = CompanyPlatoon.Role.WITHDRAW
 			if next_role == CompanyPlatoon.Role.RESERVE and formation.role != CompanyPlatoon.Role.RESERVE:
 				formation.staging_hex = formation.anchor()
@@ -382,6 +385,8 @@ func _assign_defense_reserves(members: Array[CompanyPlatoon]) -> void:
 
 
 func _needs_attack(formation: CompanyPlatoon) -> bool:
+	if formation.task != null and formation.task.escape_policy != null:
+		return formation.task.breach_required
 	if formation.task != null and formation.task.withdrawal:
 		return false
 	if formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT:

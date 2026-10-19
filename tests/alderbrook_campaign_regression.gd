@@ -130,6 +130,12 @@ func _test_content() -> void:
 					_check(map.get_ground_layer().get_cell_source_id(marker) >= 0, "Objectives never lie on impassable river cells")
 		for policy: HoldToExitFallbackPolicy in scenario.ai_fallback_policies:
 			_check(policy.configuration_error(scenario.victory_conditions).is_empty(), "Enemy withdrawal references valid campaign victory conditions")
+		for policy: EscapeMissionPolicy in scenario.ai_escape_policies:
+			_check(policy.configuration_error(scenario.victory_conditions).is_empty(), "Escape missions reference the actual campaign exit condition")
+		if index == 2:
+			_check(scenario.ai_escape_policies.size() == 1 and scenario.ai_escape_policies[0].exit_condition.team == Globals.Team.AXIS, "Roadblock explicitly assigns the Axis column an escape mission")
+		else:
+			_check(scenario.ai_escape_policies.is_empty(), "Other campaign missions retain their existing strategic policies")
 		previous = scenario
 	_check(kinds.size() == 4, "The campaign uses all four implemented victory-condition types")
 	_test_quiet_start()

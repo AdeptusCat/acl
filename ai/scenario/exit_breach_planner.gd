@@ -3,7 +3,8 @@ extends RefCounted
 
 
 # Search captured knowledge only. A safe opening takes precedence over a breach.
-static func select(planner: PlatoonAI, exits: Array[Vector2i]) -> InfluenceContact:
+static func select(planner: PlatoonAI, exits: Array[Vector2i], escape_policy: EscapeMissionPolicy = null) -> InfluenceContact:
+	var escape: bool = escape_policy != null
 	if planner.influence_map_controller == null or planner.influence_map_controller.snapshot == null:
 		return null
 	var snapshot: InfluenceSnapshot = planner.influence_map_controller.snapshot
@@ -15,12 +16,17 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i]) -> InfluenceConta
 	for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
 		if contact.confidence < 0.25 or (contact.observed and not TacticalPositionExecutor.is_active_defender(contact.unit)):
 			continue
+		# Old sightings increase route exposure; they cannot prove a passage is sealed.
+		if escape and not contact.observed:
+			continue
 		contacts.append(contact)
 	if contacts.is_empty():
 		return null
 	var origins: Array[int] = []
 	for unit: Unit in planner.squads:
-		if HqSupportPositionPolicy.is_headquarters(unit) or not TacticalPositionExecutor.is_active_defender(unit) or not ids.has(unit.current_hex):
+		if escape and not escape_policy.allows(unit):
+			continue
+		if (not escape and HqSupportPositionPolicy.is_headquarters(unit)) or not TacticalPositionExecutor.is_active_defender(unit) or not ids.has(unit.current_hex):
 			continue
 		var id: int = ids[unit.current_hex]
 		if not graph.is_point_disabled(id) and not origins.has(id):
@@ -48,7 +54,7 @@ static func select(planner: PlatoonAI, exits: Array[Vector2i]) -> InfluenceConta
 					strength *= 0.2
 				pressure += strength * 8.0 / float(maxi(1, distance))
 		var risk: float = PositionFeatureEvaluator.risk(snapshot.maps[planner.team].get_layer_value(InfluenceMap.Layer.THREAT, cell))
-		if risk > 0.8 and blockers[id].is_empty():
+		if not escape and risk > 0.8 and blockers[id].is_empty():
 			for contact: InfluenceContact in contacts:
 				if snapshot.los.get(contact.hex, {}).has(cell):
 					blockers[id].append(contact)

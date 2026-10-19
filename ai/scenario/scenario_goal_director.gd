@@ -14,6 +14,8 @@ var diagnostics: PackedStringArray = []
 var primary: ScenarioGoalTask
 var manual_override: bool = false
 var fallback_policies: Array[HoldToExitFallbackPolicy] = []
+var escape_policies: Array[EscapeMissionPolicy] = []
+var _fallback_escape_policy: EscapeMissionPolicy
 var active_fallback: HoldToExitFallbackPolicy
 var fallback_reason: String = ""
 var _fallback_pending_since: Dictionary[HoldToExitFallbackPolicy, float] = {}
@@ -29,10 +31,12 @@ var _last_objective: Vector2i
 var _initialized: bool = false
 
 
-func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode, policies: Array[HoldToExitFallbackPolicy] = []) -> void:
+func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode, policies: Array[HoldToExitFallbackPolicy] = [], escapes: Array[EscapeMissionPolicy] = []) -> void:
 	team = owner
 	conditions = scenario_conditions.duplicate()
 	fallback_policies.clear()
+	escape_policies.clear()
+	_fallback_escape_policy = null
 	_policy_diagnostics.clear()
 	active_fallback = null
 	fallback_reason = ""
@@ -50,6 +54,16 @@ func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition]
 			_policy_diagnostics.append(error)
 		elif not fallback_policies.has(policy):
 			fallback_policies.append(policy)
+	for policy: EscapeMissionPolicy in escapes:
+		if policy == null or not policy.enabled:
+			continue
+		if policy.exit_condition != null and policy.exit_condition.team != team:
+			continue
+		var error: String = policy.configuration_error(conditions)
+		if error != "":
+			_policy_diagnostics.append(error)
+		elif not escape_policies.has(policy):
+			escape_policies.append(policy)
 	change_posture(mode)
 
 
@@ -147,6 +161,10 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 			diagnostics.append(state.diagnostic)
 	_update_objective_control(progress, planner)
 	_evaluate_fallbacks(progress, planner, seconds_left, now)
+	var escape: EscapeMissionPolicy = _escape_mission(progress)
+	if escape != null:
+		_add_escape_task(escape, planner)
+		return
 	var own_level: int = _choose_own_outcome(progress, planner, seconds_left)
 	for state: VictoryConditionProgress in progress:
 		if state.team == team and state.outcome == own_level and state.valid:
@@ -192,6 +210,57 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 			task.urgent = true
 			task.reason += "; breach the weakest defended corridor at " + str(breach.hex)
 	tasks.sort_custom(_prefer_task)
+
+
+func _escape_mission(progress: Array[VictoryConditionProgress]) -> EscapeMissionPolicy:
+	if active_fallback != null:
+		var state: VictoryConditionProgress = _progress_for(active_fallback.exit_condition, progress)
+		if state == null or not state.valid:
+			return null
+		if _fallback_escape_policy == null:
+			_fallback_escape_policy = EscapeMissionPolicy.new()
+		_fallback_escape_policy.exit_condition = active_fallback.exit_condition
+		_fallback_escape_policy.withdraw_entire_force = active_fallback.withdraw_entire_force
+		_fallback_escape_policy.include_headquarters = active_fallback.withdraw_entire_force
+		return _fallback_escape_policy
+	for policy: EscapeMissionPolicy in escape_policies:
+		var state: VictoryConditionProgress = _progress_for(policy.exit_condition, progress)
+		if state != null and state.valid:
+			return policy
+	return null
+
+
+func _add_escape_task(policy: EscapeMissionPolicy, planner: PlatoonAI) -> void:
+	var state: VictoryConditionProgress = VictoryConditionProgress.read(policy.exit_condition)
+	var demand: int = state.remaining_units
+	if policy.withdraw_entire_force:
+		demand = 0
+		for unit: Unit in planner.squads:
+			if TacticalPositionExecutor.is_active_defender(unit) and policy.allows(unit):
+				demand += 1
+	if demand <= 0:
+		return
+	var anchor: Vector2i = _exit_hex(state, planner)
+	if primary != null and primary.condition == policy.exit_condition and state.hexes.has(primary.hex):
+		# Each unit chooses its own exit corridor. Keep the company mission anchor stable.
+		anchor = primary.hex
+	var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, anchor)
+	# A different exit or a temporary breach must not become a different strategic mission.
+	task.key = str([state.condition.get_instance_id(), ScenarioGoalTask.Kind.EXIT, "escape"])
+	task.escape_policy = policy
+	task.withdrawal = policy.withdraw_entire_force
+	task.required_units = demand
+	task.priority = 200.0
+	task.urgent = true
+	task.reason = "Escape to an exit: %d more distinct units required" % state.remaining_units
+	if active_fallback != null:
+		task.reason = "Withdraw to exit: " + fallback_reason
+	var breach: InfluenceContact = ExitBreachPlanner.select(planner, state.hexes, policy)
+	if breach != null:
+		task.breach_required = true
+		task.breach_hex = breach.hex
+		task.reason += "; open a passage at " + str(breach.hex)
+	tasks.append(task)
 
 
 func _merge_occupation_duties() -> void:
@@ -452,22 +521,6 @@ func _choose_own_outcome(progress: Array[VictoryConditionProgress], planner: Pla
 
 
 func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void:
-	if active_fallback != null and state.condition == active_fallback.exit_condition:
-		var demand: int = state.remaining_units
-		if active_fallback.withdraw_entire_force:
-			demand = 0
-			for unit: Unit in planner.squads:
-				if TacticalPositionExecutor.is_active_defender(unit):
-					demand += 1
-		if demand > 0:
-			var withdrawal: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, _exit_hex(state, planner))
-			withdrawal.required_units = demand
-			withdrawal.priority = 200.0
-			withdrawal.urgent = true
-			withdrawal.withdrawal = active_fallback.withdraw_entire_force
-			withdrawal.reason = "Withdraw to exit: " + fallback_reason
-			tasks.append(withdrawal)
-		return
 	if state.kind == VictoryConditionProgress.Kind.OCCUPY:
 		for hex: Vector2i in state.hexes:
 			var existing: ScenarioGoalTask
@@ -695,6 +748,8 @@ func _allocate(planner: PlatoonAI) -> void:
 	var available: Array[Unit] = []
 	for unit: Unit in planner.squads:
 		var withdraw_hq: bool = active_fallback != null and active_fallback.withdraw_entire_force
+		for task: ScenarioGoalTask in tasks:
+			withdraw_hq = withdraw_hq or (task.escape_policy != null and task.escape_policy.include_headquarters)
 		if TacticalPositionExecutor.is_active_defender(unit) and (withdraw_hq or not HqSupportPositionPolicy.is_headquarters(unit)):
 			available.append(unit)
 	for unit: Unit in assignments:
@@ -703,7 +758,7 @@ func _allocate(planner: PlatoonAI) -> void:
 			continue
 		# Even a counted exit squad finishes its accepted route and setup. Urgent
 		# duties can release other squads; route safety remains the executor's gate.
-		next[unit] = previous
+		next[unit] = _refresh_escape_task(previous)
 		available.erase(unit)
 	for task: ScenarioGoalTask in tasks:
 		if task.kind == ScenarioGoalTask.Kind.PRESERVE:
@@ -738,6 +793,8 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 	var selected: Unit
 	var score: float = -INF
 	for unit: Unit in available:
+		if task.escape_policy != null and not task.escape_policy.allows(unit):
+			continue
 		if task.kind == ScenarioGoalTask.Kind.HUNT and not PositionQueryService.can_assault(unit):
 			continue
 		if task.kind == ScenarioGoalTask.Kind.EXIT and not task.withdrawal and ScenarioGoalTask.exit_state_for(task.condition).units_exited.has(unit):
@@ -756,12 +813,29 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 			value += 50.0
 		if unit.current_hex == task.hex:
 			value += 100.0
-		if task.is_destination_goal() and _unit_route_missing(unit, task.hex):
+		if task.is_destination_goal() and task.escape_policy == null and _unit_route_missing(unit, task.hex):
 			continue
 		if value > score:
 			selected = unit
 			score = value
 	return selected
+
+
+func _refresh_escape_task(previous: ScenarioGoalTask) -> ScenarioGoalTask:
+	if previous.escape_policy != null:
+		for task: ScenarioGoalTask in tasks:
+			if task.key == previous.key:
+				return task
+	return previous
+
+
+func _goal_travel_seconds(planner: PlatoonAI, unit: Unit, task: ScenarioGoalTask) -> float:
+	if task.escape_policy == null:
+		return _unit_travel_seconds(planner, unit, task.hex)
+	var best: float = INF
+	for hex: Vector2i in ScenarioGoalTask.exit_state_for(task.condition).exit_hexes:
+		best = minf(best, _unit_travel_seconds(planner, unit, hex))
+	return best
 
 
 func _unit_route_missing(unit: Unit, hex: Vector2i) -> bool:

@@ -22,6 +22,7 @@ func _run() -> void:
 	var planner: PlatoonAI = controller._ai_director_for_team(Globals.Team.AXIS).platoon_ai
 	var defenders: Array[Unit] = Globals.get_units_for_team(Globals.Team.ALLIES)
 	var attackers: Array[Unit] = Globals.get_units_for_team(Globals.Team.AXIS)
+	_test_escape_corridors(planner, defenders, attackers, controller.influence_map_controller, scenario)
 	var rows: Array[int] = [0, 3, 6, 9, 12, 13]
 	for index: int in range(defenders.size()):
 		var defender: Unit = defenders[index]
@@ -97,6 +98,17 @@ func _run() -> void:
 			supporter.order(Globals.UnitCmd.FIRE_AT_UNIT, weak)
 			_check(TacticalPositionExecutor.select_support_target(supporter, weak.current_hex) == weak, "Covering fire prioritizes the selected breach defender")
 			_check(maneuver.planner._has_company_support(), "Established fire on the breach releases the company support gate")
+	weak.stress_system.state = STATES.MoraleState.PINNED
+	director._build_tasks(planner, scenario.duration_s)
+	for task: ScenarioGoalTask in director.tasks:
+		if task.kind == ScenarioGoalTask.Kind.EXIT:
+			_check(not task.breach_required, "Suppressing the blocker releases the breach as soon as a passage opens")
+	director._allocate(planner)
+	planner.company_command._assign_roles()
+	for formation: CompanyPlatoon in planner.company_command.platoons.values():
+		if formation.task != null and formation.task.escape_policy != null:
+			_check(formation.role == CompanyPlatoon.Role.WITHDRAW, "An opened passage releases company assault and covering-fire roles")
+	weak.stress_system.state = STATES.MoraleState.NORMAL
 	_test_clear_exit(planner, rifles, snapshot, exit_task)
 	for row: int in [6, 7, 8, 9]:
 		_check(controller._is_exit_hex(Globals.Team.AXIS, Vector2i(0, row)), "The road and neighboring western bypass hexes are exits")
@@ -117,6 +129,71 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("RoadBlock breach match regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attackers: Array[Unit], controller: InfluenceMapController, scenario: Scenario) -> void:
+	for unit: Unit in attackers:
+		Globals.unit_visible_enemies[unit] = defenders.duplicate()
+	controller.reset_for_match()
+	controller.create_maps(0.0)
+	while controller.rebuild_pending:
+		controller._process_los_rebuild()
+		controller._process_budgeted_rebuild()
+	var director: ScenarioGoalDirector = planner.goal_director
+	director._build_tasks(planner, scenario.duration_s)
+	_check(director.tasks.size() == 1 and director.tasks[0].escape_policy != null, "The authored Roadblock escape suppresses competing occupation-denial duties")
+	var task: ScenarioGoalTask = director.tasks[0]
+	_check(not task.breach_required, "Authored woodland bypasses remain usable despite overlapping enemy fire")
+	_check(task.required_units == attackers.size() and task.includes_headquarters(), "The column sends its headquarters and combat squads toward the exits")
+	planner._planning_snapshot = controller.snapshot
+	planner._planning_reservations.clear()
+	var crossed_fire: bool = false
+	var rifle: Unit
+	for unit: Unit in attackers:
+		if unit.squad_type != Globals.SquadType.Rifle and not HqSupportPositionPolicy.is_headquarters(unit):
+			continue
+		planner._planning_requests.clear()
+		planner._add_goal_request(unit, task)
+		var query: PositionQuery = planner._planning_requests[0]["query"]
+		var result: PositionResult = PositionQueryService.query_positions(query)
+		_check(result.is_valid() and result.should_move and query.escape_hexes.has(result.target_hex), "Rifles and headquarters receive a complete route to a reachable western exit")
+		_check(PositionQueryService.escape_path_is_safe(controller.snapshot, planner.team, unit.current_hex, result.path), "The chosen corridor avoids occupied hexes and neighboring unsuppressed defenders")
+		_check(result.features.get("escape", false) and result.profile_mode == PositionProfile.Mode.ADVANCE, "Escape advice preserves movement instead of seeking firing positions")
+		crossed_fire = crossed_fire or result.features.get("peak_exposure", 0.0) > 0.8
+		if unit.squad_type == Globals.SquadType.Rifle:
+			rifle = unit
+			unit.stress_system.state = STATES.MoraleState.PINNED
+	_check(crossed_fire, "The bypass fixture includes the high fire exposure that previously forced an assault")
+	director._build_tasks(planner, scenario.duration_s)
+	_check(director.tasks.size() == 1 and director._preferred_primary().kind == ScenarioGoalTask.Kind.EXIT, "Pinning every rifle cannot replace the escape mission with an attack on A")
+	director._allocate(planner)
+	var headquarters: int = 0
+	for unit: Unit in director.assignments:
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			headquarters += 1
+	_check(headquarters == 3, "The three headquarters remain eligible to satisfy the exit victory condition")
+	for unit: Unit in attackers:
+		unit.stress_system.state = STATES.MoraleState.NORMAL
+	director._build_tasks(planner, scenario.duration_s)
+	director._allocate(planner)
+	_check(director.assignments.size() == attackers.size(), "Recovered rifles rejoin the committed column escape")
+	_set_hex(defenders[0], Vector2i(0, 6))
+	controller.reset_for_match()
+	controller.create_maps(0.0)
+	while controller.rebuild_pending:
+		controller._process_los_rebuild()
+		controller._process_budgeted_rebuild()
+	planner._planning_snapshot = controller.snapshot
+	planner._planning_requests.clear()
+	planner._add_goal_request(rifle, task)
+	var alternate_query: PositionQuery = planner._planning_requests[0]["query"]
+	var alternate: PositionResult = PositionQueryService.query_positions(alternate_query)
+	_check(alternate.is_valid() and alternate.target_hex != Vector2i(0, 6) and alternate_query.escape_hexes.has(alternate.target_hex), "A defended exit redirects movement to another exit instead of rejecting the escape")
+	_check(PositionQueryService.escape_path_is_safe(controller.snapshot, planner.team, rifle.current_hex, alternate.path), "The alternate corridor preserves separation from the exit defender")
+	controller.snapshot.routes[planner.team].set_point_disabled(controller.snapshot.point_ids[planner.team][Vector2i(0, 6)], true)
+	director._build_tasks(planner, scenario.duration_s)
+	director._allocate(planner)
+	_check(director.assignments.size() == attackers.size(), "Company allocation considers every exit when the nearest marker has no terrain route")
 
 
 func _test_clear_exit(planner: PlatoonAI, rifles: Array[Unit], snapshot: InfluenceSnapshot, blocked_task: ScenarioGoalTask) -> void:

@@ -86,6 +86,8 @@ var goal_key: String = ""
 var goal_reason: String = ""
 var goal_destination_required: bool = false
 var goal_capacity: int = 1
+var escape_policy: EscapeMissionPolicy
+var escape_hexes: Array[Vector2i] = []
 
 
 func reset_evaluation() -> void:
@@ -118,6 +120,8 @@ func firepower_at_range(friendly: Unit, distance: int) -> float:
 
 
 func context_key() -> String:
+	if escape_policy != null:
+		return str([team, "escape", goal_key, escape_hexes, goal_capacity, escape_policy.exposure_weight])
 	if profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 		# Stress changes affect utility, without resetting a stable support position every snapshot.
 		return str([team, profile.mode, support_targets.keys(), support_radius, movement_radius, assault_support_squad])

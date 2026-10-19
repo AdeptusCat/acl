@@ -123,6 +123,8 @@ static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
 
 
 func score(features: Dictionary, unit: Unit) -> float:
+	if features.get("escape", false):
+		return -features["escape_cost"]
 	if mode == Mode.HQ_SUPPORT:
 		return features["cover"] * cover_weight + features["support_utility"] * support_weight + features.get("support_priority_progress", 0.0) * progress_weight - features["incoming"] * incoming_weight - features["enemy_visibility"] * 6.0 - features["travel"] * travel_weight - features["exposure_seconds"] * exposure_weight - features["open_ground"] * open_ground_weight
 	if mode == Mode.LEGACY_DEFENSE:

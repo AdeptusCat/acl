@@ -105,6 +105,9 @@ func prepare(query: PositionQuery) -> void:
 	var record: Dictionary = orders.get(query.unit, {})
 	if record.is_empty() or record["order_id"] != query.unit.action_controller.action_order_id:
 		return
+	# A usable passage releases a firing bound; a new blocker requires a new breach plan.
+	if record["result"].features.get("escape", false) != (query.escape_policy != null):
+		return
 	query.stable_order = record["result"]
 	query.has_accepted_target = true
 	query.accepted_target = query.stable_order.target_hex

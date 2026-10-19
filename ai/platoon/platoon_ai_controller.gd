@@ -439,6 +439,9 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 
 
 func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
+	if task.escape_policy != null and (not task.breach_required or HqSupportPositionPolicy.is_headquarters(unit)):
+		_add_escape_request(unit, task)
+		return
 	var clear_exit: bool = task.kind == ScenarioGoalTask.Kind.EXIT and not task.breach_required
 	var combat_hex: Vector2i = task.hex
 	if task.breach_required:
@@ -549,6 +552,38 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	query.response_priority = 2
 	if task.urgent:
 		query.response_priority = 3
+	_planning_requests.append({"query": query, "role": "scenario_goal", "axis": null})
+
+
+func _add_escape_request(unit: Unit, task: ScenarioGoalTask) -> void:
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = team
+	query.snapshot = _planning_snapshot
+	query.objective_hex = task.hex
+	query.mission_objective_hex = task.hex
+	query.escape_policy = task.escape_policy
+	query.escape_hexes = ScenarioGoalTask.exit_state_for(task.condition).exit_hexes.duplicate()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
+	# Fire is a cost of escape, not a reason to replace it with an assault.
+	query.profile.max_incoming_risk = 1.0
+	query.profile.max_route_exposure = 1.0
+	query.profile.avoid_unsuppressed_defenders = true
+	query.profile.exposure_weight = task.escape_policy.exposure_weight
+	query.profile.open_ground_weight = 0.5
+	query.profile.firing_weight = 0.0
+	query.profile.support_weight = 0.0
+	query.profile.progress_weight = 0.0
+	query.profile.forecast_route_weight = 0.25
+	query.use_defense_area = false
+	query.reservations = _planning_reservations.duplicate()
+	query.goal_key = task.key
+	query.goal_reason = task.reason
+	query.goal_capacity = task.exit_capacity()
+	query.goal_destination_required = true
+	query.deliberate_movement = true
+	query.response_priority = 3
+	_configure_position_stability(query)
 	_planning_requests.append({"query": query, "role": "scenario_goal", "axis": null})
 
 
@@ -973,6 +1008,8 @@ func _check_company_cover() -> void:
 		return
 	for unit: Unit in executor.pending.keys():
 		var result: PositionResult = executor.pending[unit]["result"]
+		if result.features.get("escape", false):
+			continue
 		if result.profile_mode not in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
 			continue
 		executor.cancel(unit, true)
@@ -1576,7 +1613,9 @@ func _issue_order(squad: Unit) -> void:
 		check.profile = result.position_profile
 		check.press_attack = _can_attack_without_overwatch(squad, result.objective_hex)
 		var safe: bool = not result.features.get("press_attack", false) or check.press_attack
-		if check.profile.avoid_unsuppressed_defenders:
+		if result.features.get("escape", false):
+			safe = safe and PositionQueryService.escape_path_is_safe(check.snapshot, team, squad.current_hex, result.path)
+		elif check.profile.avoid_unsuppressed_defenders:
 			safe = safe and PositionQueryService.approach_path_is_safe(check, result.path)
 		var requires_cover: bool = false
 		var overwhelmed_goal: bool = false
@@ -1586,7 +1625,7 @@ func _issue_order(squad: Unit) -> void:
 					overwhelmed_goal = true
 				if contact.observed and LOSHelper.get_hex_distance(contact.hex, result.objective_hex) <= 2 and TacticalPositionExecutor.is_active_defender(contact.unit) and not TacticalPositionExecutor.is_overwhelmed(contact.unit):
 					requires_cover = true
-		if requires_cover and not check.press_attack and not overwhelmed_goal:
+		if requires_cover and not result.features.get("escape", false) and not check.press_attack and not overwhelmed_goal:
 			safe = safe and _goal_support_ready(squad, result.objective_hex)
 		if not safe:
 			executor.cancel(squad, true)

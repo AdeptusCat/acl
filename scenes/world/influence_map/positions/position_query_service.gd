@@ -97,6 +97,8 @@ static func finish_accepted_order(query: PositionQuery, result: PositionResult) 
 	if query.unit.movement.is_moving:
 		path = _remaining_path(query.unit)
 	var target: Vector2i = query.stable_order.target_hex
+	if query.escape_policy != null and not query.escape_hexes.has(target):
+		return false
 	if not _valid_snapshot_path(query, path, target):
 		return false
 	if query.profile.avoid_unsuppressed_defenders and not approach_path_is_safe(query, path):
@@ -116,6 +118,8 @@ static func finish_accepted_order(query: PositionQuery, result: PositionResult) 
 		return false
 	result.status = PositionResult.Status.RETAINED
 	result.target_hex = target
+	if query.escape_policy != null:
+		result.objective_hex = target
 	result.proposed_hex = target
 	result.target_index = query.snapshot.maps[query.team].cell_to_index(target)
 	result.path = path
@@ -187,7 +191,7 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 	candidates.sort_custom(_prefer_candidate)
 	var best: PositionCandidate = candidates[0]
 	var required_destination: bool = false
-	if query.goal_destination_required:
+	if query.goal_destination_required and query.escape_policy == null:
 		for candidate: PositionCandidate in candidates:
 			if candidate.hex == query.objective_hex:
 				# Only feasible, checked candidates can fulfil a geographic victory goal.
@@ -231,12 +235,17 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		if required_destination and retained.hex != query.objective_hex:
 			retain_position = false
 			query.movement_kind = "goal"
+		if query.escape_policy != null:
+			retain_position = false
+			query.movement_kind = "goal"
 		if retain_position:
 			best = retained
 			result.status = PositionResult.Status.RETAINED
 	elif query.stability != null:
 		query.stability.authorize(query, best, null)
 	result.target_hex = best.hex
+	if query.escape_policy != null:
+		result.objective_hex = best.hex
 	result.target_index = best.index
 	result.score = best.score
 	result.features = best.features
@@ -287,6 +296,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = query.stability_reason
 	if query.goal_reason != "":
 		result.reason = query.goal_reason + " | " + result.reason
+	if query.escape_policy != null:
+		result.reason = query.goal_reason + " | Follow an exit corridor; travel %.1fs, exposure %.1fs" % [best.features["route_seconds"], best.features["exposure_seconds"]]
 	return
 
 
@@ -436,6 +447,8 @@ static func evaluate_candidate(query: PositionQuery, index: int, diagnostics: Po
 
 
 static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -> bool:
+	if query.escape_policy != null:
+		return escape_path_is_safe(query.snapshot, query.team, query.origin_hex, path)
 	if path.is_empty():
 		return false
 	if query.press_attack and not press_attack_path_is_safe(query.snapshot, query.team, query.origin_hex, path):
@@ -456,6 +469,22 @@ static func approach_path_is_safe(query: PositionQuery, path: Array[Vector2i]) -
 	return true
 
 
+static func escape_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i]) -> bool:
+	if path.is_empty():
+		return false
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
+		if not contact.observed or not TacticalPositionExecutor.is_active_defender(contact.unit):
+			continue
+		var suppressed: bool = TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit)
+		for step: Vector2i in path:
+			if step == origin:
+				continue
+			var distance: int = LOSHelper.get_hex_distance(step, contact.hex)
+			if distance == 0 or (distance <= 1 and not suppressed):
+				return false
+	return true
+
+
 static func press_attack_path_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2i, path: Array[Vector2i]) -> bool:
 	if path.is_empty():
 		return false
@@ -469,6 +498,9 @@ static func press_attack_path_is_safe(snapshot: InfluenceSnapshot, team: int, or
 
 
 static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) -> bool:
+	if query.escape_policy != null:
+		# The complete corridor can bend away from an exit and exceed a tactical bound.
+		return query.escape_hexes.has(cell)
 	if query.profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 		return HqSupportPositionPolicy.in_geography(query, cell)
 	if query.protect_garrison_hex and cell == query.objective_hex:
@@ -505,7 +537,7 @@ static func _in_geography(query: PositionQuery, cell: Vector2i, fallback: bool) 
 static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 	if can_enter_suppressed_enemy_hex(query, cell):
 		return false
-	var shared_goal: bool = query.goal_capacity > 1 and cell == query.objective_hex
+	var shared_goal: bool = query.goal_capacity > 1 and (cell == query.objective_hex or (query.escape_policy != null and query.escape_hexes.has(cell)))
 	var occupants: Dictionary[Unit, bool] = {}
 	for other: Unit in query.reservations:
 		if other != query.unit and is_instance_valid(other) and other.alive and query.reservations[other] == cell:
@@ -523,6 +555,8 @@ static func _occupied(query: PositionQuery, cell: Vector2i) -> bool:
 		return true
 	# Cleared tactical memory must also release occupied-hex restrictions after a surrender.
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		if query.escape_policy != null and not contact.observed:
+			continue
 		if contact.hex == cell and (not contact.observed or TacticalPositionExecutor.is_active_defender(contact.unit)):
 			return true
 	return false

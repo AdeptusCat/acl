@@ -30,6 +30,8 @@ enum AIMode { ATTACK, DEFEND }
 @export_group("AI")
 ## Explicit strategic links. Without a policy, the director uses ordinary victory priorities.
 @export var ai_fallback_policies: Array[HoldToExitFallbackPolicy] = []
+## Explicit escape missions take precedence over tactical posture and enemy denial duties.
+@export var ai_escape_policies: Array[EscapeMissionPolicy] = []
 @export_subgroup("Axis", "axis_ai_")
 ## Controls automatic Axis orders independently of the selected player side.
 @export_enum("OFF", "ON") var axis_ai_status: int = AIStatus.OFF

@@ -23,11 +23,12 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var exposure_seconds: float = 0.0
 	var open_exposure_seconds: float = 0.0
 	var route_seconds: float = 0.0
+	var escape_cost: float = 0.0
 	var open_crossing_seconds: float = 0.0
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
-		if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
+		if query.escape_policy != null or query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 			if query.route_field != null:
 				step_risk = query.route_field.step_data(step)["risk"]
 			else:
@@ -39,6 +40,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		route_contact_distance = mini(route_contact_distance, nearest_contact_distance(contacts, step))
 		var seconds: float = crossing_seconds(query, path[index - 1], step)
 		route_seconds += seconds
+		if query.escape_policy != null:
+			escape_cost += seconds * (1.0 + query.profile.exposure_weight * step_risk + query.profile.open_ground_weight * (1.0 - step_cover))
 		exposure_seconds += seconds * step_risk
 		if step_cover < query.profile.minimum_cover:
 			open_exposure_seconds += seconds * step_risk
@@ -52,6 +55,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	features.merge({"travel": travel, "route_exposure": exposure, "peak_exposure": peak_exposure,
 		"open_ground": open_ground, "open_fire": open_fire, "route_contact_distance": route_contact_distance,
 		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds, "open_crossing_seconds": open_crossing_seconds})
+	if query.escape_policy != null:
+		features["escape_cost"] = escape_cost
 	if query.defense_area != null:
 		features["deadline_slack_seconds"] = features.get("arrival_seconds", INF) - route_seconds - query.profile.establishment_seconds
 		if query.reserve_position and path.size() > 1:
@@ -68,6 +73,9 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	var start_distance: int = LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex)
 	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	if query.escape_policy != null:
+		return {"escape": true, "cover": cover, "incoming": incoming, "forecast": 0.0,
+			"firing": 0.0, "objective_coverage": 0.0, "support": 0.0, "progress": 0.0}
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
 	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
