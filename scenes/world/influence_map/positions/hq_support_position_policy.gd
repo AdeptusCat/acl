@@ -40,7 +40,10 @@ static func prepare(query: PositionQuery) -> void:
 			belongs = belongs or (captured["company"] == headquarters["company"] and (headquarters.get("company_hq", false) or captured["platoon"] == headquarters["platoon"]))
 		if belongs:
 			var need: float = captured["need"]
-			if query.profile.support_assault_squads and friendly.squad_type == Globals.SquadType.Rifle and (query.assault_support_squad == null or friendly == query.assault_support_squad):
+			if query.profile.support_withdrawing_squads:
+				# Keep pace with the whole withdrawing formation, including calm support weapons.
+				need = maxf(need, 0.35)
+			elif query.profile.support_assault_squads and friendly.squad_type == Globals.SquadType.Rifle and (query.assault_support_squad == null or friendly == query.assault_support_squad):
 				# Advancing rifles need leadership before stress forces a support response.
 				need = maxf(need, 0.35)
 			query.support_targets[friendly] = {"hex": query.snapshot.positions[friendly], "need": need}
@@ -63,7 +66,7 @@ static func in_geography(query: PositionQuery, cell: Vector2i) -> bool:
 	for target: Dictionary in query.support_targets.values():
 		if LOSHelper.get_hex_distance(cell, target["hex"]) <= query.support_radius + 2:
 			return true
-		if query.profile.support_assault_squads and target["need"] >= 0.35 and LOSHelper.get_hex_distance(cell, target["hex"]) < LOSHelper.get_hex_distance(query.origin_hex, target["hex"]):
+		if query.profile.follows_moving_squads() and target["need"] >= 0.35 and LOSHelper.get_hex_distance(cell, target["hex"]) < LOSHelper.get_hex_distance(query.origin_hex, target["hex"]):
 			# The next bound can close a gap larger than one planning radius.
 			return true
 	return false
@@ -99,7 +102,7 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	if highest_need >= 0.35 and priority_distance <= query.support_radius:
 		priority_support = highest_need
 	var priority_progress: float = 0.0
-	if query.profile.support_assault_squads and highest_need >= 0.35:
+	if query.profile.follows_moving_squads() and highest_need >= 0.35:
 		priority_progress = float(maxi(0, priority_origin_distance - query.support_radius) - maxi(0, priority_distance - query.support_radius)) / float(maxi(1, query.movement_radius))
 	var visibility: float = 0.0
 	var frontline: bool = false
@@ -115,13 +118,16 @@ static func features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 			visibility += multiplier * maxf(0.2, contact.confidence)
 			if multiplier >= 1.0:
 				frontline = frontline or LOSHelper.get_hex_distance(cell, contact.hex) <= 1
+	var open_support_safe: bool = not good_order_enemy_los
+	if query.profile.support_withdrawing_squads:
+		open_support_safe = open_position_is_safe(query, cell)
 	return {"responsibility": "hq_support", "support_utility": utility / maxf(total_weight, 0.001) + priority_support,
 		"supported_squads": supported, "support_priority_squad": urgent, "support_priority_need": highest_need,
 		"support_distance": nearest, "leadership_radius": query.support_radius,
 		"support_priority_distance": priority_distance, "support_priority_covered": priority_distance <= query.support_radius,
 		"support_priority_progress": priority_progress,
 		"enemy_visibility": PositionFeatureEvaluator.risk(visibility), "frontline": frontline,
-		"good_order_enemy_los": good_order_enemy_los}
+		"good_order_enemy_los": good_order_enemy_los, "open_support_safe": open_support_safe}
 
 
 static func contact_threat_multiplier(query: PositionQuery, contact: InfluenceContact) -> float:
@@ -129,7 +135,7 @@ static func contact_threat_multiplier(query: PositionQuery, contact: InfluenceCo
 	if contact.observed:
 		if not TacticalPositionExecutor.is_active_defender(contact.unit):
 			return 0.0
-		if query.profile.support_assault_squads and TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
+		if query.profile.follows_moving_squads() and TacticalPositionExecutor.is_sufficiently_suppressed(contact.unit):
 			return 0.1
 	return 1.0
 
@@ -145,8 +151,16 @@ static func known_good_order_enemy_has_los(snapshot: InfluenceSnapshot, team: in
 	return false
 
 
+static func open_position_is_safe(query: PositionQuery, cell: Vector2i) -> bool:
+	if query.profile.support_withdrawing_squads:
+		# Withdrawal may need short open bounds; fire risk and crossing budgets still apply.
+		var incoming: float = PositionFeatureEvaluator._contact_fire_risk(query, query.snapshot.get_defensive_contacts(query.team), cell, false)
+		return incoming <= query.profile.max_incoming_risk
+	return not known_good_order_enemy_has_los(query.snapshot, query.team, cell)
+
+
 static func rejection(query: PositionQuery, features: Dictionary, check_route: bool = true) -> String:
-	if features["cover"] < query.profile.minimum_cover and features["good_order_enemy_los"]:
+	if features["cover"] < query.profile.minimum_cover and not features.get("open_support_safe", not features["good_order_enemy_los"]):
 		return "hq_open_enemy_los"
 	if features["frontline"]:
 		return "hq_frontline"

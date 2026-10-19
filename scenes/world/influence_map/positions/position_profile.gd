@@ -15,6 +15,7 @@ var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 @export var objective_weight: float = 2.0
 @export var support_weight: float = 0.3
 @export var support_assault_squads: bool = false
+@export var support_withdrawing_squads: bool = false
 @export var avoid_unsuppressed_defenders: bool = false
 @export var enter_suppressed_enemy_hex: bool = false
 @export var travel_weight: float = 0.08
@@ -120,6 +121,10 @@ static func for_unit(base: PositionProfile, unit: Unit) -> PositionProfile:
 	profile.improvement_absolute *= relocation_cost
 	profile.improvement_relative *= relocation_cost
 	return profile
+
+
+func follows_moving_squads() -> bool:
+	return support_assault_squads or support_withdrawing_squads
 
 
 func score(features: Dictionary, unit: Unit) -> float:

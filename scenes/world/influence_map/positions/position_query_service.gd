@@ -286,6 +286,8 @@ static func finish(query: PositionQuery, result: PositionResult, candidates: Arr
 		result.reason = "Supporting nearby squads from cover; priority need %.2f" % best.features["support_priority_need"]
 		if best.features["cover"] < query.profile.minimum_cover:
 			result.reason = "Supporting nearby squads in open ground outside known good-order enemy LOS; priority need %.2f" % best.features["support_priority_need"]
+			if query.profile.support_withdrawing_squads:
+				result.reason = "Supporting withdrawing squads within fire-risk and crossing limits; priority need %.2f" % best.features["support_priority_need"]
 		if not best.features["support_priority_covered"] and best.features.get("support_priority_progress", 0.0) > 0.0:
 			result.reason = "Moving closer to the forward support squad; leadership range not yet reached"
 	if result.features["connected_cover_preferred"] and result.status == PositionResult.Status.ACCEPTED:

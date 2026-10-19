@@ -26,9 +26,17 @@ func _run() -> void:
 	var saw_fight: bool = false
 	var saw_pinned: bool = false
 	var started: bool = false
+	var headquarters_origins: Dictionary[Unit, Vector2i] = {}
+	var headquarters_moved: Dictionary[Unit, bool] = {}
+	for unit: Unit in planner.squads:
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			headquarters_origins[unit] = unit.current_hex
 	# Keep authored forces, visibility, movement, damage, morale, victory rules and player orders.
 	for frame: int in range(90 * 60):
 		started = started or Globals.game_started
+		for unit: Unit in headquarters_origins:
+			if is_instance_valid(unit) and unit.current_hex != headquarters_origins[unit]:
+				headquarters_moved[unit] = true
 		if frame % (5 * 60) == 0:
 			for task: ScenarioGoalTask in planner.goal_director.tasks:
 				_check(task.kind == ScenarioGoalTask.Kind.EXIT and task.escape_policy != null, "The column retains escape instead of contesting A")
@@ -45,6 +53,7 @@ func _run() -> void:
 		await get_tree().process_frame
 	_check(saw_fight, "The normal column engages the roadblock with actual covering fire")
 	_check(saw_pinned, "The live reproduction includes temporary pinning without abandoning escape")
+	_check(headquarters_origins.size() == 3 and headquarters_moved.size() == headquarters_origins.size(), "All three headquarters move with the column instead of waiting at their starting positions")
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame

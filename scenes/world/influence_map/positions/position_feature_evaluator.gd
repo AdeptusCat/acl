@@ -79,7 +79,7 @@ static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dicti
 	var contacts: Array[InfluenceContact] = query.snapshot.get_contacts(query.team)
 	if query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 		contacts = query.snapshot.get_defensive_contacts(query.team)
-		if (query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.support_assault_squads) or query.press_attack:
+		if (query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and query.profile.follows_moving_squads()) or query.press_attack:
 			incoming = _contact_fire_risk(query, contacts, cell, false)
 		else:
 			incoming = maxf(incoming, _contact_fire_risk(query, contacts, cell, false))
@@ -202,9 +202,9 @@ static func _contact_fire_risk(query: PositionQuery, contacts: Array[InfluenceCo
 static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var contacts: Array[InfluenceContact] = query.snapshot.get_defensive_contacts(query.team)
-	# Attack headquarters use observed contact capability rather than stale unsuppressed map risk.
+	# Moving headquarters use observed contact capability rather than stale unsuppressed map risk.
 	var danger: float = _contact_fire_risk(query, contacts, cell, true)
-	if not query.press_attack and (query.profile.mode != PositionProfile.Mode.HQ_SUPPORT or not query.profile.support_assault_squads):
+	if not query.press_attack and (query.profile.mode != PositionProfile.Mode.HQ_SUPPORT or not query.profile.follows_moving_squads()):
 		danger = maxf(risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell)), danger)
 	if query.forecast_data.size() == map.cell_count:
 		danger = maxf(danger, query.profile.forecast_route_weight * risk(query.forecast_data[map.cell_to_index(cell)]))

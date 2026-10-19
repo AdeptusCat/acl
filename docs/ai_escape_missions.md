@@ -27,8 +27,14 @@ covering-fire checks.
 A front covered by effective observation or fire creates a coordinated breach.
 Suppressing one blocker releases that breach only when the rest of the route
 is also usable. The check covers the combat column: a forward HQ cannot release
-rifles that are still cut off. Headquarters wait for an exit corridor instead
-of receiving an assault duty. Concealed exit movement needs no company support.
+rifles that are still cut off. During the breach, platoon headquarters follow
+their own squads and company headquarters follow their company in protected
+support bounds. Calm rifle squads and support weapons both receive leadership
+priority during withdrawal. Headquarters may take short open bounds within their
+fire-risk and crossing budgets and avoid unsuppressed defenders. Once a corridor
+opens, they replace support bounds with complete exit orders. Headquarters without
+surviving subordinates seek their
+own exit. Concealed exit movement needs no company support.
 
 Hold-to-exit fallbacks use the same corridor planning only after their existing
 withdrawal trigger activates. Their confirmation, strength, objective-loss and
@@ -36,9 +42,11 @@ deadline rules remain unchanged. Scenarios without either policy retain their
 ordinary attack, defense and goal-selection behavior.
 
 Run `tests/roadblock_breach_match_regression.tscn` for authored bypasses, HQ
-eligibility, pinning and recovery, sealed fronts, and release after suppression.
+eligibility, follow movement, support-to-exit transitions, pinning and recovery,
+sealed fronts, and release after suppression.
 Run `godot --headless --path . --fixed-fps 60 tests/roadblock_escape_match_regression.tscn`
-for a normal match that verifies actual covering fire, morale and no player orders.
+for a normal match that verifies actual covering fire, morale, and movement by
+all three headquarters without player orders.
 
 Battles end when a side's last remaining units are destroyed or surrendered. Both sides'
 existing victory conditions are compared immediately, including conditions

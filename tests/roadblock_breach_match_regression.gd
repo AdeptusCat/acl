@@ -65,6 +65,7 @@ func _run() -> void:
 		_check(not query.goal_destination_required, "A breach plan does not demand movement to the defended exit")
 		var approach: PositionResult = PositionQueryService.query_positions(query)
 		_check(approach.is_valid() and approach.should_move and LOSHelper.get_hex_distance(approach.target_hex, weak.current_hex) < LOSHelper.get_hex_distance(rifles[0].current_hex, weak.current_hex), "A shadowed breach advances into firing range instead of waiting without a shot")
+		_test_escape_headquarters(planner, attackers, snapshot, exit_task)
 		director._allocate(planner)
 		planner.company_command._assign_roles()
 		var maneuver: CompanyPlatoon
@@ -240,6 +241,120 @@ func _test_escape_corridors(planner: PlatoonAI, defenders: Array[Unit], attacker
 	director._build_tasks(planner, scenario.duration_s)
 	director._allocate(planner)
 	_check(director.assignments.size() == attackers.size(), "Company allocation considers every exit when the nearest marker has no terrain route")
+
+
+func _test_escape_headquarters(planner: PlatoonAI, attackers: Array[Unit], snapshot: InfluenceSnapshot, task: ScenarioGoalTask) -> void:
+	var positions: Dictionary[Unit, Vector2i] = snapshot.positions.duplicate()
+	var support_units: Dictionary[Unit, Dictionary] = snapshot.support_units.duplicate(true)
+	var assignments: Dictionary[Unit, ScenarioGoalTask] = planner.goal_assignments.duplicate()
+	var contacts: Array = snapshot.contacts[planner.team]
+	var had_defensive_contacts: bool = snapshot.defensive_contacts.has(planner.team)
+	var defensive_contacts: Array = snapshot.defensive_contacts.get(planner.team, [])
+	var map: InfluenceMap = snapshot.maps[planner.team]
+	var threat: PackedFloat32Array = map.get_layer_data_copy(InfluenceMap.Layer.THREAT)
+	var sightlines: Dictionary = snapshot.los
+	var weapon_ranges: Dictionary[InfluenceContact, int] = {}
+	snapshot.los = {}
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+		weapon_ranges[contact] = contact.weapon_range
+		contact.weapon_range = 1
+		snapshot.los[contact.hex] = {}
+		for cell: Vector2i in map.playable_cells:
+			snapshot.los[contact.hex][cell] = {"hindrance": 0.0, "target_cover": 0.0}
+	# A broad threat projection cannot veto movement where captured contacts have no fire.
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.THREAT, cell, 100.0)
+	var headquarters: Array[Unit] = []
+	var squad_types: Dictionary[Unit, Globals.SquadType] = {}
+	for unit: Unit in attackers:
+		squad_types[unit] = unit.squad_type
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			_set_hex(unit, Vector2i(19, 7))
+			headquarters.append(unit)
+		else:
+			# Exercise withdrawal without rifles or stress to drive ordinary assault support.
+			unit.squad_type = Globals.SquadType.MG
+			_set_hex(unit, Vector2i(11, 7))
+		snapshot.positions[unit] = unit.current_hex
+		snapshot.support_units[unit]["need"] = 0.0
+	planner._planning_reservations.clear()
+	for unit: Unit in headquarters:
+		planner.goal_assignments[unit] = task
+		planner._planning_requests.clear()
+		planner._add_goal_request(unit, task)
+		var query: PositionQuery = planner._planning_requests[0]["query"]
+		_check(query.profile.mode == PositionProfile.Mode.HQ_SUPPORT and not query.goal_destination_required, "A blocked exit gives headquarters a protected bound with its squads")
+		var result: PositionResult = PositionQueryService.query_positions(query)
+		_check(result.is_valid() and result.should_move and LOSHelper.get_hex_distance(result.target_hex, Vector2i(11, 7)) < 8, "Platoon and company headquarters close a leadership gap larger than one planning radius")
+		var follows_weapons: bool = false
+		for subordinate: Unit in query.support_targets:
+			_check(subordinate.company == unit.company and (unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS or subordinate.platoon == unit.platoon), "Headquarters follows its own formation")
+			if subordinate.squad_type != Globals.SquadType.Rifle:
+				follows_weapons = follows_weapons or query.support_targets[subordinate]["need"] >= 0.35
+		_check(follows_weapons, "Calm support weapons also draw their headquarters forward during withdrawal")
+		_check(PositionQueryService.approach_path_is_safe(query, result.path), "The headquarters bound avoids unsuppressed defenders")
+		planner.squad_assignments[unit] = {"result": result}
+		planner._issue_order(unit)
+		_check(unit.movement.is_moving and unit.movement.target_hex == result.target_hex, "Headquarters starts the follow order while combat squads prepare the breach")
+	var observer: InfluenceContact = snapshot.get_defensive_contacts(planner.team)[0]
+	var firepower: float = observer.firepower
+	observer.firepower = 10000.0
+	observer.weapon_range = 40
+	var safety_query: PositionQuery = PositionQuery.new()
+	safety_query.snapshot = snapshot
+	safety_query.team = planner.team
+	safety_query.profile = PositionProfile.for_mode(PositionProfile.Mode.HQ_SUPPORT)
+	safety_query.profile.support_withdrawing_squads = true
+	_check(not HqSupportPositionPolicy.open_position_is_safe(safety_query, Vector2i(19, 7)), "Dangerous overwatch still rejects an open headquarters position")
+	planner._planning_requests.clear()
+	planner._add_goal_request(headquarters[0], task)
+	var unsafe: PositionResult = PositionQueryService.query_positions(planner._planning_requests[0]["query"])
+	_check(not unsafe.is_valid(), "Withdrawal does not authorize a headquarters bound under overwhelming fire")
+	observer.firepower = firepower
+	observer.weapon_range = 1
+	# A fresh escape order must replace the accepted support bound once the passage opens.
+	map.set_layer_data_copy(InfluenceMap.Layer.THREAT, threat)
+	task.breach_required = false
+	snapshot.contacts[planner.team] = []
+	snapshot.defensive_contacts[planner.team] = []
+	for unit: Unit in headquarters:
+		planner._planning_requests.clear()
+		planner._add_goal_request(unit, task)
+		var query: PositionQuery = planner._planning_requests[0]["query"]
+		var result: PositionResult = PositionQueryService.query_positions(query)
+		_check(result.is_valid() and result.should_move and result.features.get("escape", false) and query.escape_hexes.has(result.target_hex), "An opened route replaces headquarters support with a complete exit order")
+		planner.squad_assignments[unit] = {"result": result}
+		planner._issue_order(unit)
+		_check(unit.movement.is_moving and query.escape_hexes.has(unit.movement.target_hex), "Headquarters executes escape instead of keeping its old support bound")
+	# An HQ with no remaining squads still receives its own escape duty.
+	task.breach_required = true
+	for unit: Unit in attackers:
+		if not HqSupportPositionPolicy.is_headquarters(unit):
+			snapshot.positions.erase(unit)
+	planner._planning_requests.clear()
+	planner._add_goal_request(headquarters[0], task)
+	_check(planner._planning_requests[0]["query"].escape_policy == task.escape_policy, "Headquarters without subordinates seeks an exit instead of an empty support duty")
+	snapshot.positions = positions
+	snapshot.support_units = support_units
+	snapshot.los = sightlines
+	for contact: InfluenceContact in weapon_ranges:
+		contact.weapon_range = weapon_ranges[contact]
+	snapshot.contacts[planner.team] = contacts
+	if had_defensive_contacts:
+		snapshot.defensive_contacts[planner.team] = defensive_contacts
+	else:
+		snapshot.defensive_contacts.erase(planner.team)
+	planner.goal_assignments = assignments
+	for unit: Unit in attackers:
+		unit.squad_type = squad_types[unit]
+		_set_hex(unit, positions[unit])
+	for unit: Unit in headquarters:
+		planner.executor.cancel(unit, true)
+		planner.position_stability.forget(unit)
+		planner.accepted_positions.erase(unit)
+		planner.squad_assignments.erase(unit)
+	planner._planning_reservations.clear()
+	planner._planning_requests.clear()
 
 
 func _test_clear_exit(planner: PlatoonAI, rifles: Array[Unit], snapshot: InfluenceSnapshot, blocked_task: ScenarioGoalTask) -> void:

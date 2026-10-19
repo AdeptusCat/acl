@@ -439,9 +439,13 @@ func _build_planning_requests(available: Array[Unit]) -> void:
 
 
 func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
-	if task.escape_policy != null and (not task.breach_required or HqSupportPositionPolicy.is_headquarters(unit)):
-		_add_escape_request(unit, task)
-		return
+	if task.escape_policy != null:
+		if not task.breach_required:
+			_add_escape_request(unit, task)
+			return
+		if HqSupportPositionPolicy.is_headquarters(unit):
+			_add_escape_headquarters_request(unit, task)
+			return
 	var clear_exit: bool = task.kind == ScenarioGoalTask.Kind.EXIT and not task.breach_required
 	var combat_hex: Vector2i = task.hex
 	if task.breach_required:
@@ -553,6 +557,29 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 	if task.urgent:
 		query.response_priority = 3
 	_planning_requests.append({"query": query, "role": "scenario_goal", "axis": null})
+
+
+func _add_escape_headquarters_request(unit: Unit, task: ScenarioGoalTask) -> void:
+	var config: InfluenceProjectionConfig = influence_map_controller._mission_config(team, task.hex, current_order, accepted_positions)
+	config.profile = PositionProfile.for_mode(PositionProfile.Mode.HQ_SUPPORT)
+	config.profile.support_withdrawing_squads = true
+	config.profile.progress_weight = 12.0
+	config.profile.avoid_unsuppressed_defenders = true
+	config.profile.max_exposure_seconds = current_order.exposure_budget_seconds
+	config.profile.max_open_exposure_seconds = current_order.open_crossing_budget_seconds
+	var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
+	query.snapshot = _planning_snapshot
+	HqSupportPositionPolicy.configure(query)
+	if query.support_targets.is_empty():
+		# Headquarters without surviving subordinates must still seek their own exit.
+		_add_escape_request(unit, task)
+		return
+	query.goal_key = task.key
+	query.goal_reason = task.reason
+	_configure_position_stability(query)
+	query.mission_objective_hex = task.hex
+	query.response_priority = 2
+	_planning_requests.append({"query": query, "role": "hq_support", "axis": null})
 
 
 func _add_escape_request(unit: Unit, task: ScenarioGoalTask) -> void:
@@ -1639,7 +1666,12 @@ func _issue_order(squad: Unit) -> void:
 			time_until_reconsider = 0.0
 			return
 	if result.is_valid() and result.profile_mode == PositionProfile.Mode.HQ_SUPPORT and result.features.get("open_support_position", false):
-		if HqSupportPositionPolicy.known_good_order_enemy_has_los(influence_map_controller.snapshot, team, result.target_hex):
+		var check: PositionQuery = PositionQuery.new()
+		check.unit = squad
+		check.team = team
+		check.snapshot = influence_map_controller.snapshot
+		check.profile = result.position_profile
+		if not HqSupportPositionPolicy.open_position_is_safe(check, result.target_hex):
 			# Suppression can end while a budgeted query or an accepted move is in progress.
 			executor.cancel(squad, true)
 			position_stability.forget(squad)
