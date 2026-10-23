@@ -12,6 +12,24 @@ static func step_is_safe(snapshot: InfluenceSnapshot, team: int, origin: Vector2
 	return _blockers(snapshot, team, cell, policy, origin, true).is_empty()
 
 
+static func route_visibility(snapshot: InfluenceSnapshot, team: int, cell: Vector2i) -> float:
+	var visibility: float = 0.0
+	for contact: InfluenceContact in snapshot.get_defensive_contacts(team):
+		if contact.observed and not TacticalPositionExecutor.is_active_defender(contact.unit):
+			continue
+		var distance: int = LOSHelper.get_hex_distance(cell, contact.hex)
+		var records: Dictionary = snapshot.los.get(contact.hex, {})
+		if distance > contact.weapon_range or not records.has(cell):
+			continue
+		var record: Dictionary = records[cell]
+		var hindrance: float = maxf(0.0, record.get("hindrance", 0.0))
+		var concealment: float = maxf(0.0, record.get("target_concealment", 0.0))
+		# Near crossings are easier to observe, even when current firepower is low.
+		var observation: float = clampf(contact.confidence, 0.0, 1.0) * maxf(0.15, 1.0 - float(distance) / float(maxi(1, contact.weapon_range)))
+		visibility = maxf(visibility, observation / (1.0 + hindrance + concealment))
+	return visibility
+
+
 static func _blockers(snapshot: InfluenceSnapshot, team: int, cell: Vector2i, policy: EscapeMissionPolicy, origin: Vector2i, disengaging: bool) -> Array[InfluenceContact]:
 	var result: Array[InfluenceContact] = []
 	var firing: Array[InfluenceContact] = []

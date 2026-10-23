@@ -9,6 +9,8 @@ extends Resource
 @export var include_headquarters: bool = true
 ## Compare routes by travel time plus time exposed to known or remembered fire.
 @export_range(0.0, 20.0, 0.5) var exposure_weight: float = 4.0
+## Favor time concealed from known or remembered enemies over short visible crossings.
+@export_range(0.0, 20.0, 0.5) var concealment_weight: float = 8.0
 ## Observation that can seal a guarded close gap or narrow terrain passage. Distant sightings only increase route cost.
 @export_range(0.0, 1.0, 0.05) var maximum_bypass_visibility: float = 0.25
 ## Effective fire required, together with observation, to seal a guarded passage.
@@ -21,6 +23,8 @@ func configuration_error(conditions: Array[VictoryCondition]) -> String:
 		return "Escape mission must reference an existing scenario exit condition"
 	if not is_finite(exposure_weight) or exposure_weight < 0.0:
 		return "Escape mission exposure weight must be finite and nonnegative"
+	if not is_finite(concealment_weight) or concealment_weight < 0.0:
+		return "Escape mission concealment weight must be finite and nonnegative"
 	if not is_finite(maximum_bypass_visibility) or maximum_bypass_visibility < 0.0 or maximum_bypass_visibility > 1.0:
 		return "Escape mission bypass visibility must be between zero and one"
 	if not is_finite(maximum_bypass_risk) or maximum_bypass_risk < 0.0 or maximum_bypass_risk > 1.0:

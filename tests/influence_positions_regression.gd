@@ -109,6 +109,7 @@ func _run() -> void:
 	controller.set_objective_for_team(Globals.Team.ALLIES, Vector2i(5, 3))
 	_publish()
 	_test_knowledge()
+	_test_concealed_escape()
 	controller.defensive_memory.clear()
 	_test_publication()
 	_test_snapshot_capture_slices()
@@ -264,6 +265,103 @@ func _test_knowledge() -> void:
 	enemy.current_hex = hidden_hex
 	controller.knowledge_policy = InfluenceMapController.KnowledgePolicy.OBSERVED_AND_MEMORY
 	_publish()
+
+
+func _test_concealed_escape() -> void:
+	var exit: Vector2i = Vector2i(7, 3)
+	var detour: Vector2i = Vector2i(4, 0)
+	var direct_path: Array[Vector2i] = controller.snapshot.get_path(own.team, own.current_hex, exit)
+	var concealed_path: Array[Vector2i] = controller.snapshot.get_path(own.team, own.current_hex, detour)
+	concealed_path.append_array(controller.snapshot.get_path(own.team, detour, exit).slice(1))
+	var snapshot: InfluenceSnapshot = InfluenceSnapshot.new()
+	var map: InfluenceMap = InfluenceMap.new()
+	map.configure(Rect2i(0, 0, 9, 7))
+	var graph: AStar2D = AStar2D.new()
+	var ids: Dictionary[Vector2i, int] = {}
+	# Two complete corridors share an exit: a short visible road and a longer hidden bypass.
+	for path: Array[Vector2i] in [direct_path, concealed_path]:
+		for index: int in range(path.size()):
+			var cell: Vector2i = path[index]
+			if not ids.has(cell):
+				ids[cell] = ids.size()
+				graph.add_point(ids[cell], ground.map_to_local(cell))
+				map.playable_cells[cell] = true
+			if index > 0:
+				graph.connect_points(ids[path[index - 1]], ids[cell])
+	snapshot.maps[own.team] = map
+	snapshot.routes[own.team] = graph
+	snapshot.point_ids[own.team] = ids
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = Vector2i(4, 6)
+	contact.weapon_range = 8
+	contact.observed = true
+	# Isolate concealment from the existing fire-risk and terrain-cover preferences.
+	contact.firepower = 0.0
+	snapshot.defensive_contacts[own.team] = [contact]
+	snapshot.los[contact.hex] = {}
+	for cell: Vector2i in ids:
+		snapshot.los[contact.hex][cell] = {"hindrance": 0.0, "target_concealment": 0.0}
+	for cell: Vector2i in concealed_path:
+		if not direct_path.has(cell):
+			snapshot.los[contact.hex][cell]["hindrance"] = 8.0
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = own
+	query.team = own.team
+	query.snapshot = snapshot
+	query.objective_hex = exit
+	query.escape_hexes = [exit]
+	query.escape_policy = EscapeMissionPolicy.new()
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
+	query.profile.max_incoming_risk = 1.0
+	query.profile.max_route_exposure = 1.0
+	query.profile.avoid_unsuppressed_defenders = true
+	query.use_defense_area = false
+	var weight: float = query.escape_policy.concealment_weight
+	query.escape_policy.concealment_weight = 0.0
+	var direct: PositionResult = PositionQueryService.query_positions(query)
+	_check(direct.is_valid() and direct.path == direct_path, "Travel and fire risk alone reproduce the short crossing near the defender")
+	query.escape_policy.concealment_weight = weight
+	var concealed: PositionResult = PositionQueryService.query_positions(query)
+	_check(concealed.is_valid() and concealed.path.has(detour) and concealed.features["route_seconds"] > direct.features["route_seconds"], "Escape accepts a longer concealed detour instead of the nearby visible road crossing")
+	_check(concealed.features["visibility_seconds"] < direct.features["visibility_seconds"], "The concealed bypass reduces time visible to the defender")
+	var settled: int = query.route_field.labels_by_cell[exit][0]
+	_check(is_equal_approx(concealed.features["escape_cost"], query.route_field.labels[settled]["cost"]), "Exit scoring and the weighted route search use the same concealment cost")
+	query.escape_hexes.append(direct_path[-2])
+	var alternate_exit: PositionResult = PositionQueryService.query_positions(query)
+	_check(alternate_exit.is_valid() and alternate_exit.target_hex == exit and alternate_exit.path.has(detour), "A concealed route to a farther exit beats an exposed route to the nearer exit")
+	var job: PositionQueryJob = PositionQueryJob.new()
+	job.query = query
+	var slices: int = 0
+	while not job.completed and slices < 10000:
+		job.advance(Time.get_ticks_usec() + 50)
+		slices += 1
+	_check(job.completed and job.result.path == alternate_exit.path and is_equal_approx(job.result.score, alternate_exit.score), "Sliced planning preserves the concealed route and exit choice")
+	graph.set_point_disabled(ids[detour], true)
+	var exposed: PositionResult = PositionQueryService.query_positions(query)
+	_check(exposed.is_valid() and not exposed.path.has(detour), "Escape still uses an exposed route when the concealed bypass is unavailable")
+	graph.set_point_disabled(ids[detour], false)
+	contact.observed = false
+	contact.confidence = 0.0
+	var forgotten: PositionResult = PositionQueryService.query_positions(query)
+	_check(forgotten.is_valid() and not forgotten.path.has(detour), "A contact with no remaining confidence does not impose a concealed detour")
+	contact.confidence = 1.0
+	var remembered: PositionResult = PositionQueryService.query_positions(query)
+	_check(remembered.is_valid() and remembered.path.has(detour), "Remembered enemy sightlines favor a concealed route without becoming hard blockers")
+	var sample: Vector2i = direct_path[2]
+	var visible: float = EscapeCorridorPolicy.route_visibility(snapshot, own.team, sample)
+	snapshot.los[contact.hex][sample]["target_concealment"] = 2.0
+	_check(EscapeCorridorPolicy.route_visibility(snapshot, own.team, sample) < visible, "Target concealment reduces observation independently of terrain cover")
+	snapshot.los[contact.hex].erase(sample)
+	_check(is_zero_approx(EscapeCorridorPolicy.route_visibility(snapshot, own.team, sample)), "Blocked enemy LOS adds no observation cost")
+	var context: String = query.context_key()
+	query.escape_policy.concealment_weight = 0.0
+	_check(query.context_key() != context, "Editing concealment preference invalidates the escape query context")
+	query.escape_policy.exit_condition = ExitUnitsCondition.new()
+	query.escape_policy.concealment_weight = -1.0
+	_check(query.escape_policy.configuration_error([query.escape_policy.exit_condition]) != "", "Escape policies reject negative concealment weights")
+	query.escape_policy.concealment_weight = NAN
+	_check(query.escape_policy.configuration_error([query.escape_policy.exit_condition]) != "", "Escape policies reject nonfinite concealment weights")
 
 
 func _test_publication() -> void:

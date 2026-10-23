@@ -24,15 +24,18 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	var open_exposure_seconds: float = 0.0
 	var route_seconds: float = 0.0
 	var escape_cost: float = 0.0
+	var visibility_seconds: float = 0.0
 	var open_crossing_seconds: float = 0.0
 	for index: int in range(1, path.size()):
 		var step: Vector2i = path[index]
 		var step_risk: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, step))
+		var step_features: Dictionary = {}
 		if query.escape_policy != null or query.profile.mode in [PositionProfile.Mode.DEFEND, PositionProfile.Mode.HQ_SUPPORT] or query.press_attack:
 			if query.route_field != null:
-				step_risk = query.route_field.step_data(step)["risk"]
+				step_features = query.route_field.step_data(step)
 			else:
-				step_risk = route_step(query, step)["risk"]
+				step_features = route_step(query, step)
+			step_risk = step_features["risk"]
 		var step_cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, step), 0.0, 1.0)
 		open_ground += 1.0 - step_cover
 		if step_cover < query.profile.minimum_cover:
@@ -41,7 +44,8 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		var seconds: float = crossing_seconds(query, path[index - 1], step)
 		route_seconds += seconds
 		if query.escape_policy != null:
-			escape_cost += seconds * (1.0 + query.profile.exposure_weight * step_risk + query.profile.open_ground_weight * (1.0 - step_cover))
+			escape_cost += route_step_cost(query, step_features, seconds)
+			visibility_seconds += seconds * step_features["visibility"]
 		exposure_seconds += seconds * step_risk
 		if step_cover < query.profile.minimum_cover:
 			open_exposure_seconds += seconds * step_risk
@@ -57,6 +61,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 		"route_seconds": route_seconds, "exposure_seconds": exposure_seconds, "open_exposure_seconds": open_exposure_seconds, "open_crossing_seconds": open_crossing_seconds})
 	if query.escape_policy != null:
 		features["escape_cost"] = escape_cost
+		features["visibility_seconds"] = visibility_seconds
 	if query.defense_area != null:
 		features["deadline_slack_seconds"] = features.get("arrival_seconds", INF) - route_seconds - query.profile.establishment_seconds
 		if query.reserve_position and path.size() > 1:
@@ -212,7 +217,17 @@ static func route_step(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var open_fire: float = 0.0
 	if cover < query.profile.minimum_cover:
 		open_fire = danger
-	return {"risk": danger, "open_fire": open_fire, "cover": cover}
+	var visibility: float = 0.0
+	if query.escape_policy != null:
+		visibility = EscapeCorridorPolicy.route_visibility(query.snapshot, query.team, cell)
+	return {"risk": danger, "open_fire": open_fire, "cover": cover, "visibility": visibility}
+
+
+static func route_step_cost(query: PositionQuery, step: Dictionary, seconds: float) -> float:
+	var cost: float = 1.0 + query.profile.exposure_weight * step["risk"] + query.profile.open_ground_weight * (1.0 - step["cover"])
+	if query.escape_policy != null:
+		cost += query.escape_policy.concealment_weight * step["visibility"]
+	return seconds * cost
 
 
 static func crossing_seconds(query: PositionQuery, from: Vector2i, to: Vector2i) -> float:

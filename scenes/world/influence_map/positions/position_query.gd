@@ -121,7 +121,7 @@ func firepower_at_range(friendly: Unit, distance: int) -> float:
 
 func context_key() -> String:
 	if escape_policy != null:
-		return str([team, "escape", goal_key, escape_hexes, goal_capacity, escape_policy.exposure_weight, escape_policy.maximum_bypass_visibility, escape_policy.maximum_bypass_risk])
+		return str([team, "escape", goal_key, escape_hexes, goal_capacity, escape_policy.exposure_weight, escape_policy.concealment_weight, escape_policy.maximum_bypass_visibility, escape_policy.maximum_bypass_risk])
 	if profile.mode == PositionProfile.Mode.HQ_SUPPORT:
 		# Stress changes affect utility, without resetting a stable support position every snapshot.
 		return str([team, profile.mode, support_targets.keys(), support_radius, movement_radius, assault_support_squad])

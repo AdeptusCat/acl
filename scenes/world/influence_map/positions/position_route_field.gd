@@ -162,7 +162,7 @@ func _neighbor_edges(from: Vector2i) -> Array:
 		if not is_finite(seconds):
 			continue
 		edges.append({"cell": cell, "exposure": seconds * step["risk"], "open_exposure": seconds * step["open_fire"],
-			"cost": seconds * (1.0 + _query.profile.exposure_weight * step["risk"] + _query.profile.open_ground_weight * (1.0 - step["cover"]))})
+			"cost": PositionFeatureEvaluator.route_step_cost(_query, step, seconds)})
 	_edges[from] = edges
 	return edges
 

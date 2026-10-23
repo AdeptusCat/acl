@@ -13,7 +13,12 @@ Disable **Withdraw Entire Force** to assign only the remaining quota. Disable
 **Include Headquarters** to retain headquarters explicitly.
 
 Each squad searches complete corridors to all matching exits. Routes minimize
-travel time plus weighted exposure time and an open-ground cost. Seeing an enemy
+travel time plus weighted exposure time, observation time and an open-ground cost.
+**Concealment Weight** favors longer routes behind LOS hindrance and concealed
+terrain over short visible road crossings. Observation cost uses contact confidence
+and distance, so crossing close to a known defender costs more even while its
+current firepower is low. It is a preference: an entirely observed map still
+allows escape, and remembered contacts never become hard blockers. Seeing an enemy
 across open ground increases that cost without creating a pursuit objective.
 Enemy fire can seal a close guarded gap (within two hexes) or a terrain
 bottleneck with at most two usable neighboring hexes. Such a passage requires
@@ -81,6 +86,8 @@ morale, and movement by all three headquarters without player orders.
 Run `tests/roadblock_pursuit_regression.tscn` for a live sighting-only reproduction:
 player units move behind the column while damage and morale changes are disabled,
 and every rifle and headquarters must keep escaping through the western exits.
+Run `tests/influence_positions_regression.tscn` for concealed detours, safer exit
+selection, remembered sightlines and escape when the concealed bypass is unavailable.
 
 Run `godot --headless --path . --fixed-fps 60 tests/roadblock_performance_regression.tscn`
 for stationary authored-force frame timing, repeated mission publication,
