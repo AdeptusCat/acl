@@ -96,7 +96,8 @@ func _create_material() -> void:
 	fog_material.set_shader_parameter("feather_width", feather_width)
 	fog_material.set_shader_parameter("opacity", opacity)
 	fog_material.set_shader_parameter("wind_velocity", wind_velocity)
-	fog_material.set_shader_parameter("hdr_2d", get_viewport().use_hdr_2d)
+	var linear_output: bool = get_viewport().use_hdr_2d and RenderingServer.get_rendering_device() != null
+	fog_material.set_shader_parameter("hdr_2d", linear_output)
 	var palette: Dictionary = TerrainPalette.PALETTE.data["families"]["grid_fog"]
 	var colors: Array = palette["colors"]
 	for index: int in range(3):

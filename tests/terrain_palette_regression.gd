@@ -16,6 +16,12 @@ func _ready() -> void:
 
 func _run() -> void:
 	palettes = (JSON.parse_string(FileAccess.get_file_as_string(TerrainPalette.PALETTE_PATH)) as Dictionary)["families"]
+	if OS.get_cmdline_user_args().has("--render-only"):
+		for hdr: bool in [false, true]:
+			await _test_render(hdr)
+		print("Terrain palette GPU checks: ", checks, "; failures: ", failures)
+		get_tree().quit(failures)
+		return
 	var proposal: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://docs/art/palette-proposals/natural-richness.json")) as Dictionary
 	for family: Dictionary in proposal["families"]:
 		_check(palettes[family["id"]]["colors"] == family["colors"], "Runtime swatches match the approved palette exactly")
@@ -161,7 +167,7 @@ func _test_render(hdr: bool) -> void:
 
 func _display_color(image: Image, point: Vector2i, hdr: bool) -> Color:
 	var color: Color = image.get_pixelv(point)
-	if hdr:
+	if hdr and RenderingServer.get_rendering_device() != null:
 		return color.linear_to_srgb()
 	return color
 

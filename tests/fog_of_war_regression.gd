@@ -89,6 +89,8 @@ func _test_render(tile_size: int, hdr: bool) -> void:
 	var fog: FogOfWarOverlay = FogOfWarOverlay.new()
 	viewport.add_child(fog)
 	fog.configure(ground, Vector2i(4, 3), cells)
+	var linear_output: bool = hdr and RenderingServer.get_rendering_device() != null
+	_check(fog.fog_material.get_shader_parameter("hdr_2d") == linear_output, "Fog color conversion matches the active renderer")
 	var clear_cell: Vector2i = Vector2i(1, 1)
 	fog.update_visibility([clear_cell])
 	fog.fog_material.set_shader_parameter("time_override", 0.0)

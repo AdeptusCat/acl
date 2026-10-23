@@ -88,7 +88,9 @@ static func family_for_tile(layer_name: StringName, data: TileData, texture_path
 
 
 static func material_for_family(family: String, hdr_2d: bool = true) -> ShaderMaterial:
-	var key: String = family + "/" + str(hdr_2d)
+	# Compatibility retains the HDR request but always renders 2D in sRGB.
+	var linear_output: bool = hdr_2d and RenderingServer.get_rendering_device() != null
+	var key: String = family + "/" + str(linear_output)
 	if _materials.has(key):
 		return _materials[key]
 	if _palettes.is_empty():
@@ -116,9 +118,8 @@ static func material_for_family(family: String, hdr_2d: bool = true) -> ShaderMa
 	if family == "bridge":
 		kind = 7
 	material.set_shader_parameter("material_kind", kind)
-	material.set_shader_parameter("hdr_2d", hdr_2d)
-	# RD samples linear textures in HDR; Compatibility still samples sRGB.
-	material.set_shader_parameter("texture_is_linear", hdr_2d and RenderingServer.get_rendering_device() != null)
+	material.set_shader_parameter("hdr_2d", linear_output)
+	material.set_shader_parameter("texture_is_linear", linear_output)
 	_materials[key] = material
 	return material
 
