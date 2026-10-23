@@ -32,16 +32,23 @@ Automatically rebuilt tables are saved in `user://los_cache/`, with one file
 per map identity. A fingerprint verifies the grid, tile geometry, vegetation
 rules, wall directions, cover, atlas transforms, actual texture pixels, sample
 spacing and cache version before reuse. A changed fingerprint replaces the
-previous cached table. Project map scenes and authored LOS resources are not
-written by runtime cache updates.
+previous cached table. When a changed map is loaded from the editor, the refreshed
+lookup is also saved to that map's project LOS resource (`los_resource_path`, or
+the default `resources/los/<map_name>.tres`). This includes compatible data reused
+from the local cache, and creates the resource if it is missing. After saving
+tile edits, launch the edited map from the editor once; later web and desktop
+exports include the saved bake without a separate rebake command. This happens
+on map loading, not on each tile stroke or scene save. Map scenes are not changed.
+Exported games only update `user://` storage and never write project resources.
 
 The loader validates the full input fingerprint for every authored LOS file,
 including vegetation and artwork as well as buildings and walls. Legacy files
 without that fingerprint cannot certify the current map: they rebuild once or
 reuse a compatible runtime cache. This also detects terrain-only edits on older
 campaign maps such as Roadblock. The rebuilt fingerprint is retained in memory
-and in the runtime cache; the authored resource is not overwritten. Increment
-`LosBakeCache.VERSION` when changing LOS rules or the meaning of cached results.
+and in the runtime cache, and saved to the project when running from the editor.
+Increment `LosBakeCache.VERSION` when changing LOS rules or the meaning of cached
+results.
 
 ## Validation and timing
 

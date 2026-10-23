@@ -67,12 +67,9 @@ func load_prebaked_los(map: Map) -> void:
 	var signature: String = building_layout_signature()
 	var wall_signature: String = wall_layout_signature()
 	if los_resource == null:
-		if not signature.is_empty() or not wall_signature.is_empty():
-			_active_los_resource = _load_or_rebuild_los(map, signature, wall_signature)
-			los_lookup = _active_los_resource.los_lookup
-			return
-		los_lookup = {}
-		push_error("Missing baked line of sight for " + map.map_name)
+		_active_los_resource = _load_or_rebuild_los(map, signature, wall_signature)
+		los_lookup = _active_los_resource.los_lookup
+		_save_editor_baked_los(_active_los_resource, file_path)
 		return
 	var changed: bool = los_resource.building_layout_signature != signature or los_resource.wall_layout_signature != wall_signature
 	# Legacy tables have no terrain fingerprint and cannot certify the current layout.
@@ -81,14 +78,32 @@ func load_prebaked_los(map: Map) -> void:
 	changed = changed or los_resource.bake_layout_signature != bake_layout_signature()
 	if changed:
 		var rebuilt: LosLookupData = _load_or_rebuild_los(map, signature, wall_signature)
-		# Retain the refreshed active lookup in memory; authoring tools save it.
+		# Refresh the loaded instance as well as the project data used by exports.
 		los_resource.los_lookup = rebuilt.los_lookup
 		los_resource.building_layout_signature = signature
 		los_resource.wall_layout_signature = wall_signature
 		los_resource.bake_layout_signature = rebuilt.bake_layout_signature
+		_save_editor_baked_los(los_resource, file_path)
 	end_los_bake()
 	los_lookup = los_resource.los_lookup
 	print("LOS data loaded!")
+
+
+func _can_save_editor_baked_los(file_path: String) -> bool:
+	return OS.has_feature("editor") and file_path.begins_with("res://")
+
+
+func _save_editor_baked_los(resource: LosLookupData, file_path: String) -> void:
+	# Exported games only update user storage; the editor also prepares future exports.
+	if not _can_save_editor_baked_los(file_path):
+		return
+	var error: Error = DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(file_path.get_base_dir()))
+	if error == OK:
+		error = ResourceSaver.save(resource, file_path, ResourceSaver.FLAG_COMPRESS)
+	if error != OK:
+		push_warning("Could not save updated baked LOS to " + file_path + ": " + error_string(error))
+		return
+	print("Updated project baked LOS: ", file_path)
 
 
 func _load_or_rebuild_los(map: Map, signature: String, wall_signature: String) -> LosLookupData:

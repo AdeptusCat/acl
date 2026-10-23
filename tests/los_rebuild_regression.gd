@@ -126,11 +126,70 @@ func _test_disk_cache() -> void:
 	service.baked_origins = 0
 	service.load_prebaked_los(map)
 	_check(service.baked_origins == 36, "An incompatible cache rebuilds instead of returning stale sight")
+	_test_editor_persistence(map, service, source)
 	service.unload_map()
 	service.free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(map.los_resource_path))
 	map.free()
+
+
+func _test_editor_persistence(map: Map, service: Node2D, source: TileSetAtlasSource) -> void:
+	var original_path: String = map.los_resource_path
+	map.get_wall_layer().clear()
+	map.los_resource_path = "res://.godot/los_auto_save_regression/lookup.res"
+	var cache_path: String = "user://los_cache/" + map.los_resource_path.sha256_text() + ".res"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(map.los_resource_path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(cache_path))
+	service.unload_map()
+	service.baked_origins = 0
+	service.load_prebaked_los(map)
+	var saved: LosLookupData = ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
+	_check(service.baked_origins == 36 and saved != null and saved.los_lookup == service.los_lookup, "Editor map loading creates missing project LOS for export")
+	var first_signature: String = saved.bake_layout_signature
+	var image: Image = Image.create(128, 128, false, Image.FORMAT_RGBA8)
+	image.fill(Color.WHITE)
+	source.texture = ImageTexture.create_from_image(image)
+	service.unload_map()
+	service.baked_origins = 0
+	service.load_prebaked_los(map)
+	saved = ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
+	_check(service.baked_origins == 36 and saved.bake_layout_signature != first_signature and saved.los_lookup == service.los_lookup, "A terrain edit automatically refreshes the project LOS file")
+	var current_signature: String = saved.bake_layout_signature
+	# A fresh installation must be able to load the project resource without a user cache.
+	service.unload_map()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(cache_path))
+	service.baked_origins = 0
+	service.load_prebaked_los(map)
+	_check(service.baked_origins == 0 and not FileAccess.file_exists(cache_path), "Saved project LOS loads without recalculation or a local cache")
+	# Also persist a compatible runtime cache when the authored file itself is stale.
+	saved.bake_layout_signature = "stale"
+	_check(ResourceSaver.save(saved, map.los_resource_path, ResourceSaver.FLAG_COMPRESS) == OK, "The stale project fixture saves")
+	ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_REPLACE)
+	service.unload_map()
+	service.load_prebaked_los(map)
+	saved.bake_layout_signature = "stale"
+	ResourceSaver.save(saved, map.los_resource_path, ResourceSaver.FLAG_COMPRESS)
+	ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_REPLACE)
+	service.unload_map()
+	service.baked_origins = 0
+	service.load_prebaked_los(map)
+	saved = ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
+	_check(service.baked_origins == 0 and saved.bake_layout_signature == current_signature, "Reusing a runtime cache also updates stale project data")
+	# Exercise the exported-game branch without writing into an actual export package.
+	service.editor_bake_saving_enabled = false
+	image.fill(Color.TRANSPARENT)
+	source.texture = ImageTexture.create_from_image(image)
+	service.unload_map()
+	service.load_prebaked_los(map)
+	saved = ResourceLoader.load(map.los_resource_path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
+	_check(saved.bake_layout_signature == current_signature and service.bake_layout_signature() != current_signature, "Exported-game mode leaves project data untouched while refreshing runtime LOS")
+	service.editor_bake_saving_enabled = true
+	service.unload_map()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(cache_path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(map.los_resource_path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(map.los_resource_path.get_base_dir()))
+	map.los_resource_path = original_path
 
 
 func _mark_stale(data: LosLookupData) -> void:
