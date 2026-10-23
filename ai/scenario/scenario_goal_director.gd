@@ -2,6 +2,7 @@ class_name ScenarioGoalDirector
 extends RefCounted
 
 const REASSESS_SECONDS: float = 0.5
+const BREACH_SEARCH_BUDGET_USEC: int = 1500
 const MISSION_HOLD_SECONDS: float = 8.0
 const CHANGE_CONFIRM_SECONDS: float = 3.0
 
@@ -29,6 +30,10 @@ var _contender: String = ""
 var _contender_since: float = -INF
 var _last_objective: Vector2i
 var _initialized: bool = false
+var last_breach_slice_usec: int = 0
+var _breach_search: ExitBreachPlanner.Search
+var _budgeted_update: bool = false
+var _breach_pending: bool = false
 
 
 func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode, policies: Array[HoldToExitFallbackPolicy] = [], escapes: Array[EscapeMissionPolicy] = []) -> void:
@@ -77,6 +82,9 @@ func change_posture(mode: PositionProfile.Mode) -> void:
 	manual_override = false
 	_initialized = false
 	_next_update = -INF
+	_breach_search = null
+	_breach_pending = false
+	last_breach_slice_usec = 0
 	_primary_since = -INF
 	_contender = ""
 
@@ -100,15 +108,28 @@ func initial_order(planner: PlatoonAI, fallback: MissionOrder, seconds_left: flo
 
 
 func update(planner: PlatoonAI, seconds_left: float, now: float) -> void:
-	if not planner.active or planner.current_order == null or now < _next_update:
+	if not planner.active or planner.current_order == null or (now < _next_update and _breach_search == null):
 		return
-	_next_update = now + REASSESS_SECONDS
 	if _initialized and planner.current_order.objective_hex != _last_objective:
 		# Debug objective edits remain deliberate overrides until the posture is changed.
 		manual_override = true
 	if manual_override:
+		_breach_search = null
 		return
+	var previous_tasks: Array[ScenarioGoalTask] = tasks.duplicate()
+	var previous_diagnostics: PackedStringArray = diagnostics.duplicate()
+	_budgeted_update = planner.is_inside_tree() and planner.is_processing()
+	_breach_pending = false
+	last_breach_slice_usec = 0
 	_build_tasks(planner, seconds_left, now)
+	_budgeted_update = false
+	if _breach_pending:
+		# Do not publish a partially searched mission or change existing squad orders.
+		tasks = previous_tasks
+		diagnostics = previous_diagnostics
+		return
+	_breach_search = null
+	_next_update = now + REASSESS_SECONDS
 	var preferred: ScenarioGoalTask = _preferred_primary()
 	if primary == null or not _contains_task(primary.key):
 		primary = preferred
@@ -258,12 +279,29 @@ func _add_escape_task(policy: EscapeMissionPolicy, planner: PlatoonAI) -> void:
 	task.reason = "Escape to an exit: %d more distinct units required" % state.remaining_units
 	if active_fallback != null:
 		task.reason = "Withdraw to exit: " + fallback_reason
-	var breach: InfluenceContact = ExitBreachPlanner.select(planner, state.hexes, policy, task.bypass_units)
+	var breach: InfluenceContact = _escape_breach(planner, state.hexes, policy, task.bypass_units)
 	if breach != null:
 		task.breach_required = true
 		task.breach_hex = breach.hex
 		task.reason += "; open a passage at " + str(breach.hex)
 	tasks.append(task)
+
+
+func _escape_breach(planner: PlatoonAI, exits: Array[Vector2i], policy: EscapeMissionPolicy, bypass_units: Dictionary[Unit, bool]) -> InfluenceContact:
+	if not _budgeted_update:
+		_breach_search = null
+		return ExitBreachPlanner.select(planner, exits, policy, bypass_units)
+	var started: int = Time.get_ticks_usec()
+	if _breach_search == null or not _breach_search.matches(planner, exits, policy):
+		_breach_search = ExitBreachPlanner.Search.new()
+		_breach_search.start(planner, exits, policy)
+	_breach_search.advance(started + BREACH_SEARCH_BUDGET_USEC)
+	last_breach_slice_usec = Time.get_ticks_usec() - started
+	if not _breach_search.completed:
+		_breach_pending = true
+		return null
+	bypass_units.merge(_breach_search.bypass_units)
+	return _breach_search.result
 
 
 func _merge_occupation_duties() -> void:

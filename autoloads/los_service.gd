@@ -75,10 +75,10 @@ func load_prebaked_los(map: Map) -> void:
 		push_error("Missing baked line of sight for " + map.map_name)
 		return
 	var changed: bool = los_resource.building_layout_signature != signature or los_resource.wall_layout_signature != wall_signature
-	# New authored tables also detect vegetation, pixel and grid changes.
-	if not los_resource.bake_layout_signature.is_empty():
-		begin_los_bake()
-		changed = changed or los_resource.bake_layout_signature != bake_layout_signature()
+	# Legacy tables have no terrain fingerprint and cannot certify the current layout.
+	# Always validate the full layout, including vegetation, artwork and grid changes.
+	begin_los_bake()
+	changed = changed or los_resource.bake_layout_signature != bake_layout_signature()
 	if changed:
 		var rebuilt: LosLookupData = _load_or_rebuild_los(map, signature, wall_signature)
 		# Retain the refreshed active lookup in memory; authoring tools save it.

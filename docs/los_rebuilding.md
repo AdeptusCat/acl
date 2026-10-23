@@ -35,11 +35,13 @@ spacing and cache version before reuse. A changed fingerprint replaces the
 previous cached table. Project map scenes and authored LOS resources are not
 written by runtime cache updates.
 
-Newly authored LOS files also record the full input fingerprint. Their loader
-detects vegetation and artwork changes as well as changed buildings and walls.
-Existing LOS files remain readable and keep their original building/wall checks
-until regenerated. Increment `LosBakeCache.VERSION` when changing LOS rules or
-the meaning of cached results.
+The loader validates the full input fingerprint for every authored LOS file,
+including vegetation and artwork as well as buildings and walls. Legacy files
+without that fingerprint cannot certify the current map: they rebuild once or
+reuse a compatible runtime cache. This also detects terrain-only edits on older
+campaign maps such as Roadblock. The rebuilt fingerprint is retained in memory
+and in the runtime cache; the authored resource is not overwritten. Increment
+`LosBakeCache.VERSION` when changing LOS rules or the meaning of cached results.
 
 ## Validation and timing
 

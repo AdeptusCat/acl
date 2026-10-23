@@ -43,6 +43,19 @@ planning results. Its HQ keeps a recovery support duty, and the squad resumes
 its escape mission when it can move again. If every combat squad is pinned,
 headquarters support recovery instead of receiving an assault mission.
 A forward HQ cannot release mobile rifles that are still cut off.
+
+Live escape/breach reassessment uses a resumable search with a 1,500-microsecond
+per-frame scheduling target. Cell evaluation, safe-corridor flooding,
+origin-specific disengagement, weighted breach search, and path reconstruction
+all resume across frames. Defender coordinates and suppression flags are reused
+within each search. Published missions and squad assignments remain in place
+until a complete replacement is available. New snapshots, changed squad origins
+or mobility, changed defender activity/suppression, and edited bypass policies
+invalidate pending work. Reassessment waits 0.5 seconds after publication before
+starting another search; response latency includes its scheduled slices.
+Initial mission setup and frozen test callers retain a synchronous API using
+the same search implementation.
+
 During the breach, platoon headquarters follow
 their own squads and company headquarters follow their company in protected
 support bounds. Calm rifle squads and support weapons both receive leadership
@@ -68,6 +81,13 @@ morale, and movement by all three headquarters without player orders.
 Run `tests/roadblock_pursuit_regression.tscn` for a live sighting-only reproduction:
 player units move behind the column while damage and morale changes are disabled,
 and every rifle and headquarters must keep escaping through the western exits.
+
+Run `godot --headless --path . --fixed-fps 60 tests/roadblock_performance_regression.tscn`
+for stationary authored-force frame timing, repeated mission publication,
+pending-mission retention, sliced/synchronous result parity, expired deadlines,
+and invalidation after movement, pinning, policy changes, or snapshot replacement.
+The breach match regression also checks sliced weighted-search parity on a
+sealed front. Timing checks measure CPU simulation, not rendering performance.
 
 Battles end when a side's last remaining units are destroyed or surrendered. Both sides'
 existing victory conditions are compared immediately, including conditions

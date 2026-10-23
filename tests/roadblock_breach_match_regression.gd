@@ -56,6 +56,14 @@ func _run() -> void:
 	_check(exit_task != null and exit_task.breach_required, "A sealed RoadBlock front creates a breach duty")
 	if exit_task != null:
 		_check(exit_task.breach_hex == weak.current_hex, "RoadBlock concentrates on the weakest defended point: selected %s; weak %s" % [exit_task.breach_hex, weak.current_hex])
+		var sliced: ExitBreachPlanner.Search = ExitBreachPlanner.Search.new()
+		sliced.start(planner, scenario.ai_escape_policies[0].exit_condition.state.exit_hexes, scenario.ai_escape_policies[0])
+		var slices: int = 0
+		while not sliced.completed and slices < 10000:
+			sliced.advance(Time.get_ticks_usec() + 250)
+			slices += 1
+		_check(sliced.completed and sliced.result != null and sliced.result.hex == weak.current_hex, "Sliced weighted search selects the same weakest breach defender")
+		_check(sliced.bypass_units == exit_task.bypass_units, "Sliced sealed-front search preserves bypass duties")
 		planner._planning_snapshot = controller.influence_map_controller.snapshot
 		planner.goal_assignments = {rifles[0]: exit_task, rifles[1]: exit_task}
 		planner._planning_requests.clear()

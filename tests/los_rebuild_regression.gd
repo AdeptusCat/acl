@@ -12,7 +12,7 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	main.process_mode = Node.PROCESS_MODE_DISABLED
-	for number: int in [1, 5]:
+	for number: int in [1, 3, 5]:
 		_test_rays(main.world.maps.get_node("Alderbrook" + str(number)) as Map)
 	_test_disk_cache()
 	main.queue_free()
@@ -84,11 +84,12 @@ func _test_disk_cache() -> void:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	var stale: LosLookupData = LosLookupData.new()
 	stale.los_lookup = {}
+	stale.wall_layout_signature = wall.los_layout_signature()
 	_check(ResourceSaver.save(stale, map.los_resource_path) == OK, "The stale fixture saves independently of project maps")
 	var service: Node2D = load("res://tests/fixtures/los_rebuild_counting_service.gd").new() as Node2D
 	add_child(service)
 	service.load_prebaked_los(map)
-	_check(service.baked_origins == 36 and FileAccess.file_exists(path), "First rebuild computes each origin and retains a local cache")
+	_check(service.baked_origins == 36 and FileAccess.file_exists(path), "A legacy lookup without a fingerprint rebuilds even when building and wall signatures match")
 	var expected: Dictionary = service.los_lookup.duplicate(true)
 	var authored: LosLookupData = load(map.los_resource_path) as LosLookupData
 	_mark_stale(authored)
@@ -98,12 +99,13 @@ func _test_disk_cache() -> void:
 	_check(service.baked_origins == 0 and service.los_lookup == expected, "Stale authored data reuses the saved cache without recomputing any ray")
 	var cached: LosLookupData = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
 	var original_signature: String = cached.bake_layout_signature
+	authored.bake_layout_signature = ""
 	data.set_custom_data("hindrance", false)
 	service.unload_map()
 	service.baked_origins = 0
 	service.load_prebaked_los(map)
 	cached = ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_IGNORE) as LosLookupData
-	_check(service.baked_origins == 36 and cached.bake_layout_signature != original_signature, "Changing vegetation rules invalidates both the authored lookup and disk cache")
+	_check(service.baked_origins == 36 and cached.bake_layout_signature != original_signature, "Terrain edits invalidate legacy lookups and the disk cache without a building or wall edit")
 	data.set_custom_data("hindrance", true)
 	_mark_stale(authored)
 	service.unload_map()
