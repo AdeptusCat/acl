@@ -69,7 +69,7 @@ func _on_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLe
 			minor_victory_conditions_v_box_container.add_child(row)
 			minor_objectives_label.show()
 		var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
-		row.set_victory_condition(progress.valid and progress.complete, condition.get_description() + "\n" + _progress_text(progress))
+		row.set_victory_condition(progress.complete, condition.get_description() + "\n" + _progress_text(progress), progress.valid)
 		if not progress.valid:
 			row.tooltip_text = progress.diagnostic
 	objectives_scroll.scroll_vertical = 0

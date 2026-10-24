@@ -46,6 +46,8 @@ func _run() -> void:
 		"Reading results does not advance captures or register additional exits")
 	_check_inside()
 	if OS.get_cmdline_user_args().has("--capture"):
+		screen.body.current_tab = 1
+		await _settle()
 		await RenderingServer.frame_post_draw
 		var image: Image = get_viewport().get_texture().get_image()
 		_check(image.save_png("/tmp/acl-battle-results.png") == OK, "The rendered result screen is captured")
