@@ -95,8 +95,9 @@ func _run() -> void:
 	world._on_hex_selected(hex, Vector2.ZERO)
 	_check(not card.details.folded, "Reopening terrain inspection preserves expanded details")
 	world._on_hex_selected(hex, Vector2.ZERO)
-	_check(not world.has_inspected_hex and not card.visible, "Clicking an inspected hex again dismisses inspection")
-	world._on_hex_selected(hex, Vector2.ZERO)
+	_check(world.has_inspected_hex and world.selected_hex == hex and card.visible and card.inspected_hex == hex and not card.details.folded,
+		"Clicking an inspected hex again preserves selection and expanded terrain details")
+	_check(world.selected_tile_map_layer.get_cell_source_id(hex) != -1, "Clicking the selected hex again preserves its map highlight")
 	var escape: InputEventKey = InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.pressed = true

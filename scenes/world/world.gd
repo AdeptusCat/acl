@@ -128,8 +128,10 @@ var has_inspected_hex: bool = false
 func _on_hex_selected(map_hex: Vector2i, _event_pos: Vector2) -> void:
 	if not is_setup or ground_layer == null:
 		return
-	if ground_layer.get_cell_source_id(map_hex) == -1 or (has_inspected_hex and map_hex == selected_hex):
+	if ground_layer.get_cell_source_id(map_hex) == -1:
 		clear_hex_inspection()
+		return
+	if has_inspected_hex and map_hex == selected_hex:
 		return
 	clear_hex_inspection()
 	selected_hex = map_hex

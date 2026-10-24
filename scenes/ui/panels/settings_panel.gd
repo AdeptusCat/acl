@@ -4,7 +4,7 @@ const SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker.svg")
 const MUTED_SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker_muted.svg")
 
 const CONTROL_HINTS: Dictionary[String, String] = {
-	"Left click": "Select / deselect squad",
+	"Left click": "Select hex / cycle squads",
 	"Roster row": "Select and center squad",
 	"Hold right click": "Open the order wheel",
 	"Release right click": "Issue the selected order",

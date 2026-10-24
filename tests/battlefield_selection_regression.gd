@@ -290,6 +290,15 @@ func _test_pointer_stack_input(input: Node) -> void:
 	_mouse(corpse_point, MouseButton.MOUSE_BUTTON_LEFT, false)
 	_check(controller.selected_unit == units[1], "Clicks through an overlapping corpse still select the living squad")
 	_check(get_viewport().gui_get_hovered_control() == null, "A corpse over a stack cannot block the command wheel")
+	var hidden_details: Array[int] = [0]
+	var shown_details: Array[Unit] = []
+	controller.hide_unit_details_in_ui.connect(func() -> void: hidden_details[0] += 1)
+	controller.show_unit_details_in_ui.connect(func(unit: Unit) -> void: shown_details.append(unit))
+	for click: int in range(3):
+		_mouse(corpse_point, MouseButton.MOUSE_BUTTON_LEFT, true)
+		_mouse(corpse_point, MouseButton.MOUSE_BUTTON_LEFT, false)
+		_check(controller.selected_unit == units[1] and units[1].selected, "Repeated pointer clicks preserve the only living squad's selection")
+	_check(hidden_details[0] == 0 and shown_details == [units[1], units[1], units[1]], "Repeated selection keeps squad details visible")
 	get_viewport().canvas_transform = original_canvas
 
 

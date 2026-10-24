@@ -171,13 +171,10 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 		controller.selected_hex_index = maxi(0, units.find(picked))
 	controller.previous_selected_hex = stack_hex
 	var unit: Unit = units[controller.selected_hex_index]
-	if unit == controller.selected_unit:
-		controller._deselect_unit(unit)
-		controller.hide_unit_details_in_ui.emit()
-	else:
+	if unit != controller.selected_unit:
 		controller._select_unit(unit)
-		controller.show_unit_details_in_ui.emit(unit)
-		LOSHelper.clear_los()
+	controller.show_unit_details_in_ui.emit(unit)
+	LOSHelper.clear_los()
 
 
 static func _counter_under_pointer(candidates: Array[Unit], screen_point: Vector2) -> Unit:
