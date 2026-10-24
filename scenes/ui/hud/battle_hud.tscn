@@ -112,6 +112,12 @@ visible = false
 layout_mode = 2
 text = "Minutes"
 
+[node name="BattleResults" type="Button" parent="Control/Countdown/HBoxContainer"]
+visible = false
+layout_mode = 2
+tooltip_text = "Review the recorded battle results"
+text = "Battle Results"
+
 [node name="MissionObjectives" type="PanelContainer" parent="Control" unique_id=1608121920]
 visible = false
 custom_minimum_size = Vector2(320, 0)

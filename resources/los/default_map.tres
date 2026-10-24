@@ -683836,3 +683836,5 @@ Vector2i(32, 19): {
 }
 }
 }
+wall_layout_signature = "c7c5b70e6fa82b07a9d755f260739826b1e5c4d106aec1fa27d33216431d1cea"
+bake_layout_signature = "6ab5b10fbe38a9084a9940935d5db01a62aac506c7fb11caeef3dc1768bd6cd5"

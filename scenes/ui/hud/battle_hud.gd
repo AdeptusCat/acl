@@ -4,6 +4,7 @@ extends CanvasLayer
 @export var ground_layer : HexagonTileMapLayer
 
 @onready var countdown_panel_container: PanelContainer = $Control/Countdown
+@onready var battle_results_button: Button = $Control/Countdown/HBoxContainer/BattleResults
 @onready var retry_panel: PanelContainer = $Control/TryAgain
 @onready var mission_objectives: MissionObjectivesPanel = $Control/MissionObjectives
 @onready var squad_roster: SquadRosterPanel = $Control/SquadRoster
@@ -23,6 +24,7 @@ var _top_layout_queued: bool = false
 var _compact_layout: bool = false
 
 signal try_again
+signal battle_results_requested
 
 # Configuration
 const HEX_DIRECTIONS: Array[Vector2i] = [
@@ -39,6 +41,7 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 		#print(option)
 
 func _ready() -> void:
+	battle_results_button.pressed.connect(_on_battle_results_pressed)
 	$Control.resized.connect(_queue_top_layout)
 	$Control/Settings.item_rect_changed.connect(_queue_top_layout)
 	squad_roster.visibility_changed.connect(_queue_top_layout)
@@ -102,6 +105,15 @@ func _layout_top_bar() -> void:
 	_layout_mission_objectives()
 	_layout_order_feedback()
 	_queue_left_layout()
+
+
+func set_battle_results_available(available: bool) -> void:
+	battle_results_button.visible = available
+	_queue_top_layout()
+
+
+func _on_battle_results_pressed() -> void:
+	battle_results_requested.emit()
 
 
 func show_squad_roster(player_team: Globals.Team) -> void:

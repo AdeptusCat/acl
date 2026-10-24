@@ -211,6 +211,7 @@ func _check_keep_playing(world: Node, unit: Unit) -> void:
 	var original_collections: Dictionary[Globals.Team, VictoryConditionCollection] = Globals.victory_conditions
 	var wheel: Control = world.ui.selection_wheel_alt
 	_check(not controller.continue_after_end(), "Keep Playing cannot change an unfinished mission")
+	_check(not world.ui.battle_results_button.visible, "An unfinished mission offers no recorded battle results")
 	for early_defeat: bool in [false, true]:
 		controller.end_game_handled = false
 		controller.continuing_after_end = false
@@ -239,6 +240,7 @@ func _check_keep_playing(world: Node, unit: Unit) -> void:
 		var save_path: String = "user://matches/%s.tres" % scenario.get_save_id()
 		var recorded_result: String = FileAccess.get_file_as_string(save_path)
 		var recorded_time: float = controller.time_left_seconds
+		var recorded_objective: String = world.result_screen.major_victory_conditions_v_box_container.get_child(0).label.text
 		world.result_screen.get_node("Control/CenterContainer/PanelContainer/Content/Actions/KeepPlaying").pressed.emit()
 		await _settle()
 		_check(not world.result_screen.visible and controller.continuing_after_end and world.input_manager._battle_input_enabled, "The actual Keep Playing button restores battlefield input after either result")
@@ -277,6 +279,21 @@ func _check_keep_playing(world: Node, unit: Unit) -> void:
 		_check(controller.end_game_handled and not controller.timer_running and controller.time_left_seconds == recorded_time and not world.result_screen.visible, "Continuing cannot restart the clock or display another result")
 		_check(major.state.units_exited.is_empty() and minor.state.units_exited.is_empty() and unit.is_active(), "Moving onto an exit after the result does not alter scored objectives or retire the squad")
 		_check(FileAccess.get_file_as_string(save_path) == recorded_result, "Continuing leaves the saved battle result unchanged")
+		major.state.units_exited.append(unit)
+		var results_button: Button = world.ui.battle_results_button
+		_check(results_button.visible and _screen_rect(world.ui.countdown_panel_container).encloses(_screen_rect(results_button)), "Battle Results is available beside the mission clock after Keep Playing")
+		if OS.get_cmdline_user_args().has("--capture"):
+			await _capture("results-button")
+		var results_point: Vector2 = _screen_rect(results_button).get_center()
+		_motion(results_point)
+		_mouse(results_point, MouseButton.MOUSE_BUTTON_LEFT, true)
+		_mouse(results_point, MouseButton.MOUSE_BUTTON_LEFT, false)
+		await _settle()
+		_check(world.result_screen.visible and not world.input_manager._battle_input_enabled, "Clicking Battle Results reopens the summary and suspends battlefield input")
+		_check(world.result_screen.major_victory_conditions_v_box_container.get_child(0).label.text == recorded_objective and FileAccess.get_file_as_string(save_path) == recorded_result, "Reopening preserves the recorded progress and save despite changes during continued play")
+		world.result_screen.get_node("Control/CenterContainer/PanelContainer/Content/Actions/KeepPlaying").pressed.emit()
+		await _settle()
+		_check(not world.result_screen.visible and world.input_manager._battle_input_enabled and controller.order_via_option_wheel(unit.current_hex, WheelOption.Option.STOP), "Keep Playing restores squad control after reviewing results again")
 	scenario.victory_conditions = original_conditions
 	Globals.victory_conditions = original_collections
 

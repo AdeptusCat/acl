@@ -83,6 +83,7 @@ func _ready() -> void:
 	ui.squad_roster.unit_selected.connect(game_controller.select_and_center_unit)
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	result_screen.keep_playing.connect(_on_result_screen_keep_playing)
+	ui.battle_results_requested.connect(_on_battle_results_requested)
 	game_controller.hex_selected.connect(_on_hex_selected)
 	ui.tile_details.inspection_closed.connect(clear_hex_inspection)
 	hex_inspection.edge_hovered.connect(ui.show_hex_edge_hint)
@@ -369,6 +370,20 @@ func _on_result_screen_try_again() -> void:
 func _on_result_screen_keep_playing() -> void:
 	if is_setup and game_controller.continue_after_end():
 		input_manager.set_battle_input_enabled(true)
+		ui.set_battle_results_available(true)
+
+
+func _on_battle_results_requested() -> void:
+	if not is_setup or not game_controller.end_game_handled or not game_controller.continuing_after_end or result_screen.visible:
+		return
+	ui.selection_wheel_alt.cancel()
+	input_manager.set_battle_input_enabled(false)
+	clear_hex_inspection()
+	ui.hide_target_hex_cover_distance()
+	ui.hide_order_feedback()
+	ui.get_node("Control/Settings").close_panels()
+	LOSHelper.clear_los()
+	result_screen.show()
 
 
 var selected_map_hex: Vector2i
@@ -417,6 +432,7 @@ func _on_wheel_cancelled() -> void:
 
 
 func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCondition.OutcomeLevel, timeout: bool) -> void:
+	ui.set_battle_results_available(false)
 	ui.selection_wheel_alt.cancel()
 	input_manager.set_battle_input_enabled(false)
 	clear_hex_inspection()
