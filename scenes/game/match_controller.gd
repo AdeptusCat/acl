@@ -453,12 +453,12 @@ func _on_unit_exited(unit: Unit) -> void:
 	update_visible_hexes()
 	show_visible_units()
 	draw_fog()
-	if MatchVictoryCoordinator.can_finish_after_force_defeat():
+	if MatchVictoryCoordinator.can_finish_after_force_defeat() or MatchVictoryCoordinator.can_finish_after_objective_defeat(self):
 		_on_win_condition_timer_timeout.call_deferred()
 
 
 func _on_unit_surrendered(_unit: Unit) -> void:
-	if MatchVictoryCoordinator.can_finish_after_force_defeat():
+	if MatchVictoryCoordinator.can_finish_after_force_defeat() or MatchVictoryCoordinator.can_finish_after_objective_defeat(self):
 		_on_win_condition_timer_timeout.call_deferred()
 
 
@@ -476,7 +476,7 @@ func _on_unit_died(unit: Unit) -> void:
 	show_visible_units()
 	draw_fog()
 	#unit.queue_free()
-	if MatchVictoryCoordinator.can_finish_after_force_defeat():
+	if MatchVictoryCoordinator.can_finish_after_force_defeat() or MatchVictoryCoordinator.can_finish_after_objective_defeat(self):
 		_on_win_condition_timer_timeout.call_deferred()
 
 

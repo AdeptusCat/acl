@@ -80,7 +80,7 @@ func _run() -> void:
 	for unit: Unit in enemies:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
-	_check(winners.size() == 1 and winners[0]["team"] == -1, "Elimination compares both sides and allows a draw when neither outcome is earned")
+	_check(winners.size() == 1 and winners[0]["team"] == Globals.Team.AXIS, "Eliminating the enemy after both player objectives become impossible still ends in player defeat")
 	_reset()
 	friends.alive = false
 	Globals.units_destroyed.units_collection[Globals.Team.AXIS].units.append(friends)

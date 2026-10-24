@@ -80,3 +80,57 @@ static func outcome_complete(conditions: Array[VictoryCondition], owner: Globals
 		if not condition.is_condition_met():
 			return false
 	return found
+
+
+static func outcome_possible(conditions: Array[VictoryCondition], owner: Globals.Team, level: VictoryCondition.OutcomeLevel) -> bool:
+	var units: Array[Unit] = Globals.get_units()
+	var friendly_count: int = _remaining_units(units, owner)
+	var enemy_team: Globals.Team = Globals.get_enemy_team(owner)
+	var enemy_count: int = _remaining_units(units, enemy_team)
+	var garrisons: Dictionary[Vector2i, int] = {}
+	var exits_needed: int = 0
+	var found: bool = false
+	for source: VictoryCondition in conditions:
+		if source.team != owner or source.outcome_level != level:
+			continue
+		found = true
+		var progress: VictoryConditionProgress = read(source)
+		# Missing state and custom conditions cannot prove an irreversible defeat.
+		if not progress.valid or progress.complete:
+			continue
+		match progress.kind:
+			Kind.EXIT:
+				var exit: ExitUnitsCondition = source as ExitUnitsCondition
+				if progress.remaining_units > _remaining_units(units, owner, exit.state.units_exited):
+					return false
+				# Overlapping exit objectives can credit the same departing squad.
+				exits_needed = maxi(exits_needed, progress.remaining_units)
+			Kind.DESTROY:
+				var defeated: Array[Unit] = Globals.units_destroyed.units_collection[owner].units
+				if friendly_count == 0 or progress.remaining_units > _remaining_units(units, enemy_team, defeated):
+					return false
+			Kind.PREVENT_EXIT:
+				# Recorded enemy exits can never be reversed.
+				return false
+			Kind.OCCUPY:
+				if friendly_count == 0:
+					return false
+				# Eliminating the remaining enemy can secure even unoccupied objectives.
+				# Do not reject a capture for insufficient garrisons while that route remains.
+				if enemy_count > 0:
+					continue
+				for hex: Vector2i in progress.hexes:
+					garrisons[hex] = maxi(garrisons.get(hex, 0), progress.required_units)
+	var garrison_count: int = 0
+	for count: int in garrisons.values():
+		garrison_count += count
+	return found and garrison_count + exits_needed <= friendly_count
+
+
+static func _remaining_units(units: Array[Unit], team: Globals.Team, credited: Array[Unit] = []) -> int:
+	var count: int = 0
+	for unit: Unit in units:
+		if is_instance_valid(unit) and not unit.is_queued_for_deletion() and unit.team == team and unit.is_active() and not unit.surrendered and not credited.has(unit):
+			# Pinning and routing are recoverable; they do not remove a squad's potential.
+			count += 1
+	return count

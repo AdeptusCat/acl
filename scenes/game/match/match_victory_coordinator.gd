@@ -139,6 +139,18 @@ static func can_finish_after_force_defeat() -> bool:
 	return not _defeated_teams().is_empty()
 
 
+static func can_finish_after_objective_defeat(controller: Node2D) -> bool:
+	if not controller.timer_running or controller.time_left_seconds <= 0.0 or not is_instance_valid(Globals.scenario_chosen):
+		return false
+	var collection: VictoryConditionCollection = Globals.victory_conditions.get(Globals.team_player)
+	if collection == null or collection.victory_conditions.is_empty():
+		return false
+	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
+		if VictoryConditionProgress.outcome_possible(collection.victory_conditions, Globals.team_player, level):
+			return false
+	return true
+
+
 static func _defeated_teams() -> Array[Globals.Team]:
 	var result: Array[Globals.Team] = []
 	if not is_instance_valid(Globals.scenario_chosen):
@@ -236,7 +248,13 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 		if controller.overtime_active:
 			controller.timer_running = true
 			return
-	var at_end: bool = force_defeated or controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
+	var objective_defeat: bool = can_finish_after_objective_defeat(controller)
+	var at_end: bool = force_defeated or objective_defeat or controller.time_left_seconds <= 0.0 or can_finish_after_enemy_departure()
+	if objective_defeat:
+		controller.timer_running = false
+		controller.overtime_active = false
+		controller.overtime_packages.clear()
+		controller.end_game_handled = true
 	
 	var major_victory_conditions_met: Dictionary[Globals.Team, bool] = {
 		Globals.Team.AXIS: false,
@@ -286,6 +304,11 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 				controller.end_game_handled = true
 				return
 	
+	if objective_defeat:
+		# If the opponent has not earned a higher result, the failed mission is a
+		# minor enemy victory. Keep objective progress intact rather than inventing credit.
+		controller.show_winner.emit(Globals.get_enemy_team(Globals.team_player), VictoryCondition.OutcomeLevel.MINOR, false)
+		return
 	if at_end:
 		controller.show_winner.emit(-1, VictoryCondition.OutcomeLevel.MAJOR, controller.time_left_seconds <= 0.0)
 		controller.timer_running = false
