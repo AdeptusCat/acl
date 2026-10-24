@@ -116,13 +116,14 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		u.receive_fire(terrain_defense_bonus)
 		
 		var state: STATES.MoraleState = u.stress_system.state
+		var target_chance_to_hit: float = chance_to_hit
 		if state == STATES.MoraleState.PANIC:
-			chance_to_hit *= 4
+			target_chance_to_hit *= 4
 		if state == STATES.MoraleState.PINNED:
-			chance_to_hit *= 0.2
+			target_chance_to_hit *= 0.2
 		
-		chance_to_hit = clamp(chance_to_hit, 0.00001, 0.95)
-		chance_to_hit_per_target.append(chance_to_hit)
+		target_chance_to_hit = clampf(target_chance_to_hit, 0.00001, 0.95)
+		chance_to_hit_per_target.append(target_chance_to_hit)
 		i += 1
 
 	# --- assign each round to ONE squad and roll the hit there ---

@@ -116,7 +116,7 @@
 						"received": 0.0
 					},
 					{
-						"casualties": 5,
+						"casualties": 3,
 						"fast": 100.0,
 						"original_source": true,
 						"slow": 100.0
@@ -157,7 +157,7 @@
 				30.0,
 				30.0
 			],
-			"rng_tail": 0.58963006734848
+			"rng_tail": 0.594778716564178
 		},
 		"0/true/77": {
 			"events": [
@@ -169,7 +169,7 @@
 						"received": 0.0
 					},
 					{
-						"casualties": 5,
+						"casualties": 3,
 						"fast": 100.0,
 						"original_source": true,
 						"slow": 100.0
@@ -210,7 +210,7 @@
 				30.0,
 				30.0
 			],
-			"rng_tail": 0.517764627933502
+			"rng_tail": 0.0281502734869719
 		},
 		"1/false/0": {
 			"events": [
@@ -223,7 +223,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -237,7 +237,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -251,7 +251,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -276,7 +276,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -290,7 +290,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -304,7 +304,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 4.044978,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -329,7 +329,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -343,7 +343,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -357,7 +357,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -382,7 +382,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -396,7 +396,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -410,7 +410,7 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 6.137208,
+						"fast": 3.626532,
 						"original_source": true,
 						"slow": 1.8
 					}
@@ -422,7 +422,7 @@
 				8.0,
 				8.0
 			],
-			"rng_tail": 0.717557489871979
+			"rng_tail": 0.204509228467941
 		},
 		"2/false/0": {
 			"events": [
@@ -647,9 +647,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -661,9 +661,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -674,10 +674,10 @@
 						"received": 0.0
 					},
 					{
-						"casualties": 0,
-						"fast": 82.23,
+						"casualties": 1,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				]
 			],
@@ -687,7 +687,7 @@
 				3.0,
 				3.0
 			],
-			"rng_tail": 0.814048409461975
+			"rng_tail": 0.197998091578484
 		},
 		"3/false/77": {
 			"events": [
@@ -700,9 +700,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -714,9 +714,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -728,9 +728,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				]
 			],
@@ -740,7 +740,7 @@
 				3.0,
 				3.0
 			],
-			"rng_tail": 0.788113951683044
+			"rng_tail": 0.379807591438293
 		},
 		"3/true/0": {
 			"events": [
@@ -753,9 +753,9 @@
 					},
 					{
 						"casualties": 5,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -767,9 +767,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -780,10 +780,10 @@
 						"received": 0.0
 					},
 					{
-						"casualties": 0,
-						"fast": 82.23,
+						"casualties": 1,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				]
 			],
@@ -793,7 +793,7 @@
 				3.0,
 				3.0
 			],
-			"rng_tail": 0.814048409461975
+			"rng_tail": 0.197998091578484
 		},
 		"3/true/77": {
 			"events": [
@@ -806,9 +806,9 @@
 					},
 					{
 						"casualties": 4,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -820,9 +820,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				],
 				[
@@ -834,9 +834,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 82.23,
+						"fast": 85.63434,
 						"original_source": true,
-						"slow": 82.23
+						"slow": 85.63434
 					}
 				]
 			],
@@ -846,7 +846,7 @@
 				3.0,
 				3.0
 			],
-			"rng_tail": 0.788113951683044
+			"rng_tail": 0.379807591438293
 		},
 		"4/false/0": {
 			"events": [
@@ -859,9 +859,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 56.4447,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 41.4447
+						"slow": 40.76964
 					}
 				],
 				[
@@ -873,9 +873,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 56.4447,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 41.4447
+						"slow": 40.76964
 					}
 				],
 				[
@@ -887,9 +887,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 56.4447,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 41.4447
+						"slow": 40.76964
 					}
 				]
 			],
@@ -912,9 +912,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 41.4447,
+						"fast": 40.76964,
 						"original_source": true,
-						"slow": 31.4447
+						"slow": 30.76964
 					}
 				],
 				[
@@ -926,9 +926,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 41.4447,
+						"fast": 40.76964,
 						"original_source": true,
-						"slow": 31.4447
+						"slow": 30.76964
 					}
 				],
 				[
@@ -940,9 +940,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 41.4447,
+						"fast": 40.76964,
 						"original_source": true,
-						"slow": 31.4447
+						"slow": 30.76964
 					}
 				]
 			],
@@ -964,10 +964,10 @@
 						"received": 1.0
 					},
 					{
-						"casualties": 4,
-						"fast": 74.82,
+						"casualties": 1,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 40.76964
 					}
 				],
 				[
@@ -979,9 +979,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 40.76964
 					}
 				],
 				[
@@ -993,9 +993,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 40.76964
 					}
 				]
 			],
@@ -1005,7 +1005,7 @@
 				4.0,
 				4.0
 			],
-			"rng_tail": 0.814048409461975
+			"rng_tail": 0.41507476568222
 		},
 		"4/true/77": {
 			"events": [
@@ -1017,10 +1017,10 @@
 						"received": 1.0
 					},
 					{
-						"casualties": 2,
-						"fast": 74.82,
+						"casualties": 1,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 40.76964
 					}
 				],
 				[
@@ -1032,9 +1032,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 40.76964
 					}
 				],
 				[
@@ -1046,9 +1046,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 55.76964,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 40.76964
 					}
 				]
 			],
@@ -1058,7 +1058,7 @@
 				4.0,
 				4.0
 			],
-			"rng_tail": 0.788113951683044
+			"rng_tail": 0.636521518230438
 		},
 		"5/false/0": {
 			"events": [
@@ -1071,9 +1071,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 64.82
+						"slow": 65.33312
 					}
 				],
 				[
@@ -1085,9 +1085,9 @@
 					},
 					{
 						"casualties": 3,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 64.82
+						"slow": 65.33312
 					}
 				],
 				[
@@ -1099,9 +1099,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 64.82
+						"slow": 65.33312
 					}
 				]
 			],
@@ -1124,9 +1124,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				],
 				[
@@ -1138,9 +1138,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				],
 				[
@@ -1152,9 +1152,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				]
 			],
@@ -1164,7 +1164,7 @@
 				4.0,
 				4.0
 			],
-			"rng_tail": 0.788113951683044
+			"rng_tail": 0.379807591438293
 		},
 		"5/true/0": {
 			"events": [
@@ -1177,9 +1177,9 @@
 					},
 					{
 						"casualties": 4,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 75.33312
 					}
 				],
 				[
@@ -1191,9 +1191,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 75.33312
 					}
 				],
 				[
@@ -1205,9 +1205,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 74.82
+						"slow": 75.33312
 					}
 				]
 			],
@@ -1230,9 +1230,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				],
 				[
@@ -1244,9 +1244,9 @@
 					},
 					{
 						"casualties": 2,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				],
 				[
@@ -1258,9 +1258,9 @@
 					},
 					{
 						"casualties": 0,
-						"fast": 74.82,
+						"fast": 75.33312,
 						"original_source": true,
-						"slow": 54.82
+						"slow": 55.33312
 					}
 				]
 			],
@@ -1270,7 +1270,7 @@
 				4.0,
 				4.0
 			],
-			"rng_tail": 0.788113951683044
+			"rng_tail": 0.379807591438293
 		}
 	},
 	"math": {
