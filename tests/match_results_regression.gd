@@ -55,6 +55,7 @@ func _run() -> void:
 	for index: int in range(20):
 		scenario.victory_conditions.append(occupation)
 	screen._on_show_winner(Globals.Team.ALLIES)
+	screen.body.current_tab = 1
 	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
 		get_tree().root.size = resolution
 		await _settle()

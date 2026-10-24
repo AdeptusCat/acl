@@ -31,7 +31,7 @@ func setup(unit: Unit) -> void:
 			strength_text = "1 soldier"
 	equipment_summary = _equipment_summary(unit.squad_loadout)
 	_headquarters = unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS
-	_picture = _idle_picture(unit)
+	_picture = idle_picture(unit)
 	var frame: PanelContainer = _make_picture(THUMBNAIL_SIZE)
 	frame.name = "Picture"
 	thumbnail = frame.get_node("Image") as TextureRect
@@ -53,7 +53,9 @@ func setup(unit: Unit) -> void:
 	tooltip_text = "%s\n%s\nRole: %s\nStrength: %s\nEquipment: %s" % [squad_name, formation, role, strength_text, equipment_summary]
 
 
-func _idle_picture(unit: Unit) -> Texture2D:
+static func idle_picture(unit: Unit) -> Texture2D:
+	if not is_instance_valid(unit.ui) or not is_instance_valid(unit.ui.unit_status_control):
+		return null
 	var icons: Control = unit.ui.unit_status_control
 	var property: String = "idle_"
 	match unit.squad_type:
@@ -64,7 +66,7 @@ func _idle_picture(unit: Unit) -> Texture2D:
 		Globals.SquadType.MORTAR:
 			property = "idle_mortar_"
 	if unit.team == Globals.Team.AXIS:
-		if _headquarters:
+		if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 			var leader: Texture2D = icons.get("idle_leader_ger") as Texture2D
 			if leader != null:
 				return leader

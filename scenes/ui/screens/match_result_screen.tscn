@@ -4,6 +4,31 @@
 [ext_resource type="PackedScene" uid="uid://dpmkqlbwsqj2x" path="res://scenes/ui/screens/victory_condition_result_row.tscn" id="2"]
 [ext_resource type="Theme" uid="uid://g173hug4jpgu" path="res://resources/theme/battle_hud_theme.tres" id="3"]
 
+[sub_resource type="StyleBoxFlat" id="ResultsBody"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.12, 0.13, 0.105, 1)
+
+[sub_resource type="StyleBoxFlat" id="TabSelected"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.12, 0.13, 0.105, 1)
+border_width_top = 2
+border_color = Color(0.86, 0.77, 0.56, 1)
+
+[sub_resource type="StyleBoxFlat" id="TabUnselected"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.09, 0.1, 0.085, 1)
+border_width_top = 2
+border_color = Color(0.09, 0.1, 0.085, 1)
+
 [node name="ResultScreen" type="CanvasLayer" unique_id=1842144900]
 layer = 3
 script = ExtResource("1")
@@ -41,7 +66,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Control/CenterContainer"]
-custom_minimum_size = Vector2(780, 0)
+custom_minimum_size = Vector2(1020, 0)
 layout_mode = 2
 
 [node name="Content" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer"]
@@ -159,37 +184,104 @@ text = "0"
 horizontal_alignment = 2
 autowrap_mode = 3
 
-[node name="ObjectivesSeparator" type="HSeparator" parent="Control/CenterContainer/PanelContainer/Content"]
+[node name="DetailsSeparator" type="HSeparator" parent="Control/CenterContainer/PanelContainer/Content"]
 layout_mode = 2
 
-[node name="ObjectivesScroll" type="ScrollContainer" parent="Control/CenterContainer/PanelContainer/Content"]
-custom_minimum_size = Vector2(0, 180)
+[node name="Body" type="TabContainer" parent="Control/CenterContainer/PanelContainer/Content"]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ResultsBody")
+theme_override_colors/font_selected_color = Color(0.86, 0.77, 0.56, 1)
+theme_override_colors/font_unselected_color = Color(0.78, 0.79, 0.7, 1)
+theme_override_colors/font_hovered_color = Color(0.93, 0.91, 0.82, 1)
+theme_override_styles/tab_selected = SubResource("TabSelected")
+theme_override_styles/tab_unselected = SubResource("TabUnselected")
+theme_override_styles/tab_hovered = SubResource("TabSelected")
+current_tab = 0
+clip_tabs = false
+
+[node name="Squads" type="ScrollContainer" parent="Control/CenterContainer/PanelContainer/Content/Body"]
 layout_mode = 2
 mouse_force_pass_scroll_events = false
 follow_focus = true
 horizontal_scroll_mode = 0
 
-[node name="Objectives" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/ObjectivesScroll"]
+[node name="Forces" type="HBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Player" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="MajorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/Content/ObjectivesScroll/Objectives"]
+[node name="Heading" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Player"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Your force"
+autowrap_mode = 3
+
+[node name="Rows" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Player"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Empty" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Player"]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "No squads recorded."
+
+[node name="Separator" type="VSeparator" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces"]
+layout_mode = 2
+
+[node name="Enemy" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Heading" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Enemy"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Enemy"
+autowrap_mode = 3
+
+[node name="Rows" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Enemy"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Empty" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Squads/Forces/Enemy"]
+layout_mode = 2
+theme_type_variation = &"HudSecondary"
+text = "No squads recorded."
+
+[node name="Objectives" type="ScrollContainer" parent="Control/CenterContainer/PanelContainer/Content/Body"]
+visible = false
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Objectives"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="MajorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Objectives/Rows"]
 layout_mode = 2
 theme_type_variation = &"HudHeading"
 text = "Major victory objectives"
 
-[node name="MajorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/ObjectivesScroll/Objectives"]
+[node name="MajorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Objectives/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/Content/ObjectivesScroll/Objectives"]
+[node name="MinorObjectivesLabel" type="Label" parent="Control/CenterContainer/PanelContainer/Content/Body/Objectives/Rows"]
 visible = false
 layout_mode = 2
 theme_type_variation = &"HudHeading"
 text = "Minor victory objectives"
 
-[node name="MinorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/ObjectivesScroll/Objectives"]
+[node name="MinorVictoryConditionsVBoxContainer" type="VBoxContainer" parent="Control/CenterContainer/PanelContainer/Content/Body/Objectives/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
