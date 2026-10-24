@@ -10,7 +10,7 @@ const CONNECTED_COLOR: Color = Color("a9dfb5")
 const LIMITED_COLOR: Color = Color("ffd078")
 const LOST_COLOR: Color = Color("ff9b91")
 const INK: Color = Color("101b21")
-const HIGHLIGHT: Color = Color("f3e6bb")
+const HIGHLIGHT: Color = Color(0.95, 0.9, 0.73, 0.65)
 
 class ContactCue extends RefCounted:
 	var state: CommandConnectivity.ContactState = CommandConnectivity.ContactState.CONNECTED
@@ -203,15 +203,6 @@ func _draw() -> void:
 	# Viewport coordinates keep widths, patterns and labels stable through zoom.
 	draw_set_transform_matrix(get_global_transform_with_canvas().affine_inverse())
 	# Contact details live in the squad panel; midpoint labels obscure nearby counters.
-	for unit_id: int in highlighted_units:
-		if not is_instance_id_valid(unit_id):
-			continue
-		var unit: Unit = instance_from_id(unit_id) as Unit
-		if not _can_display(unit):
-			continue
-		var frame: Rect2 = counter_rect(unit).grow(4.0)
-		draw_rect(frame, INK, false, 6.0)
-		draw_rect(frame, HIGHLIGHT, false, 2.0)
 	for unit_id: int in _cues:
 		if not is_instance_id_valid(unit_id):
 			continue
@@ -222,6 +213,13 @@ func _draw() -> void:
 
 func _draw_links() -> void:
 	_links_layer.draw_set_transform_matrix(_links_layer.get_global_transform_with_canvas().affine_inverse())
+	# Relationship marks stay behind counters so stacked squads' text stays clear.
+	for unit_id: int in highlighted_units:
+		if not is_instance_id_valid(unit_id):
+			continue
+		var unit: Unit = instance_from_id(unit_id) as Unit
+		if _can_display(unit):
+			_draw_highlight(counter_rect(unit).grow(3.0))
 	for cached: Variant in displayed_links:
 		if not is_instance_valid(cached):
 			continue
@@ -230,6 +228,22 @@ func _draw_links() -> void:
 			continue
 		var emphasized: bool = _selected == null or unit == _selected or highlighted_units.has(unit.get_instance_id())
 		_draw_link(link_points(unit), CommandConnectivity.contact_state_for(unit), emphasized)
+
+
+func _draw_highlight(frame: Rect2) -> void:
+	var length: float = minf(8.0, minf(frame.size.x, frame.size.y) * 0.25)
+	var top_left: Vector2 = frame.position
+	var top_right: Vector2 = Vector2(frame.end.x, frame.position.y)
+	var bottom_left: Vector2 = Vector2(frame.position.x, frame.end.y)
+	var bottom_right: Vector2 = frame.end
+	var corners: Array[PackedVector2Array] = [
+		PackedVector2Array([top_left + Vector2(length, 0.0), top_left, top_left + Vector2(0.0, length)]),
+		PackedVector2Array([top_right - Vector2(length, 0.0), top_right, top_right + Vector2(0.0, length)]),
+		PackedVector2Array([bottom_left - Vector2(0.0, length), bottom_left, bottom_left + Vector2(length, 0.0)]),
+		PackedVector2Array([bottom_right - Vector2(0.0, length), bottom_right, bottom_right - Vector2(length, 0.0)]),
+	]
+	for corner: PackedVector2Array in corners:
+		_links_layer.draw_polyline(corner, HIGHLIGHT, 1.25, true)
 
 
 func _draw_link(points: PackedVector2Array, state: CommandConnectivity.ContactState, emphasized: bool) -> void:
