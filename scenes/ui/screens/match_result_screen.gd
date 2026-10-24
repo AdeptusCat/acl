@@ -38,6 +38,7 @@ const SQUAD_RESULT_ROW: Script = preload("res://scenes/ui/units/squad_result_row
 var _fit_queued: bool = false
 
 signal try_again
+signal keep_playing
 
 
 func _ready() -> void:
@@ -217,3 +218,4 @@ func _on_try_again_pressed() -> void:
 
 func _on_keep_playing_pressed() -> void:
 	hide()
+	keep_playing.emit()

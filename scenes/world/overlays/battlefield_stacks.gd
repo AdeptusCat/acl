@@ -13,7 +13,7 @@ func setup(match_controller: Node2D) -> void:
 
 
 func cycle_selection(cell: Vector2i, picked: Unit = null) -> bool:
-	if not is_instance_valid(controller) or controller.end_game_handled:
+	if not is_instance_valid(controller) or (controller.end_game_handled and not controller.continuing_after_end):
 		return false
 	var members: Array[Unit] = []
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):

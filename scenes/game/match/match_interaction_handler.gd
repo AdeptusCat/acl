@@ -11,7 +11,7 @@ static func command_name(option: WheelOption.Option) -> String:
 static func command_restriction(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> String:
 	if option == WheelOption.Option.NONE:
 		return ""
-	if controller.end_game_handled:
+	if controller.end_game_handled and not controller.continuing_after_end:
 		return "The mission has ended."
 	var unit: Unit = controller.selected_unit
 	if not is_instance_valid(unit) or not unit.is_active():
@@ -209,7 +209,7 @@ static func handle_mouse_event_position_changed(controller: Node2D, event_pos: V
 
 static func refresh_target_preview(controller: Node2D, local_point: Vector2, screen_point: Vector2) -> void:
 	var world: Node2D = controller.get_parent() as Node2D
-	if not is_instance_valid(controller.ground_layer) or controller.end_game_handled or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
+	if not is_instance_valid(controller.ground_layer) or (controller.end_game_handled and not controller.continuing_after_end) or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return

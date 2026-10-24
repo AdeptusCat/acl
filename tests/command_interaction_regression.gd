@@ -195,11 +195,90 @@ func _run() -> void:
 		wheel.select_at(point)
 		_check(wheel.close() == WheelOption.Option.MOVE_NORMAL, "Releasing at the original pointer selects Move near %s" % point)
 	LOSHelper.los_lookup[unit.current_hex] = original_los
+	await _check_keep_playing(world, unit)
 	await _check_rout(world, unit, other)
 	main.queue_free()
 	await _settle()
 	print("Command interaction checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _check_keep_playing(world: Node, unit: Unit) -> void:
+	var controller: Node2D = world.game_controller
+	var ground: HexagonTileMapLayer = world.ground_layer
+	var scenario: Scenario = Globals.scenario_chosen
+	var original_conditions: Array[VictoryCondition] = scenario.victory_conditions.duplicate()
+	var original_collections: Dictionary[Globals.Team, VictoryConditionCollection] = Globals.victory_conditions
+	var wheel: Control = world.ui.selection_wheel_alt
+	_check(not controller.continue_after_end(), "Keep Playing cannot change an unfinished mission")
+	for early_defeat: bool in [false, true]:
+		controller.end_game_handled = false
+		controller.continuing_after_end = false
+		controller.timer_running = true
+		controller.time_left_seconds = 0.0
+		if early_defeat:
+			controller.time_left_seconds = 120.0
+		var major: ExitUnitsCondition = ExitUnitsCondition.new()
+		major.team = Globals.team_player
+		major.required_unit_count = 999
+		major.state = ExitUnitsState.new()
+		major.state.exit_hexes.assign([unit.current_hex])
+		var minor: ExitUnitsCondition = major.duplicate() as ExitUnitsCondition
+		minor.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+		minor.state = ExitUnitsState.new()
+		minor.state.exit_hexes.assign([unit.current_hex])
+		scenario.victory_conditions.assign([major, minor])
+		Globals.victory_conditions = {Globals.Team.AXIS: VictoryConditionCollection.new(), Globals.Team.ALLIES: VictoryConditionCollection.new()}
+		Globals.victory_conditions[Globals.team_player].victory_conditions.assign([major, minor])
+		controller._on_win_condition_timer_timeout()
+		await _settle()
+		_check(controller.end_game_handled and world.result_screen.visible and not world.input_manager._battle_input_enabled, "Timeout and impossible objectives display results and suspend battlefield input")
+		if early_defeat:
+			_check(world.result_screen.result_label.text == "Defeat" and controller.time_left_seconds == 120.0, "Impossible objectives end the actual map before its deadline")
+		_check(not controller.order_via_option_wheel(unit.current_hex, WheelOption.Option.STOP), "Orders stay blocked until Keep Playing is chosen")
+		var save_path: String = "user://matches/%s.tres" % scenario.get_save_id()
+		var recorded_result: String = FileAccess.get_file_as_string(save_path)
+		var recorded_time: float = controller.time_left_seconds
+		world.result_screen.get_node("Control/CenterContainer/PanelContainer/Content/Actions/KeepPlaying").pressed.emit()
+		await _settle()
+		_check(not world.result_screen.visible and controller.continuing_after_end and world.input_manager._battle_input_enabled, "The actual Keep Playing button restores battlefield input after either result")
+		controller._deselect_unit(controller.selected_unit)
+		controller.camera.position = unit.position
+		controller.camera.force_update_scroll()
+		await _settle()
+		var counter_point: Vector2 = BattlefieldStacks.counter_rect(unit).get_center()
+		var clicks_before: int = map_clicks
+		_motion(counter_point)
+		_mouse(counter_point, MouseButton.MOUSE_BUTTON_LEFT, true)
+		_mouse(counter_point, MouseButton.MOUSE_BUTTON_LEFT, false)
+		_check(map_clicks == clicks_before + 1 and controller.selected_unit == unit, "Battlefield clicks select a surviving squad again after Keep Playing")
+		var destination: Vector2i = _reachable_neighbor(unit, ground)
+		major.state.exit_hexes.assign([destination])
+		minor.state.exit_hexes.assign([destination])
+		var target_point: Vector2 = controller.get_global_transform_with_canvas() * ground.map_to_local(destination)
+		_motion(target_point)
+		await _settle()
+		MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
+		_check(world.ui.target_cover_distance.visible, "Target previews resume after Keep Playing")
+		var order_before: int = unit.action_controller.action_order_id
+		_right_open(target_point)
+		await _settle()
+		_check(wheel.is_open(), "The actual command wheel reopens in a completed map")
+		_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
+		_check(unit.action_controller.action_order_id > order_before and unit.action_controller.objective_hex == destination, "Move orders reach the surviving squad after Keep Playing")
+		unit.movement._process_movement(100.0)
+		_check(unit.current_hex == destination and unit.position == ground.map_to_local(destination), "The squad completes its movement after the map has ended")
+		var fire_target: Vector2i = _reachable_neighbor(unit, ground)
+		LOSHelper.los_lookup[unit.current_hex][fire_target] = {"target_cover": 0}
+		_check(controller.order_via_option_wheel(fire_target, WheelOption.Option.FIRE_AT) and unit.squad_fire.has_target_hex, "Fire orders remain available after Keep Playing")
+		_check(controller.order_via_option_wheel(destination, WheelOption.Option.STOP) and not unit.squad_fire.has_target_hex, "Stop still clears orders after Keep Playing")
+		controller._process(1.0)
+		controller._on_win_condition_timer_timeout()
+		_check(controller.end_game_handled and not controller.timer_running and controller.time_left_seconds == recorded_time and not world.result_screen.visible, "Continuing cannot restart the clock or display another result")
+		_check(major.state.units_exited.is_empty() and minor.state.units_exited.is_empty() and unit.is_active(), "Moving onto an exit after the result does not alter scored objectives or retire the squad")
+		_check(FileAccess.get_file_as_string(save_path) == recorded_result, "Continuing leaves the saved battle result unchanged")
+	scenario.victory_conditions = original_conditions
+	Globals.victory_conditions = original_collections
 
 
 func _test_cover_firepower(world: Node, unit: Unit, destination: Vector2i, target_point: Vector2) -> void:

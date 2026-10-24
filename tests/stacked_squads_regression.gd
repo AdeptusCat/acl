@@ -10,6 +10,7 @@ class ControllerProbe extends Node2D:
 	var previous_selected_hex: Vector2i = Vector2i(-999, -999)
 	var selected_hex_index: int = 0
 	var end_game_handled: bool = false
+	var continuing_after_end: bool = false
 	var stacks: BattlefieldStacks
 	var map_clicks: int = 0
 	signal hex_selected(cell: Vector2i, point: Vector2)
@@ -277,7 +278,10 @@ func _test_removal_and_cleanup() -> void:
 			unit.current_hex = Vector2i(15 + unit.squad, 15)
 	_check(not stacks.cycle_selection(stack_cell) and controller.selected_unit == second, "Single squads retain normal selection behavior")
 	controller.end_game_handled = true
+	third.current_hex = stack_cell
 	_check(not stacks.cycle_selection(stack_cell), "Stack selection stops when the match ends")
+	controller.continuing_after_end = true
+	_check(stacks.cycle_selection(stack_cell) and controller.selected_unit == third, "Keep Playing restores cycling through surviving stacked squads")
 	_check(hud.get_child_count() == 0, "Movement, selection and removal never recreate the squad panel")
 
 

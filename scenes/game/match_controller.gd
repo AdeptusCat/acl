@@ -49,6 +49,7 @@ signal ai_status_changed(team: Globals.Team, enabled: bool, mode: PositionProfil
 signal order_feedback(accepted: bool, command: String, explanation: String)
 
 var end_game_handled: bool = false
+var continuing_after_end: bool = false
 var _ai_orders_by_team: Dictionary[Globals.Team, MissionOrder] = {}
 var _ai_goal_directors: Dictionary[Globals.Team, ScenarioGoalDirector] = {}
 
@@ -497,7 +498,7 @@ func erase_freed_objects_key_from_dict(dict: Dictionary) -> void:
 
 
 func start_game(team: Globals.Team, time: float) -> void:
-	
+	continuing_after_end = false
 	time_left_seconds = time * 60.0 # * 60.0
 	overtime_active = false
 	overtime_elapsed_seconds = 0.0
@@ -703,7 +704,17 @@ func create_test_axes() -> Array[ThreatAxis]:
 	return axes
 
 
+func continue_after_end() -> bool:
+	if not end_game_handled:
+		return false
+	continuing_after_end = true
+	timer_running = false
+	return true
+
+
 func _on_started_moving() -> void:
+	if end_game_handled:
+		return
 	if not timer_running:
 		game_started_through_moving_unit.emit()
 		Globals.game_started = true

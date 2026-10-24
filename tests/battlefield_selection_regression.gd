@@ -20,6 +20,7 @@ class ControllerProbe extends Node2D:
 	var previous_selected_hex: Vector2i = Vector2i(-999, -999)
 	var selected_hex_index: int = 0
 	var end_game_handled: bool = false
+	var continuing_after_end: bool = false
 	signal hex_selected(cell: Vector2i, point: Vector2)
 	signal show_unit_details_in_ui(unit: Unit)
 	signal hide_unit_details_in_ui
