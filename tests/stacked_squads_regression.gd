@@ -27,8 +27,8 @@ class ControllerProbe extends Node2D:
 			unit.deselect()
 			selected_unit = null
 
-	func cycle_stack_roster(cell: Vector2i, picked: Unit) -> bool:
-		return stacks.cycle_roster(cell, picked)
+	func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
+		return stacks.cycle_selection(cell, picked)
 
 	func click(point: Vector2) -> void:
 		map_clicks += 1
@@ -113,24 +113,19 @@ func _run() -> void:
 	stacks = STACK_SCRIPT.new() as BattlefieldStacks
 	controller.add_child(stacks)
 	controller.stacks = stacks
-	stacks.setup(controller, hud)
-	stacks.set_process(false)
+	stacks.setup(controller)
 	commands = COMMAND_SCRIPT.new() as CommandConnectivityRenderer
 	controller.add_child(commands)
 	commands.setup()
 	commands.set_process(false)
 	await _settle()
 	_test_preserved_stack()
-	_test_selection_gate()
-	await _test_arrival_popup()
+	_test_arrivals()
 	_test_enemy_visibility()
 	await _test_pointer_and_selection()
-	await _test_pointer_clearance()
 	await _test_outside_hud_click()
-	await _test_hud_overlap()
-	await _test_shared_hq()
-	await _test_live_updates_and_large_stacks()
 	_test_model_positions()
+	_test_large_stacks()
 	_test_removal_and_cleanup()
 	for unit: Unit in units:
 		unit.squad_fire.calc.free()
@@ -161,102 +156,44 @@ func _unit(cell: Vector2i, number: int, type: Globals.SquadType, offset: Vector2
 	return unit
 
 
-func _test_preserved_stack() -> void:
-	_check(hud.get_child_count() == 1 and hud.get_child(0) == stacks.roster, "Stack interaction adds only the roster, with no squad-count indicator")
-	_check(not stacks.roster.visible, "Existing stacks do not open a roster during setup")
-	_check(Globals.get_units().size() == units.size(), "Stack interaction does not create gameplay units")
-	for unit: Unit in [first, second, third]:
-		_check(unit.ui.modulate.a == 1.0 and unit.ui.is_visible_in_tree(), "Each slightly offset squad counter remains visible")
-	_check(single.ui.modulate.a == 1.0, "Single squads retain their normal counter")
-	_test_model_positions()
-
-
-func _test_selection_gate() -> void:
-	_check(not stacks.open_roster(stack_cell) and not stacks.roster.visible, "A stack roster cannot open without a selected squad")
-	controller._select_unit(single)
-	_check(not stacks.open_roster(stack_cell) and not stacks.roster.visible, "A selected squad outside the stack cannot open its roster")
-	controller._select_unit(second)
-	_check(stacks.open_roster(stack_cell) and stacks.roster.rows[second.get_instance_id()].button_pressed, "A selected member permits its own stack roster")
-	controller._select_unit(single)
-	stacks.refresh()
-	_check(not stacks.roster.visible, "Selecting a squad outside the stack closes the open roster")
-	controller._select_unit(second)
-	stacks.open_roster(stack_cell)
-	controller._deselect_unit(second)
-	stacks.refresh()
-	_check(not stacks.roster.visible, "Clearing selection closes the stack roster")
-
-
-func _test_arrival_popup() -> void:
-	var mover: Unit = _unit(Vector2i(1, 4), 7, Globals.SquadType.Rifle)
-	stacks.refresh()
-	controller._select_unit(second)
-	_move_to(mover, Vector2i(1, 5))
-	_check(not stacks.roster.visible, "Moving into an empty hex does not open a roster")
-	_move_to(mover, headquarters.current_hex)
-	await _settle()
-	_check(not stacks.roster.visible, "An unrelated friendly stack forming cannot open a roster")
-	_check(controller.selected_unit == second and mover.current_hex == headquarters.current_hex and mover.current_cube == headquarters.current_cube, "An unrelated arrival preserves selection and the movement system's occupied hex")
-	_move_to(mover, Vector2i(1, 5))
-	controller._select_unit(mover)
-	_move_to(mover, headquarters.current_hex)
-	await _settle()
-	_check(stacks.roster.visible and stacks.roster.cell == headquarters.current_hex and stacks.roster.rows.size() == 2 and stacks.roster.rows[mover.get_instance_id()].button_pressed, "A selected squad entering an occupied hex opens that stack's roster")
-	_check(mover.global_position.is_equal_approx(controller.ground_layer.to_global(controller.ground_layer.map_to_local(mover.current_hex))), "Opening the arrival roster leaves the movement endpoint unchanged")
-	stacks.roster.close()
-	for frame: int in range(3):
-		stacks.refresh()
-		await get_tree().process_frame
-	_move_to(mover, mover.current_hex)
-	_check(not stacks.roster.visible, "Dismissing an arrival roster keeps it closed through refresh and same-hex recentering")
-	_move_to(mover, stack_cell)
-	await _settle()
-	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 4 and stacks.roster.rows[mover.get_instance_id()].button_pressed, "A selected squad entering a larger stack reopens its roster with the existing selection highlighted")
-	controller._select_unit(second)
-	_move_to(mover, headquarters.current_hex)
-	_check(stacks.roster.visible and stacks.roster.cell == stack_cell and stacks.roster.rows.size() == 3, "Unrelated movement cannot replace the selected stack's open roster")
-	controller._deselect_unit(second)
-	stacks.refresh()
-	_move_to(mover, stack_cell)
-	_check(not stacks.roster.visible, "Movement into an occupied hex cannot open a roster when nothing is selected")
-	_move_to(mover, headquarters.current_hex)
-	controller._select_unit(second)
-	_move_to(mover, stack_cell)
-	_check(stacks.roster.visible and stacks.roster.rows[second.get_instance_id()].button_pressed, "Another squad joining the selected squad's hex opens the selected stack's roster")
-	stacks.roster.close()
-	var enemy: Unit = _unit(Vector2i(1, 4), 8, Globals.SquadType.Rifle)
-	enemy.team = Globals.get_enemy_team(Globals.team_player)
-	stacks.refresh()
-	_move_to(enemy, stack_cell)
-	_check(not stacks.roster.visible, "Enemy movement does not open a friendly stack roster")
-	var hidden: Unit = _unit(Vector2i(1, 4), 9, Globals.SquadType.Rifle)
-	hidden.hide()
-	stacks.refresh()
-	_move_to(hidden, stack_cell)
-	_check(not stacks.roster.visible and not hidden.is_visible_in_tree(), "Hidden units cannot reveal a stack through automatic popups")
-	mover.exited = true
-	mover.unit_entered_hex.emit(mover, stack_cell)
-	_check(not stacks.roster.visible, "Exited units cannot open an arrival roster")
-	mover.exited = false
-	_move_to(mover, headquarters.current_hex)
-	controller.end_game_handled = true
-	_move_to(mover, stack_cell)
-	_check(not stacks.roster.visible, "Movement after the match ends cannot open a roster")
-	controller.end_game_handled = false
-	for unit: Unit in [mover, enemy, hidden]:
-		units.erase(unit)
-		unit.squad_fire.calc.free()
-		unit.free()
-	stacks.refresh()
-	controller._deselect_unit(second)
-	_test_model_positions()
-
-
 func _move_to(unit: Unit, cell: Vector2i) -> void:
 	unit.goal_hex = cell
 	unit.movement.target_position = controller.to_local(controller.ground_layer.to_global(controller.ground_layer.map_to_local(cell)))
 	unit.movement.is_moving = true
 	unit.movement._process_movement(100.0)
+
+
+func _test_preserved_stack() -> void:
+	_check(hud.get_child_count() == 0 and not stacks.is_processing(), "Stack selection creates no floating panel or continuously refreshed UI")
+	_check(Globals.get_units().size() == units.size(), "Stack selection does not create gameplay units")
+	for unit: Unit in [first, second, third, single]:
+		_check(unit.ui.modulate.a == 1.0 and unit.ui.is_visible_in_tree(), "Every squad counter remains visible")
+
+
+func _test_arrivals() -> void:
+	controller._select_unit(second)
+	_move_to(single, stack_cell)
+	_check(hud.get_child_count() == 0 and controller.selected_unit == second, "Entering an occupied hex opens no panel and preserves the selected squad")
+	_check(single.current_hex == stack_cell and single.current_cube == controller.ground_layer.map_to_cube(stack_cell), "Removing the arrival popup preserves normal movement")
+	_move_to(single, Vector2i(2, 2))
+	_check(hud.get_child_count() == 0, "Leaving an occupied hex adds no panel")
+
+
+func _test_enemy_visibility() -> void:
+	var enemy: Unit = _unit(stack_cell, 8, Globals.SquadType.Rifle)
+	enemy.team = Globals.get_enemy_team(Globals.team_player)
+	var hidden: Unit = _unit(stack_cell, 9, Globals.SquadType.Rifle)
+	hidden.hide()
+	var exited: Unit = _unit(stack_cell, 10, Globals.SquadType.Rifle)
+	exited.exited = true
+	controller._select_unit(third)
+	for expected: Unit in [first, second, third]:
+		_check(stacks.cycle_selection(stack_cell) and controller.selected_unit == expected, "Cycling skips enemy, hidden and exited squads")
+	_check(not hidden.is_visible_in_tree() and hud.get_child_count() == 0, "Stack selection cannot reveal hidden units or create a panel")
+	for unit: Unit in [enemy, hidden, exited]:
+		units.erase(unit)
+		unit.squad_fire.calc.free()
+		unit.free()
 
 
 func _test_pointer_and_selection() -> void:
@@ -265,119 +202,31 @@ func _test_pointer_and_selection() -> void:
 		var canvas: Transform2D = Transform2D.IDENTITY.scaled(Vector2(zoom, zoom))
 		canvas.origin = Vector2(350.0, 270.0) - center * zoom
 		get_viewport().canvas_transform = canvas
-		stacks.refresh()
 		await _settle()
-		stacks.refresh()
 		if is_instance_valid(controller.selected_unit):
 			controller._deselect_unit(controller.selected_unit)
 		var point: Vector2 = BattlefieldStacks.counter_rect(second).get_center()
 		_click(point)
 		await _settle()
-		_check(stacks.roster.visible and stacks.roster.rows.size() == 3, "One battlefield click opens all occupants after zoom and pan %.1f" % zoom)
-		_check(controller.selected_unit == third and stacks.roster.rows[third.get_instance_id()].button_pressed, "The first stack click selects the front counter and its roster row at zoom %.1f" % zoom)
+		_check(controller.selected_unit == third, "The first stack click selects the front counter at zoom %.1f" % zoom)
 		for expected: Unit in [first, second, third]:
 			_click(point)
 			await _settle()
 			commands.refresh(0.0)
-			_check(stacks.roster.visible and controller.selected_unit == expected and stacks.roster.rows[expected.get_instance_id()].button_pressed, "Repeated clicks cycle through every squad and wrap the roster selection at zoom %.1f" % zoom)
-			_check(commands.displayed_links == [expected] and commands.highlighted_units.has(headquarters.get_instance_id()), "Every cycle step updates the selected squad's HQ connection")
-		var row: SquadRosterRow = stacks.roster.rows[second.get_instance_id()]
-		_check(row.identity.text.contains("/1/2") and row.identity.text.contains("MG") and row.strength.text == "%d/%d" % [second.squad_fire.soldiers.size(), second.original_size], "Stack rows show squad identity, type and strength on one line")
-		_check(row.size.y <= 32.0 and not row.get_node("Content/Status").visible and not row.strength_bar.visible, "Stack rows remain compact without extra status rows or strength bars")
-		_check(not stacks.roster.has_node("Content/Hex") and not row.has_node("Content/Command") and not row.tooltip_text.contains("contact"), "The hex roster omits hex coordinates and command connections, including tooltips")
-		_click(point)
-		_click(point)
+			_check(controller.selected_unit == expected, "Repeated clicks reach every squad and wrap at zoom %.1f" % zoom)
+			_check(commands.displayed_links == [expected] and commands.highlighted_units.has(headquarters.get_instance_id()), "Each cycle step updates the selected squad's HQ connection")
+		_check(hud.get_child_count() == 0, "Clicking a stack never opens a squad panel at zoom %.1f" % zoom)
+		_check(commands.counter_rect(third).is_equal_approx(BattlefieldStacks.counter_rect(third)), "Command links retain the counter's original position")
+		var single_rect: Rect2 = BattlefieldStacks.counter_rect(single)
+		_click(single_rect.position + Vector2(single_rect.size.x * 0.5, 1.0))
 		await _settle()
-		stacks.refresh()
-		row = stacks.roster.rows[second.get_instance_id()]
-		commands.refresh(0.0)
-		_check(controller.selected_unit == second and second.selected and not first.selected and not third.selected and row.button_pressed, "Hex clicks select the exact squad and highlight its passive roster row at zoom %.1f" % zoom)
-		_check(commands.displayed_links == [second] and commands.highlighted_units.has(headquarters.get_instance_id()), "Hex selection highlights its commanding HQ")
-		_check(commands.counter_rect(second).is_equal_approx(BattlefieldStacks.counter_rect(second)), "Command links retain the selected squad's original counter origin")
-		_check(Rect2(Vector2.ZERO, hud.size).encloses(stacks.roster.get_rect()), "The roster stays within the HUD after pan and zoom")
-		_check(not stacks.roster.get_rect().intersects(commands.counter_rect(second)) and not stacks.roster.get_rect().intersects(commands.counter_rect(headquarters)), "The roster keeps the selected counter and its HQ visible at zoom %.1f" % zoom)
+		_check(controller.selected_unit == single, "An outside click selects a different squad immediately")
 		if OS.get_cmdline_user_args().has("--render"):
 			await _capture("zoom-" + str(zoom))
-		# Use the exposed top of the counter; the compact popup can cover its center.
-		var single_rect: Rect2 = BattlefieldStacks.counter_rect(single)
-		var single_point: Vector2 = single_rect.position + Vector2(single_rect.size.x * 0.5, 1.0)
-		var popup_rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
-		_check(not popup_rect.has_point(single_point), "The outside-selection fixture uses an exposed battlefield counter")
-		var before: int = controller.map_clicks
-		_click(single_point)
-		await _settle()
-		_check(not stacks.roster.visible and controller.map_clicks == before + 1 and controller.selected_unit == single, "An outside click closes the roster and selects a different squad without a dead click at zoom %.1f" % zoom)
-		controller._deselect_unit(single)
-		_click(point)
-		await _settle()
-		_check(stacks.roster.visible, "The slightly stacked counters reopen the roster directly")
-		var escape: InputEventKey = InputEventKey.new()
-		escape.keycode = KEY_ESCAPE
-		escape.pressed = true
-		get_viewport().push_input(escape, true)
-		_check(not stacks.roster.visible, "Escape closes the stack roster")
 	get_viewport().canvas_transform = Transform2D.IDENTITY
-	stacks.refresh()
-
-
-func _test_pointer_clearance() -> void:
-	controller._select_unit(second)
-	var anchor: Rect2 = BattlefieldStacks.counter_rect(second)
-	var members: Array[Unit] = [first, second, third]
-	var bounds: Vector2 = hud.size
-	for point: Vector2 in [anchor.get_center(), Vector2(1.0, 1.0), bounds - Vector2.ONE, Vector2(bounds.x - 1.0, 1.0), Vector2(1.0, bounds.y - 1.0)]:
-		stacks.roster.close()
-		_motion(point)
-		stacks.roster.open(stack_cell, members)
-		stacks.roster.fit_to_anchor(Rect2(point - Vector2.ONE * 16.0, Vector2.ONE * 32.0))
-		await _settle()
-		stacks.roster.fit_to_anchor(Rect2(point - Vector2.ONE * 16.0, Vector2.ONE * 32.0))
-		var rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
-		var clearance: Rect2 = Rect2(point - Vector2.ONE * 24.0, Vector2.ONE * 48.0)
-		_check(not rect.intersects(clearance) and Rect2(Vector2.ZERO, bounds).encloses(rect), "Roster opens clear of the pointer and stays onscreen near %s" % point)
-	stacks.roster.close()
-	_motion(anchor.get_center())
-	stacks.open_roster(stack_cell)
-	await _settle()
-	stacks.refresh()
-	var row: SquadRosterRow = stacks.roster.rows[second.get_instance_id()]
-	var target: Vector2 = row.get_global_transform_with_canvas() * (row.size * 0.5)
-	var start: Vector2 = anchor.get_center()
-	for step: int in range(1, 21):
-		_motion(start.lerp(target, float(step) / 20.0))
-		stacks.refresh()
-		await _settle()
-		var rect: Rect2 = stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, stacks.roster.size)
-		var pointer: Vector2 = start.lerp(target, float(step) / 20.0)
-		_check(not rect.intersects(Rect2(pointer - Vector2.ONE * 24.0, Vector2.ONE * 48.0)), "The passive roster moves out of the way as the pointer approaches")
-	_check(stacks.roster.mouse_filter == Control.MOUSE_FILTER_IGNORE and row.mouse_filter == Control.MOUSE_FILTER_IGNORE and stacks.roster.scroll.get_v_scroll_bar().mouse_filter == Control.MOUSE_FILTER_IGNORE, "The roster, rows and internal scrollbar all pass through mouse input")
-	var covered_point: Vector2 = stacks.roster.get_global_transform_with_canvas() * (stacks.roster.size * 0.5)
-	var clicks_before: int = controller.map_clicks
-	_click(covered_point)
-	await _settle()
-	_check(controller.map_clicks == clicks_before + 1, "Even a click before the roster can move reaches the battlefield")
-	controller._select_unit(second)
-	stacks.roster.close()
-
-
-func _test_enemy_visibility() -> void:
-	var enemy: Unit = _unit(stack_cell, 8, Globals.SquadType.Rifle)
-	enemy.team = Globals.get_enemy_team(Globals.team_player)
-	controller._select_unit(second)
-	stacks.open_roster(stack_cell)
-	_check(stacks.roster.rows.size() == 3 and not stacks.roster.rows.has(enemy.get_instance_id()), "Friendly stack rosters never include enemy squads")
-	enemy.hide()
-	stacks.refresh()
-	_check(stacks.roster.rows.size() == 3 and not enemy.is_visible_in_tree(), "Opening the roster never reveals hidden enemy counters")
-	stacks.roster.close()
-	controller._deselect_unit(second)
-	units.erase(enemy)
-	enemy.squad_fire.calc.free()
-	enemy.free()
 
 
 func _test_outside_hud_click() -> void:
-	stacks.open_roster(stack_cell)
 	var button: Button = Button.new()
 	button.position = Vector2(12.0, 12.0)
 	button.size = Vector2(140.0, 32.0)
@@ -388,139 +237,55 @@ func _test_outside_hud_click() -> void:
 	var before: int = controller.map_clicks
 	_click(button.get_global_rect().get_center())
 	await _settle()
-	_check(not stacks.roster.visible and presses[0] == 1 and controller.map_clicks == before, "An outside HUD click closes the roster and activates that same control")
+	_check(presses[0] == 1 and controller.map_clicks == before, "HUD controls retain normal input handling")
 	button.free()
+	var zoom_before: int = zooms
+	_mouse(BattlefieldStacks.counter_rect(second).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_UP, true)
+	_mouse(BattlefieldStacks.counter_rect(second).get_center(), MouseButton.MOUSE_BUTTON_WHEEL_UP, false)
+	_check(zooms == zoom_before + 1 and hud.get_child_count() == 0, "Wheel input zooms the battlefield without opening a stack panel")
 
 
-func _test_hud_overlap() -> void:
-	controller._select_unit(second)
-	stacks.open_roster(stack_cell)
-	await _settle()
-	var panel: PanelContainer = PanelContainer.new()
-	panel.name = "MissionObjectives"
-	panel.position = stacks.roster.position
-	panel.size = stacks.roster.size
-	hud.add_child(panel)
-	stacks.refresh()
-	await _settle()
-	_check(not stacks.roster.get_rect().intersects(panel.get_rect()), "Stack information moves clear of visible HUD text panels")
-	panel.free()
-	stacks.roster.close()
-
-
-func _test_shared_hq() -> void:
-	var original_hex: Vector2i = headquarters.current_hex
-	var original_cube: Vector3i = headquarters.current_cube
-	var original_transform: Transform2D = headquarters.global_transform
-	headquarters.current_hex = stack_cell
-	headquarters.current_cube = controller.ground_layer.map_to_cube(stack_cell)
-	headquarters.global_position = controller.ground_layer.to_global(controller.ground_layer.map_to_local(stack_cell)) + Vector2(0.0, -32.0)
-	controller._select_unit(second)
-	stacks.refresh()
-	commands.refresh(0.0)
-	stacks.open_roster(stack_cell)
-	_check(stacks.roster.rows.size() == 4 and commands.badge_text(headquarters).begins_with("HQ"), "The selected squad's HQ stays identified when it shares the stack")
-	var points: PackedVector2Array = commands.link_points(second)
-	_check(points.size() == 2 and points[0].is_equal_approx(commands.counter_rect(second).get_center()) and points[1].is_equal_approx(commands.counter_rect(headquarters).get_center()), "An HQ in the same stack uses a straight command link between the counters")
-	if OS.get_cmdline_user_args().has("--render"):
-		stacks.open_roster(stack_cell)
-		await _settle()
-		commands.refresh(3.0)
-		await _capture("shared-hq")
-		stacks.roster.close()
-	headquarters.current_hex = original_hex
-	headquarters.current_cube = original_cube
-	headquarters.global_transform = original_transform
-	stacks.refresh()
-
-
-func _test_live_updates_and_large_stacks() -> void:
-	stacks.open_roster(stack_cell)
-	var old_strength: int = first.squad_fire.soldiers.size()
-	first.squad_fire.soldiers.pop_back()
-	first.members_alive -= 1
-	first.stress_system._set_state(STATES.MoraleState.PINNED)
-	first.command_connectivity.clear_connectivity()
-	stacks.refresh()
-	await _settle()
-	var row: SquadRosterRow = stacks.roster.rows[first.get_instance_id()]
-	_check(row.strength.text.begins_with(str(old_strength - 1) + "/") and not row.morale.is_visible_in_tree() and not row.isolation.is_visible_in_tree(), "An open roster updates strength while morale and command changes cannot add extra information")
-	controller._select_unit(second)
-	stacks.refresh()
-	first.ui.show_casualty(1)
-	_check(first.ui._casualty_feedback.active and first.ui.modulate.a == 1.0, "Each stacked squad retains its own visible casualty feedback")
+func _test_large_stacks() -> void:
 	for index: int in range(8):
 		_unit(stack_cell, 5 + index, Globals.SquadType.Rifle)
-	stacks.refresh()
-	await _settle()
-	stacks.refresh()
-	_check(stacks.roster.rows.size() == 11 and hud.get_child_count() == 1, "Large stack rosters retain every squad without adding battlefield count indicators")
-	controller._select_unit(second)
-	stacks.refresh()
-	var point: Vector2 = BattlefieldStacks.counter_rect(second).get_center()
-	for click: int in range(9):
-		_click(point)
-	await _settle()
-	var last: Unit = units.back()
-	var last_row: SquadRosterRow = stacks.roster.rows[last.get_instance_id()]
-	_check(controller.selected_unit == last and last_row.button_pressed and stacks.roster.scroll.scroll_vertical > 0 and stacks.roster.scroll.get_global_rect().encloses(last_row.get_global_rect()), "Rapid stack clicks select and scroll to the last squad in a large roster")
-	_click(point)
-	await _settle()
-	_check(controller.selected_unit == first and stacks.roster.rows[first.get_instance_id()].button_pressed and stacks.roster.scroll.scroll_vertical == 0, "Cycling past the last squad wraps and scrolls back to the first row")
-	var scroll_point: Vector2 = stacks.roster.scroll.get_global_transform_with_canvas() * (stacks.roster.scroll.size * 0.5)
-	var before: int = zooms
-	_mouse(scroll_point, MouseButton.MOUSE_BUTTON_WHEEL_UP, true)
-	_mouse(scroll_point, MouseButton.MOUSE_BUTTON_WHEEL_UP, false)
-	_check(zooms == before + 1 and stacks.roster.visible, "The passive roster passes wheel input through to battlefield zoom without closing")
-	for window_size: Vector2i in [Vector2i(800, 600), Vector2i(708, 639)]:
-		get_tree().root.size = window_size
-		await _settle()
-		stacks.refresh()
-		await _settle()
-		stacks.refresh()
-		_check(Rect2(Vector2.ZERO, hud.size).encloses(stacks.roster.get_rect()) and stacks.roster.scroll.size.y < stacks.roster.row_container.size.y, "Large rosters fit and scroll at window size %s" % window_size)
-	if OS.get_cmdline_user_args().has("--render"):
-		await _capture("large-stack")
-	stacks.roster.close()
+	controller._deselect_unit(controller.selected_unit)
+	var expected: Array[Unit] = [first, second, third]
+	for index: int in range(5, units.size()):
+		expected.append(units[index])
+	for unit: Unit in expected:
+		_check(stacks.cycle_selection(stack_cell, first) and controller.selected_unit == unit, "Large stacks retain every squad in formation order")
+	_check(stacks.cycle_selection(stack_cell) and controller.selected_unit == first, "Cycling past the last squad wraps to the first")
+	_check(hud.get_child_count() == 0, "Large stacks add no floating panel")
+	first.ui.show_casualty(1)
+	_check(first.ui._casualty_feedback.active and first.ui.modulate.a == 1.0, "Stacked squads retain their own casualty feedback")
+
+
+func _test_removal_and_cleanup() -> void:
+	third.current_hex = Vector2i(7, 4)
+	first.alive = false
+	first.ui.die()
+	controller._select_unit(first)
+	_check(stacks.cycle_selection(stack_cell, second) and controller.selected_unit == second, "Cycling skips dead squads and squads that left the hex")
+	var doomed: Unit = units.back()
+	controller._select_unit(doomed)
+	units.erase(doomed)
+	doomed.squad_fire.calc.free()
+	doomed.free()
+	_check(stacks.cycle_selection(stack_cell, second) and controller.selected_unit == second, "Cycling recovers from a freed selected squad without stale references")
+	for unit: Unit in units:
+		if unit != second:
+			unit.current_hex = Vector2i(15 + unit.squad, 15)
+	_check(not stacks.cycle_selection(stack_cell) and controller.selected_unit == second, "Single squads retain normal selection behavior")
+	controller.end_game_handled = true
+	_check(not stacks.cycle_selection(stack_cell), "Stack selection stops when the match ends")
+	_check(hud.get_child_count() == 0, "Movement, selection and removal never recreate the squad panel")
 
 
 func _test_model_positions() -> void:
 	for unit: Unit in [first, second, third, headquarters, single]:
 		var original: Dictionary = snapshots[unit.get_instance_id()]
 		_check(unit.global_transform == original["transform"] and unit.current_hex == original["hex"] and unit.current_cube == original["cube"] and unit.ui.get_global_transform() == original["ui_transform"], "Stack presentation preserves unit transforms, occupied hexes and counter origins")
-		_check(not unit.is_moving and not unit.movement.is_moving, "Opening and selecting a stack does not issue movement orders")
-
-
-func _test_removal_and_cleanup() -> void:
-	stacks.open_roster(stack_cell)
-	third.current_hex = Vector2i(7, 4)
-	stacks.refresh()
-	_check(third.ui.modulate.a == 1.0 and stacks.roster.rows.size() == 10 and not stacks.roster.rows.has(third.get_instance_id()), "Leaving a stack removes the roster row and preserves the original counter")
-	first.alive = false
-	first.ui.die()
-	stacks.refresh()
-	_check(first.ui.modulate.a == 1.0 and not stacks.roster.visible, "Losing the selected squad closes the roster and preserves its corpse presentation")
-	controller._select_unit(second)
-	stacks.open_roster(stack_cell)
-	var doomed: Unit = units.back()
-	var doomed_id: int = doomed.get_instance_id()
-	controller._select_unit(doomed)
-	stacks.refresh()
-	units.erase(doomed)
-	doomed.squad_fire.calc.free()
-	doomed.free()
-	stacks.refresh()
-	_check(not stacks.roster.visible and not stacks.roster.rows.has(doomed_id), "Freeing the selected squad closes the roster without stale Node keys")
-	_click(BattlefieldStacks.counter_rect(second).get_center())
-	_check(is_instance_valid(controller.selected_unit) and controller.selected_unit.is_active() and stacks.roster.rows[controller.selected_unit.get_instance_id()].button_pressed, "Cycling skips removed squads and recovers from a freed current selection")
-	for unit: Unit in units:
-		if unit != second:
-			unit.current_hex = Vector2i(15 + unit.squad, 15)
-	stacks.refresh()
-	_check(not stacks.roster.visible and not stacks.open_roster(stack_cell) and second.ui.modulate.a == 1.0, "A stack roster closes cleanly when only one squad remains")
-	controller.end_game_handled = true
-	stacks.refresh()
-	_check(not stacks.roster.visible, "Ending the match closes any stack roster")
+		_check(not unit.is_moving and not unit.movement.is_moving, "Selecting a stack does not issue movement orders")
 
 
 func _capture(label: String) -> void:
@@ -528,7 +293,7 @@ func _capture(label: String) -> void:
 	# Minimized test windows do not reliably emit frame_post_draw on every driver.
 	RenderingServer.force_draw(false)
 	var capture: Image = get_viewport().get_texture().get_image()
-	_check(capture.save_png("/tmp/acl-stacks-" + label + ".png") == OK, "Capture stack roster %s" % label)
+	_check(capture.save_png("/tmp/acl-stacks-" + label + ".png") == OK, "Capture stack selection %s" % label)
 
 
 func _settle() -> void:

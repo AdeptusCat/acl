@@ -25,6 +25,7 @@ func _run() -> void:
 	audio.name = "AudioPool"
 	world.add_child(audio)
 	_test_pinned_and_recovery()
+	_test_ribbon_fade()
 	_test_terminal_states()
 	_test_elimination_fade()
 	_test_visibility_and_details()
@@ -41,7 +42,7 @@ func _test_pinned_and_recovery() -> void:
 	ui._show_shooting_status()
 	ui.state_changed(STATES.MoraleState.PINNED)
 	var marker: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
-	_check(marker.state == FEEDBACK.State.PINNED and marker.is_visible_in_tree(), "Pinning creates the persistent amber marker")
+	_check(marker.state == FEEDBACK.State.PINNED and marker.is_visible_in_tree(), "Pinning creates the temporary amber notification")
 	_check(ui.pinned_texture_rect.visible and not ui.idle_texture_rect.visible and not ui.shooting_texture_rect.visible, "Pinning immediately changes the soldier pose")
 	_check((ui.get_node("Timer") as Timer).is_stopped(), "Pinning cancels the shooting pose timer")
 	marker.advance(0.3)
@@ -55,7 +56,7 @@ func _test_pinned_and_recovery() -> void:
 	ui.stopped_moving(false, false)
 	_check(ui.pinned_texture_rect.visible and not ui.moving_texture_rect.visible, "Movement callbacks cannot overwrite the pinned pose")
 	marker.advance(10.0)
-	_check(marker.is_visible_in_tree() and not marker.is_processing(), "The pinned marker persists without an idle animation cost")
+	_check(not marker.visible and not marker.is_processing() and ui.pinned_texture_rect.visible, "The pinned ribbon disappears while the pinned pose remains")
 	ui.state_changed(STATES.MoraleState.CAUTIOUS)
 	_check(marker.state == FEEDBACK.State.NONE and not marker.visible and ui.idle_texture_rect.visible, "Recovery removes the marker and restores the normal pose")
 	ui.show_pinned()
@@ -63,6 +64,33 @@ func _test_pinned_and_recovery() -> void:
 	ui.state_changed(STATES.MoraleState.PANIC)
 	_check(marker.state == FEEDBACK.State.NONE and ui.broken_texture_rect.visible, "Routing replaces pinning instead of leaving a stale pinned marker")
 	ui.free()
+
+
+func _test_ribbon_fade() -> void:
+	for fps: int in [30, 60, 144]:
+		for state: FEEDBACK.State in [FEEDBACK.State.PINNED, FEEDBACK.State.SURRENDERED]:
+			var ui: UnitUi = UI_SCENE.instantiate() as UnitUi
+			add_child(ui)
+			if state == FEEDBACK.State.PINNED:
+				ui.show_pinned()
+			else:
+				ui.surrender()
+			var marker: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
+			marker.advance(FEEDBACK.TRANSITION_SECONDS)
+			_check(marker.visible and marker.modulate.a == 1.0, "Status text stays readable before fading at %d FPS" % fps)
+			var step: float = 1.0 / float(fps)
+			for frame: int in range(roundi(FEEDBACK.FADE_SECONDS * float(fps) * 0.5)):
+				marker.advance(step)
+			_check(marker.visible and marker.modulate.a > 0.35 and marker.modulate.a < 0.65, "The entire status notification fades gradually at %d FPS" % fps)
+			var opacity: float = marker.modulate.a
+			marker.set_state(state)
+			_check(is_equal_approx(marker.modulate.a, opacity), "Repeated state notifications cannot brighten a fading ribbon")
+			marker.advance(FEEDBACK.FADE_SECONDS)
+			var ribbon_point: Vector2 = marker.get_global_transform_with_canvas() * FEEDBACK.RIBBON_RECT.get_center()
+			_check(not marker.visible and not marker.is_processing() and not ui.contains_battlefield_point(ribbon_point), "An expired ribbon disappears and no longer extends the squad's clickable area")
+			marker.set_state(state)
+			_check(not marker.visible, "Repeated state notifications cannot revive an expired ribbon")
+			ui.free()
 
 
 func _test_terminal_states() -> void:
@@ -82,9 +110,11 @@ func _test_terminal_states() -> void:
 	ui.stopped_moving(false, true)
 	ui._on_morale_recovered()
 	_check(marker.state == FEEDBACK.State.SURRENDERED and ui.surrendered_texture_rect.visible and not ui.idle_texture_rect.visible, "Surrender survives morale, firing, timer and movement callbacks")
+	marker.advance(10.0)
+	_check(not marker.visible and ui.surrendered_texture_rect.visible, "The surrender ribbon disappears while the surrendered pose remains")
 	ui.show_casualty(2)
 	ui.die()
-	_check(marker.state == FEEDBACK.State.ELIMINATED and ui.dead.visible, "Complete elimination replaces surrender with the skull marker")
+	_check(marker.state == FEEDBACK.State.ELIMINATED and marker.visible and marker.modulate.a == 1.0 and ui.dead.visible, "Complete elimination restores a visible skull marker after the surrender ribbon has faded")
 	_check(not ui.unit_status_control.visible and not ui.sprite_node.visible and not ui.rank_texture_rect.visible, "An eliminated squad cannot retain a living pose or command badge")
 	var casualties: CASUALTIES = ui.get_node("CasualtyFeedback") as CASUALTIES
 	_check(casualties.active and casualties.casualty_count == 2, "Elimination preserves the final casualty count above the state ribbon")
@@ -117,12 +147,12 @@ func _test_visibility_and_details() -> void:
 	var marker: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
 	_check(not marker.is_visible_in_tree() and not marker.is_processing(), "A hidden state change produces no visible transition")
 	ui.show()
-	_check(marker.is_visible_in_tree() and marker.elapsed == FEEDBACK.TRANSITION_SECONDS, "Revealing a unit shows its current state without replaying a hidden event")
+	_check(not marker.visible and marker.elapsed == FEEDBACK.LIFETIME_SECONDS and ui.pinned_texture_rect.visible, "Revealing a unit keeps its pinned pose without replaying a hidden notification")
 	ui.state_changed(STATES.MoraleState.NORMAL)
 	ui.show_pinned()
 	ui.hide()
 	ui.show()
-	_check(not marker.is_processing() and marker.elapsed == FEEDBACK.TRANSITION_SECONDS, "Hiding a unit cancels its pending transition pulse")
+	_check(not marker.visible and not marker.is_processing() and marker.elapsed == FEEDBACK.LIFETIME_SECONDS, "Hiding a unit cancels its pending notification")
 	ui.surrender()
 	var detail_marker: FEEDBACK = detail.get_node("StateFeedback") as FEEDBACK
 	_check(detail_marker.state == FEEDBACK.State.SURRENDERED and detail.surrendered_texture_rect.visible, "The detailed view mirrors surrender state and pose")
@@ -209,7 +239,7 @@ func _render_preview() -> void:
 	viewport.add_child(camera)
 	_caption(viewport, "PINNED / SURRENDERED / ELIMINATED", Vector2(28.0, 24.0), 20)
 	_caption(viewport, "Transition cue", Vector2(28.0, 72.0), 14)
-	_caption(viewport, "Persistent marker after the pulse finishes", Vector2(28.0, 367.0), 14)
+	_caption(viewport, "After the notification fades: poses remain visible", Vector2(28.0, 367.0), 14)
 	for row: int in range(2):
 		for column: int in range(3):
 			var ui: UnitUi = UI_SCENE.instantiate() as UnitUi

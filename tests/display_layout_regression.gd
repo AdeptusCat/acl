@@ -27,8 +27,8 @@ class ControllerProbe extends Node2D:
 			unit.deselect()
 			selected_unit = null
 
-	func cycle_stack_roster(cell: Vector2i, picked: Unit) -> bool:
-		return stacks.cycle_roster(cell, picked)
+	func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
+		return stacks.cycle_selection(cell, picked)
 
 	func click(point: Vector2) -> void:
 		MatchInteractionHandler.on_mouse_button_left_pressed(self, point)
@@ -243,8 +243,7 @@ func _build_fixture() -> void:
 		units.append(unit)
 	controller.stacks = BattlefieldStacks.new()
 	controller.add_child(controller.stacks)
-	controller.stacks.setup(controller, root_control)
-	controller.stacks.set_process(false)
+	controller.stacks.setup(controller)
 	controller.show_unit_details_in_ui.connect(hud._on_show_unit_details)
 	var conditions: Array[VictoryCondition] = []
 	for index: int in range(24):
@@ -267,7 +266,6 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	tested_layouts += 1
 	var settings: Control = root_control.get_node("Settings")
 	settings.close_panels()
-	controller.stacks.roster.close()
 	hud.hide_order_feedback()
 	hud.hide_target_hex_cover_distance()
 	var zoom_before: Vector2 = camera.zoom
@@ -321,15 +319,10 @@ func _test_layout(resolution: Vector2i, value: float) -> void:
 	point = BattlefieldStacks.counter_rect(units[1]).get_center()
 	_click(point)
 	await _settle()
-	controller.stacks.refresh()
-	_check(controller.stacks.roster.visible and controller.stacks.roster.rows.size() == 3, context + ": battlefield click opens the complete stack")
-	_check(_inside(controller.stacks.roster), context + ": stack roster stays onscreen")
-	var popup_rect: Rect2 = controller.stacks.roster.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, controller.stacks.roster.size)
-	_check(not popup_rect.intersects(Rect2(point - Vector2.ONE * 24.0, Vector2.ONE * 48.0)), context + ": stack roster leaves clearance around the pointer")
+	_check(controller.selected_unit == units[1], context + ": battlefield clicks cycle the selected stack")
+	_check(not root_control.has_node("HexStackRoster"), context + ": stack selection adds no floating squad panel")
 	_click(point)
-	_check(controller.selected_unit == units[2] and controller.stacks.roster.rows[units[2].get_instance_id()].button_pressed, context + ": hex clicks cycle selection and highlight the passive roster")
-	_check(controller.stacks.roster.mouse_filter == Control.MOUSE_FILTER_IGNORE and controller.stacks.roster.scroll.mouse_filter == Control.MOUSE_FILTER_IGNORE, context + ": the roster cannot capture mouse input")
-	controller.stacks.roster.close()
+	_check(controller.selected_unit == units[2], context + ": repeated clicks reach every squad without a floating panel")
 	_click(settings.settings_button.get_global_transform_with_canvas() * (settings.settings_button.size * 0.5))
 	await _settle()
 	_check(settings.menu.visible and _inside(settings.menu), context + ": scaled Settings button opens a contained, scrollable menu")

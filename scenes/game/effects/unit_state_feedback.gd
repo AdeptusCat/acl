@@ -3,12 +3,14 @@ extends Node2D
 enum State { NONE, PINNED, SURRENDERED, ELIMINATED }
 
 const TRANSITION_SECONDS: float = 1.1
+const FADE_SECONDS: float = 0.6
+const LIFETIME_SECONDS: float = TRANSITION_SECONDS + FADE_SECONDS
 const SKULL: Texture2D = preload("res://assets/effects/skull.png")
 const FRAME_RECT: Rect2 = Rect2(-2.0, -3.0, 68.0, 66.0)
 const RIBBON_RECT: Rect2 = Rect2(-10.0, 65.0, 84.0, 17.0)
 
 var state: State = State.NONE
-var elapsed: float = TRANSITION_SECONDS
+var elapsed: float = LIFETIME_SECONDS
 
 
 func _ready() -> void:
@@ -22,7 +24,8 @@ func set_state(next: State, emphasize: bool = true) -> void:
 	if next == state:
 		return
 	state = next
-	elapsed = TRANSITION_SECONDS
+	elapsed = LIFETIME_SECONDS
+	modulate = Color.WHITE
 	if next == State.NONE:
 		hide()
 		set_process(false)
@@ -30,15 +33,18 @@ func set_state(next: State, emphasize: bool = true) -> void:
 		show()
 		if emphasize and is_visible_in_tree():
 			elapsed = 0.0
-		set_process(elapsed < TRANSITION_SECONDS)
+		advance(0.0)
 	queue_redraw()
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_VISIBILITY_CHANGED and is_inside_tree() and state != State.NONE:
 		if not is_visible_in_tree():
-			# Revealing an enemy shows its current marker without replaying a hidden event.
-			elapsed = TRANSITION_SECONDS
+			# Revealing an enemy must not replay a notification from behind the fog.
+			elapsed = LIFETIME_SECONDS
+			if _is_temporary():
+				modulate.a = 0.0
+				hide()
 			set_process(false)
 			queue_redraw()
 
@@ -50,16 +56,25 @@ func _process(delta: float) -> void:
 func advance(delta: float) -> void:
 	if state == State.NONE:
 		return
-	elapsed = minf(elapsed + maxf(delta, 0.0), TRANSITION_SECONDS)
+	elapsed = minf(elapsed + maxf(delta, 0.0), LIFETIME_SECONDS)
 	if not is_visible_in_tree():
-		elapsed = TRANSITION_SECONDS
-	if elapsed >= TRANSITION_SECONDS:
-		set_process(false)
+		elapsed = LIFETIME_SECONDS
+	if _is_temporary():
+		modulate.a = 1.0 - clampf((elapsed - TRANSITION_SECONDS) / FADE_SECONDS, 0.0, 1.0)
+		if elapsed >= LIFETIME_SECONDS:
+			hide()
+		set_process(elapsed < LIFETIME_SECONDS)
+	else:
+		set_process(elapsed < TRANSITION_SECONDS)
 	queue_redraw()
 
 
+func _is_temporary() -> bool:
+	return state == State.PINNED or state == State.SURRENDERED
+
+
 func contains_screen_point(screen_point: Vector2) -> bool:
-	if state == State.NONE or not is_visible_in_tree():
+	if state == State.NONE or not is_visible_in_tree() or modulate.a <= 0.0:
 		return false
 	var local_point: Vector2 = get_global_transform_with_canvas().affine_inverse() * screen_point
 	return FRAME_RECT.has_point(local_point) or RIBBON_RECT.has_point(local_point)

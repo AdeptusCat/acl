@@ -154,8 +154,8 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 	for candidate: Unit in candidates:
 		if candidate.current_hex == stack_hex:
 			units.append(candidate)
-	if units.size() > 1 and controller.has_method("cycle_stack_roster"):
-		if controller.cycle_stack_roster(stack_hex, picked):
+	if units.size() > 1 and controller.has_method("cycle_stack_selection"):
+		if controller.cycle_stack_selection(stack_hex, picked):
 			return
 	if units.is_empty():
 		if is_instance_valid(controller.selected_unit):

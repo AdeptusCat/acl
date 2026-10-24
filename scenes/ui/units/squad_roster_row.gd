@@ -9,13 +9,10 @@ class_name SquadRosterRow
 @onready var isolation: Label = $Content/Status/Isolation
 
 var unit: Unit
-var stack_row: bool = false
 
 
 func _ready() -> void:
 	$Content.minimum_size_changed.connect(_fit_content)
-	$Content/Status.visible = not stack_row
-	strength_bar.visible = not stack_row
 	_fit_content()
 	if is_instance_valid(unit):
 		unit.stress_system.state_changed.connect(_on_morale_state_changed)
@@ -23,8 +20,6 @@ func _ready() -> void:
 
 func _fit_content() -> void:
 	var minimum_height: float = 44.0
-	if stack_row:
-		minimum_height = 28.0
 	custom_minimum_size.y = maxf(minimum_height, $Content.get_combined_minimum_size().y + 6.0)
 
 
@@ -40,17 +35,12 @@ func refresh() -> void:
 	if not unit.alive:
 		modulate = Color(0.65, 0.65, 0.65, 1.0)
 	identity.text = unit.get_hud_name()
-	if stack_row:
-		identity.text = "%s/%d/%d · %s" % [Unit.COMPANY_NAMES[unit.company], unit.platoon, unit.squad, Globals.SQUAD_TYPE_NAMES[unit.squad_type]]
 	var remaining: int = unit.squad_fire.soldiers.size()
 	if not unit.alive:
 		remaining = 0
 	strength.text = "%d/%d" % [remaining, unit.original_size]
 	strength_bar.value = float(remaining) / float(maxi(1, unit.original_size))
 	set_pressed_no_signal(unit.selected)
-	if stack_row:
-		tooltip_text = "%s\n%s" % [unit.get_hud_name(), unit.get_formation_name()]
-		return
 	if not unit.alive:
 		morale.text = "Eliminated"
 		morale.add_theme_color_override("font_color", Color(0.7, 0.67, 0.6))

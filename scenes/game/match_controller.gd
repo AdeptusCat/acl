@@ -135,7 +135,7 @@ func setup() -> void:
 		unit._on_command_connectivity_timeout()
 	stack_presenter = STACK_PRESENTATION.new() as BattlefieldStacks
 	add_child(stack_presenter)
-	stack_presenter.setup(self, get_parent().ui.get_node("Control") as Control)
+	stack_presenter.setup(self)
 	$CommandConnectivityRenderer.setup()
 	#for x in range(LOSHelper.grid_size.x):
 		#for y in range(LOSHelper.grid_size.y):
@@ -391,19 +391,11 @@ func _on_key_space_pressed(_event_pos: Vector2) -> void:
 
 func _select_unit(unit: Unit) -> void:
 	MatchInteractionHandler.select_unit(self, unit)
+
+
+func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
 	if is_instance_valid(stack_presenter):
-		stack_presenter.refresh()
-
-
-func open_stack_roster(cell: Vector2i) -> bool:
-	if is_instance_valid(stack_presenter):
-		return stack_presenter.open_roster(cell)
-	return false
-
-
-func cycle_stack_roster(cell: Vector2i, picked: Unit) -> bool:
-	if is_instance_valid(stack_presenter):
-		return stack_presenter.cycle_roster(cell, picked)
+		return stack_presenter.cycle_selection(cell, picked)
 	return false
 
 
