@@ -111,10 +111,12 @@ func get_lock_reason(scenario: Scenario) -> String:
 	if ResourceLoader.exists(save_path):
 		# Inspect progression without importing a previous battle's casualty records.
 		var saved: MatchSaveData = ResourceLoader.load(save_path, "", ResourceLoader.CACHE_MODE_IGNORE) as MatchSaveData
-		if saved != null and saved.winner_team == saved.player_team:
+		if saved != null:
 			if previous.scenario_id.is_empty():
-				return ""
-			if saved.scenario_id == previous.scenario_id and saved.player_team == previous.player_team:
+				for completed_team: Globals.Team in Globals.Team.values():
+					if saved.has_player_victory(completed_team):
+						return ""
+			elif saved.scenario_id == previous.scenario_id and saved.has_player_victory(previous.player_team):
 				return ""
 	return "Win \"%s\" to unlock this mission." % previous.scenario_name
 

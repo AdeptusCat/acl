@@ -249,6 +249,10 @@ func save_match_data(match_save: MatchSaveData) -> void:
 			push_error("Could not create save directory: %s Error: %s" % [dir_path, dir_error])
 			return
 
+	var previous: MatchSaveData
+	if ResourceLoader.exists(save_path):
+		previous = ResourceLoader.load(save_path, "", ResourceLoader.CACHE_MODE_IGNORE) as MatchSaveData
+	match_save.preserve_player_victories(previous)
 	var save_error: Error = ResourceSaver.save(match_save, save_path)
 
 	if save_error != OK:

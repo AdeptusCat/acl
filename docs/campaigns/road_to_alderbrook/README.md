@@ -3,8 +3,11 @@
 A five-mission Allied campaign, available under **Road to Alderbrook** in the
 normal mission menu. Win the previous mission with a minor or major victory to
 unlock the next. Mission results use stable identifiers, so changing a briefing
-title does not erase progression. Each mission introduces a larger force with a
-fresh deployment; battle casualties are recorded by the existing save system.
+title does not erase progression. Earned unlocks survive replay defeats and draws;
+completion is retained per player faction alongside the latest battle result.
+Existing victory saves retain their completion when replayed. Each mission
+introduces a larger force with a fresh deployment; battle casualties are recorded
+by the existing save system.
 
 | Mission | Player force | Enemy force | Default time | Major victory |
 | --- | --- | --- | --- | --- |
