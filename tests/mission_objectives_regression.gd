@@ -191,6 +191,7 @@ func _run() -> void:
 	occupy.advance_time(3.0)
 	_check(not occupy.is_condition_met() and occupy.state.victory_conditions_met[Vector2i(-99, -99)], "Enemy recapture only transfers the hex it occupies")
 	await _check_area_overlay(world, objective_hex)
+	await _check_exit_shader(world)
 	await _check_mission_two(world, panel)
 	var replacement_conditions: Array[VictoryCondition] = [minor, enemy_objective]
 	hud.show_mission_objectives(replacement_conditions, Globals.Team.ALLIES, 60.0)
@@ -457,3 +458,59 @@ func _check_hex_cycling(world: Node, panel: MissionObjectivesPanel, occupy: Occu
 	exit.state.exit_hexes = original_exits
 	prevention.state.exit_hexes = original_enemy_exits
 	panel.refresh()
+
+
+func _objective_source(layer: HexagonTileMapLayer, objective_id: int) -> int:
+	for index: int in range(layer.tile_set.get_source_count()):
+		var source_id: int = layer.tile_set.get_source_id(index)
+		var source: TileSetAtlasSource = layer.tile_set.get_source(source_id) as TileSetAtlasSource
+		if source != null and source.has_tile(Vector2i.ZERO):
+			if int(source.get_tile_data(Vector2i.ZERO, 0).get_custom_data("objective_id")) == objective_id:
+				return source_id
+	return -1
+
+
+func _check_exit_shader(world: Node) -> void:
+	var player_layer: HexagonTileMapLayer = world.game_controller.allies_objective_tilemap
+	var enemy_layer: HexagonTileMapLayer = world.game_controller.axis_objective_tilemap
+	var exit_hex: Vector2i = Vector2i(12, 12)
+	var neighbor: Vector2i = enemy_layer.get_neighbor_cell(exit_hex, TileSet.CELL_NEIGHBOR_TOP_SIDE)
+	var named_exit: Vector2i = Vector2i(14, 12)
+	var hidden_capture: Vector2i = Vector2i(15, 12)
+	player_layer.clear()
+	enemy_layer.clear()
+	for hex: Vector2i in [exit_hex, neighbor]:
+		player_layer.set_cell(hex, _objective_source(player_layer, 0), Vector2i.ZERO)
+		enemy_layer.set_cell(hex, _objective_source(enemy_layer, 0), Vector2i.ZERO)
+	enemy_layer.set_cell(named_exit, _objective_source(enemy_layer, 1), Vector2i.ZERO)
+	enemy_layer.set_cell(hidden_capture, _objective_source(enemy_layer, 2), Vector2i.ZERO)
+	var prevention: PreventEnemyExitCondition = world.ui.mission_objectives.conditions[3] as PreventEnemyExitCondition
+	prevention.state.exit_hexes = [named_exit]
+	world.game_controller.set_objective_cells(Globals.Team.ALLIES)
+	var own_overlay: ObjectiveAreaOverlay = player_layer.get_node("ObjectiveArea") as ObjectiveAreaOverlay
+	var enemy_overlay: ObjectiveAreaOverlay = enemy_layer.get_parent().get_node("EnemyExitArea") as ObjectiveAreaOverlay
+	_check(own_overlay.markers.size() == 2 and enemy_overlay.markers.size() == 3, "Both player and enemy exit hexes receive shader markers")
+	_check(enemy_overlay.is_visible_in_tree() and not enemy_layer.visible, "Enemy exit effects remain visible while enemy capture markers stay hidden")
+	var exposed: int = 0
+	for marker: Dictionary in enemy_overlay.markers:
+		_check(bool(marker["is_exit"]) and marker["hex"] != hidden_capture, "The enemy overlay only reveals exit routes, including named exits")
+		var shader_material: ShaderMaterial = marker["material"]
+		_check(shader_material.shader == ObjectiveAreaOverlay.AREA_SHADER and shader_material.get_shader_parameter("area_color") == ObjectiveAreaOverlay.COLORS[0], "Exit routes use the objective animation shader with cyan markings")
+		if int(marker["id"]) == 0:
+			for edge: float in marker["edges"]:
+				exposed += int(edge)
+	_check(exposed == 10, "Connected exit hexes share one animated perimeter")
+	if OS.get_cmdline_user_args().has("--capture"):
+		world.ui.hide()
+		world.game_controller.camera.position = (enemy_layer.map_to_local(exit_hex) + enemy_layer.map_to_local(named_exit)) * 0.5
+		world.game_controller.camera.zoom = Vector2(1.5, 1.5)
+		world.game_controller.camera.reset_smoothing()
+		world.game_controller.camera.force_update_scroll()
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-exit-area-shader.png")
+		world.ui.show()
+	player_layer.clear()
+	enemy_layer.clear()
+	world.game_controller.set_objective_cells(Globals.Team.ALLIES)
+	_check(enemy_overlay.markers.is_empty(), "Repeated setup clears exit effects after exit tiles are removed")

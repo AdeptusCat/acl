@@ -75,6 +75,10 @@ func _check_view(controller: Node, player_team: Globals.Team, label: String) -> 
 	var allies_layer: TileMapLayer = controller.allies_objective_tilemap
 	_check(axis_layer.visible == (player_team == Globals.Team.AXIS), label + ": Axis visibility matches the player faction")
 	_check(allies_layer.visible == (player_team == Globals.Team.ALLIES), label + ": Allied visibility matches the player faction")
+	var exit_overlay: ObjectiveAreaOverlay = axis_layer.get_parent().get_node("EnemyExitArea") as ObjectiveAreaOverlay
+	_check(exit_overlay.is_visible_in_tree() and exit_overlay.team == Globals.get_enemy_team(player_team), label + ": Enemy exit effects remain visible for the opposing faction")
+	for marker: Dictionary in exit_overlay.markers:
+		_check(bool(marker["is_exit"]), label + ": Enemy capture markers remain hidden")
 	if player_team == Globals.Team.AXIS:
 		_check(axis_layer.is_visible_in_tree(), label + ": Axis objectives are visible after reparenting")
 	else:

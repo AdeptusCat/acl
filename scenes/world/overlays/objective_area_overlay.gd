@@ -24,7 +24,43 @@ static func install(target: HexagonTileMapLayer, owner_team: Globals.Team) -> vo
 	overlay.setup(target, owner_team)
 
 
-func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
+static func install_enemy_exits(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
+	# Enemy capture markers stay hidden; exit routes remain visible on their own canvas item.
+	var parent: Node = target.get_parent()
+	var overlay: ObjectiveAreaOverlay = parent.get_node_or_null("EnemyExitArea") as ObjectiveAreaOverlay
+	if overlay == null:
+		overlay = ObjectiveAreaOverlay.new()
+		overlay.name = "EnemyExitArea"
+		parent.add_child(overlay)
+	overlay.setup(target, owner_team, true)
+	overlay.global_transform = target.global_transform
+
+
+static func get_exit_hexes(target: HexagonTileMapLayer, owner_team: Globals.Team) -> Array[Vector2i]:
+	var exit_hexes: Array[Vector2i] = []
+	for hex: Vector2i in target.get_used_cells():
+		var data: TileData = target.get_cell_tile_data(hex)
+		if data != null and int(data.get_custom_data("objective_id")) == ExitUnitsCondition.ObjectiveId.EXIT:
+			exit_hexes.append(hex)
+	for condition_team: Globals.Team in Globals.victory_conditions:
+		var collection: VictoryConditionCollection = Globals.victory_conditions[condition_team]
+		for condition: VictoryCondition in collection.victory_conditions:
+			var cells: Array[Vector2i] = []
+			if condition is ExitUnitsCondition and condition.team == owner_team:
+				var exit: ExitUnitsCondition = condition as ExitUnitsCondition
+				if exit.state != null:
+					cells = exit.state.exit_hexes
+			elif condition is PreventEnemyExitCondition and Globals.get_enemy_team(condition.team) == owner_team:
+				var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
+				if prevention.state != null:
+					cells = prevention.state.exit_hexes
+			for hex: Vector2i in cells:
+				if not exit_hexes.has(hex):
+					exit_hexes.append(hex)
+	return exit_hexes
+
+
+func setup(target: HexagonTileMapLayer, owner_team: Globals.Team, exits_only: bool = false) -> void:
 	layer = target
 	team = owner_team
 	# Suppress the old tile artwork while retaining authored cells and layer visibility.
@@ -40,13 +76,18 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 		var projection: float = corner.dot(Vector2(0.45, -1.0))
 		capture_span.x = minf(capture_span.x, projection)
 		capture_span.y = maxf(capture_span.y, projection)
-	for hex: Vector2i in layer.get_used_cells():
+	var exit_hexes: Array[Vector2i] = get_exit_hexes(layer, team)
+	var visible_cells: Array[Vector2i] = layer.get_used_cells()
+	if exits_only:
+		visible_cells = exit_hexes
+	for hex: Vector2i in visible_cells:
 		var data: TileData = layer.get_cell_tile_data(hex)
 		if data == null:
 			continue
 		var id: int = int(data.get_custom_data("objective_id"))
 		if id < 0 or id >= NAMES.size():
 			continue
+		var is_exit: bool = exit_hexes.has(hex)
 		var center: Vector2 = layer.map_to_local(hex)
 		var edges: PackedFloat32Array = PackedFloat32Array()
 		var points: PackedVector2Array = PackedVector2Array()
@@ -56,7 +97,7 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 			var neighbor: Vector2i = layer.local_to_map(center + midpoint * 1.1)
 			var neighbor_data: TileData = layer.get_cell_tile_data(neighbor)
 			var exposed: float = 1.0
-			if neighbor != hex and neighbor_data != null and int(neighbor_data.get_custom_data("objective_id")) == id:
+			if neighbor != hex and visible_cells.has(neighbor) and neighbor_data != null and int(neighbor_data.get_custom_data("objective_id")) == id and exit_hexes.has(neighbor) == is_exit:
 				exposed = 0.0
 			edges.append(exposed)
 		var shader_material: ShaderMaterial = ShaderMaterial.new()
@@ -66,12 +107,15 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 		shader_material.set_shader_parameter("center", center)
 		shader_material.set_shader_parameter("capture_span", capture_span)
 		shader_material.set_shader_parameter("objective_phase", float(id) * 2.1)
-		shader_material.set_shader_parameter("area_color", COLORS[id])
+		var color: Color = COLORS[id]
+		if is_exit:
+			color = COLORS[ExitUnitsCondition.ObjectiveId.EXIT]
+		shader_material.set_shader_parameter("area_color", color)
 		var polygon: Polygon2D = Polygon2D.new()
 		polygon.polygon = points
 		polygon.material = shader_material
 		add_child(polygon)
-		markers.append({"hex": hex, "id": id, "center": center, "material": shader_material, "edges": edges})
+		markers.append({"hex": hex, "id": id, "center": center, "material": shader_material, "edges": edges, "is_exit": is_exit})
 	_update_colors()
 	queue_redraw()
 
@@ -89,6 +133,8 @@ func _update_colors() -> void:
 		return
 	for marker: Dictionary in markers:
 		var color: Color = COLORS[int(marker["id"])]
+		if bool(marker["is_exit"]):
+			color = COLORS[ExitUnitsCondition.ObjectiveId.EXIT]
 		var capture_progress: float = 0.0
 		var capture_color: Color = FRIENDLY_COLOR
 		for condition: VictoryCondition in collection.victory_conditions:
@@ -134,6 +180,8 @@ static func capture_style(occupy: OccupyObjectiveCondition, hex: Vector2i) -> Di
 func _draw() -> void:
 	for marker: Dictionary in markers:
 		var text: String = NAMES[int(marker["id"])]
+		if bool(marker["is_exit"]) and int(marker["id"]) != ExitUnitsCondition.ObjectiveId.EXIT:
+			text = "EXIT " + text
 		var center: Vector2 = marker["center"]
 		var extent: Vector2 = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13)
 		var baseline: Vector2 = center + Vector2(-extent.x * 0.5, 4.0)
