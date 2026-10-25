@@ -56,10 +56,10 @@ func _check_modifiers_and_expiry() -> void:
 	_check(is_equal_approx(stress.S_eff, 45.096), "A hit immediately updates effective stress using the actual leadership and stress modifiers")
 	stress._process(0.5)
 	_check(is_equal_approx(stress.incoming_stress_rate, 10.192), "Incoming rate counts weighted, modified gain rather than raw fast-plus-slow damage")
-	_check(is_equal_approx(stress.stress_recovery_rate, 0.23) and is_equal_approx(stress.net_stress_rate, 9.962), "Recovery uses the real cohesion and fading fire-pressure slowdown in the same units as incoming stress")
+	_check(is_equal_approx(stress.stress_recovery_rate, 0.6) and is_equal_approx(stress.net_stress_rate, 9.592), "Recovery uses the real cohesion and fading fire-pressure slowdown in the same units as incoming stress")
 	_check(is_equal_approx(stress.S_eff - 40.0, stress.net_stress_rate * stress.balance_sample_duration_s), "The measured net rate exactly explains the stress meter's change")
 	_check(view.stress_arrows.text.length() > view.recovery_arrows.text.length(), "Increasing stress shows more red arrows than green arrows")
-	_check(view.stress_arrows.tooltip_text.contains("+10.19/s") and view.recovery_arrows.tooltip_text.contains("Actual recovery: -0.23/s"), "Both arrow tooltips explain the measured numerical balance")
+	_check(view.stress_arrows.tooltip_text.contains("+10.19/s") and view.recovery_arrows.tooltip_text.contains("Actual recovery: -0.60/s"), "Both arrow tooltips explain the measured numerical balance")
 	var before_recovery: float = stress.S_eff
 	stress._process(0.5)
 	_check(is_equal_approx(stress.incoming_stress_rate, 5.096) and stress.S_eff < before_recovery, "Recent averaging avoids replacing a volley with zero pressure on the next half-second tick")
@@ -74,10 +74,10 @@ func _check_weak_and_balanced_incoming() -> void:
 	var weak: StressController = _create_stress(50.0, 50.0)
 	weak.apply_stress(0.2, 0.2)
 	weak._process(0.5)
-	_check(is_equal_approx(weak.incoming_stress_rate, 0.3) and is_equal_approx(weak.stress_recovery_rate, 1.0) and is_equal_approx(weak.net_stress_rate, -0.7), "Weak incoming stress can be outweighed by recovery")
+	_check(is_equal_approx(weak.incoming_stress_rate, 0.3) and is_equal_approx(weak.stress_recovery_rate, 1.5) and is_equal_approx(weak.net_stress_rate, -1.2), "Weak incoming stress can be outweighed by recovery")
 	_check(view.stress_arrows.text.length() > 0 and view.recovery_arrows.text.length() > view.stress_arrows.text.length(), "Falling stress under light incoming stress still shows more green arrows")
 	var balanced: StressController = _create_stress(50.0, 50.0)
-	balanced.apply_stress(2.0 / 3.0, 2.0 / 3.0)
+	balanced.apply_stress(1.0, 1.0)
 	balanced._process(0.5)
 	_check(is_equal_approx(balanced.S_eff, 50.0) and is_zero_approx(balanced.net_stress_rate), "Equal gain and recovery leave the stress meter unchanged")
 	_check(view.stress_arrows.text == "<<" and view.recovery_arrows.text == ">>", "A balanced influence has equal arrow counts")
@@ -94,8 +94,8 @@ func _check_caps_and_empty_bins() -> void:
 	_check(capped.incoming_stress_rate == 0.0 and view.stress_arrows.text.is_empty() and view.recovery_arrows.text.is_empty(), "A capped meter with no recovery does not claim an impossible stress increase")
 	var partial: StressController = _create_stress(0.0, 1.0)
 	partial._process(0.5)
-	_check(is_equal_approx(partial.S_eff, 0.25) and is_equal_approx(partial.stress_recovery_rate, 0.5), "An empty fast bin contributes no fictional recovery to the effective rate")
-	_check(partial.leadership_bonus == 0.0 and is_equal_approx(partial.recovery_capacity_rate, 1.0) and view.recovery_arrows.text == ">>", "Green arrows measure natural recovery capacity independently of the amount left in each bin")
+	_check(is_equal_approx(partial.S_eff, 0.125) and is_equal_approx(partial.stress_recovery_rate, 0.75), "An empty fast bin contributes no fictional recovery to the effective rate")
+	_check(partial.leadership_bonus == 0.0 and is_equal_approx(partial.recovery_capacity_rate, 1.5) and view.recovery_arrows.text == ">>", "Green arrows measure natural recovery capacity independently of the amount left in each bin")
 	_advance_without_input(partial, 3.0)
 	_check(partial.S_eff == 0.0 and partial.stress_recovery_rate == 0.0 and partial.net_stress_rate == 0.0 and view.stress_arrows.text.is_empty() and view.recovery_arrows.text == ">>", "An empty stress meter retains its available recovery without claiming an actual stress reduction")
 	partial.apply_stress(-10.0, -10.0)
@@ -117,10 +117,9 @@ func _check_situational_recovery() -> void:
 	stress.incoming_stress_scale = 2.0
 	stress.apply_stress(1.0, 0.5)
 	stress._process(0.5)
-	# After 0.5 seconds, 10 rounds contribute 7.5 rps and a 0.175 fire multiplier.
-	# Recovery: (0.35 + 0.65 * 0.5) * 2 * 1.2 * 0.48 * 0.7375 * 0.175.
-	_check(is_equal_approx(stress.stress_recovery_rate, 0.100359), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and fading fire")
-	_check(is_equal_approx(stress.incoming_stress_rate, 2.28), "Incoming scaling and leader protection affect the measured gain")
+	# Recovery: 0.55 * 1.25 command * 2 HQ * 1.5 base * 1.2 scale * 0.48 cohesion * 0.7375 shock * 0.35 fire.
+	_check(is_equal_approx(stress.stress_recovery_rate, 0.3066525), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and fading fire")
+	_check(is_equal_approx(stress.incoming_stress_rate, 2.109), "Incoming scaling and leader protection affect the measured gain")
 	_check(is_equal_approx(stress.S_eff - 40.0, stress.net_stress_rate * 0.5), "The complete situational balance agrees with the actual meter change")
 
 
@@ -150,24 +149,24 @@ func _simulate_volley_series(step: float) -> StressController:
 func _check_idle_recovery_and_leadership() -> void:
 	var idle: StressController = _create_stress(0.0, 0.0)
 	idle._process(0.5)
-	_check(is_equal_approx(idle.recovery_capacity_rate, 1.0) and idle.stress_recovery_rate == 0.0 and idle.net_stress_rate == 0.0 and view.recovery_arrows.text == ">>", "An unstressed squad shows inherent recovery capacity and zero actual change")
+	_check(is_equal_approx(idle.recovery_capacity_rate, 1.5) and idle.stress_recovery_rate == 0.0 and idle.net_stress_rate == 0.0 and view.recovery_arrows.text == ">>", "An unstressed squad shows inherent recovery capacity and zero actual change")
 	var pinned: StressController = _create_stress(0.0, 0.0)
 	pinned.state = STATES.MoraleState.PINNED
 	pinned._process(0.5)
-	_check(is_equal_approx(pinned.recovery_capacity_rate, 0.35) and view.recovery_arrows.text == ">", "Small pinned recovery uses one green arrow even with no stored stress")
+	_check(is_equal_approx(pinned.recovery_capacity_rate, 0.825) and view.recovery_arrows.text == ">>", "Pinned squads retain visible inherent recovery even with no stored stress")
 	pinned.leader_presence_strength = 0.5
-	_check(is_equal_approx(pinned.get_recovery_capacity(), 0.675), "Leadership presence increases the very same capacity used by gameplay recovery")
+	_check(is_equal_approx(pinned.get_recovery_capacity(), 1.03125), "Leadership presence increases the very same capacity used by gameplay recovery")
 	_advance_without_input(pinned, 2.0)
-	_check(is_equal_approx(pinned.recovery_capacity_rate, 0.675) and view.recovery_arrows.text == ">>" and pinned.S_eff == 0.0, "Averaged leadership-supported recovery stays visible at zero stress")
+	_check(is_equal_approx(pinned.recovery_capacity_rate, 1.03125) and view.recovery_arrows.text == ">>" and pinned.S_eff == 0.0, "Averaged leadership-supported recovery stays visible at zero stress")
 	var leader_only: StressController = _create_stress(0.0, 0.0)
 	leader_only.state = STATES.MoraleState.COMBAT_INEFFECTIVE
 	leader_only.leader_presence_strength = 0.8
 	leader_only._process(0.5)
-	_check(is_equal_approx(leader_only.recovery_capacity_rate, 0.8) and view.recovery_arrows.text == ">>", "A leadership-only recovery benefit remains visible without inherent recovery or stored stress")
+	_check(is_equal_approx(leader_only.recovery_capacity_rate, 0.36) and view.recovery_arrows.text == ">", "A limited leadership-only recovery benefit remains visible without inherent recovery or stored stress")
 	var headquarters: Unit = idle.get_parent() as Unit
 	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
 	_advance_without_input(idle, 2.0)
-	_check(is_equal_approx(idle.recovery_capacity_rate, 2.0) and view.recovery_arrows.text == ">>>", "Strong headquarters recovery uses three arrows rather than the same count as modest recovery")
+	_check(is_equal_approx(idle.recovery_capacity_rate, 3.0) and view.recovery_arrows.text == ">>>", "Strong headquarters recovery uses three arrows rather than the same count as modest recovery")
 	var disabled: StressController = _create_stress(0.0, 0.0)
 	disabled.recovery_scale = 0.0
 	disabled._process(0.5)

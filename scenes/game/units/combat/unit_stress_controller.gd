@@ -6,9 +6,9 @@ const BALANCE_WINDOW_SAMPLES: int = 4
 
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
-		STATES.MoraleState.CAUTIOUS : 0.8,
-		STATES.MoraleState.PINNED : 0.35,
-		STATES.MoraleState.PANIC : 0.1,
+		STATES.MoraleState.CAUTIOUS : 0.85,
+		STATES.MoraleState.PINNED : 0.55,
+		STATES.MoraleState.PANIC : 0.3,
 		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
 	}
 
@@ -81,7 +81,10 @@ var _since_rout_check: float  = 999.0		# seconds since we checked for rout
 @export var leader_gain_reduction_max: float = 0.5      # up to 50% less *incoming* stress
 @export var leader_decay_boost_max: float = 0.15        # up to 15% faster decay
 @export var leader_effect_smooth_s: float = 0.5         # seconds to blend leader influence
-@export var min_incoming_gain_mult: float = 0.4         # floor; never invincible
+@export var command_gain_reduction_max: float = 0.15  # full command presence reduces incoming stress by 15%
+@export var min_incoming_gain_mult: float = 0.75      # all leadership protection is capped at 25%
+@export var leader_recovery_bonus: float = 0.5        # full presence adds at most 50% recovery
+@export var leader_ineffective_recovery: float = 0.3  # limited recovery when no inherent capacity remains
 
 # --- internal accumulator for trial cadence ---
 var _trial_bucket_s: float = 0.0
@@ -92,8 +95,9 @@ var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 @export var S_CAP: float = 100.0                 # hard ceiling on stress
 @export var incoming_stress_scale: float = 1.0   # global multiplier on added stress
 @export var recovery_scale: float = 1.0          # >1 faster decay, <1 slower decay (global)
+@export var base_recovery_per_second: float = 1.5 # inherent recovery before morale and situational modifiers
 @export var hq_recovery_multiplier: float = 2.0
-@export var hq_panic_recovery_floor: float = 1.5 # stress points/second before situational modifiers
+@export var hq_panic_recovery_floor: float = 0.6 # morale recovery factor before base/situational scaling
 @export var hq_rally_multiplier: float = 2.0
 @export var cohesion_recovery_floor: float = 0.25
 @export var casualty_recovery_window_s: float = 120.0
@@ -104,8 +108,8 @@ var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 # --- NEW: slower recovery while under fire ---
 @export var under_fire_window_s: float = 2.0     # seconds considered "under fire" after a volley
 @export var pressure_ref_rps: float = 10.0       # rounds/sec counted as "heavy"
-@export var slowdown_light: float = 0.4         # decay-rate multiplier at light pressure
-@export var slowdown_heavy: float = 0.1         # decay-rate multiplier at heavy pressure
+@export var slowdown_light: float = 0.65        # retain useful inherent recovery under intermittent fire
+@export var slowdown_heavy: float = 0.25        # sustained heavy fire still suppresses recovery
 @export var stop_fast_decay_when_heavy: bool = false  # freeze fast-stress decay at heavy pressure
 
 # --- slower recovery when panic ---
@@ -268,12 +272,15 @@ func _sample_stress_balance(delta: float) -> void:
 func get_recovery_capacity() -> float:
 	var squad_bonus: float = _state_mod_dict[state]
 	var leader_presence: float = clampf(leader_presence_strength, 0.0, 1.0)
-	var combined: float = 1.0 - ((1.0 - squad_bonus) * (1.0 - leader_presence))
+	# Command improves the squad's own recovery instead of replacing impaired morale.
+	var combined: float = squad_bonus * (1.0 + maxf(leader_recovery_bonus, 0.0) * leader_presence)
+	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
+		combined = maxf(leader_ineffective_recovery, 0.0) * leader_presence
 	if _is_headquarters():
 		combined *= maxf(hq_recovery_multiplier, 0.0)
 		if state == STATES.MoraleState.PANIC:
 			combined = maxf(combined, hq_panic_recovery_floor)
-	return combined * maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
+	return combined * maxf(base_recovery_per_second, 0.0) * maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
 
 
 func _process(delta: float) -> void:
@@ -489,6 +496,8 @@ func apply_stress(df: float, ds: float) -> void:
 
 	var L: float = _get_current_leader_effect()
 	var leader_mult: float = 1.0 - leader_gain_reduction_max * L
+	var command_presence: float = clampf(leader_presence_strength, 0.0, 1.0)
+	leader_mult *= 1.0 - clampf(command_gain_reduction_max, 0.0, 1.0) * command_presence
 	if leader_mult < min_incoming_gain_mult:
 		leader_mult = min_incoming_gain_mult
 	if leader_mult > 1.0:

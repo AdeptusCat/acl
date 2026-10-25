@@ -69,7 +69,7 @@ func _test_pressure_history() -> void:
 	_check(is_equal_approx(stress._under_fire_t, remaining) and is_equal_approx(stress._last_pressure_rps, 0.5), "Invalid or empty volleys cannot refresh, erase or corrupt pressure")
 	stress._process(0.5)
 	_check(stress._last_pressure_rps == 0.0 and not stress.under_fire and stress._fire_pressure_samples.is_empty(), "All pressure and fire flags clear when the final sample expires")
-	_check(is_equal_approx(stress.get_recovery_capacity(), 1.0), "Recovery returns to baseline after incoming fire stops")
+	_check(is_equal_approx(stress.get_recovery_capacity(), 1.5), "Recovery returns to baseline after incoming fire stops")
 	stress.under_fire_window_s = 0.0
 	stress.mark_under_fire(10.0)
 	_check(stress._last_pressure_rps == 0.0 and not stress.under_fire, "A disabled fire window cannot divide by zero or retain samples")
@@ -119,11 +119,11 @@ func _test_live_cohesion() -> void:
 	unit.add_child(unit.movement)
 	stats.cohesion_current = 0.4
 	stats.setup(unit)
-	_check(is_equal_approx(unit.stress_system.cohesion, 0.4) and is_equal_approx(unit.stress_system.get_recovery_capacity(), 0.4), "Setup feeds loaded combat cohesion into stress recovery immediately")
+	_check(is_equal_approx(unit.stress_system.cohesion, 0.4) and is_equal_approx(unit.stress_system.get_recovery_capacity(), 0.6), "Setup feeds loaded combat cohesion into stress recovery immediately")
 	stats.update_stats(1.0)
 	_check(stats.cohesion_current > 0.4 and is_equal_approx(unit.stress_system.cohesion, stats.cohesion_current), "Natural combat cohesion recovery updates the stress input")
 	unit.stress_system.add_leadership_source(1, 0.1, 0.1, 1.2)
-	_check(is_equal_approx(unit.stress_system.get_recovery_capacity(), stats.cohesion_current * 1.2), "Aura cohesion multiplies live cohesion once")
+	_check(is_equal_approx(unit.stress_system.get_recovery_capacity(), stats.cohesion_current * 1.2 * 1.5), "Aura cohesion multiplies live cohesion once")
 	stats.update_stats(0.0)
 	stats.update_stats(0.0)
 	_check(is_equal_approx(unit.stress_system.cohesion, stats.cohesion_current), "Repeated updates do not fold aura bonuses into base cohesion")
@@ -132,7 +132,7 @@ func _test_live_cohesion() -> void:
 	stats.update_stats(1.0)
 	_check(stats.cohesion_current < 1.0 and is_equal_approx(unit.stress_system.cohesion, stats.cohesion_current), "A casualty-induced cohesion drop reaches stress recovery through the live stats update")
 	unit.stress_system.remove_leadership_source(1)
-	_check(is_equal_approx(unit.stress_system.get_recovery_capacity(), stats.cohesion_current), "Removing an aura restores recovery based on current combat cohesion")
+	_check(is_equal_approx(unit.stress_system.get_recovery_capacity(), stats.cohesion_current * 1.5), "Removing an aura restores recovery based on current combat cohesion")
 	unit.free()
 
 

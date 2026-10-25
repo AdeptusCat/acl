@@ -17,6 +17,7 @@ SCENES = (
     "stress_balance_regression",
     "stress_recovery_regression",
     "stress_inputs_regression",
+    "stress_resilience_regression",
     "command_connections_regression",
     "target_hit_chance_regression",
     "stress_scenarios_regression",

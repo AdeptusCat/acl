@@ -244,8 +244,8 @@ func _test_final_calculation() -> void:
 	# Volley: 11.25 * 1.2 * 0.8 * 0.85 = 9.18 effective gain.
 	# Attention: 1 overload + (1 - exp(-0.5)) effective switching, same modifiers.
 	var attention_gain: float = (2.0 - exp(-0.5)) * 1.2 * 0.8 * 0.8041
-	_check(is_equal_approx(stress.S_eff, 39.18 + attention_gain - 0.5), "All four attention effects enter the existing stress bins with recovery applied once")
-	_check(is_equal_approx(stress.incoming_stress_rate, (9.18 + attention_gain) / 0.5) and is_equal_approx(stress.stress_recovery_rate, 1.0), "The stress-rate display accounts for both impact and continuous attention gains")
+	_check(is_equal_approx(stress.S_eff, 39.18 + attention_gain - 0.75), "All four attention effects enter the existing stress bins with recovery applied once")
+	_check(is_equal_approx(stress.incoming_stress_rate, (9.18 + attention_gain) / 0.5) and is_equal_approx(stress.stress_recovery_rate, 1.5), "The stress-rate display accounts for both impact and continuous attention gains")
 	_check(is_equal_approx(stress.S_eff - 30.0, stress.net_stress_rate * 0.5), "The complete stress balance explains the final meter change")
 
 	stress.recovery_scale = 0.0
@@ -266,7 +266,7 @@ func _test_final_calculation() -> void:
 	_check(stress.S_eff == before, "Inactive squads do not accumulate ongoing attention stress")
 	unit.surrendered = false
 	unit.tactical_state = _focused()
-	unit.tactical_state.attention_stress_rate = 2.0
+	unit.tactical_state.attention_stress_rate = 4.0
 	stress.pin_threshold = stress.S_eff + 0.1
 	stress.refractory_s = 0.0
 	stress.L_NORMAL_TO_PINNED = 1000.0

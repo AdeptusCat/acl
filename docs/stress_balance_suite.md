@@ -8,7 +8,7 @@ python3 tests/run_stress_suite.py
 
 Use `--godot /path/to/godot` to select the Godot 4.7 executable and `--output /path/to/results` to change the report directory. The default is `/tmp/acl-stress-results`. Each scene runs in a fresh Godot process with temporary XDG user directories, a 120-second timeout and a saved log. A nonzero exit, any Godot `ERROR:`/`SCRIPT ERROR:`, or a missing successful completion summary fails the suite. This catches script aborts even when Godot exits with status zero.
 
-The runner includes squad attention, integrated attention stress, stress balance/UI, stress recovery, stress input integration, command connections, target hit probability, and the weapon/scenario matrix. HQ multipliers and morale thresholds are unchanged by the input correctness fixes.
+The nine-suite runner includes squad attention, integrated attention stress, stress balance/UI, stress recovery, stress input integration, stress resilience with live attention and morale, command connections, target hit probability, and the weapon/scenario matrix. Morale thresholds and directional attention costs are unchanged by the recovery rebalance.
 
 ## Coverage
 
@@ -25,6 +25,7 @@ The runner includes squad attention, integrated attention stress, stress balance
 | Volume and attacker | Normal versus high-frequency volleys; heavy-fire recovery slowdown; stressed attacker accuracy and HE suppression. |
 | Integration and boundaries | Incoming scaling, leadership gain reduction, existing-stress resistance, caps, negative input, empty bins, disabled damage, surrender, smoothing expiry, measured net rate and different simulation steps are covered by the existing suites included in the runner. |
 | Input correctness | First and repeated pinning use time spent pinned; repinning retains its separate ramp. Simultaneous and successive impacts accumulate into a normalized, fading rounds/second history. Pressure expires consistently at different simulation steps. Combat cohesion reaches recovery at setup and during live updates without compounding aura bonuses. |
+| Resilience balance | Actual squad/platoon/company rank parameters, live visible contacts and bearing memories, and stochastic morale over eight paired seeds. One frontal threat must not pin an intact isolated squad under intermittent fire. Unsupported squads must recover below caution within 90 seconds after opposing threats stop; HQ must improve recovery. Concentrated three-direction fire must still overwhelm company-supported squads. |
 
 ## Scenario protocol and report
 
@@ -36,17 +37,40 @@ These are controlled stress scenarios, not full squad DPS or ammunition simulati
 
 CSV columns include the scenario inputs, seed, step, volley size and interval, raw fast/slow impact gain, stress at the end of firing, peak stress, first pin/panic threshold crossing, stress after recovery, and time to fall below the normal-from-cautious threshold. Threshold crossings are stress measurements, not times when the fixed morale state changes. `-1` means a timing was not reached within the simulation or a metric does not apply. For impact rows, `stress_at_30s` holds immediate effective stress; `phase` identifies those rows. CSV values are measurements, not golden snapshots that would prevent intentional tuning.
 
-## Initial balance observations
+## Recovery rebalance
+
+Attention overload and switching retain their original costs. The rebalance strengthens the recovery available to every squad, gives command presence useful protection before pinning, and limits how far HQ can bypass morale impairment.
+
+| Mechanic | Before | After |
+| --- | ---: | ---: |
+| Normal inherent recovery, stress/second | 1.00 | 1.50 |
+| Cautious inherent recovery | 0.80 | 1.275 |
+| Pinned inherent recovery | 0.35 | 0.825 |
+| Panic inherent recovery | 0.10 | 0.45 |
+| Light/heavy fire recovery multipliers | 0.40 / 0.10 | 0.65 / 0.25 |
+| Full command presence | Restores the normal recovery factor | Adds 50% to the squad's morale-adjusted recovery |
+| Incoming command protection | None beyond rank aura | Up to 15%, proportional to presence |
+| Minimum incoming gain multiplier | 0.40 | 0.75 |
+
+Recovery rates in the table assume full cohesion and no fire, casualties, aura or HQ-unit bonus. Rank aura gain protection and command presence multiply, then share the 25% cap. Recovery aura cohesion still uses the strongest source rather than stacking. Combat-ineffective squads retain limited command-assisted recovery. The HQ-unit panic floor is reduced to 0.6 before base-rate scaling, preventing the former extreme disparity with unsupported panic recovery.
+
+## Measured results
 
 Godot 4.7.2, seed 1234, cover 2, half weapon range, opposing directions, normal morale, default two-second volley interval:
 
-| Weapon | Stress after 30 s, unsupported | Stress after 30 s, nearby HQ |
-| --- | ---: | ---: |
-| M1 Garand | 9.32 | 7.81 |
-| MG34 | 34.74 | 31.00 |
-| M2 60 mm mortar | 99.08 | 99.03 |
+| Weapon | Unsupported before | Unsupported after | Nearby HQ before | Nearby HQ after |
+| --- | ---: | ---: | ---: | ---: |
+| M1 Garand | 9.32 | 1.54 | 7.81 | 0.00 |
+| MG34 | 34.74 | 25.00 | 31.00 | 9.80 |
+| M2 60 mm mortar | 99.08 | 97.97 | 99.03 | 96.80 |
 
-The mortar reaches the cap under this controlled schedule; HQ gain protection has little room to separate the end values once saturated. Use threshold times and recovery columns alongside end stress. Radio presence alone does not improve normal-state recovery because normal morale already provides the full base recovery capacity. It improves recovery for impaired morale states.
+The mortar still approaches the cap under this controlled schedule. Use threshold times and recovery columns alongside end stress. Radio presence now improves gain protection and recovery even in normal morale, with a smaller benefit than nearby voice/sight presence. Zero end stress in the light supported rifle case means recovery offsets that controlled input; it does not imply immunity to individual hits or heavier fire.
+
+The separate resilience regression runs eight paired seeds with live two-direction attention, incoming bearings and stochastic morale. Isolated squads retain their squad-leader aura; supported squads use actual platoon-leader parameters. Mean stress at 30 seconds is 86.87 isolated versus 63.26 supported. Mean time below the caution recovery threshold after pressure stops is 59.59 versus 21.44 seconds. This is a severe opposing-threat case with ongoing overload, distinct from the fixed-morale weapon matrix. One frontal threat stays below caution without pinning, while concentrated three-direction fire still exceeds 65 stress and pins a company-supported squad.
+
+These live-attention checks use controlled suppression inputs rather than a complete weapon/loadout simulation. They keep squad size and cohesion intact, omit projectile travel, movement and casualty rolls, and do not exercise proximity routing. They validate bounded support and autonomous recovery, rather than claiming a full-match break probability.
+
+Validation after the rebalance: all nine stress suites pass, with 1,370 CSV cases including 90 sustained scenarios. All 312 project scripts pass parsing and annotation checks. Unit-roster and active-match smoke assertions pass. The active-match test still reports the previously observed shutdown leaks (174 ObjectDB instances and one resource); no simulation script errors occurred.
 
 These measurements include the fire-pressure correction. Each impact supplies a round count. A normalized triangular history over `under_fire_window_s` (two seconds by default) adds overlapping impacts and fades each contribution linearly to zero. Its integral equals the submitted rounds, so the resulting pressure has rounds/second units. Empty, negative and nonfinite inputs do not refresh fire pressure. The stress controller ages this history using simulation time.
 

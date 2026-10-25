@@ -224,7 +224,7 @@ func _sustained_matrix() -> void:
 			if profile in ["platoon_hq", "company_hq", "stressed_shooter"]:
 				_check(float(result.end) <= float(reference.end), filename + ": protective influence lowers sustained stress: " + profile)
 			if profile == "radio_hq":
-				_check(is_equal_approx(float(result.end), float(reference.end)), filename + ": radio presence adds no recovery to already-normal morale")
+				_check(float(result.end) < float(reference.end), filename + ": radio presence improves gain protection and recovery even in normal morale")
 
 
 func _simulate(weapon: WeaponSpec, cover: int, directions: int, profile: String) -> Dictionary:
