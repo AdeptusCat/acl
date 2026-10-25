@@ -404,6 +404,9 @@ func _test_attention_capacity() -> void:
 		var enemy: UnitProbe = _unit()
 		enemy.team = Globals.get_enemy_team(target.team)
 		enemy.position = Vector2.RIGHT.rotated(float(index) * TAU / 3.0) * 100.0
+		enemy.squad_fire = SquadFireController.new()
+		enemy.add_child(enemy.squad_fire)
+		enemy.squad_fire.fire_recent = 1.0
 		enemies.append(enemy)
 	Globals.unit_visible_enemies[target] = enemies
 	target.tactical_state.update_attention(target)

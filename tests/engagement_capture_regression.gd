@@ -150,7 +150,7 @@ func _test_live_map() -> void:
 			observed = state
 	_check(not observed.is_empty() and observed.soldiers.size() == target.members_alive, "Snapshots retain the full live roster and actual casualties")
 	_check(observed.has("attention_gain_since_sample") and not observed.attention_gain_since_sample.is_empty(), "Continuous attention gains are aggregated into snapshots")
-	_check(observed.has("attention") and observed.has("command") and observed.has("orders") and observed.stress.has("pressure_rps"), "Snapshots contain attention, HQ, orders and pressure context")
+	_check(observed.has("attention") and observed.attention.has("required") and observed.has("command") and observed.has("orders") and observed.stress.has("pressure_rps"), "Snapshots contain attention, HQ, orders and pressure context")
 	var metadata: Dictionary = _json(path.path_join("metadata.json"))
 	_check(metadata.map.name == map.map_name and not metadata.rules_sha256.is_empty(), "Metadata identifies the map and exact rule hashes")
 	_check(not _json(path.path_join("map.json")).layers.is_empty(), "Terrain layers and their custom data are persisted")

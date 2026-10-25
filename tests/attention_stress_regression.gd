@@ -130,6 +130,9 @@ func _test_overload_and_conditions() -> void:
 		var enemy: Unit = Unit.new()
 		enemy.team = Globals.get_enemy_team(unit.team)
 		enemy.position = Vector2.RIGHT.rotated(float(index) * TAU / 3.0) * 100.0
+		enemy.squad_fire = SquadFireController.new()
+		enemy.add_child(enemy.squad_fire)
+		enemy.squad_fire.fire_recent = 1.0
 		enemies.append(enemy)
 	var state: SquadTacticalState = unit.tactical_state
 	state.update_attention(unit)
@@ -157,7 +160,7 @@ func _test_overload_and_conditions() -> void:
 	for index: int in range(3):
 		enemies[index].position = Vector2.RIGHT.rotated(deg_to_rad(float(index - 1) * 20.0)) * 100.0
 	state.update_attention(unit)
-	_check(not state.flanked and not state.surrounded and state.attention_stress_rate > 0.0, "Several frontal threats can overload attention without a flank condition")
+	_check(not state.flanked and not state.surrounded and state.attention_stress_rate == 0.0, "A healthy squad shares observation effort across clustered frontal threats")
 	var full_squad_rate: float = state.attention_stress_rate
 	unit.members_alive = 3
 	state.update_attention(unit)
