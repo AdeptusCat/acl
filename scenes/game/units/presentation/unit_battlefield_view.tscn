@@ -48,6 +48,7 @@
 [ext_resource type="Texture2D" uid="uid://c6t15chhylcy4" path="res://assets/status/united_states/infantry/mg/shooting_us.png" id="39_773ej"]
 [ext_resource type="Texture2D" uid="uid://efnfkq1gl17t" path="res://assets/status/united_states/infantry/mg/moving_us.png" id="40_mg_moving_us"]
 [ext_resource type="Texture2D" uid="uid://bcx7evn6t805m" path="res://assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_15.png" id="40_r88sf"]
+[ext_resource type="Texture2D" path="res://assets/status/germany/infantry/mortar/moving_ger.png" id="41_mortar_moving_ger"]
 [ext_resource type="Texture2D" uid="uid://dmsc6h87pf0km" path="res://assets/status/germany/infantry/mortar/ChatGPT Image 23. Okt. 2025, 23_47_21.png" id="41_tywqg"]
 [ext_resource type="Texture2D" uid="uid://bvhivdaoxde2" path="res://assets/status/united_states/infantry/antitank/ea11b643-655a-4fb1-9b89-0f6b1ba6a044.png" id="42_r88sf"]
 [ext_resource type="Texture2D" uid="uid://4l285jjrw0fv" path="res://assets/status/united_states/infantry/antitank/e25acfa8-68d8-4758-9349-c7bc8568068c.png" id="43_tywqg"]
@@ -234,6 +235,7 @@ shooting_mg_ger = ExtResource("37_eiylv")
 idle_antitank_ger = ExtResource("38_n3nxe")
 shooting_antitank_ger = ExtResource("39_0fjve")
 idle_mortar_ger = ExtResource("40_r88sf")
+moving_mortar_ger = ExtResource("41_mortar_moving_ger")
 shooting_mortar_ger = ExtResource("41_tywqg")
 idle_mg_us = ExtResource("38_wb6dq")
 moving_mg_us = ExtResource("40_mg_moving_us")
