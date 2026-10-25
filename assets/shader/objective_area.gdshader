@@ -50,6 +50,13 @@ void fragment() {
 	// Keep the connected objective perimeter legible over the capture bands.
 	capture_mask *= step(7.0, boundary);
 	tint = mix(tint, capture_color.rgb, capture_mask);
-	alpha = mix(alpha, 0.62 * capture_color.a, capture_mask);
+	alpha = mix(alpha, 0.80 * capture_color.a, capture_mask);
+	// A moving inner capture ring announces activity before the first band fills.
+	float active = step(0.00001, capture_progress) * (1.0 - step(1.0, capture_progress));
+	float capture_ring = 1.0 - smoothstep(1.1, 1.1 + aa, abs(boundary - 10.0));
+	float moving_marks = step(0.0, sin((area_position.x + area_position.y) * 0.15 - TIME * 4.0));
+	float activity = active * capture_ring * (0.45 + 0.55 * moving_marks);
+	tint = mix(tint, capture_color.rgb, activity);
+	alpha = max(alpha, activity * 0.95);
 	COLOR = vec4(tint, min(alpha, 0.95) * area_color.a);
 }

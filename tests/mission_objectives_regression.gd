@@ -319,6 +319,16 @@ func _check_capture_visual(world: Node, hex: Vector2i, progress: float, color: C
 		var shader_material: ShaderMaterial = marker["material"]
 		var actual: float = shader_material.get_shader_parameter("capture_progress")
 		_check(is_equal_approx(actual, progress), "Capture bands reflect live hold progress and clear after capture or interruption")
+		var activity_label: Label = marker["activity_label"]
+		_check(activity_label.visible == (progress > 0.0), "Hex capture activity labels appear during capture and clear after interruption or completion")
+		if progress > 0.0:
+			var action: String = "CAPTURING"
+			if color == ObjectiveAreaOverlay.ENEMY_COLOR:
+				action = "LOSING"
+			_check(activity_label.text.begins_with(action) and activity_label.text.contains("%"), "Hex labels identify the capturing side and show progress")
+			world.ui.mission_objectives.refresh()
+			var button: ObjectiveCaptureButton = world.ui.mission_objectives.capture_buttons[0]
+			_check(button.text.to_upper().begins_with(action), "Objective buttons announce friendly capture and enemy recapture")
 		if progress > 0.0:
 			_check(shader_material.get_shader_parameter("capture_color") == color, "Capture bands use the capturing side's color")
 		return
@@ -393,6 +403,7 @@ func _check_mission_two(world: Node, panel: MissionObjectivesPanel) -> void:
 	major.state.required_times_reached_s[major_hex] = major.required_time_s * 0.5
 	panel.refresh()
 	_check_button_capture_style(panel.capture_buttons[0], ObjectiveAreaOverlay.ENEMY_COLOR, 0.5)
+	_check(panel.capture_buttons[0].text.begins_with("Capturing A"), "Active friendly capture is explicit in the objective button")
 	var minor: OccupyObjectiveCondition = panel.conditions[2] as OccupyObjectiveCondition
 	var click: InputEventMouseButton = InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT

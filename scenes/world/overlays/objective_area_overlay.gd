@@ -115,7 +115,20 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team, exits_only: bo
 		polygon.polygon = points
 		polygon.material = shader_material
 		add_child(polygon)
-		markers.append({"hex": hex, "id": id, "center": center, "material": shader_material, "edges": edges, "is_exit": is_exit})
+		var activity_label: Label = Label.new()
+		activity_label.position = center + Vector2(-52.0, 13.0)
+		activity_label.size = Vector2(104.0, 18.0)
+		activity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		activity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		activity_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		activity_label.add_theme_font_override("font", FONT)
+		activity_label.add_theme_font_size_override("font_size", 10)
+		activity_label.add_theme_constant_override("outline_size", 3)
+		activity_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.02))
+		activity_label.z_index = 1
+		activity_label.hide()
+		add_child(activity_label)
+		markers.append({"hex": hex, "id": id, "center": center, "material": shader_material, "edges": edges, "is_exit": is_exit, "activity_label": activity_label})
 	_update_colors()
 	queue_redraw()
 
@@ -152,6 +165,14 @@ func _update_colors() -> void:
 		shader_material.set_shader_parameter("area_color", color)
 		shader_material.set_shader_parameter("capture_progress", capture_progress)
 		shader_material.set_shader_parameter("capture_color", capture_color)
+		var activity_label: Label = marker["activity_label"]
+		activity_label.visible = capture_progress > 0.0 and capture_progress < 1.0
+		if activity_label.visible:
+			var action: String = "CAPTURING"
+			if capture_color == ENEMY_COLOR:
+				action = "LOSING"
+			activity_label.text = "%s %d%%" % [action, clampi(floori(capture_progress * 100.0), 1, 99)]
+			activity_label.add_theme_color_override("font_color", capture_color)
 
 
 static func capture_style(occupy: OccupyObjectiveCondition, hex: Vector2i) -> Dictionary:

@@ -132,21 +132,21 @@ sources/0 = SubResource("TileSetAtlasSource_fhlvw")
 
 [sub_resource type="Resource" id="Resource_r28t1"]
 script = ExtResource("49_6apu7")
-required_time_s = 45.0
+required_time_s = 15.0
 team = 1
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_ilf4m"]
 script = ExtResource("49_6apu7")
 objective_id = 2
-required_time_s = 45.0
+required_time_s = 15.0
 team = 1
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_uam5t"]
 script = ExtResource("49_6apu7")
 objective_id = 3
-required_time_s = 45.0
+required_time_s = 30.0
 team = 1
 test_at_scenario_end = true
 
@@ -179,19 +179,19 @@ test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_d3vmv"]
 script = ExtResource("49_6apu7")
-required_time_s = 45.0
+required_time_s = 15.0
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_xby52"]
 script = ExtResource("49_6apu7")
 objective_id = 2
-required_time_s = 45.0
+required_time_s = 15.0
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_2oei0"]
 script = ExtResource("49_6apu7")
 objective_id = 3
-required_time_s = 45.0
+required_time_s = 30.0
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_2p27w"]

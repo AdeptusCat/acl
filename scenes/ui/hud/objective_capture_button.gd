@@ -85,9 +85,28 @@ func refresh() -> void:
 	elif owner == -2:
 		ownership_badge.text = "MIXED"
 	ownership_badge.add_theme_color_override("font_color", badge_color)
+	var active_progress: float = 0.0
+	var enemy_capturing: bool = false
 	for index: int in range(hexes.size()):
 		var style: Dictionary = ObjectiveAreaOverlay.capture_style(condition, hexes[index])
 		var shader_material: ShaderMaterial = (backgrounds.get_child(index) as ColorRect).material as ShaderMaterial
 		shader_material.set_shader_parameter("area_color", style["color"])
 		shader_material.set_shader_parameter("capture_progress", style["progress"])
 		shader_material.set_shader_parameter("capture_color", style["capture_color"])
+		var progress: float = style["progress"]
+		if progress <= 0.0 or progress >= 1.0:
+			continue
+		var enemy_capture: bool = style["capture_color"] == ObjectiveAreaOverlay.ENEMY_COLOR
+		if enemy_capture and not enemy_capturing:
+			enemy_capturing = true
+			active_progress = progress
+		elif enemy_capture == enemy_capturing:
+			active_progress = maxf(active_progress, progress)
+	text = condition.get_description()
+	if active_progress > 0.0:
+		var action: String = "Capturing"
+		if enemy_capturing:
+			action = "Losing"
+		text = action + " " + ObjectiveAreaOverlay.NAMES[condition.objective_id]
+		if hexes.size() == 1:
+			text += " · %d%%" % clampi(floori(active_progress * 100.0), 1, 99)
