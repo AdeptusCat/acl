@@ -54,7 +54,7 @@ func _run() -> void:
 	_freeze(main)
 	_check_initial_objective_control(world, scenario, occupy)
 	_check(panel.is_visible_in_tree(), "Starting a battle displays its mission panel")
-	_check(panel.conditions.size() == 4 and not panel.conditions.has(enemy_objective) and not panel.conditions.has(minor), "Only the player's primary objectives are displayed")
+	_check(panel.conditions.size() == 5 and not panel.conditions.has(enemy_objective) and panel.conditions.has(minor), "Both victory levels are displayed without enemy conditions")
 	for frame: int in range(6):
 		await get_tree().process_frame
 	var expanded_height: float = panel.size.y
@@ -72,12 +72,12 @@ func _run() -> void:
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
 	world.game_controller.camera.position = Vector2(-1000.0, -1000.0)
-	panel.rows.get_child(0).gui_input.emit(click)
+	panel.status_labels[0].gui_input.emit(click)
 	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(objective_hex), "Clicking a capture row centers the camera on its hex")
-	panel.rows.get_child(1).gui_input.emit(click)
+	panel.status_labels[1].gui_input.emit(click)
 	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(exit.state.exit_hexes[0]), "Clicking an exit row focuses its exit hex")
 	var previous_position: Vector2 = world.game_controller.camera.position
-	panel.rows.get_child(2).gui_input.emit(click)
+	panel.status_labels[2].gui_input.emit(click)
 	_check(world.game_controller.camera.position == previous_position, "Objectives without a hex leave the camera unchanged")
 	enemies[0].current_hex = objective_hex
 	occupy.advance_time(0.5)
@@ -186,9 +186,10 @@ func _run() -> void:
 	occupy.advance_time(3.0)
 	_check(not occupy.is_condition_met() and occupy.state.victory_conditions_met[Vector2i(-99, -99)], "Enemy recapture only transfers the hex it occupies")
 	await _check_area_overlay(world, objective_hex)
+	await _check_mission_two(world, panel)
 	var replacement_conditions: Array[VictoryCondition] = [minor, enemy_objective]
 	hud.show_mission_objectives(replacement_conditions, Globals.Team.ALLIES, 60.0)
-	_check(panel.conditions.size() == 1 and panel.rows.get_child_count() == 1 and panel.conditions[0] == minor, "A mission without primary objectives falls back to its own minor objectives")
+	_check(panel.conditions.size() == 1 and panel.status_labels.size() == 1 and panel.conditions[0] == minor, "A mission with only minor objectives displays its own minor group")
 	replacement_conditions = [enemy_objective]
 	hud.show_mission_objectives(replacement_conditions, Globals.Team.AXIS, 60.0)
 	_check(panel.conditions.size() == 1 and panel.conditions[0].team == Globals.Team.AXIS, "Reconfiguration uses the selected faction without stale rows")
@@ -222,7 +223,7 @@ func _check_layout(hud: CanvasLayer, panel: MissionObjectivesPanel, window_size:
 
 
 func _row(panel: MissionObjectivesPanel, index: int) -> String:
-	var label: Label = panel.rows.get_child(index) as Label
+	var label: Label = panel.status_labels[index]
 	return label.text
 
 
@@ -358,3 +359,40 @@ func _check_initial_objective_control(world: Node, scenario: Scenario, occupy: O
 	world.game_controller.set_victory_conditions()
 	overlay._update_colors()
 	world.ui.mission_objectives.refresh()
+
+
+func _check_mission_two(world: Node, panel: MissionObjectivesPanel) -> void:
+	var mission_map: Map = load("res://scenes/campaigns/alderbrook/02_orchard_outpost.tscn").instantiate() as Map
+	get_tree().root.add_child(mission_map)
+	var scenario: Scenario = mission_map.get_scenario(0)
+	var previous_scenario: Scenario = Globals.scenario_chosen
+	var previous_objectives: Dictionary[Globals.Team, ObjectivesCollection] = Globals.objectives
+	var previous_conditions: Dictionary[Globals.Team, VictoryConditionCollection] = Globals.victory_conditions
+	Globals.scenario_chosen = scenario
+	Globals.objectives = scenario.get_objectives()
+	Globals.victory_conditions = scenario.get_victory_conditions()
+	world.game_controller.set_victory_conditions()
+	panel.setup(scenario.victory_conditions, Globals.Team.ALLIES, 600.0)
+	_check(panel.conditions.size() == 3, "Mission 2 displays both major requirements and its minor objective")
+	_check((panel.rows.get_child(0) as Label).text == "Major victory · meet all" and (panel.rows.get_child(3) as Label).text == "Minor victory · meet all", "Major and minor requirements have separate labeled groups")
+	_check(panel.requirement_labels[0].text.contains("Capture all A hexes") and panel.requirement_labels[0].text.contains("30 s continuous"), "Mission 2 explains the major capture requirement and hold duration")
+	_check(panel.requirement_labels[1].text.contains("Destroy at least 2"), "Mission 2 also explains the destruction requirement for major victory")
+	_check(panel.requirement_labels[2].text.contains("Capture all B hexes") and panel.requirement_labels[2].text.contains("Required at mission end"), "Mission 2 shows objective B and its mission-end requirement for minor victory")
+	var minor: OccupyObjectiveCondition = panel.conditions[2] as OccupyObjectiveCondition
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	panel.requirement_labels[2].gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(minor.state.hexes[0]), "Clicking the minor victory requirement focuses objective B")
+	for hex: Vector2i in minor.state.hexes:
+		minor.state.victory_conditions_met[hex] = true
+		minor.state.controlling_teams[hex] = minor.team
+		minor.state.required_times_reached_s[hex] = minor.required_time_s
+	panel.refresh()
+	_check(_row(panel, 2).contains("player controlled"), "Minor objective progress refreshes alongside major objectives")
+	await _check_layout(world.ui, panel, Vector2i(1440, 900))
+	await _check_layout(world.ui, panel, Vector2i(800, 600))
+	Globals.scenario_chosen = previous_scenario
+	Globals.objectives = previous_objectives
+	Globals.victory_conditions = previous_conditions
+	mission_map.queue_free()

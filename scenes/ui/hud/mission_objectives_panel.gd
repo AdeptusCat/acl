@@ -14,6 +14,8 @@ const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 @onready var rows: VBoxContainer = $Objectives/Scroll/Rows
 
 var conditions: Array[VictoryCondition] = []
+var status_labels: Array[Label] = []
+var requirement_labels: Array[Label] = []
 var time_left_seconds: float = 0.0
 var _refresh_elapsed_s: float = 0.0
 var _height_limit: float = 200.0
@@ -44,22 +46,41 @@ func _on_folding_changed(_folded: bool) -> void:
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
 	conditions.clear()
+	status_labels.clear()
+	requirement_labels.clear()
 	for child: Node in rows.get_children():
 		rows.remove_child(child)
 		child.queue_free()
-	for condition: VictoryCondition in scenario_conditions:
-		if condition.team == player_team and condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
-			conditions.append(condition)
-	if conditions.is_empty():
+	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
+		var heading: Label = null
 		for condition: VictoryCondition in scenario_conditions:
-			if condition.team == player_team:
-				conditions.append(condition)
-	for condition: VictoryCondition in conditions:
-		var label: Label = Label.new()
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.mouse_filter = Control.MOUSE_FILTER_STOP
-		label.gui_input.connect(_on_row_input.bind(condition))
-		rows.add_child(label)
+			if condition.team != player_team or condition.outcome_level != level:
+				continue
+			if heading == null:
+				heading = Label.new()
+				heading.text = "Major victory · meet all"
+				if level == VictoryCondition.OutcomeLevel.MINOR:
+					heading.text = "Minor victory · meet all"
+				heading.theme_type_variation = &"HudHeading"
+				heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				heading.tooltip_text = "Meet every requirement in this group. Major victory takes priority over minor victory."
+				rows.add_child(heading)
+			conditions.append(condition)
+			var card: VBoxContainer = VBoxContainer.new()
+			card.add_theme_constant_override("separation", 2)
+			rows.add_child(card)
+			var requirement: Label = Label.new()
+			requirement.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			requirement.mouse_filter = Control.MOUSE_FILTER_STOP
+			requirement.gui_input.connect(_on_row_input.bind(condition))
+			card.add_child(requirement)
+			requirement_labels.append(requirement)
+			var status: Label = Label.new()
+			status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			status.mouse_filter = Control.MOUSE_FILTER_STOP
+			status.gui_input.connect(_on_row_input.bind(condition))
+			card.add_child(status)
+			status_labels.append(status)
 	time_left_seconds = remaining_seconds
 	_refresh_elapsed_s = 0.0
 	section.expand()
@@ -86,7 +107,11 @@ func refresh() -> void:
 	for index: int in range(conditions.size()):
 		var condition: VictoryCondition = conditions[index]
 		var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
-		var label: Label = rows.get_child(index) as Label
+		var label: Label = status_labels[index]
+		var requirement: Label = requirement_labels[index]
+		requirement.text = _requirement_text(condition)
+		requirement.mouse_default_cursor_shape = Control.CURSOR_ARROW
+		label.mouse_default_cursor_shape = Control.CURSOR_ARROW
 		var text: String = ""
 		var color: Color = ACTIVE_COLOR
 		if not progress.valid:
@@ -128,8 +153,23 @@ func refresh() -> void:
 					color = FAILED_COLOR
 				else:
 					text += " · In progress"
+		requirement.tooltip_text = label.tooltip_text
+		requirement.mouse_default_cursor_shape = label.mouse_default_cursor_shape
 		label.text = text
 		label.add_theme_color_override("font_color", color)
+
+
+func _requirement_text(condition: VictoryCondition) -> String:
+	var text: String = condition.get_description()
+	if condition is OccupyObjectiveCondition:
+		var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
+		var squads: String = "good-order squad"
+		if occupy.required_unit_count != 1:
+			squads = "good-order squads"
+		text = "Capture all %s hexes · %d %s/hex · %.0f s continuous" % [OBJECTIVE_NAMES[occupy.objective_id], occupy.required_unit_count, squads, occupy.required_time_s]
+	if condition.test_at_scenario_end:
+		text += " · Required at mission end"
+	return text
 
 
 func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryConditionProgress, units: Array[Unit]) -> String:
