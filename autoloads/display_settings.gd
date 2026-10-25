@@ -29,7 +29,8 @@ func _ready() -> void:
 	_resize_timer.wait_time = 0.3
 	add_child(_resize_timer)
 	_resize_timer.timeout.connect(_remember_window_size)
-	get_window().min_size = DESIGN_SIZE
+	if not OS.has_feature("web"):
+		get_window().min_size = DESIGN_SIZE
 	get_window().unresizable = false
 	# Regression runs must not read or overwrite the player's preferences.
 	if DisplayServer.get_name() == "headless":
@@ -107,6 +108,9 @@ func _apply_window() -> void:
 	_web_fullscreen_pending = false
 	var window: Window = get_window()
 	window.mode = window_mode
+	# Adaptive web exports take their size and position from the browser frame.
+	if OS.has_feature("web"):
+		return
 	if window_mode == Window.MODE_WINDOWED:
 		var usable: Rect2i = DisplayServer.screen_get_usable_rect(window.current_screen)
 		var target: Vector2i = windowed_size

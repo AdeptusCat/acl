@@ -196,7 +196,7 @@ func _sync_display_settings() -> void:
 	resolution_selector.set_item_text(DisplaySettings.WINDOW_PRESETS.size(), "%d × %d (custom)" % [DisplaySettings.windowed_size.x, DisplaySettings.windowed_size.y])
 	resolution_selector.set_item_disabled(DisplaySettings.WINDOW_PRESETS.size(), true)
 	resolution_selector.select(preset_index)
-	resolution_selector.disabled = DisplaySettings.window_mode != Window.MODE_WINDOWED
+	resolution_selector.disabled = OS.has_feature("web") or DisplaySettings.window_mode != Window.MODE_WINDOWED
 	var usable: Rect2i = DisplayServer.screen_get_usable_rect(get_window().current_screen)
 	for index: int in range(DisplaySettings.WINDOW_PRESETS.size()):
 		var preset: Vector2i = DisplaySettings.WINDOW_PRESETS[index]

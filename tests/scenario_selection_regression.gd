@@ -20,6 +20,15 @@ func _run() -> void:
 	screen.game_started.connect(_on_started)
 	get_tree().root.size = Vector2i(1152, 648)
 	await _settle()
+	_check_toolbar_bounds(screen)
+	var settings: Control = screen.settings
+	_click(settings.settings_button.get_global_rect().get_center())
+	await _settle()
+	_check(settings.menu.is_visible_in_tree() and Rect2(Vector2.ZERO, screen.get_node("Control").size).encloses(settings.menu.get_global_rect()), "Main-menu Settings opens inside the visible frame")
+	_click(settings.controls_button.get_global_rect().get_center())
+	await _settle()
+	_check(settings.controls_panel.is_visible_in_tree() and not settings.menu.visible and Rect2(Vector2.ZERO, screen.get_node("Control").size).encloses(settings.controls_panel.get_global_rect()), "Main-menu Controls opens inside the frame and closes Settings")
+	settings.close_panels()
 	_check(screen.start_button.disabled and screen.selected_scenario == null, "A mission requires a selection before Start mission becomes available")
 	_check(not screen.force_briefing.visible and screen.player_roster_rows.is_empty() and screen.enemy_assessment.text.is_empty(), "No force or enemy preview is shown before choosing a mission")
 	var map: Map = world.maps.get_node("DefaultMap")
@@ -84,6 +93,7 @@ func _run() -> void:
 	await _select(screen, button)
 	get_tree().root.size = Vector2i(1440, 900)
 	await _settle()
+	_check_toolbar_bounds(screen)
 	_check(_inside(screen), "The mission selector remains inside the large viewport")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await _capture("selected")
@@ -216,6 +226,14 @@ func _select(screen: CanvasLayer, button: Button) -> void:
 	await _settle()
 	_click(button.get_global_rect().get_center())
 	await _settle()
+
+
+func _check_toolbar_bounds(screen: CanvasLayer) -> void:
+	var bounds: Rect2 = Rect2(Vector2.ZERO, screen.get_node("Control").size)
+	var settings: Control = screen.settings
+	for button: Button in [settings.mute_button, settings.settings_button, settings.controls_button]:
+		_check(bounds.encloses(button.get_global_rect()), "Main-menu toolbar buttons stay entirely inside the frame: " + button.name)
+	_check(is_equal_approx(settings.get_global_rect().end.x, bounds.end.x - 12.0), "The main-menu toolbar stays anchored to the right edge after resizing")
 
 
 func _inside(screen: CanvasLayer) -> bool:
