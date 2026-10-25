@@ -269,6 +269,8 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	if is_setup:
 		return
 	is_setup = true
+	input_manager.set_battle_input_enabled(false)
+	await LoadingScreen.show_loading("Loading battlefield...")
 	Globals.begin_battle()
 	
 	ground_layer = map.get_ground_layer()
@@ -338,9 +340,11 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	game_controller.start_game(team, start_screen.time)
 	ui.show_mission_objectives(scenario.victory_conditions, team, game_controller.time_left_seconds)
 	ui.show_squad_roster(team)
-	input_manager.set_battle_input_enabled(true)
 	
 	game_controller.move_camera(scenario.start_hex[scenario.player_team])
+	await get_tree().process_frame
+	LoadingScreen.hide_loading()
+	input_manager.set_battle_input_enabled(true)
 	
 	
 	
