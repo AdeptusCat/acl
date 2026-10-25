@@ -3,12 +3,14 @@ extends Node
 
 const BALANCE_SAMPLE_SECONDS: float = 0.5
 const BALANCE_WINDOW_SAMPLES: int = 4
+const MAX_LEADERSHIP_RECOVERY_MULTIPLIER: float = 1.5
+const MAX_HQ_RECOVERY_MULTIPLIER: float = 1.5
 
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
 		STATES.MoraleState.CAUTIOUS : 0.85,
-		STATES.MoraleState.PINNED : 0.55,
-		STATES.MoraleState.PANIC : 0.3,
+		STATES.MoraleState.PINNED : 0.65,
+		STATES.MoraleState.PANIC : 0.4,
 		STATES.MoraleState.COMBAT_INEFFECTIVE : 0.0,
 	}
 
@@ -84,7 +86,7 @@ var _since_rout_check: float  = 999.0		# seconds since we checked for rout
 @export var leader_effect_smooth_s: float = 0.5         # seconds to blend leader influence
 @export var command_gain_reduction_max: float = 0.15  # full command presence reduces incoming stress by 15%
 @export var min_incoming_gain_mult: float = 0.75      # all leadership protection is capped at 25%
-@export var leader_recovery_bonus: float = 0.5        # full presence adds at most 50% recovery
+@export var leader_recovery_bonus: float = 0.35       # command bonus shares a 50% budget with aura cohesion
 @export var leader_ineffective_recovery: float = 0.3  # limited recovery when no inherent capacity remains
 
 # --- internal accumulator for trial cadence ---
@@ -97,9 +99,9 @@ var _leader_effect: float = 0.0   # 0..1 smoothed from leadership_bonu
 @export var incoming_stress_scale: float = 1.0   # global multiplier on added stress
 @export var recovery_scale: float = 1.0          # >1 faster decay, <1 slower decay (global)
 @export var base_recovery_per_second: float = 1.5 # inherent recovery before morale and situational modifiers
-@export var hq_recovery_multiplier: float = 2.0
-@export var hq_panic_recovery_floor: float = 0.6 # morale recovery factor before base/situational scaling
-@export var hq_rally_multiplier: float = 2.0
+@export var hq_recovery_multiplier: float = 1.35 # personal HQ bonus; capped independently at 50%
+@export var hq_panic_recovery_floor: float = 0.4 # floor cannot bypass the personal HQ recovery cap
+@export var hq_rally_multiplier: float = 1.35
 @export var cohesion_recovery_floor: float = 0.25
 @export var casualty_recovery_window_s: float = 120.0
 @export var casualty_recovery_slowdown: float = 0.25
@@ -276,13 +278,21 @@ func get_recovery_capacity() -> float:
 	var leader_presence: float = clampf(leader_presence_strength, 0.0, 1.0)
 	# Command improves the squad's own recovery instead of replacing impaired morale.
 	var combined: float = squad_bonus * (1.0 + maxf(leader_recovery_bonus, 0.0) * leader_presence)
+	var baseline_morale: float = squad_bonus
 	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		combined = maxf(leader_ineffective_recovery, 0.0) * leader_presence
+		baseline_morale = combined
+	# Command presence and aura cohesion share one budget at the same base
+	# cohesion, casualties and fire pressure. Auras cannot bypass the cap.
+	var situational: float = _situational_recovery_multiplier()
+	var baseline: float = baseline_morale * _situational_recovery_multiplier(false)
+	var recovery: float = minf(combined * situational, baseline * MAX_LEADERSHIP_RECOVERY_MULTIPLIER)
 	if _is_headquarters():
-		combined *= maxf(hq_recovery_multiplier, 0.0)
+		var personal_cap: float = recovery * MAX_HQ_RECOVERY_MULTIPLIER
+		recovery *= clampf(hq_recovery_multiplier, 0.0, MAX_HQ_RECOVERY_MULTIPLIER)
 		if state == STATES.MoraleState.PANIC:
-			combined = maxf(combined, hq_panic_recovery_floor)
-	return combined * maxf(base_recovery_per_second, 0.0) * maxf(recovery_scale, 0.0) * _situational_recovery_multiplier()
+			recovery = minf(maxf(recovery, maxf(hq_panic_recovery_floor, 0.0) * situational), personal_cap)
+	return recovery * maxf(base_recovery_per_second, 0.0) * maxf(recovery_scale, 0.0)
 
 
 func _process(delta: float) -> void:
@@ -701,8 +711,9 @@ func _maybe_transition(delta: float) -> void:
 				if roll < p_unpin:
 					_set_state(STATES.MoraleState.CAUTIOUS)
 		STATES.MoraleState.PANIC:
-			# use panic_threshold hysteresis, not pin_threshold
-			if s_eff < panic_threshold * H_CAUTION_FROM_PANIC:
+			# Quiet squads can regain cautious morale before passive-contact
+			# overload and the panic penalty keep stress above the threshold.
+			if s_eff < panic_threshold * H_CAUTION_FROM_PANIC or _can_unpin_after_fire():
 				# recovery leg: PANIC -> CAUTIOUS (apply bias)
 				var p: float = _rate_to_prob(_apply_recovery_bias(L_PANIC_TO_CAUTIOUS), dt_trial)
 				if roll < p:
@@ -768,9 +779,10 @@ func _clamp_bins() -> void:
 
 func _apply_recovery_bias(lambda_per_s: float) -> float:
 	# >1.0 makes recovery faster; =1.0 neutral; <1.0 slower
-	var biased: float = lambda_per_s * recovery_bias * _situational_recovery_multiplier()
+	var situational: float = minf(_situational_recovery_multiplier(), _situational_recovery_multiplier(false) * MAX_LEADERSHIP_RECOVERY_MULTIPLIER)
+	var biased: float = lambda_per_s * recovery_bias * situational
 	if _is_headquarters():
-		biased *= maxf(hq_rally_multiplier, 0.0)
+		biased *= clampf(hq_rally_multiplier, 0.0, MAX_HQ_RECOVERY_MULTIPLIER)
 	return max(0.0, biased)
 
 
@@ -779,8 +791,11 @@ func _is_headquarters() -> bool:
 	return unit != null and HqSupportPositionPolicy.is_headquarters(unit)
 
 
-func _situational_recovery_multiplier() -> float:
-	var multiplier: float = clampf(cohesion * _leadership_cohesion_mult, clampf(cohesion_recovery_floor, 0.0, 1.0), 1.5)
+func _situational_recovery_multiplier(include_leadership: bool = true) -> float:
+	var effective_cohesion: float = cohesion
+	if include_leadership:
+		effective_cohesion *= _leadership_cohesion_mult
+	var multiplier: float = clampf(effective_cohesion, clampf(cohesion_recovery_floor, 0.0, 1.0), 1.5)
 	if _casualty_recovery_t > 0.0 and casualty_recovery_window_s > 0.0:
 		var shock: float = _casualty_recovery_shock * clampf(_casualty_recovery_t / casualty_recovery_window_s, 0.0, 1.0)
 		multiplier *= lerpf(1.0, clampf(casualty_recovery_slowdown, 0.0, 1.0), shock)

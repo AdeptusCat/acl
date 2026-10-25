@@ -14,7 +14,7 @@ The game prints the absolute session path as `Engagement capture: ...` when capt
 
 | File | Contents |
 | --- | --- |
-| `metadata.json` | Schema and engine versions, map/scenario identity, battle ID, player team and game mode, debug flags, physics rate/time scale, source-rule hashes, morale state modifiers and rank parameters. |
+| `metadata.json` | Schema and engine versions, map/scenario identity, battle ID, player team and game mode, debug flags, physics rate/time scale, source-rule hashes, morale state modifiers, rank parameters and the hard leadership/personal-HQ recovery limits. |
 | `map.json` | Used cells in ground, building, wall, terrain and road layers, their tile sources/atlas coordinates, custom tile data, tileset references and layer positions. |
 | `events.jsonl` | Ordered discrete combat and lifecycle events, with sequence numbers, capture time and physics-frame offsets. |
 | `snapshots.jsonl` | Complete per-unit state at startup, every simulated second, results and finalization. |

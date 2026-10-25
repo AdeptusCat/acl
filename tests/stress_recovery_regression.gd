@@ -23,7 +23,7 @@ func _ready() -> void:
 		stress.stress_slow = 80.0
 		stress.S_eff = 80.0
 		stress._process(1.0)
-	_check(command.S_eff < regular.S_eff - 0.4, "Broken headquarters sheds stress faster than a broken rifle squad without an excessive panic advantage")
+	_check(command.S_eff < regular.S_eff - 0.15, "Broken headquarters sheds stress faster than a broken rifle squad without an excessive panic advantage")
 	_check(command._apply_recovery_bias(0.1) > regular._apply_recovery_bias(0.1), "Headquarters rallies faster after reaching the stress threshold")
 	hq.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
 	_check(command._is_headquarters(), "Company headquarters also receives command recovery")

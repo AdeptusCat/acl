@@ -152,6 +152,7 @@ func _test_live_map() -> void:
 	_check(observed.has("attention_gain_since_sample") and not observed.attention_gain_since_sample.is_empty(), "Continuous attention gains are aggregated into snapshots")
 	_check(observed.has("attention") and observed.attention.has("required") and observed.has("command") and observed.has("orders") and observed.stress.has("pressure_rps") and observed.stress.has("time_without_fire_s"), "Snapshots contain attention, HQ, orders and pressure context")
 	var metadata: Dictionary = _json(path.path_join("metadata.json"))
+	_check(metadata.recovery_limits.leadership_multiplier == 1.5 and metadata.recovery_limits.hq_personal_multiplier == 1.5, "Metadata records the leadership and personal HQ recovery budgets")
 	_check(metadata.map.name == map.map_name and not metadata.rules_sha256.is_empty(), "Metadata identifies the map and exact rule hashes")
 	_check(not _json(path.path_join("map.json")).layers.is_empty(), "Terrain layers and their custom data are persisted")
 	var events: Array[Dictionary] = _json_lines(path.path_join("events.jsonl"))

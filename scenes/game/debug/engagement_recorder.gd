@@ -365,6 +365,7 @@ func _metadata() -> Dictionary:
 		"map": map_data,
 		"scenario": scenario_data,
 		"rules_sha256": rules,
+		"recovery_limits": {"leadership_multiplier": StressController.MAX_LEADERSHIP_RECOVERY_MULTIPLIER, "hq_personal_multiplier": StressController.MAX_HQ_RECOVERY_MULTIPLIER},
 		"state_modifiers": _value(STATES.STATE_MOD),
 		"rank_parameters": _value(RankGrades.GRADE_PARAMS),
 		"debug": _debug_flags(),

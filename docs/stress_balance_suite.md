@@ -8,7 +8,7 @@ python3 tests/run_stress_suite.py
 
 Use `--godot /path/to/godot` to select the Godot 4.7 executable and `--output /path/to/results` to change the report directory. The default is `/tmp/acl-stress-results`. Each scene runs in a fresh Godot process with temporary XDG user directories and a saved log. Timeouts are 120 seconds, or 600 seconds for whole-squad exchanges. A nonzero exit, any Godot `ERROR:`/`SCRIPT ERROR:`, or a missing successful completion summary fails the suite. This catches script aborts even when Godot exits with status zero.
 
-The twelve-suite runner includes squad attention, integrated attention stress, passive-contact and clustered-bearing overload, high-stress pinning recovery after fire, stress balance/UI, stress recovery, stress input integration, stress resilience with live attention and morale, command connections, target hit probability, the weapon/scenario matrix, and [whole-squad reciprocal fire exchanges](squad_fire_exchange_tests.md). The exchange suite distinguishes mechanical failures from provisional balance alerts; use `--strict-balance` to fail on those alerts. Morale thresholds and directional attention costs are unchanged by the recovery rebalance.
+The thirteen-suite runner includes squad attention, integrated attention stress, passive-contact and clustered-bearing overload, high-stress pinning recovery after fire, bounded HQ support and isolated recovery, stress balance/UI, stress recovery, stress input integration, stress resilience with live attention and morale, command connections, target hit probability, the weapon/scenario matrix, and [whole-squad reciprocal fire exchanges](squad_fire_exchange_tests.md). The exchange suite distinguishes mechanical failures from provisional balance alerts; use `--strict-balance` to fail on those alerts. Morale thresholds and directional attention costs are unchanged by the recovery rebalance.
 
 ## Coverage
 
@@ -120,3 +120,42 @@ Across 16 seeds per layout/support combination, high-stress unpinning occurs an 
 Engagement snapshots record `stress.time_without_fire_s`, measured after expiry of the incoming-fire window. The configured quiet delay is included in each unit's exported stress tunables.
 
 Validation after the pinning-recovery change: all 12 stress suites pass, including 285 targeted pinning-recovery checks, 48 whole-squad exchanges and zero provisional balance alerts. All 317 project scripts parse and pass explicit-type/no-ternary checks. The real-map capture test passes all 41 checks and retains its previously observed shutdown resource-leak warnings.
+
+
+## Isolated recovery and bounded HQ support
+
+This tuning keeps normal and cautious inherent recovery unchanged and strengthens the weaker morale states:
+
+| Setting | Before | Current |
+| --- | ---: | ---: |
+| Isolated normal recovery, full cohesion | 1.50/s | 1.50/s |
+| Isolated cautious recovery, full cohesion | 1.275/s | 1.275/s |
+| Isolated pinned recovery, full cohesion | 0.825/s | 0.975/s |
+| Isolated panic recovery, full cohesion | 0.45/s | 0.60/s |
+| Full command presence recovery bonus before aura | +50% | +35% |
+| Combined direct recovery from presence and aura | Could exceed +50% | Capped at +50% |
+| HQ personal recovery/rally multiplier | 2.0 | 1.35, capped at 1.5 |
+| HQ panic morale-factor floor | 0.6 | 0.4, subject to the personal recovery cap |
+
+Rates above assume no aura, command presence, fire or recent casualty shock. A real isolated squad still retains its embedded leader's aura, which improves these rates. Radio uses the existing 0.35 command presence; nearby voice/sight presence is 1.0. Actual rank coefficients come from `RankGrades.GRADE_PARAMS` and use the strongest aura rather than multiplying overlapping officers.
+
+The combined recovery cap compares supported and unsupported recovery at the **same base cohesion, casualties, fire pressure, morale and global recovery scale**. Aura cohesion and command presence cannot bypass it by compounding; this also bounds aura assistance to morale rally rolls. Indirect HQ effects on changing combat cohesion or fighting outcomes are not covered by this same-condition ratio. HQ units receive a separate personal cap, at most 1.5 times an otherwise equivalent supported ordinary squad. The two direct limits can therefore combine to at most 2.25 times a same-condition ordinary squad without leadership. Extreme configured personal multipliers, rally values and panic floors cannot bypass the caps. Incoming gain protection remains capped at 25% and still applies before the existing stress-level modifier.
+
+Panic can now use the same quiet-period recovery gate as pinning, retaining its slower existing rally rate, refractory interval and situational penalties. Otherwise, its 25% attention factor could keep six passive contacts producing more overload than inherent recovery, even after the last projectile. Actual incoming fire and the three-second quiet delay still block high-stress rallying. This changes eligibility rather than granting a large HQ-dependent decay bonus. Low-stress panic retains its existing hysteresis-based recovery path.
+
+### Recovery profile measurements
+
+The new `hq_support_budget_regression` runs 48 morale/cohesion/fire/casualty combinations against ordered real radio and rank profiles, overlapping and deliberately extreme aura values, HQ personal bonuses/floors, support loss, and the panic quiet gate. It also runs 64 seeded recovery cases: four support profiles, four seeds, pinned/panic starting states, and zero/two casualties. The squad starts at stress 90 immediately after one eight-round fire-pressure event. Six passive frontal contacts remain visible. Two-casualty cases use ten remaining soldiers, base cohesion 0.8 and the production casualty shock; intact cases have 12 men and cohesion 1.0. Cohesion is held fixed to isolate recovery. Times are mean seconds until the actual morale state becomes normal, not only a meter threshold crossing.
+
+| Starting condition | Isolated with squad leader | Radio with squad leader | Nearby platoon HQ | Nearby company HQ |
+| --- | ---: | ---: | ---: | ---: |
+| Pinned, intact | 55.56 | 51.13 | 43.25 | 41.25 |
+| Pinned, two casualties | 98.50 | 89.75 | 78.19 | 77.38 |
+| Panic, intact | 76.69 | 69.19 | 57.31 | 51.31 |
+| Panic, two casualties | 119.13 | 109.31 | 96.31 | 95.88 |
+
+These are controlled quiet-recovery cases. They do not model ongoing casualty rolls, movement, proximity rout checks or a deterministic replay of a captured match. Existing live-attention resilience tests separately require that intermittent frontal rifle pressure stays manageable without HQ and that concentrated three-direction heavy fire still overwhelms company-supported squads.
+
+Capture metadata now records both hard recovery limits, in addition to exported unit tunables, sampled actual capacity and the recorded rule hashes. Historical measurements in earlier sections predate this tuning.
+
+Validation after isolated-recovery/support tuning: all 13 stress suites pass, including 582 HQ support-budget checks, 285 pinning-recovery checks, the 1,370-case weapon/scenario matrix and 48 whole-squad exchanges with zero provisional balance alerts. Concentrated crossfire still reaches mean defender stress 100 at 45 seconds. All 318 project scripts parse and pass convention checks. The real-map capture regression passes 42 checks, including recorded hard recovery limits; its known shutdown resource-leak warnings remain.

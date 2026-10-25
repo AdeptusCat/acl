@@ -52,9 +52,9 @@ func _test_capacity_and_limits() -> void:
 		if state == STATES.MoraleState.NORMAL:
 			_check(is_equal_approx(alone, 1.5), "Unsupported normal squads recover 1.5 stress per second")
 		if state == STATES.MoraleState.PINNED:
-			_check(alone >= 0.8, "Unsupported pinned squads retain useful inherent recovery")
+			_check(is_equal_approx(alone, 0.975), "Unsupported pinned squads recover 0.975 stress per second")
 		if state == STATES.MoraleState.PANIC:
-			_check(alone >= 0.4, "Unsupported panicked squads can recover without mandatory HQ assistance")
+			_check(is_equal_approx(alone, 0.6), "Unsupported panicked squads recover 0.6 stress per second without mandatory HQ assistance")
 		stress.leader_presence_strength = 1.0
 		_check(stress.get_recovery_capacity() > alone and stress.get_recovery_capacity() <= alone * 1.5 + 0.00001, "Command recovery is useful and bounded in morale state %d" % state)
 	stress.state = STATES.MoraleState.NORMAL

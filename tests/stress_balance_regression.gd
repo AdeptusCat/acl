@@ -117,8 +117,8 @@ func _check_situational_recovery() -> void:
 	stress.incoming_stress_scale = 2.0
 	stress.apply_stress(1.0, 0.5)
 	stress._process(0.5)
-	# Recovery: 0.55 * 1.25 command * 2 HQ * 1.5 base * 1.2 scale * 0.48 cohesion * 0.7375 shock * 0.35 fire.
-	_check(is_equal_approx(stress.stress_recovery_rate, 0.3066525), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and fading fire")
+	# Recovery: 0.65 * 1.175 command * 1.35 HQ * 1.5 base * 1.2 scale * 0.48 cohesion * 0.7375 shock * 0.35 fire.
+	_check(is_equal_approx(stress.stress_recovery_rate, 0.22994755875000006), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and fading fire")
 	_check(is_equal_approx(stress.incoming_stress_rate, 2.109), "Incoming scaling and leader protection affect the measured gain")
 	_check(is_equal_approx(stress.S_eff - 40.0, stress.net_stress_rate * 0.5), "The complete situational balance agrees with the actual meter change")
 
@@ -153,11 +153,11 @@ func _check_idle_recovery_and_leadership() -> void:
 	var pinned: StressController = _create_stress(0.0, 0.0)
 	pinned.state = STATES.MoraleState.PINNED
 	pinned._process(0.5)
-	_check(is_equal_approx(pinned.recovery_capacity_rate, 0.825) and view.recovery_arrows.text == ">>", "Pinned squads retain visible inherent recovery even with no stored stress")
+	_check(is_equal_approx(pinned.recovery_capacity_rate, 0.975) and view.recovery_arrows.text == ">>", "Pinned squads retain visible inherent recovery even with no stored stress")
 	pinned.leader_presence_strength = 0.5
-	_check(is_equal_approx(pinned.get_recovery_capacity(), 1.03125), "Leadership presence increases the very same capacity used by gameplay recovery")
+	_check(is_equal_approx(pinned.get_recovery_capacity(), 1.145625), "Leadership presence increases the very same capacity used by gameplay recovery")
 	_advance_without_input(pinned, 2.0)
-	_check(is_equal_approx(pinned.recovery_capacity_rate, 1.03125) and view.recovery_arrows.text == ">>" and pinned.S_eff == 0.0, "Averaged leadership-supported recovery stays visible at zero stress")
+	_check(is_equal_approx(pinned.recovery_capacity_rate, 1.145625) and view.recovery_arrows.text == ">>" and pinned.S_eff == 0.0, "Averaged leadership-supported recovery stays visible at zero stress")
 	var leader_only: StressController = _create_stress(0.0, 0.0)
 	leader_only.state = STATES.MoraleState.COMBAT_INEFFECTIVE
 	leader_only.leader_presence_strength = 0.8
@@ -166,7 +166,7 @@ func _check_idle_recovery_and_leadership() -> void:
 	var headquarters: Unit = idle.get_parent() as Unit
 	headquarters.squad_type = Globals.SquadType.PLATOON_HEADQUARTERS
 	_advance_without_input(idle, 2.0)
-	_check(is_equal_approx(idle.recovery_capacity_rate, 3.0) and view.recovery_arrows.text == ">>>", "Strong headquarters recovery uses three arrows rather than the same count as modest recovery")
+	_check(is_equal_approx(idle.recovery_capacity_rate, 2.025) and view.recovery_arrows.text == ">>>", "Bounded headquarters recovery still uses the strong recovery magnitude band")
 	var disabled: StressController = _create_stress(0.0, 0.0)
 	disabled.recovery_scale = 0.0
 	disabled._process(0.5)
