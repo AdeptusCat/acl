@@ -43,7 +43,7 @@ Snapshots include both teams and remembered contacts, including units hidden by 
 - Stable capture ID, formation identity, faction/loadout, hex/world position, cover, activity, movement, surrender, exit, broken and close-combat flags.
 - Living roster, casualties, embedded leadership, cohesion/target cohesion, combat effectiveness and recent casualty shock.
 - Every soldier's role/rank, weapon ID, ammunition and magazine, grenade state, setup/reload/acquisition readiness and remaining task times, and accuracy/fire-rate multipliers.
-- Effective and fast/slow stress, incoming/actual-recovery/net rates, available recovery capacity, averaging-window duration, fire pressure, casualty-recovery shock, pin/unpin timers and leadership modifiers.
+- Effective and fast/slow stress, incoming/actual-recovery/net rates, available recovery capacity, averaging-window duration, fire pressure, casualty-recovery shock, pin/unpin timers, quiet time since the incoming-fire window expired (`stress.time_without_fire_s`) and leadership modifiers.
 - Attention focus, width, quality, capacity, raw directional demand, adjusted required demand (`attention.required`), incoming bearings, overload, switching, surprise, crossfire and flank/surround conditions. Raw demand preserves observation information; adjusted required demand includes passive-contact weighting and shared effort across nearby bearings.
 - Assigned HQ, actual command-link/presence strengths, target, action/order/task IDs, objective and movement targets, visible enemies and their remembered tracks.
 

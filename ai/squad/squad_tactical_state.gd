@@ -328,7 +328,9 @@ func _attention_quality(unit: Unit) -> float:
 			STATES.MoraleState.CAUTIOUS:
 				quality *= 0.9
 			STATES.MoraleState.PINNED:
-				quality *= 0.55
+				# Pinning limits observation without halving capacity and feeding
+				# the overload that caused the pin in the first place.
+				quality *= 0.8
 			STATES.MoraleState.PANIC:
 				quality *= 0.25
 			STATES.MoraleState.COMBAT_INEFFECTIVE:

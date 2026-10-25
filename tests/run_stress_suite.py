@@ -15,6 +15,7 @@ SCENES = (
     "squad_attention_regression",
     "attention_stress_regression",
     "passive_overload_regression",
+    "pinning_recovery_regression",
     "stress_balance_regression",
     "stress_recovery_regression",
     "stress_inputs_regression",

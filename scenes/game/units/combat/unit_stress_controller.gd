@@ -70,6 +70,7 @@ var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 # --- TUNABLES: ramps (seconds to go 0 → 100%) ---
 @export var repin_ramp_s: float  = 10.0   # CAUTIOUS→PINNED hazard ramps up after unpin
 @export var unpin_ramp_s: float  = 10.0   # PINNED→CAUTIOUS hazard ramps up while pinned
+@export var unpin_no_fire_delay_s: float = 3.0 # quiet time after the incoming-fire window expires
 @export var rout_ramp_s: float  = 10.0    # ROUT hazard ramps up while pinned
 
 # --- INTERNALS: timers for ramps ---
@@ -129,6 +130,7 @@ var _how_long_under_fire_s: float = 0.0
 var _how_long_under_fire_util_rout_s: float = 4.0
 var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
+var _time_without_fire_s: float = 0.0
 var _fire_pressure_samples: Array[FirePressureSample] = []
 var under_fire: bool = false
 
@@ -575,6 +577,7 @@ func mark_under_fire(rounds: float) -> void:
 
 func _advance_fire_pressure(delta: float) -> void:
 	var window_s: float = maxf(under_fire_window_s, 0.0)
+	var previous_remaining_s: float = _under_fire_t
 	_last_pressure_rps = 0.0
 	_under_fire_t = 0.0
 	for index: int in range(_fire_pressure_samples.size() - 1, -1, -1):
@@ -588,6 +591,11 @@ func _advance_fire_pressure(delta: float) -> void:
 		_last_pressure_rps += sample.rounds * 2.0 * remaining_s / (window_s * window_s)
 		_under_fire_t = maxf(_under_fire_t, remaining_s)
 	under_fire = _under_fire_t > 0.0
+	if under_fire:
+		_time_without_fire_s = 0.0
+	else:
+		# Count only the part of this step after the last sample expired.
+		_time_without_fire_s += maxf(0.0, delta - maxf(previous_remaining_s, 0.0))
 
 # state machine (unchanged logic)
 #func _maybe_transition(delta: float) -> void:
@@ -678,17 +686,13 @@ func _maybe_transition(delta: float) -> void:
 					_set_state(STATES.MoraleState.NORMAL)
 
 		STATES.MoraleState.PINNED:
-			# disabled by setting L_PINNED_TO_PANIC = 0.0
-			if s_eff >= panic_threshold:
+			# High stress blocks ordinary unpinning under fire. After a quiet
+			# interval, allow the existing rally roll without requiring stress
+			# to cross 65 first; cautious morale restores useful recovery.
+			if s_eff >= panic_threshold and not _can_unpin_after_fire():
 				var p: float = _rate_to_prob(L_PINNED_TO_PANIC, dt_trial)
 				if roll < p:
 					_set_state(STATES.MoraleState.PANIC)
-			#elif s_eff < pin_threshold * H_CAUTION_FROM_PINNED:
-			#else: # make recovery possible even tho S_eff is high
-				## recovery leg: PINNED -> CAUTIOUS (apply bias)
-				#var p: float = _rate_to_prob(_apply_recovery_bias(0.50), dt_trial)
-				#if roll < p:
-					#_set_state(MoraleState.CAUTIOUS)
 			else:
 				# recovery hazard ramps from 0 → base, then gets recovery_bias
 				var lambda_unpin: float = L_PINNED_TO_CAUTIOUS * _unpin_ramp_multiplier()
@@ -705,6 +709,10 @@ func _maybe_transition(delta: float) -> void:
 					_set_state(STATES.MoraleState.CAUTIOUS)
 					
 					
+func _can_unpin_after_fire() -> bool:
+	return not under_fire and _time_without_fire_s >= maxf(unpin_no_fire_delay_s, 0.0)
+
+
 func _rate_to_prob(rate_per_sec: float, dt: float) -> float:
 	if rate_per_sec < 0.0:
 		rate_per_sec = 0.0
