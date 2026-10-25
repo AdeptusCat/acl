@@ -10,6 +10,8 @@ var last_known_hex: Vector2i = Vector2i.ZERO
 var last_known_global_position: Vector2 = Vector2.ZERO
 
 var confidence: float = 0.0
+# Remembered contact survives loss of visual confidence and never grants live visibility.
+var awareness: float = 0.0
 var observed_strength: float = 0.0
 var uncertainty_radius: int = 0
 
@@ -24,6 +26,7 @@ var is_stale: bool = false
 const CONFIRMED_CONFIDENCE: float = 0.70
 const STALE_CONFIDENCE: float = 0.20
 const DECAY_PER_SECOND: float = 0.025
+const AWARENESS_DECAY_PER_SECOND: float = 1.0 / 30.0
 const UNCERTAINTY_GROWTH_INTERVAL: float = 8.0
 
 
@@ -136,8 +139,10 @@ func update_seen(delta: float, now_unix: float) -> void:
 	los_time_s += delta
 	last_seen_unix_s = now_unix
 
-	if enemy != null:
-		last_known_global_position = enemy.global_position
+	if is_visible:
+		record_detection()
+	else:
+		_decay_awareness(delta)
 
 	if los_time_s >= LOCK_REQUIRED_LOS_TIME_S:
 		has_confirmed_lock = true
@@ -149,20 +154,35 @@ func update_not_seen(delta: float) -> void:
 	currently_in_los = false
 	los_time_s = 0.0
 	has_confirmed_lock = false
+	is_visible = false
+	_decay_awareness(delta)
 
 	confidence -= 0.10 * delta
 	if confidence < 0.0:
 		confidence = 0.0
 
-	if confidence < VISIBLE_CONF_THRESHOLD:
-		is_visible = false
+	_update_flags()
+
+
+func record_detection() -> void:
+	if not is_instance_valid(enemy):
+		return
+	is_visible = true
+	awareness = 1.0
+	last_known_global_position = enemy.global_position
+	last_known_hex = enemy.current_hex
+	_update_flags()
+
+
+func _decay_awareness(delta: float) -> void:
+	awareness = maxf(awareness - AWARENESS_DECAY_PER_SECOND * maxf(delta, 0.0), 0.0)
 
 
 func should_delete() -> bool:
 	if currently_in_los:
 		return false
 
-	if confidence > 0.0:
+	if confidence > 0.0 or awareness > 0.0:
 		return false
 
 	return true

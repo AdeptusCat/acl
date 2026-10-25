@@ -63,6 +63,7 @@ func _ready() -> void:
 	enemy.position = unit.position + Vector2(100.0, 0.0)
 	var track: EnemyTrack = EnemyTrack.new(unit, enemy)
 	track.confidence = 0.8
+	track.record_detection()
 	Globals.unit_enemy_tracks[unit] = {enemy: track}
 	enemy.position = unit.position + Vector2(0.0, 100.0)
 	attention.update_attention(unit)
@@ -70,7 +71,7 @@ func _ready() -> void:
 	unit.movement.is_moving = true
 	unit.goal_hex = destination
 	attention.update_attention(unit)
-	_check(attention.focus_direction.is_equal_approx((expected + Vector2.RIGHT).normalized()), "Movement and remembered threat blend equally")
+	_check(attention.focus_direction.dot(Vector2.RIGHT) > expected.dot(Vector2.RIGHT) and attention.focus_direction.dot(expected) > Vector2.RIGHT.dot(expected), "Remembered demand pulls movement focus toward the known threat")
 	Globals.unit_visible_enemies[unit] = [enemy]
 	attention.update_attention(unit)
 	_check(attention.has_contact and attention.focus_direction.is_equal_approx(Vector2.DOWN), "Visible contact overrides movement and memory")
@@ -80,13 +81,20 @@ func _ready() -> void:
 	attention.update_attention(unit)
 	_check(not attention.has_contact and attention.focus_direction.is_equal_approx(Vector2.RIGHT), "Contact loss restores remembered expectation")
 	track.confidence = 0.0
+	track.update_not_seen(11.0)
+	attention.update_attention(unit)
+	_check(attention.focus_direction.is_equal_approx(Vector2.RIGHT) and not track.should_delete(), "Awareness persists after visual confidence is exhausted")
+	track.update_not_seen(20.0)
 	attention.update_attention(unit)
 	_check_neutral(attention, "Expired threat clears old focus")
+	_check(track.should_delete(), "Expired awareness allows an unseen track to be removed")
 	Globals.objective_hexes[unit.team] = [unit.current_hex]
 	attention.update_attention(unit)
 	_check_neutral(attention, "Objective at current position has no direction")
 	_test_attention_quality(unit, attention)
 	_test_detection(unit, enemy, attention)
+	_test_directional_demand(unit, enemy, attention)
+	_test_awareness(enemy)
 	unit.movement.is_moving = true
 	unit.surrendered = true
 	attention.update_attention(unit)
@@ -110,6 +118,81 @@ func _ready() -> void:
 	ground.free()
 	print("Squad attention regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_awareness(enemy: Unit) -> void:
+	var track: EnemyTrack = EnemyTrack.new(null, enemy)
+	var first_position: Vector2 = enemy.position
+	enemy.position += Vector2.DOWN * 100.0
+	track.update_seen(1.0, 1.0)
+	_check(track.awareness == 0.0 and track.last_known_global_position == first_position, "Undetected LOS candidates cannot create awareness or update a known location")
+	track.confidence = 0.7
+	track.record_detection()
+	var detected_position: Vector2 = enemy.position
+	var detected_hex: Vector2i = enemy.current_hex
+	enemy.position += Vector2.LEFT * 100.0
+	enemy.current_hex += Vector2i(1, 1)
+	track.update_not_seen(1.0)
+	_check(not track.is_visible and not track.has_confirmed_lock and track.awareness > 0.9, "LOS loss clears live visibility while retaining awareness")
+	track.update_seen(1.0, 2.0)
+	_check(track.last_known_global_position == detected_position and track.last_known_hex == detected_hex, "Returning to LOS cannot update last-seen coordinates before reacquisition")
+	var split: EnemyTrack = EnemyTrack.new(null, enemy)
+	split.confidence = track.confidence
+	split.awareness = 1.0
+	for step: int in range(20):
+		split.update_not_seen(0.1)
+	_check(is_equal_approx(split.awareness, track.awareness), "Awareness decay depends on elapsed time rather than update frequency")
+	track.record_detection()
+	_check(track.awareness == 1.0 and track.last_known_global_position == enemy.position, "Confirmed reacquisition refreshes awareness and location")
+	enemy.position = first_position
+	enemy.current_hex = detected_hex
+
+
+func _test_directional_demand(unit: Unit, enemy: Unit, attention: SquadTacticalState) -> void:
+	Globals.unit_enemy_tracks.clear()
+	Globals.objective_hexes.clear()
+	var other: Unit = Unit.new()
+	other.team = enemy.team
+	other.position = unit.position + Vector2.LEFT * 100.0
+	enemy.position = unit.position + Vector2.RIGHT * 100.0
+	enemy.squad_fire = SquadFireController.new()
+	Globals.unit_visible_enemies[unit] = [enemy, other]
+	attention.update_attention(unit)
+	_check(attention.directional_demand[0] > 0.0 and attention.directional_demand[4] > 0.0 and attention.total_directional_demand > 0.0, "Opposing detected contacts retain demand in both directions")
+	_check(attention.focus_direction == Vector2.ZERO and attention.has_contact, "Balanced opposing demand produces broad coverage while retaining contact")
+	enemy.squad_fire.fire_recent = 1.0
+	attention.update_attention(unit)
+	_check(attention.focus_direction.is_equal_approx(Vector2.RIGHT) and attention.directional_demand[0] > attention.directional_demand[4], "An enemy firing now pulls focus more strongly")
+	enemy.squad_fire.fire_recent = 0.0
+	other.position = unit.position + Vector2.LEFT * 1000.0
+	attention.update_attention(unit)
+	_check(attention.focus_direction.is_equal_approx(Vector2.RIGHT), "Nearer detected contacts create more directional demand")
+	Globals.unit_visible_enemies[unit] = [enemy]
+	attention.update_attention(unit)
+	var visible_demand: float = attention.total_directional_demand
+	var track: EnemyTrack = EnemyTrack.new(unit, enemy)
+	track.record_detection()
+	Globals.unit_enemy_tracks[unit] = {enemy: track}
+	attention.update_attention(unit)
+	_check(is_equal_approx(attention.total_directional_demand, visible_demand), "A visible contact is counted once even when it also has an awareness track")
+	Globals.unit_visible_enemies.clear()
+	track.update_not_seen(5.0)
+	attention.update_attention(unit)
+	var remembered_demand: float = attention.total_directional_demand
+	var remembered_strength: float = attention.focus_strength
+	enemy.position = unit.position + Vector2.DOWN * 100.0
+	track.update_seen(1.0, 1.0)
+	attention.update_attention(unit)
+	_check(attention.focus_direction.is_equal_approx(Vector2.RIGHT), "Remembered demand cannot follow a hidden enemy's movement")
+	track.update_not_seen(10.0)
+	attention.update_attention(unit)
+	_check(attention.total_directional_demand < remembered_demand and attention.focus_strength < remembered_strength, "Demand and focus strength fade with awareness")
+	track.update_not_seen(30.0)
+	attention.update_attention(unit)
+	_check(attention.total_directional_demand == 0.0, "Forgotten contacts leave no stale directional demand")
+	Globals.unit_enemy_tracks.clear()
+	enemy.squad_fire.free()
+	other.free()
 
 
 func _test_attention_quality(unit: Unit, attention: SquadTacticalState) -> void:

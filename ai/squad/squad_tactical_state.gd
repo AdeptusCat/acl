@@ -23,6 +23,7 @@ var assigned_task_id: int = -1
 const FULL_ATTENTION_MEMBERS: int = 10
 const FOCUSED_DETECTION_MULTIPLIER: float = 1.35
 const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
+const DEMAND_SECTOR_COUNT: int = 8
 
 # World-space unit direction; zero means broad, neutral coverage.
 # Width is in radians. Quality is observation capacity, separate from directional focus.
@@ -31,6 +32,9 @@ var focus_strength: float = 0.0
 var attention_width: float = TAU
 var attention_quality: float = 0.0
 var has_contact: bool = false
+# Raw demand, clockwise from world-space east. Opposing contacts remain separate.
+var directional_demand: PackedFloat32Array = PackedFloat32Array()
+var total_directional_demand: float = 0.0
 
 
 func update_attention(unit: Unit) -> void:
@@ -39,35 +43,48 @@ func update_attention(unit: Unit) -> void:
 	attention_width = TAU
 	attention_quality = 0.0
 	has_contact = false
+	directional_demand.resize(DEMAND_SECTOR_COUNT)
+	directional_demand.fill(0.0)
+	total_directional_demand = 0.0
 	if not unit.is_active() or unit.surrendered or unit.members_alive <= 0:
 		return
 	attention_quality = _attention_quality(unit)
 
 	var contact_direction: Vector2 = Vector2.ZERO
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
+	var tracks: Dictionary = Globals.unit_enemy_tracks.get(unit, {})
+	var observed: Array[Unit] = []
 	for enemy: Unit in visible:
 		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
 			continue
+		if Globals.unit_enemies_in_los.has(unit) and not Globals.unit_enemies_in_los[unit].has(enemy):
+			continue
+		observed.append(enemy)
 		has_contact = true
-		contact_direction += unit.global_position.direction_to(enemy.global_position)
-	if has_contact:
-		_set_attention(contact_direction, 1.0, PI / 2.0)
-		return
+		var urgency: float = 1.0
+		if enemy.squad_fire != null:
+			urgency += clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
+		contact_direction += _add_directional_demand(enemy.global_position - unit.global_position, urgency)
 
-	if not is_instance_valid(LOSHelper.ground_layer):
-		return
-	var movement_order_direction: Vector2 = _movement_order_direction(unit)
 	var enemy_direction: Vector2 = Vector2.ZERO
-	var tracks: Dictionary = Globals.unit_enemy_tracks.get(unit, {})
 	for enemy: Unit in tracks:
 		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
 			continue
+		if observed.has(enemy):
+			continue
 		var track: EnemyTrack = tracks[enemy] as EnemyTrack
-		if track == null or track.confidence <= EnemyTrack.STALE_CONFIDENCE:
+		if track == null or track.awareness <= 0.0:
 			continue
 		# Hidden units contribute only their recorded position, never their live position.
-		enemy_direction += unit.global_position.direction_to(track.last_known_global_position) * track.confidence
+		enemy_direction += _add_directional_demand(track.last_known_global_position - unit.global_position, track.awareness * 0.5)
+	if has_contact:
+		_set_attention(contact_direction + enemy_direction, 1.0, PI / 2.0)
+		return
 
+	if not is_instance_valid(LOSHelper.ground_layer):
+		_set_attention(enemy_direction, minf(total_directional_demand, 0.6), PI)
+		return
+	var movement_order_direction: Vector2 = _movement_order_direction(unit)
 	var objective_direction: Vector2 = Vector2.ZERO
 	var nearest_distance: float = INF
 	var objectives: Array = Globals.objective_hexes.get(unit.team, [])
@@ -77,9 +94,28 @@ func update_attention(unit: Unit) -> void:
 			nearest_distance = offset.length_squared()
 			objective_direction = offset.normalized()
 
-	# Normalize each source so the number of remembered enemies cannot dominate orders.
-	var expectation: Vector2 = movement_order_direction * 0.4 + enemy_direction.normalized() * 0.4 + objective_direction * 0.2
-	_set_attention(expectation, 0.6, PI)
+	# Remembered demand fades gradually, letting movement and objectives regain attention.
+	var expectation: Vector2 = movement_order_direction * 0.4 + enemy_direction.limit_length(1.0) * 0.8 + objective_direction * 0.2
+	var strength: float = 0.6
+	if movement_order_direction.is_zero_approx() and objective_direction.is_zero_approx():
+		strength = minf(total_directional_demand * 1.2, 0.6)
+	_set_attention(expectation, strength, PI)
+
+
+func _add_directional_demand(offset: Vector2, urgency: float) -> Vector2:
+	if offset.is_zero_approx():
+		return Vector2.ZERO
+	var hex_size: float = 64.0
+	if is_instance_valid(LOSHelper.ground_layer) and LOSHelper.ground_layer.tile_set != null:
+		hex_size = maxf(float(LOSHelper.ground_layer.tile_set.tile_size.x), 1.0)
+	var weight: float = urgency / (1.0 + offset.length() / hex_size * 0.15)
+	var sector: float = fposmod(offset.angle(), TAU) / TAU * float(DEMAND_SECTOR_COUNT)
+	var index: int = int(floorf(sector)) % DEMAND_SECTOR_COUNT
+	var fraction: float = sector - floorf(sector)
+	directional_demand[index] += weight * (1.0 - fraction)
+	directional_demand[(index + 1) % DEMAND_SECTOR_COUNT] += weight * fraction
+	total_directional_demand += weight
+	return offset.normalized() * weight
 
 
 func detection_multiplier(direction: Vector2) -> float:

@@ -80,6 +80,7 @@ func _test_los_transition(probe: FireProbe, attack_state: Unit.AttackState, path
 	var controller: Node = get_tree().root.get_node("Main").world.game_controller
 	controller._on_unit_visibility_checker_timer_timeout()
 	_check(Globals.unit_visible_enemies[shooter].has(enemy) and probe.target_unit == enemy, "Fixture starts with a detected and tracked enemy")
+	_check(track.awareness == 1.0 and shooter.tactical_state.total_directional_demand > 0.0, "Actual detection publishes persistent awareness and directional demand")
 	_fire_burst(VISIBLE_HEX)
 	_check(visual.destinations.size() == 1, "First shot precedes LOS loss")
 	if path == "observer_move":
@@ -114,6 +115,13 @@ func _test_los_transition(probe: FireProbe, attack_state: Unit.AttackState, path
 	_check(probe.target_unit == null, "A stale detection cannot reacquire the hidden target")
 	controller._on_unit_visibility_checker_timer_timeout()
 	_check(not Globals.unit_visible_enemies[shooter].has(enemy), "Detection refresh removes the hidden enemy")
+	_check(track.awareness > 0.0 and track.last_known_hex == VISIBLE_HEX, "LOS loss preserves awareness at the last detected hex")
+	var remembered_awareness: float = track.awareness
+	# LOS occupancy can change before the per-frame track flag catches up.
+	track.currently_in_los = true
+	controller._on_unit_shooting(enemy)
+	_check(track.awareness == remembered_awareness and track.last_known_hex == VISIBLE_HEX and not track.is_visible, "Hidden firing cannot renew awareness or expose a live position through a stale LOS flag")
+	track.currently_in_los = false
 	_set_hex(shooter, OBSERVER_HEX)
 	_set_hex(enemy, VISIBLE_HEX)
 	LOS.update_all_unit_visibilities()

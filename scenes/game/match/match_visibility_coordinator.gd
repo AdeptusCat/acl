@@ -144,7 +144,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 				continue
 
 			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
-				track.is_visible = true
+				track.record_detection()
 				units_visible.append(enemy_tracked)
 				continue
 
@@ -163,7 +163,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 			track.confidence = clamp(track.confidence, 0.0, 1.0)
 
 			if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
-				track.is_visible = true
+				track.record_detection()
 				
 				units_visible.append(enemy_tracked)
 			else:
@@ -188,15 +188,17 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 				track_map[unit_in_current_hex] = same_hex_track
 
 			same_hex_track.confidence = 1.0
-			same_hex_track.is_visible = true
+			same_hex_track.record_detection()
 			same_hex_track.has_confirmed_lock = true
 			same_hex_track.currently_in_los = true
-			same_hex_track.last_known_global_position = unit_in_current_hex.global_position
 
 		Globals.unit_enemy_tracks[unit] = track_map
 		next_visible[unit] = units_visible
 
 	Globals.unit_visible_enemies = next_visible
+	# New contacts pull attention immediately, after every observer finishes its detection roll.
+	for unit: Unit in Globals.get_units():
+		unit.tactical_state.update_attention(unit)
 	controller.show_visible_units()
 
 
@@ -286,8 +288,8 @@ static func on_unit_shooting(controller: Node2D, shooter: Unit) -> void:
 		track.confidence += 0.1
 		track.confidence = clamp(track.confidence, 0.0, 1.0)
 
-		if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
-			track.is_visible = true
+		if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD and Globals.unit_enemies_in_los.get(observer, []).has(shooter):
+			track.record_detection()
 
 		Globals.unit_enemy_tracks[observer] = track_map
 
