@@ -67,6 +67,17 @@ func _run() -> void:
 	for unit: Unit in Globals.get_units():
 		unit.current_hex = Vector2i(-100, -100)
 	var objective_hex: Vector2i = occupy.state.hexes[0]
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	world.game_controller.camera.position = Vector2(-1000.0, -1000.0)
+	panel.rows.get_child(0).gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(objective_hex), "Clicking a capture row centers the camera on its hex")
+	panel.rows.get_child(1).gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(exit.state.exit_hexes[0]), "Clicking an exit row focuses its exit hex")
+	var previous_position: Vector2 = world.game_controller.camera.position
+	panel.rows.get_child(2).gui_input.emit(click)
+	_check(world.game_controller.camera.position == previous_position, "Objectives without a hex leave the camera unchanged")
 	enemies[0].current_hex = objective_hex
 	occupy.advance_time(0.5)
 	panel.refresh()
@@ -99,9 +110,41 @@ func _run() -> void:
 	friends[0].current_hex = Vector2i(-100, -100)
 	occupy.advance_time(0.25)
 	panel.refresh()
-	_check(_row(panel, 0) == "Objective A: unoccupied" and not occupy.is_condition_met(), "Losing control updates the label while resetting capture progress")
+	_check(_row(panel, 0) == "Objective A: player controlled" and occupy.is_condition_met(), "Captured objectives remain controlled after the garrison leaves")
+	occupy.refresh_control()
+	_check(occupy.is_condition_met(), "Final scoring preserves an empty captured objective")
+	enemies[0].current_hex = objective_hex
+	occupy.advance_time(1.0)
+	_check(occupy.is_condition_met(), "An incomplete enemy capture preserves ownership")
+	friends[0].current_hex = objective_hex
+	occupy.advance_time(4.0)
+	_check(occupy.is_condition_met() and occupy.state.enemy_hold_times_s[objective_hex] == 0.0, "Contesting interrupts the enemy capture without losing ownership")
+	friends[0].current_hex = Vector2i(-100, -100)
+	enemies[0].broken = true
+	occupy.advance_time(4.0)
+	_check(occupy.is_condition_met(), "Broken enemies cannot recapture an objective")
+	enemies[0].broken = false
+	occupy.required_unit_count = 2
+	occupy.advance_time(4.0)
+	_check(occupy.is_condition_met(), "Enemy recapture requires the configured squad count")
+	occupy.required_unit_count = 1
+	occupy.advance_time(3.0)
+	_check(not occupy.is_condition_met(), "A full uncontested enemy hold transfers ownership")
+	enemies[0].current_hex = Vector2i(-100, -100)
+	occupy.advance_time(1.0)
+	panel.refresh()
+	_check(_row(panel, 0) == "Objective A: enemy controlled", "Enemy ownership also persists without a garrison")
+	friends[0].current_hex = objective_hex
+	occupy.advance_time(1.0)
+	friends[0].current_hex = Vector2i(-100, -100)
+	occupy.advance_time(1.0)
+	_check(occupy.state.required_times_reached_s[objective_hex] == 0.0, "Leaving an unfinished recapture resets its timer")
+	friends[0].current_hex = objective_hex
+	occupy.advance_time(3.0)
+	friends[0].current_hex = Vector2i(-100, -100)
+	panel.refresh()
 	hud._on_update_timer_label(0.0)
-	_check(_row(panel, 0) == "Objective A: unoccupied", "An unfinished capture still displays control at the deadline")
+	_check(_row(panel, 0) == "Objective A: player controlled", "The deadline retains captured ownership without a garrison")
 	hud._on_update_timer_label(60.0)
 	for index: int in range(2):
 		exit.record_unit_entry(friends[index], exit.state.exit_hexes[0])
@@ -130,6 +173,14 @@ func _run() -> void:
 	occupy.advance_time(3.0)
 	panel.refresh()
 	_check(_row(panel, 0) == "Objective A: partially player controlled" and not occupy.is_condition_met(), "Multiple objective markers display partial control without capture counters")
+	friends[0].current_hex = Vector2i(-99, -99)
+	occupy.advance_time(3.0)
+	panel.refresh()
+	_check(occupy.is_condition_met() and _row(panel, 0) == "Objective A: player controlled", "A single squad can secure multiple hexes sequentially")
+	enemies[0].current_hex = objective_hex
+	occupy.advance_time(3.0)
+	_check(not occupy.is_condition_met() and occupy.state.victory_conditions_met[Vector2i(-99, -99)], "Enemy recapture only transfers the hex it occupies")
+	await _check_area_overlay(world, objective_hex)
 	var replacement_conditions: Array[VictoryCondition] = [minor, enemy_objective]
 	hud.show_mission_objectives(replacement_conditions, Globals.Team.ALLIES, 60.0)
 	_check(panel.conditions.size() == 1 and panel.rows.get_child_count() == 1 and panel.conditions[0] == minor, "A mission without primary objectives falls back to its own minor objectives")
@@ -184,3 +235,51 @@ func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures += 1
 		push_error(message)
+
+
+func _check_area_overlay(world: Node, hex: Vector2i) -> void:
+	var layer: HexagonTileMapLayer = world.game_controller.allies_objective_tilemap
+	var neighbor: Vector2i = layer.get_neighbor_cell(hex, TileSet.CELL_NEIGHBOR_TOP_SIDE)
+	var source: int = layer.get_cell_source_id(hex)
+	var atlas: Vector2i = layer.get_cell_atlas_coords(hex)
+	var alternative: int = layer.get_cell_alternative_tile(hex)
+	layer.clear()
+	layer.set_cell(hex, source, atlas, alternative)
+	layer.set_cell(neighbor, source, atlas, alternative)
+	ObjectiveAreaOverlay.install(layer, Globals.Team.ALLIES)
+	var overlay: ObjectiveAreaOverlay = layer.get_node("ObjectiveArea") as ObjectiveAreaOverlay
+	_check(overlay.markers.size() == 2, "Every objective hex receives a shader polygon")
+	var exposed: int = 0
+	for marker: Dictionary in overlay.markers:
+		for edge: float in marker["edges"]:
+			exposed += int(edge)
+	_check(exposed == 10, "Connected hexes of the same objective omit both shared edges")
+	if OS.get_cmdline_user_args().has("--capture"):
+		world.ui.hide()
+		world.game_controller.camera.position = (layer.map_to_local(hex) + layer.map_to_local(neighbor)) * 0.5
+		world.game_controller.camera.zoom = Vector2(2.0, 2.0)
+		world.game_controller.camera.reset_smoothing()
+		world.game_controller.camera.force_update_scroll()
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-connected-objectives.png")
+		world.ui.show()
+	var different_source: int = -1
+	for index: int in range(layer.tile_set.get_source_count()):
+		var candidate_id: int = layer.tile_set.get_source_id(index)
+		var candidate: TileSetAtlasSource = layer.tile_set.get_source(candidate_id) as TileSetAtlasSource
+		if candidate != null and candidate.has_tile(Vector2i.ZERO):
+			if int(candidate.get_tile_data(Vector2i.ZERO, 0).get_custom_data("objective_id")) == 2:
+				different_source = candidate_id
+	_check(different_source >= 0, "Fixture supplies another objective identity")
+	if different_source >= 0:
+		layer.set_cell(neighbor, different_source, Vector2i.ZERO)
+		ObjectiveAreaOverlay.install(layer, Globals.Team.ALLIES)
+		exposed = 0
+		for marker: Dictionary in overlay.markers:
+			for edge: float in marker["edges"]:
+				exposed += int(edge)
+		_check(exposed == 12, "Adjacent different objectives retain their separate borders")
+	layer.clear()
+	ObjectiveAreaOverlay.install(layer, Globals.Team.ALLIES)
+	_check(overlay.markers.is_empty() and overlay.get_child_count() == 0, "Reinitializing an empty layer removes old objective artwork")

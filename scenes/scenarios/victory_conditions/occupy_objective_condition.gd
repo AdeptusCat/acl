@@ -33,7 +33,7 @@ const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 
 
 func get_description() -> String:
-	var text: String = "Hold every '%s' hex with at least %d good-order squad(s) for %.0f continuous seconds." % [OBJECTIVE_NAMES[objective_id], required_unit_count, required_time_s]
+	var text: String = "Capture every '%s' hex with at least %d good-order squad(s) for %.0f continuous seconds. Control remains until the enemy recaptures it." % [OBJECTIVE_NAMES[objective_id], required_unit_count, required_time_s]
 	return text
 
 
@@ -53,7 +53,7 @@ func advance_time(delta: float) -> void:
 
 
 func refresh_control() -> void:
-	# Final scoring must drop dead or surrendered garrisons without adding hold time.
+	# Refresh presence without advancing either side's capture timer.
 	_update_control(0.0)
 
 
@@ -67,6 +67,7 @@ func complete_after_enemy_defeat(capture_all: bool = false) -> void:
 		if capture_all or held_seconds > 0.0:
 			state.required_times_reached_s[hex] = maxf(held_seconds, required_time_s)
 			state.victory_conditions_met[hex] = true
+			state.controlling_teams[hex] = team
 
 
 func _update_control(delta: float) -> void:
@@ -101,13 +102,21 @@ func _update_control(delta: float) -> void:
 			if friendly_units.size() >= required_unit_count:
 				objective_held = true
 
-		
+		var enemy_held: bool = enemy_units.size() >= required_unit_count and friendly_units.is_empty()
 		if objective_held:
 			state.required_times_reached_s[hex] += delta
+		elif not state.victory_conditions_met.get(hex, false):
+			state.required_times_reached_s[hex] = 0.0
+
+		if enemy_held:
+			state.enemy_hold_times_s[hex] = state.enemy_hold_times_s.get(hex, 0.0) + delta
 		else:
-			state.required_times_reached_s[hex] = 0
+			state.enemy_hold_times_s[hex] = 0.0
 
 		if objective_held and state.required_times_reached_s[hex] >= required_time_s:
 			state.victory_conditions_met[hex] = true
-		else:
+			state.controlling_teams[hex] = team
+		elif enemy_held and state.enemy_hold_times_s[hex] >= required_time_s:
 			state.victory_conditions_met[hex] = false
+			state.controlling_teams[hex] = enemy_team
+			state.required_times_reached_s[hex] = 0.0

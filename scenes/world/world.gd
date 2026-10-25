@@ -81,6 +81,7 @@ func _ready() -> void:
 	game_controller.order_feedback.connect(ui.show_order_feedback)
 	ui.selection_wheel_alt.cancelled.connect(_on_wheel_cancelled)
 	ui.squad_roster.unit_selected.connect(game_controller.select_and_center_unit)
+	ui.mission_objectives.objective_focused.connect(game_controller.move_camera)
 	game_controller.show_winner.connect(result_screen._on_show_winner)
 	result_screen.keep_playing.connect(_on_result_screen_keep_playing)
 	ui.battle_results_requested.connect(_on_battle_results_requested)

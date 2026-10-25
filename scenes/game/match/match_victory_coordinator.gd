@@ -25,6 +25,8 @@ static func set_objective_cells(controller: Node2D, player_team: Globals.Team) -
 		ai_team = Globals.Team.AXIS
 		ai_objective_tilemap = controller.axis_objective_tilemap
 		player_objective_tilemap = controller.allies_objective_tilemap
+	ObjectiveAreaOverlay.install(player_objective_tilemap as HexagonTileMapLayer, player_team)
+	ObjectiveAreaOverlay.install(ai_objective_tilemap as HexagonTileMapLayer, ai_team)
 	player_objective_tilemap.show()
 	ai_objective_tilemap.hide()
 	#if player_team == Globals.Team.AXIS:

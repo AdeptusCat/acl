@@ -1,6 +1,8 @@
 extends PanelContainer
 class_name MissionObjectivesPanel
 
+signal objective_focused(hex: Vector2i)
+
 const REFRESH_INTERVAL_S: float = 0.2
 const COMPLETE_COLOR: Color = Color(0.65, 0.85, 0.55)
 const FAILED_COLOR: Color = Color(1.0, 0.55, 0.45)
@@ -55,7 +57,8 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 	for condition: VictoryCondition in conditions:
 		var label: Label = Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.gui_input.connect(_on_row_input.bind(condition))
 		rows.add_child(label)
 	time_left_seconds = remaining_seconds
 	_refresh_elapsed_s = 0.0
@@ -91,6 +94,11 @@ func refresh() -> void:
 			label.tooltip_text = progress.diagnostic
 		else:
 			label.tooltip_text = condition.get_description()
+			if not progress.hexes.is_empty():
+				label.tooltip_text += "\nClick to focus objective"
+				label.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			else:
+				label.mouse_default_cursor_shape = Control.CURSOR_ARROW
 			match progress.kind:
 				VictoryConditionProgress.Kind.OCCUPY:
 					text = _occupation_text(condition as OccupyObjectiveCondition, progress, units)
@@ -140,13 +148,16 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 				friendly_count += 1
 			else:
 				enemy_count += 1
-		minimum_squads = mini(minimum_squads, friendly_count)
+		if not condition.state.victory_conditions_met.get(hex, false):
+			minimum_squads = mini(minimum_squads, friendly_count)
 		minimum_seconds = minf(minimum_seconds, progress.held_seconds.get(hex, 0.0))
-		if friendly_count > 0 and (not condition.contested_by_enemy_presence or enemy_count == 0):
-			held_hexes += 1
-		elif friendly_count > 0 and enemy_count > 0 and condition.contested_by_enemy_presence:
+		if friendly_count > 0 and enemy_count > 0 and condition.contested_by_enemy_presence:
 			contested_hexes += 1
-		elif enemy_count > 0:
+		elif condition.state.victory_conditions_met.get(hex, false):
+			held_hexes += 1
+		elif friendly_count > 0 and (not condition.contested_by_enemy_presence or enemy_count == 0):
+			held_hexes += 1
+		elif enemy_count > 0 or condition.state.controlling_teams.get(hex, -1) == Globals.get_enemy_team(condition.team):
 			enemy_hexes += 1
 	var status: String = "unoccupied"
 	if held_hexes == progress.hexes.size():
@@ -165,3 +176,13 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 		status = "enemy present"
 	var text: String = "Objective %s: %s" % [OBJECTIVE_NAMES[condition.objective_id], status]
 	return text
+
+
+func _on_row_input(event: InputEvent, condition: VictoryCondition) -> void:
+	if event is InputEventMouseButton:
+		var click: InputEventMouseButton = event as InputEventMouseButton
+		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
+			var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
+			if not progress.hexes.is_empty():
+				objective_focused.emit(progress.hexes[0])
+				accept_event()

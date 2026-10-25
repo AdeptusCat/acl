@@ -1,0 +1,3831 @@
+{
+  "capture": "2026-10-25T19-32-52_a04b535f6154c3d9",
+  "map": "Alderbrook Village",
+  "end_s": 732.901409777778,
+  "summary": {
+    "complete": true,
+    "elapsed_s": 819.749009666616,
+    "events": 39864,
+    "reason": "map_closed",
+    "result": {
+      "outcome": 0,
+      "timeout": false,
+      "winner": -1
+    },
+    "samples": 822,
+    "schema_version": 1,
+    "units": 31
+  },
+  "result": {
+    "outcome": 0,
+    "timeout": false,
+    "winner": -1
+  },
+  "integrity": {
+    "events": 39864,
+    "samples": 822,
+    "counts_match": true,
+    "sequential": true,
+    "unmatched_applications": 0,
+    "unapplied_impacts": 0
+  },
+  "hash_match": {
+    "res://ai/squad/squad_tactical_state.gd": true,
+    "res://autoloads/rank_grades.gd": true,
+    "res://autoloads/unit_states.gd": true,
+    "res://scenes/game/units/actions/squad_action_controller.gd": true,
+    "res://scenes/game/units/combat/squad_fire_controller.gd": true,
+    "res://scenes/game/units/combat/squad_hit_resolver.gd": true,
+    "res://scenes/game/units/combat/unit_casualty_handler.gd": true,
+    "res://scenes/game/units/combat/unit_combat_stats.gd": true,
+    "res://scenes/game/units/combat/unit_stress_controller.gd": true,
+    "res://scenes/game/units/command/command_connectivity.gd": true,
+    "res://scenes/game/units/command/leader_aura.gd": true,
+    "res://scenes/game/units/soldiers/soldier.gd": true,
+    "res://scenes/game/units/unit.gd": true
+  },
+  "debug_variants": [
+    {
+      "dont_fire_weapons": false,
+      "hide_fog_of_war": false,
+      "no_damage": false,
+      "show_enemies": true
+    }
+  ],
+  "units": [
+    {
+      "id": "u_11526769515218",
+      "name": "CA_P1_S0_Allies_PlatoonHQ",
+      "team": 1,
+      "type": 4,
+      "original": 5,
+      "initial": 5,
+      "last_members": 0,
+      "casualties": 5,
+      "rounds": 1,
+      "effects": 4,
+      "fire_gain": 36.34148486754274,
+      "attention_gain": 0.32863710087934184,
+      "active_s": 602.01729633335,
+      "engaged_s": 602.01729633335,
+      "morale_s": [
+        591.0049003333496,
+        11.012396000000408,
+        0,
+        0,
+        0
+      ],
+      "peak": 32.4199253758223,
+      "last_stress": 24.339273466049,
+      "quiet_s": 591.9853796190642,
+      "quiet_with_contacts_s": 104.00906633334807,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 16.3797168333335,
+      "quiet_recovery_steps": 31,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 75.3245790000003,
+          "previous": 0,
+          "next": 1,
+          "stress": 32.2801829099679,
+          "quiet": 0.0,
+          "members": 4
+        },
+        {
+          "t": 86.0361210000006,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.121845458781,
+          "quiet": 9.31214733333333,
+          "members": 4
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          601.039338285731
+        ]
+      ]
+    },
+    {
+      "id": "u_11528581460418",
+      "name": "CA_P1_S1_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 10,
+      "casualties": 2,
+      "rounds": 788,
+      "effects": 111,
+      "fire_gain": 85.09109148639989,
+      "attention_gain": 1.7411420594135263,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        638.89634277778,
+        42.99939022221996,
+        51.005676777778035,
+        0,
+        0
+      ],
+      "peak": 47.9254041458119,
+      "last_stress": 0.0,
+      "quiet_s": 582.8661620365506,
+      "quiet_with_contacts_s": 495.9239730841696,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 23.981206222222013,
+      "max_pressure": 27.801477354257,
+      "quiet_recovery_steps": 24,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 109.597798666667,
+          "previous": 0,
+          "next": 2,
+          "stress": 44.1822101458309,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 111.357539666667,
+          "previous": 2,
+          "next": 1,
+          "stress": 43.9286049197062,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 115.641809000001,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.4008735820559,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 118.736301333334,
+          "previous": 2,
+          "next": 1,
+          "stress": 45.1408283964718,
+          "quiet": 0.129613000000002,
+          "members": 10
+        },
+        {
+          "t": 120.933031666668,
+          "previous": 1,
+          "next": 2,
+          "stress": 45.5167453015648,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 144.575203000001,
+          "previous": 2,
+          "next": 1,
+          "stress": 46.3402172580434,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 149.102566000001,
+          "previous": 1,
+          "next": 2,
+          "stress": 46.5760607383911,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 169.195298666666,
+          "previous": 2,
+          "next": 1,
+          "stress": 44.9241550864921,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 179.490655809523,
+          "previous": 1,
+          "next": 2,
+          "stress": 42.7220542955067,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 181.936473999999,
+          "previous": 2,
+          "next": 1,
+          "stress": 42.8475016292801,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 203.604465333332,
+          "previous": 1,
+          "next": 0,
+          "stress": 17.5832810977721,
+          "quiet": 0.0,
+          "members": 10
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11530393400029",
+      "name": "CA_P1_S2_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 11,
+      "casualties": 1,
+      "rounds": 1073,
+      "effects": 136,
+      "fire_gain": 165.96494831355017,
+      "attention_gain": 6.0113991465227885,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 36.1704156776649,
+      "last_stress": 0.0,
+      "quiet_s": 470.7719805666048,
+      "quiet_with_contacts_s": 310.80468286674466,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 16.3797168333335,
+      "quiet_recovery_steps": 42,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11532205340334",
+      "name": "CA_P1_S3_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 1,
+      "casualties": 11,
+      "rounds": 168,
+      "effects": 107,
+      "fire_gain": 155.3371733531504,
+      "attention_gain": 2.118995342934317,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        476.915085777762,
+        182.96857209092798,
+        73.01775190908802,
+        0,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 0.0,
+      "quiet_s": 633.8875436392516,
+      "quiet_with_contacts_s": 533.888096639251,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 64.01358524242201,
+      "max_pressure": 13.6740651666666,
+      "quiet_recovery_steps": 210,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 145.664465333334,
+          "previous": 0,
+          "next": 2,
+          "stress": 67.785575988043,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 154.220111666667,
+          "previous": 2,
+          "next": 1,
+          "stress": 59.3806863149267,
+          "quiet": 6.70564633333335,
+          "members": 12
+        },
+        {
+          "t": 167.209392,
+          "previous": 1,
+          "next": 2,
+          "stress": 90.710291771365,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 231.910699575755,
+          "previous": 2,
+          "next": 1,
+          "stress": 99.3756920323483,
+          "quiet": 8.02956757575759,
+          "members": 1
+        },
+        {
+          "t": 401.378354222239,
+          "previous": 1,
+          "next": 0,
+          "stress": 15.6128523808384,
+          "quiet": 177.497222222221,
+          "members": 1
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11534017281537",
+      "name": "CA_P1_S4_Allies_MG",
+      "team": 1,
+      "type": 1,
+      "original": 5,
+      "initial": 5,
+      "last_members": 5,
+      "casualties": 0,
+      "rounds": 992,
+      "effects": 211,
+      "fire_gain": 101.20632117805482,
+      "attention_gain": 6.99475285912243,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 18.1302812257582,
+      "last_stress": 0.0,
+      "quiet_s": 559.7893505382397,
+      "quiet_with_contacts_s": 360.89056192640066,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 13.6740651666666,
+      "quiet_recovery_steps": 22,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11535829218798",
+      "name": "CA_P2_S0_Allies_PlatoonHQ",
+      "team": 1,
+      "type": 4,
+      "original": 5,
+      "initial": 5,
+      "last_members": 5,
+      "casualties": 0,
+      "rounds": 155,
+      "effects": 23,
+      "fire_gain": 13.366995182141144,
+      "attention_gain": 0.8812088720589232,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 7.74415102033369,
+      "last_stress": 0.0,
+      "quiet_s": 700.8764619519006,
+      "quiet_with_contacts_s": 478.9029635050581,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 7.92375060606061,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11537641158033",
+      "name": "CA_P2_S1_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 10,
+      "casualties": 2,
+      "rounds": 606,
+      "effects": 110,
+      "fire_gain": 112.69631846689498,
+      "attention_gain": 10.612491357417179,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        632.905322814801,
+        57.013169666674116,
+        42.982917296302844,
+        0,
+        0
+      ],
+      "peak": 51.8193972309829,
+      "last_stress": 0.0,
+      "quiet_s": 498.8538736661697,
+      "quiet_with_contacts_s": 252.84675803317626,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 14.992929292932956,
+      "max_pressure": 24.0138046666667,
+      "quiet_recovery_steps": 5,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 349.689465333341,
+          "previous": 0,
+          "next": 2,
+          "stress": 49.6875273366083,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 355.230508363645,
+          "previous": 2,
+          "next": 1,
+          "stress": 48.6357095216845,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 362.229755333343,
+          "previous": 1,
+          "next": 2,
+          "stress": 46.4182106487871,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 372.684608666678,
+          "previous": 2,
+          "next": 1,
+          "stress": 43.8211958034749,
+          "quiet": 0.429337333333334,
+          "members": 10
+        },
+        {
+          "t": 374.014260000012,
+          "previous": 1,
+          "next": 2,
+          "stress": 43.4318834186572,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 378.303354222235,
+          "previous": 2,
+          "next": 1,
+          "stress": 42.2736981249507,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 380.864465333346,
+          "previous": 1,
+          "next": 2,
+          "stress": 42.822458524345,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 395.085877000016,
+          "previous": 2,
+          "next": 1,
+          "stress": 43.9030549798396,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 406.103179333351,
+          "previous": 1,
+          "next": 2,
+          "stress": 39.8814825846095,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 414.708166666685,
+          "previous": 2,
+          "next": 1,
+          "stress": 36.8407898264479,
+          "quiet": 0.311262666666668,
+          "members": 10
+        },
+        {
+          "t": 449.774625666688,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.7451425163342,
+          "quiet": 0.0,
+          "members": 10
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11539453099489",
+      "name": "CA_P2_S2_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 12,
+      "casualties": 0,
+      "rounds": 825,
+      "effects": 234,
+      "fire_gain": 193.66232558646087,
+      "attention_gain": 3.9974544252487494,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        574.91336925396,
+        61.015295524776974,
+        96.97274499904103,
+        0,
+        0
+      ],
+      "peak": 67.8666681399643,
+      "last_stress": 0.0,
+      "quiet_s": 533.8243410630085,
+      "quiet_with_contacts_s": 355.776052679654,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 37.98173595575,
+      "max_pressure": 24.0138046666667,
+      "quiet_recovery_steps": 35,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 195.406889575757,
+          "previous": 0,
+          "next": 1,
+          "stress": 28.8449726220134,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 209.254810523808,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.777320386229,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 219.874881080806,
+          "previous": 2,
+          "next": 1,
+          "stress": 37.8448268705967,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 224.764403666665,
+          "previous": 1,
+          "next": 2,
+          "stress": 49.3023892120894,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 233.358909777775,
+          "previous": 2,
+          "next": 1,
+          "stress": 54.6602176594817,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 239.801193151513,
+          "previous": 1,
+          "next": 2,
+          "stress": 61.4501124455821,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 277.371297333333,
+          "previous": 2,
+          "next": 1,
+          "stress": 64.8218396288861,
+          "quiet": 0.815539333333334,
+          "members": 12
+        },
+        {
+          "t": 282.210347000001,
+          "previous": 1,
+          "next": 2,
+          "stress": 64.0429296987055,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 288.681132000002,
+          "previous": 2,
+          "next": 1,
+          "stress": 62.4051307426645,
+          "quiet": 0.995353888888879,
+          "members": 12
+        },
+        {
+          "t": 293.263868574798,
+          "previous": 1,
+          "next": 2,
+          "stress": 60.6815074291669,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 297.345861000003,
+          "previous": 2,
+          "next": 1,
+          "stress": 59.7965221404449,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 302.462117333336,
+          "previous": 1,
+          "next": 2,
+          "stress": 60.3593578179667,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 314.146130111115,
+          "previous": 2,
+          "next": 1,
+          "stress": 53.1764233050963,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 317.476657000004,
+          "previous": 1,
+          "next": 2,
+          "stress": 51.9167935918087,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 335.081132000005,
+          "previous": 2,
+          "next": 1,
+          "stress": 43.3748432554324,
+          "quiet": 1.97428799999999,
+          "members": 12
+        },
+        {
+          "t": 353.282243111119,
+          "previous": 1,
+          "next": 0,
+          "stress": 10.1664610054324,
+          "quiet": 20.1753991111111,
+          "members": 12
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11541265037065",
+      "name": "CA_P2_S3_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 12,
+      "casualties": 0,
+      "rounds": 1388,
+      "effects": 159,
+      "fire_gain": 173.2147369908929,
+      "attention_gain": 10.750610791527535,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        675.912736111101,
+        31.994784777782968,
+        24.99388888889399,
+        0,
+        0
+      ],
+      "peak": 69.9593590885463,
+      "last_stress": 0.0,
+      "quiet_s": 486.83524920441073,
+      "quiet_with_contacts_s": 366.8117465492891,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 24.99388888889399,
+      "max_pressure": 35.0122894285713,
+      "quiet_recovery_steps": 19,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 352.064465333341,
+          "previous": 0,
+          "next": 2,
+          "stress": 46.2771754447522,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 377.942163746044,
+          "previous": 2,
+          "next": 1,
+          "stress": 31.952855771791,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 409.149546000018,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.7376350544689,
+          "quiet": 2.095139,
+          "members": 12
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11543076975684",
+      "name": "CA_P2_S4_Allies_MG",
+      "team": 1,
+      "type": 1,
+      "original": 5,
+      "initial": 5,
+      "last_members": 4,
+      "casualties": 1,
+      "rounds": 1288,
+      "effects": 127,
+      "fire_gain": 78.03705321056293,
+      "attention_gain": 3.8957471560116934,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 24.0457248604744,
+      "last_stress": 0.0,
+      "quiet_s": 529.8572423915235,
+      "quiet_with_contacts_s": 288.97061672487007,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 12.8464194343434,
+      "quiet_recovery_steps": 14,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11544888914911",
+      "name": "CA_P3_S0_Allies_PlatoonHQ",
+      "team": 1,
+      "type": 4,
+      "original": 5,
+      "initial": 5,
+      "last_members": 5,
+      "casualties": 0,
+      "rounds": 0,
+      "effects": 0,
+      "fire_gain": 0,
+      "attention_gain": 0,
+      "active_s": 732.901409777778,
+      "engaged_s": 0,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 0.0,
+      "last_stress": 0.0,
+      "quiet_s": 729.8811213968256,
+      "quiet_with_contacts_s": 0.0,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 0,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11546700854136",
+      "name": "CA_P3_S1_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 12,
+      "casualties": 0,
+      "rounds": 424,
+      "effects": 479,
+      "fire_gain": 260.71387280115795,
+      "attention_gain": 3.1207409821726952,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        491.87976883839,
+        122.15110779845207,
+        118.87053314093589,
+        0,
+        0
+      ],
+      "peak": 47.0747155249905,
+      "last_stress": 0.0,
+      "quiet_s": 461.7822959745086,
+      "quiet_with_contacts_s": 37.89915418903399,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 20.989192333336007,
+      "max_pressure": 23.1501626666666,
+      "quiet_recovery_steps": 29,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 410.969921333351,
+          "previous": 0,
+          "next": 1,
+          "stress": 29.9103237952279,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 417.175223000018,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.4781185589823,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 421.704211333352,
+          "previous": 2,
+          "next": 1,
+          "stress": 34.2990740344046,
+          "quiet": 0.417115666666668,
+          "members": 12
+        },
+        {
+          "t": 425.050266000019,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.5315339235987,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 442.744485666688,
+          "previous": 2,
+          "next": 1,
+          "stress": 33.7958926370991,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 447.264465333354,
+          "previous": 1,
+          "next": 2,
+          "stress": 43.6189826786353,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 468.829942000024,
+          "previous": 2,
+          "next": 1,
+          "stress": 42.9592892112134,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 474.258298333358,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.5012299442365,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 489.462157666692,
+          "previous": 2,
+          "next": 1,
+          "stress": 24.6096559738608,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 503.231451666695,
+          "previous": 1,
+          "next": 2,
+          "stress": 42.039719935188,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 508.940655809553,
+          "previous": 2,
+          "next": 1,
+          "stress": 38.7222593934298,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 511.443323333363,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.1421015979236,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 519.950625222251,
+          "previous": 2,
+          "next": 1,
+          "stress": 29.1988025849175,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 527.819732222248,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.4184446145108,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 536.101648333357,
+          "previous": 2,
+          "next": 1,
+          "stress": 31.4939587044683,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 553.222798666687,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.5894216235172,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 559.907485333354,
+          "previous": 2,
+          "next": 1,
+          "stress": 31.2756456254114,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 574.387755333353,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.9727357071557,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 588.316528518538,
+          "previous": 2,
+          "next": 1,
+          "stress": 22.1296443004968,
+          "quiet": 10.5385786296296,
+          "members": 12
+        },
+        {
+          "t": 607.563604555572,
+          "previous": 1,
+          "next": 2,
+          "stress": 38.5269412929387,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 616.504703969712,
+          "previous": 2,
+          "next": 1,
+          "stress": 37.5598804354561,
+          "quiet": 0.623571969696978,
+          "members": 12
+        },
+        {
+          "t": 622.414465333349,
+          "previous": 1,
+          "next": 2,
+          "stress": 47.0033312132243,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 633.160313666683,
+          "previous": 2,
+          "next": 1,
+          "stress": 36.5348227481149,
+          "quiet": 6.361224,
+          "members": 12
+        },
+        {
+          "t": 651.481132000011,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.8648309610036,
+          "quiet": 1.3109101111111,
+          "members": 12
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11548512793382",
+      "name": "CA_P3_S2_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 8,
+      "casualties": 4,
+      "rounds": 420,
+      "effects": 533,
+      "fire_gain": 342.1774663496565,
+      "attention_gain": 6.292674359800396,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        305.92010984849395,
+        180.82226392641303,
+        237.16161566953699,
+        8.997420333333991,
+        0
+      ],
+      "peak": 92.9356289646287,
+      "last_stress": 0.0,
+      "quiet_s": 398.8176653448866,
+      "quiet_with_contacts_s": 24.907124836940966,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 59.00128733333199,
+      "max_pressure": 21.2306658484848,
+      "quiet_recovery_steps": 148,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 181.320020888888,
+          "previous": 0,
+          "next": 1,
+          "stress": 31.1810820474489,
+          "quiet": 0.0,
+          "members": 11
+        },
+        {
+          "t": 182.764465333333,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.7694589319187,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 194.240724999999,
+          "previous": 2,
+          "next": 1,
+          "stress": 60.8279081379652,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 200.082065666666,
+          "previous": 1,
+          "next": 2,
+          "stress": 72.652683494694,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 259.379246999998,
+          "previous": 2,
+          "next": 3,
+          "stress": 92.4171961627995,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 268.231131999999,
+          "previous": 3,
+          "next": 1,
+          "stress": 87.8666911935074,
+          "quiet": 8.32622655555553,
+          "members": 10
+        },
+        {
+          "t": 313.145374424246,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.9943712231229,
+          "quiet": 53.2404689797977,
+          "members": 10
+        },
+        {
+          "t": 408.330568000018,
+          "previous": 0,
+          "next": 1,
+          "stress": 25.3536416944052,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 415.069489666685,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.7198056259399,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 425.998487000019,
+          "previous": 2,
+          "next": 1,
+          "stress": 39.2172410219775,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 434.612424666687,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.3929600887387,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 443.914465333354,
+          "previous": 2,
+          "next": 1,
+          "stress": 36.8483756374966,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 451.079494666689,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.5628291765222,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 464.35779866669,
+          "previous": 2,
+          "next": 1,
+          "stress": 50.616627915034,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 469.945405333357,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.8960935219089,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 475.696462333358,
+          "previous": 2,
+          "next": 1,
+          "stress": 39.6188064876775,
+          "quiet": 0.259418333333334,
+          "members": 10
+        },
+        {
+          "t": 477.643293000025,
+          "previous": 1,
+          "next": 2,
+          "stress": 37.8528349303285,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 487.214465333359,
+          "previous": 2,
+          "next": 1,
+          "stress": 30.455464891134,
+          "quiet": 1.97409539393938,
+          "members": 10
+        },
+        {
+          "t": 495.897435666693,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.1022884683273,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 499.552701000027,
+          "previous": 2,
+          "next": 1,
+          "stress": 40.4297009762089,
+          "quiet": 2.01193033333334,
+          "members": 10
+        },
+        {
+          "t": 504.259969777806,
+          "previous": 1,
+          "next": 2,
+          "stress": 48.8903086644117,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 511.326656666696,
+          "previous": 2,
+          "next": 1,
+          "stress": 46.3988771001234,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 516.372454666696,
+          "previous": 1,
+          "next": 2,
+          "stress": 42.9007128317513,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 524.731411666693,
+          "previous": 2,
+          "next": 1,
+          "stress": 43.7418190203795,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 527.936398888915,
+          "previous": 1,
+          "next": 2,
+          "stress": 49.2413124463322,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 534.262810000025,
+          "previous": 2,
+          "next": 1,
+          "stress": 46.8436689693388,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 538.832075777802,
+          "previous": 1,
+          "next": 2,
+          "stress": 44.5950641213536,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 559.907485333354,
+          "previous": 2,
+          "next": 1,
+          "stress": 52.2321623212313,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 565.514465333354,
+          "previous": 1,
+          "next": 2,
+          "stress": 55.9137901875266,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 584.786740666686,
+          "previous": 2,
+          "next": 1,
+          "stress": 50.9627888655634,
+          "quiet": 7.00879077777778,
+          "members": 9
+        },
+        {
+          "t": 590.893483000019,
+          "previous": 1,
+          "next": 2,
+          "stress": 45.9974533970802,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 599.194074666684,
+          "previous": 2,
+          "next": 1,
+          "stress": 56.7423745593323,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 603.1805678384,
+          "previous": 1,
+          "next": 2,
+          "stress": 56.8836221535894,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 613.139793592608,
+          "previous": 2,
+          "next": 1,
+          "stress": 61.7882260028588,
+          "quiet": 0.508661592592602,
+          "members": 9
+        },
+        {
+          "t": 619.553909777794,
+          "previous": 1,
+          "next": 2,
+          "stress": 62.2486788449713,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 620.801820000016,
+          "previous": 2,
+          "next": 1,
+          "stress": 61.7009923950937,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 625.552410333349,
+          "previous": 1,
+          "next": 2,
+          "stress": 69.2742217853899,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 634.547394515167,
+          "previous": 2,
+          "next": 1,
+          "stress": 64.4204968195935,
+          "quiet": 7.74830484848485,
+          "members": 8
+        },
+        {
+          "t": 640.497798666681,
+          "previous": 1,
+          "next": 2,
+          "stress": 62.3276956909388,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 655.794465333344,
+          "previous": 2,
+          "next": 1,
+          "stress": 58.0759334848761,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 659.889281333343,
+          "previous": 1,
+          "next": 2,
+          "stress": 56.3793968717045,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 667.055542333343,
+          "previous": 2,
+          "next": 1,
+          "stress": 52.5467265930381,
+          "quiet": 4.8174658888889,
+          "members": 8
+        },
+        {
+          "t": 703.247798666672,
+          "previous": 1,
+          "next": 0,
+          "stress": 19.5457543811145,
+          "quiet": 41.0097222222222,
+          "members": 8
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11550324733074",
+      "name": "CA_P3_S3_Allies_Rifle",
+      "team": 1,
+      "type": 0,
+      "original": 12,
+      "initial": 12,
+      "last_members": 0,
+      "casualties": 12,
+      "rounds": 290,
+      "effects": 266,
+      "fire_gain": 238.29830374855004,
+      "attention_gain": 4.461377686401144,
+      "active_s": 488.001408333359,
+      "engaged_s": 488.001408333359,
+      "morale_s": [
+        295.04932170371706,
+        76.97423562098098,
+        104.95669056421497,
+        11.021160444446025,
+        0
+      ],
+      "peak": 86.8873157994252,
+      "last_stress": 86.8873157994252,
+      "quiet_s": 308.9763664560066,
+      "quiet_with_contacts_s": 14.981032948054974,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 68.999741888887,
+      "max_pressure": 21.1249444444444,
+      "quiet_recovery_steps": 66,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 181.086808666666,
+          "previous": 0,
+          "next": 2,
+          "stress": 44.199064870416,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 189.720090999999,
+          "previous": 2,
+          "next": 1,
+          "stress": 58.6062618065989,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 192.628133999999,
+          "previous": 1,
+          "next": 2,
+          "stress": 61.9773729618799,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 261.283860666665,
+          "previous": 2,
+          "next": 3,
+          "stress": 80.5905463336326,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 272.879391999999,
+          "previous": 3,
+          "next": 1,
+          "stress": 73.8341045654295,
+          "quiet": 9.40185155555555,
+          "members": 12
+        },
+        {
+          "t": 303.556226000003,
+          "previous": 1,
+          "next": 0,
+          "stress": 17.8634540115795,
+          "quiet": 40.0786855555555,
+          "members": 12
+        },
+        {
+          "t": 411.507798666684,
+          "previous": 0,
+          "next": 1,
+          "stress": 29.6647419279502,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 418.599650518537,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.9169526812362,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 428.667528666686,
+          "previous": 2,
+          "next": 1,
+          "stress": 33.0728852591992,
+          "quiet": 1.00783581481482,
+          "members": 12
+        },
+        {
+          "t": 435.709422666687,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.0103005841681,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 439.413398222243,
+          "previous": 2,
+          "next": 1,
+          "stress": 34.3655027085766,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 448.866228000021,
+          "previous": 1,
+          "next": 2,
+          "stress": 41.2858501098958,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 454.276965333356,
+          "previous": 2,
+          "next": 1,
+          "stress": 38.4738960837569,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 464.35779866669,
+          "previous": 1,
+          "next": 2,
+          "stress": 42.6176652617259,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 467.945521000024,
+          "previous": 2,
+          "next": 1,
+          "stress": 39.1572936739045,
+          "quiet": 1.33694466666667,
+          "members": 12
+        },
+        {
+          "t": 469.821004000024,
+          "previous": 1,
+          "next": 2,
+          "stress": 37.4791686528539,
+          "quiet": 0.0,
+          "members": 12
+        },
+        {
+          "t": 472.218239000024,
+          "previous": 2,
+          "next": 1,
+          "stress": 34.3343469048897,
+          "quiet": 2.15540866666667,
+          "members": 12
+        },
+        {
+          "t": 480.653354222247,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.813906988487,
+          "quiet": 10.5905238888889,
+          "members": 12
+        },
+        {
+          "t": 485.277859333359,
+          "previous": 0,
+          "next": 2,
+          "stress": 56.1191106160623,
+          "quiet": 0.0,
+          "members": 7
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          487.214465333359
+        ]
+      ]
+    },
+    {
+      "id": "u_11552136667896",
+      "name": "CA_P3_S4_Allies_MG",
+      "team": 1,
+      "type": 1,
+      "original": 5,
+      "initial": 5,
+      "last_members": 3,
+      "casualties": 2,
+      "rounds": 228,
+      "effects": 544,
+      "fire_gain": 313.32220981648857,
+      "attention_gain": 53.66460281724641,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        312.92970055556395,
+        122.05152181481404,
+        277.91665074073103,
+        20.003536666668992,
+        0
+      ],
+      "peak": 97.7211557024544,
+      "last_stress": 0.0,
+      "quiet_s": 392.7772453448846,
+      "quiet_with_contacts_s": 33.87113210822696,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 90.98997933332703,
+      "max_pressure": 21.2306658484848,
+      "quiet_recovery_steps": 140,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 182.214160999999,
+          "previous": 0,
+          "next": 2,
+          "stress": 42.2276000421347,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 186.225068,
+          "previous": 2,
+          "next": 1,
+          "stress": 55.9292538798255,
+          "quiet": 0.0523916666666667,
+          "members": 5
+        },
+        {
+          "t": 191.203881515151,
+          "previous": 1,
+          "next": 2,
+          "stress": 61.3174610315031,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 193.588882999999,
+          "previous": 2,
+          "next": 1,
+          "stress": 59.6734263034891,
+          "quiet": 0.516819666666667,
+          "members": 5
+        },
+        {
+          "t": 199.337583814814,
+          "previous": 1,
+          "next": 2,
+          "stress": 68.4841351717745,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 256.921444666664,
+          "previous": 2,
+          "next": 3,
+          "stress": 78.2240821802549,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 276.676499999999,
+          "previous": 3,
+          "next": 1,
+          "stress": 68.400248253568,
+          "quiet": 16.7715945555555,
+          "members": 5
+        },
+        {
+          "t": 304.981132000003,
+          "previous": 1,
+          "next": 0,
+          "stress": 16.8478356200046,
+          "quiet": 45.0762265555554,
+          "members": 5
+        },
+        {
+          "t": 411.507798666684,
+          "previous": 0,
+          "next": 1,
+          "stress": 29.6822502481871,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 417.075223000018,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.5993217422525,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 422.198234333352,
+          "previous": 2,
+          "next": 1,
+          "stress": 33.700474478827,
+          "quiet": 0.911138666666667,
+          "members": 5
+        },
+        {
+          "t": 425.179148333352,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.9135427872573,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 429.006889575777,
+          "previous": 2,
+          "next": 1,
+          "stress": 32.3890967474174,
+          "quiet": 1.34719672390571,
+          "members": 5
+        },
+        {
+          "t": 436.559504333354,
+          "previous": 1,
+          "next": 2,
+          "stress": 36.2227789133343,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 458.54779866669,
+          "previous": 2,
+          "next": 1,
+          "stress": 42.9334709102533,
+          "quiet": 1.56200399999999,
+          "members": 4
+        },
+        {
+          "t": 464.480149000023,
+          "previous": 1,
+          "next": 2,
+          "stress": 55.7061848769707,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 489.575036454571,
+          "previous": 2,
+          "next": 1,
+          "stress": 57.923480608729,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 492.495121222248,
+          "previous": 1,
+          "next": 2,
+          "stress": 65.779786215458,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 583.6335129524,
+          "previous": 2,
+          "next": 1,
+          "stress": 85.947867903559,
+          "quiet": 5.85556306349206,
+          "members": 3
+        },
+        {
+          "t": 590.768483000019,
+          "previous": 1,
+          "next": 2,
+          "stress": 78.5369025635406,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 630.054470666683,
+          "previous": 2,
+          "next": 1,
+          "stress": 93.2394809680673,
+          "quiet": 3.255381,
+          "members": 3
+        },
+        {
+          "t": 637.011658666682,
+          "previous": 1,
+          "next": 2,
+          "stress": 83.8201868913612,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 665.670020888899,
+          "previous": 2,
+          "next": 1,
+          "stress": 72.5952621857021,
+          "quiet": 3.43194444444444,
+          "members": 3
+        },
+        {
+          "t": 709.839781148152,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.5572235711761,
+          "quiet": 47.6017047037038,
+          "members": 3
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11553948596558",
+      "name": "CA_P0_S0_Allies_CompanyHQ",
+      "team": 1,
+      "type": 5,
+      "original": 7,
+      "initial": 7,
+      "last_members": 7,
+      "casualties": 0,
+      "rounds": 0,
+      "effects": 0,
+      "fire_gain": 0,
+      "attention_gain": 0,
+      "active_s": 732.901409777778,
+      "engaged_s": 0,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 0.0,
+      "last_stress": 0.0,
+      "quiet_s": 729.8811213968256,
+      "quiet_with_contacts_s": 3.011220666665963,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 0,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11555760554307",
+      "name": "CA_P0_S1_Allies_Mortar",
+      "team": 1,
+      "type": 3,
+      "original": 5,
+      "initial": 5,
+      "last_members": 5,
+      "casualties": 0,
+      "rounds": 0,
+      "effects": 0,
+      "fire_gain": 0,
+      "attention_gain": 0,
+      "active_s": 732.901409777778,
+      "engaged_s": 0,
+      "morale_s": [
+        732.901409777778,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 0.0,
+      "last_stress": 0.0,
+      "quiet_s": 729.8811213968256,
+      "quiet_with_contacts_s": 0.0,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 0,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": []
+    },
+    {
+      "id": "u_11557572464080",
+      "name": "CA_P1_S0_Axis_PlatoonHQ",
+      "team": 0,
+      "type": 4,
+      "original": 7,
+      "initial": 7,
+      "last_members": 0,
+      "casualties": 7,
+      "rounds": 0,
+      "effects": 670,
+      "fire_gain": 302.42430891064623,
+      "attention_gain": 49.50888820354629,
+      "active_s": 732.901409777778,
+      "engaged_s": 732.901409777778,
+      "morale_s": [
+        550.038928705622,
+        84.97008872006697,
+        83.94385701875501,
+        13.948535333334007,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 99.9988053356197,
+      "quiet_s": 544.9242579119666,
+      "quiet_with_contacts_s": 344.8998171009979,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 35.898432555550016,
+      "max_pressure": 23.755268029822,
+      "quiet_recovery_steps": 136,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 231.776922515149,
+          "previous": 0,
+          "next": 1,
+          "stress": 26.1654304532154,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 233.114334333331,
+          "previous": 1,
+          "next": 2,
+          "stress": 38.1134569743418,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 245.75469222222,
+          "previous": 2,
+          "next": 3,
+          "stress": 98.38152585717,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 259.496038999998,
+          "previous": 3,
+          "next": 1,
+          "stress": 94.5813717228505,
+          "quiet": 5.50862994372295,
+          "members": 7
+        },
+        {
+          "t": 297.456446666669,
+          "previous": 1,
+          "next": 0,
+          "stress": 19.2614340549982,
+          "quiet": 43.4690376103895,
+          "members": 7
+        },
+        {
+          "t": 424.662202000019,
+          "previous": 0,
+          "next": 1,
+          "stress": 24.7184595357247,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 434.031148666687,
+          "previous": 1,
+          "next": 2,
+          "stress": 38.3572632836621,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 465.681975333357,
+          "previous": 2,
+          "next": 1,
+          "stress": 53.7915365301166,
+          "quiet": 8.60722,
+          "members": 6
+        },
+        {
+          "t": 497.370020888916,
+          "previous": 1,
+          "next": 0,
+          "stress": 18.1620385546053,
+          "quiet": 40.2952655555555,
+          "members": 6
+        },
+        {
+          "t": 688.346283515159,
+          "previous": 0,
+          "next": 2,
+          "stress": 35.4276744707349,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 693.49026233334,
+          "previous": 2,
+          "next": 1,
+          "stress": 61.5707893339588,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 696.980755000006,
+          "previous": 1,
+          "next": 2,
+          "stress": 74.3696733909403,
+          "quiet": 0.0,
+          "members": 3
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          732.901409777778
+        ]
+      ]
+    },
+    {
+      "id": "u_11559384414362",
+      "name": "CA_P1_S1_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 0,
+      "casualties": 10,
+      "rounds": 69,
+      "effects": 291,
+      "fire_gain": 106.28003893176798,
+      "attention_gain": 5.169807392352955,
+      "active_s": 141.011456000001,
+      "engaged_s": 141.011456000001,
+      "morale_s": [
+        95.0033542222228,
+        0,
+        46.00810177777821,
+        0,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 98.845068871649,
+      "quiet_s": 85.99841995238162,
+      "quiet_with_contacts_s": 0.0,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 46.00810177777821,
+      "max_pressure": 20.3847822222221,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 94.8922431111117,
+          "previous": 0,
+          "next": 2,
+          "stress": 60.5259768211462,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 140.358226222223,
+          "previous": 2,
+          "next": 3,
+          "stress": 100.0,
+          "quiet": 0.0,
+          "members": 4
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          167.069393777777
+        ]
+      ]
+    },
+    {
+      "id": "u_11561196354627",
+      "name": "CA_P1_S2_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 2,
+      "casualties": 8,
+      "rounds": 395,
+      "effects": 958,
+      "fire_gain": 91.5896763614218,
+      "attention_gain": 146.79053552947678,
+      "active_s": 433.007233222242,
+      "engaged_s": 433.007233222242,
+      "morale_s": [
+        164.011687555555,
+        83.01908344445295,
+        142.98329255556706,
+        42.993169666667,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 0.0,
+      "quiet_s": 204.97480995238962,
+      "quiet_with_contacts_s": 45.98333166666896,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 86.98768322223503,
+      "max_pressure": 28.5128137070705,
+      "quiet_recovery_steps": 81,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 163.457024857143,
+          "previous": 0,
+          "next": 1,
+          "stress": 24.633759037521,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 168.276693,
+          "previous": 1,
+          "next": 2,
+          "stress": 35.8223957211183,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 221.158859238093,
+          "previous": 2,
+          "next": 3,
+          "stress": 94.0266948995248,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 264.889465333332,
+          "previous": 3,
+          "next": 1,
+          "stress": 97.6782983951033,
+          "quiet": 10.9020562770563,
+          "members": 2
+        },
+        {
+          "t": 338.213466333339,
+          "previous": 1,
+          "next": 2,
+          "stress": 53.9908677992565,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 341.234313818188,
+          "previous": 2,
+          "next": 1,
+          "stress": 54.3424077601443,
+          "quiet": 0.525404040404041,
+          "members": 2
+        },
+        {
+          "t": 345.181132000007,
+          "previous": 1,
+          "next": 2,
+          "stress": 54.4360724473429,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 432.97251100002,
+          "previous": 2,
+          "next": 3,
+          "stress": 100.0,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 439.003377666687,
+          "previous": 3,
+          "next": 1,
+          "stress": 97.5289585126117,
+          "quiet": 4.03086666666667,
+          "members": 2
+        },
+        {
+          "t": 442.744485666688,
+          "previous": 1,
+          "next": 2,
+          "stress": 98.1753162787827,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 468.705030587325,
+          "previous": 2,
+          "next": 1,
+          "stress": 90.28679903061,
+          "quiet": 11.6302752539683,
+          "members": 2
+        },
+        {
+          "t": 531.642841333359,
+          "previous": 1,
+          "next": 0,
+          "stress": 15.0847380000523,
+          "quiet": 74.5680859999998,
+          "members": 2
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11563008293363",
+      "name": "CA_P1_S3_Axis_MG",
+      "team": 0,
+      "type": 1,
+      "original": 7,
+      "initial": 7,
+      "last_members": 4,
+      "casualties": 3,
+      "rounds": 99,
+      "effects": 80,
+      "fire_gain": 97.19689194839816,
+      "attention_gain": 2.257158171869695,
+      "active_s": 125.001826000001,
+      "engaged_s": 125.001826000001,
+      "morale_s": [
+        110.015648333334,
+        0,
+        14.986177666667004,
+        0,
+        0
+      ],
+      "peak": 90.1805148837534,
+      "last_stress": 0.0,
+      "quiet_s": 98.98489528571491,
+      "quiet_with_contacts_s": 18.961643087061592,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 14.986177666667004,
+      "max_pressure": 13.3457226563251,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 109.952873666667,
+          "previous": 0,
+          "next": 2,
+          "stress": 56.5590217330944,
+          "quiet": 0.0,
+          "members": 4
+        },
+        {
+          "t": 124.252063060607,
+          "previous": 2,
+          "next": 3,
+          "stress": 90.0694621830902,
+          "quiet": 0.0,
+          "members": 4
+        },
+        {
+          "t": 161.451016888889,
+          "previous": 3,
+          "next": 1,
+          "stress": 85.152028862616,
+          "quiet": 15.1698848888889,
+          "members": 4
+        },
+        {
+          "t": 246.281131999997,
+          "previous": 1,
+          "next": 0,
+          "stress": 17.6833376715548,
+          "quiet": 100.0,
+          "members": 4
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11564820247751",
+      "name": "CA_P2_S0_Axis_PlatoonHQ",
+      "team": 0,
+      "type": 4,
+      "original": 7,
+      "initial": 7,
+      "last_members": 0,
+      "casualties": 7,
+      "rounds": 0,
+      "effects": 242,
+      "fire_gain": 186.0762374809329,
+      "attention_gain": 10.237572939793706,
+      "active_s": 580.025236333353,
+      "engaged_s": 580.025236333353,
+      "morale_s": [
+        475.017511148163,
+        44.98178837374303,
+        60.02593681144691,
+        0,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 99.995232074763,
+      "quiet_s": 498.9788379153616,
+      "quiet_with_contacts_s": 280.98774605821006,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 36.023790629624955,
+      "max_pressure": 22.3648405942761,
+      "quiet_recovery_steps": 60,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 382.960275000013,
+          "previous": 0,
+          "next": 2,
+          "stress": 40.3347632541683,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 391.12513244446,
+          "previous": 2,
+          "next": 1,
+          "stress": 48.5242242553662,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 393.245637666683,
+          "previous": 1,
+          "next": 2,
+          "stress": 51.528536732277,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 408.472316333351,
+          "previous": 2,
+          "next": 1,
+          "stress": 61.0080259778374,
+          "quiet": 2.66340655555557,
+          "members": 6
+        },
+        {
+          "t": 451.464465333355,
+          "previous": 1,
+          "next": 0,
+          "stress": 19.1530113690035,
+          "quiet": 45.6555555555556,
+          "members": 6
+        },
+        {
+          "t": 543.247798666691,
+          "previous": 0,
+          "next": 2,
+          "stress": 60.1772591419598,
+          "quiet": 0.0,
+          "members": 3
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          579.537770666686
+        ]
+      ]
+    },
+    {
+      "id": "u_11566632171581",
+      "name": "CA_P2_S1_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 1,
+      "casualties": 9,
+      "rounds": 634,
+      "effects": 640,
+      "fire_gain": 223.6531883311301,
+      "attention_gain": 40.56343242555653,
+      "active_s": 515.021247333363,
+      "engaged_s": 515.021247333363,
+      "morale_s": [
+        287.026965333335,
+        64.06215003367902,
+        119.92824307745298,
+        44.00388888889603,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 0.0,
+      "quiet_s": 253.9265057724996,
+      "quiet_with_contacts_s": 131.92400959789202,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 55.99595392593301,
+      "max_pressure": 43.2543381507935,
+      "quiet_recovery_steps": 81,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 286.896409777779,
+          "previous": 0,
+          "next": 1,
+          "stress": 25.8196403968998,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 298.59640977778,
+          "previous": 1,
+          "next": 2,
+          "stress": 37.7681815454465,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 305.470971333336,
+          "previous": 2,
+          "next": 1,
+          "stress": 51.5700484136995,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 309.498401952384,
+          "previous": 1,
+          "next": 2,
+          "stress": 65.2263037622408,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 333.422823333339,
+          "previous": 2,
+          "next": 3,
+          "stress": 100.0,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 377.258472555568,
+          "previous": 3,
+          "next": 1,
+          "stress": 95.6724534161665,
+          "quiet": 5.54595527417029,
+          "members": 4
+        },
+        {
+          "t": 407.409857333351,
+          "previous": 1,
+          "next": 2,
+          "stress": 92.7968709263014,
+          "quiet": 0.0,
+          "members": 3
+        },
+        {
+          "t": 440.294348333354,
+          "previous": 2,
+          "next": 1,
+          "stress": 96.9101895677843,
+          "quiet": 9.08449344444444,
+          "members": 2
+        },
+        {
+          "t": 458.65476266669,
+          "previous": 1,
+          "next": 2,
+          "stress": 96.7410523852463,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 514.587977238124,
+          "previous": 2,
+          "next": 3,
+          "stress": 98.8651048438252,
+          "quiet": 3.38343098412698,
+          "members": 1
+        },
+        {
+          "t": 618.390351000016,
+          "previous": 3,
+          "next": 1,
+          "stress": 73.8429655198013,
+          "quiet": 71.774033814815,
+          "members": 1
+        },
+        {
+          "t": 697.505967777783,
+          "previous": 1,
+          "next": 0,
+          "stress": 15.5566841278945,
+          "quiet": 150.889650592594,
+          "members": 1
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11568444100632",
+      "name": "CA_P2_S2_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 0,
+      "casualties": 10,
+      "rounds": 129,
+      "effects": 671,
+      "fire_gain": 109.28195999570224,
+      "attention_gain": 21.78211409079845,
+      "active_s": 713.006432666671,
+      "engaged_s": 713.006432666671,
+      "morale_s": [
+        571.005043666687,
+        6.018943333333027,
+        23.003560333329915,
+        112.97888533332105,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 99.9981349549053,
+      "quiet_s": 567.9770296782336,
+      "quiet_with_contacts_s": 8.987164656565938,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 23.003560333329915,
+      "max_pressure": 25.3134954999999,
+      "quiet_recovery_steps": 10,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 570.971710333353,
+          "previous": 0,
+          "next": 1,
+          "stress": 25.7625896640803,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 576.610372666687,
+          "previous": 1,
+          "next": 2,
+          "stress": 41.6389227488133,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 599.790898666684,
+          "previous": 2,
+          "next": 3,
+          "stress": 100.0,
+          "quiet": 0.0,
+          "members": 10
+        }
+      ],
+      "terminal": [
+        [
+          "unit_died",
+          712.061713000003
+        ]
+      ]
+    },
+    {
+      "id": "u_11570256039863",
+      "name": "CA_P2_S3_Axis_MG",
+      "team": 0,
+      "type": 1,
+      "original": 7,
+      "initial": 7,
+      "last_members": 5,
+      "casualties": 2,
+      "rounds": 1277,
+      "effects": 1194,
+      "fire_gain": 200.58810221714933,
+      "attention_gain": 29.803560692052823,
+      "active_s": 647.026056000011,
+      "engaged_s": 647.026056000011,
+      "morale_s": [
+        365.010199333344,
+        49.02354166666305,
+        200.01474751852396,
+        32.97756748147992,
+        0
+      ],
+      "peak": 100.0,
+      "last_stress": 82.658856272268,
+      "quiet_s": 389.0060606190466,
+      "quiet_with_contacts_s": 248.00374795238508,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 167.015851666674,
+      "max_pressure": 27.9397383412698,
+      "quiet_recovery_steps": 52,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 364.174828333344,
+          "previous": 0,
+          "next": 1,
+          "stress": 27.2005573357136,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 367.391482333344,
+          "previous": 1,
+          "next": 2,
+          "stress": 39.1928978282421,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 371.107348666678,
+          "previous": 2,
+          "next": 1,
+          "stress": 40.872557550239,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 372.547037333345,
+          "previous": 1,
+          "next": 2,
+          "stress": 41.4601342799593,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 378.417798666679,
+          "previous": 2,
+          "next": 1,
+          "stress": 49.2240683338044,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 383.57639366668,
+          "previous": 1,
+          "next": 2,
+          "stress": 50.9315954603626,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 550.013601666688,
+          "previous": 2,
+          "next": 3,
+          "stress": 99.9275483770936,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 561.81496500002,
+          "previous": 3,
+          "next": 1,
+          "stress": 97.507580006879,
+          "quiet": 4.88383300000001,
+          "members": 5
+        },
+        {
+          "t": 593.026866333351,
+          "previous": 1,
+          "next": 2,
+          "stress": 63.9308806287008,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 616.210968333349,
+          "previous": 2,
+          "next": 3,
+          "stress": 98.5667667083865,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 638.075478666681,
+          "previous": 3,
+          "next": 1,
+          "stress": 92.4130355902676,
+          "quiet": 13.231836,
+          "members": 5
+        }
+      ],
+      "terminal": [
+        [
+          "unit_exited",
+          646.248915333344
+        ]
+      ]
+    },
+    {
+      "id": "u_11572067979121",
+      "name": "CA_P3_S0_Axis_PlatoonHQ",
+      "team": 0,
+      "type": 4,
+      "original": 7,
+      "initial": 7,
+      "last_members": 7,
+      "casualties": 0,
+      "rounds": 0,
+      "effects": 11,
+      "fire_gain": 69.51556895876884,
+      "attention_gain": 0.7984215852780062,
+      "active_s": 719.011634000003,
+      "engaged_s": 719.011634000003,
+      "morale_s": [
+        701.020564777785,
+        13.998331999997049,
+        3.992737222220967,
+        0,
+        0
+      ],
+      "peak": 39.1174967668956,
+      "last_stress": 39.1174967668956,
+      "quiet_s": 709.9960719725887,
+      "quiet_with_contacts_s": 11.050310696967927,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 3.992737222220967,
+      "max_pressure": 5.38913224242424,
+      "quiet_recovery_steps": 24,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 687.327180333341,
+          "previous": 0,
+          "next": 2,
+          "stress": 36.2366648849638,
+          "quiet": 0.0,
+          "members": 7
+        },
+        {
+          "t": 691.078843666674,
+          "previous": 2,
+          "next": 1,
+          "stress": 33.5782647640458,
+          "quiet": 0.960543787878787,
+          "members": 7
+        },
+        {
+          "t": 705.014465333338,
+          "previous": 1,
+          "next": 0,
+          "stress": 20.8653197033582,
+          "quiet": 14.8961654545455,
+          "members": 7
+        },
+        {
+          "t": 718.273545666669,
+          "previous": 0,
+          "next": 1,
+          "stress": 33.6448442545009,
+          "quiet": 0.0,
+          "members": 7
+        }
+      ],
+      "terminal": [
+        [
+          "unit_exited",
+          718.725761666669
+        ]
+      ]
+    },
+    {
+      "id": "u_11573879918383",
+      "name": "CA_P3_S1_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 9,
+      "casualties": 1,
+      "rounds": 451,
+      "effects": 739,
+      "fire_gain": 208.41173485805285,
+      "attention_gain": 6.12441858155207,
+      "active_s": 690.019010787887,
+      "engaged_s": 690.019010787887,
+      "morale_s": [
+        405.005898757593,
+        72.96377603895593,
+        212.04933599133813,
+        0,
+        0
+      ],
+      "peak": 76.8048053434522,
+      "last_stress": 26.7679940591497,
+      "quiet_s": 418.99544603657273,
+      "quiet_with_contacts_s": 32.031599185191055,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 64.00484124243098,
+      "max_pressure": 26.0792575555557,
+      "quiet_recovery_steps": 25,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 404.248410000017,
+          "previous": 0,
+          "next": 2,
+          "stress": 51.0016662700841,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 468.315773000024,
+          "previous": 2,
+          "next": 1,
+          "stress": 63.80637720496,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 475.935557666691,
+          "previous": 1,
+          "next": 2,
+          "stress": 58.1953110136963,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 482.925576444469,
+          "previous": 2,
+          "next": 1,
+          "stress": 56.907582330025,
+          "quiet": 0.0,
+          "members": 10
+        },
+        {
+          "t": 491.337674666692,
+          "previous": 1,
+          "next": 2,
+          "stress": 59.6685036206781,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 516.725851222251,
+          "previous": 2,
+          "next": 1,
+          "stress": 61.5844074802065,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 517.965448333362,
+          "previous": 1,
+          "next": 2,
+          "stress": 60.8973349816606,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 530.135298666693,
+          "previous": 2,
+          "next": 1,
+          "stress": 57.9738411827635,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 536.497798666691,
+          "previous": 1,
+          "next": 2,
+          "stress": 60.054953003639,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 549.973281666688,
+          "previous": 2,
+          "next": 1,
+          "stress": 59.5274358185343,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 554.806179555576,
+          "previous": 1,
+          "next": 2,
+          "stress": 65.1629816249068,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 562.30933209093,
+          "previous": 2,
+          "next": 1,
+          "stress": 63.7508986374575,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 565.088627333354,
+          "previous": 1,
+          "next": 2,
+          "stress": 66.2503604238621,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 591.359642666686,
+          "previous": 2,
+          "next": 1,
+          "stress": 64.1360670855498,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 597.056708333351,
+          "previous": 1,
+          "next": 2,
+          "stress": 60.0482966599408,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 631.404941523826,
+          "previous": 2,
+          "next": 1,
+          "stress": 60.7263632918819,
+          "quiet": 2.65320767195767,
+          "members": 9
+        },
+        {
+          "t": 632.797798666683,
+          "previous": 1,
+          "next": 2,
+          "stress": 58.9568134062476,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 642.60512777779,
+          "previous": 2,
+          "next": 1,
+          "stress": 55.5289748393825,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 646.248915333344,
+          "previous": 1,
+          "next": 2,
+          "stress": 53.9318399252698,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 655.907798666677,
+          "previous": 2,
+          "next": 1,
+          "stress": 53.5047211019435,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 663.25357000001,
+          "previous": 1,
+          "next": 2,
+          "stress": 62.0461280441054,
+          "quiet": 0.0,
+          "members": 9
+        },
+        {
+          "t": 666.501388000009,
+          "previous": 2,
+          "next": 1,
+          "stress": 57.9213860466866,
+          "quiet": 2.90973466666667,
+          "members": 9
+        }
+      ],
+      "terminal": [
+        [
+          "unit_exited",
+          689.254465333341
+        ]
+      ]
+    },
+    {
+      "id": "u_11575691888675",
+      "name": "CA_P3_S2_Axis_Rifle",
+      "team": 0,
+      "type": 0,
+      "original": 10,
+      "initial": 10,
+      "last_members": 10,
+      "casualties": 0,
+      "rounds": 530,
+      "effects": 25,
+      "fire_gain": 3.482882140271804,
+      "attention_gain": 2.3841841464189946,
+      "active_s": 643.004941523822,
+      "engaged_s": 643.004941523822,
+      "morale_s": [
+        643.004941523822,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 0.184936832129645,
+      "last_stress": 0.0,
+      "quiet_s": 559.9568276984276,
+      "quiet_with_contacts_s": 218.96773270371693,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 10.6691951666666,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": [
+        [
+          "unit_exited",
+          642.07911466668
+        ]
+      ]
+    },
+    {
+      "id": "u_11577503804892",
+      "name": "CA_P3_S3_Axis_MG",
+      "team": 0,
+      "type": 1,
+      "original": 7,
+      "initial": 7,
+      "last_members": 7,
+      "casualties": 0,
+      "rounds": 1531,
+      "effects": 212,
+      "fire_gain": 98.76694160058642,
+      "attention_gain": 1.9503717212106202,
+      "active_s": 646.041421000011,
+      "engaged_s": 646.041421000011,
+      "morale_s": [
+        646.041421000011,
+        0,
+        0,
+        0,
+        0
+      ],
+      "peak": 14.1889923943301,
+      "last_stress": 1.6503159111172,
+      "quiet_s": 531.0234472712926,
+      "quiet_with_contacts_s": 269.01018079365707,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 0,
+      "max_pressure": 10.879050037037,
+      "quiet_recovery_steps": 9,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [],
+      "terminal": [
+        [
+          "unit_exited",
+          645.946464666678
+        ]
+      ]
+    },
+    {
+      "id": "u_11579315736294",
+      "name": "CA_P0_S0_Axis_CompanyHQ",
+      "team": 0,
+      "type": 5,
+      "original": 7,
+      "initial": 7,
+      "last_members": 2,
+      "casualties": 5,
+      "rounds": 0,
+      "effects": 142,
+      "fire_gain": 112.09802702222913,
+      "attention_gain": 0.05884019536064494,
+      "active_s": 515.021247333363,
+      "engaged_s": 515.021247333363,
+      "morale_s": [
+        467.011154000023,
+        9.005697666668027,
+        39.004395666671996,
+        0,
+        0
+      ],
+      "peak": 90.1310421729917,
+      "last_stress": 0.0,
+      "quiet_s": 456.8985186931446,
+      "quiet_with_contacts_s": 290.990745074093,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 39.004395666671996,
+      "max_pressure": 10.6582058333333,
+      "quiet_recovery_steps": 0,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 466.788199555579,
+          "previous": 0,
+          "next": 1,
+          "stress": 32.5701937111575,
+          "quiet": 0.0,
+          "members": 6
+        },
+        {
+          "t": 475.814465333358,
+          "previous": 1,
+          "next": 2,
+          "stress": 61.2798279837315,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 514.831132000029,
+          "previous": 2,
+          "next": 3,
+          "stress": 90.1290666808746,
+          "quiet": 3.62658574603174,
+          "members": 2
+        },
+        {
+          "t": 526.231538296323,
+          "previous": 3,
+          "next": 1,
+          "stress": 89.0066159360415,
+          "quiet": 4.01353796296296,
+          "members": 2
+        },
+        {
+          "t": 536.362271333357,
+          "previous": 1,
+          "next": 2,
+          "stress": 87.2415301647006,
+          "quiet": 0.0,
+          "members": 2
+        },
+        {
+          "t": 552.883117666688,
+          "previous": 2,
+          "next": 1,
+          "stress": 83.1447452726295,
+          "quiet": 6.26680048148149,
+          "members": 2
+        },
+        {
+          "t": 621.584688000016,
+          "previous": 1,
+          "next": 0,
+          "stress": 17.0632089358817,
+          "quiet": 74.9683708148149,
+          "members": 2
+        }
+      ],
+      "terminal": []
+    },
+    {
+      "id": "u_11581127675590",
+      "name": "CA_P0_S1_Axis_Mortar",
+      "team": 0,
+      "type": 3,
+      "original": 8,
+      "initial": 8,
+      "last_members": 5,
+      "casualties": 3,
+      "rounds": 68,
+      "effects": 198,
+      "fire_gain": 146.78091499848753,
+      "attention_gain": 18.36189775745402,
+      "active_s": 619.000447111127,
+      "engaged_s": 619.000447111127,
+      "morale_s": [
+        521.000902444472,
+        36.014169666663975,
+        47.03574784126397,
+        14.949627158727026,
+        0
+      ],
+      "peak": 99.9959857512879,
+      "last_stress": 0.0,
+      "quiet_s": 543.0291359894416,
+      "quiet_with_contacts_s": 351.02543018520805,
+      "quiet_attention_gain": 0,
+      "quiet_max_overload": 0,
+      "max_pin_run": 24.035785111107998,
+      "max_pressure": 14.238311904762,
+      "quiet_recovery_steps": 51,
+      "quiet_plateaus_positive": 0,
+      "morale_events": [
+        {
+          "t": 520.591496555584,
+          "previous": 0,
+          "next": 2,
+          "stress": 36.5564413657553,
+          "quiet": 0.0,
+          "members": 8
+        },
+        {
+          "t": 544.658741427633,
+          "previous": 2,
+          "next": 3,
+          "stress": 91.6194375317102,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 556.660524666687,
+          "previous": 3,
+          "next": 1,
+          "stress": 93.0247055461775,
+          "quiet": 4.122733,
+          "members": 5
+        },
+        {
+          "t": 592.239465333352,
+          "previous": 1,
+          "next": 2,
+          "stress": 71.4864485263354,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 615.552773888904,
+          "previous": 2,
+          "next": 3,
+          "stress": 100.0,
+          "quiet": 0.0,
+          "members": 5
+        },
+        {
+          "t": 653.006977000011,
+          "previous": 3,
+          "next": 1,
+          "stress": 82.9559235993196,
+          "quiet": 34.0450801481483,
+          "members": 5
+        },
+        {
+          "t": 710.256293000005,
+          "previous": 1,
+          "next": 0,
+          "stress": 18.2751096701829,
+          "quiet": 91.2943961481484,
+          "members": 5
+        }
+      ],
+      "terminal": []
+    }
+  ],
+  "quiet_episodes": [
+    {
+      "unit": "CA_P1_S0_Allies_PlatoonHQ",
+      "start": 79.0130960000004,
+      "end": 601.003624000017,
+      "stress_start": 28.5668908959213,
+      "stress_end": 24.3716098201331,
+      "members": 4,
+      "members_end": 1,
+      "presence_start": 0.0,
+      "presence_end": 0.0,
+      "visible_start": 0,
+      "visible_end": 2,
+      "morale_start": 1,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P1_S1_Allies_Rifle",
+      "start": 186.019933,
+      "end": 200.037217333333,
+      "stress_start": 38.496800442226,
+      "stress_end": 18.1398419591704,
+      "members": 10,
+      "members_end": 10,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 3,
+      "visible_end": 3,
+      "morale_start": 1,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P1_S2_Allies_Rifle",
+      "start": 79.0130960000004,
+      "end": 90.0005187777785,
+      "stress_start": 30.4595140897094,
+      "stress_end": 14.4492560523702,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 0.8,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 1,
+      "morale_start": 0,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P1_S3_Allies_Rifle",
+      "start": 150.015372666667,
+      "end": 167.001338222222,
+      "stress_start": 64.0586067627767,
+      "stress_end": 40.9979055911516,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 0.25,
+      "presence_end": 0.25,
+      "visible_start": 3,
+      "visible_end": 3,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P1_S3_Allies_Rifle",
+      "start": 226.029849666665,
+      "end": 732.901409777778,
+      "stress_start": 99.8365419791486,
+      "stress_end": 0.0,
+      "members": 1,
+      "members_end": 1,
+      "presence_start": 0.25,
+      "presence_end": 0.0,
+      "visible_start": 1,
+      "visible_end": 1,
+      "morale_start": 2,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P2_S2_Allies_Rifle",
+      "start": 336.031132000006,
+      "end": 516.019162303059,
+      "stress_start": 41.7128927951415,
+      "stress_end": 0.0,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 1,
+      "visible_end": 0,
+      "morale_start": 1,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P2_S3_Allies_Rifle",
+      "start": 340.031132000006,
+      "end": 349.00704122223,
+      "stress_start": 64.6791641013449,
+      "stress_end": 49.4430879863449,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 0.25,
+      "presence_end": 0.25,
+      "visible_start": 2,
+      "visible_end": 1,
+      "morale_start": 0,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S1_Allies_Rifle",
+      "start": 580.025236333353,
+      "end": 590.009720333353,
+      "stress_start": 31.2009966906488,
+      "stress_end": 20.6303656817718,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 3,
+      "visible_end": 3,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S1_Allies_Rifle",
+      "start": 629.00778733335,
+      "end": 636.031317585874,
+      "stress_start": 42.3749164868149,
+      "stress_end": 31.3546573906331,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 2,
+      "visible_end": 1,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S2_Allies_Rifle",
+      "start": 262.005368555553,
+      "end": 393.002106000016,
+      "stress_start": 91.2854331826324,
+      "stress_end": 0.0,
+      "members": 10,
+      "members_end": 10,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 0,
+      "morale_start": 3,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S2_Allies_Rifle",
+      "start": 580.025236333353,
+      "end": 590.009720333353,
+      "stress_start": 56.2185914149884,
+      "stress_end": 43.4754453894354,
+      "members": 9,
+      "members_end": 9,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 3,
+      "visible_end": 3,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S2_Allies_Rifle",
+      "start": 629.00778733335,
+      "end": 636.031317585874,
+      "stress_start": 67.7207330927151,
+      "stress_end": 63.2475303802931,
+      "members": 8,
+      "members_end": 8,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 2,
+      "visible_end": 1,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S2_Allies_Rifle",
+      "start": 665.01555200001,
+      "end": 732.901409777778,
+      "stress_start": 54.1432295292429,
+      "stress_end": 0.0,
+      "members": 8,
+      "members_end": 8,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 0,
+      "morale_start": 2,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S3_Allies_Rifle",
+      "start": 266.002659777776,
+      "end": 389.023289666681,
+      "stress_start": 79.7688756014296,
+      "stress_end": 0.0,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 2,
+      "morale_start": 3,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S3_Allies_Rifle",
+      "start": 473.028962909115,
+      "end": 483.003354222247,
+      "stress_start": 32.9242716601102,
+      "stress_end": 18.853506988487,
+      "members": 12,
+      "members_end": 12,
+      "presence_start": 1.0,
+      "presence_end": 0.25,
+      "visible_start": 1,
+      "visible_end": 2,
+      "morale_start": 1,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S4_Allies_MG",
+      "start": 262.005368555553,
+      "end": 389.023289666681,
+      "stress_start": 81.0231167117681,
+      "stress_end": 0.0,
+      "members": 5,
+      "members_end": 5,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 1,
+      "morale_start": 3,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S4_Allies_MG",
+      "start": 580.025236333353,
+      "end": 590.009720333353,
+      "stress_start": 90.0099474940297,
+      "stress_end": 76.6272679287471,
+      "members": 3,
+      "members_end": 3,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 3,
+      "visible_end": 3,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S4_Allies_MG",
+      "start": 629.00778733335,
+      "end": 636.031317585874,
+      "stress_start": 94.45617669883,
+      "stress_end": 84.480646720744,
+      "members": 3,
+      "members_end": 3,
+      "presence_start": 1.0,
+      "presence_end": 1.0,
+      "visible_start": 2,
+      "visible_end": 1,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S4_Allies_MG",
+      "start": 665.01555200001,
+      "end": 732.901409777778,
+      "stress_start": 73.3592000515166,
+      "stress_end": 0.0,
+      "members": 3,
+      "members_end": 3,
+      "presence_start": 1.0,
+      "presence_end": 0.25,
+      "visible_start": 0,
+      "visible_end": 0,
+      "morale_start": 2,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P1_S0_Axis_PlatoonHQ",
+      "start": 256.024096666664,
+      "end": 337.035828000005,
+      "stress_start": 97.8506853523108,
+      "stress_end": 0.0,
+      "members": 7,
+      "members_end": 7,
+      "presence_start": 0.25,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 2,
+      "morale_start": 3,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P1_S0_Axis_PlatoonHQ",
+      "start": 460.034248000023,
+      "end": 644.025336333345,
+      "stress_start": 58.3674004354054,
+      "stress_end": 0.0,
+      "members": 6,
+      "members_end": 5,
+      "presence_start": 0.4,
+      "presence_end": 0.0,
+      "visible_start": 4,
+      "visible_end": 0,
+      "morale_start": 2,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P1_S0_Axis_PlatoonHQ",
+      "start": 701.011246373744,
+      "end": 714.002150333337,
+      "stress_start": 73.4154932302825,
+      "stress_end": 70.8304139982821,
+      "members": 3,
+      "members_end": 3,
+      "presence_start": 0.0,
+      "presence_end": 0.0,
+      "visible_start": 2,
+      "visible_end": 2,
+      "morale_start": 2,
+      "morale_end": 2
+    },
+    {
+      "unit": "CA_P1_S2_Axis_Rifle",
+      "start": 256.024096666664,
+      "end": 337.035828000005,
+      "stress_start": 99.6349364876521,
+      "stress_end": 54.634154983685,
+      "members": 2,
+      "members_end": 2,
+      "presence_start": 0.0,
+      "presence_end": 1.0,
+      "visible_start": 0,
+      "visible_end": 1,
+      "morale_start": 3,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P2_S0_Axis_PlatoonHQ",
+      "start": 408.011813000018,
+      "end": 540.026713333357,
+      "stress_start": 61.2502097285253,
+      "stress_end": 0.0,
+      "members": 6,
+      "members_end": 6,
+      "presence_start": 0.25,
+      "presence_end": 0.0,
+      "visible_start": 3,
+      "visible_end": 4,
+      "morale_start": 2,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P2_S1_Axis_Rifle",
+      "start": 344.015648111118,
+      "end": 369.007542333344,
+      "stress_start": 99.4151903123072,
+      "stress_end": 92.8039818966087,
+      "members": 4,
+      "members_end": 4,
+      "presence_start": 0.4,
+      "presence_end": 0.4,
+      "visible_start": 0,
+      "visible_end": 1,
+      "morale_start": 3,
+      "morale_end": 3
+    },
+    {
+      "unit": "CA_P2_S1_Axis_Rifle",
+      "start": 374.014260000012,
+      "end": 405.005898757593,
+      "stress_start": 96.8082526974293,
+      "stress_end": 76.4946531068078,
+      "members": 4,
+      "members_end": 4,
+      "presence_start": 0.4,
+      "presence_end": 0.14,
+      "visible_start": 1,
+      "visible_end": 1,
+      "morale_start": 3,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P2_S1_Axis_Rifle",
+      "start": 434.031148666687,
+      "end": 458.035948000023,
+      "stress_start": 99.0290867271381,
+      "stress_end": 87.5324786366825,
+      "members": 2,
+      "members_end": 2,
+      "presence_start": 0.32,
+      "presence_end": 0.4,
+      "visible_start": 1,
+      "visible_end": 1,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P2_S3_Axis_MG",
+      "start": 559.036687555576,
+      "end": 592.024598000018,
+      "stress_start": 98.8851083757002,
+      "stress_end": 64.1201015898685,
+      "members": 5,
+      "members_end": 5,
+      "presence_start": 0.14,
+      "presence_end": 0.0,
+      "visible_start": 0,
+      "visible_end": 2,
+      "morale_start": 3,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P2_S3_Axis_MG",
+      "start": 627.011739111127,
+      "end": 646.041421000011,
+      "stress_start": 98.6467117246675,
+      "stress_end": 82.963406780868,
+      "members": 5,
+      "members_end": 5,
+      "presence_start": 0.0,
+      "presence_end": 0.0,
+      "visible_start": 0,
+      "visible_end": 0,
+      "morale_start": 3,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P3_S0_Axis_PlatoonHQ",
+      "start": 693.009919878794,
+      "end": 717.009434000003,
+      "stress_start": 31.8359673738128,
+      "stress_end": 8.01333161710812,
+      "members": 7,
+      "members_end": 7,
+      "presence_start": 0.0,
+      "presence_end": 0.0,
+      "visible_start": 2,
+      "visible_end": 0,
+      "morale_start": 1,
+      "morale_end": 0
+    },
+    {
+      "unit": "CA_P3_S1_Axis_Rifle",
+      "start": 666.017622333343,
+      "end": 689.007971826848,
+      "stress_start": 58.626856474815,
+      "stress_end": 26.9495114999464,
+      "members": 9,
+      "members_end": 9,
+      "presence_start": 1.0,
+      "presence_end": 0.0875,
+      "visible_start": 2,
+      "visible_end": 0,
+      "morale_start": 2,
+      "morale_end": 1
+    },
+    {
+      "unit": "CA_P0_S1_Axis_Mortar",
+      "start": 555.006687555576,
+      "end": 592.024598000018,
+      "stress_start": 93.4409661699762,
+      "stress_end": 71.4071208840395,
+      "members": 5,
+      "members_end": 5,
+      "presence_start": 0.0,
+      "presence_end": 0.0,
+      "visible_start": 0,
+      "visible_end": 1,
+      "morale_start": 3,
+      "morale_end": 1
+    }
+  ],
+  "quiet_violations": [],
+  "friendly": {
+    "applications": 37,
+    "gain": 32.0122864683233,
+    "casualties": 5
+  },
+  "recovery_budget": {
+    "max_squad": 1.4580000000000035,
+    "max_hq": 1.9683000000000141,
+    "violations": 0
+  },
+  "teams": {
+    "1": {
+      "initial": 150,
+      "casualties": 40,
+      "rounds": 8646,
+      "combat_pin_pct": 11.072913784647403,
+      "engaged_combat_pin_pct": 12.02208723310917,
+      "combat_panic_pct": 0.43114187998044884,
+      "fire_gain": 2219.72182130182,
+      "attention_gain": 113.66198898381886,
+      "exited": 0,
+      "died": 2
+    },
+    "0": {
+      "initial": 117,
+      "casualties": 65,
+      "rounds": 5183,
+      "combat_pin_pct": 15.583669343772213,
+      "engaged_combat_pin_pct": 15.583669343772213,
+      "combat_panic_pct": 4.793047657161359,
+      "fire_gain": 1286.0323313829683,
+      "attention_gain": 275.18748050874296,
+      "exited": 5,
+      "died": 4
+    }
+  },
+  "additional_findings": {
+    "positive_stress_quiet_comparisons": 1314,
+    "positive_stress_quiet_plateaus": 0,
+    "quiet_stress_increases": 0,
+    "settled_quiet_attention_gain": 0,
+    "friendly_losses_by_weapon": {
+      "MP40": 3,
+      "Granatwerfer 34 (81 mm)": 1,
+      "MG34 (Tripod)": 1
+    },
+    "recorded_rules_match_commit": "19cbbcf",
+    "version_metadata_present": false
+  }
+}
