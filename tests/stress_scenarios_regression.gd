@@ -407,6 +407,7 @@ func _test_attention_capacity() -> void:
 		enemy.squad_fire = SquadFireController.new()
 		enemy.add_child(enemy.squad_fire)
 		enemy.squad_fire.fire_recent = 1.0
+		target.tactical_state.register_incoming_fire(enemy.position, target._now())
 		enemies.append(enemy)
 	Globals.unit_visible_enemies[target] = enemies
 	target.tactical_state.update_attention(target)

@@ -487,7 +487,9 @@ func _apply_attention_stress(delta: float) -> void:
 		return
 	# Advance even with damage disabled so switching recovery/detection keep running.
 	var costs: Vector2 = unit.tactical_state.advance_attention(delta)
-	if Debug.no_damage or costs.length_squared() <= 0.0:
+	# The pressure history expires during this tick, after the attention refresh.
+	# Observation and switching still update, but cannot add stress in a lull.
+	if Debug.no_damage or not under_fire or costs.length_squared() <= 0.0:
 		return
 	# Overload is sustained (both bins); switching is transient (fast bin only).
 	apply_stress(costs.x + costs.y, costs.x, "attention")

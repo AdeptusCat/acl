@@ -26,8 +26,8 @@ const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
 const DEMAND_SECTOR_COUNT: int = 8
 const INCOMING_FIRE_WINDOW_SECONDS: float = 4.0
 const FULL_ATTENTION_CAPACITY: float = 2.0
-const PASSIVE_CONTACT_DEMAND: float = 0.2
-const FIRING_CONTACT_DEMAND: float = 2.0
+const DEFAULT_SUPPRESSION_WINDOW_SECONDS: float = 2.0
+const INCOMING_SUPPRESSION_DEMAND: float = 2.0
 const CLUSTER_DEMAND_LIMIT: float = 1.5
 const MAX_ATTENTION_STRESS_RATE: float = 4.0
 const SWITCH_STRESS_RATE: float = 2.0
@@ -51,13 +51,15 @@ var _incoming_fire_directions: PackedVector2Array = PackedVector2Array()
 var attention_capacity: float = 0.0
 var attention_deficit: float = 0.0
 var required_attention: float = 0.0
+var suppression_activity: float = 0.0
 var attention_stress_rate: float = 0.0
 var attention_switch_load: float = 0.0
 var switching_stress_rate: float = 0.0
 var flanked: bool = false
 var surrounded: bool = false
 var _last_focus_direction: Vector2 = Vector2.ZERO
-var _overload_contacts: PackedVector3Array = PackedVector3Array()
+var _suppression_bearings: PackedVector3Array = PackedVector3Array()
+var _suppression_window_s: float = DEFAULT_SUPPRESSION_WINDOW_SECONDS
 var _threat_angles: PackedFloat32Array = PackedFloat32Array()
 
 
@@ -70,7 +72,7 @@ func _init() -> void:
 
 
 func update_attention(unit: Unit) -> void:
-	_overload_contacts.clear()
+	_suppression_bearings.clear()
 	_threat_angles.clear()
 	_update_focus(unit)
 	_update_attention_load()
@@ -90,12 +92,16 @@ func _update_focus(unit: Unit) -> void:
 		_incoming_fire_times.fill(-INF)
 		incoming_fire_demand.fill(0.0)
 		multi_direction_pressure = 0.0
+		suppression_activity = 0.0
 		last_attack_surprise = 0.0
 		attention_switch_load = 0.0
 		switching_stress_rate = 0.0
 		_last_focus_direction = Vector2.ZERO
 		return
 	attention_quality = _attention_quality(unit)
+	_suppression_window_s = DEFAULT_SUPPRESSION_WINDOW_SECONDS
+	if unit.stress_system != null:
+		_suppression_window_s = maxf(unit.stress_system.under_fire_window_s, 0.0)
 	update_fire_pressure(unit._now())
 
 	var contact_direction: Vector2 = Vector2.ZERO
@@ -114,14 +120,14 @@ func _update_focus(unit: Unit) -> void:
 		if enemy.squad_fire != null:
 			firing = clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
 			urgency += firing
-		var overload_urgency: float = lerpf(PASSIVE_CONTACT_DEMAND, FIRING_CONTACT_DEMAND, firing)
-		contact_direction += _add_directional_demand(enemy.global_position - unit.global_position, urgency, overload_urgency)
+		contact_direction += _add_directional_demand(enemy.global_position - unit.global_position, urgency)
 
 	var enemy_direction: Vector2 = Vector2.ZERO
 	for index: int in range(DEMAND_SECTOR_COUNT):
 		if incoming_fire_demand[index] > 0.0:
 			# Incoming fire provides a bearing, without identifying or revealing its source.
-			enemy_direction += _add_directional_weight(_incoming_fire_directions[index], incoming_fire_demand[index])
+			var suppression: float = _suppression_weight(index, unit._now()) * INCOMING_SUPPRESSION_DEMAND
+			enemy_direction += _add_directional_weight(_incoming_fire_directions[index], incoming_fire_demand[index], suppression)
 	for enemy: Unit in tracks:
 		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
 			continue
@@ -131,7 +137,7 @@ func _update_focus(unit: Unit) -> void:
 		if track == null or track.awareness <= 0.0:
 			continue
 		# Hidden units contribute only their recorded position, never their live position.
-		enemy_direction += _add_directional_demand(track.last_known_global_position - unit.global_position, track.awareness * 0.5, track.awareness * PASSIVE_CONTACT_DEMAND * 0.5)
+		enemy_direction += _add_directional_demand(track.last_known_global_position - unit.global_position, track.awareness * 0.5)
 	if has_contact:
 		_set_attention(contact_direction + enemy_direction, 1.0, PI / 2.0)
 		return
@@ -157,26 +163,25 @@ func _update_focus(unit: Unit) -> void:
 	_set_attention(expectation, strength, PI)
 
 
-func _add_directional_demand(offset: Vector2, urgency: float, overload_urgency: float) -> Vector2:
+func _add_directional_demand(offset: Vector2, urgency: float) -> Vector2:
 	if offset.is_zero_approx():
 		return Vector2.ZERO
 	var hex_size: float = 64.0
 	if is_instance_valid(LOSHelper.ground_layer) and LOSHelper.ground_layer.tile_set != null:
 		hex_size = maxf(float(LOSHelper.ground_layer.tile_set.tile_size.x), 1.0)
 	var distance_factor: float = 1.0 / (1.0 + offset.length() / hex_size * 0.15)
-	return _add_directional_weight(offset.normalized(), urgency * distance_factor, overload_urgency * distance_factor)
+	return _add_directional_weight(offset.normalized(), urgency * distance_factor)
 
 
-func _add_directional_weight(direction: Vector2, weight: float, overload_weight: float = -1.0) -> Vector2:
+func _add_directional_weight(direction: Vector2, weight: float, suppression_weight: float = 0.0) -> Vector2:
 	var sector: float = fposmod(direction.angle(), TAU) / TAU * float(DEMAND_SECTOR_COUNT)
 	var index: int = int(floorf(sector)) % DEMAND_SECTOR_COUNT
 	var fraction: float = sector - floorf(sector)
 	directional_demand[index] += weight * (1.0 - fraction)
 	directional_demand[(index + 1) % DEMAND_SECTOR_COUNT] += weight * fraction
 	total_directional_demand += weight
-	if overload_weight < 0.0:
-		overload_weight = weight
-	_overload_contacts.append(Vector3(direction.x, direction.y, overload_weight))
+	if suppression_weight > 0.0:
+		_suppression_bearings.append(Vector3(direction.x, direction.y, suppression_weight))
 	# Ignore nearly expired memories when deriving current tactical conditions.
 	if weight >= 0.15:
 		_threat_angles.append(fposmod(direction.angle(), TAU))
@@ -187,12 +192,11 @@ func _update_attention_load() -> void:
 	attention_capacity = FULL_ATTENTION_CAPACITY * attention_quality
 	var demand: float = 0.0
 	var resultant: Vector2 = Vector2.ZERO
-	# Share observation effort across nearby bearings, including a visible shooter
-	# and its incoming-fire bearing. Work from the complete list so contact order
-	# and the display sector boundaries cannot change overload.
-	for contact: Vector3 in _overload_contacts:
+	# Only received fire creates suppression demand. Visible firing elsewhere and
+	# remembered contacts retain observation/focus demand without an overload tax.
+	for contact: Vector3 in _suppression_bearings:
 		var overlapping: float = 0.0
-		for other: Vector3 in _overload_contacts:
+		for other: Vector3 in _suppression_bearings:
 			var alignment: float = maxf(contact.x * other.x + contact.y * other.y, 0.0)
 			var alignment_squared: float = alignment * alignment
 			overlapping += other.z * alignment_squared * alignment_squared
@@ -238,11 +242,11 @@ func advance_attention(delta: float) -> Vector2:
 		_last_focus_direction = Vector2.ZERO
 	# Integrate decay exactly so a discrete switch has the same cost at any frame rate.
 	var decay: float = exp(-delta / SWITCH_RECOVERY_SECONDS)
-	var switch_stress: float = attention_switch_load * SWITCH_RECOVERY_SECONDS * (1.0 - decay) * SWITCH_STRESS_RATE
+	var switch_stress: float = attention_switch_load * SWITCH_RECOVERY_SECONDS * (1.0 - decay) * SWITCH_STRESS_RATE * suppression_activity
 	attention_switch_load *= decay
 	if is_zero_approx(attention_switch_load):
 		attention_switch_load = 0.0
-	switching_stress_rate = attention_switch_load * SWITCH_STRESS_RATE
+	switching_stress_rate = attention_switch_load * SWITCH_STRESS_RATE * suppression_activity
 	var overload_stress: float = attention_stress_rate * delta
 	return Vector2(overload_stress, switch_stress)
 
@@ -268,10 +272,12 @@ func register_incoming_fire(direction: Vector2, now_seconds: float) -> Vector2:
 
 
 func update_fire_pressure(now_seconds: float) -> void:
+	suppression_activity = 0.0
 	var total: float = 0.0
 	var resultant: Vector2 = Vector2.ZERO
 	var active_directions: int = 0
 	for index: int in range(DEMAND_SECTOR_COUNT):
+		suppression_activity = maxf(suppression_activity, _suppression_weight(index, now_seconds))
 		var age: float = maxf(now_seconds - _incoming_fire_times[index], 0.0)
 		var weight: float = clampf(1.0 - age / INCOMING_FIRE_WINDOW_SECONDS, 0.0, 1.0)
 		incoming_fire_demand[index] = weight
@@ -283,6 +289,13 @@ func update_fire_pressure(now_seconds: float) -> void:
 	if active_directions > 1:
 		# Aligned fire adds volume, while separated bearings stretch the squad's capacity.
 		multi_direction_pressure = clampf((total - resultant.length()) / maxf(attention_quality, 0.25), 0.0, 1.0)
+
+
+func _suppression_weight(index: int, now_seconds: float) -> float:
+	if _suppression_window_s <= 0.0:
+		return 0.0
+	var age: float = maxf(now_seconds - _incoming_fire_times[index], 0.0)
+	return clampf(1.0 - age / _suppression_window_s, 0.0, 1.0)
 
 
 func _unattended_fraction(direction: Vector2) -> float:

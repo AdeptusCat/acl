@@ -49,6 +49,7 @@ func _focused() -> SquadTacticalState:
 	state.focus_strength = 1.0
 	state.attention_width = PI / 2.0
 	state.attention_quality = 1.0
+	state.suppression_activity = 1.0
 	return state
 
 
@@ -144,7 +145,12 @@ func _test_overload_and_conditions() -> void:
 	Globals.unit_visible_enemies[unit] = [enemies[0], enemies[1]]
 	state.update_attention(unit)
 	_check(state.flanked and not state.surrounded and state.focus_direction == Vector2.ZERO, "Opposing threats derive flanked without replacing the primary attention data or implying encirclement")
-	_check(state.attention_deficit > 0.0 and state.attention_stress_rate > 0.0, "Unmet attention demand generates stress without any incoming volley")
+	_check(state.attention_stress_rate == 0.0, "Visible firing on opposing bearings alone does not create suppression stress")
+	state.register_incoming_fire(Vector2.RIGHT, unit._now())
+	state.register_incoming_fire(Vector2.LEFT, unit._now())
+	unit.stress_system.mark_under_fire(2.0)
+	state.update_attention(unit)
+	_check(state.attention_deficit > 0.0 and state.attention_stress_rate > 0.0, "Received opposing fire creates actual suppression demand")
 	var no_damage: bool = Debug.no_damage
 	Debug.no_damage = false
 	unit._process(0.5)
@@ -157,15 +163,23 @@ func _test_overload_and_conditions() -> void:
 	state.update_attention(unit)
 	_check(state.surrounded and state.flanked, "Three directions enclosing the squad derive a separate surrounded condition")
 	unit.stress_system.S_eff = 0.0
+	unit.tactical_state = SquadTacticalState.new()
+	state = unit.tactical_state
 	for index: int in range(3):
 		enemies[index].position = Vector2.RIGHT.rotated(deg_to_rad(float(index - 1) * 20.0)) * 100.0
 	state.update_attention(unit)
 	_check(not state.flanked and not state.surrounded and state.attention_stress_rate == 0.0, "A healthy squad shares observation effort across clustered frontal threats")
+	unit.tactical_state = SquadTacticalState.new()
+	state = unit.tactical_state
+	state.register_incoming_fire(Vector2.RIGHT, unit._now())
+	state.update_attention(unit)
 	var full_squad_rate: float = state.attention_stress_rate
-	unit.members_alive = 3
+	unit.members_alive = 1
 	state.update_attention(unit)
 	_check(state.attention_stress_rate > full_squad_rate and state.attention_stress_rate <= SquadTacticalState.MAX_ATTENTION_STRESS_RATE, "Smaller squads have less attention capacity and a bounded overload stress rate")
 	Globals.unit_visible_enemies.erase(unit)
+	unit.tactical_state = SquadTacticalState.new()
+	state = unit.tactical_state
 	state.update_attention(unit)
 	_check(state.attention_stress_rate == 0.0 and not state.flanked and not state.surrounded, "Removing the threat demand clears overload and derived conditions")
 	unit.free()
@@ -205,7 +219,10 @@ func _test_switching() -> void:
 	for refresh: int in range(20):
 		unit.tactical_state.update_attention(unit)
 	_check(unit.tactical_state.attention_switch_load == 0.0, "Repeated perception refreshes cannot charge switching cost")
-	_check(unit.tactical_state.advance_attention(0.1).y > 0.0, "The simulation tick charges the changed combat focus once")
+	_check(unit.tactical_state.advance_attention(0.1).y == 0.0 and unit.tactical_state.attention_switch_load > 0.0, "Observation switching affects focus stability without stress in a lull")
+	unit.tactical_state.register_incoming_fire(Vector2.LEFT, unit._now())
+	unit.tactical_state.update_attention(unit)
+	_check(unit.tactical_state.advance_attention(0.1).y > 0.0, "Switching while receiving fire charges combat stress")
 	unit.surrendered = true
 	unit.tactical_state.update_attention(unit)
 	_check(unit.tactical_state.attention_switch_load == 0.0 and not unit.tactical_state.flanked and not unit.tactical_state.surrounded, "Inactive squads clear attention burdens and tactical conditions")
@@ -241,6 +258,9 @@ func _test_final_calculation() -> void:
 	stress._since_change = 0.0
 	var no_damage: bool = Debug.no_damage
 	Debug.no_damage = false
+	stress.slowdown_light = 1.0
+	stress.slowdown_heavy = 1.0
+	stress.mark_under_fire(1.0)
 	stress.apply_stress(gain.fast, gain.slow)
 	_check(is_equal_approx(stress.S_eff, 39.18), "The composed volley receives leadership, incoming scaling and existing-stress resistance once")
 	stress._process(0.5)

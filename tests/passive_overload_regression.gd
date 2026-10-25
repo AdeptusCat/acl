@@ -87,25 +87,26 @@ func _test_contact_geometry() -> void:
 	for enemy: Unit in enemies:
 		enemy.squad_fire.fire_recent = 1.0
 	attention.update_attention(target)
-	var clustered: float = attention.required_attention
-	_check(attention.attention_stress_rate == 0.0, "Six clustered frontal firing contacts share observation effort within intact capacity")
-	for rotation: float in [PI / 8.0, 1.23, PI, TAU - 0.01]:
-		_layout(rotation, false)
-		attention.update_attention(target)
-		_check(is_equal_approx(attention.required_attention, clustered), "Rotating a contact cluster across sector boundaries preserves overload demand")
-	var reversed_contacts: Array = enemies.duplicate()
-	reversed_contacts.reverse()
-	Globals.unit_visible_enemies[target] = reversed_contacts
-	attention.update_attention(target)
-	_check(is_equal_approx(attention.required_attention, clustered), "Contact enumeration order does not change shared attention effort")
+	_check(attention.required_attention == 0.0, "Observed frontal firing alone does not create suppression demand")
+	var observed_demand: float = attention.total_directional_demand
 	_layout(0.0, true)
 	attention.update_attention(target)
-	_check(attention.required_attention > clustered and attention.attention_stress_rate > 0.0 and attention.flanked, "Opposing active groups retain stronger overload and flanking than the same frontal contact count")
-	var opposing: float = attention.required_attention
-	_layout(PI / 8.0, true)
-	attention.update_attention(target)
-	_check(is_equal_approx(attention.required_attention, opposing), "Separated firing directions retain their demand when rotated")
-	print("Attention geometry: frontal required=", clustered, "; opposing required=", opposing, "; opposing overload/s=", attention.attention_stress_rate)
+	_check(attention.flanked and attention.attention_stress_rate == 0.0, "Dispersed visible firing preserves flank awareness without inventing incoming pressure")
+	for rotation: float in [0.0, PI / 8.0, 1.23, PI, TAU - 0.01]:
+		_layout(rotation, true)
+		target.tactical_state = SquadTacticalState.new()
+		attention = target.tactical_state
+		attention.register_incoming_fire(Vector2.RIGHT.rotated(rotation), target._now())
+		attention.register_incoming_fire(Vector2.LEFT.rotated(rotation), target._now())
+		attention.update_attention(target)
+		_check(attention.attention_stress_rate > 0.0 and attention.required_attention > attention.attention_capacity, "Received opposing fire retains overload across rotated bearings")
+		var received: float = attention.required_attention
+		var reversed_contacts: Array = enemies.duplicate()
+		reversed_contacts.reverse()
+		Globals.unit_visible_enemies[target] = reversed_contacts
+		attention.update_attention(target)
+		_check(is_equal_approx(attention.required_attention, received), "Observation contact order does not alter received-fire demand")
+	print("Attention separation: visible demand=", observed_demand, "; received opposing demand=", attention.required_attention)
 	_cleanup()
 
 
@@ -139,16 +140,16 @@ func _test_passive_memory() -> void:
 	Globals.unit_enemy_tracks[target as Unit] = tracks
 	var attention: SquadTacticalState = target.tactical_state
 	attention.update_attention(target)
-	var remembered: float = attention.required_attention
+	var remembered: float = attention.total_directional_demand
 	var focus: Vector2 = attention.focus_direction
 	for enemy: Unit in enemies:
 		enemy.position = Vector2.LEFT * 200.0
 	attention.update_attention(target)
-	_check(is_equal_approx(attention.required_attention, remembered) and attention.focus_direction.is_equal_approx(focus), "Hidden movement cannot update remembered overload or focus")
+	_check(is_equal_approx(attention.total_directional_demand, remembered) and attention.focus_direction.is_equal_approx(focus), "Hidden movement cannot update remembered overload or focus")
 	for track: EnemyTrack in tracks.values():
 		track.update_not_seen(15.0)
 	attention.update_attention(target)
-	_check(attention.required_attention < remembered and attention.attention_stress_rate == 0.0, "Remembered passive demand fades without sustained overload")
+	_check(attention.total_directional_demand < remembered and attention.attention_stress_rate == 0.0, "Remembered passive demand fades without sustained overload")
 	for track: EnemyTrack in tracks.values():
 		track.update_not_seen(20.0)
 	attention.update_attention(target)
