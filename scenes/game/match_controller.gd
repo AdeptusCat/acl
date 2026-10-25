@@ -530,6 +530,7 @@ func start_game(team: Globals.Team, time: float) -> void:
 	#defense_director.manual_threat_axes = create_test_axes()
 	influence_map_controller.reset_for_match()
 	_configure_platoon_ai()
+	Debug.start_engagement_capture(self)
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
 	#match Globals.game_mode:

@@ -292,5 +292,7 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 			var direction: Vector2 = shot_origin - u_apply.global_position
 			attention_effects = u_apply.tactical_state.register_incoming_fire(direction, u_apply._now())
 		var stress: StressController.StressGain = StressController.calculate_incoming_fire_stress(controller, suppression, casualty_shock, attention_effects)
+		if is_instance_valid(Debug.engagement_recorder) and Debug.engagement_recorder.tracks(u_apply):
+			Debug.engagement_recorder.record_impact(controller, u_apply, weapon, {"rounds": total_rounds, "grenade": riflegrenade, "origin": [shot_origin.x, shot_origin.y], "target_hex": [_target_hex.x, _target_hex.y], "distance": target_distance, "cover": target_cover, "resolved_defense": terrain_defense_bonus, "hit_probability": chance_to_hit_per_target[i], "hits": hits_per_target[i], "disable_probability": chance_to_disable, "casualties": cas_i, "shared_casualties": casualties_total, "suppression": [suppression.fast, suppression.slow], "casualty_shock": [casualty_shock.fast, casualty_shock.slow], "surprise": attention_effects.x, "crossfire": attention_effects.y, "composed_stress": [stress.fast, stress.slow]})
 		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, stress.fast, stress.slow, controller)
 		i += 1

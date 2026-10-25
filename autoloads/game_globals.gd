@@ -188,6 +188,8 @@ func record_casualty(unit: Unit, soldier: Soldier) -> CasualtyRecord:
 	soldier.casualty_record_id = record.record_id
 	casualty_history.add_record(record)
 	battle_casualties.append(record)
+	if is_instance_valid(Debug.engagement_recorder):
+		Debug.engagement_recorder.record_casualty(unit, soldier, record)
 	_queue_casualty_save()
 	return record
 
@@ -216,6 +218,7 @@ func _save_casualty_history() -> void:
 
 
 func reset() -> void:
+	Debug.finish_engagement_capture("match_reset")
 	battle_id = ""
 	battle_casualties.clear()
 	battle_exits.clear()

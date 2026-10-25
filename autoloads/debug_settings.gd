@@ -33,3 +33,19 @@ var units_to_surrender: Array[Unit] = []
 
 var influence_map_name: String = ""
 var influence_map_team_name: String = ""
+
+var engagement_recorder: EngagementRecorder
+
+
+func start_engagement_capture(controller: Node) -> void:
+	if not OS.is_debug_build() or Engine.is_editor_hint():
+		return
+	if not is_instance_valid(engagement_recorder):
+		engagement_recorder = EngagementRecorder.new()
+		add_child(engagement_recorder)
+	engagement_recorder.start_capture(controller)
+
+
+func finish_engagement_capture(reason: String) -> void:
+	if is_instance_valid(engagement_recorder):
+		engagement_recorder.finish(reason)

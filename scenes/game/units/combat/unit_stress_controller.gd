@@ -478,11 +478,11 @@ func _apply_attention_stress(delta: float) -> void:
 	if Debug.no_damage or costs.length_squared() <= 0.0:
 		return
 	# Overload is sustained (both bins); switching is transient (fast bin only).
-	apply_stress(costs.x + costs.y, costs.x)
+	apply_stress(costs.x + costs.y, costs.x, "attention")
 
 
 # All stress sources share gain modifiers, bin caps and actual-gain accounting.
-func apply_stress(df: float, ds: float) -> void:
+func apply_stress(df: float, ds: float, cause: String = "event") -> void:
 	var df_in: float = df
 	var ds_in: float = ds
 	if df_in < 0.0:
@@ -507,6 +507,7 @@ func apply_stress(df: float, ds: float) -> void:
 	_clamp_bins()
 	_update_effective_stress()
 	var stress_before_gain: float = S_eff
+	var bins_before_gain: Vector2 = Vector2(stress_fast, stress_slow)
 	var stress_mod: float = remap(S_eff, 0.0, maxf(S_CAP, 0.001), 1.0, 0.5)
 	# FIXME cmd stress modifier needs adjustment
 	#print(S_eff, " ", stress_mod)
@@ -515,6 +516,8 @@ func apply_stress(df: float, ds: float) -> void:
 	_clamp_bins()
 	_update_effective_stress()
 	_balance_stress_added += maxf(0.0, S_eff - stress_before_gain)
+	if is_instance_valid(Debug.engagement_recorder):
+		Debug.engagement_recorder.record_stress_gain(get_parent() as Unit, df_in, ds_in, bins_before_gain, cause)
 	stress_changed.emit(S_eff)
 
 

@@ -251,6 +251,8 @@ func setAttackState(_attackState: AttackState) -> void:
 func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 	if not is_active() or in_close_combat:
 		return
+	if is_instance_valid(Debug.engagement_recorder):
+		Debug.engagement_recorder.record_order(self, cmd, parameter)
 	match cmd:
 		Globals.UnitCmd.FIRE_AT_HEX:
 			if squad_type == Globals.SquadType.MORTAR:
@@ -745,18 +747,28 @@ func receive_fire(terrain_defense_bonus: float) -> void:
 		#movement.recalc_path()
 
 func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) -> void:
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	var capture: Dictionary = {}
+	if is_instance_valid(recorder):
+		capture = recorder.begin_effect(self, casualties, df, ds, _source)
 	if not is_active() or Debug.no_damage:
+		if not capture.is_empty():
+			recorder.finish_effect(self, capture, "ignored_inactive_or_no_damage")
 		return
 	if casualties > 0:
 		_apply_casualties(casualties)
 		soldiers_changed.emit()
 	if not alive:
+		if not capture.is_empty():
+			recorder.finish_effect(self, capture, "eliminated")
 		return
-	stress_system.apply_stress(df, ds)
+	stress_system.apply_stress(df, ds, "incoming_fire")
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()
 	leader_aura._affected.erase(self)
 	leader_aura._apply_to(self)
+	if not capture.is_empty():
+		recorder.finish_effect(self, capture, "applied")
 	#emit_signal("stress_applied", df, ds, source)
 
 

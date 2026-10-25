@@ -688,6 +688,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var life: float = dist / s.weapon.projectile_speed      # seconds
 	if riflegrenade:
 		life = dist / s.weapon.riflegrenade_projectile_speed
+	if is_instance_valid(Debug.engagement_recorder):
+		Debug.engagement_recorder.record_shot(self, s, shots, _target_hex, target_distance, target_cover, shot_origin, life, riflegrenade)
 	await get_tree().create_timer(life).timeout
 	
 	if unit.is_active():
