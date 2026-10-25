@@ -6,6 +6,9 @@ uniform vec2 corners[6];
 uniform float exposed_edges[6];
 uniform vec2 center;
 uniform float objective_phase = 0.0;
+uniform float capture_progress : hint_range(0.0, 1.0) = 0.0;
+uniform vec4 capture_color : source_color = vec4(0.48, 0.85, 0.60, 1.0);
+uniform vec2 capture_span = vec2(-64.0, 64.0);
 
 varying vec2 area_position;
 
@@ -37,5 +40,16 @@ void fragment() {
 	float alpha = 0.045 + hatch * 0.025 + sweep * 0.055 + glow * 0.15;
 	alpha += rim * 0.72 + inner_rail * dashes * 0.42;
 	vec3 tint = area_color.rgb + vec3(rim * 0.16 + sweep * 0.08);
+	// Twelve discrete bands switch on at fixed capture thresholds; colors never fade.
+	float height = clamp((dot(p, vec2(0.45, -1.0)) - capture_span.x) / (capture_span.y - capture_span.x), 0.0, 0.9999);
+	float band_position = height * 12.0;
+	float filled_bands = floor(clamp(capture_progress, 0.0, 1.0) * 12.0 + 0.0001);
+	float filled = 1.0 - step(filled_bands, floor(band_position));
+	float stripe = step(0.20, fract(band_position)) * (1.0 - step(0.75, fract(band_position)));
+	float capture_mask = filled * stripe;
+	// Keep the connected objective perimeter legible over the capture bands.
+	capture_mask *= step(7.0, boundary);
+	tint = mix(tint, capture_color.rgb, capture_mask);
+	alpha = mix(alpha, 0.62 * capture_color.a, capture_mask);
 	COLOR = vec4(tint, min(alpha, 0.95) * area_color.a);
 }

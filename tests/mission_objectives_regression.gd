@@ -94,6 +94,7 @@ func _run() -> void:
 	enemies[0].current_hex = Vector2i(-100, -100)
 	occupy.advance_time(1.25)
 	panel._process(0.2)
+	_check_capture_visual(world, objective_hex, 1.25 / 3.0, ObjectiveAreaOverlay.FRIENDLY_COLOR)
 	_check(_row(panel, 0) == "Objective A: securing · 1/3 s", "Capture rows distinguish occupation from completed capture")
 	for iteration: int in range(5):
 		panel.refresh()
@@ -101,6 +102,7 @@ func _run() -> void:
 	occupy.advance_time(1.75)
 	panel.refresh()
 	_check(occupy.is_condition_met() and _row(panel, 0) == "Objective A: player controlled", "Meeting capture requirements preserves the control-only label")
+	_check_capture_visual(world, objective_hex, 0.0, ObjectiveAreaOverlay.FRIENDLY_COLOR)
 	occupy.test_at_scenario_end = true
 	panel.refresh()
 	_check(_row(panel, 0) == "Objective A: player controlled", "End-only capture displays control without provisional status")
@@ -115,9 +117,11 @@ func _run() -> void:
 	_check(occupy.is_condition_met(), "Final scoring preserves an empty captured objective")
 	enemies[0].current_hex = objective_hex
 	occupy.advance_time(1.0)
+	_check_capture_visual(world, objective_hex, 1.0 / 3.0, ObjectiveAreaOverlay.ENEMY_COLOR)
 	_check(occupy.is_condition_met(), "An incomplete enemy capture preserves ownership")
 	friends[0].current_hex = objective_hex
 	occupy.advance_time(4.0)
+	_check_capture_visual(world, objective_hex, 0.0, ObjectiveAreaOverlay.FRIENDLY_COLOR)
 	_check(occupy.is_condition_met() and occupy.state.enemy_hold_times_s[objective_hex] == 0.0, "Contesting interrupts the enemy capture without losing ownership")
 	friends[0].current_hex = Vector2i(-100, -100)
 	enemies[0].broken = true
@@ -263,6 +267,19 @@ func _check_area_overlay(world: Node, hex: Vector2i) -> void:
 		await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/acl-connected-objectives.png")
+		var occupy: OccupyObjectiveCondition = world.ui.mission_objectives.conditions[0] as OccupyObjectiveCondition
+		occupy.state.controlling_teams[hex] = Globals.Team.AXIS
+		occupy.state.required_times_reached_s[hex] = occupy.required_time_s * 0.5
+		overlay._update_colors()
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-capture-progress.png")
+		occupy.state.controlling_teams[hex] = Globals.Team.ALLIES
+		occupy.state.enemy_hold_times_s[hex] = occupy.required_time_s * 0.75
+		overlay._update_colors()
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-enemy-capture-progress.png")
 		world.ui.show()
 	var different_source: int = -1
 	for index: int in range(layer.tile_set.get_source_count()):
@@ -283,3 +300,18 @@ func _check_area_overlay(world: Node, hex: Vector2i) -> void:
 	layer.clear()
 	ObjectiveAreaOverlay.install(layer, Globals.Team.ALLIES)
 	_check(overlay.markers.is_empty() and overlay.get_child_count() == 0, "Reinitializing an empty layer removes old objective artwork")
+
+
+func _check_capture_visual(world: Node, hex: Vector2i, progress: float, color: Color) -> void:
+	var overlay: ObjectiveAreaOverlay = world.game_controller.allies_objective_tilemap.get_node("ObjectiveArea") as ObjectiveAreaOverlay
+	overlay._update_colors()
+	for marker: Dictionary in overlay.markers:
+		if marker["hex"] != hex:
+			continue
+		var shader_material: ShaderMaterial = marker["material"]
+		var actual: float = shader_material.get_shader_parameter("capture_progress")
+		_check(is_equal_approx(actual, progress), "Capture bands reflect live hold progress and clear after capture or interruption")
+		if progress > 0.0:
+			_check(shader_material.get_shader_parameter("capture_color") == color, "Capture bands use the capturing side's color")
+		return
+	_check(false, "Capture progress has a matching objective marker")

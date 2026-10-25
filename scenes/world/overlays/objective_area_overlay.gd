@@ -2,6 +2,9 @@ extends Node2D
 class_name ObjectiveAreaOverlay
 
 const AREA_SHADER: Shader = preload("res://assets/shader/objective_area.gdshader")
+const FRIENDLY_COLOR: Color = Color(0.48, 0.85, 0.60)
+const ENEMY_COLOR: Color = Color(0.96, 0.40, 0.30)
+const REFRESH_INTERVAL_S: float = 0.05
 const FONT: Font = preload("res://assets/fonts/courier_prime/Courier Prime.ttf")
 const NAMES: Array[String] = ["EXIT", "A", "B", "C", "START"]
 const COLORS: Array[Color] = [Color(0.48, 0.83, 0.85), Color(0.96, 0.75, 0.34), Color(0.70, 0.65, 0.96), Color(0.45, 0.82, 0.72), Color(0.65, 0.72, 0.78)]
@@ -32,6 +35,11 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 	markers.clear()
 	var shape: ConvexPolygonShape2D = layer.geometry_tile_shape.shape as ConvexPolygonShape2D
 	var corners: PackedVector2Array = shape.points
+	var capture_span: Vector2 = Vector2(INF, -INF)
+	for corner: Vector2 in corners:
+		var projection: float = corner.dot(Vector2(0.45, -1.0))
+		capture_span.x = minf(capture_span.x, projection)
+		capture_span.y = maxf(capture_span.y, projection)
 	for hex: Vector2i in layer.get_used_cells():
 		var data: TileData = layer.get_cell_tile_data(hex)
 		if data == null:
@@ -56,6 +64,7 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 		shader_material.set_shader_parameter("corners", corners)
 		shader_material.set_shader_parameter("exposed_edges", edges)
 		shader_material.set_shader_parameter("center", center)
+		shader_material.set_shader_parameter("capture_span", capture_span)
 		shader_material.set_shader_parameter("objective_phase", float(id) * 2.1)
 		shader_material.set_shader_parameter("area_color", COLORS[id])
 		var polygon: Polygon2D = Polygon2D.new()
@@ -69,7 +78,7 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team) -> void:
 
 func _process(delta: float) -> void:
 	refresh_elapsed += delta
-	if refresh_elapsed >= 0.2:
+	if refresh_elapsed >= REFRESH_INTERVAL_S:
 		refresh_elapsed = 0.0
 		_update_colors()
 
@@ -80,6 +89,8 @@ func _update_colors() -> void:
 		return
 	for marker: Dictionary in markers:
 		var color: Color = COLORS[int(marker["id"])]
+		var capture_progress: float = 0.0
+		var capture_color: Color = FRIENDLY_COLOR
 		for condition: VictoryCondition in collection.victory_conditions:
 			if condition is not OccupyObjectiveCondition:
 				continue
@@ -88,11 +99,27 @@ func _update_colors() -> void:
 				continue
 			var owner: int = occupy.state.controlling_teams.get(marker["hex"], -1)
 			if owner == team:
-				color = Color(0.48, 0.85, 0.60)
+				color = FRIENDLY_COLOR
 			elif owner == Globals.get_enemy_team(team):
-				color = Color(0.96, 0.40, 0.30)
+				color = ENEMY_COLOR
+			if occupy.required_time_s <= 0.0:
+				continue
+			var friendly_progress: float = 0.0
+			var enemy_progress: float = 0.0
+			if owner != team:
+				friendly_progress = clampf(occupy.state.required_times_reached_s.get(marker["hex"], 0.0) / occupy.required_time_s, 0.0, 1.0)
+			if owner != Globals.get_enemy_team(team):
+				enemy_progress = clampf(occupy.state.enemy_hold_times_s.get(marker["hex"], 0.0) / occupy.required_time_s, 0.0, 1.0)
+			if friendly_progress > capture_progress:
+				capture_progress = friendly_progress
+				capture_color = FRIENDLY_COLOR
+			if enemy_progress > capture_progress:
+				capture_progress = enemy_progress
+				capture_color = ENEMY_COLOR
 		var shader_material: ShaderMaterial = marker["material"]
 		shader_material.set_shader_parameter("area_color", color)
+		shader_material.set_shader_parameter("capture_progress", capture_progress)
+		shader_material.set_shader_parameter("capture_color", capture_color)
 
 
 func _draw() -> void:
