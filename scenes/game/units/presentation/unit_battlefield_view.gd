@@ -110,7 +110,7 @@ func _update_focus_indicator() -> void:
 	var edge_distance: float = minf(half_size.x / maxf(absf(local_direction.x), 0.001), half_size.y / maxf(absf(local_direction.y), 0.001))
 	focus_indicator.position = sprite_node.position + half_size + local_direction * (edge_distance + 6.0)
 	focus_indicator.rotation = local_direction.angle()
-	focus_indicator.modulate.a = lerpf(0.5, 1.0, clampf(attention.focus_strength, 0.0, 1.0))
+	focus_indicator.modulate.a = lerpf(0.5, 1.0, clampf(attention.focus_strength * attention.attention_quality, 0.0, 1.0))
 	focus_indicator.show()
 
 

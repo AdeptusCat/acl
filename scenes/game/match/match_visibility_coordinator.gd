@@ -120,6 +120,8 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 		if not is_instance_valid(unit):
 			continue
 
+		# Refresh once per observer so every candidate uses the same current attention.
+		unit.tactical_state.update_attention(unit)
 		var units_visible: Array[Unit] = []
 		var units_visible_by_this_unit: Array = Globals.unit_visible_enemies.get(unit, [])
 		var units_in_los: Array = Globals.unit_enemies_in_los.get(unit, [])
@@ -199,6 +201,8 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 
 
 static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, enemy: Unit, delta: float) -> float:
+	if not observer.is_active() or observer.surrendered or observer.members_alive <= 0:
+		return 0.0
 	var dist: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
 	if dist < 1:
 		dist = 1
@@ -234,6 +238,9 @@ static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, ene
 	# convert score -> hazard rate (lambda >= 0)
 	# baseline ensures “sometimes” even if score small
 	var lambda: float = 0.00 + 0.15 * max(score, 0.0)
+	if observer.tactical_state != null:
+		var direction: Vector2 = observer.global_position.direction_to(enemy.global_position)
+		lambda *= observer.tactical_state.detection_multiplier(direction)
 	var p: float = 1.0 - exp(-lambda * delta)
 
 	return clamp(p, 0.0, 0.95)

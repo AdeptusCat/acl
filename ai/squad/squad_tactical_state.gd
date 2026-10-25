@@ -20,11 +20,16 @@ var morale_state: STATES.MoraleState = STATES.MoraleState.NORMAL
 var current_role: int = PlatoonTypes.Role.NONE
 var assigned_task_id: int = -1
 
+const FULL_ATTENTION_MEMBERS: int = 10
+const FOCUSED_DETECTION_MULTIPLIER: float = 1.35
+const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
+
 # World-space unit direction; zero means broad, neutral coverage.
-# Width is in radians. These fields describe attention without affecting combat.
+# Width is in radians. Quality is observation capacity, separate from directional focus.
 var focus_direction: Vector2 = Vector2.ZERO
 var focus_strength: float = 0.0
 var attention_width: float = TAU
+var attention_quality: float = 0.0
 var has_contact: bool = false
 
 
@@ -32,9 +37,11 @@ func update_attention(unit: Unit) -> void:
 	focus_direction = Vector2.ZERO
 	focus_strength = 0.0
 	attention_width = TAU
+	attention_quality = 0.0
 	has_contact = false
-	if not unit.is_active() or unit.surrendered:
+	if not unit.is_active() or unit.surrendered or unit.members_alive <= 0:
 		return
+	attention_quality = _attention_quality(unit)
 
 	var contact_direction: Vector2 = Vector2.ZERO
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
@@ -73,6 +80,36 @@ func update_attention(unit: Unit) -> void:
 	# Normalize each source so the number of remembered enemies cannot dominate orders.
 	var expectation: Vector2 = movement_order_direction * 0.4 + enemy_direction.normalized() * 0.4 + objective_direction * 0.2
 	_set_attention(expectation, 0.6, PI)
+
+
+func detection_multiplier(direction: Vector2) -> float:
+	if focus_direction.is_zero_approx() or direction.is_zero_approx():
+		return attention_quality
+	var angle: float = absf(focus_direction.angle_to(direction))
+	var half_width: float = clampf(attention_width * 0.5, 0.001, PI)
+	var alignment: float = 1.0 - smoothstep(0.0, half_width, angle)
+	var directional_rate: float = lerpf(PERIPHERAL_DETECTION_MULTIPLIER, FOCUSED_DETECTION_MULTIPLIER, alignment)
+	return attention_quality * lerpf(1.0, directional_rate, focus_strength)
+
+
+func _attention_quality(unit: Unit) -> float:
+	# Small teams have fewer observers; casualties also reduce larger squads' capacity.
+	var expected_size: int = maxi(unit.original_size, FULL_ATTENTION_MEMBERS)
+	var quality: float = sqrt(clampf(float(unit.members_alive) / float(expected_size), 0.0, 1.0))
+	if unit.combat_stats != null:
+		quality *= lerpf(0.5, 1.0, clampf(unit.combat_stats.cohesion_current, 0.0, 1.0))
+	if unit.stress_system != null:
+		quality *= lerpf(1.0, 0.75, clampf(unit.stress_system.S_eff / 100.0, 0.0, 1.0))
+		match unit.stress_system.state:
+			STATES.MoraleState.CAUTIOUS:
+				quality *= 0.9
+			STATES.MoraleState.PINNED:
+				quality *= 0.55
+			STATES.MoraleState.PANIC:
+				quality *= 0.25
+			STATES.MoraleState.COMBAT_INEFFECTIVE:
+				quality *= 0.15
+	return clampf(quality, 0.0, 1.0)
 
 
 func _movement_order_direction(unit: Unit) -> Vector2:
