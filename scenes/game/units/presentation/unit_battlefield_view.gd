@@ -55,6 +55,7 @@ var detail_ui: UnitUi = null
 @onready var unit_designation_label: Label = $UnitDesignation
 @onready var rank_texture_rect: TextureRect = $Rank
 @onready var dead: TextureRect = $Dead
+@onready var focus_indicator: Node2D = $FocusIndicator
 
 
 @onready var soldiers_detail_container: VBoxContainer = $Soldiers/SoldiersContainer
@@ -86,11 +87,31 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or _dead or _exited or _surrendered:
 		return
+	_update_focus_indicator()
 	_facing_update_remaining -= delta
 	if _facing_update_remaining > 0.0:
 		return
 	_facing_update_remaining = FACING_UPDATE_INTERVAL
 	_update_facing()
+
+
+func _update_focus_indicator() -> void:
+	var unit: Unit = get_parent() as Unit
+	if unit == null or not unit.is_active() or unit.surrendered or unit.tactical_state == null:
+		focus_indicator.hide()
+		return
+	var attention: SquadTacticalState = unit.tactical_state
+	if attention.focus_direction.is_zero_approx() or attention.focus_strength <= 0.0:
+		focus_indicator.hide()
+		return
+	# Attention uses world space; keep the arrow aligned through parent transforms.
+	var local_direction: Vector2 = get_global_transform().affine_inverse().basis_xform(attention.focus_direction).normalized()
+	var half_size: Vector2 = sprite_node.size * 0.5
+	var edge_distance: float = minf(half_size.x / maxf(absf(local_direction.x), 0.001), half_size.y / maxf(absf(local_direction.y), 0.001))
+	focus_indicator.position = sprite_node.position + half_size + local_direction * (edge_distance + 6.0)
+	focus_indicator.rotation = local_direction.angle()
+	focus_indicator.modulate.a = lerpf(0.5, 1.0, clampf(attention.focus_strength, 0.0, 1.0))
+	focus_indicator.show()
 
 
 func _update_facing() -> void:
@@ -555,6 +576,7 @@ func surrender() -> void:
 	if _dead or _exited or _surrendered:
 		return
 	_surrendered = true
+	focus_indicator.hide()
 	$Timer.stop()
 	$UnitStates.hide()
 	_show_status(surrendered_texture_rect)
@@ -565,6 +587,7 @@ func surrender() -> void:
 
 func mark_exited() -> void:
 	_exited = true
+	focus_indicator.hide()
 	if _elimination_fade != null and _elimination_fade.is_valid():
 		_elimination_fade.kill()
 	if is_instance_valid(_casualty_feedback):
@@ -592,6 +615,7 @@ func die() -> void:
 	if _dead or _exited:
 		return
 	_dead = true
+	focus_indicator.hide()
 	$Timer.stop()
 	dead.show()
 	unit_status_control.hide()
