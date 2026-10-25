@@ -97,29 +97,38 @@ func _update_colors() -> void:
 			var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
 			if occupy.objective_id != int(marker["id"]) or occupy.state == null:
 				continue
-			var owner: int = occupy.state.controlling_teams.get(marker["hex"], -1)
-			if owner == team:
-				color = FRIENDLY_COLOR
-			elif owner == Globals.get_enemy_team(team):
-				color = ENEMY_COLOR
-			if occupy.required_time_s <= 0.0:
-				continue
-			var friendly_progress: float = 0.0
-			var enemy_progress: float = 0.0
-			if owner != team:
-				friendly_progress = clampf(occupy.state.required_times_reached_s.get(marker["hex"], 0.0) / occupy.required_time_s, 0.0, 1.0)
-			if owner != Globals.get_enemy_team(team):
-				enemy_progress = clampf(occupy.state.enemy_hold_times_s.get(marker["hex"], 0.0) / occupy.required_time_s, 0.0, 1.0)
-			if friendly_progress > capture_progress:
-				capture_progress = friendly_progress
-				capture_color = FRIENDLY_COLOR
-			if enemy_progress > capture_progress:
-				capture_progress = enemy_progress
-				capture_color = ENEMY_COLOR
+			var style: Dictionary = capture_style(occupy, marker["hex"])
+			color = style["color"]
+			if float(style["progress"]) > capture_progress:
+				capture_progress = style["progress"]
+				capture_color = style["capture_color"]
 		var shader_material: ShaderMaterial = marker["material"]
 		shader_material.set_shader_parameter("area_color", color)
 		shader_material.set_shader_parameter("capture_progress", capture_progress)
 		shader_material.set_shader_parameter("capture_color", capture_color)
+
+
+static func capture_style(occupy: OccupyObjectiveCondition, hex: Vector2i) -> Dictionary:
+	var color: Color = COLORS[occupy.objective_id]
+	var progress: float = 0.0
+	var capture_color: Color = FRIENDLY_COLOR
+	if occupy.state == null:
+		return {"color": color, "progress": progress, "capture_color": capture_color}
+	var owner: int = occupy.state.controlling_teams.get(hex, -1)
+	var enemy: Globals.Team = Globals.get_enemy_team(occupy.team)
+	if owner == occupy.team:
+		color = FRIENDLY_COLOR
+	elif owner == enemy:
+		color = ENEMY_COLOR
+	if occupy.required_time_s > 0.0:
+		if owner != occupy.team:
+			progress = clampf(occupy.state.required_times_reached_s.get(hex, 0.0) / occupy.required_time_s, 0.0, 1.0)
+		if owner != enemy:
+			var enemy_progress: float = clampf(occupy.state.enemy_hold_times_s.get(hex, 0.0) / occupy.required_time_s, 0.0, 1.0)
+			if enemy_progress > progress:
+				progress = enemy_progress
+				capture_color = ENEMY_COLOR
+	return {"color": color, "progress": progress, "capture_color": capture_color}
 
 
 func _draw() -> void:

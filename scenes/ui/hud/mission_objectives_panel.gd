@@ -14,6 +14,7 @@ const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 @onready var rows: VBoxContainer = $Objectives/Scroll/Rows
 
 var conditions: Array[VictoryCondition] = []
+var capture_buttons: Dictionary[int, ObjectiveCaptureButton] = {}
 var status_labels: Array[Label] = []
 var requirement_labels: Array[Label] = []
 var time_left_seconds: float = 0.0
@@ -46,6 +47,7 @@ func _on_folding_changed(_folded: bool) -> void:
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
 	conditions.clear()
+	capture_buttons.clear()
 	status_labels.clear()
 	requirement_labels.clear()
 	for child: Node in rows.get_children():
@@ -58,9 +60,9 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 				continue
 			if heading == null:
 				heading = Label.new()
-				heading.text = "Major victory · meet all"
+				heading.text = "Major victory"
 				if level == VictoryCondition.OutcomeLevel.MINOR:
-					heading.text = "Minor victory · meet all"
+					heading.text = "Minor victory"
 				heading.theme_type_variation = &"HudHeading"
 				heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				heading.tooltip_text = "Meet every requirement in this group. Major victory takes priority over minor victory."
@@ -69,6 +71,12 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 			var card: VBoxContainer = VBoxContainer.new()
 			card.add_theme_constant_override("separation", 2)
 			rows.add_child(card)
+			if condition is OccupyObjectiveCondition:
+				var capture_button: ObjectiveCaptureButton = ObjectiveCaptureButton.new()
+				card.add_child(capture_button)
+				capture_button.setup(condition as OccupyObjectiveCondition)
+				capture_button.objective_focused.connect(objective_focused.emit)
+				capture_buttons[conditions.size() - 1] = capture_button
 			var requirement: Label = Label.new()
 			requirement.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			requirement.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -138,7 +146,7 @@ func refresh() -> void:
 					var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
 					text = "Enemy exits: %d/%d allowed" % [prevention.state.units_exited.size(), prevention.max_allowed_enemy_exits]
 			# Capture rows distinguish a running hold from a secured objective.
-			if progress.kind != VictoryConditionProgress.Kind.OCCUPY:
+			if progress.kind != VictoryConditionProgress.Kind.OCCUPY and progress.kind != VictoryConditionProgress.Kind.DESTROY:
 				if progress.complete:
 					if condition.test_at_scenario_end and time_left_seconds > 0.0:
 						text += " · On track (at mission end)"
@@ -157,6 +165,12 @@ func refresh() -> void:
 		requirement.mouse_default_cursor_shape = label.mouse_default_cursor_shape
 		label.text = text
 		label.add_theme_color_override("font_color", color)
+		requirement.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY and progress.kind != VictoryConditionProgress.Kind.DESTROY
+		label.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY
+		if capture_buttons.has(index):
+			var capture_button: ObjectiveCaptureButton = capture_buttons[index]
+			capture_button.refresh()
+			capture_button.tooltip_text = text + "\n" + requirement.text + "\nClick to focus objective"
 
 
 func _requirement_text(condition: VictoryCondition) -> String:

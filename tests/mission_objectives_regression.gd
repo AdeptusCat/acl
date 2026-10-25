@@ -374,15 +374,24 @@ func _check_mission_two(world: Node, panel: MissionObjectivesPanel) -> void:
 	world.game_controller.set_victory_conditions()
 	panel.setup(scenario.victory_conditions, Globals.Team.ALLIES, 600.0)
 	_check(panel.conditions.size() == 3, "Mission 2 displays both major requirements and its minor objective")
-	_check((panel.rows.get_child(0) as Label).text == "Major victory · meet all" and (panel.rows.get_child(3) as Label).text == "Minor victory · meet all", "Major and minor requirements have separate labeled groups")
+	_check((panel.rows.get_child(0) as Label).text == "Major victory" and (panel.rows.get_child(3) as Label).text == "Minor victory", "Major and minor requirements have separate labeled groups")
 	_check(panel.requirement_labels[0].text.contains("Capture all A hexes") and panel.requirement_labels[0].text.contains("30 s continuous"), "Mission 2 explains the major capture requirement and hold duration")
 	_check(panel.requirement_labels[1].text.contains("Destroy at least 2"), "Mission 2 also explains the destruction requirement for major victory")
 	_check(panel.requirement_labels[2].text.contains("Capture all B hexes") and panel.requirement_labels[2].text.contains("Required at mission end"), "Mission 2 shows objective B and its mission-end requirement for minor victory")
+	_check(panel.capture_buttons[0].text == "Capture Objective A" and panel.capture_buttons[2].text == "Capture Objective B", "Mission 2 uses concise capture button labels")
+	_check(not panel.requirement_labels[0].visible and not panel.status_labels[0].visible and not panel.requirement_labels[1].visible, "Mission 2 hides verbose requirement and duplicate status lines")
+	_check(panel.status_labels[1].text == "Enemy squads destroyed: 1/2", "Mission 2 displays only the live destruction count")
+	_check_button_capture_style(panel.capture_buttons[0], ObjectiveAreaOverlay.ENEMY_COLOR, 0.0)
+	var major: OccupyObjectiveCondition = panel.conditions[0] as OccupyObjectiveCondition
+	var major_hex: Vector2i = major.state.hexes[0]
+	major.state.required_times_reached_s[major_hex] = major.required_time_s * 0.5
+	panel.refresh()
+	_check_button_capture_style(panel.capture_buttons[0], ObjectiveAreaOverlay.ENEMY_COLOR, 0.5)
 	var minor: OccupyObjectiveCondition = panel.conditions[2] as OccupyObjectiveCondition
 	var click: InputEventMouseButton = InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
-	panel.requirement_labels[2].gui_input.emit(click)
+	panel.capture_buttons[2].pressed.emit()
 	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(minor.state.hexes[0]), "Clicking the minor victory requirement focuses objective B")
 	for hex: Vector2i in minor.state.hexes:
 		minor.state.victory_conditions_met[hex] = true
@@ -390,9 +399,16 @@ func _check_mission_two(world: Node, panel: MissionObjectivesPanel) -> void:
 		minor.state.required_times_reached_s[hex] = minor.required_time_s
 	panel.refresh()
 	_check(_row(panel, 2).contains("player controlled"), "Minor objective progress refreshes alongside major objectives")
+	_check_button_capture_style(panel.capture_buttons[2], ObjectiveAreaOverlay.FRIENDLY_COLOR, 0.0)
 	await _check_layout(world.ui, panel, Vector2i(1440, 900))
 	await _check_layout(world.ui, panel, Vector2i(800, 600))
 	Globals.scenario_chosen = previous_scenario
 	Globals.objectives = previous_objectives
 	Globals.victory_conditions = previous_conditions
 	mission_map.queue_free()
+
+
+func _check_button_capture_style(button: ObjectiveCaptureButton, color: Color, progress: float) -> void:
+	var shader_material: ShaderMaterial = (button.backgrounds.get_child(0) as ColorRect).material as ShaderMaterial
+	_check(shader_material.get_shader_parameter("area_color") == color, "Capture buttons match the map's current ownership color")
+	_check(is_equal_approx(float(shader_material.get_shader_parameter("capture_progress")), progress), "Capture button bands match live hex capture progress")
