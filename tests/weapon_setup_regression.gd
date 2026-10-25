@@ -5,6 +5,7 @@ const DETAILS_SCRIPT: Script = preload("res://scenes/ui/units/unit_details_panel
 
 class FireProbe extends SquadFireController:
 	var shots_fired: int = 0
+	var impact_hexes: Array[Vector2i] = []
 
 	func _on_fire_weapon(_weapon: WeaponSpec, _position: Vector2, _auto: bool, _owner_id: int, _owner: Node2D) -> void:
 		pass
@@ -12,8 +13,8 @@ class FireProbe extends SquadFireController:
 	func fire_shots(_soldier: Soldier, shots: int, _rpm: float, _auto: bool, _hex: Vector2i) -> void:
 		shots_fired += shots
 
-	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, _hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit], _shot_origin: Vector2 = Vector2.INF) -> void:
-		pass
+	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit], _shot_origin: Vector2 = Vector2.INF) -> void:
+		impact_hexes.append(hex)
 
 
 var failures: int = 0
@@ -69,6 +70,7 @@ func _run() -> void:
 	probe._process(0.0)
 	_check(gunner.setup_weapon_task.done, "A rifle with no setup duration is immediately ready")
 	await _test_crew_effects()
+	await _test_personal_defense()
 	shooter.squad_fire = original_fire
 	probe.calc.free()
 	main.queue_free()
@@ -265,6 +267,154 @@ func _test_crew_effects() -> void:
 	_check(is_equal_approx(gunner.reload_task.remaining_time_s, 99.0), "Personal weapons do not receive a missing-crew penalty")
 	Debug.dont_fire_wepaons = true
 	probe.clear_target()
+
+
+func _attempt_personal_fire(soldier: Soldier, target: Unit) -> int:
+	soldier.setup_weapon_task.done = true
+	soldier.reload_task.done = true
+	soldier.aquire_target_task.done = true
+	soldier.aquire_target_task.target_id = target
+	soldier.weapon.projectile_speed = 1000000
+	return await probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
+
+
+func _test_personal_defense() -> void:
+	var original_type: Globals.SquadType = shooter.squad_type
+	var original_enemy_team: Globals.Team = enemy.team
+	enemy.team = Globals.get_enemy_team(shooter.team)
+	var distant: Unit = Unit.new()
+	distant.team = enemy.team
+	_set_hex(distant, Vector2i(3, 0))
+	for squad_type: Globals.SquadType in [Globals.SquadType.MG, Globals.SquadType.MORTAR, Globals.SquadType.ANTITANK]:
+		shooter.squad_type = squad_type
+		var weapon_path: String = "res://resources/weapons/mg34_heavy.tres"
+		if squad_type == Globals.SquadType.MORTAR:
+			weapon_path = "res://resources/weapons/m1_81mm_mortar.tres"
+		elif squad_type == Globals.SquadType.ANTITANK:
+			weapon_path = "res://resources/weapons/rpzb_54_panzerschreck.tres"
+		_prepare_crew(weapon_path, 1, 1)
+		var loader: Soldier = probe.soldiers[1]
+		var assistant: Soldier = probe.soldiers[2]
+		var leader: Soldier = Soldier.new(1100, "Leader", RankGrades.Grade.SQUAD_LEADER, RankGrades.Role.SQUAD_LEADER, WeaponSpec.new(), shooter, shooter.team)
+		var rifleman: Soldier = Soldier.new(1101, "Rifleman", RankGrades.Grade.SOLDIER, RankGrades.Role.SOLDIER, WeaponSpec.new(), shooter, shooter.team)
+		probe.soldiers.append_array([leader, rifleman])
+		Debug.dont_fire_wepaons = false
+		_set_hex(enemy, Vector2i(3, 0))
+		LOSHelper.los_lookup = {shooter.current_hex: {enemy.current_hex: {"target_cover": 0}, distant.current_hex: {"target_cover": 0}}}
+		Globals.unit_visible_enemies[shooter] = [enemy, distant]
+		probe.set_target_unit(enemy)
+		for soldier: Soldier in [leader, rifleman, assistant, loader]:
+			var ammunition: int = soldier.weapon.ammunition
+			_check(await _attempt_personal_fire(soldier, enemy) == 0 and soldier.weapon.ammunition == ammunition,
+				"Weapon squad personal weapons remain silent beyond one hex")
+		_set_hex(enemy, Vector2i(2, 0))
+		LOSHelper.los_lookup[shooter.current_hex][enemy.current_hex] = {"target_cover": 0}
+		probe.set_target_unit(distant)
+		for soldier: Soldier in [leader, rifleman, assistant]:
+			probe.impact_hexes.clear()
+			_check(await _attempt_personal_fire(soldier, enemy) > 0 and probe.impact_hexes == [enemy.current_hex],
+				"Leader, rifleman and assistant shoot an adjacent threat")
+			_check(probe.target_unit == distant and probe.target_hex == distant.current_hex,
+				"Personal defense preserves the support weapon's distant target")
+		probe.impact_hexes.clear()
+		_check(await _attempt_personal_fire(gunner, distant) > 0 and probe.impact_hexes == [distant.current_hex],
+			"The support weapon still fires at its distant ordered target")
+		assistant.aquire_target_task.target_id = null
+		assistant.aquire_target_task.done = true
+		assistant.aim_jitter_s = 0.0
+		_check(await probe._try_fire_soldier(0.0, assistant, false, 0, 0, 0, 0) == 0 and not assistant.aquire_target_task.done,
+			"An adjacent threat starts the assistant's normal acquisition delay")
+		var acquire_remaining: float = assistant.aquire_target_task.remaining_time_s
+		probe.set_target_unit(distant)
+		probe.aim_delay()
+		_check(assistant.aquire_target_task.target_id == enemy and is_equal_approx(assistant.aquire_target_task.remaining_time_s, acquire_remaining),
+			"Support targeting and aiming do not restart independent personal-defense acquisition")
+		probe.clear_target()
+		_check(await _attempt_personal_fire(assistant, enemy) > 0, "Adjacent personal defense works without a primary weapon target")
+		probe.set_target_unit(distant)
+		_check(await _attempt_personal_fire(loader, enemy) == 0, "A supplied support weapon keeps its loader on crew duties")
+		gunner.reload_task.done = false
+		gunner.reload_task.start_time_s = 10.0
+		_check(await _attempt_personal_fire(loader, enemy) == 0, "Reloading does not release the loader to fire a rifle")
+		gunner.weapon.ammunition = 0
+		_check(await _attempt_personal_fire(loader, enemy) > 0, "An ammunition-exhausted support weapon releases its loader for adjacent defense")
+		gunner.weapon.ammunition = 100
+		gunner.is_alive = false
+		_check(await _attempt_personal_fire(loader, enemy) > 0, "An absent active gunner releases the loader for adjacent defense")
+		Globals.unit_visible_enemies[shooter] = [distant]
+		_check(await _attempt_personal_fire(assistant, enemy) == 0, "Personal defense cannot use an undetected adjacent enemy")
+		Globals.unit_visible_enemies[shooter] = [enemy, distant]
+		LOSHelper.los_lookup[shooter.current_hex].erase(enemy.current_hex)
+		_check(await _attempt_personal_fire(assistant, enemy) == 0, "Personal defense requires current LOS")
+		LOSHelper.los_lookup[shooter.current_hex][enemy.current_hex] = {"target_cover": 0}
+		shooter.setAttackState(Unit.AttackState.MANUAL_GROUND)
+		probe.set_target_hex(distant.current_hex)
+		shooter.attack_ground_rounds_budget = 10
+		_check(await _attempt_personal_fire(leader, enemy) > 0 and shooter.attack_ground_rounds_budget == 10,
+			"Ground-fire orders permit adjacent defense without consuming their round budget")
+		_check(probe.target_hex == distant.current_hex, "Adjacent defense preserves the ground-fire destination")
+		await _test_personal_ground_order(leader, assistant, loader, distant.current_hex)
+	shooter.squad_type = Globals.SquadType.Rifle
+	_prepare_crew("res://resources/weapons/kar98.tres", 0, 0)
+	_set_hex(enemy, Vector2i(3, 0))
+	LOSHelper.los_lookup = {shooter.current_hex: {enemy.current_hex: {"target_cover": 0}}}
+	probe.set_target_unit(enemy)
+	gunner.role = RankGrades.Role.SOLDIER
+	_check(await _attempt_personal_fire(gunner, enemy) > 0, "Ordinary rifle squads retain personal fire beyond one hex")
+	probe.clear_target()
+	Globals.unit_visible_enemies[shooter] = []
+	distant.free()
+	shooter.squad_type = original_type
+	enemy.team = original_enemy_team
+	Debug.dont_fire_wepaons = true
+
+
+func _test_personal_ground_order(leader: Soldier, assistant: Soldier, loader: Soldier, distant_hex: Vector2i) -> void:
+	var controller: Node2D = get_tree().root.get_node("Main").world.game_controller
+	var previous_selection: Unit = controller.selected_unit
+	controller.selected_unit = shooter
+	Globals.unit_visible_enemies[shooter] = []
+	var ordered_hex: Vector2i = Vector2i.ZERO
+	LOSHelper.los_lookup[shooter.current_hex][ordered_hex] = {"target_cover": 0}
+	_check(MatchInteractionHandler.order_via_option_wheel(controller, ordered_hex, WheelOption.Option.FIRE_AT),
+		"The Fire wheel accepts an adjacent hex without a detected enemy")
+	_check(shooter.attackState == Unit.AttackState.MANUAL_GROUND and probe.target_hex == ordered_hex and probe.target_unit == null,
+		"The wheel creates a ground-fire target without inventing an enemy unit")
+	for soldier: Soldier in [leader, assistant]:
+		probe.impact_hexes.clear()
+		_check(await _attempt_personal_fire(soldier, null) == 0 and not soldier.aquire_target_task.done,
+			"An ordered adjacent ground hex starts normal personal-weapon acquisition")
+		await probe._try_fire_soldier(100.0, soldier, false, 0, 0, 0, 0)
+		var budget: int = shooter.attack_ground_rounds_budget
+		var ammunition: int = soldier.weapon.ammunition
+		var shots: int = await probe._try_fire_soldier(0.0, soldier, false, 0, 0, 0, 0)
+		_check(shots > 0 and probe.impact_hexes == [ordered_hex] and soldier.weapon.ammunition == ammunition - shots,
+			"Leaders and assistants fire at an ordered adjacent hex without detection")
+		_check(shooter.attack_ground_rounds_budget == budget - shots, "Ordered personal fire consumes the ground-fire round budget")
+		var cadence_remaining: float = soldier.aquire_target_task.remaining_time_s
+		await probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
+		_check(soldier.aquire_target_task.remaining_time_s < cadence_remaining,
+			"Repeated ground-fire attempts advance cadence instead of restarting acquisition")
+	gunner.is_alive = true
+	gunner.weapon.ammunition = 100
+	_check(await _attempt_personal_fire(loader, null) == 0, "An explicit ground-fire order still reserves the active weapon's loader")
+	shooter.attack_ground_rounds_budget = 1
+	leader.weapon.burst_rounds = 3
+	leader.rounds_in_mag = 5
+	_check(await _attempt_personal_fire(leader, null) == 1 and shooter.attack_ground_rounds_budget == 0,
+		"An ordered personal volley cannot exceed the remaining round budget")
+	_check(await _attempt_personal_fire(leader, null) == 0, "An exhausted round budget stops ordered personal fire")
+	leader.weapon.burst_rounds = 1
+	shooter.setAttackState(Unit.AttackState.MANUAL_GROUND)
+	LOSHelper.los_lookup[shooter.current_hex].erase(ordered_hex)
+	_check(await _attempt_personal_fire(assistant, null) == 0, "Indirect mortar orders do not let personal weapons shoot through blocked LOS")
+	LOSHelper.los_lookup[shooter.current_hex][ordered_hex] = {"target_cover": 0}
+	probe.clear_target()
+	_check(await _attempt_personal_fire(assistant, null) == 0, "Clearing the order removes permission to fire without detection")
+	shooter.setAttackState(Unit.AttackState.MANUAL_GROUND)
+	probe.set_target_hex(distant_hex)
+	_check(await _attempt_personal_fire(assistant, null) == 0, "Ground-fire orders beyond one hex do not release personal weapons")
+	controller.selected_unit = previous_selection
 
 
 func _set_hex(unit: Unit, hex: Vector2i) -> void:

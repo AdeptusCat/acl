@@ -121,6 +121,8 @@ signal shooting(unit: Unit)
 
 func set_soldiers_new_target_task(target_distance: int) -> void:
 	for s: Soldier in soldiers:
+		if _uses_personal_defense(s):
+			continue
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		#if not s.aquire_target_task.target_id == target_unit:
@@ -222,6 +224,8 @@ func set_target_unit(targetUnit: Unit) -> void:
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 	
 	for s: Soldier in soldiers:
+		if _uses_personal_defense(s):
+			continue
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		
@@ -472,10 +476,65 @@ func _tick_soldiers(delta: float) -> void:
 					return
 		i += 1
 
+func _uses_personal_defense(soldier: Soldier) -> bool:
+	return unit.squad_type in [Globals.SquadType.MG, Globals.SquadType.MORTAR, Globals.SquadType.ANTITANK] and soldier.role != RankGrades.Role.GUNNER
+
+
+func _has_active_support_weapon() -> bool:
+	for soldier: Soldier in soldiers:
+		if soldier.is_alive and soldier.role == RankGrades.Role.GUNNER and soldier.weapon != null and soldier.weapon.ammunition > 0:
+			return true
+	return false
+
+
+func _personal_defense_target(soldier: Soldier) -> Unit:
+	var selected: Unit = null
+	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+		if not _can_track_target(enemy) or enemy.team == unit.team:
+			continue
+		if mission_support_fire and not _has_safe_support_target(enemy.current_hex):
+			continue
+		if LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(enemy.current_hex)) != 1:
+			continue
+		if enemy == soldier.aquire_target_task.target_id:
+			return enemy
+		if selected == null:
+			selected = enemy
+	return selected
+
+
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
 	if not unit.is_active() or unit.ai_support_only:
 		return 0
-	if mission_support_fire and not _has_safe_support_target(target_hex):
+	var personal_defense: bool = _uses_personal_defense(s)
+	var personal_ground_fire: bool = (
+		personal_defense
+		and unit.attackState == Unit.AttackState.MANUAL_GROUND
+		and has_target_hex
+		and LOSHelper.los_lookup.get(unit.current_hex, {}).has(target_hex)
+		and LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(target_hex)) == 1
+	)
+	var shot_target: Unit = target_unit
+	var personal_target_hex: Vector2i = target_hex
+	if personal_defense:
+		if s.role == RankGrades.Role.LOADER and _has_active_support_weapon():
+			return 0
+		if personal_ground_fire:
+			if unit.attack_ground_rounds_budget <= 0:
+				return 0
+			# The player's ordered hex supplies the target without inventing a contact.
+			shot_target = null
+		else:
+			shot_target = _personal_defense_target(s)
+			if shot_target == null:
+				return 0
+			personal_target_hex = shot_target.current_hex
+		if s.aquire_target_task.target_id != shot_target or (personal_ground_fire and s.last_target_hex != personal_target_hex):
+			s.aquire_target_task.target_id = shot_target
+			s.aquire_target_task.done = false
+			s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+		s.last_target_hex = personal_target_hex
+	elif mission_support_fire and not _has_safe_support_target(target_hex):
 		clear_target()
 		unit.setAttackState(Unit.AttackState.AUTO)
 		return 0
@@ -489,10 +548,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		if crew_available < s.weapon.crew_required - 1:
 			crew_penalty = maxf(1.0, s.weapon.undercrew_penalty_mult)
 		delta_mod *= compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal) / crew_penalty
-	if unit.attackState != Unit.AttackState.MANUAL_GROUND and not _refresh_tracked_target():
+	if not personal_defense and unit.attackState != Unit.AttackState.MANUAL_GROUND and not _refresh_tracked_target():
 		return 0
 	var _target_hex: Vector2i = target_hex
-	if s.weapon.family == WeaponSpec.Family.MORTAR:
+	if personal_defense:
+		_target_hex = personal_target_hex
+	elif s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = mortar_target_hex
 	
 	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
@@ -513,11 +574,12 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if Debug.dont_fire_wepaons:
 		return 0
 	
-	if s.weapon.family == WeaponSpec.Family.MORTAR:
-		if not has_mortar_target_hex:
+	if not personal_defense:
+		if s.weapon.family == WeaponSpec.Family.MORTAR:
+			if not has_mortar_target_hex:
+				return 0
+		elif not has_target_hex:
 			return 0
-	elif not has_target_hex:
-		return 0
 	
 	var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 	if cover_map and cover_map.has(_target_hex):
@@ -537,7 +599,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
 	
 	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
-	if not unit.attackState == Unit.AttackState.MANUAL_GROUND: 
+	if personal_defense or unit.attackState != Unit.AttackState.MANUAL_GROUND:
 		for u: Unit in visible_enemies:
 			if u.current_hex == _target_hex:
 				if is_instance_valid(u):
@@ -558,8 +620,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		return 0
 	
 	
-	# Loader dont fire their weapon
-	if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+	# Outside dedicated weapon squads, helpers retain their existing crew duties.
+	if not personal_defense and (s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT):
 		return 0
 	
 	
@@ -585,8 +647,10 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	# determine burst size for this weapon
 	var rounds_in_mag: int = s.rounds_in_mag
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
+	if personal_ground_fire:
+		shots = mini(shots, unit.attack_ground_rounds_budget)
 	
-	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
+	if (not personal_defense or personal_ground_fire) and unit.attackState == Unit.AttackState.MANUAL_GROUND:
 		if unit.attack_ground_rounds_budget <= 0:
 			unit.setAttackState(Unit.AttackState.AUTO)
 		
@@ -650,7 +714,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	# mortar reload
 	if not s.weapon.family == WeaponSpec.Family.MORTAR:
-		if not is_instance_valid(target_unit):
+		if not personal_defense and not is_instance_valid(target_unit):
 			target_unit = null
 		
 		# cadence to next burst (respect soldier’s rof and crew)
@@ -661,7 +725,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		var pause_s: float = s.weapon.burst_pause_s
 		var _total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
 		
-		s.aquire_target_task.target_id = target_unit
+		s.aquire_target_task.target_id = shot_target
 		s.aquire_target_task.done = false
 		s.aquire_target_task.start_time_s = _calc_acquire_delay(s) + _total_cadence_s
 	
@@ -755,6 +819,8 @@ func aim_delay() -> void:
 	if state_idx >= 0 and state_idx < state_acquire_mults.size():
 		acquire_mult = state_acquire_mults[state_idx]
 	for s: Soldier in soldiers:
+		if _uses_personal_defense(s):
+			continue
 		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
 			continue
 		s.aquire_target_task.done = false
