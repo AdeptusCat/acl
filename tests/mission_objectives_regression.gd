@@ -46,6 +46,9 @@ func _run() -> void:
 	var minor: DestroyUnitsCondition = DestroyUnitsCondition.new()
 	minor.team = Globals.Team.ALLIES
 	minor.outcome_level = VictoryCondition.OutcomeLevel.MINOR
+	_check(occupy.get_description() == "Capture Objective A" and destroy.get_description() == "Destroy 2 enemy squads", "Capture and destruction descriptions use short action labels")
+	_check(exit.get_description() == "Exit with 3 squads" and prevent.get_description() == "Allow no more than 1 enemy exit at Objective A", "Exit objectives have short descriptions with the target and limit")
+	_check(occupy.get_details().contains("continuous seconds") and prevent.get_details().contains("Required at mission end"), "Short labels retain capture mechanics and scoring timing in their details")
 	scenario.victory_conditions = [occupy, exit, destroy, prevent, enemy_objective, minor]
 	Globals.map_chosen = map
 	Globals.scenario_chosen = scenario
@@ -154,17 +157,18 @@ func _run() -> void:
 	for index: int in range(2):
 		exit.record_unit_entry(friends[index], exit.state.exit_hexes[0])
 	panel.refresh()
-	_check(_row(panel, 1).contains("Exit squads: 2/3") and _row(panel, 1).contains("In progress"), "Recorded exits display their live count")
+	_check(not panel.requirement_labels[1].visible and not panel.requirement_labels[3].visible, "Exit and prevention rows use the same compact layout as mission 2")
+	_check(_row(panel, 1) == "Exit squads: 2/3" and panel.status_labels[1].tooltip_text.contains("In progress"), "Recorded exits display their live count")
 	Globals.units_destroyed.units_collection[Globals.Team.ALLIES].units.append(enemies[0])
 	panel.refresh()
 	_check(_row(panel, 2).contains("Enemy squads destroyed: 1/2"), "Enemy losses display their live count")
-	_check(_row(panel, 3).contains("On track") and not _row(panel, 3).contains("Complete"), "Preventing exits is provisional while time remains")
+	_check(_row(panel, 3) == "Enemy exits: 0/1 allowed at Objective A" and panel.status_labels[3].tooltip_text.contains("On track at mission end"), "Preventing exits is provisional while time remains")
 	await _check_layout(hud, panel, Vector2i(1440, 900))
 	await _check_layout(hud, panel, Vector2i(800, 600))
 	for index: int in range(2, 3):
 		exit.record_unit_entry(friends[index], exit.state.exit_hexes[0])
 	panel.refresh()
-	_check(_row(panel, 1).contains("3/3") and _row(panel, 1).contains("Complete"), "The exit target is marked complete when enough squads exit")
+	_check(_row(panel, 1) == "Exit squads: 3/3" and panel.status_labels[1].get_theme_color("font_color") == MissionObjectivesPanel.COMPLETE_COLOR, "The exit target is marked complete when enough squads exit")
 	prevent.record_unit_entry(enemies[0], prevent.state.exit_hexes[0])
 	prevent.record_unit_entry(enemies[1], prevent.state.exit_hexes[0])
 	panel.refresh()

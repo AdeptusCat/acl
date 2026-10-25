@@ -77,7 +77,7 @@ func _test_authoring() -> void:
 	_check(condition.test_at_scenario_end and condition.max_allowed_enemy_exits == 0 and condition.objective_id == PreventEnemyExitCondition.ObjectiveId.EXIT, "New prevention conditions default to zero allowed exits and deadline evaluation")
 	_check(condition.property_can_revert(&"test_at_scenario_end") and condition.property_get_revert(&"test_at_scenario_end") == true, "The Inspector can restore the prevention-specific ON default")
 	_check(not ExitUnitsCondition.new().test_at_scenario_end, "Other victory conditions retain their OFF default")
-	_check(condition.get_description().contains("Prevent any enemy unit"), "Zero-exit description explains the denial objective")
+	_check(condition.get_description() == "Stop enemy exits", "Zero-exit description uses a short action label")
 	condition.max_allowed_enemy_exits = 2
 	_check(condition.get_description().contains("no more than 2"), "Description includes a nonzero allowed-exit count")
 	var exported: bool = false

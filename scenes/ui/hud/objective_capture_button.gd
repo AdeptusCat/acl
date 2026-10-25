@@ -4,7 +4,6 @@ class_name ObjectiveCaptureButton
 signal objective_focused(hex: Vector2i)
 
 const CAPTURE_SHADER: Shader = preload("res://assets/shader/objective_capture_button.gdshader")
-const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 
 var condition: OccupyObjectiveCondition
 var backgrounds: HBoxContainer
@@ -14,7 +13,7 @@ var ownership_badge: Label
 
 func setup(source: OccupyObjectiveCondition) -> void:
 	condition = source
-	text = "Capture Objective " + OBJECTIVE_NAMES[condition.objective_id]
+	text = condition.get_description()
 	custom_minimum_size.y = 40.0
 	add_theme_font_size_override("font_size", 14)
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND

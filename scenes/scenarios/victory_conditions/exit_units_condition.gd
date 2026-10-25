@@ -11,6 +11,8 @@ enum ObjectiveId {
 @export var objective_id: ObjectiveId = ObjectiveId.EXIT
 @export var required_unit_count: int = 1
 
+const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
+
 var state: ExitUnitsState
 
 func is_condition_met() -> bool:
@@ -28,12 +30,15 @@ func record_unit_entry(unit: Unit, hex: Vector2i) -> void:
 		state.record_unit_entry(unit, team, hex)
 
 func get_description() -> String:
-	var plural_suffix: String = ""
-	if required_unit_count > 1:
-		plural_suffix = "s"
-	
-	var text: String = "Move at least {count} of your unit{plural_suffix} to 'Exit' Markers.".format({
-	"plural_suffix": plural_suffix,
-	"count": required_unit_count
-	})
+	var squads: String = "squads"
+	if required_unit_count == 1:
+		squads = "squad"
+	var text: String = "Exit with %d %s" % [required_unit_count, squads]
+	if objective_id != ObjectiveId.EXIT:
+		text += " at Objective " + OBJECTIVE_NAMES[objective_id]
 	return text
+
+
+func get_details() -> String:
+	var marker: String = OBJECTIVE_NAMES[objective_id]
+	return _with_timing("Move at least %d squads to the '%s' exit markers." % [required_unit_count, marker])

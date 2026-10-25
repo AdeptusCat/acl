@@ -147,6 +147,8 @@ func _on_scenario_button_pressed(map: Map, scenario: Scenario) -> void:
 			continue
 		var label: Label = Label.new()
 		label.text = condition.get_description()
+		label.tooltip_text = condition.get_details()
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
 			major_victory_conditions_v_box_container.add_child(label)

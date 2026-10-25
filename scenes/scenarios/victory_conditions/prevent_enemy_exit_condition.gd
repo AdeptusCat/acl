@@ -60,7 +60,19 @@ func record_unit_entry(unit: Unit, hex: Vector2i) -> void:
 
 
 func get_description() -> String:
+	var text: String = "Stop enemy exits"
+	if max_allowed_enemy_exits > 0:
+		var exits: String = "exits"
+		if max_allowed_enemy_exits == 1:
+			exits = "exit"
+		text = "Allow no more than %d enemy %s" % [max_allowed_enemy_exits, exits]
+	if objective_id != ObjectiveId.EXIT:
+		text += " at Objective " + OBJECTIVE_NAMES[objective_id]
+	return text
+
+
+func get_details() -> String:
 	var marker: String = OBJECTIVE_NAMES[objective_id]
 	if max_allowed_enemy_exits == 0:
-		return "Prevent any enemy unit from reaching the enemy '%s' markers." % marker
-	return "Allow no more than %d enemy units to reach the enemy '%s' markers." % [max_allowed_enemy_exits, marker]
+		return _with_timing("Prevent any enemy unit from reaching the enemy '%s' markers." % marker)
+	return _with_timing("Allow no more than %d enemy units to reach the enemy '%s' markers." % [max_allowed_enemy_exits, marker])

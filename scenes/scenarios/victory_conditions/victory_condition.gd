@@ -58,3 +58,14 @@ func record_unit_entry(_unit: Unit, _hex: Vector2i) -> void:
 func get_description() -> String:
 	push_error("VictoryCondition.evaluate() must be overridden.")
 	return ""
+
+
+# Short descriptions are shared by mission briefings, the HUD, and battle results.
+func get_details() -> String:
+	return _with_timing(get_description())
+
+
+func _with_timing(description: String) -> String:
+	if test_at_scenario_end:
+		return description + "\nRequired at mission end."
+	return description

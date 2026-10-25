@@ -16,6 +16,7 @@ enum ObjectiveId {
 var state: OccupyObjectiveState
 
 const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
+	ObjectiveId.EXIT: "Exit",
 	ObjectiveId.A: "A",
 	ObjectiveId.B: "B",
 	ObjectiveId.C: "C",
@@ -33,8 +34,12 @@ const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 
 
 func get_description() -> String:
+	return "Capture Objective " + OBJECTIVE_NAMES[objective_id]
+
+
+func get_details() -> String:
 	var text: String = "Capture every '%s' hex with at least %d good-order squad(s) for %.0f continuous seconds. Control remains until the enemy recaptures it." % [OBJECTIVE_NAMES[objective_id], required_unit_count, required_time_s]
-	return text
+	return _with_timing(text)
 
 
 func is_condition_met() -> bool:

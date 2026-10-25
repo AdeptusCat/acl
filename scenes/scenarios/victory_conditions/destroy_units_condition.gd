@@ -10,6 +10,13 @@ func is_condition_met() -> bool:
 	return false
 
 func get_description() -> String:
+	var squads: String = "squads"
+	if required_unit_count == 1:
+		squads = "squad"
+	return "Destroy %d enemy %s" % [required_unit_count, squads]
+
+
+func get_details() -> String:
 	var plural_suffix: String = ""
 	if required_unit_count > 1:
 		plural_suffix = "s"
@@ -18,4 +25,4 @@ func get_description() -> String:
 	"plural_suffix": plural_suffix,
 	"count": required_unit_count
 	})
-	return text
+	return _with_timing(text)

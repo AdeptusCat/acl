@@ -88,7 +88,7 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 			status.mouse_filter = Control.MOUSE_FILTER_STOP
 			status.gui_input.connect(_on_row_input.bind(condition))
 			status.add_theme_font_size_override("font_size", 14)
-			if condition is DestroyUnitsCondition:
+			if not condition is OccupyObjectiveCondition:
 				var metric: PanelContainer = PanelContainer.new()
 				var metric_style: StyleBoxFlat = StyleBoxFlat.new()
 				metric_style.bg_color = Color(0.035, 0.045, 0.04, 0.65)
@@ -176,7 +176,7 @@ func refresh() -> void:
 			text = condition.get_description() + " · Unavailable"
 			label.tooltip_text = progress.diagnostic
 		else:
-			label.tooltip_text = condition.get_description()
+			label.tooltip_text = condition.get_details()
 			if not progress.hexes.is_empty():
 				label.tooltip_text += "\nClick to focus objective"
 				label.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -189,35 +189,36 @@ func refresh() -> void:
 					var exit_condition: ExitUnitsCondition = condition as ExitUnitsCondition
 					text = "Exit squads: %d/%d" % [progress.required_units - progress.remaining_units, progress.required_units]
 					if exit_condition.objective_id != ExitUnitsCondition.ObjectiveId.EXIT:
-						text += " at " + OBJECTIVE_NAMES[exit_condition.objective_id]
+						text += " at Objective " + OBJECTIVE_NAMES[exit_condition.objective_id]
 				VictoryConditionProgress.Kind.DESTROY:
 					text = "Enemy squads destroyed: %d/%d" % [progress.required_units - progress.remaining_units, progress.required_units]
 				VictoryConditionProgress.Kind.PREVENT_EXIT:
 					var prevention: PreventEnemyExitCondition = condition as PreventEnemyExitCondition
 					text = "Enemy exits: %d/%d allowed" % [prevention.state.units_exited.size(), prevention.max_allowed_enemy_exits]
-			# Capture rows distinguish a running hold from a secured objective.
-			if progress.kind != VictoryConditionProgress.Kind.OCCUPY and progress.kind != VictoryConditionProgress.Kind.DESTROY:
+					if prevention.objective_id != PreventEnemyExitCondition.ObjectiveId.EXIT:
+						text += " at Objective " + OBJECTIVE_NAMES[prevention.objective_id]
+			if progress.kind != VictoryConditionProgress.Kind.OCCUPY:
 				if progress.complete:
 					if condition.test_at_scenario_end and time_left_seconds > 0.0:
-						text += " · On track (at mission end)"
+						label.tooltip_text += "\nOn track at mission end."
 					else:
-						text += " · Complete"
 						color = COMPLETE_COLOR
+						label.tooltip_text += "\nComplete."
 				elif progress.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
 					text += " · Failed"
 					color = FAILED_COLOR
 				elif time_left_seconds <= 0.0:
-					text += " · Not met"
 					color = FAILED_COLOR
+					label.tooltip_text += "\nNot met."
 				else:
-					text += " · In progress"
+					label.tooltip_text += "\nIn progress."
 		requirement.tooltip_text = label.tooltip_text
 		requirement.mouse_default_cursor_shape = label.mouse_default_cursor_shape
 		label.text = text
 		if progress.kind == VictoryConditionProgress.Kind.DESTROY and progress.complete:
 			color = COMPLETE_COLOR
 		label.add_theme_color_override("font_color", color)
-		requirement.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY and progress.kind != VictoryConditionProgress.Kind.DESTROY
+		requirement.hide()
 		label.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY
 		if capture_buttons.has(index):
 			var capture_button: ObjectiveCaptureButton = capture_buttons[index]
@@ -226,14 +227,14 @@ func refresh() -> void:
 
 
 func _requirement_text(condition: VictoryCondition) -> String:
-	var text: String = condition.get_description()
+	var text: String = condition.get_details()
 	if condition is OccupyObjectiveCondition:
 		var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
 		var squads: String = "good-order squad"
 		if occupy.required_unit_count != 1:
 			squads = "good-order squads"
 		text = "Capture all %s hexes · %d %s/hex · %.0f s continuous" % [OBJECTIVE_NAMES[occupy.objective_id], occupy.required_unit_count, squads, occupy.required_time_s]
-	if condition.test_at_scenario_end:
+	if condition.test_at_scenario_end and condition is OccupyObjectiveCondition:
 		text += " · Required at mission end"
 	return text
 
