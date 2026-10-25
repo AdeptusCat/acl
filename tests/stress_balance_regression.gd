@@ -56,10 +56,10 @@ func _check_modifiers_and_expiry() -> void:
 	_check(is_equal_approx(stress.S_eff, 45.096), "A hit immediately updates effective stress using the actual leadership and stress modifiers")
 	stress._process(0.5)
 	_check(is_equal_approx(stress.incoming_stress_rate, 10.192), "Incoming rate counts weighted, modified gain rather than raw fast-plus-slow damage")
-	_check(is_equal_approx(stress.stress_recovery_rate, 0.2) and is_equal_approx(stress.net_stress_rate, 9.992), "Recovery uses the real cohesion and fire-pressure slowdown in the same units as incoming stress")
+	_check(is_equal_approx(stress.stress_recovery_rate, 0.23) and is_equal_approx(stress.net_stress_rate, 9.962), "Recovery uses the real cohesion and fading fire-pressure slowdown in the same units as incoming stress")
 	_check(is_equal_approx(stress.S_eff - 40.0, stress.net_stress_rate * stress.balance_sample_duration_s), "The measured net rate exactly explains the stress meter's change")
 	_check(view.stress_arrows.text.length() > view.recovery_arrows.text.length(), "Increasing stress shows more red arrows than green arrows")
-	_check(view.stress_arrows.tooltip_text.contains("+10.19/s") and view.recovery_arrows.tooltip_text.contains("Actual recovery: -0.20/s"), "Both arrow tooltips explain the measured numerical balance")
+	_check(view.stress_arrows.tooltip_text.contains("+10.19/s") and view.recovery_arrows.tooltip_text.contains("Actual recovery: -0.23/s"), "Both arrow tooltips explain the measured numerical balance")
 	var before_recovery: float = stress.S_eff
 	stress._process(0.5)
 	_check(is_equal_approx(stress.incoming_stress_rate, 5.096) and stress.S_eff < before_recovery, "Recent averaging avoids replacing a volley with zero pressure on the next half-second tick")
@@ -117,8 +117,9 @@ func _check_situational_recovery() -> void:
 	stress.incoming_stress_scale = 2.0
 	stress.apply_stress(1.0, 0.5)
 	stress._process(0.5)
-	# Recovery: (0.35 + 0.65 * 0.5) * 2 * 1.2 * 0.48 * 0.7375 * 0.1.
-	_check(is_equal_approx(stress.stress_recovery_rate, 0.057348), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and heavy fire")
+	# After 0.5 seconds, 10 rounds contribute 7.5 rps and a 0.175 fire multiplier.
+	# Recovery: (0.35 + 0.65 * 0.5) * 2 * 1.2 * 0.48 * 0.7375 * 0.175.
+	_check(is_equal_approx(stress.stress_recovery_rate, 0.100359), "Recovery rate includes pinned morale, headquarters, leadership presence, cohesion, casualty shock and fading fire")
 	_check(is_equal_approx(stress.incoming_stress_rate, 2.28), "Incoming scaling and leader protection affect the measured gain")
 	_check(is_equal_approx(stress.S_eff - 40.0, stress.net_stress_rate * 0.5), "The complete situational balance agrees with the actual meter change")
 

@@ -99,14 +99,14 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	var chance_to_hit_per_target: Array = []
 	
 	# --- slower recovery while under fire ---
-	var pressure_rps: float = float(total_rounds)   # or total_rounds / volley_dt if you track it
+	var incoming_rounds: float = float(total_rounds)
 	var j: int = 0
 	while j < n_targets:
 		var u_mark: Node = batch_targets[j]
 		if "stress_system" in u_mark:
 			var sc: StressController = u_mark.stress_system as StressController
 			if sc != null:
-				sc.mark_under_fire(pressure_rps)
+				sc.mark_under_fire(incoming_rounds)
 		j += 1
 
 	var i: int = 0

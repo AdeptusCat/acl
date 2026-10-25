@@ -22,6 +22,7 @@ var unit: Unit = null
 
 func setup(p_unit: Unit) -> void:
 	unit = p_unit
+	_sync_stress_cohesion()
 
 
 func update_stats(delta: float) -> void:
@@ -94,6 +95,12 @@ func _update_cohesion(delta: float) -> void:
 	)
 	
 	cohesion_current = clampf(cohesion_current, cohesion_min, 1.0)
+	_sync_stress_cohesion()
+
+
+func _sync_stress_cohesion() -> void:
+	if is_instance_valid(unit) and is_instance_valid(unit.stress_system):
+		unit.stress_system.cohesion = cohesion_current
 
 
 func _get_cohesion_recovery_rate() -> float:

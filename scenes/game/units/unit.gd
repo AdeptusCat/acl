@@ -203,6 +203,7 @@ func setup() -> void:
 	stress_system.state_changed.connect(_on_state_changed)
 	stress_system.stress_changed.connect(_on_stress_changed)
 	stress_system.stress_balance_changed.connect(ui._on_stress_balance_changed)
+	combat_stats.setup(self)
 	stress_system.recovery_capacity_rate = stress_system.get_recovery_capacity()
 	ui._on_stress_balance_changed(0.0, stress_system.recovery_capacity_rate, 0.0, 0.0)
 	
@@ -227,7 +228,6 @@ func setup() -> void:
 	
 	command_connectivity_timer.start()
 	enemy_visibility_checker_timer.start()
-	combat_stats.unit = self
 	combat_stats_timer.start()
 	squad_ai_controller.unit = self
 

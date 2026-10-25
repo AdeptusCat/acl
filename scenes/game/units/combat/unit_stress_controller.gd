@@ -125,6 +125,7 @@ var _how_long_under_fire_s: float = 0.0
 var _how_long_under_fire_util_rout_s: float = 4.0
 var _under_fire_t: float = 0.0
 var _last_pressure_rps: float = 0.0
+var _fire_pressure_samples: Array[FirePressureSample] = []
 var under_fire: bool = false
 
 # Actual change stays separate from recovery capacity when the stress bins are empty.
@@ -157,6 +158,13 @@ class StressGain:
 	func _init(fast_gain: float, slow_gain: float) -> void:
 		fast = fast_gain
 		slow = slow_gain
+
+class FirePressureSample:
+	var rounds: float
+	var age_s: float = 0.0
+
+	func _init(round_count: float) -> void:
+		rounds = round_count
 
 class StressBalanceSample:
 	var duration_s: float
@@ -269,13 +277,7 @@ func get_recovery_capacity() -> float:
 
 
 func _process(delta: float) -> void:
-	_under_fire_t -= delta
-	if _under_fire_t < 0.0:
-		_under_fire_t = 0.0
-	if _under_fire_t > 0.0:
-		under_fire = true
-	else:
-		under_fire = false
+	_advance_fire_pressure(delta)
 	
 	# Attention gains enter the same bins and balance sample before recovery/morale.
 	_apply_attention_stress(delta)
@@ -547,12 +549,33 @@ func on_casualty_event(n: int, leader_down: bool = false) -> void:
 		#stress_slow += 8.0 * leader_presence_strength
 	#_clamp_bins()
 
-# call this whenever rounds crack overhead (per volley)
-func mark_under_fire(pressure_rps: float) -> void:
-	if pressure_rps < 0.0:
-		pressure_rps = 0.0
-	_last_pressure_rps = pressure_rps
-	_under_fire_t = under_fire_window_s
+# Accept rounds, not a rate: callers can submit individual bullets or whole volleys.
+func mark_under_fire(rounds: float) -> void:
+	if not is_finite(rounds) or rounds <= 0.0:
+		return
+	# Coalesce simultaneous impacts without losing their combined volume.
+	if not _fire_pressure_samples.is_empty() and _fire_pressure_samples.back().age_s == 0.0:
+		_fire_pressure_samples.back().rounds += rounds
+	else:
+		_fire_pressure_samples.append(FirePressureSample.new(rounds))
+	_advance_fire_pressure(0.0)
+
+
+func _advance_fire_pressure(delta: float) -> void:
+	var window_s: float = maxf(under_fire_window_s, 0.0)
+	_last_pressure_rps = 0.0
+	_under_fire_t = 0.0
+	for index: int in range(_fire_pressure_samples.size() - 1, -1, -1):
+		var sample: FirePressureSample = _fire_pressure_samples[index]
+		sample.age_s += maxf(delta, 0.0)
+		if sample.age_s >= window_s:
+			_fire_pressure_samples.remove_at(index)
+			continue
+		var remaining_s: float = window_s - sample.age_s
+		# A triangular kernel with unit area preserves rounds/second at steady fire.
+		_last_pressure_rps += sample.rounds * 2.0 * remaining_s / (window_s * window_s)
+		_under_fire_t = maxf(_under_fire_t, remaining_s)
+	under_fire = _under_fire_t > 0.0
 
 # state machine (unchanged logic)
 #func _maybe_transition(delta: float) -> void:
@@ -705,12 +728,11 @@ func _repin_ramp_multiplier() -> float:
 
 
 func _unpin_ramp_multiplier() -> float:
-	# 1 - exp(-t/τ): rises quick, eases in; τ = unpin_ramp_s
+	# Recovery hazard rises linearly with time spent in the current pinned state.
 	if state != STATES.MoraleState.PINNED:
 		return 1.0
 	var tau: float = max(0.001, unpin_ramp_s)  # avoid div-by-zero
-	#var m: float = 1.0 - exp(-_since_pinned / tau)
-	var m: float = _repin_since_unpin / tau
+	var m: float = _since_pinned / tau
 	return clampf(m, 0.0, 1.0)
 
 

@@ -184,6 +184,8 @@ func _observe_impact(variant: int, reverse_order: bool, random_seed: int) -> Dic
 		_set_hex(targets[index], Vector2i(11, 10))
 		targets[index].events.clear()
 		targets[index].members_alive = 5 - 2 * index
+		# Each baseline observation is an independent volley, not sustained fire.
+		targets[index].stress_system._advance_fire_pressure(targets[index].stress_system.under_fire_window_s)
 		targets[index].stress_system.state = [STATES.MoraleState.NORMAL, STATES.MoraleState.PANIC, STATES.MoraleState.PINNED][index]
 	shooter.stress_system.state = STATES.MoraleState.CAUTIOUS
 	shooter.stress_system.S_eff = 30.0
