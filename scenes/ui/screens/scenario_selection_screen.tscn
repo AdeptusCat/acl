@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cu06jcpwigm47" path="res://scenes/ui/screens/scenario_selection_screen.gd" id="1"]
 [ext_resource type="Theme" uid="uid://g173hug4jpgu" path="res://resources/theme/battle_hud_theme.tres" id="2"]
 [ext_resource type="FontFile" uid="uid://br0f33pkoxrkr" path="res://assets/fonts/courier_prime/Courier Prime Bold.ttf" id="3_bold"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/battle_settings_panel.tscn" id="4_settings"]
 
 [node name="StartScreen" type="CanvasLayer" unique_id=944251599]
 layer = 2
@@ -199,3 +200,7 @@ text = "Select a mission, read the briefing, then start."
 layout_mode = 2
 disabled = true
 text = "Start mission"
+
+[node name="Settings" parent="Control" instance=ExtResource("4_settings")]
+offset_left = -260.0
+show_command_view = false

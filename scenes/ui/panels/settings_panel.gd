@@ -1,5 +1,7 @@
 extends Control
 
+@export var show_command_view: bool = true
+
 const SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker.svg")
 const MUTED_SPEAKER_ICON: Texture2D = preload("res://assets/ui/hud/speaker_muted.svg")
 
@@ -38,6 +40,8 @@ var _scale_dragging: bool = false
 
 
 func _ready() -> void:
+	command_view_button.visible = show_command_view
+	command_links.visible = show_command_view
 	mute_button.toggled.connect(_on_mute_toggled)
 	SessionAudio.master_mute_changed.connect(_on_master_mute_changed)
 	_on_master_mute_changed(SessionAudio.master_muted)
@@ -63,6 +67,8 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
 	if not menu.visible and not controls_panel.visible:
 		return
 	if event.is_action_pressed("ui_cancel"):

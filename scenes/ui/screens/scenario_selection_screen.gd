@@ -23,6 +23,7 @@ const FORCE_ROW: Script = preload("res://scenes/ui/units/mission_force_row.gd")
 @onready var force_briefing: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces
 @onready var player_roster: VBoxContainer = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/PlayerRoster
 @onready var enemy_assessment: Label = $Control/Center/Panel/Content/Body/BriefingScroll/Briefing/Forces/EnemyAssessment
+@onready var settings: Control = $Control/Settings
 
 var team_texture: Dictionary[Globals.Team, Texture2D] = {
 	Globals.Team.AXIS: preload("res://assets/ui/axis_flag.png"),
@@ -242,6 +243,7 @@ func _on_start_mission_pressed() -> void:
 		start_button.disabled = true
 		return
 	_starting = true
+	settings.close_panels()
 	start_button.disabled = true
 	for button: Button in scenario_buttons.values():
 		button.disabled = true
