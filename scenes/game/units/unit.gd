@@ -616,6 +616,8 @@ func _process(_delta: float) -> void:
 	
 	
 	_check_contacts()
+	if not Engine.is_editor_hint():
+		tactical_state.update_attention(self)
 	if not alive:
 		return
 
