@@ -198,26 +198,18 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	if chance_to_disable < 0.01:
 		chance_to_disable = 0.01  # tiny floor so hits can still matter
 
-	# Convert hits → casualties with a capped, smooth hazard form
-	# lambda = hits * p_disable_final;  p_cas = 1 - exp(-lambda)
-	# This scales gently and avoids huge spikes.
+	# Roll each hit independently using the final per-hit disable chance.
 	var casualties_per_target: Array = []
 	var target_i: int = 0
 	while target_i < n_targets:
 		var hits_i: int = int(hits_per_target[target_i])
 		var casualties_i: int = 0
 
-		if hits_i > 0:
-			var lambda_val: float = float(hits_i) * chance_to_disable
-			var p_cas: float = 1.0 - exp(-lambda_val)
-			
-			var d: int = 0
-			while d < hits_i:
-				if randf() < p_cas:
-					casualties_i += 1
-				else:
-					casualties_i += 0
-				d += 1
+		var d: int = 0
+		while d < hits_i:
+			if randf() < chance_to_disable:
+				casualties_i += 1
+			d += 1
 
 		# Never exceed living heads, if present
 		var u_chk: Node = batch_targets[target_i]
