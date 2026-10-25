@@ -21,6 +21,8 @@ var requirement_labels: Array[Label] = []
 var time_left_seconds: float = 0.0
 var _refresh_elapsed_s: float = 0.0
 var _height_limit: float = 200.0
+var _last_focused_hexes: Dictionary[VictoryCondition, Vector2i] = {}
+var _metric_rows: Dictionary[int, PanelContainer] = {}
 
 
 func _ready() -> void:
@@ -53,6 +55,8 @@ func _on_folding_changed(_folded: bool) -> void:
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
 	conditions.clear()
+	_last_focused_hexes.clear()
+	_metric_rows.clear()
 	group_headings.clear()
 	capture_buttons.clear()
 	status_labels.clear()
@@ -75,7 +79,7 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 				var capture_button: ObjectiveCaptureButton = ObjectiveCaptureButton.new()
 				card.add_child(capture_button)
 				capture_button.setup(condition as OccupyObjectiveCondition)
-				capture_button.objective_focused.connect(objective_focused.emit)
+				capture_button.focus_requested.connect(_focus_next_hex.bind(condition))
 				capture_buttons[conditions.size() - 1] = capture_button
 			var requirement: Label = Label.new()
 			requirement.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -90,6 +94,9 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 			status.add_theme_font_size_override("font_size", 14)
 			if not condition is OccupyObjectiveCondition:
 				var metric: PanelContainer = PanelContainer.new()
+				metric.mouse_filter = Control.MOUSE_FILTER_STOP
+				metric.gui_input.connect(_on_row_input.bind(condition))
+				_metric_rows[conditions.size() - 1] = metric
 				var metric_style: StyleBoxFlat = StyleBoxFlat.new()
 				metric_style.bg_color = Color(0.035, 0.045, 0.04, 0.65)
 				metric_style.content_margin_left = 10.0
@@ -178,7 +185,7 @@ func refresh() -> void:
 		else:
 			label.tooltip_text = condition.get_details()
 			if not progress.hexes.is_empty():
-				label.tooltip_text += "\nClick to focus objective"
+				label.tooltip_text += "\n" + _focus_hint(progress.hexes.size())
 				label.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 			else:
 				label.mouse_default_cursor_shape = Control.CURSOR_ARROW
@@ -220,10 +227,13 @@ func refresh() -> void:
 		label.add_theme_color_override("font_color", color)
 		requirement.hide()
 		label.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY
+		if _metric_rows.has(index):
+			_metric_rows[index].mouse_default_cursor_shape = label.mouse_default_cursor_shape
+			_metric_rows[index].tooltip_text = label.tooltip_text
 		if capture_buttons.has(index):
 			var capture_button: ObjectiveCaptureButton = capture_buttons[index]
 			capture_button.refresh()
-			capture_button.tooltip_text = text + "\n" + requirement.text + "\nClick to focus objective"
+			capture_button.tooltip_text = text + "\n" + requirement.text + "\n" + _focus_hint(progress.hexes.size())
 
 
 func _requirement_text(condition: VictoryCondition) -> String:
@@ -285,11 +295,33 @@ func _occupation_text(condition: OccupyObjectiveCondition, progress: VictoryCond
 	return text
 
 
+func _focus_hint(hex_count: int) -> String:
+	if hex_count > 1:
+		return "Click to cycle through %d objective hexes" % hex_count
+	return "Click to focus objective"
+
+
+func _focus_next_hex(condition: VictoryCondition) -> bool:
+	var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
+	var hexes: Array[Vector2i] = []
+	for hex: Vector2i in progress.hexes:
+		if not hexes.has(hex):
+			hexes.append(hex)
+	if hexes.is_empty():
+		_last_focused_hexes.erase(condition)
+		return false
+	var next_index: int = 0
+	if _last_focused_hexes.has(condition):
+		next_index = (hexes.find(_last_focused_hexes[condition]) + 1) % hexes.size()
+	var hex: Vector2i = hexes[next_index]
+	_last_focused_hexes[condition] = hex
+	objective_focused.emit(hex)
+	return true
+
+
 func _on_row_input(event: InputEvent, condition: VictoryCondition) -> void:
 	if event is InputEventMouseButton:
 		var click: InputEventMouseButton = event as InputEventMouseButton
 		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
-			var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
-			if not progress.hexes.is_empty():
-				objective_focused.emit(progress.hexes[0])
+			if _focus_next_hex(condition):
 				accept_event()

@@ -1,7 +1,7 @@
 extends Button
 class_name ObjectiveCaptureButton
 
-signal objective_focused(hex: Vector2i)
+signal focus_requested
 
 const CAPTURE_SHADER: Shader = preload("res://assets/shader/objective_capture_button.gdshader")
 
@@ -46,7 +46,7 @@ func setup(source: OccupyObjectiveCondition) -> void:
 	ownership_badge.offset_right = -8.0
 	ownership_badge.offset_top = -10.0
 	ownership_badge.offset_bottom = 10.0
-	pressed.connect(_focus_objective)
+	pressed.connect(focus_requested.emit)
 	refresh()
 
 
@@ -91,9 +91,3 @@ func refresh() -> void:
 		shader_material.set_shader_parameter("area_color", style["color"])
 		shader_material.set_shader_parameter("capture_progress", style["progress"])
 		shader_material.set_shader_parameter("capture_color", style["capture_color"])
-
-
-func _focus_objective() -> void:
-	# The panel owns camera navigation; keyboard and mouse activation share this signal.
-	if not hexes.is_empty():
-		objective_focused.emit(hexes[0])

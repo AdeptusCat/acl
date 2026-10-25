@@ -82,6 +82,7 @@ func _run() -> void:
 	var previous_position: Vector2 = world.game_controller.camera.position
 	panel.status_labels[2].gui_input.emit(click)
 	_check(world.game_controller.camera.position == previous_position, "Objectives without a hex leave the camera unchanged")
+	_check_hex_cycling(world, panel, occupy, exit, prevent)
 	enemies[0].current_hex = objective_hex
 	occupy.advance_time(0.5)
 	panel.refresh()
@@ -416,3 +417,43 @@ func _check_button_capture_style(button: ObjectiveCaptureButton, color: Color, p
 	var shader_material: ShaderMaterial = (button.backgrounds.get_child(0) as ColorRect).material as ShaderMaterial
 	_check(shader_material.get_shader_parameter("area_color") == color, "Capture buttons match the map's current ownership color")
 	_check(is_equal_approx(float(shader_material.get_shader_parameter("capture_progress")), progress), "Capture button bands match live hex capture progress")
+
+
+func _check_hex_cycling(world: Node, panel: MissionObjectivesPanel, occupy: OccupyObjectiveCondition, exit: ExitUnitsCondition, prevention: PreventEnemyExitCondition) -> void:
+	var original_capture: Array[Vector2i] = occupy.state.hexes.duplicate()
+	var original_exits: Array[Vector2i] = exit.state.exit_hexes.duplicate()
+	var original_enemy_exits: Array[Vector2i] = prevention.state.exit_hexes.duplicate()
+	occupy.state.hexes = [Vector2i(4, 4), Vector2i(5, 4)]
+	exit.state.exit_hexes = [Vector2i(6, 4), Vector2i(7, 4), Vector2i(8, 4)]
+	prevention.state.exit_hexes = [Vector2i(4, 8), Vector2i(5, 8), Vector2i(6, 8)]
+	panel.refresh()
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	for index: int in range(4):
+		panel.capture_buttons[0].pressed.emit()
+		_check(world.game_controller.camera.position == world.ground_layer.map_to_local(occupy.state.hexes[index % 2]), "Capture button clicks cycle through every objective hex and wrap")
+		panel.status_labels[1].gui_input.emit(click)
+		_check(world.game_controller.camera.position == world.ground_layer.map_to_local(exit.state.exit_hexes[index % 3]), "Exit row clicks cycle independently through all exit hexes")
+		var enemy_row: PanelContainer = panel.status_labels[3].get_parent() as PanelContainer
+		enemy_row.gui_input.emit(click)
+		_check(world.game_controller.camera.position == world.ground_layer.map_to_local(prevention.state.exit_hexes[index % 3]), "The full enemy-exit row cycles through enemy exit hexes")
+		panel.refresh()
+	_check(panel.capture_buttons[0].tooltip_text.contains("cycle through 2") and panel.status_labels[3].tooltip_text.contains("cycle through 3"), "Multihex objective tooltips explain cycling")
+	click.button_index = MOUSE_BUTTON_RIGHT
+	var previous_position: Vector2 = world.game_controller.camera.position
+	panel.status_labels[1].gui_input.emit(click)
+	_check(world.game_controller.camera.position == previous_position, "Right-clicking does not focus or advance objective cycling")
+	click.button_index = MOUSE_BUTTON_LEFT
+	panel.status_labels[1].gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(exit.state.exit_hexes[1]), "Ignored clicks leave the next objective hex unchanged")
+	prevention.state.exit_hexes.clear()
+	panel.status_labels[3].gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(exit.state.exit_hexes[1]), "Empty objective hex lists leave the camera unchanged")
+	prevention.state.exit_hexes = [Vector2i(9, 8)]
+	panel.status_labels[3].gui_input.emit(click)
+	_check(world.game_controller.camera.position == world.ground_layer.map_to_local(Vector2i(9, 8)), "A replaced objective list safely focuses its new first hex")
+	occupy.state.hexes = original_capture
+	exit.state.exit_hexes = original_exits
+	prevention.state.exit_hexes = original_enemy_exits
+	panel.refresh()
