@@ -1,5 +1,10 @@
 extends Node
 
+class AttentionUnitProbe extends Unit:
+	func _check_contacts() -> void:
+		pass
+
+
 class TargetProbe extends Unit:
 	var received_fast: float = 0.0
 	var received_slow: float = 0.0
@@ -30,6 +35,8 @@ func _run() -> void:
 	_test_surprise()
 	_test_pressure()
 	_test_incoming_attention()
+	_test_overload_and_conditions()
+	_test_switching()
 	await _test_impacts()
 	print("Attention stress checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
@@ -107,6 +114,95 @@ func _test_incoming_attention() -> void:
 	unit.surrendered = true
 	unit.tactical_state.update_attention(unit)
 	_check(unit.tactical_state.multi_direction_pressure == 0.0 and unit.tactical_state.incoming_fire_demand.count(0.0) == SquadTacticalState.DEMAND_SECTOR_COUNT, "Inactive attention clears recent incoming-fire pressure")
+	unit.free()
+
+
+func _test_overload_and_conditions() -> void:
+	var unit: AttentionUnitProbe = AttentionUnitProbe.new()
+	unit.tactical_state = SquadTacticalState.new()
+	unit.stress_system = StressController.new()
+	var enemies: Array[Unit] = []
+	for index: int in range(3):
+		var enemy: Unit = Unit.new()
+		enemy.team = Globals.get_enemy_team(unit.team)
+		enemy.position = Vector2.RIGHT.rotated(float(index) * TAU / 3.0) * 100.0
+		enemies.append(enemy)
+	var state: SquadTacticalState = unit.tactical_state
+	state.update_attention(unit)
+	_check(state.attention_stress_rate == 0.0, "A squad without threats does not generate attention stress")
+	Globals.unit_visible_enemies[unit] = [enemies[0]]
+	state.update_attention(unit)
+	_check(state.attention_deficit == 0.0 and not state.flanked and not state.surrounded, "One manageable threat does not imply overload or flanking")
+	enemies[1].position = Vector2.LEFT * 100.0
+	Globals.unit_visible_enemies[unit] = [enemies[0], enemies[1]]
+	state.update_attention(unit)
+	_check(state.flanked and not state.surrounded and state.focus_direction == Vector2.ZERO, "Opposing threats derive flanked without replacing the primary attention data or implying encirclement")
+	_check(state.attention_deficit > 0.0 and state.attention_stress_rate > 0.0, "Unmet attention demand generates stress without any incoming volley")
+	var no_damage: bool = Debug.no_damage
+	Debug.no_damage = false
+	unit._process(0.5)
+	_check(unit.stress_system.S_eff > 0.0, "The unit frame loop delivers ongoing attention stress to its actual stress controller")
+	Debug.no_damage = no_damage
+	enemies[1].position = Vector2.RIGHT.rotated(TAU / 3.0) * 100.0
+	Globals.unit_visible_enemies[unit] = enemies
+	state.update_attention(unit)
+	_check(state.surrounded and state.flanked, "Three directions enclosing the squad derive a separate surrounded condition")
+	unit.stress_system.S_eff = 0.0
+	for index: int in range(3):
+		enemies[index].position = Vector2.RIGHT.rotated(deg_to_rad(float(index - 1) * 20.0)) * 100.0
+	state.update_attention(unit)
+	_check(not state.flanked and not state.surrounded and state.attention_stress_rate > 0.0, "Several frontal threats can overload attention without a flank condition")
+	var full_squad_rate: float = state.attention_stress_rate
+	unit.members_alive = 3
+	state.update_attention(unit)
+	_check(state.attention_stress_rate > full_squad_rate and state.attention_stress_rate <= SquadTacticalState.MAX_ATTENTION_STRESS_RATE, "Smaller squads have less attention capacity and a bounded overload stress rate")
+	Globals.unit_visible_enemies.erase(unit)
+	state.update_attention(unit)
+	_check(state.attention_stress_rate == 0.0 and not state.flanked and not state.surrounded, "Removing the threat demand clears overload and derived conditions")
+	unit.stress_system.free()
+	unit.free()
+	for enemy: Unit in enemies:
+		enemy.free()
+
+
+func _test_switching() -> void:
+	var coarse: SquadTacticalState = _focused()
+	var fine: SquadTacticalState = _focused()
+	for state: SquadTacticalState in [coarse, fine]:
+		state.total_directional_demand = 1.0
+		_check(state.advance_attention(0.1) == Vector2.ZERO, "Acquiring an initial focus does not pay a switching cost")
+		state.focus_direction = Vector2.LEFT
+	var coarse_cost: Vector2 = coarse.advance_attention(1.0)
+	var fine_cost: Vector2 = Vector2.ZERO
+	for step: int in range(10):
+		fine_cost += fine.advance_attention(0.1)
+	_check(coarse_cost.is_equal_approx(fine_cost) and coarse_cost.x > 0.0 and coarse_cost.y == 0.0, "Focus switching adds a frame-rate-independent temporary fast-stress cost")
+	_check(is_equal_approx(coarse.attention_switch_load, fine.attention_switch_load), "Switch recovery is independent of tick frequency")
+	var distracted_detection: float = fine.detection_multiplier(Vector2.LEFT)
+	fine.advance_attention(5.0)
+	_check(fine.detection_multiplier(Vector2.LEFT) > distracted_detection and fine.switching_stress_rate < 0.01, "A stable focus recovers spotting quality and clears the switching burden")
+	var idle: SquadTacticalState = _focused()
+	idle.advance_attention(0.1)
+	idle.focus_direction = Vector2.LEFT
+	_check(idle.advance_attention(0.1) == Vector2.ZERO, "Changing march direction without threat demand does not generate combat stress")
+	var unit: Unit = Unit.new()
+	unit.tactical_state = SquadTacticalState.new()
+	var enemy: Unit = Unit.new()
+	enemy.team = Globals.get_enemy_team(unit.team)
+	enemy.position = Vector2.RIGHT * 100.0
+	Globals.unit_visible_enemies[unit] = [enemy]
+	unit.tactical_state.update_attention(unit)
+	unit.tactical_state.advance_attention(0.1)
+	enemy.position = Vector2.LEFT * 100.0
+	for refresh: int in range(20):
+		unit.tactical_state.update_attention(unit)
+	_check(unit.tactical_state.attention_switch_load == 0.0, "Repeated perception refreshes cannot charge switching cost")
+	_check(unit.tactical_state.advance_attention(0.1).x > 0.0, "The simulation tick charges the changed combat focus once")
+	unit.surrendered = true
+	unit.tactical_state.update_attention(unit)
+	_check(unit.tactical_state.attention_switch_load == 0.0 and not unit.tactical_state.flanked and not unit.tactical_state.surrounded, "Inactive squads clear attention burdens and tactical conditions")
+	Globals.unit_visible_enemies.erase(unit)
+	enemy.free()
 	unit.free()
 
 

@@ -1,6 +1,6 @@
 extends Node2D
 
-enum State { NONE, PINNED, SURRENDERED, ELIMINATED }
+enum State { NONE, PINNED, SURRENDERED, ELIMINATED, FLANKED, SURROUNDED }
 
 const TRANSITION_SECONDS: float = 1.1
 const FADE_SECONDS: float = 0.6
@@ -11,6 +11,7 @@ const RIBBON_RECT: Rect2 = Rect2(-10.0, 65.0, 84.0, 17.0)
 
 var state: State = State.NONE
 var elapsed: float = LIFETIME_SECONDS
+var ribbon_offset: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -70,14 +71,14 @@ func advance(delta: float) -> void:
 
 
 func _is_temporary() -> bool:
-	return state == State.PINNED or state == State.SURRENDERED
+	return state != State.NONE and state != State.ELIMINATED
 
 
 func contains_screen_point(screen_point: Vector2) -> bool:
 	if state == State.NONE or not is_visible_in_tree() or modulate.a <= 0.0:
 		return false
 	var local_point: Vector2 = get_global_transform_with_canvas().affine_inverse() * screen_point
-	return FRAME_RECT.has_point(local_point) or RIBBON_RECT.has_point(local_point)
+	return FRAME_RECT.has_point(local_point) or Rect2(RIBBON_RECT.position + ribbon_offset, RIBBON_RECT.size).has_point(local_point)
 
 
 func _draw() -> void:
@@ -86,6 +87,12 @@ func _draw() -> void:
 	var accent: Color = Color(1.0, 0.70, 0.12)
 	var caption: String = "PINNED"
 	match state:
+		State.FLANKED:
+			accent = Color(1.0, 0.54, 0.14)
+			caption = "FLANKED"
+		State.SURROUNDED:
+			accent = Color(1.0, 0.28, 0.18)
+			caption = "SURROUNDED"
 		State.SURRENDERED:
 			accent = Color(0.96, 0.96, 0.88)
 			caption = "SURRENDERED"
@@ -109,6 +116,7 @@ func _draw() -> void:
 			draw_texture_rect(SKULL, Rect2(17.0, 10.0, 30.0, 34.0), false, Color(1.0, 0.94, 0.80))
 
 	# The state ribbon sits below the counter; casualty counts float above it.
+	draw_set_transform(ribbon_offset)
 	var badge: Rect2 = RIBBON_RECT
 	draw_rect(badge.grow(1.0), Color(0.03, 0.02, 0.01))
 	draw_rect(badge, Color(accent.r * 0.16, accent.g * 0.12, accent.b * 0.09, 0.96))
@@ -119,9 +127,25 @@ func _draw() -> void:
 			_draw_flag(Vector2(-4.0, 68.0), 0.7, accent)
 		State.ELIMINATED:
 			draw_texture_rect(SKULL, Rect2(-5.0, 68.0, 9.0, 11.0), false, Color(1.0, 0.94, 0.80))
+		State.FLANKED:
+			_draw_tactical_arrows(Vector2(0.0, 73.0), 2, accent)
+		State.SURROUNDED:
+			_draw_tactical_arrows(Vector2(0.0, 73.0), 4, accent)
 	var font: Font = ThemeDB.fallback_font
 	var text_width: float = font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 9).x
 	draw_string(font, Vector2(39.0 - text_width * 0.5, 76.5), caption, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 9, Color(1.0, 0.97, 0.88))
+
+
+func _draw_tactical_arrows(center: Vector2, count: int, color: Color) -> void:
+	for index: int in range(count):
+		var direction: Vector2 = Vector2.from_angle(float(index) * TAU / float(count))
+		var tip: Vector2 = center + direction
+		var side: Vector2 = direction.orthogonal() * 1.5
+		var head: PackedVector2Array = PackedVector2Array([tip + direction * 2.0 + side, tip, tip + direction * 2.0 - side])
+		draw_line(center + direction * 6.0, tip, Color(0.04, 0.02, 0.01), 3.0, true)
+		draw_polyline(head, Color(0.04, 0.02, 0.01), 3.0, true)
+		draw_line(center + direction * 6.0, tip, color, 1.0, true)
+		draw_polyline(head, color, 1.0, true)
 
 
 func _draw_pin(point: Vector2, icon_scale: float, color: Color) -> void:

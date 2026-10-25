@@ -600,7 +600,7 @@ func _on_morale_recovered() -> void:
 
 # === Process Loop ===
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
@@ -618,6 +618,9 @@ func _process(_delta: float) -> void:
 	_check_contacts()
 	if not Engine.is_editor_hint():
 		tactical_state.update_attention(self)
+		var attention_stress: Vector2 = tactical_state.advance_attention(delta)
+		if not Debug.no_damage and stress_system != null and attention_stress.length_squared() > 0.0:
+			stress_system.apply_stress(attention_stress.x, attention_stress.y)
 	if not alive:
 		return
 
@@ -921,6 +924,8 @@ func surrender() -> void:
 	Globals.units_destroyed.units_collection[enemy_team].units.append(self)
 	movement.stop()
 	surrendered = true
+	if tactical_state != null:
+		tactical_state.update_attention(self)
 	#alive = false
 	broken = false
 	for candidate: Unit in Globals.get_units():
@@ -934,6 +939,8 @@ func exit_map(record_event: bool = true) -> void:
 	if not is_active() or surrendered:
 		return
 	exited = true
+	if tactical_state != null:
+		tactical_state.update_attention(self)
 	position = LOSHelper.ground_layer.map_to_local(current_hex)
 	is_moving = false
 	movement.is_moving = false
@@ -992,6 +999,8 @@ func die() -> void:
 	if not is_active():
 		return
 	alive = false
+	if tactical_state != null:
+		tactical_state.update_attention(self)
 	# Direct elimination must retain the remaining men and equipment as casualties.
 	var remaining_members: int = squad_fire.soldiers.size()
 	for soldier: Soldier in squad_fire.soldiers:

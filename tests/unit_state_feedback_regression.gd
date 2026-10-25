@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_elimination_fade()
 	_test_visibility_and_details()
 	_test_unit_events()
+	_test_tactical_feedback()
 	if OS.get_cmdline_user_args().has("--render"):
 		await _render_preview()
 	print("Unit state feedback checks: ", checks, "; failures: ", failures)
@@ -220,6 +221,49 @@ func _test_unit_events() -> void:
 	ground.free()
 
 
+func _test_tactical_feedback() -> void:
+	var ui: UnitUi = UI_SCENE.instantiate() as UnitUi
+	add_child(ui)
+	ui.state_changed(STATES.MoraleState.PINNED)
+	ui.set_tactical_conditions(true, false)
+	var tactical: FEEDBACK = ui.get_node("TacticalFeedback") as FEEDBACK
+	var morale: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
+	_check(tactical.state == FEEDBACK.State.FLANKED and tactical.visible and morale.state == FEEDBACK.State.PINNED, "Flanked has its own popup alongside the pinned notification")
+	var tactical_rect: Rect2 = Rect2(FEEDBACK.RIBBON_RECT.position + tactical.ribbon_offset, FEEDBACK.RIBBON_RECT.size)
+	_check(not tactical_rect.intersects(FEEDBACK.RIBBON_RECT), "Tactical and morale ribbons occupy separate rows")
+	var ribbon_point: Vector2 = tactical.get_global_transform_with_canvas() * tactical_rect.get_center()
+	_check(ui.contains_battlefield_point(ribbon_point), "A visible tactical ribbon belongs to its squad's map selection area")
+	tactical.advance(0.3)
+	ui.set_tactical_conditions(true, false)
+	_check(is_equal_approx(tactical.elapsed, 0.3), "An unchanged flank condition does not replay the popup")
+	tactical.advance(10.0)
+	_check(not tactical.visible and not ui.contains_battlefield_point(ribbon_point), "The tactical popup fades and releases its selection area")
+	ui.set_tactical_conditions(true, true)
+	_check(tactical.state == FEEDBACK.State.SURROUNDED and tactical.visible and morale.state == FEEDBACK.State.PINNED, "Surrounded has a distinct popup and takes precedence over flanked")
+	ui.hide()
+	ui.show()
+	_check(not tactical.visible, "Revealing a unit cannot replay a tactical notification from behind fog")
+	ui.set_tactical_conditions(false, false)
+	ui.set_tactical_conditions(true, false)
+	_check(tactical.visible, "A newly entered flank condition can notify again")
+	ui.surrender()
+	ui.set_tactical_conditions(true, true)
+	_check(tactical.state == FEEDBACK.State.NONE and not tactical.visible, "Surrender clears tactical notifications and prevents revival")
+	ui.free()
+	for exit_state: bool in [false, true]:
+		ui = UI_SCENE.instantiate() as UnitUi
+		add_child(ui)
+		ui.set_tactical_conditions(true, true)
+		tactical = ui.get_node("TacticalFeedback") as FEEDBACK
+		if exit_state:
+			ui.mark_exited()
+		else:
+			ui.die()
+		ui.set_tactical_conditions(true, false)
+		_check(tactical.state == FEEDBACK.State.NONE and not tactical.visible, "Elimination and map exit clear tactical notifications")
+		ui.free()
+
+
 func _render_preview() -> void:
 	var viewport: SubViewport = SubViewport.new()
 	viewport.size = Vector2i(960, 640)
@@ -272,7 +316,41 @@ func _render_preview() -> void:
 		RenderingServer.force_draw(false)
 		_check(viewport.get_texture().get_image().save_png("/tmp/acl-unit-states-" + str(zoom) + ".png") == OK, "Render state cues at zoom " + str(zoom))
 	await _render_elimination_fade(viewport, camera)
+	await _render_tactical_feedback(viewport, camera)
 	viewport.free()
+
+
+func _render_tactical_feedback(viewport: SubViewport, camera: Camera2D) -> void:
+	for child: Node in viewport.get_children():
+		if child is UnitUi or child is Label:
+			child.queue_free()
+	await get_tree().process_frame
+	camera.zoom = Vector2.ONE
+	_caption(viewport, "DERIVED TACTICAL CONDITIONS", Vector2(28.0, 24.0), 20)
+	_caption(viewport, "Independent of morale; notifications fade without replaying each frame", Vector2(28.0, 64.0), 14)
+	var captions: Array[String] = ["Flanked", "Surrounded", "Pinned and surrounded"]
+	for index: int in range(3):
+		var ui: UnitUi = UI_SCENE.instantiate() as UnitUi
+		ui.position = Vector2(118.0 + float(index) * 300.0, 220.0)
+		ui.scale = Vector2(2.0, 2.0)
+		viewport.add_child(ui)
+		ui.update_team_sprite(index % 2, Globals.SquadType.Rifle)
+		if index == 2:
+			ui.state_changed(STATES.MoraleState.PINNED)
+			var pinned: FEEDBACK = ui.get_node("StateFeedback") as FEEDBACK
+			pinned.advance(0.2)
+			pinned.set_process(false)
+		ui.set_tactical_conditions(true, index > 0)
+		var marker: FEEDBACK = ui.get_node("TacticalFeedback") as FEEDBACK
+		marker.advance(0.2)
+		marker.set_process(false)
+		_caption(viewport, captions[index], ui.position + Vector2(-12.0, 235.0), 14)
+	for zoom: float in [1.0, 0.5]:
+		camera.zoom = Vector2(zoom, zoom)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		RenderingServer.force_draw(false)
+		_check(viewport.get_texture().get_image().save_png("/tmp/acl-tactical-conditions-" + str(zoom) + ".png") == OK, "Render flanked and surrounded notifications at zoom " + str(zoom))
 
 
 func _render_elimination_fade(viewport: SubViewport, camera: Camera2D) -> void:

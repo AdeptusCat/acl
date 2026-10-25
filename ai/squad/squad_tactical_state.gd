@@ -25,6 +25,10 @@ const FOCUSED_DETECTION_MULTIPLIER: float = 1.35
 const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
 const DEMAND_SECTOR_COUNT: int = 8
 const INCOMING_FIRE_WINDOW_SECONDS: float = 4.0
+const FULL_ATTENTION_CAPACITY: float = 2.0
+const MAX_ATTENTION_STRESS_RATE: float = 4.0
+const SWITCH_STRESS_RATE: float = 2.0
+const SWITCH_RECOVERY_SECONDS: float = 1.0
 
 # World-space unit direction; zero means broad, neutral coverage.
 # Width is in radians. Quality is observation capacity, separate from directional focus.
@@ -41,6 +45,16 @@ var multi_direction_pressure: float = 0.0
 var incoming_fire_demand: PackedFloat32Array = PackedFloat32Array()
 var _incoming_fire_times: PackedFloat64Array = PackedFloat64Array()
 var _incoming_fire_directions: PackedVector2Array = PackedVector2Array()
+var attention_capacity: float = 0.0
+var attention_deficit: float = 0.0
+var attention_stress_rate: float = 0.0
+var attention_switch_load: float = 0.0
+var switching_stress_rate: float = 0.0
+var flanked: bool = false
+var surrounded: bool = false
+var _last_focus_direction: Vector2 = Vector2.ZERO
+var _demand_resultant: Vector2 = Vector2.ZERO
+var _threat_angles: PackedFloat32Array = PackedFloat32Array()
 
 
 func _init() -> void:
@@ -52,6 +66,14 @@ func _init() -> void:
 
 
 func update_attention(unit: Unit) -> void:
+	_demand_resultant = Vector2.ZERO
+	_threat_angles.clear()
+	_update_focus(unit)
+	_update_attention_load()
+	_update_tactical_conditions()
+
+
+func _update_focus(unit: Unit) -> void:
 	focus_direction = Vector2.ZERO
 	focus_strength = 0.0
 	attention_width = TAU
@@ -65,6 +87,9 @@ func update_attention(unit: Unit) -> void:
 		incoming_fire_demand.fill(0.0)
 		multi_direction_pressure = 0.0
 		last_attack_surprise = 0.0
+		attention_switch_load = 0.0
+		switching_stress_rate = 0.0
+		_last_focus_direction = Vector2.ZERO
 		return
 	attention_quality = _attention_quality(unit)
 	update_fire_pressure(unit._now())
@@ -142,7 +167,60 @@ func _add_directional_weight(direction: Vector2, weight: float) -> Vector2:
 	directional_demand[index] += weight * (1.0 - fraction)
 	directional_demand[(index + 1) % DEMAND_SECTOR_COUNT] += weight * fraction
 	total_directional_demand += weight
+	_demand_resultant += direction * weight
+	# Ignore nearly expired memories when deriving current tactical conditions.
+	if weight >= 0.15:
+		_threat_angles.append(fposmod(direction.angle(), TAU))
 	return direction * weight
+
+
+func _update_attention_load() -> void:
+	attention_capacity = FULL_ATTENTION_CAPACITY * attention_quality
+	var dispersion: float = 0.0
+	if total_directional_demand > 0.0:
+		dispersion = clampf(1.0 - _demand_resultant.length() / total_directional_demand, 0.0, 1.0)
+	var required_attention: float = total_directional_demand * (1.0 + dispersion)
+	attention_deficit = maxf(required_attention - attention_capacity, 0.0)
+	attention_stress_rate = MAX_ATTENTION_STRESS_RATE * clampf(attention_deficit / maxf(attention_capacity, 0.25), 0.0, 1.0)
+
+
+func _update_tactical_conditions() -> void:
+	var flank_angle: float = PI / 2.0
+	if flanked:
+		flank_angle = PI * 5.0 / 12.0
+	var max_gap: float = TAU
+	if _threat_angles.size() >= 2:
+		_threat_angles.sort()
+		max_gap = _threat_angles[0] + TAU - _threat_angles[-1]
+		for index: int in range(1, _threat_angles.size()):
+			max_gap = maxf(max_gap, _threat_angles[index] - _threat_angles[index - 1])
+	flanked = _threat_angles.size() >= 2 and TAU - max_gap >= flank_angle
+	var surround_gap: float = PI * 17.0 / 18.0
+	if surrounded:
+		surround_gap = PI
+	surrounded = _threat_angles.size() >= 3 and max_gap < surround_gap
+
+
+# Tick once per simulation frame; perception refreshes never charge switching cost.
+func advance_attention(delta: float) -> Vector2:
+	if delta <= 0.0 or attention_quality <= 0.0:
+		return Vector2.ZERO
+	if not focus_direction.is_zero_approx():
+		if not _last_focus_direction.is_zero_approx() and total_directional_demand > 0.0:
+			var turn: float = absf(_last_focus_direction.angle_to(focus_direction)) / PI
+			attention_switch_load = minf(attention_switch_load + turn, 1.0)
+		_last_focus_direction = focus_direction
+	elif total_directional_demand <= 0.0:
+		_last_focus_direction = Vector2.ZERO
+	# Integrate decay exactly so a discrete switch has the same cost at any frame rate.
+	var decay: float = exp(-delta / SWITCH_RECOVERY_SECONDS)
+	var switch_stress: float = attention_switch_load * SWITCH_RECOVERY_SECONDS * (1.0 - decay) * SWITCH_STRESS_RATE
+	attention_switch_load *= decay
+	if is_zero_approx(attention_switch_load):
+		attention_switch_load = 0.0
+	switching_stress_rate = attention_switch_load * SWITCH_STRESS_RATE
+	var overload_stress: float = attention_stress_rate * delta
+	return Vector2(overload_stress + switch_stress, overload_stress)
 
 
 # Returns normalized surprise and crossfire pressure for this attack, before attention reacts.
@@ -204,13 +282,14 @@ func _unattended_fraction(direction: Vector2) -> float:
 
 
 func detection_multiplier(direction: Vector2) -> float:
+	var detection_quality: float = attention_quality * lerpf(1.0, 0.65, attention_switch_load)
 	if focus_direction.is_zero_approx() or direction.is_zero_approx():
-		return attention_quality
+		return detection_quality
 	var angle: float = absf(focus_direction.angle_to(direction))
 	var half_width: float = clampf(attention_width * 0.5, 0.001, PI)
 	var alignment: float = 1.0 - smoothstep(0.0, half_width, angle)
 	var directional_rate: float = lerpf(PERIPHERAL_DETECTION_MULTIPLIER, FOCUSED_DETECTION_MULTIPLIER, alignment)
-	return attention_quality * lerpf(1.0, directional_rate, focus_strength)
+	return detection_quality * lerpf(1.0, directional_rate, focus_strength)
 
 
 func _attention_quality(unit: Unit) -> float:

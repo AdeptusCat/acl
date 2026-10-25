@@ -70,6 +70,7 @@ var _formation_color: Color = UnitHudStyle.SUPPORT_COLOR
 var _formation_key: Vector3i = Vector3i(-1, -1, -1)
 var _casualty_feedback: CASUALTY_FEEDBACK
 var _state_feedback: STATE_FEEDBACK
+var _tactical_feedback: STATE_FEEDBACK
 var _elimination_fade: Tween
 var _facing_update_remaining: float = 0.0
 
@@ -88,6 +89,7 @@ func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or _dead or _exited or _surrendered:
 		return
 	_update_focus_indicator()
+	_update_tactical_feedback()
 	_facing_update_remaining -= delta
 	if _facing_update_remaining > 0.0:
 		return
@@ -112,6 +114,36 @@ func _update_focus_indicator() -> void:
 	focus_indicator.rotation = local_direction.angle()
 	focus_indicator.modulate.a = lerpf(0.5, 1.0, clampf(attention.focus_strength * attention.attention_quality, 0.0, 1.0))
 	focus_indicator.show()
+
+
+func _update_tactical_feedback() -> void:
+	var unit: Unit = get_parent() as Unit
+	if unit != null and unit.tactical_state != null:
+		set_tactical_conditions(unit.tactical_state.flanked, unit.tactical_state.surrounded)
+
+
+func set_tactical_conditions(flanked: bool, surrounded: bool) -> void:
+	if _dead or _exited or _surrendered:
+		return
+	var state: STATE_FEEDBACK.State = STATE_FEEDBACK.State.NONE
+	if surrounded:
+		state = STATE_FEEDBACK.State.SURROUNDED
+	elif flanked:
+		state = STATE_FEEDBACK.State.FLANKED
+	if not is_instance_valid(_tactical_feedback) and state != STATE_FEEDBACK.State.NONE:
+		_tactical_feedback = STATE_FEEDBACK.new()
+		_tactical_feedback.name = "TacticalFeedback"
+		_tactical_feedback.ribbon_offset = Vector2(0.0, 20.0)
+		add_child(_tactical_feedback)
+	if is_instance_valid(_tactical_feedback):
+		_tactical_feedback.set_state(state, is_visible_in_tree())
+	if is_instance_valid(detail_ui):
+		detail_ui.set_tactical_conditions(flanked, surrounded)
+
+
+func _clear_tactical_feedback() -> void:
+	if is_instance_valid(_tactical_feedback):
+		_tactical_feedback.set_state(STATE_FEEDBACK.State.NONE)
 
 
 func _update_facing() -> void:
@@ -301,7 +333,10 @@ func contains_battlefield_point(screen_point: Vector2) -> bool:
 	if sprite_node.is_visible_in_tree() and Rect2(Vector2.ZERO, sprite_node.size).has_point(sprite_point):
 		return true
 	if is_instance_valid(_state_feedback):
-		return _state_feedback.contains_screen_point(screen_point)
+		if _state_feedback.contains_screen_point(screen_point):
+			return true
+	if is_instance_valid(_tactical_feedback):
+		return _tactical_feedback.contains_screen_point(screen_point)
 	return false
 
 
@@ -576,6 +611,7 @@ func surrender() -> void:
 	if _dead or _exited or _surrendered:
 		return
 	_surrendered = true
+	_clear_tactical_feedback()
 	focus_indicator.hide()
 	$Timer.stop()
 	$UnitStates.hide()
@@ -587,6 +623,7 @@ func surrender() -> void:
 
 func mark_exited() -> void:
 	_exited = true
+	_clear_tactical_feedback()
 	focus_indicator.hide()
 	if _elimination_fade != null and _elimination_fade.is_valid():
 		_elimination_fade.kill()
@@ -615,6 +652,7 @@ func die() -> void:
 	if _dead or _exited:
 		return
 	_dead = true
+	_clear_tactical_feedback()
 	focus_indicator.hide()
 	$Timer.stop()
 	dead.show()
