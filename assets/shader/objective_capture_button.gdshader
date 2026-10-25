@@ -14,8 +14,10 @@ void fragment() {
 	float filled = 1.0 - step(amount, floor(band_position));
 	float diagonal = fract(UV.x * 12.0 + UV.y * 0.7);
 	float stripe = step(0.20, diagonal) * (1.0 - step(0.75, diagonal));
-	float marking = filled * stripe * (1.0 - border);
+	// Reserve the text area; capture bands form a crisp track along the bottom.
+	float track = step(0.80, UV.y);
+	float marking = filled * stripe * track * (1.0 - border);
 	vec3 tint = mix(area_color.rgb, capture_color.rgb, marking);
-	float alpha = mix(0.16, 0.48, marking);
+	float alpha = mix(0.12, 0.68, marking);
 	COLOR = vec4(tint, mix(alpha, 0.95, border));
 }

@@ -374,7 +374,7 @@ func _check_mission_two(world: Node, panel: MissionObjectivesPanel) -> void:
 	world.game_controller.set_victory_conditions()
 	panel.setup(scenario.victory_conditions, Globals.Team.ALLIES, 600.0)
 	_check(panel.conditions.size() == 3, "Mission 2 displays both major requirements and its minor objective")
-	_check((panel.rows.get_child(0) as Label).text == "Major victory" and (panel.rows.get_child(3) as Label).text == "Minor victory", "Major and minor requirements have separate labeled groups")
+	_check(panel.group_headings[VictoryCondition.OutcomeLevel.MAJOR].text == "Major victory" and panel.group_headings[VictoryCondition.OutcomeLevel.MINOR].text == "Minor victory", "Major and minor requirements have separate labeled groups")
 	_check(panel.requirement_labels[0].text.contains("Capture all A hexes") and panel.requirement_labels[0].text.contains("30 s continuous"), "Mission 2 explains the major capture requirement and hold duration")
 	_check(panel.requirement_labels[1].text.contains("Destroy at least 2"), "Mission 2 also explains the destruction requirement for major victory")
 	_check(panel.requirement_labels[2].text.contains("Capture all B hexes") and panel.requirement_labels[2].text.contains("Required at mission end"), "Mission 2 shows objective B and its mission-end requirement for minor victory")

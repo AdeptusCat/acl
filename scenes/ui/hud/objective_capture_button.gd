@@ -9,18 +9,20 @@ const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 var condition: OccupyObjectiveCondition
 var backgrounds: HBoxContainer
 var hexes: Array[Vector2i] = []
+var ownership_badge: Label
 
 
 func setup(source: OccupyObjectiveCondition) -> void:
 	condition = source
 	text = "Capture Objective " + OBJECTIVE_NAMES[condition.objective_id]
-	custom_minimum_size.y = 38.0
+	custom_minimum_size.y = 40.0
+	add_theme_font_size_override("font_size", 14)
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var normal: StyleBoxFlat = StyleBoxFlat.new()
 	normal.bg_color = Color.TRANSPARENT
 	normal.content_margin_left = 12.0
-	normal.content_margin_right = 12.0
+	normal.content_margin_right = 66.0
 	add_theme_stylebox_override("normal", normal)
 	for state: String in ["hover", "pressed", "focus"]:
 		var highlight: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
@@ -34,6 +36,17 @@ func setup(source: OccupyObjectiveCondition) -> void:
 	backgrounds.add_theme_constant_override("separation", 0)
 	add_child(backgrounds)
 	backgrounds.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ownership_badge = Label.new()
+	ownership_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ownership_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ownership_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ownership_badge.add_theme_font_size_override("font_size", 10)
+	add_child(ownership_badge)
+	ownership_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	ownership_badge.offset_left = -60.0
+	ownership_badge.offset_right = -8.0
+	ownership_badge.offset_top = -10.0
+	ownership_badge.offset_bottom = 10.0
 	pressed.connect(_focus_objective)
 	refresh()
 
@@ -56,6 +69,23 @@ func refresh() -> void:
 			shader_material.shader = CAPTURE_SHADER
 			background.material = shader_material
 			backgrounds.add_child(background)
+	var owner: int = -1
+	if not hexes.is_empty():
+		owner = condition.state.controlling_teams.get(hexes[0], -1)
+	for hex: Vector2i in hexes:
+		if int(condition.state.controlling_teams.get(hex, -1)) != owner:
+			owner = -2
+	var badge_color: Color = ObjectiveAreaOverlay.COLORS[condition.objective_id]
+	ownership_badge.text = "NEUTRAL"
+	if owner == condition.team:
+		ownership_badge.text = "OURS"
+		badge_color = ObjectiveAreaOverlay.FRIENDLY_COLOR
+	elif owner == Globals.get_enemy_team(condition.team):
+		ownership_badge.text = "ENEMY"
+		badge_color = ObjectiveAreaOverlay.ENEMY_COLOR
+	elif owner == -2:
+		ownership_badge.text = "MIXED"
+	ownership_badge.add_theme_color_override("font_color", badge_color)
 	for index: int in range(hexes.size()):
 		var style: Dictionary = ObjectiveAreaOverlay.capture_style(condition, hexes[index])
 		var shader_material: ShaderMaterial = (backgrounds.get_child(index) as ColorRect).material as ShaderMaterial

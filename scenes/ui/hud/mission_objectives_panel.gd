@@ -14,6 +14,7 @@ const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 @onready var rows: VBoxContainer = $Objectives/Scroll/Rows
 
 var conditions: Array[VictoryCondition] = []
+var group_headings: Dictionary[VictoryCondition.OutcomeLevel, Label] = {}
 var capture_buttons: Dictionary[int, ObjectiveCaptureButton] = {}
 var status_labels: Array[Label] = []
 var requirement_labels: Array[Label] = []
@@ -23,6 +24,11 @@ var _height_limit: float = 200.0
 
 
 func _ready() -> void:
+	rows.add_theme_constant_override("separation", 12)
+	var frame: StyleBoxFlat = get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	frame.set_border_width_all(1)
+	frame.border_color = Color(0.30, 0.33, 0.28)
+	add_theme_stylebox_override("panel", frame)
 	minimum_size_changed.connect(_fit_height)
 	rows.minimum_size_changed.connect(_fit_height)
 	section.folding_changed.connect(_on_folding_changed)
@@ -47,6 +53,7 @@ func _on_folding_changed(_folded: bool) -> void:
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
 	conditions.clear()
+	group_headings.clear()
 	capture_buttons.clear()
 	status_labels.clear()
 	requirement_labels.clear()
@@ -54,23 +61,16 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 		rows.remove_child(child)
 		child.queue_free()
 	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
-		var heading: Label = null
+		var group: VBoxContainer = null
 		for condition: VictoryCondition in scenario_conditions:
 			if condition.team != player_team or condition.outcome_level != level:
 				continue
-			if heading == null:
-				heading = Label.new()
-				heading.text = "Major victory"
-				if level == VictoryCondition.OutcomeLevel.MINOR:
-					heading.text = "Minor victory"
-				heading.theme_type_variation = &"HudHeading"
-				heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
-				heading.tooltip_text = "Meet every requirement in this group. Major victory takes priority over minor victory."
-				rows.add_child(heading)
+			if group == null:
+				group = _create_group(level)
 			conditions.append(condition)
 			var card: VBoxContainer = VBoxContainer.new()
 			card.add_theme_constant_override("separation", 2)
-			rows.add_child(card)
+			group.add_child(card)
 			if condition is OccupyObjectiveCondition:
 				var capture_button: ObjectiveCaptureButton = ObjectiveCaptureButton.new()
 				card.add_child(capture_button)
@@ -87,7 +87,20 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 			status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			status.mouse_filter = Control.MOUSE_FILTER_STOP
 			status.gui_input.connect(_on_row_input.bind(condition))
-			card.add_child(status)
+			status.add_theme_font_size_override("font_size", 14)
+			if condition is DestroyUnitsCondition:
+				var metric: PanelContainer = PanelContainer.new()
+				var metric_style: StyleBoxFlat = StyleBoxFlat.new()
+				metric_style.bg_color = Color(0.035, 0.045, 0.04, 0.65)
+				metric_style.content_margin_left = 10.0
+				metric_style.content_margin_right = 10.0
+				metric_style.content_margin_top = 7.0
+				metric_style.content_margin_bottom = 7.0
+				metric.add_theme_stylebox_override("panel", metric_style)
+				card.add_child(metric)
+				metric.add_child(status)
+			else:
+				card.add_child(status)
 			status_labels.append(status)
 	time_left_seconds = remaining_seconds
 	_refresh_elapsed_s = 0.0
@@ -95,6 +108,43 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 	visible = not conditions.is_empty()
 	set_process(visible)
 	refresh()
+
+
+func _create_group(level: VictoryCondition.OutcomeLevel) -> VBoxContainer:
+	var accent: Color = Color(0.82, 0.72, 0.48)
+	var title: String = "Major victory"
+	if level == VictoryCondition.OutcomeLevel.MINOR:
+		accent = Color(0.57, 0.69, 0.72)
+		title = "Minor victory"
+	var panel: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.12, 0.14, 0.12, 0.75)
+	style.border_width_left = 2
+	style.border_color = accent.darkened(0.3)
+	style.content_margin_left = 10.0
+	style.content_margin_right = 8.0
+	style.content_margin_top = 9.0
+	style.content_margin_bottom = 9.0
+	panel.add_theme_stylebox_override("panel", style)
+	rows.add_child(panel)
+	var group: VBoxContainer = VBoxContainer.new()
+	group.add_theme_constant_override("separation", 8)
+	panel.add_child(group)
+	var header: HBoxContainer = HBoxContainer.new()
+	group.add_child(header)
+	var heading: Label = Label.new()
+	heading.text = title
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	heading.add_theme_font_size_override("font_size", 14)
+	heading.add_theme_color_override("font_color", accent)
+	header.add_child(heading)
+	group_headings[level] = heading
+	var hint: Label = Label.new()
+	hint.text = "ALL REQUIRED"
+	hint.add_theme_font_size_override("font_size", 10)
+	hint.add_theme_color_override("font_color", Color(0.53, 0.57, 0.51))
+	header.add_child(hint)
+	return group
 
 
 func _process(delta: float) -> void:
@@ -164,6 +214,8 @@ func refresh() -> void:
 		requirement.tooltip_text = label.tooltip_text
 		requirement.mouse_default_cursor_shape = label.mouse_default_cursor_shape
 		label.text = text
+		if progress.kind == VictoryConditionProgress.Kind.DESTROY and progress.complete:
+			color = COMPLETE_COLOR
 		label.add_theme_color_override("font_color", color)
 		requirement.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY and progress.kind != VictoryConditionProgress.Kind.DESTROY
 		label.visible = progress.kind != VictoryConditionProgress.Kind.OCCUPY
