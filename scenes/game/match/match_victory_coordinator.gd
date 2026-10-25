@@ -82,6 +82,10 @@ static func set_objective_cells(controller: Node2D, player_team: Globals.Team) -
 
 
 static func set_victory_conditions(controller: Node2D) -> void:
+	var initial_owner: int = Globals.get_enemy_team(Globals.team_player)
+	var scenario: Scenario = Globals.scenario_chosen
+	if is_instance_valid(scenario):
+		initial_owner = scenario.get_initial_objective_owner(Globals.team_player)
 	for team: int in Globals.victory_conditions:
 		var victory_conditions: VictoryConditionCollection = Globals.victory_conditions[team]
 		for victory_condition: VictoryCondition in victory_conditions.victory_conditions:
@@ -94,8 +98,12 @@ static func set_victory_conditions(controller: Node2D) -> void:
 						if objective.objective_id == victory_condition.objective_id:
 							victory_condition.state.hexes.append(objective.hex)
 							victory_condition.state.required_times_reached_s[objective.hex] = 0.0
+							if initial_owner == team:
+								victory_condition.state.required_times_reached_s[objective.hex] = maxf(0.0, victory_condition.required_time_s)
+							victory_condition.state.controlling_teams[objective.hex] = initial_owner
+							victory_condition.state.enemy_hold_times_s[objective.hex] = 0.0
 							victory_condition.state.units_in_objectives[objective.hex] = UnitsCollection.new()
-							victory_condition.state.victory_conditions_met[objective.hex] = false
+							victory_condition.state.victory_conditions_met[objective.hex] = initial_owner == team
 							#victory_condition.hex = objective.hex
 				var condition when condition is ExitUnitsCondition:
 					victory_condition = victory_condition as ExitUnitsCondition

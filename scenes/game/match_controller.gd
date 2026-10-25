@@ -511,6 +511,7 @@ func start_game(team: Globals.Team, time: float) -> void:
 	
 	
 	
+	set_victory_conditions()
 	set_objective_cells(team)
 	#timer_running = true
 	
@@ -525,7 +526,6 @@ func start_game(team: Globals.Team, time: float) -> void:
 	draw_fog()
 	show_visible_units()
 	win_condition_timer.start()
-	set_victory_conditions()
 	
 	#defense_director.manual_threat_axes = create_test_axes()
 	influence_map_controller.reset_for_match()

@@ -52,6 +52,7 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze(main)
+	_check_initial_objective_control(world, scenario, occupy)
 	_check(panel.is_visible_in_tree(), "Starting a battle displays its mission panel")
 	_check(panel.conditions.size() == 4 and not panel.conditions.has(enemy_objective) and not panel.conditions.has(minor), "Only the player's primary objectives are displayed")
 	for frame: int in range(6):
@@ -315,3 +316,45 @@ func _check_capture_visual(world: Node, hex: Vector2i, progress: float, color: C
 			_check(shader_material.get_shader_parameter("capture_color") == color, "Capture bands use the capturing side's color")
 		return
 	_check(false, "Capture progress has a matching objective marker")
+
+
+func _check_initial_objective_control(world: Node, scenario: Scenario, occupy: OccupyObjectiveCondition) -> void:
+	_check(scenario.initial_objective_control == Scenario.InitialObjectiveControl.ENEMY, "Existing scenarios default to enemy-controlled objectives")
+	var hex: Vector2i = occupy.state.hexes[0]
+	_check(occupy.state.controlling_teams[hex] == Globals.Team.AXIS and not occupy.is_condition_met(), "Match startup assigns objectives to the player's enemy")
+	_check(_row(world.ui.mission_objectives, 0) == "Objective A: enemy controlled", "The HUD immediately shows starting enemy ownership")
+	var overlay: ObjectiveAreaOverlay = world.game_controller.allies_objective_tilemap.get_node("ObjectiveArea") as ObjectiveAreaOverlay
+	for marker: Dictionary in overlay.markers:
+		if marker["hex"] == hex:
+			var shader_material: ShaderMaterial = marker["material"]
+			_check(shader_material.get_shader_parameter("area_color") == ObjectiveAreaOverlay.ENEMY_COLOR, "Starting ownership reaches the shader before the first refresh")
+	var opposing_capture: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+	opposing_capture.team = Globals.Team.AXIS
+	Globals.victory_conditions[Globals.Team.AXIS].victory_conditions.append(opposing_capture)
+	for selected_team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		Globals.team_player = selected_team
+		for control: Scenario.InitialObjectiveControl in [Scenario.InitialObjectiveControl.NEUTRAL, Scenario.InitialObjectiveControl.FRIENDLY, Scenario.InitialObjectiveControl.ENEMY]:
+			scenario.initial_objective_control = control
+			world.game_controller.set_victory_conditions()
+			var expected_owner: int = -1
+			if control == Scenario.InitialObjectiveControl.FRIENDLY:
+				expected_owner = selected_team
+			elif control == Scenario.InitialObjectiveControl.ENEMY:
+				expected_owner = Globals.get_enemy_team(selected_team)
+			for capture: OccupyObjectiveCondition in [occupy, opposing_capture]:
+				_check(not capture.state.hexes.is_empty(), "Both factions have capture markers for initial ownership checks")
+				for cell: Vector2i in capture.state.hexes:
+					_check(capture.state.controlling_teams[cell] == expected_owner, "Initial ownership is relative to the selected player for both factions")
+					_check(capture.state.victory_conditions_met[cell] == (expected_owner == capture.team), "Initial ownership and capture scoring agree")
+					var expected_seconds: float = 0.0
+					if expected_owner == capture.team:
+						expected_seconds = capture.required_time_s
+					_check(is_equal_approx(capture.state.required_times_reached_s[cell], expected_seconds) and capture.state.enemy_hold_times_s[cell] == 0.0, "Repeated setup resets capture timers and fully credits the initial owner")
+				capture.refresh_control()
+				_check(capture.state.controlling_teams[capture.state.hexes[0]] == expected_owner, "Presence refresh preserves authored starting ownership")
+	Globals.victory_conditions[Globals.Team.AXIS].victory_conditions.erase(opposing_capture)
+	Globals.team_player = Globals.Team.ALLIES
+	scenario.initial_objective_control = Scenario.InitialObjectiveControl.NEUTRAL
+	world.game_controller.set_victory_conditions()
+	overlay._update_colors()
+	world.ui.mission_objectives.refresh()
