@@ -21,6 +21,7 @@ SCENES = (
     "command_connections_regression",
     "target_hit_chance_regression",
     "stress_scenarios_regression",
+    "squad_fire_exchange_regression",
 )
 
 
@@ -28,6 +29,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", default="godot", help="Godot 4.7 executable")
     parser.add_argument("--output", type=Path, default=Path("/tmp/acl-stress-results"))
+    parser.add_argument("--strict-balance", action="store_true",
+                        help="Fail whole-squad exchanges on provisional balance alerts")
     args = parser.parse_args()
     executable = shutil.which(args.godot)
     if executable is None:
@@ -44,13 +47,22 @@ def main() -> int:
         ):
             environment[variable] = str(Path(temporary) / directory)
         for scene in SCENES:
-            command = [executable, "--headless", "--path", str(ROOT), "--fixed-fps", "120",
+            frame_rate = "120"
+            timeout = 120
+            if scene == "squad_fire_exchange_regression":
+                frame_rate = "60"
+                timeout = 600
+            command = [executable, "--headless", "--path", str(ROOT), "--fixed-fps", frame_rate,
                        f"res://tests/{scene}.tscn"]
             if scene == "stress_scenarios_regression":
                 command += ["--", f"--report={output / 'stress_scenarios.csv'}"]
+            if scene == "squad_fire_exchange_regression":
+                command += ["--", f"--output={output}"]
+                if args.strict_balance:
+                    command += ["--strict-balance"]
             try:
                 result = subprocess.run(command, cwd=ROOT, env=environment,
-                                        capture_output=True, text=True, timeout=120)
+                                        capture_output=True, text=True, timeout=timeout)
                 log = result.stdout + result.stderr
                 success = result.returncode == 0 and not any(
                     marker in log for marker in ("SCRIPT ERROR:", "ERROR:")
@@ -67,6 +79,11 @@ def main() -> int:
                 success = False
             (output / f"{scene}.log").write_text(log)
             print(f"{'PASS' if success else 'FAIL'} {scene}", flush=True)
+            if scene == "squad_fire_exchange_regression":
+                for line in log.splitlines():
+                    if line.startswith("Whole-squad balance alerts:"):
+                        print(line, flush=True)
+                print(f"Whole-squad report: {output / 'squad_fire_exchange.csv'}", flush=True)
             if not success:
                 failed.append(scene)
                 print(log[-6000:], file=sys.stderr)

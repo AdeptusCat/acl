@@ -6,9 +6,9 @@ Run from the project root:
 python3 tests/run_stress_suite.py
 ```
 
-Use `--godot /path/to/godot` to select the Godot 4.7 executable and `--output /path/to/results` to change the report directory. The default is `/tmp/acl-stress-results`. Each scene runs in a fresh Godot process with temporary XDG user directories, a 120-second timeout and a saved log. A nonzero exit, any Godot `ERROR:`/`SCRIPT ERROR:`, or a missing successful completion summary fails the suite. This catches script aborts even when Godot exits with status zero.
+Use `--godot /path/to/godot` to select the Godot 4.7 executable and `--output /path/to/results` to change the report directory. The default is `/tmp/acl-stress-results`. Each scene runs in a fresh Godot process with temporary XDG user directories and a saved log. Timeouts are 120 seconds, or 600 seconds for whole-squad exchanges. A nonzero exit, any Godot `ERROR:`/`SCRIPT ERROR:`, or a missing successful completion summary fails the suite. This catches script aborts even when Godot exits with status zero.
 
-The nine-suite runner includes squad attention, integrated attention stress, stress balance/UI, stress recovery, stress input integration, stress resilience with live attention and morale, command connections, target hit probability, and the weapon/scenario matrix. Morale thresholds and directional attention costs are unchanged by the recovery rebalance.
+The ten-suite runner includes squad attention, integrated attention stress, stress balance/UI, stress recovery, stress input integration, stress resilience with live attention and morale, command connections, target hit probability, the weapon/scenario matrix, and [whole-squad reciprocal fire exchanges](squad_fire_exchange_tests.md). The exchange suite distinguishes mechanical failures from provisional balance alerts; use `--strict-balance` to fail on those alerts. Morale thresholds and directional attention costs are unchanged by the recovery rebalance.
 
 ## Coverage
 
