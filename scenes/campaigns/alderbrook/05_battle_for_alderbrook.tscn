@@ -942,6 +942,6 @@ tile_set = SubResource("TileSet_0jm0n")
 script = ExtResource("4_7tw40")
 
 [node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1906976286]
-tile_map_data = PackedByteArray("AAACAAgAAgAAAAAAAAAQAA8ACAAAAAAAAAAVAAoABwAAAAAAAAAOAAYABgAAAAAAAAAOAAUABgAAAAAAAAAOAAcABgAAAAAAAAAVAAsABgAAAAAAAAAWAAsABgAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAACAAgAAgAAAAAAAAAQAA8ACAAAAAAAAAAVAAoABwAAAAAAAAAOAAYABgAAAAAAAAAOAAUABgAAAAAAAAAOAAcABgAAAAAAAAAVAAsABwAAAAAAAAAWAAsABwAAAAAAAAA=")
 tile_set = SubResource("TileSet_cwow2")
 script = ExtResource("4_7tw40")
