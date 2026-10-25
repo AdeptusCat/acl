@@ -4,7 +4,7 @@ class_name SquadHitResolver
 # Synchronous SquadHitResolver operations; state and scene identity stay on the caller.
 
 
-static func fire_at(controller: SquadFireController, total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit]) -> void:
+static func fire_at(controller: SquadFireController, total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit], shot_origin: Vector2 = Vector2.INF) -> void:
 	# debug
 	#return
 	#if not riflegrenade:
@@ -17,6 +17,8 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	# TODO refactor fire functions
 	# TODO riflegrenate hits instant?
 	controller.add_fire_impulse(total_rounds, 10)
+	if not shot_origin.is_finite():
+		shot_origin = controller.unit.global_position
 	var terrain_defense_bonus: float = target_cover
 	if weapon.family == WeaponSpec.Family.MORTAR:
 		terrain_defense_bonus = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(_target_hex))
@@ -228,7 +230,7 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		target_i += 1
 
 
-	# --- compute ONE shared stress payload (equal for all squads) ---
+	# --- shared base stress, before each squad's attention modifiers ---
 	var mean_chance_to_hit: float = controller._get_mean_change_to_hit(chance_to_hit_per_target, n_targets)
 
 	# base fast shock + how “accurate” incoming fire looks
@@ -269,14 +271,6 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		s_fast *= stress_distance_mod
 		s_slow *= stress_distance_mod
 	
-	## crossfire bonus if you track it outside; else leave 0.0
-	#if stress_crossfire_bonus > 0.0:
-		#s_fast *= (1.0 + stress_crossfire_bonus)
-		#s_slow *= (1.0 + stress_crossfire_bonus)
-	#else:
-		#s_fast *= 1.0
-		#s_slow *= 1.0
-
 	## weapon flavour & global scale
 	#s_fast *= weapon_stress_mult * stress_scale
 	#s_slow *= weapon_stress_mult * stress_scale
@@ -286,6 +280,8 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		s_fast = controller.stress_max_per_volley
 	if s_slow > controller.stress_max_per_volley:
 		s_slow = controller.stress_max_per_volley
+	var base_fast: float = s_fast
+	var base_slow: float = s_slow
 	
 	
 	# --- casualties → extra shock (add to s_fast / s_slow) ---
@@ -338,26 +334,21 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 		s_fast += kill_fast
 		s_slow += kill_slow
 
-	# --- apply effects to each squad: casualties as rolled, stress equal for all ---
+	# --- apply effects to each squad: casualties as rolled, stress follows its attention ---
 	i = 0
 	while i < n_targets:
-		var u_apply: Node = batch_targets[i]
+		var u_apply: Unit = batch_targets[i]
 		var cas_i: int = int(casualties_per_target[i])
+		var fast_final: float = s_fast
+		var slow_final: float = s_slow
+		if total_rounds > 0 and u_apply.tactical_state != null:
+			var direction: Vector2 = shot_origin - u_apply.global_position
+			var attention_effects: Vector2 = u_apply.tactical_state.register_incoming_fire(direction, u_apply._now())
+			var pressure_multiplier: float = 1.0 + maxf(controller.stress_crossfire_bonus, 0.0) * attention_effects.y
+			var fast_multiplier: float = pressure_multiplier + maxf(controller.stress_surprise_bonus, 0.0) * attention_effects.x
+			# Preserve both the base-volley cap and the separate casualty-shock cap.
+			fast_final = minf(base_fast * fast_multiplier, controller.stress_max_per_volley) + kill_fast
+			slow_final = minf(base_slow * pressure_multiplier, controller.stress_max_per_volley) + kill_slow
 
-		#var rf: float = 1.0
-		#if "stress_resilience" in u_apply:
-			#rf = float(u_apply.stress_resilience)
-
-		#var s_fast_final: float = s_fast * rf
-		#var s_slow_final: float = s_slow * rf
-		#
-		## debug, or rather balance?
-		#s_fast_final *= 0.2
-		#s_slow_final *= 0.2
-		
-		#s_fast *= total_rounds
-		#s_slow *= total_rounds
-	
-		#print(unit, " ", int(s_fast), " ", int(s_slow), " ", cas_i, " ", chance_to_hit_per_target)
-		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, s_fast, s_slow, controller)
+		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, fast_final, slow_final, controller)
 		i += 1

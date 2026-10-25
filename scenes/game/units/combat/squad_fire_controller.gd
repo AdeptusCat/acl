@@ -47,7 +47,8 @@ var accuracy_multiplier: float = 1.0
 @export var stress_fast_hit_factor: float = 20.0# adds with mean p_hit (0..1) 12
 @export var stress_slow_per_round: float = 0.6  # accrues with volume
 @export var stress_point_blank_bonus: float = 1.5 # extra fear at 1 hex
-@export var stress_crossfire_bonus: float = 0.15    # e.g. 0.15 if multiple sources
+@export var stress_crossfire_bonus: float = 0.15    # maximum extra stress from separated incoming bearings
+@export var stress_surprise_bonus: float = 0.5      # maximum extra fast shock from outside attention
 @export var stress_max_per_volley: float = 40.0    # safety cap (per volley, per squad) # if this is lower than the kill cap, raise it
 @export var weapon_stress_mult: float = 1.0   # MGs 1.2–1.4, rifles 1.0
 @export var stress_resilience: float = 1.0    # better-trained squads 0.8–0.9
@@ -681,7 +682,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 			s.rounds_in_mag = s.weapon.mag_capacity
 		#return 0 # TODO figure out why this was in place? this just prohibits that damage is done
 	
-	var dist: float = unit.global_position.distance_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(_target_hex)))
+	var shot_origin: Vector2 = unit.global_position
+	var dist: float = shot_origin.distance_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(_target_hex)))
 	
 	var life: float = dist / s.weapon.projectile_speed      # seconds
 	if riflegrenade:
@@ -691,7 +693,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if unit.is_active():
 		shooting.emit(unit)
 	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
+	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, shot_origin)
 	return shots
 
 
@@ -813,8 +815,8 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 	if fire_recent > 1.0:
 		fire_recent = 1.0
 
-func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit]) -> void:
-	SquadHitResolver.fire_at(self, total_rounds, weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets)
+func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit], shot_origin: Vector2 = Vector2.INF) -> void:
+	SquadHitResolver.fire_at(self, total_rounds, weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, shot_origin)
 
 
 func _get_mean_change_to_hit(chance_to_hit_per_target: Array, n_targets: int) -> float:

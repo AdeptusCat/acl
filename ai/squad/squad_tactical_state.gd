@@ -24,6 +24,7 @@ const FULL_ATTENTION_MEMBERS: int = 10
 const FOCUSED_DETECTION_MULTIPLIER: float = 1.35
 const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
 const DEMAND_SECTOR_COUNT: int = 8
+const INCOMING_FIRE_WINDOW_SECONDS: float = 4.0
 
 # World-space unit direction; zero means broad, neutral coverage.
 # Width is in radians. Quality is observation capacity, separate from directional focus.
@@ -35,6 +36,19 @@ var has_contact: bool = false
 # Raw demand, clockwise from world-space east. Opposing contacts remain separate.
 var directional_demand: PackedFloat32Array = PackedFloat32Array()
 var total_directional_demand: float = 0.0
+var last_attack_surprise: float = 0.0
+var multi_direction_pressure: float = 0.0
+var incoming_fire_demand: PackedFloat32Array = PackedFloat32Array()
+var _incoming_fire_times: PackedFloat64Array = PackedFloat64Array()
+var _incoming_fire_directions: PackedVector2Array = PackedVector2Array()
+
+
+func _init() -> void:
+	incoming_fire_demand.resize(DEMAND_SECTOR_COUNT)
+	incoming_fire_demand.fill(0.0)
+	_incoming_fire_times.resize(DEMAND_SECTOR_COUNT)
+	_incoming_fire_times.fill(-INF)
+	_incoming_fire_directions.resize(DEMAND_SECTOR_COUNT)
 
 
 func update_attention(unit: Unit) -> void:
@@ -47,8 +61,13 @@ func update_attention(unit: Unit) -> void:
 	directional_demand.fill(0.0)
 	total_directional_demand = 0.0
 	if not unit.is_active() or unit.surrendered or unit.members_alive <= 0:
+		_incoming_fire_times.fill(-INF)
+		incoming_fire_demand.fill(0.0)
+		multi_direction_pressure = 0.0
+		last_attack_surprise = 0.0
 		return
 	attention_quality = _attention_quality(unit)
+	update_fire_pressure(unit._now())
 
 	var contact_direction: Vector2 = Vector2.ZERO
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
@@ -67,6 +86,10 @@ func update_attention(unit: Unit) -> void:
 		contact_direction += _add_directional_demand(enemy.global_position - unit.global_position, urgency)
 
 	var enemy_direction: Vector2 = Vector2.ZERO
+	for index: int in range(DEMAND_SECTOR_COUNT):
+		if incoming_fire_demand[index] > 0.0:
+			# Incoming fire provides a bearing, without identifying or revealing its source.
+			enemy_direction += _add_directional_weight(_incoming_fire_directions[index], incoming_fire_demand[index])
 	for enemy: Unit in tracks:
 		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
 			continue
@@ -109,13 +132,75 @@ func _add_directional_demand(offset: Vector2, urgency: float) -> Vector2:
 	if is_instance_valid(LOSHelper.ground_layer) and LOSHelper.ground_layer.tile_set != null:
 		hex_size = maxf(float(LOSHelper.ground_layer.tile_set.tile_size.x), 1.0)
 	var weight: float = urgency / (1.0 + offset.length() / hex_size * 0.15)
-	var sector: float = fposmod(offset.angle(), TAU) / TAU * float(DEMAND_SECTOR_COUNT)
+	return _add_directional_weight(offset.normalized(), weight)
+
+
+func _add_directional_weight(direction: Vector2, weight: float) -> Vector2:
+	var sector: float = fposmod(direction.angle(), TAU) / TAU * float(DEMAND_SECTOR_COUNT)
 	var index: int = int(floorf(sector)) % DEMAND_SECTOR_COUNT
 	var fraction: float = sector - floorf(sector)
 	directional_demand[index] += weight * (1.0 - fraction)
 	directional_demand[(index + 1) % DEMAND_SECTOR_COUNT] += weight * fraction
 	total_directional_demand += weight
-	return offset.normalized() * weight
+	return direction * weight
+
+
+# Returns normalized surprise and crossfire pressure for this attack, before attention reacts.
+func register_incoming_fire(direction: Vector2, now_seconds: float) -> Vector2:
+	update_fire_pressure(now_seconds)
+	if direction.is_zero_approx():
+		last_attack_surprise = 0.0
+		return Vector2.ZERO
+	direction = direction.normalized()
+	var surprise: float = _unattended_fraction(direction)
+	for index: int in range(DEMAND_SECTOR_COUNT):
+		# Repeated bursts on the same bearing refresh pressure without replaying surprise.
+		var familiarity: float = pow(maxf(direction.dot(_incoming_fire_directions[index]), 0.0), 8.0)
+		surprise *= 1.0 - familiarity * incoming_fire_demand[index]
+	var sector: int = roundi(fposmod(direction.angle(), TAU) / TAU * float(DEMAND_SECTOR_COUNT)) % DEMAND_SECTOR_COUNT
+	_incoming_fire_times[sector] = now_seconds
+	_incoming_fire_directions[sector] = direction
+	update_fire_pressure(now_seconds)
+	last_attack_surprise = clampf(surprise, 0.0, 1.0)
+	return Vector2(last_attack_surprise, multi_direction_pressure)
+
+
+func update_fire_pressure(now_seconds: float) -> void:
+	var total: float = 0.0
+	var resultant: Vector2 = Vector2.ZERO
+	var active_directions: int = 0
+	for index: int in range(DEMAND_SECTOR_COUNT):
+		var age: float = maxf(now_seconds - _incoming_fire_times[index], 0.0)
+		var weight: float = clampf(1.0 - age / INCOMING_FIRE_WINDOW_SECONDS, 0.0, 1.0)
+		incoming_fire_demand[index] = weight
+		if weight > 0.0:
+			active_directions += 1
+			total += weight
+			resultant += _incoming_fire_directions[index] * weight
+	multi_direction_pressure = 0.0
+	if active_directions > 1:
+		# Aligned fire adds volume, while separated bearings stretch the squad's capacity.
+		multi_direction_pressure = clampf((total - resultant.length()) / maxf(attention_quality, 0.25), 0.0, 1.0)
+
+
+func _unattended_fraction(direction: Vector2) -> float:
+	if focus_direction.is_zero_approx() and total_directional_demand <= 0.0:
+		return 0.0
+	var coverage: float = 0.0
+	if not focus_direction.is_zero_approx():
+		var angle: float = absf(focus_direction.angle_to(direction))
+		coverage = 1.0 - smoothstep(0.0, clampf(attention_width * 0.5, 0.001, PI), angle)
+	var peak_demand: float = 0.0
+	var known_coverage: float = 0.0
+	for index: int in range(directional_demand.size()):
+		peak_demand = maxf(peak_demand, directional_demand[index])
+		var sector_direction: Vector2 = Vector2.from_angle(float(index) * TAU / float(DEMAND_SECTOR_COUNT))
+		known_coverage += directional_demand[index] * pow(maxf(direction.dot(sector_direction), 0.0), 4.0)
+	var commitment: float = focus_strength
+	if peak_demand > 0.0:
+		coverage = maxf(coverage, clampf(known_coverage / peak_demand, 0.0, 1.0))
+		commitment = maxf(commitment, minf(total_directional_demand, 1.0))
+	return (1.0 - coverage) * commitment
 
 
 func detection_multiplier(direction: Vector2) -> float:

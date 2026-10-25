@@ -12,7 +12,7 @@ class FireProbe extends SquadFireController:
 	func fire_shots(_soldier: Soldier, shots: int, _rpm: float, _auto: bool, _hex: Vector2i) -> void:
 		shots_fired += shots
 
-	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, _hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit]) -> void:
+	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, _hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit], _shot_origin: Vector2 = Vector2.INF) -> void:
 		pass
 
 

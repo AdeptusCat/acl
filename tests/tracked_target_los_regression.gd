@@ -17,7 +17,7 @@ class FireProbe extends SquadFireController:
 	func _on_stop_mg_loop(_weapon: WeaponSpec, _position: Vector2, _owner_id: int, _owner: Node2D) -> void:
 		pass
 
-	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit]) -> void:
+	func fire_at(_rounds: int, _weapon: WeaponSpec, _grenade: bool, hex: Vector2i, _distance: int, _cover: int, _targets: Array[Unit], _shot_origin: Vector2 = Vector2.INF) -> void:
 		impact_hexes.append(hex)
 
 	func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target_hex: Vector2i) -> void:
