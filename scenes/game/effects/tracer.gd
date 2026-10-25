@@ -1,12 +1,14 @@
 class_name BattlefieldTracer
 extends Node2D
 
-enum Kind { BULLET, ROCKET, GRENADE, MORTAR }
+enum Kind { BULLET, ROCKET, GRENADE, MORTAR, HAND_GRENADE }
 enum Surface { GROUND, WOOD, STONE, WATER, FOLIAGE, ROAD }
 
 const MUZZLE_SECONDS: float = 0.045
 const ARRIVAL_FADE_SECONDS: float = 0.075
 const SPAWN_RADIUS: float = 20.0
+const HAND_GRENADE_FLIGHT_SECONDS: float = 0.75
+const HAND_GRENADE_ARC_HEIGHT: float = 34.0
 
 static var _spawn_random: RandomNumberGenerator = RandomNumberGenerator.new()
 static var _spawn_seeded: bool = false
@@ -58,6 +60,8 @@ func launch(from: Vector2, to: Vector2, weapon: WeaponSpec, shot_kind: Kind, imp
 	speed = maxf(speed, 1.0)
 	# Cosmetic muzzle and impact variation keep the nominal gameplay arrival time.
 	flight_time = from.distance_to(to) / speed
+	if kind == Kind.HAND_GRENADE:
+		flight_time = HAND_GRENADE_FLIGHT_SECONDS
 	elapsed = 0.0
 	_frame_seconds = 1.0 / 60.0
 	has_arrived = false
@@ -122,7 +126,7 @@ func _draw() -> void:
 		return
 	var zoom: float = maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
 	var size_scale: float = clampf(1.0 / zoom, 0.75, 1.8)
-	if elapsed < MUZZLE_SECONDS and kind != Kind.MORTAR and _can_draw_at(origin):
+	if elapsed < MUZZLE_SECONDS and kind != Kind.MORTAR and kind != Kind.HAND_GRENADE and _can_draw_at(origin):
 		_draw_muzzle(size_scale)
 	if show_streak and elapsed < flight_time + ARRIVAL_FADE_SECONDS:
 		_draw_flight(zoom)
@@ -153,6 +157,9 @@ func trail_start(zoom: float = 1.0) -> Vector2:
 
 
 func _draw_flight(zoom: float) -> void:
+	if kind == Kind.HAND_GRENADE:
+		_draw_hand_grenade(zoom)
+		return
 	var tail: Vector2 = trail_start(zoom)
 	var fade: float = 1.0
 	if has_arrived:
@@ -197,6 +204,27 @@ func _draw_flight(zoom: float) -> void:
 		draw_circle(head, tip_radius, tip)
 	if kind == Kind.ROCKET:
 		_draw_exhaust(tail, width, fade)
+
+
+func visual_head() -> Vector2:
+	if kind != Kind.HAND_GRENADE or has_arrived:
+		return head
+	var progress: float = clampf(elapsed / flight_time, 0.0, 1.0)
+	return head + Vector2.UP * HAND_GRENADE_ARC_HEIGHT * 4.0 * progress * (1.0 - progress)
+
+
+func _draw_hand_grenade(zoom: float) -> void:
+	# Cull against its ground position; the drawn arc must not reveal hidden hexes.
+	if has_arrived or not _can_draw_at(head):
+		return
+	var radius: float = clampf(3.0 / zoom, 2.0, 6.0)
+	draw_circle(head, radius * 1.2, Color(0.08, 0.08, 0.06, 0.22))
+	var spin: float = _impact_phase + elapsed / flight_time * TAU * 1.5
+	draw_set_transform(visual_head(), spin, Vector2(1.0, 1.3))
+	draw_circle(Vector2.ZERO, radius * 1.25, Color(0.06, 0.08, 0.06))
+	draw_circle(Vector2.ZERO, radius, Color(0.40, 0.45, 0.24))
+	draw_line(Vector2(-radius * 0.4, -radius * 0.4), Vector2(radius * 0.4, -radius * 0.4), Color(0.85, 0.85, 0.57), maxf(1.0, radius * 0.3), true)
+	draw_set_transform(Vector2.ZERO)
 
 
 func _draw_mortar_shell(zoom: float, width: float, fade: float) -> void:

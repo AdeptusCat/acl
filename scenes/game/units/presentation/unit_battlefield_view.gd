@@ -13,6 +13,9 @@ const ELIMINATION_HOLD_SECONDS: float = 3.0
 const ELIMINATION_FADE_SECONDS: float = 5.0
 const ELIMINATION_REST_COLOR: Color = Color(0.60, 0.60, 0.60, 0.24)
 const FACING_UPDATE_INTERVAL: float = 0.5
+const HAND_GRENADE_INTERVAL: float = 4.0
+
+var _hand_grenade_cooldown: float = 0.0
 
 var detail_ui: UnitUi = null
 
@@ -88,6 +91,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint() or _dead or _exited or _surrendered:
 		return
+	_hand_grenade_cooldown = maxf(0.0, _hand_grenade_cooldown - delta)
 	_update_focus_indicator()
 	_update_tactical_feedback()
 	_facing_update_remaining -= delta
@@ -565,6 +569,23 @@ func shoot_mortar(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_
 
 func shoot(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:
 	_start_projectile(from_pos, to_pos, weapon, TRACER.Kind.BULLET, spawn_offset, impact_offset)
+	throw_hand_grenade(from_pos, to_pos, weapon)
+
+
+func throw_hand_grenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec) -> void:
+	if not is_inside_tree() or tracer_scene == null or _dead or _exited or _surrendered or _hand_grenade_cooldown > 0.0:
+		return
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	if not is_instance_valid(ground):
+		return
+	var from_hex: Vector2i = ground.local_to_map(ground.to_local(from_pos))
+	var to_hex: Vector2i = ground.local_to_map(ground.to_local(to_pos))
+	if ground.cube_distance(ground.map_to_cube(from_hex), ground.map_to_cube(to_hex)) != 1:
+		return
+	# Cosmetic only: no shot signals, weapon edits, hit resolution, or icon changes.
+	var grenade: TRACER = PROJECTILE_EFFECTS.for_scene(self).fire(from_pos, to_pos, weapon, TRACER.Kind.HAND_GRENADE, tracer_scene, TRACER.sample_spawn_offset())
+	if grenade != null:
+		_hand_grenade_cooldown = HAND_GRENADE_INTERVAL
 
 
 func shoot_riflegrenade(from_pos: Vector2, to_pos: Vector2, weapon: WeaponSpec, spawn_offset: Vector2 = Vector2.INF, impact_offset: Vector2 = Vector2.INF) -> void:

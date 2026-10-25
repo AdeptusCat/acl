@@ -67,6 +67,7 @@ func _run() -> void:
 	audio.name = "AudioPool"
 	world.add_child(audio)
 	_test_flight()
+	_test_hand_grenade_flight()
 	_test_pool_and_frequency()
 	await _test_map_integration()
 	_test_casualty_feedback()
@@ -203,6 +204,29 @@ func _test_flight() -> void:
 	tracer.free()
 
 
+func _test_hand_grenade_flight() -> void:
+	var weapon: WeaponSpec = WeaponSpec.new()
+	weapon.projectile_speed = 100000
+	var ammunition: int = weapon.ammunition
+	var audio_before: int = audio.hits
+	var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+	add_child(tracer)
+	for degrees: float in [0.0, 60.0, 120.0, 180.0, 240.0, 300.0]:
+		var start: Vector2 = Vector2(100.0, 100.0)
+		var target: Vector2 = start + Vector2.from_angle(deg_to_rad(degrees)) * 128.0
+		tracer.launch(start, target, weapon, Tracer.Kind.HAND_GRENADE, Tracer.Surface.GROUND, true)
+		_check(is_equal_approx(tracer.flight_time, Tracer.HAND_GRENADE_FLIGHT_SECONDS), "Cosmetic throws ignore the rifle's projectile speed")
+		tracer.advance(tracer.flight_time * 0.5)
+		_check(not tracer.has_arrived and tracer.head.is_equal_approx(start.lerp(target, 0.5)), "A grenade's ground position follows the throw direction")
+		_check(tracer.visual_head().is_equal_approx(tracer.head + Vector2.UP * Tracer.HAND_GRENADE_ARC_HEIGHT), "All six throw directions have a raised midpoint")
+		tracer.advance(tracer.flight_time * 0.5)
+		_check(tracer.has_arrived and tracer.visual_head().is_equal_approx(target), "Thrown grenades land at the explosion position")
+		tracer.advance(tracer.impact_duration())
+		_check(not tracer.active, "Grenade explosions finish and release their effect")
+	_check(weapon.ammunition == ammunition and audio.hits == audio_before, "Cosmetic grenades consume no ammunition and add no weapon audio")
+	tracer.free()
+
+
 func _test_pool_and_frequency() -> void:
 	var effects: Effects = Effects.new()
 	add_child(effects)
@@ -317,8 +341,9 @@ func _test_map_integration() -> void:
 	ui.shoot_riflegrenade(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
 	ui.shoot_mortar(Vector2(80.0, 80.0), Vector2(320.0, 80.0), weapon)
 	_check(effects._all[1].kind == Tracer.Kind.ROCKET and effects._all[2].kind == Tracer.Kind.GRENADE and effects._all[3].kind == Tracer.Kind.MORTAR, "The firing UI routes each heavy weapon to its own effect profile")
+	_test_hand_grenade_integration(ui, ground, effects, weapon)
 	ui.free()
-	_check(effects._all[0].active, "Projectiles survive removal of their firing UI")
+	_check(effects._all.any(func(effect: Tracer) -> bool: return effect.active), "Projectiles survive removal of their firing UI")
 	effects.clear()
 	LOSHelper.ground_layer = old_ground
 	LOSHelper.building_layer = old_buildings
@@ -328,6 +353,54 @@ func _test_map_integration() -> void:
 	for layer: HexagonTileMapLayer in [ground, buildings, terrain, roads]:
 		layer.free()
 	effects.free()
+
+
+func _test_hand_grenade_integration(ui: UnitUi, ground: HexagonTileMapLayer, effects: Effects, weapon: WeaponSpec) -> void:
+	effects.clear()
+	var start: Vector2 = ground.to_global(ground.map_to_local(Vector2i.ZERO))
+	var target: Vector2 = ground.to_global(ground.map_to_local(Vector2i(1, 0)))
+	var ammunition: int = weapon.ammunition
+	ui.shoot(start, target, weapon)
+	var grenades: int = 0
+	for tracer: Tracer in effects._all:
+		if tracer.active and tracer.kind == Tracer.Kind.HAND_GRENADE:
+			grenades += 1
+	_check(grenades == 1, "An adjacent small-arms shot adds a hand-grenade visual")
+	for shot: int in range(10):
+		ui.shoot(start, target, weapon)
+	grenades = 0
+	for tracer: Tracer in effects._all:
+		if tracer.active and tracer.kind == Tracer.Kind.HAND_GRENADE:
+			grenades += 1
+	_check(grenades == 1, "Rapid rifle or MG shots cannot create one grenade per round")
+	effects.clear()
+	ui._process(ui.HAND_GRENADE_INTERVAL)
+	var icon_states: Array[bool] = []
+	for icon: Control in ui.unit_status_control.get_children():
+		icon_states.append(icon.visible)
+	seed(917)
+	var expected_random: float = randf()
+	seed(917)
+	ui.throw_hand_grenade(start, target, weapon)
+	_check(randf() == expected_random and weapon.ammunition == ammunition, "Throws do not change combat RNG or ammunition")
+	var actual_icons: Array[bool] = []
+	for icon: Control in ui.unit_status_control.get_children():
+		actual_icons.append(icon.visible)
+	_check(actual_icons == icon_states, "The grenade animation does not change unit icons")
+	var active_effects: Array = effects._all.filter(func(effect: Tracer) -> bool: return effect.active)
+	_check(active_effects.size() == 1 and active_effects[0].kind == Tracer.Kind.HAND_GRENADE, "Cooldown expiry permits the next cosmetic throw")
+	var grenade: Tracer = active_effects[0] as Tracer
+	_check(ground.local_to_map(ground.to_local(grenade.destination)) == Vector2i(1, 0), "The grenade lands inside the adjacent target hex")
+	effects.clear()
+	ui._process(ui.HAND_GRENADE_INTERVAL)
+	ui.throw_hand_grenade(start, ground.to_global(ground.map_to_local(Vector2i(3, 0))), weapon)
+	ui.throw_hand_grenade(start, start, weapon)
+	_check(not effects._all.any(func(effect: Tracer) -> bool: return effect.active), "Distant and same-hex engagements produce no hand-grenade effect")
+	ui.throw_hand_grenade(start, target, weapon)
+	ui.mark_exited()
+	ui._process(ui.HAND_GRENADE_INTERVAL)
+	ui.throw_hand_grenade(start, target, weapon)
+	_check(effects._all.filter(func(effect: Tracer) -> bool: return effect.active).size() == 1, "Departed units cannot start new throws; their existing grenade survives")
 
 
 func _test_burst_origins() -> void:
@@ -522,8 +595,60 @@ func _render_preview() -> void:
 	await _render_mortar_contrast(viewport, camera)
 	await _render_impact_contrast(viewport, camera)
 	await _render_burst_sweeps(viewport, camera, ground)
+	await _render_hand_grenades(viewport, camera)
 	await _render_combat_feedback(viewport, camera)
 	viewport.free()
+
+
+func _render_hand_grenades(viewport: SubViewport, camera: Camera2D) -> void:
+	for child: Node in viewport.get_children():
+		if child is Tracer or child is Label or child is SweepGuide:
+			child.queue_free()
+	await get_tree().process_frame
+	camera.position = Vector2(480.0, 320.0)
+	camera.zoom = Vector2.ONE
+	var title: Label = Label.new()
+	title.text = "COSMETIC HAND GRENADES / THROW, ARC, LANDING, EXPLOSION"
+	title.position = Vector2(28.0, 24.0)
+	viewport.add_child(title)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	var stages: Array[float] = [0.12, 0.375, 0.65, 0.82]
+	var labels: Array[String] = ["Throw", "Lob", "Landing", "Explosion"]
+	var grenades: Array[Tracer] = []
+	for row: int in range(2):
+		for index: int in range(stages.size()):
+			var start: Vector2 = Vector2(55.0 + float(index) * 230.0, 220.0 + float(row) * 250.0)
+			var end: Vector2 = start + Vector2(128.0, 0.0)
+			if row == 1:
+				start = end
+				end -= Vector2(128.0, 0.0)
+			var tracer: Tracer = TRACER_SCENE.instantiate() as Tracer
+			viewport.add_child(tracer)
+			tracer.launch(start, end, weapon, Tracer.Kind.HAND_GRENADE, Tracer.Surface.GROUND, true)
+			_seek(tracer, stages[index])
+			tracer.set_process(false)
+			grenades.append(tracer)
+			var label: Label = Label.new()
+			label.text = labels[index]
+			label.position = Vector2(70.0 + float(index) * 230.0, 260.0 + float(row) * 250.0)
+			viewport.add_child(label)
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	var preview: Image = viewport.get_texture().get_image()
+	_check(preview.save_png("/tmp/acl-hand-grenade-preview.png") == OK, "Render the cosmetic grenade flight and explosion")
+	for tracer: Tracer in grenades:
+		tracer.hide()
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	var baseline: Image = viewport.get_texture().get_image()
+	for tracer: Tracer in grenades:
+		tracer.show()
+		tracer.visibility_test = func(_point: Vector2) -> bool: return false
+		tracer.queue_redraw()
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	_check(preview.get_data() != baseline.get_data(), "Grenade flight and explosion contribute rendered pixels")
+	_check(viewport.get_texture().get_image().get_data() == baseline.get_data(), "Hidden grenade arcs and explosions contribute no pixels")
 
 
 func _render_combat_feedback(viewport: SubViewport, camera: Camera2D) -> void:
