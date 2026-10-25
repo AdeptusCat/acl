@@ -77,6 +77,7 @@ func _run() -> void:
 
 func _test_preferences() -> void:
 	var path: String = "user://display-regression.cfg"
+	_check(DisplaySettings.window_mode == Window.MODE_FULLSCREEN, "Fresh display settings default to fullscreen")
 	DisplaySettings.preferences_path = path
 	DisplaySettings.windowed_size = Vector2i(1472, 856)
 	DisplaySettings.window_mode = Window.MODE_FULLSCREEN
@@ -91,6 +92,7 @@ func _test_preferences() -> void:
 	config.save(path)
 	DisplaySettings.load_preferences()
 	_check(DisplaySettings.ui_scale == 1.0 and DisplaySettings.get_hud_scale() == 0.75, "The previous 75% preference migrates to the new 100% at the same physical size")
+	_check(DisplaySettings.window_mode == Window.MODE_FULLSCREEN, "Preferences without a window mode default to fullscreen")
 	DisplaySettings.save_preferences()
 	DisplaySettings.ui_scale = 1.25
 	DisplaySettings.load_preferences()
@@ -100,6 +102,7 @@ func _test_preferences() -> void:
 	config.save(path)
 	DisplaySettings.load_preferences()
 	_check(DisplaySettings.ui_scale == 1.0, "A missing scale preference retains the new 100% default")
+	_check(DisplaySettings.window_mode == Window.MODE_WINDOWED, "An explicitly saved windowed preference overrides the fullscreen default")
 	config.clear()
 	config.set_value("display", "windowed_size", Vector2i(-2, 200))
 	config.set_value("display", "ui_scale", "invalid")
@@ -107,9 +110,10 @@ func _test_preferences() -> void:
 	config.save(path)
 	DisplaySettings.ui_scale = 1.0
 	DisplaySettings.load_preferences()
-	_check(DisplaySettings.windowed_size == DisplaySettings.DESIGN_SIZE and DisplaySettings.ui_scale == 1.0 and DisplaySettings.window_mode == Window.MODE_WINDOWED, "Invalid preferences cannot shrink the window or introduce unsupported scaling")
+	_check(DisplaySettings.windowed_size == DisplaySettings.DESIGN_SIZE and DisplaySettings.ui_scale == 1.0 and DisplaySettings.window_mode == Window.MODE_FULLSCREEN, "Invalid preferences retain supported sizes, scaling, and the fullscreen default")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	DisplaySettings.preferences_path = ""
+	DisplaySettings.set_window_mode(Window.MODE_WINDOWED)
 	DisplaySettings.set_ui_scale(1.0)
 
 

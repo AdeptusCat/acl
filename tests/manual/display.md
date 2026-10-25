@@ -6,6 +6,10 @@ uses `canvas_items`, `expand`, fractional scaling, and high-DPI support.
 `user://display.cfg`. UI scaling applies to the battle HUD's CanvasLayer; camera
 zoom remains independent. Secondary sections fold when the available HUD space
 falls below 1100 units wide or 620 units tall. They can still be expanded.
+New display settings default to fullscreen; an explicitly saved windowed mode
+is preserved. Web builds request fullscreen on the first left click, non-Escape
+key press, or touch inside the game because browsers require user interaction.
+The automatic request happens once, so exiting fullscreen does not trigger it again.
 The interface-size slider supports 75–125% in 1% increments and defaults to 100%.
 The new 100% uses the former 75% HUD size; the endpoints correspond to the former
 56.25% and 93.75% sizes. Saved preferences from the old scale are converted to

@@ -16,9 +16,10 @@ const WINDOW_PRESETS: Array[Vector2i] = [
 
 var ui_scale: float = 1.0
 var windowed_size: Vector2i = DESIGN_SIZE
-var window_mode: Window.Mode = Window.MODE_WINDOWED
+var window_mode: Window.Mode = Window.MODE_FULLSCREEN
 var preferences_path: String = "user://display.cfg"
 var _resize_timer: Timer
+var _web_fullscreen_pending: bool = false
 
 
 func _ready() -> void:
@@ -35,9 +36,30 @@ func _ready() -> void:
 		preferences_path = ""
 	else:
 		load_preferences()
-		_apply_window()
+		if OS.has_feature("web") and window_mode == Window.MODE_FULLSCREEN:
+			# Browser fullscreen must start inside a user input callback.
+			_web_fullscreen_pending = get_window().mode != Window.MODE_FULLSCREEN
+		else:
+			_apply_window()
 	get_window().size_changed.connect(_on_window_resized)
 	get_window().close_requested.connect(_remember_window_size)
+
+
+func _input(event: InputEvent) -> void:
+	if not _web_fullscreen_pending:
+		return
+	if event is InputEventMouseButton:
+		if not event.pressed or event.button_index != MOUSE_BUTTON_LEFT:
+			return
+	elif event is InputEventKey:
+		if not event.pressed or event.echo or event.keycode == KEY_ESCAPE:
+			return
+	elif event is InputEventScreenTouch:
+		if not event.pressed:
+			return
+	else:
+		return
+	_apply_window()
 
 
 func set_ui_scale(value: float) -> void:
@@ -82,6 +104,7 @@ func set_windowed_size(value: Vector2i) -> void:
 
 
 func _apply_window() -> void:
+	_web_fullscreen_pending = false
 	var window: Window = get_window()
 	window.mode = window_mode
 	if window_mode == Window.MODE_WINDOWED:
@@ -123,10 +146,10 @@ func load_preferences() -> void:
 	var saved_size: Variant = config.get_value("display", "windowed_size", DESIGN_SIZE)
 	if saved_size is Vector2i:
 		windowed_size = saved_size.max(DESIGN_SIZE)
-	var saved_mode: Variant = config.get_value("display", "fullscreen", false)
-	window_mode = Window.MODE_WINDOWED
-	if saved_mode is bool and saved_mode:
-		window_mode = Window.MODE_FULLSCREEN
+	var saved_mode: Variant = config.get_value("display", "fullscreen", true)
+	window_mode = Window.MODE_FULLSCREEN
+	if saved_mode is bool and not saved_mode:
+		window_mode = Window.MODE_WINDOWED
 	ui_scale_changed.emit(ui_scale)
 	settings_changed.emit()
 
