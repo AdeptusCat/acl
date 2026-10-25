@@ -150,6 +150,14 @@ var _leadership_cohesion_mult: float = 1.0
 var _casualty_recovery_t: float = 0.0
 var _casualty_recovery_shock: float = 0.0
 
+class StressGain:
+	var fast: float
+	var slow: float
+
+	func _init(fast_gain: float, slow_gain: float) -> void:
+		fast = fast_gain
+		slow = slow_gain
+
 class StressBalanceSample:
 	var duration_s: float
 	var added: float
@@ -269,6 +277,8 @@ func _process(delta: float) -> void:
 	else:
 		under_fire = false
 	
+	# Attention gains enter the same bins and balance sample before recovery/morale.
+	_apply_attention_stress(delta)
 	match state:
 		STATES.MoraleState.CAUTIOUS:
 			_repin_since_unpin += delta
@@ -435,7 +445,34 @@ func _process(delta: float) -> void:
 	
 	
 
-# add stress from events/volleys — throttled by leadership
+# Final volley gain: existing suppression + surprise + multi-direction pressure
+# + casualty shock. Continuous overload/switching enter through the same apply_stress.
+# Tactical-condition flags add no second geometry penalty.
+static func calculate_incoming_fire_stress(controller: SquadFireController, suppression: StressGain, casualty_shock: StressGain, attention_effects: Vector2) -> StressGain:
+	var volley_cap: float = maxf(controller.stress_max_per_volley, 0.0)
+	var existing_fast: float = clampf(suppression.fast, 0.0, volley_cap)
+	var existing_slow: float = clampf(suppression.slow, 0.0, volley_cap)
+	var surprise: float = maxf(controller.stress_surprise_bonus, 0.0) * clampf(attention_effects.x, 0.0, 1.0)
+	var multi_direction: float = maxf(controller.stress_crossfire_bonus, 0.0) * clampf(attention_effects.y, 0.0, 1.0)
+	var fast: float = minf(existing_fast + existing_fast * surprise + existing_fast * multi_direction, volley_cap)
+	var slow: float = minf(existing_slow + existing_slow * multi_direction, volley_cap)
+	var casualty_cap: float = maxf(controller.stress_kill_max_per_volley, 0.0)
+	return StressGain.new(fast + clampf(casualty_shock.fast, 0.0, casualty_cap), slow + clampf(casualty_shock.slow, 0.0, casualty_cap))
+
+
+func _apply_attention_stress(delta: float) -> void:
+	var unit: Unit = get_parent() as Unit
+	if unit == null or not unit.is_active() or unit.surrendered or unit.members_alive <= 0 or unit.tactical_state == null:
+		return
+	# Advance even with damage disabled so switching recovery/detection keep running.
+	var costs: Vector2 = unit.tactical_state.advance_attention(delta)
+	if Debug.no_damage or costs.length_squared() <= 0.0:
+		return
+	# Overload is sustained (both bins); switching is transient (fast bin only).
+	apply_stress(costs.x + costs.y, costs.x)
+
+
+# All stress sources share gain modifiers, bin caps and actual-gain accounting.
 func apply_stress(df: float, ds: float) -> void:
 	var df_in: float = df
 	var ds_in: float = ds

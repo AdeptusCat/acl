@@ -37,6 +37,7 @@ func _run() -> void:
 	_test_incoming_attention()
 	_test_overload_and_conditions()
 	_test_switching()
+	_test_final_calculation()
 	await _test_impacts()
 	print("Attention stress checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
@@ -121,6 +122,9 @@ func _test_overload_and_conditions() -> void:
 	var unit: AttentionUnitProbe = AttentionUnitProbe.new()
 	unit.tactical_state = SquadTacticalState.new()
 	unit.stress_system = StressController.new()
+	unit.add_child(unit.stress_system)
+	unit.stress_system.refractory_s = 100000.0
+	unit.stress_system._since_change = 0.0
 	var enemies: Array[Unit] = []
 	for index: int in range(3):
 		var enemy: Unit = Unit.new()
@@ -141,7 +145,9 @@ func _test_overload_and_conditions() -> void:
 	var no_damage: bool = Debug.no_damage
 	Debug.no_damage = false
 	unit._process(0.5)
-	_check(unit.stress_system.S_eff > 0.0, "The unit frame loop delivers ongoing attention stress to its actual stress controller")
+	_check(unit.stress_system.S_eff == 0.0, "The unit attention refresh does not apply a second stress gain")
+	unit.stress_system._process(0.5)
+	_check(unit.stress_system.S_eff > 0.0, "The stress controller integrates ongoing attention stress before recovery")
 	Debug.no_damage = no_damage
 	enemies[1].position = Vector2.RIGHT.rotated(TAU / 3.0) * 100.0
 	Globals.unit_visible_enemies[unit] = enemies
@@ -159,7 +165,6 @@ func _test_overload_and_conditions() -> void:
 	Globals.unit_visible_enemies.erase(unit)
 	state.update_attention(unit)
 	_check(state.attention_stress_rate == 0.0 and not state.flanked and not state.surrounded, "Removing the threat demand clears overload and derived conditions")
-	unit.stress_system.free()
 	unit.free()
 	for enemy: Unit in enemies:
 		enemy.free()
@@ -176,7 +181,7 @@ func _test_switching() -> void:
 	var fine_cost: Vector2 = Vector2.ZERO
 	for step: int in range(10):
 		fine_cost += fine.advance_attention(0.1)
-	_check(coarse_cost.is_equal_approx(fine_cost) and coarse_cost.x > 0.0 and coarse_cost.y == 0.0, "Focus switching adds a frame-rate-independent temporary fast-stress cost")
+	_check(coarse_cost.is_equal_approx(fine_cost) and coarse_cost.x == 0.0 and coarse_cost.y > 0.0, "Focus switching returns its frame-rate-independent cost separately from overload")
 	_check(is_equal_approx(coarse.attention_switch_load, fine.attention_switch_load), "Switch recovery is independent of tick frequency")
 	var distracted_detection: float = fine.detection_multiplier(Vector2.LEFT)
 	fine.advance_attention(5.0)
@@ -197,13 +202,80 @@ func _test_switching() -> void:
 	for refresh: int in range(20):
 		unit.tactical_state.update_attention(unit)
 	_check(unit.tactical_state.attention_switch_load == 0.0, "Repeated perception refreshes cannot charge switching cost")
-	_check(unit.tactical_state.advance_attention(0.1).x > 0.0, "The simulation tick charges the changed combat focus once")
+	_check(unit.tactical_state.advance_attention(0.1).y > 0.0, "The simulation tick charges the changed combat focus once")
 	unit.surrendered = true
 	unit.tactical_state.update_attention(unit)
 	_check(unit.tactical_state.attention_switch_load == 0.0 and not unit.tactical_state.flanked and not unit.tactical_state.surrounded, "Inactive squads clear attention burdens and tactical conditions")
 	Globals.unit_visible_enemies.erase(unit)
 	enemy.free()
 	unit.free()
+
+
+func _test_final_calculation() -> void:
+	var fire: SquadFireController = SquadFireController.new()
+	fire.stress_surprise_bonus = 0.5
+	fire.stress_crossfire_bonus = 0.25
+	var gain: StressController.StressGain = StressController.calculate_incoming_fire_stress(fire, StressController.StressGain.new(8.0, 4.0), StressController.StressGain.new(3.0, 2.0), Vector2(1.0, 0.5))
+	_check(is_equal_approx(gain.fast, 16.0) and is_equal_approx(gain.slow, 6.5), "Final volley stress adds existing suppression, surprise, crossfire and unamplified casualty shock")
+	var capped: StressController.StressGain = StressController.calculate_incoming_fire_stress(fire, StressController.StressGain.new(1000.0, 1000.0), StressController.StressGain.new(1000.0, 1000.0), Vector2.ONE)
+	_check(capped.fast == fire.stress_max_per_volley + fire.stress_kill_max_per_volley and capped.slow == capped.fast, "The integrated calculation retains independent suppression and casualty caps")
+
+	var unit: AttentionUnitProbe = AttentionUnitProbe.new()
+	var stress: StressController = StressController.new()
+	unit.add_child(stress)
+	unit.stress_system = stress
+	unit.tactical_state = _focused()
+	unit.tactical_state.total_directional_demand = 1.0
+	unit.tactical_state.advance_attention(0.1)
+	unit.tactical_state.focus_direction = Vector2.LEFT
+	unit.tactical_state.attention_stress_rate = 2.0
+	stress.stress_fast = 20.0
+	stress.stress_slow = 40.0
+	stress.S_eff = 30.0
+	stress.leadership_bonus = 0.4
+	stress.incoming_stress_scale = 1.2
+	stress.refractory_s = 100000.0
+	stress._since_change = 0.0
+	var no_damage: bool = Debug.no_damage
+	Debug.no_damage = false
+	stress.apply_stress(gain.fast, gain.slow)
+	_check(is_equal_approx(stress.S_eff, 39.18), "The composed volley receives leadership, incoming scaling and existing-stress resistance once")
+	stress._process(0.5)
+	# Volley: 11.25 * 1.2 * 0.8 * 0.85 = 9.18 effective gain.
+	# Attention: 1 overload + (1 - exp(-0.5)) effective switching, same modifiers.
+	var attention_gain: float = (2.0 - exp(-0.5)) * 1.2 * 0.8 * 0.8041
+	_check(is_equal_approx(stress.S_eff, 39.18 + attention_gain - 0.5), "All four attention effects enter the existing stress bins with recovery applied once")
+	_check(is_equal_approx(stress.incoming_stress_rate, (9.18 + attention_gain) / 0.5) and is_equal_approx(stress.stress_recovery_rate, 1.0), "The stress-rate display accounts for both impact and continuous attention gains")
+	_check(is_equal_approx(stress.S_eff - 30.0, stress.net_stress_rate * 0.5), "The complete stress balance explains the final meter change")
+
+	stress.recovery_scale = 0.0
+	unit.tactical_state = _focused()
+	unit.tactical_state.flanked = true
+	unit.tactical_state.surrounded = true
+	var before: float = stress.S_eff
+	stress._process(0.5)
+	_check(stress.S_eff == before, "Derived flanked and surrounded tags do not double-count directional stress")
+	unit.tactical_state.attention_stress_rate = 2.0
+	unit.tactical_state.attention_switch_load = 1.0
+	Debug.no_damage = true
+	stress._process(0.5)
+	_check(stress.S_eff == before and unit.tactical_state.attention_switch_load < 1.0, "Disabled damage blocks attention gains while switching and detection recover")
+	Debug.no_damage = false
+	unit.surrendered = true
+	stress._process(0.5)
+	_check(stress.S_eff == before, "Inactive squads do not accumulate ongoing attention stress")
+	unit.surrendered = false
+	unit.tactical_state = _focused()
+	unit.tactical_state.attention_stress_rate = 2.0
+	stress.pin_threshold = stress.S_eff + 0.1
+	stress.refractory_s = 0.0
+	stress.L_NORMAL_TO_PINNED = 1000.0
+	stress.mark_under_fire(1.0)
+	stress._process(0.5)
+	_check(stress.state == STATES.MoraleState.PINNED, "Morale transitions use the complete attention-adjusted stress in the same tick")
+	Debug.no_damage = no_damage
+	unit.free()
+	fire.free()
 
 
 func _test_impacts() -> void:

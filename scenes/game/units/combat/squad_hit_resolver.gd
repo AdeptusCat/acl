@@ -275,80 +275,22 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	#s_fast *= weapon_stress_mult * stress_scale
 	#s_slow *= weapon_stress_mult * stress_scale
 	
-	# clamp so one volley can’t nuke morale outright
-	if s_fast > controller.stress_max_per_volley:
-		s_fast = controller.stress_max_per_volley
-	if s_slow > controller.stress_max_per_volley:
-		s_slow = controller.stress_max_per_volley
-	var base_fast: float = s_fast
-	var base_slow: float = s_slow
-	
-	
-	# --- casualties → extra shock (add to s_fast / s_slow) ---
+	var suppression: StressController.StressGain = StressController.StressGain.new(s_fast, s_slow)
+	# Preserve the existing shared casualty shock for squads in the struck hex.
 	var casualties_total: int = 0
-	var members_total_before: int = 0
-	var kk: int = 0
-	while kk < n_targets:
-		var c_i: int = int(casualties_per_target[kk])
-		casualties_total += c_i
-
-		var u0: Node = batch_targets[kk]
-		var heads_before: int = 0
-		if "members_alive" in u0:
-			# members_alive is after losses; add back this volley’s casualties to estimate pre-volley heads
-			heads_before = int(u0.members_alive) + c_i
-		else:
-			heads_before = 0
-		members_total_before += heads_before
-		kk += 1
-
-	var kill_fast: float = 0.0
-	var kill_slow: float = 0.0
-	if casualties_total > 0:
-		# fast spike: first KIA hits hardest, the rest add smaller spikes
-		#kill_fast = stress_kill_fast_first
-		#if casualties_total > 1:
-			#kill_fast += float(casualties_total - 1) * stress_kill_fast_each
-		
-		kill_fast = float(casualties_total) * controller.stress_kill_fast_each
-		
-		# slow dread scales with body count
-		kill_slow = float(casualties_total) * controller.stress_kill_slow_each
-
-		## scale by loss ratio (bigger shock for small, mauled groups)
-		#var ratio: float = 0.0
-		#if members_total_before > 0:
-			#ratio = float(casualties_total) / float(members_total_before)
-		#var ratio_mult: float = 1.0 + ratio * stress_kill_ratio_bonus
-
-		#kill_fast *= ratio_mult
-		#kill_slow *= ratio_mult
-
-		# per-volley casualty shock caps (separate from your general stress clamp)
-		if kill_fast > controller.stress_kill_max_per_volley:
-			kill_fast = controller.stress_kill_max_per_volley
-		if kill_slow > controller.stress_kill_max_per_volley:
-			kill_slow = controller.stress_kill_max_per_volley
-
-		# add to the base stress built from rounds/hits
-		s_fast += kill_fast
-		s_slow += kill_slow
+	for casualties: int in casualties_per_target:
+		casualties_total += casualties
+	var casualty_shock: StressController.StressGain = StressController.StressGain.new(float(casualties_total) * controller.stress_kill_fast_each, float(casualties_total) * controller.stress_kill_slow_each)
 
 	# --- apply effects to each squad: casualties as rolled, stress follows its attention ---
 	i = 0
 	while i < n_targets:
 		var u_apply: Unit = batch_targets[i]
 		var cas_i: int = int(casualties_per_target[i])
-		var fast_final: float = s_fast
-		var slow_final: float = s_slow
+		var attention_effects: Vector2 = Vector2.ZERO
 		if total_rounds > 0 and u_apply.tactical_state != null:
 			var direction: Vector2 = shot_origin - u_apply.global_position
-			var attention_effects: Vector2 = u_apply.tactical_state.register_incoming_fire(direction, u_apply._now())
-			var pressure_multiplier: float = 1.0 + maxf(controller.stress_crossfire_bonus, 0.0) * attention_effects.y
-			var fast_multiplier: float = pressure_multiplier + maxf(controller.stress_surprise_bonus, 0.0) * attention_effects.x
-			# Preserve both the base-volley cap and the separate casualty-shock cap.
-			fast_final = minf(base_fast * fast_multiplier, controller.stress_max_per_volley) + kill_fast
-			slow_final = minf(base_slow * pressure_multiplier, controller.stress_max_per_volley) + kill_slow
-
-		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, fast_final, slow_final, controller)
+			attention_effects = u_apply.tactical_state.register_incoming_fire(direction, u_apply._now())
+		var stress: StressController.StressGain = StressController.calculate_incoming_fire_stress(controller, suppression, casualty_shock, attention_effects)
+		u_apply.call_deferred("_on_incoming_fire_effect", cas_i, stress.fast, stress.slow, controller)
 		i += 1

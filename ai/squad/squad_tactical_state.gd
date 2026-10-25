@@ -201,7 +201,8 @@ func _update_tactical_conditions() -> void:
 	surrounded = _threat_angles.size() >= 3 and max_gap < surround_gap
 
 
-# Tick once per simulation frame; perception refreshes never charge switching cost.
+# Tick once per simulation frame; return separate overload and switching costs.
+# The stress controller owns their final fast/slow composition and application.
 func advance_attention(delta: float) -> Vector2:
 	if delta <= 0.0 or attention_quality <= 0.0:
 		return Vector2.ZERO
@@ -220,7 +221,7 @@ func advance_attention(delta: float) -> Vector2:
 		attention_switch_load = 0.0
 	switching_stress_rate = attention_switch_load * SWITCH_STRESS_RATE
 	var overload_stress: float = attention_stress_rate * delta
-	return Vector2(overload_stress + switch_stress, overload_stress)
+	return Vector2(overload_stress, switch_stress)
 
 
 # Returns normalized surprise and crossfire pressure for this attack, before attention reacts.

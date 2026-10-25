@@ -600,7 +600,7 @@ func _on_morale_recovered() -> void:
 
 # === Process Loop ===
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	
 	if Engine.is_editor_hint() and snap_to_grid:
 		if ground_map == null:
@@ -618,9 +618,6 @@ func _process(delta: float) -> void:
 	_check_contacts()
 	if not Engine.is_editor_hint():
 		tactical_state.update_attention(self)
-		var attention_stress: Vector2 = tactical_state.advance_attention(delta)
-		if not Debug.no_damage and stress_system != null and attention_stress.length_squared() > 0.0:
-			stress_system.apply_stress(attention_stress.x, attention_stress.y)
 	if not alive:
 		return
 
