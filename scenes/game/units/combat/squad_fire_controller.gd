@@ -439,9 +439,6 @@ func _tick_soldiers(delta: float) -> void:
 	
 	var rounds_emitted: int = 0
 
-	# count available crew for MGs
-	var crew_available: int = _count_role(RankGrades.Role.LOADER)
-	var support_crew_available: int = _count_role(RankGrades.Role.ASSISTANT)
 	var gunners: Array[int] = _indices_with_role(RankGrades.Role.GUNNER)
 
 	# handle gunners first (crew-served)
@@ -452,6 +449,9 @@ func _tick_soldiers(delta: float) -> void:
 		var idx: int = gunners[j]
 		var s: Soldier = soldiers[idx]
 		if s.is_alive:
+			# Earlier gunners can await impacts; use the living crew at this attempt.
+			var crew_available: int = _count_role(RankGrades.Role.LOADER)
+			var support_crew_available: int = _count_role(RankGrades.Role.ASSISTANT)
 			rounds_emitted += await _try_fire_soldier(delta, s, true, crew_available, support_crew_available, target_distance, target_cover)
 			if rounds_emitted > 0:
 				pass
@@ -481,7 +481,14 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		return 0
 	var state_idx: int = stress_controller.state
 	var delta_multiplyer: float = state_acquire_mults[state_idx]
-	var delta_mod: float = delta * delta_multiplyer 
+	var delta_mod: float = delta * delta_multiplyer
+	if is_crew_served:
+		# Apply crew speed to remaining work so losses and replacements affect
+		# reload and firing preparation already in progress, without restarting them.
+		var crew_penalty: float = 1.0
+		if crew_available < s.weapon.crew_required - 1:
+			crew_penalty = maxf(1.0, s.weapon.undercrew_penalty_mult)
+		delta_mod *= compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal) / crew_penalty
 	if unit.attackState != Unit.AttackState.MANUAL_GROUND and not _refresh_tracked_target():
 		return 0
 	var _target_hex: Vector2i = target_hex
@@ -571,17 +578,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		pass
 	
 	
-
-	# check crew requirement
-	var _crew_mult: float = 1.0
-	if is_crew_served:
-		if s.weapon.crew_required > 1:
-			var ok: bool = crew_available >= (s.weapon.crew_required - 1)
-			if not ok:
-				_crew_mult = s.weapon.undercrew_penalty_mult
-	var efficiency_mult: float = compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal)
-	if efficiency_mult < 1.0:
-		pass
 
 	if s.weapon.riflegrenade_loaded == true and target_distance > s.weapon.riflegrenade_range:
 		s.rounds_in_mag = 0

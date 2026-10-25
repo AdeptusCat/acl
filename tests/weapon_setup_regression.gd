@@ -68,6 +68,7 @@ func _run() -> void:
 	_arrive()
 	probe._process(0.0)
 	_check(gunner.setup_weapon_task.done, "A rifle with no setup duration is immediately ready")
+	await _test_crew_effects()
 	shooter.squad_fire = original_fire
 	probe.calc.free()
 	main.queue_free()
@@ -189,6 +190,81 @@ func _test_setup_under_contact() -> void:
 	Globals.unit_visible_enemies[shooter] = []
 	probe.clear_target()
 	_set_hex(enemy, Vector2i(20, 20))
+
+
+func _prepare_crew(path: String, loaders: int, assistants: int) -> void:
+	_prepare_weapon(path)
+	for role: RankGrades.Role in [RankGrades.Role.LOADER, RankGrades.Role.ASSISTANT]:
+		var count: int = loaders
+		if role == RankGrades.Role.ASSISTANT:
+			count = assistants
+		for index: int in range(count):
+			var helper: Soldier = Soldier.new(1000 + probe.soldiers.size(), "Crew probe", RankGrades.Grade.SOLDIER, role, WeaponSpec.new(), shooter, shooter.team)
+			probe.soldiers.append(helper)
+	_set_hex(shooter, Vector2i(1, 0))
+	_set_hex(enemy, Vector2i(2, 0))
+	LOSHelper.los_lookup = {shooter.current_hex: {enemy.current_hex: {"target_cover": 0}}}
+	Globals.unit_visible_enemies[shooter] = [enemy]
+	shooter.setAttackState(Unit.AttackState.MANUAL_TRACK)
+	probe.set_target_unit(enemy)
+	gunner.setup_weapon_task.done = true
+	gunner.reload_task.done = true
+	gunner.aquire_target_task.done = true
+	gunner.aim_jitter_s = 0.0
+	gunner.weapon.fire_mode = WeaponSpec.FireMode.SINGLE
+	gunner.weapon.projectile_speed = 1000000
+	gunner.weapon.ammunition = 1000
+	probe.shots_fired = 0
+
+
+func _test_crew_effects() -> void:
+	for path: String in ["res://resources/weapons/mg34_heavy.tres", "res://resources/weapons/m1_81mm_mortar.tres"]:
+		var weapon: WeaponSpec = load(path) as WeaponSpec
+		var required_loaders: int = weapon.crew_required - 1
+		var outputs: Array[int] = []
+		for crew: Array in [[required_loaders, weapon.support_crew_optimal], [required_loaders, 0], [0, 0]]:
+			_prepare_crew(path, crew[0], crew[1])
+			Debug.dont_fire_wepaons = false
+			seed(814)
+			for tick: int in range(300):
+				probe._tick_soldiers(0.1)
+				await get_tree().process_frame
+			outputs.append(probe.shots_fired)
+		print(weapon.name, " rounds in 30 seconds, full/reduced/lone: ", outputs)
+		_check(outputs[0] > outputs[1] and outputs[1] > outputs[2] and outputs[2] > 0,
+			weapon.name + " loses firing output with missing assistants and then missing loaders, but a lone gunner can fire")
+		_prepare_crew(path, required_loaders, weapon.support_crew_optimal)
+		Debug.dont_fire_wepaons = true
+		# Losing and restoring crew must alter work already in progress, without resetting it.
+		for task: SoldierTask in [gunner.reload_task, gunner.aquire_target_task]:
+			gunner.reload_task.done = true
+			gunner.aquire_target_task.done = true
+			task.done = false
+			task.start_time_s = 100.0
+			probe._tick_soldiers(1.0)
+			_check(is_equal_approx(task.remaining_time_s, 99.0), weapon.name + " full crew advances one second of " + task.task_name)
+			for helper: Soldier in probe.soldiers:
+				if helper != gunner:
+					helper.is_alive = false
+			probe._tick_soldiers(1.0)
+			var slowed_remaining: float = task.remaining_time_s
+			_check(slowed_remaining > 98.5 and slowed_remaining < 99.0, weapon.name + " dead helpers slow the current task without restarting it")
+			for helper: Soldier in probe.soldiers:
+				helper.is_alive = true
+			probe._tick_soldiers(1.0)
+			_check(is_equal_approx(task.remaining_time_s, slowed_remaining - 1.0), weapon.name + " restored crew resumes full work speed")
+		shooter.stress_system.state = STATES.MoraleState.CAUTIOUS
+		gunner.reload_task.done = false
+		gunner.reload_task.start_time_s = 100.0
+		probe._tick_soldiers(1.0)
+		_check(is_equal_approx(gunner.reload_task.remaining_time_s, 99.2), "Crew timing retains the existing cautious-state slowdown")
+	_prepare_crew("res://resources/weapons/kar98.tres", 0, 0)
+	gunner.reload_task.done = false
+	gunner.reload_task.start_time_s = 100.0
+	probe._tick_soldiers(1.0)
+	_check(is_equal_approx(gunner.reload_task.remaining_time_s, 99.0), "Personal weapons do not receive a missing-crew penalty")
+	Debug.dont_fire_wepaons = true
+	probe.clear_target()
 
 
 func _set_hex(unit: Unit, hex: Vector2i) -> void:
