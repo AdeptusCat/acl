@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponSpec" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_spec.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2"]
+
+[resource]
+script = ExtResource("1")
+name = "105 mm HE"
+family = 6
+ammo_type = 1
+kind = 1
+ammunition_start = 36
+mag_capacity = 1
+reload_s = 5.0
+projectile_speed = 200
+range_hexes = 100
+he_burst_radius = 10.0
+he_suppression_power = 60.0
+snd_hit = ExtResource("2")

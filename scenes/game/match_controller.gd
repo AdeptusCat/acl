@@ -33,6 +33,7 @@ var overtime_packages: Array[VictoryConditionCollection] = []
 
 var selected_unit: Unit = null
 var stack_presenter: BattlefieldStacks
+var fire_support: FireSupportController
 
 
 signal update_timer_label(time_left_seconds: float)
@@ -327,6 +328,9 @@ var selected_hex_index: int = 0
 
 
 func _on_mouse_button_left_pressed(event_pos: Vector2) -> void:
+	if fire_support != null and fire_support.choosing_target:
+		fire_support.pick_target(event_pos)
+		return
 	MatchInteractionHandler.on_mouse_button_left_pressed(self, event_pos)
 
 
@@ -379,6 +383,9 @@ func _on_mouse_event_position_changed(_event_pos: Vector2) -> void:
 
 
 func handle_mouse_event_position_changed(event_pos: Vector2) -> void:
+	if fire_support != null and fire_support.choosing_target:
+		fire_support.hover_target(get_viewport().get_mouse_position())
+		return
 	MatchInteractionHandler.handle_mouse_event_position_changed(self, event_pos)
 
 
@@ -513,6 +520,11 @@ func start_game(team: Globals.Team, time: float) -> void:
 		Globals.team_enemy = Globals.Team.ALLIES
 	else:
 		Globals.team_enemy = Globals.Team.AXIS
+	if fire_support == null:
+		fire_support = FireSupportController.new()
+		fire_support.name = "FireSupportController"
+		add_child(fire_support)
+		fire_support.setup(self)
 	
 	
 	

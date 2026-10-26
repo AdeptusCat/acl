@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="OffboardBattery" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/offboard_battery.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/m1_81mm_mortar.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+battery_name = "81 mm mortar battery"
+team = 1
+weapon = ExtResource("2")
+rounds = 24
+response_seconds = 6.0
+flight_seconds = 4.0

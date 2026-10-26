@@ -103,6 +103,8 @@ var mortar_target_hex: Vector2i:
 #var target_cover: float
 var target_unit: Unit
 var mission_support_fire: bool = false
+var fire_support_mission: FireSupportMission
+var fire_support_hold: bool = false
 #var target_distance: int
 var _pending_rounds_by_hex: Dictionary = {}    # Vector2i -> int
 
@@ -252,6 +254,7 @@ func set_target_unit(targetUnit: Unit) -> void:
 
 
 func set_target_hex(_target_hex: Vector2i) -> void:
+	fire_support_hold = false
 	target_unit = null
 	target_hex = _target_hex
 	mortar_target_hex = _target_hex
@@ -511,6 +514,13 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if not unit.is_active() or unit.ai_support_only:
 		return 0
 	var personal_defense: bool = _uses_personal_defense(s)
+	if fire_support_mission != null and personal_defense:
+		return 0
+	if s.weapon.family == WeaponSpec.Family.MORTAR:
+		if fire_support_hold:
+			return 0
+		if fire_support_mission != null and not fire_support_mission.ready_to_fire():
+			return 0
 	var personal_ground_fire: bool = (
 		personal_defense
 		and unit.attackState == Unit.AttackState.MANUAL_GROUND
@@ -651,6 +661,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	# determine burst size for this weapon
 	var rounds_in_mag: int = s.rounds_in_mag
 	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
+	if fire_support_mission != null:
+		shots = mini(shots, fire_support_mission.remaining)
+		if shots <= 0:
+			return 0
+		fire_support_mission.commit_rounds(shots)
 	if personal_ground_fire:
 		shots = mini(shots, unit.attack_ground_rounds_budget)
 	

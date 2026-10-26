@@ -1,0 +1,22 @@
+# Fire support
+
+Press **F**, click a target hex, then press **Enter** to assign a fire mission. The persistent **Fire Support** button opens the same tray. Infantry selection is preserved. Choose another battery in the dropdown or use **Locate mortar** to center an onboard mortar.
+
+- **Quick:** 3 rounds, as fast as the real weapon can prepare and reload.
+- **Standard:** 6 rounds, at least 4 seconds between launches.
+- **Harassing:** one round every 15–25 seconds until **Cease fire** or ammunition exhaustion.
+
+Onboard missions use the existing gunner, ammunition, crew, setup, reload, projectile and impact systems. There is no additional call-in delay. Moving mortars halt and deploy; broken, surrendered, eliminated or close-combat squads cannot accept missions. Another fire order interrupts the support mission. Completed or ceased batteries remain silent until another fire order. Airborne rounds still land.
+
+Targets need not be visible to the mortar. The preview identifies friendly observation and friendly troops in the target hex. Existing HE resolution affects the struck hex, so the mission marker represents that hex rather than promising damage to adjacent cells.
+
+Offboard support is assigned per scenario through **offboard_batteries**, an array of **OffboardBattery** resources. Each definition specifies its faction, weapon, rounds, response delay and flight time. Definitions are copied into independent runtime batteries; they do not create battlefield counters, observers or objectives. Existing scenario balance is unchanged unless a designer assigns support.
+
+Examples:
+
+- `res://resources/fire_support/example_81mm_battery.tres`
+- `res://resources/fire_support/example_105mm_battery.tres`
+
+Only HE missions are currently offered. Fire-support orders and offboard ammunition are match-local and are not restored by the existing match-save format.
+
+Validation: `godot --headless --path . tests/fire_support_regression.tscn`. Add `-- --capture` with a rendering display to save `/tmp/acl-fire-support-hud.png`.

@@ -19,6 +19,7 @@ enum AIMode { ATTACK, DEFEND }
 @export var end_when_objectives_secured_and_enemy_gone: bool = false
 @export var released: bool = false
 @export var previous_scenario: Scenario
+@export var offboard_batteries: Array[OffboardBattery] = []
 
 #@export var attacker_team: Globals.Team = Globals.Team.ALLIES
 #@export var defender_team: Globals.Team = Globals.Team.AXIS
