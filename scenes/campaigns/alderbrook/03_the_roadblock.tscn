@@ -125,6 +125,7 @@ test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_w86wx"]
 script = ExtResource("51_llfk6")
+initial_control = 1
 required_time_s = 30.0
 team = 1
 outcome_level = 0

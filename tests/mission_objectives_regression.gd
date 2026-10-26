@@ -55,7 +55,7 @@ func _run() -> void:
 	world.start_screen.hide()
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze(main)
-	_check_initial_objective_control(world, scenario, occupy)
+	_check_initial_objective_control(world, occupy)
 	_check(panel.is_visible_in_tree(), "Starting a battle displays its mission panel")
 	_check(panel.conditions.size() == 5 and not panel.conditions.has(enemy_objective) and panel.conditions.has(minor), "Both victory levels are displayed without enemy conditions")
 	for frame: int in range(6):
@@ -335,8 +335,8 @@ func _check_capture_visual(world: Node, hex: Vector2i, progress: float, color: C
 	_check(false, "Capture progress has a matching objective marker")
 
 
-func _check_initial_objective_control(world: Node, scenario: Scenario, occupy: OccupyObjectiveCondition) -> void:
-	_check(scenario.initial_objective_control == Scenario.InitialObjectiveControl.ENEMY, "Existing scenarios default to enemy-controlled objectives")
+func _check_initial_objective_control(world: Node, occupy: OccupyObjectiveCondition) -> void:
+	_check(occupy.initial_control == OccupyObjectiveCondition.InitialControl.ENEMY, "Existing capture objectives default to enemy control")
 	var hex: Vector2i = occupy.state.hexes[0]
 	_check(occupy.state.controlling_teams[hex] == Globals.Team.AXIS and not occupy.is_condition_met(), "Match startup assigns objectives to the player's enemy")
 	_check(_row(world.ui.mission_objectives, 0) == "Objective A: enemy controlled", "The HUD immediately shows starting enemy ownership")
@@ -350,13 +350,14 @@ func _check_initial_objective_control(world: Node, scenario: Scenario, occupy: O
 	Globals.victory_conditions[Globals.Team.AXIS].victory_conditions.append(opposing_capture)
 	for selected_team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
 		Globals.team_player = selected_team
-		for control: Scenario.InitialObjectiveControl in [Scenario.InitialObjectiveControl.NEUTRAL, Scenario.InitialObjectiveControl.FRIENDLY, Scenario.InitialObjectiveControl.ENEMY]:
-			scenario.initial_objective_control = control
+		for control: OccupyObjectiveCondition.InitialControl in [OccupyObjectiveCondition.InitialControl.NEUTRAL, OccupyObjectiveCondition.InitialControl.FRIENDLY, OccupyObjectiveCondition.InitialControl.ENEMY]:
+			occupy.initial_control = control
+			opposing_capture.initial_control = control
 			world.game_controller.set_victory_conditions()
 			var expected_owner: int = -1
-			if control == Scenario.InitialObjectiveControl.FRIENDLY:
+			if control == OccupyObjectiveCondition.InitialControl.FRIENDLY:
 				expected_owner = selected_team
-			elif control == Scenario.InitialObjectiveControl.ENEMY:
+			elif control == OccupyObjectiveCondition.InitialControl.ENEMY:
 				expected_owner = Globals.get_enemy_team(selected_team)
 			for capture: OccupyObjectiveCondition in [occupy, opposing_capture]:
 				_check(not capture.state.hexes.is_empty(), "Both factions have capture markers for initial ownership checks")
@@ -369,9 +370,44 @@ func _check_initial_objective_control(world: Node, scenario: Scenario, occupy: O
 					_check(is_equal_approx(capture.state.required_times_reached_s[cell], expected_seconds) and capture.state.enemy_hold_times_s[cell] == 0.0, "Repeated setup resets capture timers and fully credits the initial owner")
 				capture.refresh_control()
 				_check(capture.state.controlling_teams[capture.state.hexes[0]] == expected_owner, "Presence refresh preserves authored starting ownership")
+	Globals.team_player = Globals.Team.ALLIES
+	var mixed_captures: Array[OccupyObjectiveCondition] = [occupy]
+	var added_markers: Array[ObjectiveDefinition] = []
+	for id: OccupyObjectiveCondition.ObjectiveId in [OccupyObjectiveCondition.ObjectiveId.B, OccupyObjectiveCondition.ObjectiveId.C]:
+		var capture: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+		capture.team = Globals.Team.ALLIES
+		capture.objective_id = id
+		capture.initial_control = OccupyObjectiveCondition.InitialControl.NEUTRAL
+		if id == OccupyObjectiveCondition.ObjectiveId.C:
+			capture.initial_control = OccupyObjectiveCondition.InitialControl.FRIENDLY
+		var marker: ObjectiveDefinition = ObjectiveDefinition.new()
+		marker.team = capture.team
+		marker.objective_id = id
+		marker.hex = hex + Vector2i(int(id), 0)
+		Globals.objectives[capture.team].objectives.append(marker)
+		Globals.victory_conditions[capture.team].victory_conditions.append(capture)
+		mixed_captures.append(capture)
+		added_markers.append(marker)
+	occupy.initial_control = OccupyObjectiveCondition.InitialControl.ENEMY
+	world.game_controller.set_victory_conditions()
+	var expected_owners: Array[int] = [Globals.Team.AXIS, -1, Globals.Team.ALLIES]
+	for index: int in range(mixed_captures.size()):
+		var capture: OccupyObjectiveCondition = mixed_captures[index]
+		for cell: Vector2i in capture.state.hexes:
+			_check(capture.state.controlling_teams[cell] == expected_owners[index], "Objectives A, B and C can start enemy, neutral and friendly in the same scenario")
+			_check(capture.state.victory_conditions_met[cell] == (expected_owners[index] == capture.team), "Mixed starting ownership initializes each objective's capture credit independently")
+	var saved_capture: OccupyObjectiveCondition = mixed_captures[2]
+	_check(ResourceSaver.save(saved_capture, "user://objective_control_test.tres") == OK, "Per-objective ownership saves with the capture resource")
+	var loaded_capture: OccupyObjectiveCondition = ResourceLoader.load("user://objective_control_test.tres", "", ResourceLoader.CACHE_MODE_IGNORE) as OccupyObjectiveCondition
+	_check(loaded_capture != null and loaded_capture.initial_control == OccupyObjectiveCondition.InitialControl.FRIENDLY, "Per-objective ownership survives resource reload")
+	DirAccess.remove_absolute("user://objective_control_test.tres")
+	for marker: ObjectiveDefinition in added_markers:
+		Globals.objectives[Globals.Team.ALLIES].objectives.erase(marker)
+	for index: int in range(1, mixed_captures.size()):
+		Globals.victory_conditions[Globals.Team.ALLIES].victory_conditions.erase(mixed_captures[index])
 	Globals.victory_conditions[Globals.Team.AXIS].victory_conditions.erase(opposing_capture)
 	Globals.team_player = Globals.Team.ALLIES
-	scenario.initial_objective_control = Scenario.InitialObjectiveControl.NEUTRAL
+	occupy.initial_control = OccupyObjectiveCondition.InitialControl.NEUTRAL
 	world.game_controller.set_victory_conditions()
 	overlay._update_colors()
 	world.ui.mission_objectives.refresh()

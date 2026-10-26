@@ -83,16 +83,13 @@ static func set_objective_cells(controller: Node2D, player_team: Globals.Team) -
 
 
 static func set_victory_conditions(controller: Node2D) -> void:
-	var initial_owner: int = Globals.get_enemy_team(Globals.team_player)
-	var scenario: Scenario = Globals.scenario_chosen
-	if is_instance_valid(scenario):
-		initial_owner = scenario.get_initial_objective_owner(Globals.team_player)
 	for team: int in Globals.victory_conditions:
 		var victory_conditions: VictoryConditionCollection = Globals.victory_conditions[team]
 		for victory_condition: VictoryCondition in victory_conditions.victory_conditions:
 			match victory_condition:
 				var condition when condition is OccupyObjectiveCondition:
 					victory_condition = victory_condition as OccupyObjectiveCondition
+					var initial_owner: int = victory_condition.get_initial_owner(Globals.team_player)
 					victory_condition.state = OccupyObjectiveState.new()
 					var objectives: ObjectivesCollection = Globals.objectives[team]
 					for objective: ObjectiveDefinition in objectives.objectives:

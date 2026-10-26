@@ -8,7 +8,12 @@ enum ObjectiveId {
 	C
 }
 
+enum InitialControl { NEUTRAL, FRIENDLY, ENEMY }
+
 @export var objective_id: ObjectiveId = ObjectiveId.A
+## Starting ownership of this capture objective, relative to the selected player faction.
+## Friendly objectives begin fully captured; neutral objectives have no owner.
+@export var initial_control: InitialControl = InitialControl.ENEMY
 @export var required_time_s: float = 3.0
 @export var required_unit_count: int = 1
 @export var contested_by_enemy_presence: bool = true
@@ -31,6 +36,15 @@ const OBJECTIVE_NAMES: Dictionary[ObjectiveId, String] = {
 		#required_unit_count,
 		#contested_by_enemy_presence
 	#)
+
+
+func get_initial_owner(selected_player_team: Globals.Team) -> int:
+	match initial_control:
+		InitialControl.FRIENDLY:
+			return selected_player_team
+		InitialControl.ENEMY:
+			return Globals.get_enemy_team(selected_player_team)
+	return -1
 
 
 func get_description() -> String:

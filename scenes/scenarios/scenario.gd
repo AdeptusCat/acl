@@ -3,7 +3,6 @@ class_name Scenario
 
 enum AIStatus { OFF, ON }
 enum AIMode { ATTACK, DEFEND }
-enum InitialObjectiveControl { NEUTRAL, FRIENDLY, ENEMY }
 
 @onready var units: Node2D = $Units
 @onready var axis_objectives_tile_map_layer: HexagonTileMapLayer = $Objectives/AxisObjectivesTileMapLayer
@@ -27,9 +26,6 @@ enum InitialObjectiveControl { NEUTRAL, FRIENDLY, ENEMY }
 @export var player_team: Globals.Team = Globals.Team.AXIS
 
 @export_group("Objectives")
-## Starting ownership of capture objectives, relative to the selected player faction.
-## Friendly objectives begin fully captured; neutral objectives have no owner.
-@export var initial_objective_control: InitialObjectiveControl = InitialObjectiveControl.ENEMY
 @export var victory_conditions: Array[VictoryCondition] = []
 
 @export_group("AI")
@@ -53,15 +49,6 @@ var start_hex: Dictionary[Globals.Team, Vector2i] = {
 	Globals.Team.AXIS: Vector2i.ZERO,
 	Globals.Team.ALLIES: Vector2i.ZERO
 	}
-
-
-func get_initial_objective_owner(selected_player_team: Globals.Team) -> int:
-	match initial_objective_control:
-		InitialObjectiveControl.FRIENDLY:
-			return selected_player_team
-		InitialObjectiveControl.ENEMY:
-			return Globals.get_enemy_team(selected_player_team)
-	return -1
 
 
 func is_ai_enabled(team: Globals.Team) -> bool:
