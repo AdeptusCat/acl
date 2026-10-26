@@ -1,10 +1,13 @@
 extends RefCounted
 class_name FireSupportMission
 
-enum Mode { QUICK, STANDARD, HARASSING }
+enum Intensity { INTENSE, STEADY, HARASSING, SPORADIC }
 enum Shape { POINT, LINE, AREA }
 const SHAPE_NAMES: Array[String] = ["Point", "Line", "Area"]
-const MODE_NAMES: Array[String] = ["Quick · 3 rounds", "Standard · 6 rounds", "Harassing · every 15–25 s"]
+const LENGTHS: Array[float] = [15.0, 30.0, 60.0, 120.0, 300.0]
+const LENGTH_NAMES: Array[String] = ["15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes"]
+const INTERVALS: Array[float] = [5.0, 10.0, 20.0, 40.0]
+const INTENSITY_NAMES: Array[String] = ["Intense · 5 s / shot", "Steady · 10 s / shot", "Harassing · 20 s / shot", "Sporadic · 40 s / shot"]
 
 var asset_id: String
 var target: Vector2i
@@ -12,7 +15,10 @@ var shape: Shape = Shape.POINT
 var cells: Array[Vector2i] = []
 var end: Vector2i
 var radius: int = 1
-var mode: Mode = Mode.QUICK
+var intensity: Intensity = Intensity.INTENSE
+var duration_seconds: float = 15.0
+var first_launch_at: float = -1.0
+var planned_rounds: int = 0
 var remaining: int = 0
 var fired: int = 0
 var elapsed: float = 0.0
@@ -37,24 +43,30 @@ func next_target() -> Vector2i:
 	return cells[fired % cells.size()]
 
 func ready_to_fire() -> bool:
-	return active and remaining > 0 and elapsed >= next_round
+	return active and remaining > 0 and elapsed >= next_round and not time_expired()
+
+func time_expired() -> bool:
+	return first_launch_at >= 0.0 and elapsed - first_launch_at >= duration_seconds
+
+func seconds_left() -> float:
+	if first_launch_at < 0.0:
+		return duration_seconds
+	return maxf(0.0, duration_seconds - (elapsed - first_launch_at))
 
 func commit_rounds(rounds: int) -> void:
+	if first_launch_at < 0.0:
+		first_launch_at = elapsed
 	last_launch_at = elapsed
 	launch_work_total = 0.0
 	remaining = maxi(0, remaining - rounds)
 	fired += rounds
 	result = "Firing"
-	if mode == Mode.HARASSING:
-		next_round = elapsed + randf_range(15.0, 25.0)
-	elif mode == Mode.STANDARD:
-		next_round = elapsed + 4.0
-	else:
-		next_round = elapsed
+	next_round = elapsed + INTERVALS[intensity]
 	if remaining <= 0:
 		active = false
 		result = "Complete · rounds may still be airborne"
 
 func stop(reason: String = "Ceased · airborne rounds still land") -> void:
 	active = false
+	remaining = 0
 	result = reason

@@ -8,7 +8,8 @@ var assets: Array[Dictionary] = []
 var missions: Array[FireSupportMission] = []
 var flights: Array[Dictionary] = []
 var selected_asset: int = 0
-var selected_mode: FireSupportMission.Mode = FireSupportMission.Mode.QUICK
+var selected_length: float = 15.0
+var selected_intensity: FireSupportMission.Intensity = FireSupportMission.Intensity.INTENSE
 var choosing_target: bool = false
 var has_target: bool = false
 var target: Vector2i
@@ -91,8 +92,10 @@ func asset_status(index: int) -> String:
 	var asset: Dictionary = assets[index]
 	var mission: FireSupportMission = asset_mission(index)
 	if mission != null and mission.active:
-		if mission.mode == FireSupportMission.Mode.HARASSING:
+		if mission.intensity == FireSupportMission.Intensity.HARASSING:
 			return "Harassing"
+		if mission.intensity == FireSupportMission.Intensity.SPORADIC:
+			return "Sporadic"
 		return "Mission active"
 	if ammunition(index) <= 0:
 		return "Empty / unavailable"
@@ -152,10 +155,10 @@ func asset_launch_progress(index: int) -> Dictionary:
 			full_reload /= crew_rate
 			aim /= crew_rate
 			full_aim /= crew_rate
-			var work: float = maxf(wait, setup) + reload + aim
+			var work: float = maxf(wait, setup + reload + aim)
 			if work < remaining:
 				remaining = work
-				duration = maxf(scheduled_duration, full_setup) + full_reload + full_aim
+				duration = maxf(scheduled_duration, full_setup + full_reload + full_aim)
 		if not is_finite(remaining):
 			return {"fill": 0.0, "seconds": -1.0, "label": "No mortar ready"}
 		# Keep completed preparation stages in this launch's denominator.
@@ -202,7 +205,18 @@ func footprint_restriction(index: int, cells: Array[Vector2i]) -> String:
 			return reason
 	return ""
 
-func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1) -> bool:
+func planned_rounds(index: int, length: float, intensity: FireSupportMission.Intensity) -> int:
+	if index < 0 or index >= assets.size():
+		return 0
+	var interval: float = FireSupportMission.INTERVALS[intensity]
+	var weapon: WeaponSpec = asset_weapon(index)
+	if weapon != null:
+		interval = maxf(interval, weapon.reload_s)
+	return mini(ammunition(index), ceili(length / interval))
+
+func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMission.Intensity, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1) -> bool:
+	if not is_finite(length) or length <= 0.0 or intensity < 0 or intensity >= FireSupportMission.INTERVALS.size():
+		return false
 	var footprint: Array[Vector2i] = cells.duplicate()
 	if footprint.is_empty():
 		footprint.append(cell)
@@ -221,12 +235,10 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode, cells: A
 	mission.shape = shape
 	mission.end = end
 	mission.radius = radius
-	mission.mode = mode
-	mission.remaining = mini(3, ammunition(index))
-	if mode == FireSupportMission.Mode.STANDARD:
-		mission.remaining = mini(6, ammunition(index))
-	elif mode == FireSupportMission.Mode.HARASSING:
-		mission.remaining = ammunition(index)
+	mission.duration_seconds = length
+	mission.intensity = intensity
+	mission.planned_rounds = planned_rounds(index, length, intensity)
+	mission.remaining = mission.planned_rounds
 	missions.append(mission)
 	var unit: Unit = asset["unit"]
 	if asset["battery"] == null:
@@ -244,7 +256,7 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode, cells: A
 	target_cells.clear()
 	LOSHelper.clear_los()
 	host._on_started_moving()
-	host.order_feedback.emit(true, "Fire mission", FireSupportMission.MODE_NAMES[mode])
+	host.order_feedback.emit(true, "Fire mission", "%d s · %s" % [ceili(length), FireSupportMission.INTENSITY_NAMES[intensity]])
 	queue_redraw()
 	return true
 
@@ -373,14 +385,8 @@ func build_footprint(start: Vector2i, end: Vector2i, shape: FireSupportMission.S
 	return cells
 
 func coverage_text() -> String:
-	var rounds: int = 0
-	if selected_asset >= 0 and selected_asset < assets.size():
-		rounds = ammunition(selected_asset)
-	if selected_mode == FireSupportMission.Mode.QUICK:
-		rounds = mini(rounds, 3)
-	elif selected_mode == FireSupportMission.Mode.STANDARD:
-		rounds = mini(rounds, 6)
-	var text: String = "%d rounds across %d hexes" % [rounds, target_cells.size()]
+	var rounds: int = planned_rounds(selected_asset, selected_length, selected_intensity)
+	var text: String = "Up to %d rounds across %d hexes" % [rounds, target_cells.size()]
 	if rounds < target_cells.size():
 		text += " · sparse coverage"
 	return text
@@ -463,6 +469,8 @@ func _process(delta: float) -> void:
 		return
 	for mission: FireSupportMission in missions:
 		mission.elapsed += delta
+		if mission.active and mission.time_expired():
+			mission.stop("Time complete · airborne rounds still land")
 	for index: int in range(assets.size()):
 		var asset: Dictionary = assets[index]
 		var mission: FireSupportMission = asset_mission(index)
@@ -504,8 +512,7 @@ func _launch_offboard(asset: Dictionary, mission: FireSupportMission) -> void:
 	var impact_cell: Vector2i = mission.next_target()
 	weapon.ammunition -= 1
 	mission.commit_rounds(1)
-	if mission.mode != FireSupportMission.Mode.HARASSING:
-		mission.next_round = maxf(mission.next_round, mission.elapsed + maxf(weapon.reload_s, 2.0))
+	mission.next_round = maxf(mission.next_round, mission.elapsed + weapon.reload_s)
 	var ground: HexagonTileMapLayer = host.ground_layer
 	var finish: Vector2 = ground.to_global(ground.map_to_local(impact_cell))
 	var origin: Vector2 = _offboard_origin(finish, float(weapon.projectile_speed) * battery.flight_seconds)

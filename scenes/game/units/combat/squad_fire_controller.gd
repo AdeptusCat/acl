@@ -519,8 +519,6 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.weapon.family == WeaponSpec.Family.MORTAR:
 		if fire_support_hold:
 			return 0
-		if fire_support_mission != null and not fire_support_mission.ready_to_fire():
-			return 0
 	var personal_ground_fire: bool = (
 		personal_defense
 		and unit.attackState == Unit.AttackState.MANUAL_GROUND
@@ -585,6 +583,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if not s.is_weapon_reload_done(delta_mod):
 		return 0
 	if not s.is_acquiring_target_done(delta_mod):
+		return 0
+	# Crew preparation runs during the scheduled interval, rather than after it.
+	if fire_support_mission != null and not fire_support_mission.ready_to_fire():
 		return 0
 	
 	if Debug.dont_fire_wepaons:

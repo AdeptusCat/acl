@@ -12,7 +12,8 @@ var launch_bars: Array[ProgressBar] = []
 var launch_clocks: Array[Label] = []
 var tray: PanelContainer
 var asset_label: Label
-var mode: OptionButton
+var length: OptionButton
+var intensity: OptionButton
 var target_label: Label
 var status_label: Label
 var fire_button: Button
@@ -46,11 +47,28 @@ func _ready() -> void:
 	asset_label = Label.new()
 	asset_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(asset_label)
-	mode = OptionButton.new()
-	for name: String in FireSupportMission.MODE_NAMES:
-		mode.add_item(name)
-	mode.item_selected.connect(_select_mode)
-	content.add_child(mode)
+	var settings: GridContainer = GridContainer.new()
+	settings.columns = 2
+	settings.add_theme_constant_override("h_separation", 12)
+	content.add_child(settings)
+	var length_label: Label = Label.new()
+	length_label.text = "Length"
+	settings.add_child(length_label)
+	var intensity_label: Label = Label.new()
+	intensity_label.text = "Intensity"
+	settings.add_child(intensity_label)
+	length = OptionButton.new()
+	for name: String in FireSupportMission.LENGTH_NAMES:
+		length.add_item(name)
+	length.item_selected.connect(_select_length)
+	length.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings.add_child(length)
+	intensity = OptionButton.new()
+	for name: String in FireSupportMission.INTENSITY_NAMES:
+		intensity.add_item(name)
+	intensity.item_selected.connect(_select_intensity)
+	intensity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings.add_child(intensity)
 	var shapes: HBoxContainer = HBoxContainer.new()
 	content.add_child(shapes)
 	for index: int in range(FireSupportMission.SHAPE_NAMES.size()):
@@ -91,7 +109,7 @@ func _ready() -> void:
 	close.pressed.connect(_close)
 	controls.add_child(close)
 	var hint: Label = Label.new()
-	hint.text = "Harassing: one round every 15–25 s until ceased or empty."
+	hint.text = "Length starts at first launch. Crew and reload may delay shots."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.theme_type_variation = &"HudSecondary"
 	content.add_child(hint)
@@ -207,7 +225,7 @@ func _refresh_launch_progress() -> void:
 		var mission: FireSupportMission = support.asset_mission(index)
 		asset_buttons[index].text = "Ammo %d" % support.ammunition(index)
 		if mission != null:
-			var total: int = mission.fired + mission.remaining
+			var total: int = mission.planned_rounds
 			asset_buttons[index].text = "%d/%d\nAmmo %d" % [mission.remaining, total, support.ammunition(index)]
 			asset_buttons[index].tooltip_text += "\nMission rounds remaining: %d/%d" % [mission.remaining, total]
 		if progress.is_empty():
@@ -221,8 +239,12 @@ func _refresh_launch_progress() -> void:
 			launch_clocks[index].text = "%ds" % ceili(seconds)
 		asset_buttons[index].tooltip_text += "\n%s · %s" % [progress["label"], launch_clocks[index].text]
 
-func _select_mode(index: int) -> void:
-	support.selected_mode = index as FireSupportMission.Mode
+func _select_length(index: int) -> void:
+	support.selected_length = FireSupportMission.LENGTHS[index]
+	refresh()
+
+func _select_intensity(index: int) -> void:
+	support.selected_intensity = index as FireSupportMission.Intensity
 	refresh()
 
 func _select_shape(index: int) -> void:
@@ -243,7 +265,7 @@ func _locate() -> void:
 func _fire() -> void:
 	if not support.has_target:
 		return
-	if support.request(support.selected_asset, support.target, support.selected_mode, support.target_cells, support.target_shape, support.target_end, support.target_radius):
+	if support.request(support.selected_asset, support.target, support.selected_length, support.selected_intensity, support.target_cells, support.target_shape, support.target_end, support.target_radius):
 		support.host.get_parent().ui.hide_target_hex_cover_distance()
 	refresh()
 
@@ -258,7 +280,10 @@ func refresh() -> void:
 	asset_label.text = "No fire support assets assigned to this scenario."
 	if not support.assets.is_empty():
 		asset_label.text = "%s\n%s · %d rounds" % [support.assets[selection]["name"], support.asset_status(selection), support.ammunition(selection)]
-	mode.disabled = support.assets.is_empty()
+	length.disabled = support.assets.is_empty()
+	intensity.disabled = support.assets.is_empty()
+	length.select(FireSupportMission.LENGTHS.find(support.selected_length))
+	intensity.select(support.selected_intensity)
 	var shown_shape: FireSupportMission.Shape = support.selected_shape
 	if support.has_target or support.dragging:
 		shown_shape = support.target_shape
@@ -283,10 +308,11 @@ func refresh() -> void:
 	if not support.assets.is_empty():
 		var mission: FireSupportMission = support.asset_mission(selection)
 		locate_button.disabled = support.assets[selection]["battery"] != null
-		status_label.text = "Ready · " + FireSupportMission.MODE_NAMES[support.selected_mode]
+		status_label.text = "Ready · %d s · %s" % [ceili(support.selected_length), FireSupportMission.INTENSITY_NAMES[support.selected_intensity]]
 		if mission != null:
 			status_label.text = "%s\n%s · %d hexes · %d fired · %d remaining" % [mission.result, FireSupportMission.SHAPE_NAMES[mission.shape], mission.cells.size(), mission.fired, mission.remaining]
 			if mission.active:
+				status_label.text += "\n%d s remaining · %s" % [ceili(mission.seconds_left()), FireSupportMission.INTENSITY_NAMES[mission.intensity]]
 				cease_button.disabled = false
 				if mission.next_round > mission.elapsed:
 					status_label.text += "\nNext launch in at least %d s" % ceili(mission.next_round - mission.elapsed)

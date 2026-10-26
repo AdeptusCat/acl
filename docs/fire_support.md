@@ -16,9 +16,12 @@ Point, Line and Area buttons provide visible alternatives to the gestures. Relea
 
 The live preview shades eligible hexes, shows line sweep direction or the area circle, highlights friendly troops inside it and reports rounds versus covered hexes. Broad footprints with fewer rounds than hexes show **sparse coverage**. The total mission ammunition is unchanged by target shape. Each round resolves through the existing single-hex HE system.
 
-- **Quick:** 3 rounds, as fast as the real weapon can prepare and reload.
-- **Standard:** 6 rounds, at least 4 seconds between launches.
-- **Harassing:** one round every 15–25 seconds until **Cease fire** or ammunition exhaustion.
+Mission settings are independent:
+
+- **Length:** 15 seconds, 30 seconds, 1 minute, 2 minutes or 5 minutes, measured from the first shell launch. Call-in and initial crew preparation do not consume the firing window.
+- **Intensity:** Intense (5 seconds per shot), Steady (10 seconds), Harassing (20 seconds) or Sporadic (40 seconds). These are minimum launch intervals; crew readiness and reload time can make them longer. Onboard crews prepare during the interval rather than waiting for it before reloading.
+
+The preview shows the maximum planned rounds for the selected window and intensity, capped by available ammunition and weapon reload speed. Missions stop when their time expires, their planned rounds have fired, ammunition runs out or fire is ceased. Delayed shells are never launched after the firing window closes. Unfired planned rounds remain in battery ammunition; the icon's mission count reaches zero when the order ends.
 
 Onboard missions use the existing gunner, ammunition, crew, setup, reload, projectile and impact systems. There is no additional call-in delay. Moving mortars halt and deploy; broken, surrendered, eliminated or close-combat squads cannot accept missions. Another fire order interrupts the support mission. Completed or ceased batteries remain silent until another fire order. Airborne rounds still land.
 

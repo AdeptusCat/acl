@@ -45,7 +45,7 @@ func _run() -> void:
 	support.panel.asset_buttons[2].pressed.emit()
 	support.panel.asset_buttons[1].pressed.emit()
 	_check(support.panel.tray.visible and support.selected_asset == 1, "Clicking a different support icon switches the open panel to that battery")
-	_check(support.panel.tray.find_children("*", "OptionButton", true, false).size() == 1, "The support panel retains only the mission mode dropdown")
+	_check(support.panel.tray.find_children("*", "OptionButton", true, false).size() == 2, "The support panel exposes independent length and intensity dropdowns")
 	support.panel._close()
 	support.selected_asset = 0
 	var target: Vector2i = mortar.current_hex
@@ -78,13 +78,13 @@ func _run() -> void:
 	host._on_mouse_button_left_pressed(point)
 	support.end_target(point)
 	_check(support.preview(0, mortar.current_hex).contains("FRIENDLY"), "The preview identifies friendly troops in the struck hex")
-	_check(support.request(0, target, FireSupportMission.Mode.QUICK), "A quick onboard mission is accepted without an artificial call-in delay")
+	_check(support.request(0, target, 15.0, FireSupportMission.Intensity.INTENSE), "A 15-second intense onboard mission is accepted without an artificial call-in delay")
 	_check(support.choosing_target and support.panel.tray.visible, "Assigning a mission keeps map targeting enabled while the support panel is open")
-	var quick: FireSupportMission = support.asset_mission(0)
-	_check(not support.request(0, target, FireSupportMission.Mode.QUICK), "A busy battery rejects overlapping fire missions")
+	var short_mission: FireSupportMission = support.asset_mission(0)
+	_check(not support.request(0, target, 15.0, FireSupportMission.Intensity.INTENSE), "A busy battery rejects overlapping fire missions")
 	gunner.setup_weapon_task.done = false
 	gunner.setup_weapon_task.start_time_s = 2.0
-	quick.launch_work_total = 0.0
+	short_mission.launch_work_total = 0.0
 	var preparing: Dictionary = support.asset_launch_progress(0)
 	_check(is_zero_approx(float(preparing["fill"])), "The onboard launch indicator begins empty during preparation")
 	gunner.setup_weapon_task.remaining_time_s = 1.0
@@ -95,36 +95,38 @@ func _run() -> void:
 	_check(support.panel.launch_bars[0].visible and support.panel.launch_bars[0].mouse_filter == Control.MOUSE_FILTER_IGNORE, "The active icon fill remains visible and cannot intercept icon clicks")
 	_check(support.panel.asset_buttons[0].text == "3/3\nAmmo 30", "The icon shows both mission rounds and battery ammunition")
 	var blocked: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
-	_check(blocked == 0 and quick.fired == 0, "Mission requests do not bypass real mortar setup")
+	_check(blocked == 0 and short_mission.fired == 0, "Mission requests do not bypass real mortar setup")
 	for shot: int in range(3):
+		var scheduled: FireSupportMission = support.asset_mission(0)
+		scheduled.elapsed = scheduled.next_round
 		_ready_gunner(gunner)
 		var fired: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
-		_check(fired == 1, "Quick missions launch actual mortar rounds")
+		_check(fired == 1, "Intense missions launch actual mortar rounds")
 		support.panel._refresh_launch_progress()
 		_check(support.panel.asset_buttons[0].text == "%d/3\nAmmo %d" % [2 - shot, 29 - shot], "Mission rounds and battery ammunition both update after each launch")
 		if shot < 2:
 			_check(is_zero_approx(float(support.asset_launch_progress(0)["fill"])), "The onboard icon fill resets after each launch")
 	_ready_gunner(gunner)
 	var extra: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
-	_check(quick.fired == 3 and not quick.active and extra == 0 and gunner.weapon.ammunition == 27, "Quick missions spend exactly three rounds with no extra shot")
+	_check(short_mission.fired == 3 and not short_mission.active and extra == 0 and gunner.weapon.ammunition == 27, "A 15-second intense mission plans three rounds with no extra shot")
 	support.panel._refresh_launch_progress()
 	_check(not support.panel.launch_bars[0].visible and not support.panel.launch_clocks[0].visible, "Completed missions hide the next-launch indicator even while shells may be airborne")
 	support._process(0.01)
 	_check(mortar.squad_fire.fire_support_hold, "A completed battery stays silent until a new fire order")
-	_check(support.request(0, target, FireSupportMission.Mode.STANDARD), "A completed battery can immediately receive another mission")
+	_check(support.request(0, target, 60.0, FireSupportMission.Intensity.STEADY), "A completed battery can immediately receive another mission")
 	_ready_gunner(gunner)
 	await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	_ready_gunner(gunner)
 	var early: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
-	_check(early == 0 and support.asset_mission(0).remaining == 5, "Standard missions space launches and retain a six-round budget")
+	_check(early == 0 and support.asset_mission(0).remaining == 5, "A one-minute steady mission spaces launches and plans six rounds")
 	support.panel._refresh_launch_progress()
 	_check(support.panel.asset_buttons[0].text == "5/6\nAmmo 26", "The mission denominator stays fixed while battery ammunition decreases")
 	support.cease(0)
-	_check(support.request(0, target, FireSupportMission.Mode.HARASSING), "Harassing fire can replace a ceased mission")
+	_check(support.request(0, target, 300.0, FireSupportMission.Intensity.HARASSING), "Harassing fire can replace a ceased mission")
 	_ready_gunner(gunner)
 	await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	var harassment: FireSupportMission = support.asset_mission(0)
-	_check(harassment.next_round >= 15.0 and harassment.next_round <= 25.0, "Harassing launches schedule an occasional round 15–25 seconds later")
+	_check(is_equal_approx(harassment.next_round, 20.0), "Harassing fire schedules the displayed 20-second interval")
 	_ready_gunner(gunner)
 	_check(await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0) == 0, "Harassing mortars cannot fire continuously between scheduled rounds")
 	support._process(harassment.next_round + 0.01)
@@ -132,7 +134,7 @@ func _run() -> void:
 	_check(await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0) == 1, "The next harassing round uses the normal firing pipeline")
 	support.cease(0)
 	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(Globals.team_player))[0]
-	_check(support.request(1, enemy.current_hex, FireSupportMission.Mode.QUICK), "Offboard missions do not require selecting or inventing a map counter")
+	_check(support.request(1, enemy.current_hex, 15.0, FireSupportMission.Intensity.INTENSE), "Offboard missions do not require selecting or inventing a map counter")
 	var before: int = support.ammunition(1)
 	_check(is_zero_approx(float(support.asset_launch_progress(1)["fill"])), "Offboard response progress starts empty")
 	support._process(5.0)
@@ -165,7 +167,7 @@ func _run() -> void:
 	await get_tree().process_frame
 	_check(support.flights.is_empty() and enemy.stress_system.under_fire, "Cease fire leaves airborne shells to resolve through the real impact system")
 	(support.assets[2]["weapon"] as WeaponSpec).ammunition = 0
-	_check(not support.request(2, target, FireSupportMission.Mode.QUICK), "Empty offboard batteries reject fire requests")
+	_check(not support.request(2, target, 15.0, FireSupportMission.Intensity.INTENSE), "Empty offboard batteries reject fire requests")
 	support.selected_asset = 0
 	support.pick_target(point)
 	support.panel.refresh()
@@ -181,13 +183,15 @@ func _run() -> void:
 	_check(not support.panel.tray.visible and not support.choosing_target and host.selected_unit == selected, "Escape cancels support targeting without changing infantry selection")
 	support.panel.toggle_tray()
 	await _test_shapes(support, mortar, gunner, target, selected)
+	await _test_timed_settings(support, mortar, gunner, target)
 	support.pick_target(point)
-	support.selected_mode = FireSupportMission.Mode.HARASSING
-	support.panel.mode.select(2)
+	support.selected_length = 300.0
+	support.selected_intensity = FireSupportMission.Intensity.HARASSING
+	support.panel.intensity.select(2)
 	support.panel.refresh()
 	if OS.get_cmdline_user_args().has("--capture"):
 		support.cease(1)
-		support.request(1, target, FireSupportMission.Mode.STANDARD)
+		support.request(1, target, 60.0, FireSupportMission.Intensity.STEADY)
 		var showcase: FireSupportMission = support.asset_mission(1)
 		showcase.elapsed = showcase.next_round * 0.55
 		support.panel.refresh()
@@ -236,8 +240,9 @@ func _test_shapes(support: FireSupportController, mortar: Unit, gunner: Soldier,
 	_check(support.target_shape == FireSupportMission.Shape.AREA, "The Area button enables area drag without Shift")
 	var area: Array[Vector2i] = support.build_footprint(start, end, FireSupportMission.Shape.AREA, 3)
 	support.target_cells = area.duplicate()
-	support.selected_mode = FireSupportMission.Mode.QUICK
-	_check(support.coverage_text().contains("sparse coverage"), "Large quick-fire areas warn about sparse coverage")
+	support.selected_length = 15.0
+	support.selected_intensity = FireSupportMission.Intensity.INTENSE
+	_check(support.coverage_text().contains("sparse coverage"), "Short intense area missions warn about sparse coverage")
 	_check(support.preview(0, start, area).contains("FRIENDLY"), "Area warnings include friendlies away from the center")
 	var escape: InputEventKey = InputEventKey.new()
 	escape.pressed = true
@@ -251,13 +256,15 @@ func _test_shapes(support: FireSupportController, mortar: Unit, gunner: Soldier,
 	var original_range: int = gunner.weapon.range_hexes
 	gunner.weapon.range_hexes = 0
 	var partly_out_of_range: Array[Vector2i] = [mortar.current_hex, start]
-	_check(not support.request(0, mortar.current_hex, FireSupportMission.Mode.QUICK, partly_out_of_range, FireSupportMission.Shape.LINE, start), "A footprint is rejected if any covered hex exceeds onboard range")
+	_check(not support.request(0, mortar.current_hex, 15.0, FireSupportMission.Intensity.INTENSE, partly_out_of_range, FireSupportMission.Shape.LINE, start), "A footprint is rejected if any covered hex exceeds onboard range")
 	gunner.weapon.range_hexes = original_range
-	_check(support.request(0, start, FireSupportMission.Mode.QUICK, line, FireSupportMission.Shape.LINE, end), "Onboard mortars accept line missions")
+	_check(support.request(0, start, 15.0, FireSupportMission.Intensity.INTENSE, line, FireSupportMission.Shape.LINE, end), "Onboard mortars accept line missions")
 	var impacts: Array[Vector2i] = []
 	var record: Callable = func(_weapon: WeaponSpec, cell: Vector2i, _origin: Vector2, _impact: Vector2) -> void: impacts.append(cell)
 	mortar.squad_fire.fire_shot.connect(record)
 	for shot: int in range(3):
+		var scheduled: FireSupportMission = support.asset_mission(0)
+		scheduled.elapsed = scheduled.next_round
 		_ready_gunner(gunner)
 		await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	mortar.squad_fire.fire_shot.disconnect(record)
@@ -266,7 +273,7 @@ func _test_shapes(support: FireSupportController, mortar: Unit, gunner: Soldier,
 	var pattern: FireSupportMission = FireSupportMission.new()
 	pattern.shape = FireSupportMission.Shape.AREA
 	pattern.cells.assign(area)
-	pattern.mode = FireSupportMission.Mode.HARASSING
+	pattern.intensity = FireSupportMission.Intensity.HARASSING
 	pattern.remaining = area.size() * 2
 	for cycle: int in range(2):
 		var visited: Array[Vector2i] = []
@@ -276,18 +283,57 @@ func _test_shapes(support: FireSupportController, mortar: Unit, gunner: Soldier,
 			visited.append(cell)
 			pattern.commit_rounds(1)
 	var invalid: Array[Vector2i] = [start, Vector2i(-9999, -9999)]
-	_check(not support.request(1, start, FireSupportMission.Mode.QUICK, invalid, FireSupportMission.Shape.LINE, end), "An invalid footprint is rejected atomically")
+	_check(not support.request(1, start, 15.0, FireSupportMission.Intensity.INTENSE, invalid, FireSupportMission.Shape.LINE, end), "An invalid footprint is rejected atomically")
 	var before: int = support.ammunition(1)
-	_check(support.request(1, start, FireSupportMission.Mode.QUICK, area, FireSupportMission.Shape.AREA, end, 3), "Offboard batteries accept area missions")
+	_check(support.request(1, start, 15.0, FireSupportMission.Intensity.INTENSE, area, FireSupportMission.Shape.AREA, end, 3), "Offboard batteries accept area missions")
 	var mission: FireSupportMission = support.asset_mission(1)
 	var landed_cells: Array[Vector2i] = []
 	for shot: int in range(3):
+		mission.elapsed = mission.next_round
 		support._launch_offboard(support.assets[1], mission)
 		var impact: Vector2i = support.flights.back()["target"]
 		_check(area.has(impact) and not landed_cells.has(impact), "Offboard shells retain distinct individual impact hexes in their area")
 		landed_cells.append(impact)
-	_check(not mission.active and mission.fired == 3 and support.ammunition(1) == before - 3, "Area size does not multiply quick mission ammunition")
+	_check(not mission.active and mission.fired == 3 and support.ammunition(1) == before - 3, "Area size does not multiply the timed mission ammunition estimate")
 	support.select_shape(FireSupportMission.Shape.POINT)
+
+func _test_timed_settings(support: FireSupportController, mortar: Unit, gunner: Soldier, target: Vector2i) -> void:
+	_check(support.planned_rounds(0, 60.0, FireSupportMission.Intensity.STEADY) == 6 and support.planned_rounds(0, 60.0, FireSupportMission.Intensity.HARASSING) == 3, "Length and intensity independently determine the planned round count")
+	var clock: FireSupportMission = FireSupportMission.new()
+	clock.duration_seconds = 15.0
+	clock.remaining = 3
+	clock.planned_rounds = 3
+	clock.elapsed = 30.0
+	_check(not clock.time_expired() and clock.seconds_left() == 15.0, "Initial response and preparation do not consume the firing window")
+	clock.commit_rounds(1)
+	_check(clock.first_launch_at == 30.0 and clock.next_round == 35.0, "The first launch starts the duration and the exact intensity interval")
+	clock.elapsed = 45.0
+	_check(clock.time_expired() and not clock.ready_to_fire(), "A shell cannot launch at or after the firing deadline")
+	clock.stop("Time complete")
+	_check(clock.remaining == 0 and clock.planned_rounds == 3, "Ending a window clears pending rounds while preserving the original planned total")
+	_check(not support.request(0, target, 0.0, FireSupportMission.Intensity.INTENSE), "Invalid mission lengths are rejected")
+	_check(support.request(0, target, 60.0, FireSupportMission.Intensity.STEADY), "A timed onboard mission is accepted")
+	_ready_gunner(gunner)
+	await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
+	var mission: FireSupportMission = support.asset_mission(0)
+	var ammo: int = support.ammunition(0)
+	gunner.reload_task.done = false
+	gunner.reload_task.start_time_s = 4.0
+	var early: int = await mortar.squad_fire._try_fire_soldier(0.5, gunner, true, 1, 1, 2, 0)
+	_check(early == 0 and gunner.reload_task.remaining_time_s < 4.0, "Crews reload during the scheduled pause without firing early")
+	mission.elapsed = mission.first_launch_at + mission.duration_seconds
+	_ready_gunner(gunner)
+	_check(await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0) == 0, "A ready onboard gunner still respects the time limit")
+	support._process(0.0)
+	_check(not mission.active and mission.remaining == 0 and support.ammunition(0) == ammo, "Expired onboard missions stop without spending unfired ammunition")
+	_check(support.request(1, target, 60.0, FireSupportMission.Intensity.STEADY), "A timed offboard mission is accepted")
+	mission = support.asset_mission(1)
+	mission.elapsed = mission.next_round
+	support._launch_offboard(support.assets[1], mission)
+	ammo = support.ammunition(1)
+	mission.elapsed = mission.first_launch_at + mission.duration_seconds
+	support._process(0.0)
+	_check(not mission.active and mission.remaining == 0 and support.ammunition(1) == ammo, "Expired offboard missions cannot launch overdue shells")
 
 func _ready_gunner(soldier: Soldier) -> void:
 	soldier.setup_weapon_task.done = true
