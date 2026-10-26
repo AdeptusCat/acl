@@ -140,6 +140,8 @@ func toggle_tray() -> void:
 	else:
 		tray.show()
 		support.choosing_target = not support.assets.is_empty()
+		if support.choosing_target:
+			support.preview_marked_hex()
 		refresh()
 
 func _close() -> void:
@@ -154,10 +156,13 @@ func _open_asset(index: int) -> void:
 	if tray.visible and support.selected_asset == index:
 		_close()
 		return
+	var opening: bool = not tray.visible
 	support.selected_asset = index
 	support.dragging = false
 	tray.show()
 	support.choosing_target = true
+	if opening:
+		support.preview_marked_hex()
 	refresh()
 
 func _refresh_icons() -> void:

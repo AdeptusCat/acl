@@ -363,6 +363,16 @@ func _release_onboard(asset: Dictionary, mission: FireSupportMission) -> void:
 			unit.squad_fire.fire_support_hold = true
 			unit.squad_fire.clear_target()
 
+func preview_marked_hex() -> void:
+	var world: Node = host.get_parent()
+	if not world.has_inspected_hex:
+		return
+	var cell: Vector2i = world.selected_hex
+	var ground: HexagonTileMapLayer = host.ground_layer
+	if ground.get_cell_source_id(cell) == -1:
+		return
+	pick_target(ground.get_global_transform_with_canvas() * ground.map_to_local(cell))
+
 func pick_target(screen_point: Vector2) -> void:
 	var focus: Control = get_viewport().gui_get_focus_owner()
 	if focus != null:
