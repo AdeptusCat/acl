@@ -49,7 +49,7 @@ window/size/mode.web=0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/faction_resource_compatibility/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hex_edge_barriers/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg")
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg", "res://addons/ai_assistant_hub/plugin.cfg", "res://addons/faction_resource_compatibility/plugin.cfg", "res://addons/godot_agent/plugin.cfg", "res://addons/hex_edge_barriers/plugin.cfg", "res://addons/hexagon_tilemaplayer/plugin.cfg", "res://addons/offboard_battery_picker/plugin.cfg")
 
 [input]
 

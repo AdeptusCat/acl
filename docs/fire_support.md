@@ -14,6 +14,8 @@ Mortar and artillery shells and explosions remain visible above fog of war, incl
 
 Offboard support is assigned per scenario through **offboard_batteries**, an array of **OffboardBattery** resources. Each definition specifies its faction, weapon, rounds, response delay and flight time. Definitions are copied into independent runtime batteries; they do not create battlefield counters, observers or objectives. Existing scenario balance is unchanged unless a designer assigns support.
 
+In the battery inspector, **Weapon** is a dropdown of WeaponSpec resources in the **Mortar** and **Howitzer** families. It discovers resources across the project, including new weapons when the dropdown is opened. Selection uses the editor's normal undo and resource saving.
+
 Examples:
 
 - `res://resources/fire_support/example_81mm_battery.tres`

@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://drvniker1271f" path="res://assets/tiles/16x16_2b - Kopie.png" id="8_fy3lb"]
 [ext_resource type="TileSet" uid="uid://dky7ipek6sjb4" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_hfvsb"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/building_tile_map_layer.tscn" id="15_fy3lb"]
+[ext_resource type="Script" uid="uid://cdv7kxgdwq1so" path="res://resources/weapons/offboard_battery.gd" id="16_qktt2"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_yycqq"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="21_hi3l8"]
 [ext_resource type="Resource" uid="uid://cntsjxepp043a" path="res://resources/soldiers/united_states/platoon_leader.tres" id="22_fy3lb"]
@@ -95,6 +96,19 @@ sources/1 = SubResource("TileSetAtlasSource_fy3lb")
 sources/2 = SubResource("TileSetAtlasSource_dlgsm")
 sources/3 = SubResource("TileSetAtlasSource_qw1vt")
 sources/4 = SubResource("TileSetAtlasSource_wi054")
+
+[sub_resource type="Resource" id="Resource_harg6"]
+script = ExtResource("16_qktt2")
+metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
+
+[sub_resource type="Resource" id="Resource_yycqq"]
+script = ExtResource("26_yac84")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_qktt2"]
+script = ExtResource("16_qktt2")
+weapon = SubResource("Resource_yycqq")
+metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
 
 [sub_resource type="Resource" id="Resource_h7ai6"]
 script = ExtResource("49_hte11")
@@ -351,6 +365,7 @@ A small patrol must secure a farm on the approach to the village. There is time 
 duration_s = 600.0
 use_authored_duration = true
 released = true
+offboard_batteries = Array[ExtResource("16_qktt2")]([SubResource("Resource_harg6"), SubResource("Resource_qktt2")])
 player_team = 1
 victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_h7ai6"), SubResource("Resource_61x6b"), SubResource("Resource_uobqf")])
 axis_ai_status = 1
