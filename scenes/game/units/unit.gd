@@ -984,11 +984,11 @@ func get_rout_restriction() -> String:
 		return "Select an active squad."
 	if surrendered:
 		return "This squad has surrendered."
-	if broken or movement.retreating or action_controller.action_state == SquadActionController.SquadActionState.ROUTING:
+	if movement.retreating or action_controller.action_state == SquadActionController.SquadActionState.ROUTING:
 		return "This squad is already routed."
 	if in_close_combat:
 		return "Cannot rout during close combat."
-	if stress_system.state != STATES.MoraleState.PINNED:
+	if not broken and stress_system.state != STATES.MoraleState.PINNED:
 		return "Available while pinned."
 	return ""
 
@@ -1000,7 +1000,11 @@ func can_rout() -> bool:
 func request_rout() -> bool:
 	if not can_rout():
 		return false
-	stress_system._set_state(STATES.MoraleState.PANIC)
+	if stress_system.state == STATES.MoraleState.PANIC:
+		# A completed rout can leave morale in panic; no state-change signal fires again.
+		action_controller.on_morale_state_changed(STATES.MoraleState.PANIC, STATES.MoraleState.PANIC)
+	else:
+		stress_system._set_state(STATES.MoraleState.PANIC)
 	return true
 
 

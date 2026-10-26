@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" path="res://assets/ui/unit_selection.svg" id="4_3gpgx"]
 [ext_resource type="PackedScene" uid="uid://f0alj1u01yb5" path="res://scenes/game/effects/tracer.tscn" id="4_25msj"]
 [ext_resource type="Script" uid="uid://b85d7gbden4ih" path="res://scenes/game/units/presentation/unit_status_icons.gd" id="5_xe57g"]
-[ext_resource type="PackedScene" uid="uid://cnam7dkrou122" path="res://scenes/ui/effects/cover_icon.tscn" id="6_fekhn"]
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="6_sw8nw"]
 [ext_resource type="Texture2D" uid="uid://d0r8virbrmwn0" path="res://assets/status/idle_us.png" id="7_87qi7"]
 [ext_resource type="Texture2D" uid="uid://c1igqxirseih7" path="res://assets/states/cautious.png" id="7_755va"]
@@ -108,7 +107,6 @@ sprite_team_1 = ExtResource("3_djxcy")
 morale_popup_scene = ExtResource("4_25msj")
 morale_flash_scene = ExtResource("4_25msj")
 tracer_scene = ExtResource("4_25msj")
-cover_icon_scene = ExtResource("6_fekhn")
 cautious_texture = ExtResource("7_755va")
 pinned_texture = ExtResource("8_dhwvl")
 panic_texture = ExtResource("9_hjrgb")
@@ -184,12 +182,6 @@ offset_right = 30.0
 offset_bottom = 56.0
 text = ""
 label_settings = SubResource("LabelSettings_k7h5o")
-vertical_alignment = 1
-
-[node name="CoverLabel" type="Label" parent="." unique_id=883554322]
-visible = false
-layout_mode = 0
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BrokenLabel" type="Label" parent="." unique_id=145859798]
@@ -310,15 +302,6 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("12_sw8nw")
 expand_mode = 3
-
-[node name="Cover" type="HBoxContainer" parent="." unique_id=1339012075]
-layout_mode = 0
-offset_left = 5.0
-offset_top = 41.0
-offset_right = 45.0
-offset_bottom = 47.0
-mouse_filter = 2
-theme_override_constants/separation = 0
 
 [node name="Timer" type="Timer" parent="." unique_id=237453581]
 

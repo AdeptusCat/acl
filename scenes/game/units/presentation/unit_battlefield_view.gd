@@ -24,7 +24,6 @@ var detail_ui: UnitUi = null
 @export var morale_popup_scene: PackedScene
 @export var morale_flash_scene: PackedScene
 @export var tracer_scene: PackedScene
-@export var cover_icon_scene: PackedScene
 @export var cautious_texture: Texture
 @export var pinned_texture: Texture
 @export var panic_texture: Texture
@@ -42,8 +41,6 @@ var detail_ui: UnitUi = null
 @onready var morale_bar: UnitMoraleBar = $MoraleBar
 @onready var stress_arrows: Label = $StressLevel
 @onready var recovery_arrows: Label = $LeadershipBonus
-@onready var cover_label: Label = $CoverLabel
-@onready var cover_container: HBoxContainer = $Cover
 @onready var broken_label: Label = $BrokenLabel
 @onready var unit_selected_sprite: TextureRect = $UnitSelectedSprite
 @onready var unit_status_control: Control = $UnitStatus
@@ -380,12 +377,6 @@ func update_team_sprite(team : int, _squad_type: Globals.SquadType) -> void:
 
 
 func set_cover(cover_value: int) -> void:
-	for child: Control in cover_container.get_children():
-		child.queue_free()
-	for cover: int in cover_value:
-		var cover_icon: TextureRect = cover_icon_scene.instantiate()
-		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
-		cover_container.add_child(cover_icon)
 	if detail_ui:
 		detail_ui.set_cover(cover_value)
 
@@ -499,12 +490,6 @@ func update_bar(current: int, _max: int) -> void:
 		
 
 func _on_cover_updated(cover_value: int) -> void:
-	for child: Control in cover_container.get_children():
-		child.queue_free()
-	for cover: int in cover_value:
-		var cover_icon: TextureRect = cover_icon_scene.instantiate()
-		cover_icon.expand_mode = TextureRect.ExpandMode.EXPAND_FIT_WIDTH_PROPORTIONAL
-		cover_container.add_child(cover_icon)
 	if detail_ui:
 		detail_ui._on_cover_updated(cover_value)
 
@@ -672,7 +657,6 @@ func mark_exited() -> void:
 	$LeadershipBonus.hide()
 	$ColorRect.hide()
 	unit_selected_sprite.hide()
-	cover_container.hide()
 	rank_texture_rect.hide()
 	sprite_node.modulate = Color(0.6, 0.6, 0.6, 0.7)
 	broken_label.text = "Exited"
@@ -691,7 +675,6 @@ func die() -> void:
 	dead.show()
 	unit_status_control.hide()
 	$UnitStates.hide()
-	cover_container.hide()
 	rank_texture_rect.hide()
 	broken_label.hide()
 	_set_state_feedback(STATE_FEEDBACK.State.ELIMINATED)

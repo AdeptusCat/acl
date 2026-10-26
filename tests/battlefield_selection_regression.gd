@@ -319,9 +319,8 @@ func _test_passive_controls() -> void:
 	ui.set_cover(3)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	var cover: Control = ui.cover_container.get_child(0) as Control
-	var cover_point: Vector2 = cover.get_global_transform_with_canvas() * (cover.size * 0.5)
-	_check_pointer_passes(cover_point, "Cover icons")
+	_check(not ui.has_node("Cover"), "Defense shields are absent from the battlefield counter")
+	_check_pointer_passes(ui.get_global_transform_with_canvas() * Vector2(25.0, 44.0), "Former cover shield area")
 	ui.die()
 	await get_tree().process_frame
 	await get_tree().process_frame

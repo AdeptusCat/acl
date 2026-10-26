@@ -1,7 +1,7 @@
 extends Button
 class_name RoutButton
 
-const ROUT_EXPLANATION: String = "Pinned: normal movement is blocked.\nRout attempts an uncontrolled retreat.\nNo escape route means surrender."
+const ROUT_EXPLANATION: String = "Pinned or broken: normal movement is blocked.\nRout attempts an uncontrolled retreat.\nNo escape route means surrender."
 
 @export var alert_color: Color = Color(0.85, 0.55, 0.3, 1.0)
 @export var normal_bg_color: Color = Color(0.18, 0.12, 0.08, 1.0)

@@ -406,6 +406,19 @@ func _check_rout(world: Node, unit: Unit, other: Unit) -> void:
 	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(4))
 	_check(bool(feedback.back()["accepted"]) and _feedback_title(world).contains("Order accepted · Rout") and unit.stress_system.state == STATES.MoraleState.PANIC and unit.movement.retreating, "The wheel starts the existing uncontrolled retreat and reports acceptance")
 	_check(not unit.can_rout() and not unit.request_rout(), "A squad already routing cannot start another rout")
+	for step: int in range(16):
+		if not unit.movement.retreating:
+			break
+		unit.movement._process_movement(60.0)
+	_check(unit.broken and unit.stress_system.state == STATES.MoraleState.PANIC and not unit.movement.retreating, "A broken squad completes its first retreat while still panicked")
+	_check(unit.action_controller.action_state == SquadActionController.SquadActionState.REGROUPING and unit.can_rout(), "The completed retreat enables Rout again before morale recovery")
+	unit.in_close_combat = true
+	_check(not unit.can_rout(), "Broken squads still cannot rout out of close combat")
+	unit.in_close_combat = false
+	_check(MatchInteractionHandler.command_restriction(controller, unit.current_hex, WheelOption.Option.ROUT).is_empty(), "The wheel permits another rout for a stationary broken squad")
+	world.ui.unit_details._on_rout_pressed()
+	_check(unit.movement.retreating and unit.action_controller.action_state == SquadActionController.SquadActionState.ROUTING, "The detail button starts another retreat even when morale is already panic")
+	_check(not unit.can_rout() and not unit.request_rout(), "The repeated retreat cannot be restarted while underway")
 	controller.select_and_center_unit(other)
 	other.stress_system._set_state(STATES.MoraleState.PINNED)
 	# Isolate the squad's hex so the existing retreat search has no legal exit.
