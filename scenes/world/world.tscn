@@ -2925,7 +2925,7 @@ squads = [NodePath(".."), NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../
 objective_hex = Vector2i(11, 13)
 
 [node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe3/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="2" unique_id=1720904070 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(938, 2569)
+position = Vector2(1310, 1935)
 squad = 1
 platoon = 1
 team = 1

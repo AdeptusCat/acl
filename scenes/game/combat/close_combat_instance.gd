@@ -2,6 +2,9 @@ extends Node2D
 class_name CloseCombatInstance
 
 const FEEDBACK: Script = preload("res://scenes/game/effects/close_combat_feedback.gd")
+const TICK_SECONDS: float = 0.1
+const OPENING_SECONDS: float = 1.0
+const LETHALITY_SCALE: float = 0.18
 
 var _feedback: FEEDBACK
 
@@ -39,6 +42,7 @@ func _sync_feedback() -> void:
 			for corner: Vector2 in shape.points:
 				corners.append(ground.global_transform.basis_xform(corner))
 			_feedback.outline = corners
+	_feedback.set_opening_contact(elapsed < OPENING_SECONDS)
 	for team: Globals.Team in units_by_team:
 		var living: int = 0
 		var unknown: bool = false
@@ -112,8 +116,6 @@ var engagement_type: int = EngagementType.ASSAULT
 var participants: Array[Participant] = []
 
 var elapsed: float = 0.0
-var meeting_elapsed: float = 0.0
-var meeting_resolution_delay: float = 1.5
 
 var units_by_team: Dictionary[Globals.Team, Array] = {
 	Globals.Team.AXIS: [],
@@ -128,7 +130,6 @@ var Team_A_soldiers: Array[Soldier] = []
 var Team_B_soldiers: Array[Soldier] = []
 
 var ongoing: bool = true
-var opening_shock_done: bool = false
 
 
 
@@ -404,6 +405,16 @@ func _on_timer_timeout() -> void:
 	refresh_participants()
 	if not ongoing:
 		return
+	# Contact gives the player time to read the encounter before melee losses.
+	# Reinforcements join the existing timeline rather than restarting this phase.
+	var opening_contact: bool = elapsed < OPENING_SECONDS
+	elapsed = snappedf(elapsed + TICK_SECONDS, TICK_SECONDS)
+	for participant: Participant in participants:
+		participant.time_in_instance += TICK_SECONDS
+	if is_instance_valid(_feedback):
+		_feedback.set_opening_contact(elapsed < OPENING_SECONDS)
+	if opening_contact:
+		return
 
 	var participants_duplicate: Array[Participant] = participants.duplicate()
 	for participant: Participant in participants_duplicate:
@@ -419,7 +430,7 @@ func _on_timer_timeout() -> void:
 				break
 			if not soldier.is_alive or not participant.unit.squad_fire.soldiers.has(soldier):
 				continue
-			soldier.cooldown_remaining -= 0.1
+			soldier.cooldown_remaining -= TICK_SECONDS
 			if soldier.cooldown_remaining <= 0.0:
 				soldier.cooldown_remaining = get_soldier_colldown_time(soldier, participant.unit.stress_system.state)
 				var enemy_soldiers: Array
@@ -438,8 +449,7 @@ func _on_timer_timeout() -> void:
 					casualty_chance = get_soldier_attack_strength(soldier) / (get_soldier_attack_strength(soldier) + get_soldier_defense_strength(enemy_soldier))
 				if participant.side_role == SideRole.DEFENDER:
 					casualty_chance = get_soldier_defense_strength(soldier) / (get_soldier_defense_strength(soldier) + get_soldier_attack_strength(enemy_soldier))
-				var lethality_scale: float = 0.3
-				casualty_chance *= lethality_scale
+				casualty_chance *= LETHALITY_SCALE
 				var min_chance: float = 0.05
 				var max_chance: float = 0.80
 				if casualty_chance < min_chance or casualty_chance > max_chance:

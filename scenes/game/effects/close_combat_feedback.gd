@@ -18,6 +18,7 @@ var recent_losses: Dictionary[Globals.Team, int] = {Globals.Team.AXIS: 0, Global
 var loss_remaining: Dictionary[Globals.Team, float] = {Globals.Team.AXIS: 0.0, Globals.Team.ALLIES: 0.0}
 var strikes: Array[Dictionary] = []
 var resolved: bool = false
+var opening_contact: bool = false
 var result_text: String = "COMBAT ENDED"
 var elapsed: float = 0.0
 var result_elapsed: float = 0.0
@@ -47,6 +48,11 @@ func can_display() -> bool:
 func set_force(team: Globals.Team, living: int, role: String) -> void:
 	counts[team] = living
 	roles[team] = role
+	queue_redraw()
+
+
+func set_opening_contact(value: bool) -> void:
+	opening_contact = value
 	queue_redraw()
 
 
@@ -164,7 +170,10 @@ func _draw() -> void:
 	if resolved:
 		_text(result_text, Vector2(0.0, -25.0), 14, Color(1.0, 0.88, 0.60))
 	else:
-		_text("CLOSE COMBAT", Vector2(0.0, -38.0), 12, Color(1.0, 0.85, 0.52))
+		var heading: String = "CLOSE COMBAT"
+		if opening_contact:
+			heading = "CLOSE CONTACT"
+		_text(heading, Vector2(0.0, -38.0), 12, Color(1.0, 0.85, 0.52))
 		_text("vs", Vector2(0.0, -20.0), 10, Color(0.8, 0.77, 0.69))
 		var teams: Array[Globals.Team] = [Globals.Team.ALLIES, Globals.Team.AXIS]
 		var names: Array[String] = ["US", "GER"]

@@ -29,6 +29,10 @@ func _run() -> void:
 	controller = world.game_controller
 	_freeze_simulation(main)
 	Debug.no_damage = false
+	if OS.get_cmdline_user_args().has("--tempo"):
+		await _test_resolution_tempo()
+	_test_opening_timing()
+	await _clear_fixtures()
 	_test_feedback()
 	await _clear_fixtures()
 	_test_admission_and_surrender()
@@ -68,6 +72,77 @@ func _run() -> void:
 	Globals.casualty_history = original_history
 	print("Close combat regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_resolution_tempo() -> void:
+	# Isolate melee pacing: fixed morale, open terrain, no outside fire.
+	# Run with -- --tempo to sample forty seeded fights per matchup.
+	for mode: int in range(3):
+		var durations: Array[float] = []
+		var first_losses: Array[float] = []
+		for trial: int in range(40):
+			seed(931 + trial)
+			var axis: Unit = _create_unit(Globals.Team.AXIS, 10)
+			axis.is_moving = true
+			var enemy_size: int = 10
+			if mode == 2:
+				enemy_size = 2
+			var allies: Unit = _create_unit(Globals.Team.ALLIES, enemy_size)
+			if mode == 1:
+				allies.stress_system.state = UnitStates.MoraleState.PINNED
+			var combat: CloseCombatInstance = _discover_combat()
+			combat.terrain_defense_value = 0
+			for participant: CloseCombatInstance.Participant in combat.participants:
+				for soldier: Soldier in participant.unit.squad_fire.soldiers:
+					soldier.cooldown_remaining = combat.get_soldier_colldown_time(soldier, participant.unit.stress_system.state)
+			var ticks: int = 0
+			var first_loss: float = -1.0
+			while combat.ongoing and ticks < 3000:
+				ticks += 1
+				combat._on_timer_timeout()
+				if first_loss < 0.0 and axis.members_alive + allies.members_alive < 10 + enemy_size:
+					first_loss = float(ticks) * CloseCombatInstance.TICK_SECONDS
+			_check(not combat.ongoing and first_loss > CloseCombatInstance.OPENING_SECONDS, "Seeded melee finishes after its opening contact")
+			durations.append(float(ticks) * CloseCombatInstance.TICK_SECONDS)
+			first_losses.append(first_loss)
+			await _clear_fixtures()
+		durations.sort()
+		first_losses.sort()
+		var median: float = durations[20]
+		if mode == 0:
+			_check(median >= 10.0 and median <= 15.0, "Equal fresh rifle squads have a 10–15 second median resolution")
+		elif mode == 1:
+			_check(median < 10.0, "Pinned defenders resolve faster than a contested fresh-squad fight")
+		else:
+			_check(median < 5.0, "An isolated two-man remnant still resolves quickly")
+		print("Close combat tempo matchup=", mode, " median=", median, " p10=", durations[4], " p90=", durations[36], " first loss median=", first_losses[20])
+
+
+func _test_opening_timing() -> void:
+	var axis: Unit = _create_unit(Globals.Team.AXIS, 3)
+	axis.is_moving = true
+	var allies: Unit = _create_unit(Globals.Team.ALLIES, 3)
+	var combat: CloseCombatInstance = _discover_combat()
+	for soldier: Soldier in axis.squad_fire.soldiers:
+		soldier.cooldown_remaining = 0.0
+	_check(combat._feedback.opening_contact, "New encounters show close contact before resolving losses")
+	seed(482)
+	var next_random: float = randf()
+	seed(482)
+	for tick: int in range(9):
+		combat._on_timer_timeout()
+	_check(axis.members_alive == 3 and allies.members_alive == 3 and combat._feedback.strikes.is_empty(), "Opening contact cannot resolve melee attacks or casualties")
+	_check(randf() == next_random, "Opening contact does not roll attacks")
+	var reinforcement: Unit = _create_unit(Globals.Team.AXIS, 2)
+	reinforcement.is_moving = true
+	combat.add_unit(reinforcement)
+	var entrant: CloseCombatInstance.Participant = combat.participants.back()
+	_check(is_equal_approx(entrant.joined_at, 0.9) and entrant.entry_role == CloseCombatInstance.EntryRole.ATTACKER_REINFORCEMENT, "The advancing encounter clock identifies late reinforcements")
+	combat._on_timer_timeout()
+	_check(axis.members_alive == 3 and allies.members_alive == 3 and not combat._feedback.opening_contact, "A full second of contact precedes melee resolution")
+	_check(is_equal_approx(entrant.time_in_instance, 0.1), "Participant time counts only time since admission")
+	combat._on_timer_timeout()
+	_check(axis.squad_fire.soldiers[0].cooldown_remaining > 0.0 and is_equal_approx(combat.elapsed, 1.1), "Ready soldiers attack after contact without restarting for reinforcements")
 
 
 func _test_feedback() -> void:
@@ -417,11 +492,14 @@ func _test_live_timer() -> void:
 	var timer: Timer = combat.get_node("Timer") as Timer
 	timer.start()
 	await timer.timeout
+	_check(is_equal_approx(combat.elapsed, 0.1) and axis.squad_fire.soldiers[0].cooldown_remaining == 100.0, "The real timer advances contact without consuming attack cooldowns")
+	for tick: int in range(10):
+		await timer.timeout
 	var remaining_cooldown: float = axis.squad_fire.soldiers[0].cooldown_remaining
 	_check(remaining_cooldown < 100.0 and combat.ongoing, "The scene's real timer advances an active encounter")
-	allies.surrender()
+	allies.die()
 	await get_tree().create_timer(0.15).timeout
-	_check(not is_instance_valid(combat) and not axis.in_close_combat, "Live timer encounter is freed after the last enemy surrenders")
+	_check(not is_instance_valid(combat) and not axis.in_close_combat, "Live timer encounter is freed after the last enemy dies")
 	_check(axis.squad_fire.soldiers[0].cooldown_remaining == remaining_cooldown, "A stopped encounter cannot advance its fighters again")
 
 
