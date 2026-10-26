@@ -34,14 +34,13 @@ victory condition requires. A surviving HQ also withdraws when the combat squads
 are gone. Pinned units still wait until movement is possible.
 
 Withdrawal remains committed until a new match begins. Changing ATTACK/DEFEND
-or switching AI OFF/ON preserves it. Enemy denial duties do not pull withdrawing
-squads back to the abandoned hold. Safe accepted moves finish before their
+or switching AI OFF/ON preserves it. Strategic duties come only from the
+AI side's own victory conditions. Safe accepted moves finish before their
 squad changes duty; movement and route safety checks continue to apply.
 
-Before fallback activates, an opponent's **Prevent Enemy Exit** condition cannot
-create an early exit duty for the linked marker group. Once withdrawal is
-authorized, reaching those markers also denies the opponent's prevention goal.
-Denial duties for other marker groups or other conditions remain available.
+An opponent's **Prevent Enemy Exit** condition never creates an AI exit duty.
+Withdrawal requires the AI's own linked exit condition and fallback policy.
+Reaching those exits still affects the opponent's prevention score normally.
 
 **Withdraw Entire Force** defaults to ON and includes rifles, MG, and HQ.
 Squads stay assigned to the exit after they have been counted. Pinned squads

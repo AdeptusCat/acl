@@ -2840,7 +2840,7 @@ func _test_defense_mission_context() -> void:
 	platoon.set_squads([own])
 	var director: DefenseDirector = DefenseDirector.new()
 	director.platoon_ai = platoon
-	director.objective_source = DefenseDirector.ObjectiveSource.OPPONENT_CAPTURE_TARGET
+	director.objective_source = DefenseDirector.ObjectiveSource.LEGACY_FORCE_ANCHOR
 	var previous: Dictionary[Globals.Team, ObjectivesCollection] = Globals.objectives.duplicate()
 	var targets: ObjectivesCollection = ObjectivesCollection.new()
 	var objective: ObjectiveDefinition = ObjectiveDefinition.new()
@@ -2849,7 +2849,7 @@ func _test_defense_mission_context() -> void:
 	targets.objectives.append(objective)
 	Globals.objectives[enemy.team] = targets
 	director.configure_for_match([own])
-	_check(director.objective_hex == objective.hex, "Defender resolves the opponent's actual capture marker rather than its starting anchor")
+	_check(director.objective_hex == own.current_hex, "Legacy opponent-target configuration stays at its own platoon anchor")
 	director.exposure_budget_seconds = 3.0
 	director.open_crossing_budget_seconds = 0.75
 	director.defense_responsibility = PositionQuery.Responsibility.GUARD

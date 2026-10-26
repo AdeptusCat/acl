@@ -31,7 +31,7 @@ func _run() -> void:
 			headquarters_found = true
 		unit.platoon = 1
 		unit.formation_id = 1
-	# Keep this denial fixture independent of authored scenario victory edits.
+	# Keep this objective-ownership fixture independent of authored scenario victory edits.
 	var occupation: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
 	occupation.team = Globals.Team.ALLIES
 	var exit: ExitUnitsCondition = ExitUnitsCondition.new()
@@ -59,8 +59,8 @@ func _run() -> void:
 	for condition: VictoryCondition in scenario.victory_conditions:
 		if condition is OccupyObjectiveCondition:
 			player_objective = (condition as OccupyObjectiveCondition).state.hexes[0]
-	_check(planner.current_order.objective_hex == player_objective, "OutpostProbe AI protects the player's actual occupation objective")
-	_check(planner.goal_director != null and planner.goal_director.primary.kind == ScenarioGoalTask.Kind.DENY_OCCUPATION, "A side without victory conditions gets a denial mission")
+	_check(planner.current_order.objective_hex != player_objective, "AI without its own objectives does not target the player occupation objective")
+	_check(planner.goal_director != null and planner.goal_director.primary == null and planner.goal_director.tasks.is_empty(), "A side without victory conditions receives no strategic objective tasks")
 	_check(controller._ai_goal_directors[Globals.Team.ALLIES].fallback_policies == [authored_fallback] and planner.goal_director.fallback_policies.is_empty(), "Match setup loads explicit policies for their owning side only")
 	for frame: int in range(900):
 		await get_tree().process_frame
@@ -86,10 +86,10 @@ func _run() -> void:
 	_test_bound_stability()
 	_test_recovered_defender()
 	_test_enemy_knowledge()
-	_test_denial_switch()
+	_test_enemy_conditions_ignored()
 	_test_fallback_authoring()
 	_test_hold_to_exit_fallback()
-	_test_counter_exit_fallback_gate()
+	_test_own_exit_fallback_gate()
 	_test_fallback_minimum_force()
 	_test_multi_objective_fallback()
 	main.queue_free()
@@ -134,14 +134,15 @@ func _test_occupation() -> void:
 	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(planner.team))[0]
 	var enemy_hex: Vector2i = enemy.current_hex
 	var condition: OccupyObjectiveCondition = _occupy([friendly.current_hex])
+	condition.required_time_s = 5.0
 	friendly.stress_system.state = UnitStates.MoraleState.PINNED
 	condition.advance_time(3.0)
-	_check(condition.is_condition_met(), "A pinned squad already on an objective still counts under the occupation rules")
+	_check(condition.state.required_times_reached_s[friendly.current_hex] == 3.0, "A pinned squad already on an objective still counts under the occupation rules")
 	_set_hex(enemy, friendly.current_hex)
 	condition.advance_time(0.1)
-	_check(not condition.is_condition_met(), "A good-order enemy in the same hex resets occupation")
+	_check(not condition.is_condition_met() and condition.state.required_times_reached_s[friendly.current_hex] == 0.0, "A good-order enemy in the same hex resets unfinished occupation")
 	condition.contested_by_enemy_presence = false
-	condition.advance_time(3.0)
+	condition.advance_time(5.0)
 	_check(condition.is_condition_met(), "The authored contest setting is respected")
 	_set_hex(enemy, enemy_hex)
 	friendly.stress_system.state = UnitStates.MoraleState.NORMAL
@@ -348,7 +349,7 @@ func _test_recovered_defender() -> void:
 	snapshot.defensive_contacts[planner.team] = []
 
 
-func _test_denial_switch() -> void:
+func _test_enemy_conditions_ignored() -> void:
 	var owner: Globals.Team = Globals.get_enemy_team(planner.team)
 	var destroy: DestroyUnitsCondition = DestroyUnitsCondition.new()
 	destroy.team = owner
@@ -362,10 +363,19 @@ func _test_denial_switch() -> void:
 	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
 	goals.configure(planner.team, [destroy, exit], PositionProfile.Mode.DEFEND)
 	goals.initial_order(planner, MissionOrder.new(), 300.0)
-	_check(goals.tasks.size() == 1 and goals.tasks[0].kind == ScenarioGoalTask.Kind.PRESERVE, "Denial chooses one remaining bottleneck rather than defending every condition")
+	_check(goals.conditions.is_empty() and goals.tasks.is_empty(), "Enemy destruction and exit conditions do not create AI tasks")
 	destroy.required_unit_count = 0
 	goals.initial_order(planner, MissionOrder.new(), 300.0)
-	_check(goals.primary != null and goals.primary.kind == ScenarioGoalTask.Kind.BLOCK_EXIT, "Once destruction is complete, denial switches to the still-unfinished exit condition")
+	_check(goals.primary == null and goals.tasks.is_empty(), "Completing an enemy condition does not redirect the AI to another enemy condition")
+	var own: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	var enemy_capture: OccupyObjectiveCondition = _occupy([rifles[1].current_hex])
+	enemy_capture.team = owner
+	goals.configure(planner.team, [own, enemy_capture, destroy, exit], PositionProfile.Mode.DEFEND)
+	goals.initial_order(planner, MissionOrder.new(), 300.0)
+	_check(goals.tasks.size() == 1 and goals.primary.condition == own, "Mixed victory conditions generate only the AI's own occupation duty")
+	enemy_capture.state.victory_conditions_met[rifles[1].current_hex] = true
+	goals.initial_order(planner, MissionOrder.new(), 300.0)
+	_check(goals.tasks.size() == 1 and goals.primary.condition == own and goals.primary.hex == rifles[0].current_hex, "Player capture progress does not redirect the AI from its own objective")
 
 
 func _fallback_exit(hex: Vector2i) -> ExitUnitsCondition:
@@ -551,7 +561,7 @@ func _has_goal_task(goals: ScenarioGoalDirector, kind: ScenarioGoalTask.Kind, co
 	return false
 
 
-func _test_counter_exit_fallback_gate() -> void:
+func _test_own_exit_fallback_gate() -> void:
 	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
 	planner.executor.cancel_all(true)
 	planner.position_stability.clear()
@@ -576,7 +586,7 @@ func _test_counter_exit_fallback_gate() -> void:
 	var early_exit: bool = false
 	for task: ScenarioGoalTask in goals.assignments.values():
 		early_exit = early_exit or (task.kind == ScenarioGoalTask.Kind.EXIT and task.condition == prevention)
-	_check(early_exit, "Without a fallback policy, a spare squad still receives the ordinary counter-exit duty")
+	_check(not early_exit, "Spare squads receive no exit duty from enemy prevention conditions")
 	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
 	planner.receive_mission_order(goals.initial_order(planner, MissionOrder.new(), 10000.0))
 	goals.update(planner, 10000.0, 301.0)
@@ -584,7 +594,7 @@ func _test_counter_exit_fallback_gate() -> void:
 	var premature_assignment: bool = false
 	for task: ScenarioGoalTask in goals.assignments.values():
 		premature_assignment = premature_assignment or task.kind == ScenarioGoalTask.Kind.EXIT
-	_check(not premature_assignment and not goals.diagnostics.is_empty(), "Spare squads receive no exit assignment while the fallback is deferred")
+	_check(not premature_assignment, "Spare squads receive no exit assignment while the fallback is deferred")
 	hold.required_unit_count = 99
 	goals.update(planner, 10000.0, 302.0)
 	goals.update(planner, 10000.0, 306.0)
@@ -600,11 +610,11 @@ func _test_counter_exit_fallback_gate() -> void:
 	policy.enabled = false
 	goals.configure(planner.team, conditions, PositionProfile.Mode.DEFEND, [policy])
 	goals.initial_order(planner, MissionOrder.new(), 10000.0)
-	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "A disabled policy does not suppress ordinary counter-exit behavior")
+	_check(not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Enemy prevention does not create exit duties with a disabled policy")
 	policy.enabled = true
 	goals.configure(planner.team, [hold, prevention], PositionProfile.Mode.DEFEND, [policy])
 	goals.initial_order(planner, MissionOrder.new(), 10000.0)
-	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "An invalid policy link cannot silently forbid an otherwise valid exit duty")
+	_check(not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Invalid policy links do not create duties from enemy conditions")
 	var other_prevention: PreventEnemyExitCondition = PreventEnemyExitCondition.new()
 	other_prevention.team = prevention.team
 	other_prevention.outcome_level = VictoryCondition.OutcomeLevel.MINOR
@@ -613,12 +623,12 @@ func _test_counter_exit_fallback_gate() -> void:
 	other_prevention.state.exit_hexes = hold.state.hexes.duplicate()
 	goals.configure(planner.team, [hold, exit, other_prevention], PositionProfile.Mode.DEFEND, [policy])
 	goals.initial_order(planner, MissionOrder.new(), 10000.0)
-	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, other_prevention), "The fallback gate applies to its linked marker group rather than unrelated objectives")
+	_check(not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, other_prevention), "Unrelated enemy prevention conditions do not create exit duties")
 	var enemy_exit: ExitUnitsCondition = _fallback_exit(rifles[1].current_hex)
 	enemy_exit.team = prevention.team
 	goals.configure(planner.team, [hold, exit, prevention, enemy_exit], PositionProfile.Mode.DEFEND, [policy])
 	goals.initial_order(planner, MissionOrder.new(), 10000.0)
-	_check(_has_goal_task(goals, ScenarioGoalTask.Kind.BLOCK_EXIT, enemy_exit) and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Deferred counter-exit leaves another necessary enemy condition available for denial")
+	_check(not _has_goal_task(goals, ScenarioGoalTask.Kind.BLOCK_EXIT, enemy_exit) and not _has_goal_task(goals, ScenarioGoalTask.Kind.EXIT, prevention), "Enemy exit and prevention conditions never create strategic duties")
 
 
 func _test_fallback_minimum_force() -> void:

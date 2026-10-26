@@ -30,19 +30,19 @@ enum AIMode { ATTACK, DEFEND }
 @export var victory_conditions: Array[VictoryCondition] = []
 
 @export_group("AI")
-## Explicit strategic links. Without a policy, the director uses ordinary victory priorities.
+## Explicit strategic links. Without a policy, the director uses its own victory priorities.
 @export var ai_fallback_policies: Array[HoldToExitFallbackPolicy] = []
 ## Explicit escape missions take precedence over tactical posture and enemy denial duties.
 @export var ai_escape_policies: Array[EscapeMissionPolicy] = []
 @export_subgroup("Axis", "axis_ai_")
 ## Controls automatic Axis orders independently of the selected player side.
 @export_enum("OFF", "ON") var axis_ai_status: int = AIStatus.OFF
-## Tactical posture. Strategic destinations come from both sides' victory conditions.
+## Tactical posture. Strategic destinations come from this side's victory conditions.
 @export_enum("ATTACK", "DEFEND") var axis_ai_mode: int = AIMode.DEFEND
 @export_subgroup("Allies", "allies_ai_")
 ## Controls automatic Allied orders independently of the selected player side.
 @export_enum("OFF", "ON") var allies_ai_status: int = AIStatus.ON
-## Tactical posture. Strategic destinations come from both sides' victory conditions.
+## Tactical posture. Strategic destinations come from this side's victory conditions.
 @export_enum("ATTACK", "DEFEND") var allies_ai_mode: int = AIMode.DEFEND
 @export_group("")
 

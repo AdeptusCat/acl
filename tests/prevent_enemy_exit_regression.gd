@@ -244,15 +244,11 @@ func _test_goals() -> void:
 	_set_conditions([condition])
 	goals.configure(Globals.Team.AXIS, [condition], PositionProfile.Mode.ASSAULT)
 	order = goals.initial_order(planner, MissionOrder.new(), 1200.0)
-	_check(goals.primary != null and goals.primary.kind == ScenarioGoalTask.Kind.EXIT and order.objective_hex == Vector2i(10, 10), "Denying the opponent's prevention condition targets our own exits")
-	_check(goals.primary.required_units == 2 and goals.primary.exit_capacity() == 2 and ScenarioGoalTask.exit_state_for(goals.primary.condition) == condition.state, "Counter-exit duties use the correct distinct-unit quota and ledger")
+	_check(goals.primary == null and goals.tasks.is_empty(), "Enemy prevention conditions do not create AI counter-exit duties")
 	condition.record_unit_entry(friendly, Vector2i(10, 10))
 	goals.initial_order(planner, MissionOrder.new(), 1200.0)
-	_check(goals.primary.required_units == 1, "Counter-exit duties subtract squads already recorded")
-	var second: Unit = Globals.get_units_for_team(Globals.Team.AXIS)[1]
-	condition.record_unit_entry(second, Vector2i(10, 10))
-	goals.initial_order(planner, MissionOrder.new(), 1200.0)
-	_check(goals.tasks.is_empty(), "Once prevention is denied, the director releases counter-exit duties")
+	_check(goals.tasks.is_empty(), "Enemy prevention progress does not create AI objectives")
+
 
 
 func _freeze(node: Node) -> void:

@@ -52,6 +52,7 @@
 [ext_resource type="Texture2D" uid="uid://ba7swy07te61o" path="res://assets/objectives/allies_a.png" id="52_sfbom"]
 [ext_resource type="Texture2D" uid="uid://bm1dwvmp0x7k3" path="res://assets/objectives/allies_b.png" id="53_tii1o"]
 [ext_resource type="Texture2D" uid="uid://dvigi28x8fe3i" path="res://assets/objectives/allies_c.png" id="54_1k02o"]
+[ext_resource type="Script" uid="uid://bity868dvulei" path="res://scenes/scenarios/reinforcements/reinforcement_definition.gd" id="55_7c7xa"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/wall_tile_map_layer.tscn" id="ConnectedWallLayer"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/road_tile_map_layer.tscn" id="SharedRoadLayer"]
 
@@ -376,6 +377,7 @@ allies_ai_status = 0
 
 [node name="CA_P1_S0_Allies_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=437630089 instance=ExtResource("19_yycqq")]
 position = Vector2(256, 832)
+map_unit_id = "3978deaa85ac0a5b546ce0c9176b4a10"
 platoon = 1
 team = 1
 loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("22_fy3lb"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
@@ -388,6 +390,7 @@ squad_type = 4
 
 [node name="CA_P1_S1_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=1222315829 instance=ExtResource("19_yycqq")]
 position = Vector2(256, 704)
+map_unit_id = "6dac8ebad69bdfb53aca76118a03e8c2"
 squad = 1
 platoon = 1
 team = 1
@@ -400,6 +403,7 @@ formation_id = 1
 
 [node name="CA_P1_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=2004293180 instance=ExtResource("19_yycqq")]
 position = Vector2(256, 960)
+map_unit_id = "93d76a59f9687359ab9ca9f10a85631b"
 squad = 2
 platoon = 1
 team = 1
@@ -412,6 +416,7 @@ formation_id = 1
 
 [node name="CA_P1_S0_Axis_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=1434628940 instance=ExtResource("19_yycqq")]
 position = Vector2(1408, 704)
+map_unit_id = "585bebb95ad41910157f0a8f4f2b0372"
 platoon = 1
 loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("35_lds10"), ExtResource("36_0kr27"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
 squad_loadout = ExtResource("38_g4gys")
@@ -423,9 +428,49 @@ squad_type = 4
 
 [node name="CA_P1_S1_Axis_Rifle" parent="Scenarios/Mission/Units" unique_id=1041334340 instance=ExtResource("19_yycqq")]
 position = Vector2(1216, 704)
+map_unit_id = "9038860c28cd69e23aeeca142930a0a0"
 squad = 1
 platoon = 1
 loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("39_s51u0"), ExtResource("36_0kr27"), ExtResource("40_w5w0i"), ExtResource("41_74mrj"), ExtResource("42_bw8uw"), ExtResource("43_lwyq0"), ExtResource("43_lwyq0"), ExtResource("43_lwyq0"), ExtResource("43_lwyq0"), ExtResource("43_lwyq0")])
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+
+[node name="CA_P2_S0_Allies_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=405853988 instance=ExtResource("19_yycqq")]
+position = Vector2(73, 841)
+map_unit_id = "55649dae29ca3e401a1ec4434f3d8f92"
+platoon = 2
+team = 1
+loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("22_fy3lb"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+squad_loadout = ExtResource("25_wi054")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squad_type = 4
+
+[node name="CA_P2_S1_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=618277268 instance=ExtResource("19_yycqq")]
+position = Vector2(50, 711)
+map_unit_id = "663916258585e352dc17d3b898603767"
+squad = 1
+platoon = 2
+team = 1
+loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
+squad_loadout = ExtResource("34_26mfj")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+
+[node name="CA_P2_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=263471798 instance=ExtResource("19_yycqq")]
+position = Vector2(55, 970)
+map_unit_id = "53e412e3b4772aaace0cfd952a6faadd"
+squad = 2
+platoon = 2
+team = 1
+loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
+squad_loadout = ExtResource("34_26mfj")
 default_rifle = SubResource("Resource_v8x2n")
 default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
@@ -442,3 +487,15 @@ script = ExtResource("4_gq6xk")
 tile_map_data = PackedByteArray("AAAMAAUABgAAAAAAAAACAAYAAgAAAAAAAAAGAAcABwAAAAAAAAA=")
 tile_set = SubResource("TileSet_cwow2")
 script = ExtResource("4_gq6xk")
+
+[node name="Reinforcements" type="Node" parent="Scenarios/Mission" unique_id=1886768851]
+
+[node name="Reinforcement" type="Node" parent="Scenarios/Mission/Reinforcements" unique_id=140689895]
+script = ExtResource("55_7c7xa")
+reinforcement_id = "4275a42afe3b0d2f8c476f95ae68bc56"
+display_name = "Second Platoon"
+team = 1
+unit_ids = PackedStringArray("55649dae29ca3e401a1ec4434f3d8f92", "663916258585e352dc17d3b898603767", "53e412e3b4772aaace0cfd952a6faadd")
+expected_seconds = 5.0
+variation_seconds = 2.0
+entry_zone = "West Road"

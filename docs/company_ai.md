@@ -52,7 +52,11 @@ assigned garrison moves to the marker. A confirmed enemy occupying the objective
 can trigger a counterattack by a maneuver-capable platoon. Mortars cannot receive
 direct hunting duties or take ownership of the rifle platoons' defensive sectors.
 
-Our occupation and enemy occupation-denial tasks at the same hex share one duty.
+Strategic duties come exclusively from the AI side's own victory conditions.
+Player victory conditions do not create capture-denial, counter-exit, or
+force-preservation missions. An AI side without geographic objectives stays
+anchored to its own force.
+
 The platoon does not allocate an additional automatic guard when a scenario duty
 already protects its objective. Squads remaining after scenario allocation cover
 approaches. Small forces retain all needed combat squads; larger forces can keep
@@ -88,8 +92,8 @@ screen after any accepted movement and setup finish.
 
 The existing exposure limits, screen preservation, safe handoffs and position
 commitments remain in force. An occupation duty retains objective protection;
-denial-only defense can intercept farther forward without inventing a physical
-garrison requirement. Advice exposes `approach_duty`, `assigned_coverage`,
+other defensive assignments can intercept farther forward without inventing a
+physical garrison requirement. Advice exposes `approach_duty`, `assigned_coverage`,
 `formation_crowding`, `mutual_support`, `forward_depth`, `forward_progress` and
 `screen_fallback` for inspection.
 

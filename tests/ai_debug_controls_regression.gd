@@ -36,7 +36,18 @@ func _run() -> void:
 		scenario.allies_ai_status = Scenario.AIStatus.ON
 		scenario.axis_ai_mode = Scenario.AIMode.ATTACK
 		scenario.allies_ai_mode = Scenario.AIMode.ATTACK
-	# Both sides need distinct capture markers to verify attack objective selection.
+	# Use explicit own objectives and distinct markers, independent of authored mission edits.
+	var own_conditions: Array[VictoryCondition] = []
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		var condition: OccupyObjectiveCondition = OccupyObjectiveCondition.new()
+		condition.team = team
+		own_conditions.append(condition)
+		var layer: HexagonTileMapLayer = scenario.get_objectives_layer(team)
+		for hex: Vector2i in layer.get_used_cells():
+			var tile: TileData = layer.get_cell_tile_data(hex)
+			if tile != null and tile.get_custom_data("objective_id") == 1:
+				layer.erase_cell(hex)
+	scenario.victory_conditions = own_conditions
 	scenario.axis_objectives_tile_map_layer.set_cell(Vector2i(10, 12), 3, Vector2i.ZERO)
 	scenario.allied_objectives_tile_map_layer.set_cell(Vector2i(17, 11), 6, Vector2i.ZERO)
 	Globals.map_chosen = map
@@ -60,7 +71,7 @@ func _run() -> void:
 		_check(controller.get_team_ai_mode(planner.team) == scenario.get_ai_mode(planner.team) and mode_selector.get_selected_id() == scenario.get_ai_mode(planner.team), "Scenario AI mode initializes the controller and debug selector, including while OFF")
 		if planner.current_order != null:
 			_check(mode_selector.get_selected_id() == planner.current_order.position_mode, "Initial mode reflects the scenario mission")
-			_check(_is_victory_goal(planner.team, planner.current_order.objective_hex), "Scenario posture uses an actual own or opposing victory objective")
+			_check(_is_victory_goal(planner.team, planner.current_order.objective_hex), "Scenario posture uses an own victory objective or own force anchor")
 		_test_side(controller, planner, status_selector, mode_selector)
 	_test_disabled_mode(controller, panel, allies)
 	main.queue_free()
@@ -111,7 +122,7 @@ func _test_side(controller: Node2D, planner: PlatoonAI, status_selector: OptionB
 	_select(mode_selector, PositionProfile.Mode.ASSAULT)
 	var attack: MissionOrder = planner.current_order
 	_check(attack.position_mode == PositionProfile.Mode.ASSAULT and attack.execution_intent == TacticalPositionExecutor.Intent.ASSAULT, "ATTACK enables coordinated assault planning and execution")
-	_check(_is_victory_goal(planner.team, attack.objective_hex), "ATTACK pursues or denies a configured victory objective")
+	_check(_is_victory_goal(planner.team, attack.objective_hex), "ATTACK uses an own objective or force anchor")
 	_check(attack.reserve_policy == MissionOrder.ReservePolicy.NONE and attack.sector_cells.is_empty(), "ATTACK releases fighting squads from defensive reserves and sectors")
 	var rifle: Unit
 	var hq: Unit
@@ -126,7 +137,7 @@ func _test_side(controller: Node2D, planner: PlatoonAI, status_selector: OptionB
 	_check(move != null and planner.executor.execute(move), "The selected AI owns an actual move before switching mode")
 	_select(mode_selector, PositionProfile.Mode.DEFEND)
 	_check(rifle.movement.path_hexes.is_empty() and rifle.movement.target_hex == rifle.current_hex and planner.executor.pending.is_empty(), "Changing mode cancels the previous AI route and pending execution")
-	_check(planner.current_order.position_mode == PositionProfile.Mode.DEFEND and _is_victory_goal(planner.team, planner.current_order.objective_hex), "DEFEND protects a configured victory objective")
+	_check(planner.current_order.position_mode == PositionProfile.Mode.DEFEND and _is_victory_goal(planner.team, planner.current_order.objective_hex), "DEFEND uses an own objective or force anchor")
 	_check(rifle.squad_ai_controller.defensive_mission_controlled, "DEFEND assigns positioning to the platoon planner")
 	move = _movement_result(rifle)
 	_check(move != null and planner.executor.execute(move), "The selected AI owns an actual move before OFF")
@@ -158,7 +169,7 @@ func _test_disabled_mode(controller: Node2D, panel: PanelContainer, planner: Pla
 	_check(not planner.active and planner.current_order == null, "Selecting ATTACK while OFF does not activate or issue orders")
 	_check(controller.get_team_ai_mode(planner.team) == PositionProfile.Mode.ASSAULT, "Disabled AI remembers its chosen mode")
 	_select(panel.allies_ai_status, 1)
-	_check(planner.active and planner.current_order.position_mode == PositionProfile.Mode.ASSAULT and _is_victory_goal(planner.team, planner.current_order.objective_hex), "ON uses the posture selected while OFF and a configured victory objective")
+	_check(planner.active and planner.current_order.position_mode == PositionProfile.Mode.ASSAULT and _is_victory_goal(planner.team, planner.current_order.objective_hex), "ON uses the posture selected while OFF and an own objective or force anchor")
 	var retained: MissionOrder = planner.current_order
 	_select(panel.allies_ai_mode, PositionProfile.Mode.ASSAULT)
 	_check(planner.current_order == retained, "Selecting the current mode does not restart the mission")
@@ -200,22 +211,15 @@ func _capture_hex(team: Globals.Team) -> Vector2i:
 
 func _is_victory_goal(team: Globals.Team, hex: Vector2i) -> bool:
 	var own: Array[Vector2i] = []
-	var opposing: Array[Vector2i] = []
 	for condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
-		if condition is OccupyObjectiveCondition:
-			var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
-			if condition.team == team:
-				own.append_array(occupy.state.hexes)
-			else:
-				opposing.append_array(occupy.state.hexes)
-	if not own.is_empty():
-		return own.has(hex)
-	for condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
-		if condition is DestroyUnitsCondition and condition.team != team:
-			for unit: Unit in Globals.get_units_for_team(team):
-				if unit.current_hex == hex:
-					return true
-	return opposing.has(hex)
+		if condition is OccupyObjectiveCondition and condition.team == team:
+			own.append_array((condition as OccupyObjectiveCondition).state.hexes)
+	if own.has(hex):
+		return true
+	for unit: Unit in Globals.get_units_for_team(team):
+		if unit.current_hex == hex:
+			return true
+	return false
 
 
 func _select(selector: OptionButton, id: int) -> void:

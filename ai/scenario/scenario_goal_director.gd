@@ -38,7 +38,10 @@ var _breach_pending: bool = false
 
 func configure(owner: Globals.Team, scenario_conditions: Array[VictoryCondition], mode: PositionProfile.Mode, policies: Array[HoldToExitFallbackPolicy] = [], escapes: Array[EscapeMissionPolicy] = []) -> void:
 	team = owner
-	conditions = scenario_conditions.duplicate()
+	conditions.clear()
+	for condition: VictoryCondition in scenario_conditions:
+		if condition != null and condition.team == owner:
+			conditions.append(condition)
 	fallback_policies.clear()
 	escape_policies.clear()
 	_fallback_escape_policy = null
@@ -96,8 +99,8 @@ func initial_order(planner: PlatoonAI, fallback: MissionOrder, seconds_left: flo
 		fallback.objective_hex = primary.hex
 		fallback.sector_cells = []
 		fallback.fallback_hexes = []
-	elif not conditions.is_empty():
-		# A destruction-denial mission has no geographic target of its own.
+	else:
+		# Without a geographic win condition, remain anchored to our own force.
 		for unit: Unit in planner.squads:
 			if TacticalPositionExecutor.is_active_defender(unit) and not HqSupportPositionPolicy.is_headquarters(unit):
 				fallback.objective_hex = unit.current_hex
@@ -190,34 +193,6 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 	for state: VictoryConditionProgress in progress:
 		if state.team == team and state.outcome == own_level and state.valid:
 			_add_own_tasks(state, planner)
-	if active_fallback != null:
-		# Withdrawal is an explicit mission change. Enemy denial must not send
-		# retreating squads back to the abandoned objective.
-		tasks.sort_custom(_prefer_task)
-		return
-	# Deny one necessary condition in each opposing victory package. Cumulative
-	# conditions already completed cannot be undone; occupation remains reversible.
-	for level: VictoryCondition.OutcomeLevel in [VictoryCondition.OutcomeLevel.MAJOR, VictoryCondition.OutcomeLevel.MINOR]:
-		var blocked: VictoryConditionProgress
-		var best_cost: float = INF
-		for state: VictoryConditionProgress in progress:
-			if state.team == team or state.outcome != level or not state.valid:
-				continue
-			if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
-				if not state.complete:
-					continue
-				if _counter_exit_deferred(state, progress):
-					diagnostics.append("Exit to deny enemy victory deferred until the linked hold-to-exit fallback activates")
-					continue
-			elif state.complete and state.kind != VictoryConditionProgress.Kind.OCCUPY:
-				continue
-			var cost: float = _denial_cost(state, planner)
-			if cost < best_cost:
-				blocked = state
-				best_cost = cost
-		if blocked != null:
-			_add_denial_tasks(blocked, planner)
-	_merge_occupation_duties()
 	_prioritize_garrisons(planner)
 	for task: ScenarioGoalTask in tasks:
 		if task.kind != ScenarioGoalTask.Kind.EXIT:
@@ -226,7 +201,7 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 		if breach != null:
 			task.breach_required = true
 			task.breach_hex = breach.hex
-			# Concentrate the column before spending a platoon on a competing denial duty.
+			# Concentrate the column before assigning squads to other objectives.
 			task.priority = maxf(task.priority, 140.0)
 			task.urgent = true
 			task.reason += "; breach the weakest defended corridor at " + str(breach.hex)
@@ -304,31 +279,6 @@ func _escape_breach(planner: PlatoonAI, exits: Array[Vector2i], policy: EscapeMi
 	return _breach_search.result
 
 
-func _merge_occupation_duties() -> void:
-	# One garrison can satisfy our occupation and deny occupation by the opponent.
-	for occupation: ScenarioGoalTask in tasks.duplicate():
-		if occupation.kind != ScenarioGoalTask.Kind.OCCUPY:
-			continue
-		for denial: ScenarioGoalTask in tasks.duplicate():
-			if denial.kind != ScenarioGoalTask.Kind.DENY_OCCUPATION or denial.hex != occupation.hex:
-				continue
-			occupation.priority = maxf(occupation.priority, denial.priority)
-			occupation.urgent = occupation.urgent or denial.urgent
-			tasks.erase(denial)
-
-
-func _counter_exit_deferred(state: VictoryConditionProgress, progress: Array[VictoryConditionProgress]) -> bool:
-	if state.objective_team != team:
-		return false
-	var prevention: PreventEnemyExitCondition = state.condition as PreventEnemyExitCondition
-	for policy: HoldToExitFallbackPolicy in fallback_policies:
-		# Opponent denial must obey the same authorization as our own linked exit.
-		# Other marker groups and scenarios without a valid policy retain their duties.
-		if int(policy.exit_condition.objective_id) == int(prevention.objective_id) and _policy_has_markers(policy, progress):
-			return true
-	return false
-
-
 func _progress_for(condition: VictoryCondition, progress: Array[VictoryConditionProgress]) -> VictoryConditionProgress:
 	for state: VictoryConditionProgress in progress:
 		if state.condition == condition:
@@ -394,7 +344,7 @@ func _prioritize_garrisons(planner: PlatoonAI) -> void:
 	for task: ScenarioGoalTask in tasks:
 		if task.kind == ScenarioGoalTask.Kind.OCCUPY and _friendly_on_objective(planner, task.hex):
 			# Allocate intact garrisons before sending local forces to recapture a
-			# lost objective, including urgent enemy occupation-denial duties.
+			# lost objective.
 			task.priority = maxf(task.priority, 130.0)
 
 
@@ -606,54 +556,6 @@ func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void
 			diagnostics.append("Destruction goal awaits an observed or remembered enemy contact")
 
 
-func _denial_cost(state: VictoryConditionProgress, planner: PlatoonAI) -> float:
-	if state.kind == VictoryConditionProgress.Kind.DESTROY:
-		return 5.0
-	if state.kind == VictoryConditionProgress.Kind.OCCUPY:
-		return 15.0 + _friendly_distance(planner, _denial_hex(state, planner))
-	return 30.0 + _friendly_distance(planner, _exit_hex(state, planner))
-
-
-func _add_denial_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void:
-	if state.kind == VictoryConditionProgress.Kind.PREVENT_EXIT:
-		# The opponent needs to stop our units exiting. Enough of our distinct
-		# squads reaching our own markers permanently denies that requirement.
-		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, _exit_hex(state, planner))
-		task.required_units = state.remaining_units
-		task.priority = 75.0
-		if state.outcome == VictoryCondition.OutcomeLevel.MAJOR:
-			task.priority = 90.0
-		task.reason = "Exit %d more squads to deny the opponent's exit-prevention condition" % state.remaining_units
-		tasks.append(task)
-		return
-	if state.kind == VictoryConditionProgress.Kind.DESTROY:
-		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.PRESERVE, Vector2i.ZERO)
-		task.priority = 100.0
-		task.required_units = state.remaining_units
-		task.reason = "Protect the force: opponent needs %d more destroyed squads" % state.remaining_units
-		tasks.append(task)
-		return
-	var hex: Vector2i = _denial_hex(state, planner)
-	var kind: ScenarioGoalTask.Kind = ScenarioGoalTask.Kind.DENY_OCCUPATION
-	if state.kind == VictoryConditionProgress.Kind.EXIT:
-		hex = _exit_hex(state, planner)
-		kind = ScenarioGoalTask.Kind.BLOCK_EXIT
-	var task: ScenarioGoalTask = _task(state, kind, hex)
-	task.priority = 75.0
-	if state.outcome == VictoryCondition.OutcomeLevel.MAJOR:
-		task.priority = 90.0
-	task.reason = "Prevent enemy occupation of " + str(hex)
-	if kind == ScenarioGoalTask.Kind.BLOCK_EXIT:
-		task.reason = "Block exits: opponent needs %d more squads to exit" % state.remaining_units
-	for contact: InfluenceContact in _contacts(planner):
-		if not contact.observed or not TacticalPositionExecutor.is_active_defender(contact.unit) or not contact.unit.is_good_order():
-			continue
-		if LOSHelper.get_hex_distance(contact.hex, hex) <= 2:
-			task.urgent = true
-			task.priority = 120.0
-	tasks.append(task)
-
-
 func _task(state: VictoryConditionProgress, kind: ScenarioGoalTask.Kind, hex: Vector2i) -> ScenarioGoalTask:
 	var task: ScenarioGoalTask = ScenarioGoalTask.new()
 	task.condition = state.condition
@@ -664,10 +566,9 @@ func _task(state: VictoryConditionProgress, kind: ScenarioGoalTask.Kind, hex: Ve
 
 
 func _preferred_primary() -> ScenarioGoalTask:
-	for task: ScenarioGoalTask in tasks:
-		if task.kind != ScenarioGoalTask.Kind.PRESERVE:
-			return task
-	return null
+	if tasks.is_empty():
+		return null
+	return tasks[0]
 
 
 func _contains_task(key: String) -> bool:
@@ -733,20 +634,6 @@ func _unit_travel_seconds(planner: PlatoonAI, unit: Unit, hex: Vector2i) -> floa
 	return float(steps) * InfluenceUnitQuery.captured_crossing_seconds(unit) + 3.0
 
 
-func _denial_hex(state: VictoryConditionProgress, planner: PlatoonAI) -> Vector2i:
-	var best: Vector2i = state.hexes[0]
-	var score: float = INF
-	for hex: Vector2i in state.hexes:
-		var cost: float = _friendly_distance(planner, hex)
-		for contact: InfluenceContact in _contacts(planner):
-			if contact.observed and TacticalPositionExecutor.is_active_defender(contact.unit):
-				cost = minf(cost, float(LOSHelper.get_hex_distance(contact.hex, hex)) - 10.0)
-		if cost < score:
-			best = hex
-			score = cost
-	return best
-
-
 func _exit_hex(state: VictoryConditionProgress, planner: PlatoonAI) -> Vector2i:
 	var best: Vector2i = state.hexes[0]
 	var score: float = INF
@@ -802,8 +689,6 @@ func _allocate(planner: PlatoonAI) -> void:
 		next[unit] = _refresh_escape_task(previous)
 		available.erase(unit)
 	for task: ScenarioGoalTask in tasks:
-		if task.kind == ScenarioGoalTask.Kind.PRESERVE:
-			continue
 		var demand: int = task.required_units
 		for unit: Unit in next:
 			if next[unit].key == task.key:
@@ -819,14 +704,6 @@ func _allocate(planner: PlatoonAI) -> void:
 			next[selected] = task
 			available.erase(selected)
 			demand -= 1
-	# Preservation is a recovery duty for threatened squads, not a command to
-	# abandon every useful firing position or an essential objective garrison.
-	for task: ScenarioGoalTask in tasks:
-		if task.kind != ScenarioGoalTask.Kind.PRESERVE:
-			continue
-		for unit: Unit in available:
-			if task.required_units <= 1 and unit.stress_system != null and unit.stress_system.S_eff > unit.stress_system.S_CAP * 0.8 and not unit.in_close_combat:
-				next[unit] = task
 	assignments = next
 
 

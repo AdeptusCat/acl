@@ -1,7 +1,7 @@
 class_name DefenseDirector
 extends Node
 
-enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET, OPPONENT_CAPTURE_TARGET }
+enum ObjectiveSource { AUTHORED, PLATOON_ANCHOR, SCENARIO_TARGET, LEGACY_FORCE_ANCHOR }
 
 @export var objective_source: ObjectiveSource = ObjectiveSource.AUTHORED
 @export var execution_intent: TacticalPositionExecutor.Intent = TacticalPositionExecutor.Intent.FROM_PROFILE
@@ -64,16 +64,10 @@ func configure_for_match(active_units: Array[Unit]) -> void:
 		var objectives: ObjectivesCollection = Globals.objectives.get(platoon_ai.team)
 		if objectives != null and not objectives.objectives.is_empty():
 			objective_hex = objectives.objectives[0].hex
-	elif objective_source == ObjectiveSource.OPPONENT_CAPTURE_TARGET:
-		# The attacker's capture marker is the defender's protected objective.
+	elif objective_source == ObjectiveSource.LEGACY_FORCE_ANCHOR:
+		# Legacy scene values retain their enum index but no longer target enemy objectives.
 		if not platoon_ai.squads.is_empty():
 			objective_hex = platoon_ai.squads[0].current_hex
-		var targets: ObjectivesCollection = Globals.objectives.get(Globals.get_enemy_team(platoon_ai.team))
-		if targets != null:
-			for target: ObjectiveDefinition in targets.objectives:
-				if target.objective_id == capture_objective_id:
-					objective_hex = target.hex
-					break
 	# Advice remains available for both teams, independently of automatic execution.
 	if platoon_ai.influence_map_controller != null:
 		platoon_ai.influence_map_controller.set_objective_for_team(platoon_ai.team, objective_hex)

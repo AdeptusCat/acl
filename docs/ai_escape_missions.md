@@ -6,8 +6,7 @@ uses this policy for the Axis column. ATTACK/DEFEND continues to control ordinar
 tactical missions on other maps.
 
 An escape mission remains active during pinning, recovery, and an unattainable
-victory quota. It does not redirect the column into enemy occupation-denial
-duties. By default every surviving unit, including headquarters, receives an
+victory quota. Strategic duties use only the AI side's own victory conditions. By default every surviving unit, including headquarters, receives an
 exit duty; the normal movement and morale restrictions still govern execution.
 Disable **Withdraw Entire Force** to assign only the remaining quota. Disable
 **Include Headquarters** to retain headquarters explicitly.
