@@ -5,7 +5,6 @@
 
 [resource]
 script = ExtResource("1")
-battery_name = "105 mm artillery"
 team = 1
 weapon = ExtResource("2")
 rounds = 36

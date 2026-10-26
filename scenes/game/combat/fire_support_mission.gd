@@ -17,6 +17,8 @@ var remaining: int = 0
 var fired: int = 0
 var elapsed: float = 0.0
 var next_round: float = 0.0
+var last_launch_at: float = 0.0
+var launch_work_total: float = 0.0
 var active: bool = true
 var result: String = "Preparing"
 var _area_cycle: Array[Vector2i] = []
@@ -38,6 +40,8 @@ func ready_to_fire() -> bool:
 	return active and remaining > 0 and elapsed >= next_round
 
 func commit_rounds(rounds: int) -> void:
+	last_launch_at = elapsed
+	launch_work_total = 0.0
 	remaining = maxi(0, remaining - rounds)
 	fired += rounds
 	result = "Firing"

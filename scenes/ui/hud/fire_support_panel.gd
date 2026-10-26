@@ -8,6 +8,8 @@ var support: FireSupportController
 var icon_bar: ScrollContainer
 var icon_row: HBoxContainer
 var asset_buttons: Array[Button] = []
+var launch_bars: Array[ProgressBar] = []
+var launch_clocks: Array[Label] = []
 var tray: PanelContainer
 var asset_label: Label
 var mode: OptionButton
@@ -130,9 +132,11 @@ func _refresh_icons() -> void:
 			icon_row.remove_child(button)
 			button.queue_free()
 		asset_buttons.clear()
+		launch_bars.clear()
+		launch_clocks.clear()
 		for index: int in range(support.assets.size()):
 			var button: Button = Button.new()
-			button.custom_minimum_size = Vector2(88, 96)
+			button.custom_minimum_size = Vector2(88, 128)
 			button.expand_icon = true
 			button.add_theme_constant_override("icon_max_width", 64)
 			button.toggle_mode = true
@@ -141,6 +145,35 @@ func _refresh_icons() -> void:
 			button.pressed.connect(_open_asset.bind(index))
 			icon_row.add_child(button)
 			asset_buttons.append(button)
+			var bar: ProgressBar = ProgressBar.new()
+			bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			bar.show_percentage = false
+			bar.max_value = 1.0
+			bar.step = 0.001
+			var background: StyleBoxFlat = StyleBoxFlat.new()
+			background.bg_color = Color.TRANSPARENT
+			var fill: StyleBoxFlat = StyleBoxFlat.new()
+			fill.bg_color = Color(1.0, 0.74, 0.27, 0.22)
+			fill.border_width_bottom = 3
+			fill.border_color = Color(1.0, 0.78, 0.35, 0.95)
+			bar.add_theme_stylebox_override("background", background)
+			bar.add_theme_stylebox_override("fill", fill)
+			button.add_child(bar)
+			bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			launch_bars.append(bar)
+			var clock: Label = Label.new()
+			clock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			clock.add_theme_font_size_override("font_size", 12)
+			clock.add_theme_constant_override("outline_size", 3)
+			clock.add_theme_color_override("font_outline_color", Color(0.03, 0.04, 0.03))
+			button.add_child(clock)
+			clock.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+			clock.offset_left = -52.0
+			clock.offset_right = -4.0
+			clock.offset_top = 3.0
+			clock.offset_bottom = 21.0
+			launch_clocks.append(clock)
 	for index: int in range(asset_buttons.size()):
 		var button: Button = asset_buttons[index]
 		var weapon: WeaponSpec = support.asset_weapon(index)
@@ -155,6 +188,7 @@ func _refresh_icons() -> void:
 		button.text = str(support.ammunition(index))
 		button.set_pressed_no_signal(tray.visible and support.selected_asset == index)
 		button.tooltip_text = "%s\n%s · %s\n%d rounds · Fire support [F]" % [support.assets[index]["name"], weapon_name, support.asset_status(index), support.ammunition(index)]
+		button.set_meta("asset_tooltip", button.tooltip_text)
 		var mission: FireSupportMission = support.asset_mission(index)
 		button.self_modulate = Color.WHITE
 		if mission != null and mission.active:
@@ -162,6 +196,30 @@ func _refresh_icons() -> void:
 		elif support.ammunition(index) <= 0:
 			button.self_modulate = Color(0.55, 0.55, 0.55)
 	icon_bar.visible = not asset_buttons.is_empty()
+	_refresh_launch_progress()
+
+func _refresh_launch_progress() -> void:
+	for index: int in range(launch_bars.size()):
+		var progress: Dictionary = support.asset_launch_progress(index)
+		launch_bars[index].visible = not progress.is_empty()
+		launch_clocks[index].visible = not progress.is_empty()
+		asset_buttons[index].tooltip_text = str(asset_buttons[index].get_meta("asset_tooltip", ""))
+		var mission: FireSupportMission = support.asset_mission(index)
+		asset_buttons[index].text = "Ammo %d" % support.ammunition(index)
+		if mission != null:
+			var total: int = mission.fired + mission.remaining
+			asset_buttons[index].text = "%d/%d\nAmmo %d" % [mission.remaining, total, support.ammunition(index)]
+			asset_buttons[index].tooltip_text += "\nMission rounds remaining: %d/%d" % [mission.remaining, total]
+		if progress.is_empty():
+			continue
+		launch_bars[index].value = float(progress["fill"])
+		var seconds: float = float(progress["seconds"])
+		launch_clocks[index].text = "Waiting"
+		if seconds == 0.0:
+			launch_clocks[index].text = "Ready"
+		elif seconds > 0.0:
+			launch_clocks[index].text = "%ds" % ceili(seconds)
+		asset_buttons[index].tooltip_text += "\n%s · %s" % [progress["label"], launch_clocks[index].text]
 
 func _select_mode(index: int) -> void:
 	support.selected_mode = index as FireSupportMission.Mode
@@ -240,12 +298,13 @@ func _layout() -> void:
 	if not is_node_ready():
 		return
 	var area: Vector2 = (get_parent() as Control).size
-	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 114.0)
+	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 146.0)
 	icon_bar.position = Vector2(maxf(12.0, (area.x - icon_bar.size.x) * 0.5), area.y - icon_bar.size.y - 12.0)
 	tray.size = Vector2(minf(460.0, area.x - 24.0), tray.get_combined_minimum_size().y)
 	tray.position = Vector2(maxf(12.0, (area.x - tray.size.x) * 0.5), maxf(12.0, icon_bar.position.y - tray.size.y - 8.0))
 
 func _process(delta: float) -> void:
+	_refresh_launch_progress()
 	_refresh_elapsed += delta
 	if _refresh_elapsed >= 0.25:
 		_refresh_elapsed = 0.0

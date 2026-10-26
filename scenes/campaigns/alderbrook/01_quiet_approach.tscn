@@ -101,8 +101,8 @@ sources/4 = SubResource("TileSetAtlasSource_wi054")
 
 [sub_resource type="Resource" id="Resource_harg6"]
 script = ExtResource("16_qktt2")
-battery_name = "howitzer"
 weapon = ExtResource("17_yycqq")
+rounds = 2
 metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
 
 [sub_resource type="Resource" id="Resource_qktt2"]

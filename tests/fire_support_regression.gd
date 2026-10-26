@@ -83,16 +83,32 @@ func _run() -> void:
 	var quick: FireSupportMission = support.asset_mission(0)
 	_check(not support.request(0, target, FireSupportMission.Mode.QUICK), "A busy battery rejects overlapping fire missions")
 	gunner.setup_weapon_task.done = false
+	gunner.setup_weapon_task.start_time_s = 2.0
+	quick.launch_work_total = 0.0
+	var preparing: Dictionary = support.asset_launch_progress(0)
+	_check(is_zero_approx(float(preparing["fill"])), "The onboard launch indicator begins empty during preparation")
+	gunner.setup_weapon_task.remaining_time_s = 1.0
+	var halfway: Dictionary = support.asset_launch_progress(0)
+	_check(is_equal_approx(float(halfway["fill"]), 1.0 / float(preparing["seconds"])), "The launch indicator follows real crew setup progress alongside other preparation")
 	gunner.setup_weapon_task.remaining_time_s = 2.0
+	support.panel._refresh_launch_progress()
+	_check(support.panel.launch_bars[0].visible and support.panel.launch_bars[0].mouse_filter == Control.MOUSE_FILTER_IGNORE, "The active icon fill remains visible and cannot intercept icon clicks")
+	_check(support.panel.asset_buttons[0].text == "3/3\nAmmo 30", "The icon shows both mission rounds and battery ammunition")
 	var blocked: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	_check(blocked == 0 and quick.fired == 0, "Mission requests do not bypass real mortar setup")
 	for shot: int in range(3):
 		_ready_gunner(gunner)
 		var fired: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 		_check(fired == 1, "Quick missions launch actual mortar rounds")
+		support.panel._refresh_launch_progress()
+		_check(support.panel.asset_buttons[0].text == "%d/3\nAmmo %d" % [2 - shot, 29 - shot], "Mission rounds and battery ammunition both update after each launch")
+		if shot < 2:
+			_check(is_zero_approx(float(support.asset_launch_progress(0)["fill"])), "The onboard icon fill resets after each launch")
 	_ready_gunner(gunner)
 	var extra: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	_check(quick.fired == 3 and not quick.active and extra == 0 and gunner.weapon.ammunition == 27, "Quick missions spend exactly three rounds with no extra shot")
+	support.panel._refresh_launch_progress()
+	_check(not support.panel.launch_bars[0].visible and not support.panel.launch_clocks[0].visible, "Completed missions hide the next-launch indicator even while shells may be airborne")
 	support._process(0.01)
 	_check(mortar.squad_fire.fire_support_hold, "A completed battery stays silent until a new fire order")
 	_check(support.request(0, target, FireSupportMission.Mode.STANDARD), "A completed battery can immediately receive another mission")
@@ -101,6 +117,8 @@ func _run() -> void:
 	_ready_gunner(gunner)
 	var early: int = await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
 	_check(early == 0 and support.asset_mission(0).remaining == 5, "Standard missions space launches and retain a six-round budget")
+	support.panel._refresh_launch_progress()
+	_check(support.panel.asset_buttons[0].text == "5/6\nAmmo 26", "The mission denominator stays fixed while battery ammunition decreases")
 	support.cease(0)
 	_check(support.request(0, target, FireSupportMission.Mode.HARASSING), "Harassing fire can replace a ceased mission")
 	_ready_gunner(gunner)
@@ -116,10 +134,13 @@ func _run() -> void:
 	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(Globals.team_player))[0]
 	_check(support.request(1, enemy.current_hex, FireSupportMission.Mode.QUICK), "Offboard missions do not require selecting or inventing a map counter")
 	var before: int = support.ammunition(1)
+	_check(is_zero_approx(float(support.asset_launch_progress(1)["fill"])), "Offboard response progress starts empty")
 	support._process(5.0)
 	_check(support.ammunition(1) == before, "Offboard batteries honor their authored response delay")
+	_check(is_equal_approx(float(support.asset_launch_progress(1)["fill"]), 5.0 / 6.0), "Offboard icon progress follows the authored response countdown")
 	support._process(1.0)
 	_check(support.ammunition(1) == before - 1 and support.flights.size() == 1, "Offboard launch spends ammunition and creates an in-flight shell")
+	_check(is_zero_approx(float(support.asset_launch_progress(1)["fill"])), "Offboard reload starts a fresh icon fill at launch")
 	var ground: HexagonTileMapLayer = host.ground_layer
 	var finish: Vector2 = ground.to_global(ground.map_to_local(enemy.current_hex))
 	var start: Vector2 = ground.to_global(ground.map_to_local(scenario.start_hex[Globals.team_player]))
@@ -139,6 +160,7 @@ func _run() -> void:
 			timed_effect = is_equal_approx(tracer.flight_time, 4.0) and is_equal_approx(tracer.speed * tracer.flight_time, origin.distance_to(finish))
 	_check(timed_effect, "Offboard visual flight time stays synchronized with impact after extending the approach")
 	support.cease(1)
+	_check(support.asset_launch_progress(1).is_empty(), "Ceased missions stop displaying a next-shell countdown")
 	support._process(4.0)
 	await get_tree().process_frame
 	_check(support.flights.is_empty() and enemy.stress_system.under_fire, "Cease fire leaves airborne shells to resolve through the real impact system")
@@ -164,6 +186,11 @@ func _run() -> void:
 	support.panel.mode.select(2)
 	support.panel.refresh()
 	if OS.get_cmdline_user_args().has("--capture"):
+		support.cease(1)
+		support.request(1, target, FireSupportMission.Mode.STANDARD)
+		var showcase: FireSupportMission = support.asset_mission(1)
+		showcase.elapsed = showcase.next_round * 0.55
+		support.panel.refresh()
 		point = get_viewport().get_visible_rect().size * Vector2(0.68, 0.35)
 		support.select_shape(FireSupportMission.Shape.AREA)
 		support.begin_target(point)

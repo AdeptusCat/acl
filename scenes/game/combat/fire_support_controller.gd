@@ -43,7 +43,7 @@ func setup(controller: Node2D) -> void:
 		source.add_child(source.squad_fire)
 		var runtime: WeaponSpec = definition.weapon.create_runtime()
 		runtime.ammunition = definition.rounds
-		assets.append({"id": "battery_%d" % assets.size(), "name": definition.battery_name + " · Offboard", "unit": source, "battery": definition, "weapon": runtime})
+		assets.append({"id": "battery_%d" % assets.size(), "name": definition.weapon.name + " · Offboard", "unit": source, "battery": definition, "weapon": runtime})
 	panel = FireSupportPanel.new()
 	panel.name = "FireSupport"
 	panel.support = self
@@ -106,6 +106,66 @@ func asset_status(index: int) -> String:
 			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR and not soldier.setup_weapon_task.done:
 				return "Deploying"
 	return "Ready"
+
+func asset_launch_progress(index: int) -> Dictionary:
+	var mission: FireSupportMission = asset_mission(index)
+	if mission == null or not mission.active:
+		return {}
+	var wait: float = maxf(0.0, mission.next_round - mission.elapsed)
+	var duration: float = maxf(0.0, mission.next_round - mission.last_launch_at)
+	var scheduled_duration: float = duration
+	var label: String = "Next shell"
+	var remaining: float = wait
+	if assets[index]["battery"] == null:
+		var unit: Unit = assets[index]["unit"]
+		if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat or unit.is_moving:
+			return {"fill": 0.0, "seconds": -1.0, "label": "Waiting for mortar"}
+		remaining = INF
+		var setup_rate: float = maxf(unit.squad_fire.state_acquire_mults[unit.stress_system.state], 0.001)
+		var loaders: int = unit.squad_fire._count_role(RankGrades.Role.LOADER)
+		var assistants: int = unit.squad_fire._count_role(RankGrades.Role.ASSISTANT)
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if not soldier.is_alive or soldier.weapon == null or soldier.weapon.family != WeaponSpec.Family.MORTAR or soldier.weapon.ammunition <= 0:
+				continue
+			var setup: float = 0.0
+			var reload: float = 0.0
+			var aim: float = 0.0
+			var full_setup: float = 0.0
+			var full_reload: float = 0.0
+			var full_aim: float = 0.0
+			if not soldier.setup_weapon_task.done:
+				setup = maxf(0.0, soldier.setup_weapon_task.remaining_time_s)
+				full_setup = maxf(setup, soldier.setup_weapon_task.start_time_s)
+			if not soldier.reload_task.done:
+				reload = maxf(0.0, soldier.reload_task.remaining_time_s)
+				full_reload = maxf(reload, soldier.reload_task.start_time_s)
+			if not soldier.aquire_target_task.done:
+				aim = maxf(0.0, soldier.aquire_target_task.remaining_time_s)
+				full_aim = maxf(aim, soldier.aquire_target_task.start_time_s)
+			var penalty: float = 1.0
+			if loaders < soldier.weapon.crew_required - 1:
+				penalty = maxf(1.0, soldier.weapon.undercrew_penalty_mult)
+			var crew_rate: float = maxf(0.001, setup_rate * unit.squad_fire.compute_support_efficiency(assistants, soldier.weapon.support_crew_optimal) / penalty)
+			setup /= setup_rate
+			full_setup /= setup_rate
+			reload /= crew_rate
+			full_reload /= crew_rate
+			aim /= crew_rate
+			full_aim /= crew_rate
+			var work: float = maxf(wait, setup) + reload + aim
+			if work < remaining:
+				remaining = work
+				duration = maxf(scheduled_duration, full_setup) + full_reload + full_aim
+		if not is_finite(remaining):
+			return {"fill": 0.0, "seconds": -1.0, "label": "No mortar ready"}
+		# Keep completed preparation stages in this launch's denominator.
+		mission.launch_work_total = maxf(mission.launch_work_total, maxf(duration, remaining))
+		duration = mission.launch_work_total
+		label = "Next shell · crew preparation"
+	var fill: float = 1.0
+	if duration > 0.0:
+		fill = clampf(1.0 - remaining / duration, 0.0, 1.0)
+	return {"fill": fill, "seconds": remaining, "label": label}
 
 func restriction(index: int, cell: Vector2i) -> String:
 	if index < 0 or index >= assets.size():
@@ -177,6 +237,7 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode, cells: A
 		unit.squad_fire.fire_support_hold = false
 	else:
 		mission.next_round = (asset["battery"] as OffboardBattery).response_seconds
+	asset_launch_progress(index)
 	choosing_target = panel != null and panel.tray.visible and not assets.is_empty()
 	has_target = false
 	dragging = false

@@ -1,7 +1,6 @@
 extends Resource
 class_name OffboardBattery
 
-@export var battery_name: String = "81 mm mortar battery"
 @export var team: Globals.Team = Globals.Team.ALLIES
 @export var weapon: WeaponSpec
 @export_range(1, 500) var rounds: int = 36

@@ -2,6 +2,10 @@
 
 Click a support weapon icon, click a target hex, then press **Enter** to assign a fire mission. Each onboard mortar or offboard battery has its own mortar/howitzer icon showing remaining rounds; active missions are highlighted. Clicking the same icon again closes the panel; clicking another icon switches batteries. Every battlefield click while the panel is open selects or replaces the target hex. **F** toggles the currently selected asset. Infantry selection is preserved. Use **Locate mortar** to center an onboard mortar.
 
+Active weapon icons fill from left to right toward the next shell launch, with a small countdown. Offboard fill tracks the response delay and launch cadence; onboard fill follows crew setup, reload, aiming and scheduled pauses. Crew countdowns account for current stress and crew efficiency and may change when those conditions change. The fill resets at launch and disappears when the mission completes or is ceased; it does not track airborne shells.
+
+After a mission is assigned, its icon displays **rounds remaining / mission total**, such as **3/6**, with **Ammo 24** underneath for total battery ammunition. Both counts update after each launch. The denominator stays fixed, and completed missions show **0/total**. Assets without a mission show their ammunition count.
+
 Target shapes use direct battlefield gestures:
 
 - **Point:** click a hex. Small pointer movements are ignored.
