@@ -29,6 +29,26 @@ layout_mode = 2
 mouse_filter = 2
 autowrap_mode = 2
 
+[node name="Firepower" type="VBoxContainer" parent="Content"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Rating" type="Label" parent="Content/Firepower"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 2
+
+[node name="Meter" type="ProgressBar" parent="Content/Firepower"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+max_value = 5.0
+step = 1.0
+show_percentage = false
+
 [node name="Extra" type="Label" parent="Content"]
 layout_mode = 2
 mouse_filter = 2

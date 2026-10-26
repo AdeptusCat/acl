@@ -135,6 +135,13 @@ func _run() -> void:
 	_motion(target_point)
 	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
 	var hint: Control = world.ui.target_cover_distance
+	for power: float in [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]:
+		world.ui.show_target_hex_cover_distance(target_point, 2, 3, power)
+		var style: Dictionary = SquadFireMath.firepower_feedback(power)
+		_check(hint.firepower_display.visible and hint.firepower_rating.text == str(style["rating"]).to_upper() and hint.firepower_meter.value == float(style["level"]), "The hover preview prominently rates firepower %.2f with the shared scale" % power)
+		if OS.get_cmdline_user_args().has("--capture") and power in [0.25, 4.0]:
+			await _capture("firepower-" + str(power))
+	MatchInteractionHandler.refresh_target_preview(controller, ground.map_to_local(destination), target_point)
 	_check(hint.visible and hint.heading.text == "Line of sight blocked" and hint.detail.text.contains("Cover: unknown") and hint.extra.text.contains("Effective firepower: 0"), "Blocked direct-fire targets keep a visible, correctly labeled preview")
 	_check(not controller.order_via_option_wheel(destination, WheelOption.Option.FIRE_AT) and str(feedback.back()["explanation"]).contains("Line of sight blocked"), "Blocked direct fire is rejected with its reason")
 	var original_type: Globals.SquadType = unit.squad_type

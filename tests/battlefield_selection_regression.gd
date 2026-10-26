@@ -89,6 +89,8 @@ func _run() -> void:
 
 
 func _test_target_link() -> void:
+	var original_ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	LOSHelper.ground_layer = controller.ground_layer
 	var original_sight: Dictionary = Globals.unit_visible_enemies
 	var original_los: Dictionary = LOSHelper.los_lookup
 	var original_debug: bool = Debug.enemy_selectable
@@ -104,24 +106,22 @@ func _test_target_link() -> void:
 	Globals.unit_visible_enemies = {source: [target]}
 	LOSHelper.los_lookup = {source.current_hex: {target.current_hex: {}}}
 	_check(overlay._target_for_link(source) == target, "A selected squad exposes its actual tracked enemy for the target line")
-	_check(source.squad_fire.get_fire_effect()["text"] == "Awaiting impact", "A tracked target is not credited with effects before an impact")
-	source.squad_fire.record_fire_effect(target, 0.0, 0)
-	_check(source.squad_fire.get_fire_effect()["text"] == "Limited", "An impact without added pressure or casualties reports limited effect")
-	source.squad_fire.record_fire_effect(target, 3.0, 0)
-	_check(source.squad_fire.get_fire_effect()["text"] == "Suppressing" and float(source.squad_fire.get_fire_effect()["pulse"]) > 0.0, "Applied pressure produces a suppression indicator and targeting-line pulse")
+	var preview: Dictionary = MatchInteractionHandler.unit_target_feedback(source, target.current_hex)
+	var effect: Dictionary = source.squad_fire.get_fire_effect()
+	_check(is_equal_approx(float(effect["firepower"]), float(preview["firepower"])) and float(effect["pulse"]) == 0.0, "The indicator uses the hover preview's firepower before any impacts")
+	source.squad_fire.record_fire_effect(target)
+	_check(source.squad_fire._fire_effect_target.get_ref() == target, "An observed impact targets its pulse at the current enemy")
 	var panel: PanelContainer = load("res://scenes/ui/units/unit_details_panel.tscn").instantiate() as PanelContainer
 	add_child(panel)
 	panel.show_unit_detail(source, false)
-	_check(panel.fire_effect_label.visible and panel.fire_effect_label.text == "Fire effect: Suppressing", "The selected squad details panel displays the resolved fire effect")
+	_check(panel.fire_effect_label.visible and panel.fire_effect_label.text == "Fire effect: " + str(effect["text"]), "The squad panel displays the same rated firepower")
 	panel.hide_unit_detail()
 	panel.free()
-	target.stress_system.state = STATES.MoraleState.PINNED
-	_check(source.squad_fire.get_fire_effect()["text"] == "Target pinned", "A recent impact reports the observed pinned state without claiming the pin")
-	target.stress_system.state = STATES.MoraleState.NORMAL
-	source.squad_fire.record_fire_effect(target, 0.0, 1)
-	_check(source.squad_fire.get_fire_effect()["text"] == "Casualties", "A confirmed casualty takes priority over suppression feedback")
+	for power: float in [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]:
+		var style: Dictionary = SquadFireMath.firepower_feedback(power)
+		_check(int(style["level"]) == [0.0, 0.25, 0.5, 1.0, 2.0, 4.0].find(power), "The firepower scale advances consistently at each threshold")
 	source.squad_fire._fire_effect_at_ms -= SquadFireController.FIRE_EFFECT_WINDOW_MS
-	_check(source.squad_fire.get_fire_effect()["text"] == "Awaiting impact" and float(source.squad_fire.get_fire_effect()["pulse"]) == 0.0, "Old effects and pulses expire instead of claiming ongoing effectiveness")
+	_check(source.squad_fire.get_fire_effect()["text"] == effect["text"] and float(source.squad_fire.get_fire_effect()["pulse"]) == 0.0, "The pulse expires while the live firepower estimate remains")
 	source.selected = false
 	_check(overlay._target_for_link(source) == null, "Deselecting immediately removes the target line")
 	source.selected = true
@@ -130,7 +130,7 @@ func _test_target_link() -> void:
 	source.attackState = Unit.AttackState.AUTO
 	target.hide()
 	_check(overlay._target_for_link(source) == null, "The target line never reveals a hidden enemy")
-	source.squad_fire.record_fire_effect(target, 10.0, 1)
+	source.squad_fire.record_fire_effect(target)
 	_check(source.squad_fire.get_fire_effect().is_empty(), "Hidden enemies cannot reveal effects through the indicator")
 	target.show()
 	LOSHelper.los_lookup = {}
@@ -162,6 +162,7 @@ func _test_target_link() -> void:
 	Globals.unit_visible_enemies = original_sight
 	LOSHelper.los_lookup = original_los
 	Debug.enemy_selectable = original_debug
+	LOSHelper.ground_layer = original_ground
 	overlay.free()
 
 
@@ -189,7 +190,7 @@ func _render_target_link(overlay: Node2D, source: Unit, target: Unit) -> void:
 	viewport.add_child(camera)
 	for zoom: float in [0.6, 1.0, 1.5]:
 		camera.zoom = Vector2.ONE * zoom
-		source.squad_fire.record_fire_effect(target, 3.0, 0)
+		source.squad_fire.record_fire_effect(target)
 		overlay.queue_redraw()
 		await get_tree().process_frame
 		await get_tree().process_frame

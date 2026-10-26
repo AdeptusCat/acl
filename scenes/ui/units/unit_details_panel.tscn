@@ -108,8 +108,8 @@ clip_text = true
 visible = false
 layout_mode = 2
 mouse_filter = 1
-tooltip_text = "Recent observed effects of this squad's impacts on its current visible target. Target pinned/routing describes its state; other squads may also be contributing."
-text = "Fire effect: Awaiting impact"
+tooltip_text = "Estimated effective firepower against this visible target, using the same calculation as the hover preview. Higher firepower does not guarantee casualties."
+text = "Fire effect: None · 0.00"
 autowrap_mode = 2
 
 [node name="Rout" type="Button" parent="Scroll/Summary"]

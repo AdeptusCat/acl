@@ -66,7 +66,12 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 
 static func target_feedback(controller: Node2D, target: Vector2i) -> Dictionary:
 	var unit: Unit = controller.selected_unit
-	var distance: int = controller.ground_layer.cube_distance(unit.current_cube, controller.ground_layer.map_to_cube(target))
+	return unit_target_feedback(unit, target)
+
+
+static func unit_target_feedback(unit: Unit, target: Vector2i) -> Dictionary:
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var distance: int = ground.cube_distance(unit.current_cube, ground.map_to_cube(target))
 	var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 	var sight_clear: bool = cover_map.has(target)
 	var cover: int = 0
@@ -75,7 +80,7 @@ static func target_feedback(controller: Node2D, target: Vector2i) -> Dictionary:
 	var indirect: bool = unit.squad_type == Globals.SquadType.MORTAR
 	if indirect:
 		# Mortar impacts use the target hex's terrain, independent of LOS edge cover.
-		cover = LOSHelper.is_sample_point_in_building(controller.ground_layer.map_to_local(target))
+		cover = LOSHelper.is_sample_point_in_building(ground.map_to_local(target))
 	var in_range: bool = distance <= InfluenceUnitQuery.get_unit_range(unit)
 	var power: float = InfluenceUnitQuery.get_firepower_at_range(unit, distance) * InfluenceUnitQuery.get_unit_effectiveness(unit)
 	power *= SquadFireMath.hit_cover_multiplier(float(cover), indirect)

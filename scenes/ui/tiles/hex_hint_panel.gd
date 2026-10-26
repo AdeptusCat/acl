@@ -3,14 +3,19 @@ extends PanelContainer
 @onready var heading: Label = $Content/Heading
 @onready var detail: Label = $Content/Detail
 @onready var extra: Label = $Content/Extra
+@onready var firepower_display: VBoxContainer = $Content/Firepower
+@onready var firepower_rating: Label = $Content/Firepower/Rating
+@onready var firepower_meter: ProgressBar = $Content/Firepower/Meter
 @onready var hud_control: Control = get_parent() as Control
 
 var anchor_point: Vector2
+var _firepower_fill: StyleBoxFlat = StyleBoxFlat.new()
 
 const HUD_PANELS: Array[String] = ["UnitDetails", "TileDetails", "SquadRoster", "Debug", "MissionObjectives", "OrderFeedback", "Countdown", "TryAgain", "Settings", "Settings/Menu", "Settings/Controls"]
 
 
 func _ready() -> void:
+	firepower_meter.add_theme_stylebox_override("fill", _firepower_fill)
 	minimum_size_changed.connect(_queue_fit)
 	hud_control.resized.connect(_queue_fit)
 	for path: String in HUD_PANELS:
@@ -21,6 +26,7 @@ func _ready() -> void:
 
 
 func show_hint(point: Vector2, title: String, description: String, additional: String = "", color: Color = Color(0.9, 0.87, 0.77)) -> void:
+	firepower_display.hide()
 	anchor_point = point
 	heading.text = title
 	heading.add_theme_color_override("font_color", color)
@@ -29,6 +35,16 @@ func show_hint(point: Vector2, title: String, description: String, additional: S
 	extra.visible = not additional.is_empty()
 	show()
 	_fit_panel()
+	_queue_fit()
+
+
+func show_firepower(power: float) -> void:
+	var style: Dictionary = SquadFireMath.firepower_feedback(power)
+	firepower_rating.text = str(style["rating"]).to_upper()
+	firepower_rating.add_theme_color_override("font_color", style["color"])
+	_firepower_fill.bg_color = style["color"]
+	firepower_meter.value = float(style["level"])
+	firepower_display.show()
 	_queue_fit()
 
 

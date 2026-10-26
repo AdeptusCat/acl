@@ -762,11 +762,10 @@ func _on_incoming_fire_effect(casualties:int, df:float, ds:float, _source:Node) 
 		if not capture.is_empty():
 			recorder.finish_effect(self, capture, "eliminated")
 		return
-	var pressure_before: float = stress_system.S_eff
 	stress_system.apply_stress(df, ds, "incoming_fire")
 	if is_instance_valid(_source) and _source is SquadFireController:
 		var firing_squad: SquadFireController = _source as SquadFireController
-		firing_squad.record_fire_effect(self, maxf(0.0, stress_system.S_eff - pressure_before), casualties)
+		firing_squad.record_fire_effect(self)
 	ui.set_loadout(squad_fire.soldiers)
 	_refresh_leader_aura()
 	leader_aura._affected.erase(self)

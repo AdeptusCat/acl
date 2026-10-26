@@ -213,13 +213,14 @@ func _draw_selected_target() -> void:
 		var pixel: float = 1.0 / zoom
 		var effect: Dictionary = unit.squad_fire.get_fire_effect()
 		var pulse: float = float(effect.get("pulse", 0.0))
+		var strength: float = float(effect.get("strength", 0.0))
 		var tint: Color = Color(1.0, 0.24, 0.18)
-		if pulse > 0.0:
-			tint = tint.lerp(effect["color"], pulse)
+		if not effect.is_empty():
+			tint = effect["color"]
 		# Layered transparent strokes give a soft glow without requiring HDR bloom.
 		draw_line(start, finish, Color(tint, 0.04 + pulse * 0.12), (10.0 + pulse * 4.0) * pixel, true)
 		draw_line(start, finish, Color(tint, 0.09 + pulse * 0.20), 5.0 * pixel, true)
-		draw_line(start, finish, Color(tint, 0.32 + pulse * 0.55), (1.5 + pulse) * pixel, true)
+		draw_line(start, finish, Color(tint, 0.20 + strength * 0.25 + pulse * 0.45), (1.0 + strength + pulse) * pixel, true)
 		if pulse > 0.0:
 			draw_arc(finish, (5.0 + (1.0 - pulse) * 8.0) * pixel, 0.0, TAU, 24, Color(tint, pulse * 0.7), 1.5 * pixel, true)
 		var normal: Vector2 = Vector2(-direction.y, direction.x)

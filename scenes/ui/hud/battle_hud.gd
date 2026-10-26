@@ -236,6 +236,7 @@ func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance:
 	if distance == 1:
 		distance_text = "1 hex"
 	target_cover_distance.show_hint(point, sight, "Distance: %s\n%s" % [distance_text, cover], "Effective firepower: %s" % String.num(firepower, 2), color)
+	target_cover_distance.show_firepower(firepower)
 
 
 func show_order_feedback(accepted: bool, command: String, explanation: String) -> void:
