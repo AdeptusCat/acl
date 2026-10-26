@@ -92,6 +92,8 @@ func _test_feedback() -> void:
 		combat._on_timer_timeout()
 	_check(allies.members_alive < 4 and not feedback.strikes.is_empty(), "Real resolved attacks drive combat flashes and casualties")
 	_check(feedback.counts[Globals.Team.ALLIES] == allies.members_alive and feedback.recent_losses[Globals.Team.ALLIES] == 4 - allies.members_alive, "The displayed roster and casualty cue match actual losses")
+	var casualty_feedback: Node2D = allies.ui.get_node("CasualtyFeedback") as Node2D
+	_check(casualty_feedback.active and not casualty_feedback.badge_visible, "Close-combat losses retain the squad flash without covering the combat panel")
 	feedback.advance(2.0)
 	Debug.hide_fog_of_war = false
 	LOSHelper.visible_hexes[Globals.team_player] = [COMBAT_HEX]
@@ -113,6 +115,7 @@ func _test_feedback() -> void:
 	combat._sync_feedback()
 	_check(feedback.visible and feedback.strikes.is_empty(), "Revealing the hex does not replay hidden exchanges")
 	allies.die()
+	_check(casualty_feedback.active and not casualty_feedback.badge_visible, "The final casualty does not obscure the combat outcome")
 	_check(feedback.resolved and feedback.result_text == "GER HOLDS HEX", "The final surviving side receives a factual encounter outcome")
 	_check(feedback.get_parent() == controller.close_combat_locations and not feedback.is_queued_for_deletion(), "The outcome briefly survives the finished combat instance")
 	feedback.advance(feedback.RESULT_SECONDS)

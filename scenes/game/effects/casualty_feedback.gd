@@ -8,6 +8,7 @@ const PULSE_SECONDS: float = 0.65
 var casualty_count: int = 0
 var elapsed: float = 0.0
 var active: bool = false
+var badge_visible: bool = true
 
 
 func _ready() -> void:
@@ -15,14 +16,23 @@ func _ready() -> void:
 	clear()
 
 
-func show_losses(count: int) -> void:
+func show_losses(count: int, show_badge: bool = true) -> void:
 	if count <= 0:
 		return
 	casualty_count += count
 	elapsed = 0.0
 	active = true
+	# Keep a close-combat cue suppressed until it expires, including on death.
+	badge_visible = badge_visible and show_badge
 	show()
 	set_process(true)
+	queue_redraw()
+
+
+func suppress_badge() -> void:
+	if not badge_visible:
+		return
+	badge_visible = false
 	queue_redraw()
 
 
@@ -30,6 +40,7 @@ func clear() -> void:
 	casualty_count = 0
 	elapsed = 0.0
 	active = false
+	badge_visible = true
 	hide()
 	set_process(false)
 	queue_redraw()
@@ -60,6 +71,8 @@ func _draw() -> void:
 	draw_rect(frame, Color(0.95, 0.08, 0.03, pulse * 0.18))
 	draw_rect(frame, Color(0.12, 0.02, 0.01, pulse), false, 4.0)
 	draw_rect(frame, Color(1.0, 0.18, 0.08, pulse), false, 2.0)
+	if not badge_visible:
+		return
 
 	var rise: float = 12.0 * (1.0 - pow(1.0 - minf(elapsed / 0.7, 1.0), 2.0))
 	var badge: Rect2 = Rect2(-6.0, -26.0 - rise, 76.0, 30.0)

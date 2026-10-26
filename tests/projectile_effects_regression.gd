@@ -94,8 +94,11 @@ func _test_casualty_feedback() -> void:
 	_check(ui.find_children("CasualtyFeedback", "", false, false).size() == 1, "Rapid losses reuse one feedback node")
 	feedback.advance(0.8)
 	_check(feedback.active, "The casualty count stays readable beyond the old half-second popup")
+	feedback.suppress_badge()
+	_check(not feedback.badge_visible, "A casualty badge can yield to the combat panel without clearing its count")
 	feedback.advance(1.0)
 	_check(not feedback.active and feedback.casualty_count == 0 and not feedback.is_processing(), "Expired feedback clears its count and stops processing")
+	_check(feedback.badge_visible, "Expired close-combat cues restore badges for later ranged losses")
 	ui.hide()
 	ui.show_casualty(3)
 	ui.show()
@@ -133,6 +136,13 @@ func _test_casualty_feedback() -> void:
 			unit._on_incoming_fire_effect(1, 0.0, 0.0, null)
 			var first_loss: CASUALTY_FEEDBACK = unit.ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
 			_check(first_loss.casualty_count == 1, "Incoming fire reports one actual loss exactly once")
+			_check(first_loss.badge_visible, "Ranged casualties retain their loss badge")
+			unit.in_close_combat = true
+			unit.ui._process(0.0)
+			_check(not first_loss.badge_visible and first_loss.active, "Entering close combat suppresses an existing ranged casualty badge")
+			unit.in_close_combat = false
+			unit.ui._process(0.0)
+			_check(not first_loss.badge_visible, "Ending close combat does not restore a badge over the outcome")
 			unit._on_incoming_fire_effect(999, 0.0, 0.0, null)
 		var final_feedback: CASUALTY_FEEDBACK = unit.ui.get_node("CasualtyFeedback") as CASUALTY_FEEDBACK
 		_check(not unit.alive and unit.members_alive == 0, "Actual elimination empties the roster")

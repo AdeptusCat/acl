@@ -94,6 +94,10 @@ func _process(delta: float) -> void:
 	_hand_grenade_cooldown = maxf(0.0, _hand_grenade_cooldown - delta)
 	_update_focus_indicator()
 	_update_tactical_feedback()
+	if is_instance_valid(_casualty_feedback) and _casualty_feedback.active:
+		var unit: Unit = get_parent() as Unit
+		if unit != null and unit.in_close_combat:
+			_casualty_feedback.suppress_badge()
 	_facing_update_remaining -= delta
 	if _facing_update_remaining > 0.0:
 		return
@@ -506,7 +510,9 @@ func show_casualty(count: int = 1) -> void:
 		_casualty_feedback = CASUALTY_FEEDBACK.new()
 		_casualty_feedback.name = "CasualtyFeedback"
 		add_child(_casualty_feedback)
-	_casualty_feedback.show_losses(count)
+	var unit: Unit = get_parent() as Unit
+	var show_badge: bool = unit == null or not unit.in_close_combat
+	_casualty_feedback.show_losses(count, show_badge)
 	if is_instance_valid(detail_ui):
 		detail_ui.show_casualty(count)
 

@@ -114,6 +114,13 @@ func _render_preview() -> void:
 			if team == Globals.Team.AXIS:
 				ui.position = center + Vector2(4.0, -10.0)
 			ui.set_process(false)
+			if (index == 1 and team == Globals.Team.AXIS) or (index == 2 and team == Globals.Team.ALLIES):
+				var losses: int = 1
+				if index == 1:
+					losses = 3
+				ui.show_casualty(losses)
+				ui._casualty_feedback.suppress_badge()
+				ui._casualty_feedback.set_process(false)
 		for strike: int in range(5):
 			marker.advance(0.08)
 			marker.record_exchange(Globals.Team.ALLIES, Globals.Team.AXIS, index == 1 and strike >= 2)
