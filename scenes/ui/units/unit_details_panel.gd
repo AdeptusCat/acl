@@ -14,6 +14,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var strength_label: Label = $Scroll/Summary/Status/Headcount/Strength
 @onready var unit_status_label: Label = $Scroll/Summary/Status/Morale
 @onready var order_label: Label = $Scroll/Summary/Order
+@onready var fire_effect_label: Label = $Scroll/Summary/FireEffect
 @onready var cohesion: Label = $Scroll/Summary/Details/Content/Readiness/Cohesion
 @onready var effectiveness: Label = $Scroll/Summary/Details/Content/Readiness/Effectiveness
 @onready var cohesion_bar: ProgressBar = $Scroll/Summary/Details/Content/Readiness/CohesionBar
@@ -218,6 +219,11 @@ func _refresh_summary() -> void:
 	_on_state_changed(unit.stress_system.state)
 	order_label.text = "Order: " + _current_order_text()
 	order_label.tooltip_text = order_label.text
+	var fire_effect: Dictionary = unit.squad_fire.get_fire_effect()
+	fire_effect_label.visible = not fire_effect.is_empty()
+	if fire_effect_label.visible:
+		fire_effect_label.text = "Fire effect: " + str(fire_effect["text"])
+		fire_effect_label.add_theme_color_override("font_color", fire_effect["color"])
 	cohesion_bar.value = clampf(unit.combat_stats.cohesion_current, 0.0, 1.0)
 	effectiveness_bar.value = clampf(unit.combat_stats.combat_effectiveness, 0.0, 1.0)
 	cohesion.text = "%.0f%%" % (cohesion_bar.value * 100.0)

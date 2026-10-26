@@ -211,13 +211,20 @@ func _draw_selected_target() -> void:
 			continue
 		var zoom: float = maxf(absf(get_global_transform_with_canvas().get_scale().x), 0.05)
 		var pixel: float = 1.0 / zoom
+		var effect: Dictionary = unit.squad_fire.get_fire_effect()
+		var pulse: float = float(effect.get("pulse", 0.0))
+		var tint: Color = Color(1.0, 0.24, 0.18)
+		if pulse > 0.0:
+			tint = tint.lerp(effect["color"], pulse)
 		# Layered transparent strokes give a soft glow without requiring HDR bloom.
-		draw_line(start, finish, Color(1.0, 0.12, 0.08, 0.04), 10.0 * pixel, true)
-		draw_line(start, finish, Color(1.0, 0.16, 0.12, 0.09), 5.0 * pixel, true)
-		draw_line(start, finish, Color(1.0, 0.24, 0.18, 0.32), 1.5 * pixel, true)
+		draw_line(start, finish, Color(tint, 0.04 + pulse * 0.12), (10.0 + pulse * 4.0) * pixel, true)
+		draw_line(start, finish, Color(tint, 0.09 + pulse * 0.20), 5.0 * pixel, true)
+		draw_line(start, finish, Color(tint, 0.32 + pulse * 0.55), (1.5 + pulse) * pixel, true)
+		if pulse > 0.0:
+			draw_arc(finish, (5.0 + (1.0 - pulse) * 8.0) * pixel, 0.0, TAU, 24, Color(tint, pulse * 0.7), 1.5 * pixel, true)
 		var normal: Vector2 = Vector2(-direction.y, direction.x)
 		var arrow: Vector2 = finish - direction * 7.0 * pixel
-		draw_polyline(PackedVector2Array([arrow + normal * 3.0 * pixel, finish, arrow - normal * 3.0 * pixel]), Color(1.0, 0.24, 0.18, 0.32), 1.5 * pixel, true)
+		draw_polyline(PackedVector2Array([arrow + normal * 3.0 * pixel, finish, arrow - normal * 3.0 * pixel]), Color(tint, 0.32 + pulse * 0.55), 1.5 * pixel, true)
 
 
 func _draw_player_routes() -> void:

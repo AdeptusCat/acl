@@ -85,6 +85,12 @@ var _accum_window_s: float = 0.0
 
 var fire_recent: float = 0.0 # 0..1 shows that they were shooting
 
+const FIRE_EFFECT_WINDOW_MS: int = 4000
+var _fire_effect_target: WeakRef
+var _fire_effect_at_ms: int = -4000
+var _fire_effect_pressure: float = 0.0
+var _fire_effect_casualty_ms: int = -4000
+
 # Targeting
 var has_target_hex: bool = false
 var has_mortar_target_hex: bool = false
@@ -878,6 +884,64 @@ func add_fire_impulse(rounds_fired: int, max_rounds_ref: int) -> void:
 	fire_recent += x
 	if fire_recent > 1.0:
 		fire_recent = 1.0
+
+func record_fire_effect(target: Unit, pressure: float, casualties_count: int) -> void:
+	# Only retain effects this shooter can observe on its current enemy target.
+	if not is_instance_valid(unit) or not is_instance_valid(target):
+		return
+	if target != target_unit or target.team == unit.team or not target.is_visible_in_tree() or not _can_track_target(target):
+		return
+	var now: int = Time.get_ticks_msec()
+	if _fire_effect_target == null or _fire_effect_target.get_ref() != target or now - _fire_effect_at_ms >= FIRE_EFFECT_WINDOW_MS:
+		_fire_effect_pressure = 0.0
+		_fire_effect_casualty_ms = -FIRE_EFFECT_WINDOW_MS
+	else:
+		_fire_effect_pressure *= exp(-float(now - _fire_effect_at_ms) / 1500.0)
+	_fire_effect_target = weakref(target)
+	_fire_effect_at_ms = now
+	_fire_effect_pressure = minf(_fire_effect_pressure + maxf(pressure, 0.0), 100.0)
+	if casualties_count > 0:
+		_fire_effect_casualty_ms = now
+
+
+func get_fire_effect() -> Dictionary:
+	var target: Unit = target_unit
+	if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat or unit.is_moving:
+		return {}
+	if unit.team != Globals.team_player and not Debug.enemy_selectable:
+		return {}
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND or not is_instance_valid(target) or target.team == unit.team or not target.is_visible_in_tree() or not _can_track_target(target):
+		return {}
+	var now: int = Time.get_ticks_msec()
+	var age: int = now - _fire_effect_at_ms
+	var recent: bool = _fire_effect_target != null and _fire_effect_target.get_ref() == target and age < FIRE_EFFECT_WINDOW_MS
+	var text: String = "Awaiting impact"
+	var color: Color = Color(0.70, 0.70, 0.65)
+	var pulse: float = 0.0
+	if recent:
+		text = "Limited"
+		color = Color(0.90, 0.55, 0.42)
+		var strength: float = 0.35
+		var pressure: float = _fire_effect_pressure * exp(-float(age) / 1500.0)
+		if pressure >= 1.0:
+			text = "Suppressing"
+			color = Color(1.0, 0.75, 0.30)
+			strength = 0.75
+		if target.stress_system.state == STATES.MoraleState.PINNED:
+			text = "Target pinned"
+			color = Color(1.0, 0.85, 0.35)
+			strength = 1.0
+		elif target.stress_system.state == STATES.MoraleState.PANIC:
+			text = "Target routing"
+			color = Color(1.0, 0.85, 0.35)
+			strength = 1.0
+		if now - _fire_effect_casualty_ms < 1500:
+			text = "Casualties"
+			color = Color(1.0, 0.48, 0.24)
+			strength = 1.0
+		pulse = strength * pow(clampf(1.0 - float(age) / 900.0, 0.0, 1.0), 2.0)
+	return {"text": text, "color": color, "pulse": pulse}
+
 
 func fire_at(total_rounds: int, weapon: WeaponSpec, riflegrenade: bool, _target_hex: Vector2i, target_distance: int, target_cover: int, batch_targets: Array[Unit], shot_origin: Vector2 = Vector2.INF) -> void:
 	SquadHitResolver.fire_at(self, total_rounds, weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, shot_origin)

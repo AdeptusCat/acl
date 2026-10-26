@@ -104,6 +104,24 @@ func _test_target_link() -> void:
 	Globals.unit_visible_enemies = {source: [target]}
 	LOSHelper.los_lookup = {source.current_hex: {target.current_hex: {}}}
 	_check(overlay._target_for_link(source) == target, "A selected squad exposes its actual tracked enemy for the target line")
+	_check(source.squad_fire.get_fire_effect()["text"] == "Awaiting impact", "A tracked target is not credited with effects before an impact")
+	source.squad_fire.record_fire_effect(target, 0.0, 0)
+	_check(source.squad_fire.get_fire_effect()["text"] == "Limited", "An impact without added pressure or casualties reports limited effect")
+	source.squad_fire.record_fire_effect(target, 3.0, 0)
+	_check(source.squad_fire.get_fire_effect()["text"] == "Suppressing" and float(source.squad_fire.get_fire_effect()["pulse"]) > 0.0, "Applied pressure produces a suppression indicator and targeting-line pulse")
+	var panel: PanelContainer = load("res://scenes/ui/units/unit_details_panel.tscn").instantiate() as PanelContainer
+	add_child(panel)
+	panel.show_unit_detail(source, false)
+	_check(panel.fire_effect_label.visible and panel.fire_effect_label.text == "Fire effect: Suppressing", "The selected squad details panel displays the resolved fire effect")
+	panel.hide_unit_detail()
+	panel.free()
+	target.stress_system.state = STATES.MoraleState.PINNED
+	_check(source.squad_fire.get_fire_effect()["text"] == "Target pinned", "A recent impact reports the observed pinned state without claiming the pin")
+	target.stress_system.state = STATES.MoraleState.NORMAL
+	source.squad_fire.record_fire_effect(target, 0.0, 1)
+	_check(source.squad_fire.get_fire_effect()["text"] == "Casualties", "A confirmed casualty takes priority over suppression feedback")
+	source.squad_fire._fire_effect_at_ms -= SquadFireController.FIRE_EFFECT_WINDOW_MS
+	_check(source.squad_fire.get_fire_effect()["text"] == "Awaiting impact" and float(source.squad_fire.get_fire_effect()["pulse"]) == 0.0, "Old effects and pulses expire instead of claiming ongoing effectiveness")
 	source.selected = false
 	_check(overlay._target_for_link(source) == null, "Deselecting immediately removes the target line")
 	source.selected = true
@@ -112,6 +130,8 @@ func _test_target_link() -> void:
 	source.attackState = Unit.AttackState.AUTO
 	target.hide()
 	_check(overlay._target_for_link(source) == null, "The target line never reveals a hidden enemy")
+	source.squad_fire.record_fire_effect(target, 10.0, 1)
+	_check(source.squad_fire.get_fire_effect().is_empty(), "Hidden enemies cannot reveal effects through the indicator")
 	target.show()
 	LOSHelper.los_lookup = {}
 	_check(overlay._target_for_link(source) == null, "LOS loss removes the line before detection refreshes")
@@ -133,6 +153,7 @@ func _test_target_link() -> void:
 	source.team = Globals.Team.AXIS
 	target.team = Globals.Team.ALLIES
 	_check(overlay._target_for_link(source) == null, "Read-only enemy inspection cannot expose enemy targeting decisions")
+	_check(source.squad_fire.get_fire_effect().is_empty(), "Enemy inspection cannot expose its outgoing fire effect")
 	Debug.enemy_selectable = true
 	_check(overlay._target_for_link(source) == target, "Explicit enemy debug control permits a selected enemy's target line")
 	source.squad_fire.target_unit = null
@@ -168,6 +189,7 @@ func _render_target_link(overlay: Node2D, source: Unit, target: Unit) -> void:
 	viewport.add_child(camera)
 	for zoom: float in [0.6, 1.0, 1.5]:
 		camera.zoom = Vector2.ONE * zoom
+		source.squad_fire.record_fire_effect(target, 3.0, 0)
 		overlay.queue_redraw()
 		await get_tree().process_frame
 		await get_tree().process_frame
