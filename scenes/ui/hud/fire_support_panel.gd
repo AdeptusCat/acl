@@ -14,6 +14,7 @@ var tray: PanelContainer
 var asset_label: Label
 var length: OptionButton
 var intensity: OptionButton
+var guns: SpinBox
 var target_label: Label
 var status_label: Label
 var fire_button: Button
@@ -69,6 +70,17 @@ func _ready() -> void:
 	intensity.item_selected.connect(_select_intensity)
 	intensity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	settings.add_child(intensity)
+	var gun_row: HBoxContainer = HBoxContainer.new()
+	content.add_child(gun_row)
+	var gun_label: Label = Label.new()
+	gun_label.text = "Guns firing"
+	gun_row.add_child(gun_label)
+	guns = SpinBox.new()
+	guns.min_value = 1.0
+	guns.step = 1.0
+	guns.custom_minimum_size.x = 110.0
+	guns.value_changed.connect(_select_guns)
+	gun_row.add_child(guns)
 	var shapes: HBoxContainer = HBoxContainer.new()
 	content.add_child(shapes)
 	for index: int in range(FireSupportMission.SHAPE_NAMES.size()):
@@ -206,6 +218,7 @@ func _refresh_icons() -> void:
 		button.text = str(support.ammunition(index))
 		button.set_pressed_no_signal(tray.visible and support.selected_asset == index)
 		button.tooltip_text = "%s\n%s · %s\n%d rounds · Fire support [F]" % [support.assets[index]["name"], weapon_name, support.asset_status(index), support.ammunition(index)]
+		button.tooltip_text += "\nGuns selected: %d/%d" % [support.selected_guns(index), support.available_guns(index)]
 		button.set_meta("asset_tooltip", button.tooltip_text)
 		var mission: FireSupportMission = support.asset_mission(index)
 		button.self_modulate = Color.WHITE
@@ -237,6 +250,8 @@ func _refresh_launch_progress() -> void:
 			launch_clocks[index].text = "Ready"
 		elif seconds > 0.0:
 			launch_clocks[index].text = "%ds" % ceili(seconds)
+		if progress.has("clock"):
+			launch_clocks[index].text = str(progress["clock"])
 		asset_buttons[index].tooltip_text += "\n%s · %s" % [progress["label"], launch_clocks[index].text]
 
 func _select_length(index: int) -> void:
@@ -245,6 +260,11 @@ func _select_length(index: int) -> void:
 
 func _select_intensity(index: int) -> void:
 	support.selected_intensity = index as FireSupportMission.Intensity
+	refresh()
+
+func _select_guns(value: float) -> void:
+	if support.selected_asset >= 0 and support.selected_asset < support.assets.size():
+		support.assets[support.selected_asset]["selected_guns"] = int(value)
 	refresh()
 
 func _select_shape(index: int) -> void:
@@ -265,7 +285,7 @@ func _locate() -> void:
 func _fire() -> void:
 	if not support.has_target:
 		return
-	if support.request(support.selected_asset, support.target, support.selected_length, support.selected_intensity, support.target_cells, support.target_shape, support.target_end, support.target_radius):
+	if support.request(support.selected_asset, support.target, support.selected_length, support.selected_intensity, support.target_cells, support.target_shape, support.target_end, support.target_radius, support.selected_guns(support.selected_asset)):
 		support.host.get_parent().ui.hide_target_hex_cover_distance()
 	refresh()
 
@@ -284,6 +304,14 @@ func refresh() -> void:
 	intensity.disabled = support.assets.is_empty()
 	length.select(FireSupportMission.LENGTHS.find(support.selected_length))
 	intensity.select(support.selected_intensity)
+	guns.set_block_signals(true)
+	guns.max_value = support.available_guns(selection)
+	guns.set_value_no_signal(support.selected_guns(selection))
+	guns.suffix = " / %d" % support.available_guns(selection)
+	guns.set_block_signals(false)
+	guns.editable = not support.assets.is_empty() and support.available_guns(selection) > 1
+	for index: int in range(FireSupportMission.INTENSITY_NAMES.size()):
+		intensity.set_item_text(index, FireSupportMission.intensity_text(index as FireSupportMission.Intensity, support.selected_guns(selection)))
 	var shown_shape: FireSupportMission.Shape = support.selected_shape
 	if support.has_target or support.dragging:
 		shown_shape = support.target_shape
@@ -308,11 +336,11 @@ func refresh() -> void:
 	if not support.assets.is_empty():
 		var mission: FireSupportMission = support.asset_mission(selection)
 		locate_button.disabled = support.assets[selection]["battery"] != null
-		status_label.text = "Ready · %d s · %s" % [ceili(support.selected_length), FireSupportMission.INTENSITY_NAMES[support.selected_intensity]]
+		status_label.text = "Ready · %d guns · %d s · %s" % [support.selected_guns(selection), ceili(support.selected_length), FireSupportMission.intensity_text(support.selected_intensity, support.selected_guns(selection))]
 		if mission != null:
-			status_label.text = "%s\n%s · %d hexes · %d fired · %d remaining" % [mission.result, FireSupportMission.SHAPE_NAMES[mission.shape], mission.cells.size(), mission.fired, mission.remaining]
+			status_label.text = "%s\n%d guns · %s · %d hexes · %d fired · %d remaining" % [mission.result, mission.guns, FireSupportMission.SHAPE_NAMES[mission.shape], mission.cells.size(), mission.fired, mission.remaining]
 			if mission.active:
-				status_label.text += "\n%d s remaining · %s" % [ceili(mission.seconds_left()), FireSupportMission.INTENSITY_NAMES[mission.intensity]]
+				status_label.text += "\n%d s remaining · %s" % [ceili(mission.seconds_left()), FireSupportMission.intensity_text(mission.intensity, mission.guns)]
 				cease_button.disabled = false
 				if mission.next_round > mission.elapsed:
 					status_label.text += "\nNext launch in at least %d s" % ceili(mission.next_round - mission.elapsed)

@@ -7,6 +7,7 @@ var host: Node2D
 var assets: Array[Dictionary] = []
 var missions: Array[FireSupportMission] = []
 var flights: Array[Dictionary] = []
+var pending_volley: Array[Dictionary] = []
 var selected_asset: int = 0
 var selected_length: float = 15.0
 var selected_intensity: FireSupportMission.Intensity = FireSupportMission.Intensity.INTENSE
@@ -44,7 +45,7 @@ func setup(controller: Node2D) -> void:
 		source.add_child(source.squad_fire)
 		var runtime: WeaponSpec = definition.weapon.create_runtime()
 		runtime.ammunition = definition.rounds
-		assets.append({"id": "battery_%d" % assets.size(), "name": definition.weapon.name + " · Offboard", "unit": source, "battery": definition, "weapon": runtime})
+		assets.append({"id": "battery_%d" % assets.size(), "name": definition.weapon.name + " · Offboard", "unit": source, "battery": definition, "weapon": runtime, "selected_guns": definition.gun_count})
 	panel = FireSupportPanel.new()
 	panel.name = "FireSupport"
 	panel.support = self
@@ -63,6 +64,19 @@ func asset_mission(index: int) -> FireSupportMission:
 		if mission.asset_id == assets[index]["id"]:
 			return mission
 	return null
+
+func available_guns(index: int) -> int:
+	if index < 0 or index >= assets.size():
+		return 1
+	var battery: OffboardBattery = assets[index]["battery"]
+	if battery != null:
+		return battery.gun_count
+	return 1
+
+func selected_guns(index: int) -> int:
+	if index < 0 or index >= assets.size():
+		return 1
+	return clampi(int(assets[index].get("selected_guns", 1)), 1, available_guns(index))
 
 func asset_weapon(index: int) -> WeaponSpec:
 	var asset: Dictionary = assets[index]
@@ -114,6 +128,8 @@ func asset_launch_progress(index: int) -> Dictionary:
 	var mission: FireSupportMission = asset_mission(index)
 	if mission == null or not mission.active:
 		return {}
+	if mission.pending_guns > 0:
+		return {"fill": 1.0, "seconds": 0.0, "label": "Firing volley", "clock": "Volley"}
 	var wait: float = maxf(0.0, mission.next_round - mission.elapsed)
 	var duration: float = maxf(0.0, mission.next_round - mission.last_launch_at)
 	var scheduled_duration: float = duration
@@ -205,16 +221,16 @@ func footprint_restriction(index: int, cells: Array[Vector2i]) -> String:
 			return reason
 	return ""
 
-func planned_rounds(index: int, length: float, intensity: FireSupportMission.Intensity) -> int:
+func planned_rounds(index: int, length: float, intensity: FireSupportMission.Intensity, guns: int = 1) -> int:
 	if index < 0 or index >= assets.size():
 		return 0
 	var interval: float = FireSupportMission.INTERVALS[intensity]
 	var weapon: WeaponSpec = asset_weapon(index)
 	if weapon != null:
 		interval = maxf(interval, weapon.reload_s)
-	return mini(ammunition(index), ceili(length / interval))
+	return mini(ammunition(index), ceili(length / interval) * clampi(guns, 1, available_guns(index)))
 
-func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMission.Intensity, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1) -> bool:
+func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMission.Intensity, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1, guns: int = 1) -> bool:
 	if not is_finite(length) or length <= 0.0 or intensity < 0 or intensity >= FireSupportMission.INTERVALS.size():
 		return false
 	var footprint: Array[Vector2i] = cells.duplicate()
@@ -223,6 +239,9 @@ func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMi
 	var reason: String = footprint_restriction(index, footprint)
 	if not reason.is_empty():
 		host.order_feedback.emit(false, "Fire support", reason)
+		return false
+	if guns < 1 or guns > available_guns(index):
+		host.order_feedback.emit(false, "Fire support", "Choose an available gun count.")
 		return false
 	var asset: Dictionary = assets[index]
 	var mission: FireSupportMission = asset_mission(index)
@@ -237,7 +256,8 @@ func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMi
 	mission.radius = radius
 	mission.duration_seconds = length
 	mission.intensity = intensity
-	mission.planned_rounds = planned_rounds(index, length, intensity)
+	mission.guns = guns
+	mission.planned_rounds = planned_rounds(index, length, intensity, guns)
 	mission.remaining = mission.planned_rounds
 	missions.append(mission)
 	var unit: Unit = asset["unit"]
@@ -256,7 +276,7 @@ func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMi
 	target_cells.clear()
 	LOSHelper.clear_los()
 	host._on_started_moving()
-	host.order_feedback.emit(true, "Fire mission", "%d s · %s" % [ceili(length), FireSupportMission.INTENSITY_NAMES[intensity]])
+	host.order_feedback.emit(true, "Fire mission", "%d s · %d guns · %s" % [ceili(length), guns, FireSupportMission.intensity_text(intensity, guns)])
 	queue_redraw()
 	return true
 
@@ -264,6 +284,7 @@ func cease(index: int) -> void:
 	var mission: FireSupportMission = asset_mission(index)
 	if mission != null and mission.active:
 		mission.stop()
+		_cancel_volley(mission)
 		_release_onboard(assets[index], mission)
 	queue_redraw()
 
@@ -385,7 +406,7 @@ func build_footprint(start: Vector2i, end: Vector2i, shape: FireSupportMission.S
 	return cells
 
 func coverage_text() -> String:
-	var rounds: int = planned_rounds(selected_asset, selected_length, selected_intensity)
+	var rounds: int = planned_rounds(selected_asset, selected_length, selected_intensity, selected_guns(selected_asset))
 	var text: String = "Up to %d rounds across %d hexes" % [rounds, target_cells.size()]
 	if rounds < target_cells.size():
 		text += " · sparse coverage"
@@ -463,6 +484,7 @@ func _process(delta: float) -> void:
 		for index: int in range(assets.size()):
 			cease(index)
 		flights.clear()
+		pending_volley.clear()
 		choosing_target = false
 		dragging = false
 		has_target = false
@@ -477,6 +499,7 @@ func _process(delta: float) -> void:
 		if mission == null:
 			continue
 		if not mission.active:
+			_cancel_volley(mission)
 			_release_onboard(asset, mission)
 			continue
 		if ammunition(index) <= 0:
@@ -484,8 +507,8 @@ func _process(delta: float) -> void:
 			_release_onboard(asset, mission)
 			continue
 		if asset["battery"] != null:
-			if mission.ready_to_fire():
-				_launch_offboard(asset, mission)
+			if mission.ready_to_fire() and mission.pending_guns == 0:
+				_begin_volley(asset, mission)
 		else:
 			var unit: Unit = asset["unit"]
 			if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat:
@@ -494,6 +517,15 @@ func _process(delta: float) -> void:
 				mission.stop("Interrupted by another order")
 				# Do not clear the replacement order.
 				unit.squad_fire.fire_support_mission = null
+	for shot: Dictionary in pending_volley.duplicate():
+		var mission: FireSupportMission = shot["mission"]
+		if not mission.active or mission.time_expired():
+			_cancel_volley(mission)
+			continue
+		if mission.elapsed >= float(shot["at"]):
+			pending_volley.erase(shot)
+			mission.pending_guns -= 1
+			_launch_offboard(shot["asset"], mission, float(shot["volley_at"]))
 	for flight: Dictionary in flights.duplicate():
 		if flight.has("new"):
 			flight.erase("new")
@@ -506,13 +538,34 @@ func _process(delta: float) -> void:
 			flights.erase(flight)
 	queue_redraw()
 
-func _launch_offboard(asset: Dictionary, mission: FireSupportMission) -> void:
+func _cancel_volley(mission: FireSupportMission) -> void:
+	for shot: Dictionary in pending_volley.duplicate():
+		if shot["mission"] == mission:
+			pending_volley.erase(shot)
+	mission.pending_guns = 0
+
+func _begin_volley(asset: Dictionary, mission: FireSupportMission) -> void:
+	var count: int = mini(mission.guns, mini(mission.remaining, (asset["weapon"] as WeaponSpec).ammunition))
+	if count <= 0:
+		return
+	var volley_at: float = mission.elapsed
+	mission.pending_guns = count - 1
+	for gun: int in range(1, count):
+		pending_volley.append({"asset": asset, "mission": mission, "at": volley_at + float(gun) / float(count - 1) * 0.45 + randf_range(0.0, 0.05), "volley_at": volley_at})
+	_launch_offboard(asset, mission, volley_at)
+
+func _launch_offboard(asset: Dictionary, mission: FireSupportMission, volley_at: float = -1.0) -> void:
 	var battery: OffboardBattery = asset["battery"]
 	var weapon: WeaponSpec = asset["weapon"]
+	if not mission.active or mission.remaining <= 0 or weapon.ammunition <= 0 or mission.time_expired():
+		return
 	var impact_cell: Vector2i = mission.next_target()
 	weapon.ammunition -= 1
 	mission.commit_rounds(1)
 	mission.next_round = maxf(mission.next_round, mission.elapsed + weapon.reload_s)
+	if volley_at >= 0.0:
+		mission.last_launch_at = volley_at
+		mission.next_round = volley_at + maxf(FireSupportMission.INTERVALS[mission.intensity], weapon.reload_s)
 	var ground: HexagonTileMapLayer = host.ground_layer
 	var finish: Vector2 = ground.to_global(ground.map_to_local(impact_cell))
 	var origin: Vector2 = _offboard_origin(finish, float(weapon.projectile_speed) * battery.flight_seconds)

@@ -23,6 +23,12 @@ Mission settings are independent:
 
 The preview shows the maximum planned rounds for the selected window and intensity, capped by available ammunition and weapon reload speed. Missions stop when their time expires, their planned rounds have fired, ammunition runs out or fire is ceased. Delayed shells are never launched after the firing window closes. Unfired planned rounds remain in battery ammunition; the icon's mission count reaches zero when the order ends.
 
+Offboard batteries have an authored **gun_count** (1–24). **Guns firing** in the panel selects how many participate in the next mission, up to that battery's available count. Existing batteries default to one gun. Onboard mortar icons continue to represent one squad's weapon.
+
+With multiple guns selected, intensity is shown in seconds **per volley**. Each participating gun launches one shell in a staggered group lasting roughly half a second. Every shell follows the Point/Line/Area distribution and resolves independently. The next volley interval is measured from the first gun so stagger does not accumulate into cadence drift. The icon says **Volley** during the launch group, then resumes its next-volley countdown.
+
+**rounds** is shared ammunition for the whole battery, not ammunition per gun. Planned ammunition scales with the selected gun count and remains capped by this shared stock; the last volley can be smaller if ammunition is low. Cease fire or the duration limit cancels guns that have not launched yet, without spending their shells. Airborne shells still land. Changing the selected gun count affects the next mission, not an active order.
+
 Onboard missions use the existing gunner, ammunition, crew, setup, reload, projectile and impact systems. There is no additional call-in delay. Moving mortars halt and deploy; broken, surrendered, eliminated or close-combat squads cannot accept missions. Another fire order interrupts the support mission. Completed or ceased batteries remain silent until another fire order. Airborne rounds still land.
 
 Targets need not be visible to the mortar. The preview identifies friendly observation and friendly troops in the target hex. Existing HE resolution affects the struck hex, so the mission marker represents that hex rather than promising damage to adjacent cells.

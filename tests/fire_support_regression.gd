@@ -15,6 +15,8 @@ func _run() -> void:
 	scenario.axis_ai_status = Scenario.AIStatus.OFF
 	scenario.allies_ai_status = Scenario.AIStatus.OFF
 	scenario.offboard_batteries = [load("res://resources/fire_support/example_81mm_battery.tres"), load("res://resources/fire_support/example_105mm_battery.tres")]
+	scenario.offboard_batteries[0] = scenario.offboard_batteries[0].duplicate() as OffboardBattery
+	scenario.offboard_batteries[0].gun_count = 4
 	var mortar: Unit = load("res://scenes/game/units/unit.tscn").instantiate() as Unit
 	mortar.team = scenario.player_team
 	mortar.squad_type = Globals.SquadType.MORTAR
@@ -184,6 +186,7 @@ func _run() -> void:
 	support.panel.toggle_tray()
 	await _test_shapes(support, mortar, gunner, target, selected)
 	await _test_timed_settings(support, mortar, gunner, target)
+	_test_volleys(support, target)
 	support.pick_target(point)
 	support.selected_length = 300.0
 	support.selected_intensity = FireSupportMission.Intensity.HARASSING
@@ -191,7 +194,9 @@ func _run() -> void:
 	support.panel.refresh()
 	if OS.get_cmdline_user_args().has("--capture"):
 		support.cease(1)
-		support.request(1, target, 60.0, FireSupportMission.Intensity.STEADY)
+		support.panel._open_asset(1)
+		support.panel._select_guns(3)
+		support.request(1, target, 60.0, FireSupportMission.Intensity.STEADY, [], FireSupportMission.Shape.POINT, target, 1, 3)
 		var showcase: FireSupportMission = support.asset_mission(1)
 		showcase.elapsed = showcase.next_round * 0.55
 		support.panel.refresh()
@@ -334,6 +339,69 @@ func _test_timed_settings(support: FireSupportController, mortar: Unit, gunner: 
 	mission.elapsed = mission.first_launch_at + mission.duration_seconds
 	support._process(0.0)
 	_check(not mission.active and mission.remaining == 0 and support.ammunition(1) == ammo, "Expired offboard missions cannot launch overdue shells")
+
+func _test_volleys(support: FireSupportController, target: Vector2i) -> void:
+	var weapon: WeaponSpec = support.assets[1]["weapon"]
+	var stock: int = weapon.ammunition
+	support.panel._open_asset(1)
+	_check(support.available_guns(1) == 4 and support.panel.guns.max_value == 4.0, "The panel uses the authored battery gun count as its selection limit")
+	support.panel._select_guns(3)
+	_check(support.selected_guns(1) == 3 and support.panel.intensity.get_item_text(0).contains("volley"), "Selecting several guns changes intensity wording to seconds per volley")
+	_check(support.planned_rounds(1, 15.0, FireSupportMission.Intensity.INTENSE, 3) == mini(stock, 9), "Planned ammunition scales with selected guns and remains capped by shared stock")
+	_check(not support.request(1, target, 15.0, FireSupportMission.Intensity.INTENSE, [], FireSupportMission.Shape.POINT, target, 1, 5), "A mission cannot select more guns than the battery contains")
+	var end: Vector2i = target
+	var ground: HexagonTileMapLayer = support.host.ground_layer
+	for cell: Vector2i in ground.get_surrounding_cells(target):
+		if ground.get_cell_source_id(cell) != -1:
+			end = cell
+			break
+	var line: Array[Vector2i] = [target, end]
+	_check(support.request(1, target, 15.0, FireSupportMission.Intensity.INTENSE, line, FireSupportMission.Shape.LINE, end, 1, 3), "A three-gun volley mission is accepted")
+	var mission: FireSupportMission = support.asset_mission(1)
+	var flights: int = support.flights.size()
+	mission.elapsed = mission.next_round
+	var first_launch: float = mission.elapsed
+	support._process(0.0)
+	_check(mission.fired == 1 and mission.pending_guns == 2 and weapon.ammunition == stock - 1, "The first gun launches immediately while the other selected guns prepare staggered shots")
+	_check(str(support.asset_launch_progress(1).get("clock", "")) == "Volley", "The launch indicator identifies a volley in progress")
+	mission.elapsed = first_launch + 0.10
+	support._process(0.0)
+	_check(mission.fired == 1, "The volley has a small timing spread rather than perfectly simultaneous shells")
+	mission.elapsed = first_launch + 0.60
+	support._process(0.0)
+	_check(mission.fired == 3 and mission.pending_guns == 0 and support.flights.size() == flights + 3 and weapon.ammunition == stock - 3, "All selected guns launch individual shells within roughly half a second")
+	_check(support.flights[flights]["target"] == target and support.flights[flights + 1]["target"] == end and support.flights[flights + 2]["target"] == target, "Individual guns distribute their shells along the mission footprint")
+	_check(is_equal_approx(mission.next_round, first_launch + 5.0), "The next volley is scheduled from its first gun, without cadence drift")
+	support.panel._select_guns(2)
+	_check(mission.guns == 3, "Changing the panel selection does not alter an already assigned mission")
+	mission.elapsed = first_launch + 4.99
+	support._process(0.0)
+	_check(mission.fired == 3, "A second volley cannot begin before the selected intensity interval")
+	mission.elapsed = first_launch + 5.0
+	support._process(0.0)
+	_check(mission.fired == 4 and mission.pending_guns == 2, "The next interval starts another coordinated volley")
+	support.cease(1)
+	mission.elapsed += 1.0
+	support._process(0.0)
+	_check(support.pending_volley.is_empty() and mission.pending_guns == 0 and weapon.ammunition == stock - 4 and support.flights.size() == flights + 4, "Cease cancels unlaunched guns without removing airborne shells or spending their ammunition")
+	weapon.ammunition = 2
+	support.request(1, target, 15.0, FireSupportMission.Intensity.INTENSE, [], FireSupportMission.Shape.POINT, target, 1, 3)
+	mission = support.asset_mission(1)
+	mission.elapsed = mission.next_round
+	support._process(0.0)
+	mission.elapsed += 0.6
+	support._process(0.0)
+	_check(mission.fired == 2 and not mission.active and weapon.ammunition == 0 and support.pending_volley.is_empty(), "A final partial volley uses only the shells actually remaining in the battery")
+	weapon.ammunition = 6
+	support.request(1, target, 0.1, FireSupportMission.Intensity.INTENSE, [], FireSupportMission.Shape.POINT, target, 1, 3)
+	mission = support.asset_mission(1)
+	mission.elapsed = mission.next_round
+	support._process(0.0)
+	mission.elapsed += 0.2
+	support._process(0.0)
+	_check(not mission.active and mission.fired == 1 and weapon.ammunition == 5 and support.pending_volley.is_empty(), "The duration limit cancels pending volley guns before they can launch late")
+	weapon.ammunition = stock
+	support.panel._open_asset(0)
 
 func _ready_gunner(soldier: Soldier) -> void:
 	soldier.setup_weapon_task.done = true

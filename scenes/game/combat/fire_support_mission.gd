@@ -19,6 +19,8 @@ var intensity: Intensity = Intensity.INTENSE
 var duration_seconds: float = 15.0
 var first_launch_at: float = -1.0
 var planned_rounds: int = 0
+var guns: int = 1
+var pending_guns: int = 0
 var remaining: int = 0
 var fired: int = 0
 var elapsed: float = 0.0
@@ -52,6 +54,12 @@ func seconds_left() -> float:
 	if first_launch_at < 0.0:
 		return duration_seconds
 	return maxf(0.0, duration_seconds - (elapsed - first_launch_at))
+
+static func intensity_text(value: Intensity, gun_count: int) -> String:
+	var text: String = INTENSITY_NAMES[value]
+	if gun_count > 1:
+		text = text.replace("/ shot", "/ volley")
+	return text
 
 func commit_rounds(rounds: int) -> void:
 	if first_launch_at < 0.0:
