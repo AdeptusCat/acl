@@ -4,6 +4,8 @@ extends RefCounted
 enum Kind { OCCUPY, EXIT, DENY_OCCUPATION, BLOCK_EXIT, HUNT, PRESERVE }
 enum EscapeDuty { EXIT, RECOVER, HEADQUARTERS_SUPPORT, BREACH }
 
+const SECURED_DEFENSE_RADIUS: int = 2
+
 var kind: Kind
 var key: String
 var condition: VictoryCondition
@@ -17,11 +19,12 @@ var bypass_units: Dictionary[Unit, bool] = {}
 var recovering_units: Dictionary[Unit, bool] = {}
 var breach_required: bool = false
 var breach_hex: Vector2i
+var defend_from_cover: bool = false
 var reason: String = ""
 
 
 func is_destination_goal() -> bool:
-	return kind in [Kind.OCCUPY, Kind.EXIT]
+	return kind == Kind.EXIT or (kind == Kind.OCCUPY and not defend_from_cover)
 
 
 func includes_headquarters() -> bool:

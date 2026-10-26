@@ -224,7 +224,7 @@ func set_scenario_goal_assignments(assignments: Dictionary[Unit, ScenarioGoalTas
 		var escape_phase_changed: bool = false
 		if previous != null and next != null and previous.key == next.key:
 			escape_phase_changed = previous.escape_policy != null and next.escape_policy != null and previous.escape_duty(unit) != next.escape_duty(unit)
-			if not escape_phase_changed:
+			if not escape_phase_changed and previous.defend_from_cover == next.defend_from_cover:
 				continue
 		if previous == null and next == null:
 			continue
@@ -474,7 +474,10 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		config.defense_radius = 2
 		config.withdrawal_requested = true
 	config.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
-	if task.kind == ScenarioGoalTask.Kind.OCCUPY and not advancing:
+	if task.defend_from_cover:
+		config.defense_responsibility = PositionQuery.Responsibility.GUARD
+		config.defense_radius = mini(config.defense_radius, ScenarioGoalTask.SECURED_DEFENSE_RADIUS)
+	elif task.kind == ScenarioGoalTask.Kind.OCCUPY and not advancing:
 		config.defense_responsibility = PositionQuery.Responsibility.OCCUPY
 		config.profile.minimum_cover = 0.0
 	elif task.kind in [ScenarioGoalTask.Kind.DENY_OCCUPATION, ScenarioGoalTask.Kind.BLOCK_EXIT] and not advancing:
@@ -532,6 +535,9 @@ func _add_goal_request(unit: Unit, task: ScenarioGoalTask) -> void:
 		if config.profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 			config.profile.support_advance_weight = 8.0
 	var query: PositionQuery = DefensePositionAnalyzer.make_query(config, unit, _planning_reservations)
+	if task.defend_from_cover:
+		query.objective_guard_radius = ScenarioGoalTask.SECURED_DEFENSE_RADIUS
+		query.use_directional_cover = true
 	if task.withdrawal and HqSupportPositionPolicy.is_headquarters(unit):
 		# A deliberate exit duty overrides the default HQ support profile.
 		query.profile = config.profile

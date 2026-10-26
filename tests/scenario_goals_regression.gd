@@ -83,6 +83,7 @@ func _run() -> void:
 	_test_exit_progress()
 	_test_multiple_goals()
 	_test_exact_destinations()
+	_test_secured_objective_defense()
 	_test_bound_stability()
 	_test_recovered_defender()
 	_test_enemy_knowledge()
@@ -253,6 +254,99 @@ func _test_exact_destinations() -> void:
 	planner._add_goal_request(unit, task)
 	_check(planner._planning_requests[0]["query"].goal_capacity == 2, "Exit movement retains capacity for the original threshold after earlier squads register")
 	planner._cancel_plan()
+
+
+func _test_secured_objective_defense() -> void:
+	var unit: Unit = rifles[0]
+	var origin: Vector2i = unit.current_hex
+	var original_director: ScenarioGoalDirector = planner.goal_director
+	var original_order: MissionOrder = planner.current_order.copy()
+	var snapshot: InfluenceSnapshot = controller.influence_map_controller.snapshot
+	var contacts: Array[InfluenceContact] = snapshot.get_contacts(planner.team).duplicate()
+	var defensive: Array[InfluenceContact] = snapshot.get_defensive_contacts(planner.team).duplicate()
+	snapshot.contacts[planner.team] = []
+	snapshot.defensive_contacts[planner.team] = []
+	var condition: OccupyObjectiveCondition = _occupy([origin])
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	goals.configure(planner.team, [condition], PositionProfile.Mode.DEFEND)
+	planner.goal_director = goals
+	planner.receive_mission_order(goals.initial_order(planner, original_order.copy(), 300.0))
+	goals.update(planner, 300.0, 100.0)
+	_check(goals.assignments.has(unit) and goals.assignments[unit].is_destination_goal(), "An unfinished capture keeps its exact-marker occupation duty")
+	condition.state.victory_conditions_met[origin] = true
+	condition.state.required_times_reached_s[origin] = condition.required_time_s
+	condition.state.controlling_teams[origin] = planner.team
+	goals.update(planner, 300.0, 110.0)
+	_check(goals.assignments.has(unit) and goals.assignments[unit].defend_from_cover and not goals.assignments[unit].is_destination_goal(), "A secured marker retains its defender while releasing exact-hex occupation")
+	planner._cancel_plan()
+	planner._planning_snapshot = snapshot
+	planner._planning_reservations = {}
+	planner._add_goal_request(unit, goals.assignments[unit])
+	var query: PositionQuery = planner._planning_requests[0]["query"]
+	_check(query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.GUARD and query.profile.minimum_cover > 0.0 and not query.goal_destination_required, "Secured objective advice requires cover and protection rather than standing on the marker")
+	var covered: Vector2i = _adjacent_empty(snapshot, unit)
+	var map: InfluenceMap = snapshot.maps[planner.team]
+	var original_cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, origin)
+	var covered_cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered)
+	var visible: Dictionary = snapshot.los[covered].duplicate()
+	snapshot.los[covered][origin] = {"target_cover": 0.0, "hindrance": 0.0}
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, origin, 0.0)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered, 1.0)
+	query.use_defense_area = false
+	query.defense_area = null
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.sector_cells = [origin, covered]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == covered and advice.should_move, "A defender on an open secured marker chooses nearby cover with a firing lane to it")
+	_check(planner.executor.execute(advice), "The covered defensive advice produces an actual squad order")
+	_set_hex(unit, covered)
+	unit.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(planner.team))[0]
+	var enemy_origin: Vector2i = enemy.current_hex
+	_set_hex(enemy, origin)
+	goals.update(planner, 300.0, 120.0)
+	_check(goals.assignments[unit].defend_from_cover, "Hidden enemy movement cannot reveal an objective incursion to its defender")
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = origin
+	contact.observed = true
+	snapshot.contacts[planner.team] = [contact]
+	snapshot.defensive_contacts[planner.team] = [contact]
+	goals.update(planner, 300.0, 130.0)
+	_check(goals.assignments.has(unit) and not goals.assignments[unit].defend_from_cover and goals.assignments[unit].urgent, "An observed incursion restores capture duties even while the defender establishes its covered position")
+	_check(is_zero_approx(planner.time_until_reconsider), "Changing between capture and covered defense schedules new tactical advice")
+	_set_hex(enemy, enemy_origin)
+	snapshot.contacts[planner.team] = []
+	snapshot.defensive_contacts[planner.team] = []
+	var overlap: OccupyObjectiveCondition = _occupy([origin], 2)
+	goals.configure(planner.team, [condition, overlap], PositionProfile.Mode.DEFEND)
+	goals._build_tasks(planner, 300.0)
+	_check(goals.tasks.size() == 1 and not goals.tasks[0].defend_from_cover and goals.tasks[0].required_units == 2, "An unfinished overlapping requirement keeps the complete capture garrison")
+	overlap.state.victory_conditions_met[origin] = true
+	goals._build_tasks(planner, 300.0)
+	_check(goals.tasks[0].defend_from_cover, "All overlapping capture requirements must be complete before covered defense begins")
+	var multiple: OccupyObjectiveCondition = _occupy([origin, covered])
+	multiple.state.victory_conditions_met[origin] = true
+	goals.configure(planner.team, [multiple], PositionProfile.Mode.DEFEND)
+	goals._build_tasks(planner, 300.0)
+	var secured_marker: bool = false
+	var unfinished_marker: bool = false
+	for task: ScenarioGoalTask in goals.tasks:
+		if task.hex == origin:
+			secured_marker = task.defend_from_cover
+		if task.hex == covered:
+			unfinished_marker = not task.defend_from_cover
+	_check(secured_marker and unfinished_marker, "Multi-hex objectives transition each secured marker independently")
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, origin, original_cover)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered, covered_cover)
+	snapshot.los[covered] = visible
+	snapshot.contacts[planner.team] = contacts
+	snapshot.defensive_contacts[planner.team] = defensive
+	planner.executor.cancel_all(true)
+	unit.give_hold_order()
+	_set_hex(unit, origin)
+	planner.goal_director = original_director
+	planner.receive_mission_order(original_order)
 
 
 func _test_bound_stability() -> void:

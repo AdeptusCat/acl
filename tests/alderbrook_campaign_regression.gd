@@ -448,6 +448,8 @@ func _test_match(index: int) -> void:
 		if not planner.squad_assignments.is_empty():
 			break
 	_check(planner.active and not planner.squad_assignments.is_empty(), "Enemy tactical planning publishes actual mission orders")
+	if index == 0:
+		_test_prologue_guard(planner)
 	if index >= 3:
 		_check(planner.company_command.uses_hierarchy(), "Larger enemy forces use company command")
 		for formation: CompanyPlatoon in planner.company_command.platoons.values():
@@ -464,6 +466,23 @@ func _test_match(index: int) -> void:
 	_check(saved != null and saved.match_id == scenario.get_save_id() and saved.scenario_id == scenario.scenario_id, "The real result handler saves stable campaign identifiers")
 	if index + 1 < campaign_maps.size():
 		_check(world.start_screen.get_lock_reason(campaign_maps[index + 1].get_scenario(0)).is_empty(), "A real saved match result unlocks the next mission")
+
+
+func _test_prologue_guard(planner: PlatoonAI) -> void:
+	var found: bool = false
+	for unit: Unit in planner.goal_assignments:
+		var task: ScenarioGoalTask = planner.goal_assignments[unit]
+		if task.kind != ScenarioGoalTask.Kind.OCCUPY:
+			continue
+		found = true
+		_check(task.defend_from_cover, "The secured prologue outpost receives a covered defense duty")
+		var assignment: Dictionary = planner.squad_assignments.get(unit, {})
+		var result: PositionResult = assignment.get("result") as PositionResult
+		_check(result != null and result.is_valid(), "The authored outpost has an available covered guard position")
+		if result != null and result.is_valid():
+			_check(result.profile_mode == PositionProfile.Mode.DEFEND and result.features.get("cover", 0.0) >= 0.1, "The prologue defender uses actual terrain or directional wall cover")
+			_check(LOSHelper.get_hex_distance(result.target_hex, task.hex) <= ScenarioGoalTask.SECURED_DEFENSE_RADIUS, "The prologue guard remains within response distance of its objective")
+	_check(found, "The prologue retains a guard assigned to its secured outpost")
 
 
 func _test_final_defense_losses(planner: PlatoonAI) -> void:

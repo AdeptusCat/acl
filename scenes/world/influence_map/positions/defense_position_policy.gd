@@ -75,7 +75,7 @@ static func _approach_graph(query: PositionQuery, contacts: Array[InfluenceConta
 static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
 	var covers_objective: bool = _can_cover(query, query.unit, cell, query.objective_hex)
-	var guard: bool = covers_objective and distance <= 1
+	var guard: bool = covers_objective and distance <= query.objective_guard_radius
 	if query.defense_approaches.is_empty():
 		guard = covers_objective and distance <= query.defense_radius
 	var blocking: float = 0.0
@@ -341,7 +341,7 @@ static func _prepare_handoff(query: PositionQuery) -> void:
 static func _loses_objective_guard(query: PositionQuery) -> bool:
 	if not query.objective_guard_required:
 		return false
-	if not DefenseReadinessJob.established(query.unit, query) or LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex) > 1 or not _can_cover(query, query.unit, query.unit.current_hex, query.objective_hex):
+	if not DefenseReadinessJob.established(query.unit, query) or LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex) > query.objective_guard_radius or not _can_cover(query, query.unit, query.unit.current_hex, query.objective_hex):
 		return false
 	var imminent: bool = false
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
@@ -353,7 +353,7 @@ static func _loses_objective_guard(query: PositionQuery) -> bool:
 			continue
 		if query.reservations.get(friendly, friendly.current_hex) != friendly.current_hex:
 			continue
-		if LOSHelper.get_hex_distance(friendly.current_hex, query.objective_hex) <= 1 and _can_cover(query, friendly, friendly.current_hex, query.objective_hex):
+		if LOSHelper.get_hex_distance(friendly.current_hex, query.objective_hex) <= query.objective_guard_radius and _can_cover(query, friendly, friendly.current_hex, query.objective_hex):
 			return false
 	return true
 

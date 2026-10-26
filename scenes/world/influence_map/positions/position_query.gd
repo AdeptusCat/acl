@@ -54,6 +54,8 @@ var handoff_requirements: Array[Dictionary] = []
 var handoff_prepared: bool = false
 var objective_handoff_required: bool = false
 var objective_guard_required: bool = true
+var objective_guard_radius: int = 1
+var use_directional_cover: bool = false
 var protect_garrison_hex: bool = false
 var coverage_delay_seconds: float = 0.0
 var movement_order_id: int = -1
@@ -138,4 +140,4 @@ func context_key() -> String:
 	var position_objective: Vector2i = objective_hex
 	if stability != null and profile.mode == PositionProfile.Mode.SUPPORT_BY_FIRE:
 		position_objective = mission_objective_hex
-	return str([team, position_objective, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount, response_capability, required_crossing_branch, goal_key, goal_destination_required, goal_capacity, objective_guard_required, minimum_forward_progress, protect_garrison_hex])
+	return str([team, position_objective, profile.mode, axis_key, geography, defense_radius, movement_radius, sector_cells, fallback_hexes, defense_responsibility, withdrawing, assigned_sector, assigned_branch, reserve_position, use_defense_area, profile.defensive_mount, response_capability, required_crossing_branch, goal_key, goal_destination_required, goal_capacity, objective_guard_required, objective_guard_radius, use_directional_cover, minimum_forward_progress, protect_garrison_hex])

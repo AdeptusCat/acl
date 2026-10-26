@@ -72,12 +72,30 @@ static func evaluate(query: PositionQuery, cell: Vector2i, path: Array[Vector2i]
 	return features
 
 
+static func defensive_cover(query: PositionQuery, cell: Vector2i) -> float:
+	var map: InfluenceMap = query.snapshot.maps[query.team]
+	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	if not query.use_directional_cover:
+		return cover
+	# Walls protect the candidate end of a firing lane, not every direction.
+	var lanes: Dictionary = query.snapshot.los.get(cell, {})
+	var directional: float = 1.0
+	var visible_contacts: int = 0
+	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
+		if lanes.has(contact.hex):
+			visible_contacts += 1
+			directional = minf(directional, float(lanes[contact.hex].get("shooter_cover", 0.0)) / 3.0)
+	if visible_contacts == 0:
+		directional = float(lanes.get(query.objective_hex, {}).get("shooter_cover", 0.0)) / 3.0
+	return maxf(cover, clampf(directional, 0.0, 1.0))
+
+
 static func _destination_features(query: PositionQuery, cell: Vector2i) -> Dictionary:
 	var map: InfluenceMap = query.snapshot.maps[query.team]
 	var objective_distance: int = LOSHelper.get_hex_distance(cell, query.objective_hex)
 	var start_distance: int = LOSHelper.get_hex_distance(query.unit.current_hex, query.objective_hex)
 	var incoming: float = risk(map.get_layer_value(InfluenceMap.Layer.THREAT, cell))
-	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
+	var cover: float = defensive_cover(query, cell)
 	if query.escape_policy != null:
 		return {"escape": true, "cover": cover, "incoming": incoming, "forecast": 0.0,
 			"firing": 0.0, "objective_coverage": 0.0, "support": 0.0, "progress": 0.0}

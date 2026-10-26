@@ -183,7 +183,7 @@ func allocate(tasks: Array[ScenarioGoalTask], previous: Dictionary[Unit, Scenari
 	for unit: Unit in previous:
 		if not InfluenceUnitQuery.is_valid_living_unit(unit) or unit.surrendered or not PlatoonPositionStability.is_busy(unit):
 			continue
-		var duty: ScenarioGoalTask = owner.goal_director._refresh_escape_task(previous[unit])
+		var duty: ScenarioGoalTask = owner.goal_director._refresh_goal_task(previous[unit])
 		next[unit] = duty
 		var key: Vector2i = Vector2i(int(unit.company), unit.platoon)
 		if platoons.has(key):
@@ -270,7 +270,7 @@ func _select_platoon(task: ScenarioGoalTask, committed: Dictionary[Vector2i, Sce
 			eligible = true
 			if previous.has(unit) and previous[unit].key == task.key:
 				value += 50.0
-			if unit.current_hex == task.hex:
+			if unit.current_hex == task.hex and not task.defend_from_cover:
 				value += 100.0
 		if eligible and value > best:
 			selected = formation
@@ -313,7 +313,7 @@ func _assign_roles() -> void:
 			reserve = _choose_reserve(members, maneuver, support)
 		for formation: CompanyPlatoon in members:
 			var next_role: CompanyPlatoon.Role = CompanyPlatoon.Role.DEFEND
-			if attack:
+			if attack and not (formation.task != null and formation.task.defend_from_cover):
 				next_role = CompanyPlatoon.Role.MANEUVER
 			if formation == support:
 				next_role = CompanyPlatoon.Role.SUPPORT
@@ -402,10 +402,16 @@ func _needs_attack(formation: CompanyPlatoon) -> bool:
 		return _formation_requires_breach(formation)
 	if formation.task != null and formation.task.withdrawal:
 		return false
+	if formation.task != null and formation.task.defend_from_cover:
+		return false
 	if formation.task != null and formation.task.kind == ScenarioGoalTask.Kind.EXIT:
 		return formation.task.breach_required
 	if owner.goal_director != null and not owner.goal_director.manual_override and owner.goal_director.primary == null and not owner.goal_director.conditions.is_empty():
 		return false
+	if formation.task == null and owner.goal_director != null and not owner.goal_director.manual_override:
+		for task: ScenarioGoalTask in owner.goal_director.tasks:
+			if task.kind == ScenarioGoalTask.Kind.OCCUPY and task.hex == formation.objective and task.defend_from_cover:
+				return false
 	if owner.current_order.position_mode == PositionProfile.Mode.ASSAULT:
 		return true
 	if formation.task == null:
@@ -424,6 +430,8 @@ func _choose_maneuver(members: Array[CompanyPlatoon]) -> CompanyPlatoon:
 	var selected: CompanyPlatoon
 	var best: float = -INF
 	for formation: CompanyPlatoon in members:
+		if formation.task != null and formation.task.defend_from_cover:
+			continue
 		if formation.task != null and formation.task.escape_policy != null and not _formation_requires_breach(formation):
 			continue
 		if not formation.can_maneuver() and (formation.role != CompanyPlatoon.Role.MANEUVER or formation.combat_units().is_empty()):

@@ -514,20 +514,25 @@ func _choose_own_outcome(progress: Array[VictoryConditionProgress], planner: Pla
 func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void:
 	if state.kind == VictoryConditionProgress.Kind.OCCUPY:
 		for hex: Vector2i in state.hexes:
+			var occupation: OccupyObjectiveCondition = state.condition as OccupyObjectiveCondition
+			var secured: bool = occupation.state.victory_conditions_met.get(hex, false) and not _lost_objectives.has(hex)
 			var existing: ScenarioGoalTask
 			for candidate: ScenarioGoalTask in tasks:
 				if candidate.kind == ScenarioGoalTask.Kind.OCCUPY and candidate.hex == hex:
 					existing = candidate
 			if existing != null:
 				existing.required_units = maxi(existing.required_units, state.required_units)
-				existing.reason = "Occupy %s: maintain %d squads for all occupation conditions" % [hex, existing.required_units]
+				# Every overlapping capture requirement must be secured before leaving.
+				existing.defend_from_cover = existing.defend_from_cover and secured
+				_set_occupation_reason(existing)
 				continue
 			var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.OCCUPY, hex)
 			task.required_units = state.required_units
+			task.defend_from_cover = secured
 			task.priority = 80.0
 			if posture == PositionProfile.Mode.ASSAULT:
 				task.priority = 100.0
-			task.reason = "Occupy %s: %.1f/%.1f seconds; %d squads required" % [hex, state.held_seconds.get(hex, 0.0), state.required_seconds, state.required_units]
+			_set_occupation_reason(task)
 			tasks.append(task)
 	elif state.kind == VictoryConditionProgress.Kind.EXIT and not state.complete:
 		var task: ScenarioGoalTask = _task(state, ScenarioGoalTask.Kind.EXIT, _exit_hex(state, planner))
@@ -554,6 +559,14 @@ func _add_own_tasks(state: VictoryConditionProgress, planner: PlatoonAI) -> void
 			tasks.append(task)
 		else:
 			diagnostics.append("Destruction goal awaits an observed or remembered enemy contact")
+
+
+func _set_occupation_reason(task: ScenarioGoalTask) -> void:
+	if task.defend_from_cover:
+		task.reason = "Defend secured objective %s from nearby cover" % task.hex
+	else:
+		task.reason = "Capture %s: maintain %d squads until all occupation conditions are secured" % [task.hex, task.required_units]
+		task.urgent = _lost_objectives.has(task.hex)
 
 
 func _task(state: VictoryConditionProgress, kind: ScenarioGoalTask.Kind, hex: Vector2i) -> ScenarioGoalTask:
@@ -686,7 +699,7 @@ func _allocate(planner: PlatoonAI) -> void:
 			continue
 		# Even a counted exit squad finishes its accepted route and setup. Urgent
 		# duties can release other squads; route safety remains the executor's gate.
-		next[unit] = _refresh_escape_task(previous)
+		next[unit] = _refresh_goal_task(previous)
 		available.erase(unit)
 	for task: ScenarioGoalTask in tasks:
 		var demand: int = task.required_units
@@ -732,7 +745,7 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 			value += 30.0
 		if prior != null and prior.key == task.key:
 			value += 50.0
-		if unit.current_hex == task.hex:
+		if unit.current_hex == task.hex and not task.defend_from_cover:
 			value += 100.0
 		if task.is_destination_goal() and task.escape_policy == null and _unit_route_missing(unit, task.hex):
 			continue
@@ -742,8 +755,8 @@ func _select_unit(task: ScenarioGoalTask, available: Array[Unit]) -> Unit:
 	return selected
 
 
-func _refresh_escape_task(previous: ScenarioGoalTask) -> ScenarioGoalTask:
-	if previous.escape_policy != null:
+func _refresh_goal_task(previous: ScenarioGoalTask) -> ScenarioGoalTask:
+	if previous.escape_policy != null or previous.kind == ScenarioGoalTask.Kind.OCCUPY:
 		for task: ScenarioGoalTask in tasks:
 			if task.key == previous.key:
 				return task

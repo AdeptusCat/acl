@@ -330,7 +330,7 @@ static func rapid_candidate_score(query: PositionQuery, index: int) -> float:
 	var cell: Vector2i = map.index_to_cell(index)
 	if not map.is_playable_cell(cell) or map.get_layer_value(InfluenceMap.Layer.NO_GO, cell) > 0.0 or not _in_geography(query, cell, false):
 		return -INF
-	var cover: float = map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell)
+	var cover: float = PositionFeatureEvaluator.defensive_cover(query, cell)
 	if query.profile.mode == PositionProfile.Mode.DEFEND and cover < query.profile.minimum_cover:
 		return -INF
 	var target: Vector2i = query.objective_hex

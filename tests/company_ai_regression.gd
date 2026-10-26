@@ -370,6 +370,21 @@ func _test_scenario_goal_dispatch() -> void:
 		platoon_ids[key] = true
 		_check(command.platoons[key].planner.goal_assignments.has(unit), "Scenario duties reach the responsible subordinate planner")
 	_check(platoon_ids.size() == 2, "Scenario occupation objectives retain separate platoon ownership")
+	for hex: Vector2i in occupation.state.hexes:
+		occupation.state.victory_conditions_met[hex] = true
+	goals.update(commander, 300.0, 20.0)
+	for unit: Unit in goals.assignments:
+		var key: Vector2i = Vector2i(int(unit.company), unit.platoon)
+		var formation: CompanyPlatoon = command.platoons[key]
+		_check(goals.assignments[unit].defend_from_cover and formation.planner.goal_assignments[unit].defend_from_cover, "Secured objectives dispatch covered defense to their owning subordinate planners")
+		_check(formation.role == CompanyPlatoon.Role.DEFEND, "A secured objective stops its platoon attacking even under an assault campaign posture")
+	occupation.state.victory_conditions_met[occupation.state.hexes[0]] = false
+	goals.update(commander, 300.0, 30.0)
+	var recapture: bool = false
+	for task: ScenarioGoalTask in goals.assignments.values():
+		if task.hex == occupation.state.hexes[0]:
+			recapture = not task.defend_from_cover and task.is_destination_goal()
+	_check(recapture, "Lost company objectives restore an exact-marker capture assignment")
 	commander.goal_director = original_director
 	commander.receive_mission_order(original_order)
 

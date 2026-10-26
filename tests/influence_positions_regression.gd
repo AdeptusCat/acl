@@ -138,6 +138,7 @@ func _run() -> void:
 	_test_defensive_posture()
 	_test_defensive_commitment()
 	_test_defensive_responsibility()
+	_test_secured_objective_cover()
 	_test_crossing_budget()
 	_test_rapid_defense_response()
 	_test_defensive_withdrawal()
@@ -2652,6 +2653,47 @@ func _add_defense_contact(query: PositionQuery) -> void:
 	contact.weapon_range = 6
 	contact.observed = true
 	query.snapshot.defensive_contacts[own.team] = [contact]
+
+
+func _test_secured_objective_cover() -> void:
+	var query: PositionQuery = _defense_fixture()
+	_add_defense_contact(query)
+	query.objective_hex = own.current_hex
+	query.defense_responsibility = PositionQuery.Responsibility.GUARD
+	query.objective_guard_radius = 2
+	query.defense_radius = 2
+	query.objective_guard_required = false
+	query.profile.minimum_cover = 0.1
+	var map: InfluenceMap = query.snapshot.maps[own.team]
+	for cell: Vector2i in map.playable_cells:
+		map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell, 0.0)
+	var covered: Vector2i = Vector2i(0, 3)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered, 1.0)
+	query.sector_cells = [own.current_hex, covered]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == covered and advice.features.get("responsibility") == "guard", "A secured objective can be guarded from cover two hexes away instead of its open marker")
+	var visible: Dictionary = query.snapshot.los[covered].duplicate()
+	query.snapshot.los[covered].erase(query.objective_hex)
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Nearby cover without a firing lane to the objective cannot serve as its guard")
+	query.snapshot.los[covered] = visible
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered, 0.0)
+	query.use_directional_cover = true
+	var contact_hex: Vector2i = Vector2i(6, 3)
+	query.snapshot.los[covered][contact_hex] = {"shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
+	advice = PositionQueryService.query_positions(query)
+	_check(advice.is_valid() and advice.target_hex == covered and advice.features["cover"] > 0.5, "A secured guard can use a wall or hedge facing a known threat without building cover")
+	_check(is_finite(PositionQueryService.rapid_candidate_score(query, map.cell_to_index(covered))), "Rapid guard selection also recognizes directional wall cover")
+	query.snapshot.los[covered][contact_hex]["shooter_cover"] = 0.0
+	query.snapshot.los[covered][query.objective_hex] = {"shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A wall facing the objective cannot conceal exposure to a known threat from another direction")
+	query.snapshot.defensive_contacts[own.team] = []
+	_check(PositionQueryService.query_positions(query).is_valid(), "Without observed threats a wall facing the objective can protect its guard")
+	query.use_directional_cover = false
+	var detached: Vector2i = Vector2i(5, 3)
+	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, detached, 1.0)
+	query.sector_cells = [detached]
+	_check(not PositionQueryService.query_positions(query).is_valid(), "Secured-objective guards cannot withdraw to distant cover outside their response radius")
+	_publish()
 
 
 func _test_defensive_responsibility() -> void:
