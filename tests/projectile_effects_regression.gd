@@ -67,6 +67,7 @@ func _run() -> void:
 	audio.name = "AudioPool"
 	world.add_child(audio)
 	_test_flight()
+	_test_indirect_fire_visibility()
 	_test_hand_grenade_flight()
 	_test_pool_and_frequency()
 	await _test_map_integration()
@@ -235,6 +236,26 @@ func _test_hand_grenade_flight() -> void:
 		_check(not tracer.active, "Grenade explosions finish and release their effect")
 	_check(weapon.ammunition == ammunition and audio.hits == audio_before, "Cosmetic grenades consume no ammunition and add no weapon audio")
 	tracer.free()
+
+
+func _test_indirect_fire_visibility() -> void:
+	var effects: Effects = Effects.new()
+	add_child(effects)
+	var weapon: WeaponSpec = WeaponSpec.new()
+	var shell: Tracer = effects.fire(Vector2.ZERO, Vector2(240.0, 0.0), weapon, Tracer.Kind.MORTAR, TRACER_SCENE)
+	shell.visibility_test = func(_point: Vector2) -> bool: return false
+	shell.screen_test = func(_point: Vector2) -> bool: return true
+	_check(effects.z_index > 0, "Indirect fire renders above the terrain fog overlay")
+	_check(shell._can_draw_at(shell.origin), "Mortar and artillery shells remain visible in unobserved hexes")
+	shell.advance(shell.flight_time)
+	_check(shell.has_arrived and shell._can_draw_at(shell.destination), "Indirect-fire explosions remain visible in unobserved hexes")
+	shell.screen_test = func(_point: Vector2) -> bool: return false
+	_check(not shell._can_draw_at(shell.destination), "Indirect fire still culls effects outside the viewport")
+	shell.advance(2.0)
+	var bullet: Tracer = effects.fire(Vector2.ZERO, Vector2(240.0, 0.0), weapon, Tracer.Kind.BULLET, TRACER_SCENE)
+	bullet.screen_test = func(_point: Vector2) -> bool: return true
+	_check(bullet == shell and not bullet._can_draw_at(bullet.destination), "Reusing an indirect-fire effect for a bullet restores fog culling")
+	effects.free()
 
 
 func _test_pool_and_frequency() -> void:

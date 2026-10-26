@@ -114,7 +114,9 @@ func impact_duration() -> float:
 
 
 func _can_draw_at(point: Vector2) -> bool:
-	if visibility_test.is_valid() and not bool(visibility_test.call(point)):
+	# Onboard mortars and offboard artillery share the mortar effect profile.
+	# Their shells and explosions remain visible over unobserved terrain.
+	if kind != Kind.MORTAR and visibility_test.is_valid() and not bool(visibility_test.call(point)):
 		return false
 	if screen_test.is_valid() and not bool(screen_test.call(point)):
 		return false

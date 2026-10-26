@@ -10,6 +10,8 @@ Onboard missions use the existing gunner, ammunition, crew, setup, reload, proje
 
 Targets need not be visible to the mortar. The preview identifies friendly observation and friendly troops in the target hex. Existing HE resolution affects the struck hex, so the mission marker represents that hex rather than promising damage to adjacent cells.
 
+Mortar and artillery shells and explosions remain visible above fog of war, including enemy fire. These effects do not reveal units or terrain visibility.
+
 Offboard support is assigned per scenario through **offboard_batteries**, an array of **OffboardBattery** resources. Each definition specifies its faction, weapon, rounds, response delay and flight time. Definitions are copied into independent runtime batteries; they do not create battlefield counters, observers or objectives. Existing scenario balance is unchanged unless a designer assigns support.
 
 Examples:
