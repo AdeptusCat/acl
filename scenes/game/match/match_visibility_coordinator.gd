@@ -13,6 +13,7 @@ static func draw_fog(controller: Node2D) -> void:
 static func show_visible_units(controller: Node2D) -> void:
 	var observer: Unit = controller.selected_unit
 	var inspect_sight: bool = is_instance_valid(observer) and observer.team == Globals.team_player and observer.is_active() and not observer.surrendered
+	var inspect_enemy: bool = is_instance_valid(observer) and observer.team != Globals.team_player and observer.is_active() and not observer.surrendered
 	var directly_seen: Array = []
 	if inspect_sight:
 		directly_seen = Globals.unit_visible_enemies.get(observer, [])
@@ -32,10 +33,15 @@ static func show_visible_units(controller: Node2D) -> void:
 		elif Debug.show_enemies:
 			unit.show()
 		var dimmed: bool = inspect_sight and unit.team != Globals.team_player and not directly_seen.has(unit)
+		if inspect_enemy and unit.team == Globals.team_player:
+			dimmed = not unit.is_active() or unit.surrendered or not Globals.unit_visible_enemies.get(unit, []).has(observer)
 		unit.modulate = Color.WHITE
 		if dimmed:
 			unit.modulate = INDIRECT_CONTACT_TINT
 		unit.ui.set_indirect_contact(dimmed)
+	if inspect_enemy and not observer.is_visible_in_tree():
+		controller._deselect_unit(observer)
+		controller.hide_unit_details_in_ui.emit()
 
 
 static func update_visible_hexes(controller: Node2D) -> void:

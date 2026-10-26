@@ -195,12 +195,66 @@ func _run() -> void:
 		wheel.select_at(point)
 		_check(wheel.close() == WheelOption.Option.MOVE_NORMAL, "Releasing at the original pointer selects Move near %s" % point)
 	LOSHelper.los_lookup[unit.current_hex] = original_los
+	await _check_enemy_inspection(world, unit, destination)
 	await _check_keep_playing(world, unit)
 	await _check_rout(world, unit, other)
 	main.queue_free()
 	await _settle()
 	print("Command interaction checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _check_enemy_inspection(world: Node, friendly: Unit, destination: Vector2i) -> void:
+	var controller: Node2D = world.game_controller
+	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(Globals.team_player))[0]
+	var original_sight: Array = Globals.unit_visible_enemies.get(friendly, []).duplicate()
+	var original_debug: bool = Debug.enemy_selectable
+	var original_state: int = enemy.stress_system.state
+	Debug.enemy_selectable = false
+	Globals.unit_visible_enemies[friendly] = [enemy]
+	controller.show_visible_units()
+	controller._select_unit(enemy)
+	controller.show_unit_details_in_ui.emit(enemy)
+	var panel: PanelContainer = world.ui.unit_details
+	enemy.stress_system.state = STATES.MoraleState.PINNED
+	panel._refresh_summary()
+	await _settle()
+	_check(controller.selected_unit == enemy and panel.unit == enemy and panel.visible, "A visible enemy opens squad details for inspection")
+	_check(not panel.rout_button.visible and not panel.debug_actions.visible, "Enemy inspection hides rout and debug action buttons")
+	var order_before: int = enemy.action_controller.action_order_id
+	for option: WheelOption.Option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.FIRE_AT, WheelOption.Option.STOP, WheelOption.Option.ROUT]:
+		_check(not controller.order_via_option_wheel(destination, option) and str(feedback.back()["explanation"]).contains("inspected"), "Enemy inspection rejects command " + MatchInteractionHandler.command_name(option))
+	var kill_count: int = Debug.units_to_kill.size()
+	var soldier_count: int = Debug.units_soldier_to_kill.size()
+	var surrender_count: int = Debug.units_to_surrender.size()
+	panel._on_kill_pressed()
+	panel._on_kill_soldier_pressed()
+	panel._on_surrender_pressed()
+	panel._on_rout_pressed()
+	panel._on_debug_rout_pressed()
+	_check(enemy.action_controller.action_order_id == order_before and enemy.stress_system.state == STATES.MoraleState.PINNED and not enemy.surrendered, "Hidden action callbacks cannot command or rout an inspected enemy")
+	_check(Debug.units_to_kill.size() == kill_count and Debug.units_soldier_to_kill.size() == soldier_count and Debug.units_to_surrender.size() == surrender_count, "Enemy inspection cannot queue destructive debug actions")
+	var point: Vector2 = controller.get_global_transform_with_canvas() * world.ground_layer.map_to_local(destination)
+	_right_open(point)
+	await _settle()
+	_check(not world.ui.selection_wheel_alt.is_open(), "Right click cannot open a command wheel for enemy inspection")
+	_right_release(point)
+	Debug.enemy_selectable = true
+	_check(panel.rout_button.visible and panel.debug_actions.visible, "The enemy-selection debug checkbox restores action controls immediately")
+	_check(controller.order_via_option_wheel(destination, WheelOption.Option.STOP), "The debug override permits enemy commands")
+	_right_open(point)
+	await _settle()
+	_check(world.ui.selection_wheel_alt.is_open(), "The debug override permits opening the enemy command wheel")
+	var debug_order: int = enemy.action_controller.action_order_id
+	Debug.enemy_selectable = false
+	_right_release(point)
+	_check(enemy.action_controller.action_order_id == debug_order and not bool(feedback.back()["accepted"]), "Revoking debug access blocks an order from an already open enemy wheel")
+	_check(not panel.rout_button.visible and not panel.debug_actions.visible and not controller.order_via_option_wheel(destination, WheelOption.Option.STOP), "Disabling the debug override immediately restores read-only inspection")
+	enemy.stress_system.state = original_state
+	Globals.unit_visible_enemies[friendly] = original_sight
+	Debug.enemy_selectable = original_debug
+	controller.select_and_center_unit(friendly)
+	await _settle()
 
 
 func _check_keep_playing(world: Node, unit: Unit) -> void:

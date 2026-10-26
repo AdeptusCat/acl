@@ -58,6 +58,7 @@ func _ready() -> void:
 	details_section.folding_changed.connect(_on_details_folding_changed)
 	roster_section.folding_changed.connect(_on_roster_folding_changed)
 	debug_actions.visible = OS.is_debug_build()
+	Debug.enemy_selection_changed.connect(_on_enemy_selection_changed)
 	rout_button.set_rout_available(false)
 	set_process(false)
 	_fit_panel()
@@ -205,6 +206,7 @@ func _set_roster_row(index: int, soldier: Soldier) -> void:
 
 
 func _refresh_summary() -> void:
+	debug_actions.visible = OS.is_debug_build() and MatchInteractionHandler.can_command_unit(unit)
 	unit_type_label.text = unit.get_hud_name()
 	unit_type_label.tooltip_text = unit_type_label.text
 	formation_label.text = unit.get_formation_name()
@@ -346,10 +348,11 @@ func _on_state_changed(state: int) -> void:
 		STATES.MoraleState.COMBAT_INEFFECTIVE:
 			color = Color(0.75, 0.6, 1.0)
 	unit_status_label.add_theme_color_override("font_color", color)
-	var rout_available: bool = unit.can_rout()
+	var can_command: bool = MatchInteractionHandler.can_command_unit(unit)
+	var rout_available: bool = can_command and unit.can_rout()
 	if rout_button.disabled == rout_available:
 		rout_button.set_rout_available(rout_available)
-	rout_explanation.visible = state == STATES.MoraleState.PINNED and not unit.surrendered
+	rout_explanation.visible = can_command and state == STATES.MoraleState.PINNED and not unit.surrendered
 	rout_explanation.text = "Pinned: normal movement blocked.\nRout risks surrender."
 	if unit.in_close_combat:
 		rout_explanation.text = "Pinned in close combat.\nRout is unavailable during this fight."
@@ -396,28 +399,33 @@ func tween_opacity(target: float) -> Tween:
 	return opacity_tween
 
 
-func _on_kill_pressed() -> void:
+func _on_enemy_selection_changed(_enabled: bool) -> void:
 	if is_instance_valid(unit):
+		_refresh_summary()
+
+
+func _on_kill_pressed() -> void:
+	if MatchInteractionHandler.can_command_unit(unit):
 		Debug.units_to_kill.append(unit)
 
 
 func _on_kill_soldier_pressed() -> void:
-	if is_instance_valid(unit):
+	if MatchInteractionHandler.can_command_unit(unit):
 		Debug.units_soldier_to_kill.append(unit)
 
 
 func _on_surrender_pressed() -> void:
-	if is_instance_valid(unit):
+	if MatchInteractionHandler.can_command_unit(unit):
 		Debug.units_to_surrender.append(unit)
 
 
 func _on_rout_pressed() -> void:
-	if is_instance_valid(unit):
+	if MatchInteractionHandler.can_command_unit(unit):
 		unit.request_rout()
 
 
 func _on_debug_rout_pressed() -> void:
-	if not OS.is_debug_build() or not is_instance_valid(unit):
+	if not OS.is_debug_build() or not MatchInteractionHandler.can_command_unit(unit):
 		return
 	if not unit.is_active() or unit.surrendered or unit.broken or unit.movement.retreating:
 		return

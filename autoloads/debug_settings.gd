@@ -2,6 +2,7 @@ extends Node
 
 signal ai_placement_visibility_changed(enabled: bool)
 signal debug_text_visibility_changed(enabled: bool)
+signal enemy_selection_changed(enabled: bool)
 
 var show_ai_placement: bool = false:
 	set(value):
@@ -16,7 +17,12 @@ var show_debug_text: bool = false:
 		show_debug_text = value
 		debug_text_visibility_changed.emit(value)
 
-var enemy_selectable: bool = false
+var enemy_selectable: bool = false:
+	set(value):
+		if enemy_selectable == value:
+			return
+		enemy_selectable = value
+		enemy_selection_changed.emit(value)
 var no_damage: bool = false
 var draw_thread_map: bool = false
 var draw_thread_map_enemy: bool = false

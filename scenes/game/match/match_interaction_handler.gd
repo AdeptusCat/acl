@@ -4,6 +4,10 @@ class_name MatchInteractionHandler
 # Synchronous MatchInteractionHandler operations; state and scene identity stay on the caller.
 
 
+static func can_command_unit(unit: Unit) -> bool:
+	return is_instance_valid(unit) and (unit.team == Globals.team_player or Debug.enemy_selectable)
+
+
 static func command_name(option: WheelOption.Option) -> String:
 	return str(WheelOption.COMMAND_NAMES.get(option, "Cancel"))
 
@@ -16,6 +20,8 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 	var unit: Unit = controller.selected_unit
 	if not is_instance_valid(unit) or not unit.is_active():
 		return "Select an active squad."
+	if not can_command_unit(unit):
+		return "Enemy squads can only be inspected."
 	if option == WheelOption.Option.ROUT:
 		return unit.get_rout_restriction()
 	if unit.surrendered:
@@ -143,7 +149,7 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 	controller.hex_selected.emit(map_hex, local_point)
 	var candidates: Array[Unit] = []
 	for candidate: Unit in Globals.get_units():
-		if candidate.is_active() and candidate.is_visible_in_tree() and (candidate.team == Globals.team_player or Debug.enemy_selectable):
+		if candidate.is_active() and candidate.is_visible_in_tree():
 			candidates.append(candidate)
 	# Stacked and moving counters can extend into the neighboring hex on screen.
 	var picked: Unit = _counter_under_pointer(candidates, event_pos)
@@ -151,10 +157,19 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 	if picked != null:
 		stack_hex = picked.current_hex
 	var units: Array[Unit] = []
+	var selection_team: Globals.Team = Globals.team_player
+	if picked != null:
+		selection_team = picked.team
+	var friendly_only: bool = selection_team == Globals.team_player
 	for candidate: Unit in candidates:
-		if candidate.current_hex == stack_hex:
+		if candidate.current_hex == stack_hex and candidate.team == selection_team:
 			units.append(candidate)
-	if units.size() > 1 and controller.has_method("cycle_stack_selection"):
+	if units.is_empty() and picked == null:
+		for candidate: Unit in candidates:
+			if candidate.current_hex == stack_hex:
+				units.append(candidate)
+				friendly_only = false
+	if friendly_only and units.size() > 1 and controller.has_method("cycle_stack_selection"):
 		if controller.cycle_stack_selection(stack_hex, picked):
 			return
 	if units.is_empty():
@@ -209,7 +224,7 @@ static func handle_mouse_event_position_changed(controller: Node2D, event_pos: V
 
 static func refresh_target_preview(controller: Node2D, local_point: Vector2, screen_point: Vector2) -> void:
 	var world: Node2D = controller.get_parent() as Node2D
-	if not is_instance_valid(controller.ground_layer) or (controller.end_game_handled and not controller.continuing_after_end) or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active():
+	if not is_instance_valid(controller.ground_layer) or (controller.end_game_handled and not controller.continuing_after_end) or not is_instance_valid(controller.selected_unit) or not controller.selected_unit.is_active() or not can_command_unit(controller.selected_unit):
 		world.ui.hide_target_hex_cover_distance()
 		LOSHelper.clear_los()
 		return
@@ -248,6 +263,8 @@ static func hex_glow(controller: Node2D, pos: Vector2) -> void:
 
 static func select_unit(controller: Node2D, unit: Unit) -> void:
 	if not unit.is_active():
+		return
+	if unit.team != Globals.team_player and not unit.is_visible_in_tree():
 		return
 	controller.influence_map_controller.clear_inspection_queries()
 	if controller.selected_unit:

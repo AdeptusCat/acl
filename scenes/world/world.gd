@@ -404,6 +404,8 @@ func _on_input_manager_right_button_pressed() -> void:
 	selected_map_hex = ground_layer.local_to_map(event_pos)
 	if ground_layer.get_cell_source_id(selected_map_hex) == -1:
 		return
+	if not MatchInteractionHandler.can_command_unit(game_controller.selected_unit):
+		return
 	_command_unit = game_controller.selected_unit
 	ui.hide_target_hex_cover_distance()
 	ui.hide_order_feedback()

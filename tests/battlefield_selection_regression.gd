@@ -119,6 +119,18 @@ func _test_selected_visibility() -> void:
 	controller.selected_unit = null
 	MatchVisibilityCoordinator.show_visible_units(controller)
 	_check(direct.modulate == Color.WHITE and indirect.modulate == Color.WHITE and not hidden.visible, "Deselecting restores team-wide contact appearance without revealing hidden enemies")
+	controller.selected_unit = direct
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(first.modulate == Color.WHITE and second.modulate == MatchVisibilityCoordinator.INDIRECT_CONTACT_TINT, "Inspecting an enemy highlights only friendlies that can see it")
+	Globals.unit_visible_enemies[second] = [direct, indirect]
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(second.modulate == Color.WHITE, "New friendly sightings update enemy inspection")
+	Globals.unit_visible_enemies[first] = []
+	Globals.unit_visible_enemies[second] = []
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(controller.selected_unit == null and not direct.visible, "Losing the team's last sighting clears enemy inspection")
+	Globals.unit_visible_enemies[first] = [direct]
+	Globals.unit_visible_enemies[second] = [indirect]
 	controller.selected_unit = first
 	Debug.show_enemies = true
 	MatchVisibilityCoordinator.show_visible_units(controller)
@@ -272,13 +284,17 @@ func _test_stack_selection() -> void:
 	var second: Unit = _unit(Globals.Team.ALLIES, cell)
 	var point: Vector2 = ground.get_global_transform_with_canvas() * ground.map_to_local(cell)
 	controller.click(point)
-	_check(controller.selected_unit == first or controller.selected_unit == second, "A mixed stack selects a friendly squad on the first click")
+	_check(controller.selected_unit != null, "A mixed stack selects a visible squad")
 	var previous: Unit = controller.selected_unit
 	controller.click(point)
-	_check(controller.selected_unit != null and controller.selected_unit != previous, "Cycling a mixed stack skips non-selectable enemies")
+	_check(controller.selected_unit != null and controller.selected_unit != previous, "Cycling a mixed stack advances selection")
 	previous = controller.selected_unit
 	controller.click(point)
 	_check(controller.selected_unit != null and controller.selected_unit != previous, "Every stack click advances to a selectable squad")
+	enemy.z_index = 3
+	controller.click(enemy.ui.sprite_node.get_global_transform_with_canvas() * Vector2(32.0, 8.0))
+	_check(controller.selected_unit == enemy, "Clicking a visible enemy counter inspects it without enabling debug command access")
+	enemy.z_index = 0
 	enemy.hide()
 	Debug.enemy_selectable = true
 	for click: int in range(4):
