@@ -150,7 +150,7 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode) -> bool:
 		unit.squad_fire.fire_support_hold = false
 	else:
 		mission.next_round = (asset["battery"] as OffboardBattery).response_seconds
-	choosing_target = false
+	choosing_target = panel != null and panel.tray.visible and not assets.is_empty()
 	has_target = false
 	LOSHelper.clear_los()
 	host._on_started_moving()
@@ -182,7 +182,7 @@ func pick_target(screen_point: Vector2) -> void:
 	var ground: HexagonTileMapLayer = host.ground_layer
 	target = ground.local_to_map(ground.get_global_transform_with_canvas().affine_inverse() * screen_point)
 	has_target = true
-	choosing_target = false
+	choosing_target = panel != null and panel.tray.visible and not assets.is_empty()
 	LOSHelper.clear_los()
 	queue_redraw()
 	panel.refresh()

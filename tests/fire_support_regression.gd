@@ -36,7 +36,13 @@ func _run() -> void:
 	_check(support.panel.asset_buttons.size() == 3, "Every support asset has its own HUD icon")
 	_check(support.panel.asset_buttons[0].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[1].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[2].icon == FireSupportPanel.HOWITZER_ICON, "Support icons distinguish actual mortar and howitzer weapon families")
 	support.panel.asset_buttons[2].pressed.emit()
-	_check(support.panel.tray.visible and support.selected_asset == 2 and support.panel.assets.selected == 2, "Clicking a howitzer icon opens its battery directly")
+	_check(support.panel.tray.visible and support.selected_asset == 2 and support.panel.asset_label.text.contains(support.assets[2]["name"]), "Clicking a howitzer icon opens its battery directly")
+	support.panel.asset_buttons[2].pressed.emit()
+	_check(not support.panel.tray.visible and not support.choosing_target, "Clicking the selected support icon again closes the panel")
+	support.panel.asset_buttons[2].pressed.emit()
+	support.panel.asset_buttons[1].pressed.emit()
+	_check(support.panel.tray.visible and support.selected_asset == 1, "Clicking a different support icon switches the open panel to that battery")
+	_check(support.panel.tray.find_children("*", "OptionButton", true, false).size() == 1, "The support panel retains only the mission mode dropdown")
 	support.panel._close()
 	support.selected_asset = 0
 	var target: Vector2i = mortar.current_hex
@@ -60,8 +66,13 @@ func _run() -> void:
 	var point: Vector2 = host.ground_layer.get_global_transform_with_canvas() * host.ground_layer.map_to_local(target)
 	host._on_mouse_button_left_pressed(point)
 	_check(support.has_target and support.target == target and host.selected_unit == selected, "Picking a fire mission hex preserves the selected infantry squad")
+	var second_point: Vector2 = host.ground_layer.get_global_transform_with_canvas() * host.ground_layer.map_to_local(mortar.current_hex)
+	host._on_mouse_button_left_pressed(second_point)
+	_check(support.target == mortar.current_hex and support.choosing_target and host.selected_unit == selected, "A second map click replaces the target while the panel stays open")
+	host._on_mouse_button_left_pressed(point)
 	_check(support.preview(0, mortar.current_hex).contains("FRIENDLY"), "The preview identifies friendly troops in the struck hex")
 	_check(support.request(0, target, FireSupportMission.Mode.QUICK), "A quick onboard mission is accepted without an artificial call-in delay")
+	_check(support.choosing_target and support.panel.tray.visible, "Assigning a mission keeps map targeting enabled while the support panel is open")
 	var quick: FireSupportMission = support.asset_mission(0)
 	_check(not support.request(0, target, FireSupportMission.Mode.QUICK), "A busy battery rejects overlapping fire missions")
 	gunner.setup_weapon_task.done = false

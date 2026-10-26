@@ -9,14 +9,13 @@ var icon_bar: ScrollContainer
 var icon_row: HBoxContainer
 var asset_buttons: Array[Button] = []
 var tray: PanelContainer
-var assets: OptionButton
+var asset_label: Label
 var mode: OptionButton
 var target_label: Label
 var status_label: Label
 var fire_button: Button
 var cease_button: Button
 var locate_button: Button
-var pick_button: Button
 var _refresh_elapsed: float = 0.0
 
 func _ready() -> void:
@@ -40,11 +39,9 @@ func _ready() -> void:
 	title.text = "Fire support · HE"
 	title.theme_type_variation = &"HudHeading"
 	content.add_child(title)
-	assets = OptionButton.new()
-	assets.fit_to_longest_item = false
-	assets.clip_text = true
-	assets.item_selected.connect(_select_asset)
-	content.add_child(assets)
+	asset_label = Label.new()
+	asset_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(asset_label)
 	mode = OptionButton.new()
 	for name: String in FireSupportMission.MODE_NAMES:
 		mode.add_item(name)
@@ -52,10 +49,6 @@ func _ready() -> void:
 	content.add_child(mode)
 	var actions: HBoxContainer = HBoxContainer.new()
 	content.add_child(actions)
-	pick_button = Button.new()
-	pick_button.text = "Choose target"
-	pick_button.pressed.connect(_choose_target)
-	actions.add_child(pick_button)
 	locate_button = Button.new()
 	locate_button.text = "Locate mortar"
 	locate_button.pressed.connect(_locate)
@@ -95,7 +88,7 @@ func toggle_tray() -> void:
 		_close()
 	else:
 		tray.show()
-		support.choosing_target = not support.has_target and not support.assets.is_empty()
+		support.choosing_target = not support.assets.is_empty()
 		refresh()
 
 func _close() -> void:
@@ -106,19 +99,13 @@ func _close() -> void:
 	support.queue_redraw()
 	_refresh_icons()
 
-func _choose_target() -> void:
-	support.choosing_target = true
-	support.has_target = false
-	refresh()
-
-func _select_asset(index: int) -> void:
-	support.selected_asset = index
-	refresh()
-
 func _open_asset(index: int) -> void:
+	if tray.visible and support.selected_asset == index:
+		_close()
+		return
 	support.selected_asset = index
 	tray.show()
-	support.choosing_target = not support.has_target
+	support.choosing_target = true
 	refresh()
 
 func _refresh_icons() -> void:
@@ -181,23 +168,14 @@ func refresh() -> void:
 	if not is_node_ready():
 		return
 	var selection: int = support.selected_asset
-	if assets.item_count != support.assets.size():
-		assets.clear()
-		for asset: Dictionary in support.assets:
-			assets.add_item(str(asset["name"]))
-	for index: int in range(support.assets.size()):
-		assets.set_item_text(index, "%s · %s · %d rounds" % [support.assets[index]["name"], support.asset_status(index), support.ammunition(index)])
+	asset_label.text = "No fire support assets assigned to this scenario."
 	if not support.assets.is_empty():
-		assets.select(clampi(selection, 0, support.assets.size() - 1))
-	assets.disabled = support.assets.is_empty()
-	pick_button.disabled = support.assets.is_empty()
+		asset_label.text = "%s\n%s · %d rounds" % [support.assets[selection]["name"], support.asset_status(selection), support.ammunition(selection)]
 	mode.disabled = support.assets.is_empty()
 	_refresh_icons()
 	target_label.text = "Click a battlefield hex to choose the target."
 	if support.has_target:
 		target_label.text = "Target (%d, %d)\n%s" % [support.target.x, support.target.y, support.preview(selection, support.target)]
-	elif not support.choosing_target:
-		target_label.text = "Choose target to prepare another mission."
 	status_label.text = "No fire support assets assigned to this scenario."
 	fire_button.disabled = true
 	cease_button.disabled = true
