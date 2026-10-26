@@ -119,6 +119,7 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
 
 
 func _draw() -> void:
+	_draw_selected_target()
 	_draw_player_routes()
 	if Debug.show_los_lines:
 		for los_data: Dictionary in los_enemy_lines:
@@ -164,6 +165,59 @@ func _draw_sight_line(data: Dictionary, opacity: float) -> void:
 	for point: Vector2 in data["hindrance_points"]:
 		crossings.append(to_local(LOSHelper.ground_layer.to_global(point)))
 	SightLineGraphic.draw(self, origin, target, false, origin, false, opacity, crossings)
+
+
+func _target_for_link(unit: Unit) -> Unit:
+	if not is_instance_valid(unit) or not unit.selected or not unit.is_active() or unit.surrendered or unit.broken or unit.in_close_combat or not unit.is_visible_in_tree():
+		return null
+	# Enemy inspection must not expose an enemy's targeting decisions.
+	if unit.team != Globals.team_player and not Debug.enemy_selectable:
+		return null
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND or not is_instance_valid(unit.squad_fire):
+		return null
+	var target: Unit = unit.squad_fire.target_unit
+	if not is_instance_valid(target) or target.team == unit.team or not target.is_visible_in_tree():
+		return null
+	if not unit.squad_fire._can_track_target(target):
+		return null
+	return target
+
+
+func _counter_center(unit: Unit) -> Vector2:
+	var sprite: TextureRect = unit.ui.sprite_node
+	return sprite.get_global_transform() * (sprite.size * 0.5)
+
+
+func _counter_edge(unit: Unit, toward: Vector2) -> Vector2:
+	var sprite: TextureRect = unit.ui.sprite_node
+	var transform: Transform2D = sprite.get_global_transform()
+	var half_size: Vector2 = sprite.size * 0.5
+	var direction: Vector2 = (transform.affine_inverse() * toward - half_size).normalized()
+	var reach: float = minf(half_size.x / maxf(absf(direction.x), 0.001), half_size.y / maxf(absf(direction.y), 0.001))
+	return transform * (half_size + direction * reach)
+
+
+func _draw_selected_target() -> void:
+	for unit: Unit in Globals.get_units():
+		var target: Unit = _target_for_link(unit)
+		if target == null:
+			continue
+		var origin: Vector2 = to_local(_counter_center(unit))
+		var destination: Vector2 = to_local(_counter_center(target))
+		var direction: Vector2 = (destination - origin).normalized()
+		var start: Vector2 = to_local(_counter_edge(unit, _counter_center(target)))
+		var finish: Vector2 = to_local(_counter_edge(target, _counter_center(unit)))
+		if (finish - start).dot(direction) <= 0.0:
+			continue
+		var zoom: float = maxf(absf(get_global_transform_with_canvas().get_scale().x), 0.05)
+		var pixel: float = 1.0 / zoom
+		# Layered transparent strokes give a soft glow without requiring HDR bloom.
+		draw_line(start, finish, Color(1.0, 0.12, 0.08, 0.04), 10.0 * pixel, true)
+		draw_line(start, finish, Color(1.0, 0.16, 0.12, 0.09), 5.0 * pixel, true)
+		draw_line(start, finish, Color(1.0, 0.24, 0.18, 0.32), 1.5 * pixel, true)
+		var normal: Vector2 = Vector2(-direction.y, direction.x)
+		var arrow: Vector2 = finish - direction * 7.0 * pixel
+		draw_polyline(PackedVector2Array([arrow + normal * 3.0 * pixel, finish, arrow - normal * 3.0 * pixel]), Color(1.0, 0.24, 0.18, 0.32), 1.5 * pixel, true)
 
 
 func _draw_player_routes() -> void:

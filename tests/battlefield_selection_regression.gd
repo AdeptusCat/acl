@@ -2,6 +2,7 @@ extends Node
 
 const UI_SCENE: PackedScene = preload("res://scenes/game/units/presentation/unit_battlefield_view.tscn")
 const UNIT_SCENE: PackedScene = preload("res://scenes/game/units/unit.tscn")
+const LINES_SCRIPT: Script = preload("res://scenes/world/overlays/tactical_lines_overlay.gd")
 
 class PreviewHudProbe extends Node:
 	var hide_calls: int = 0
@@ -77,6 +78,7 @@ func _run() -> void:
 	_test_stack_selection()
 	await _test_pointer_stack_input(input)
 	await _test_selected_visibility()
+	await _test_target_link()
 	for unit: Unit in units:
 		unit.squad_fire.calc.free()
 		unit.free()
@@ -84,6 +86,99 @@ func _run() -> void:
 	controller.free()
 	print("Battlefield selection checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_target_link() -> void:
+	var original_sight: Dictionary = Globals.unit_visible_enemies
+	var original_los: Dictionary = LOSHelper.los_lookup
+	var original_debug: bool = Debug.enemy_selectable
+	Debug.enemy_selectable = false
+	var source: Unit = _unit(Globals.Team.ALLIES, Vector2i(1, 1))
+	var target: Unit = _unit(Globals.Team.AXIS, Vector2i(4, 1))
+	var overlay: Node2D = LINES_SCRIPT.new() as Node2D
+	add_child(overlay)
+	overlay.set_process(false)
+	source.squad_fire.unit = source
+	source.squad_fire.target_unit = target
+	source.selected = true
+	Globals.unit_visible_enemies = {source: [target]}
+	LOSHelper.los_lookup = {source.current_hex: {target.current_hex: {}}}
+	_check(overlay._target_for_link(source) == target, "A selected squad exposes its actual tracked enemy for the target line")
+	source.selected = false
+	_check(overlay._target_for_link(source) == null, "Deselecting immediately removes the target line")
+	source.selected = true
+	source.attackState = Unit.AttackState.MANUAL_GROUND
+	_check(overlay._target_for_link(source) == null, "Ground fire cannot display a stale enemy link")
+	source.attackState = Unit.AttackState.AUTO
+	target.hide()
+	_check(overlay._target_for_link(source) == null, "The target line never reveals a hidden enemy")
+	target.show()
+	LOSHelper.los_lookup = {}
+	_check(overlay._target_for_link(source) == null, "LOS loss removes the line before detection refreshes")
+	LOSHelper.los_lookup = {source.current_hex: {target.current_hex: {}}}
+	Globals.unit_visible_enemies = {}
+	_check(overlay._target_for_link(source) == null, "An undetected target cannot receive a line through team spotting alone")
+	Globals.unit_visible_enemies = {source: [target]}
+	target.surrendered = true
+	_check(overlay._target_for_link(source) == null, "Surrendered targets lose their targeting line")
+	target.surrendered = false
+	source.in_close_combat = true
+	_check(overlay._target_for_link(source) == null, "Close combat does not retain an old ranged targeting line")
+	source.in_close_combat = false
+	var old_center: Vector2 = overlay._counter_center(target)
+	target.position += Vector2(40.0, 20.0)
+	_check(overlay._counter_center(target).is_equal_approx(old_center + Vector2(40.0, 20.0)), "The target endpoint follows the moving counter")
+	if OS.get_cmdline_user_args().has("--render"):
+		await _render_target_link(overlay, source, target)
+	source.team = Globals.Team.AXIS
+	target.team = Globals.Team.ALLIES
+	_check(overlay._target_for_link(source) == null, "Read-only enemy inspection cannot expose enemy targeting decisions")
+	Debug.enemy_selectable = true
+	_check(overlay._target_for_link(source) == target, "Explicit enemy debug control permits a selected enemy's target line")
+	source.squad_fire.target_unit = null
+	_check(overlay._target_for_link(source) == null, "Clearing the target removes the line")
+	source.selected = false
+	Globals.unit_visible_enemies = original_sight
+	LOSHelper.los_lookup = original_los
+	Debug.enemy_selectable = original_debug
+	overlay.free()
+
+
+func _render_target_link(overlay: Node2D, source: Unit, target: Unit) -> void:
+	var viewport: SubViewport = SubViewport.new()
+	viewport.size = Vector2i(800, 320)
+	viewport.world_2d = World2D.new()
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(viewport)
+	var background: ColorRect = ColorRect.new()
+	background.size = Vector2(800.0, 320.0)
+	background.color = Color(0.25, 0.30, 0.17)
+	viewport.add_child(background)
+	var source_position: Vector2 = source.position
+	var target_position: Vector2 = target.position
+	source.reparent(viewport)
+	target.reparent(viewport)
+	overlay.reparent(viewport)
+	source.position = Vector2(200.0, 160.0)
+	target.position = Vector2(600.0, 160.0)
+	source.ui.update_team_sprite(source.team, Globals.SquadType.Rifle)
+	target.ui.update_team_sprite(target.team, Globals.SquadType.Rifle)
+	var camera: Camera2D = Camera2D.new()
+	camera.position = Vector2(400.0, 160.0)
+	viewport.add_child(camera)
+	for zoom: float in [0.6, 1.0, 1.5]:
+		camera.zoom = Vector2.ONE * zoom
+		overlay.queue_redraw()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		RenderingServer.force_draw(false)
+		_check(viewport.get_texture().get_image().save_png("/tmp/acl-target-link-" + str(zoom) + ".png") == OK, "Render the selected target link at zoom " + str(zoom))
+	source.reparent(controller)
+	target.reparent(controller)
+	overlay.reparent(self)
+	source.position = source_position
+	target.position = target_position
+	viewport.free()
 
 
 func _test_selected_visibility() -> void:
