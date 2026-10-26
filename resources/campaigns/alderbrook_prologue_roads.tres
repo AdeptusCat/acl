@@ -16,114 +16,142 @@
 [ext_resource type="Texture2D" path="res://assets/tiles/campaign/roads/road_05_battle_for_alderbrook.svg" id="14_gppla"]
 [ext_resource type="Texture2D" path="res://assets/tiles/campaign/roads/road_alderbrook_western_approach.svg" id="15_txrvr"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_1bhae"]
-resource_name = "Alderbrook palette - roads"
-shader = ExtResource("1_jiwe7")
-shader_parameter/palette = PackedVector4Array(0.38431373, 0.32156864, 0.25882354, 1, 0.54901963, 0.4627451, 0.34509805, 1, 0.7019608, 0.6117647, 0.4509804, 1, 0.8156863, 0.7411765, 0.5803922, 1, 0.9098039, 0.85490197, 0.7411765, 1)
-shader_parameter/levels = PackedFloat32Array(0.2, 0.34, 0.55, 0.7, 0.88)
-shader_parameter/timber_palette = PackedVector4Array(0.21960784, 0.16862746, 0.15294118, 1, 0.39607844, 0.29411766, 0.21176471, 1, 0.5803922, 0.41960785, 0.28235295, 1, 0.74509805, 0.5921569, 0.42352942, 1, 0.8745098, 0.77254903, 0.627451, 1)
-shader_parameter/timber_levels = PackedFloat32Array(0.06, 0.2, 0.35, 0.57, 0.8)
-shader_parameter/soil_palette = PackedVector4Array(0.23137255, 0.16078432, 0.13725491, 1, 0.4, 0.2627451, 0.18431373, 1, 0.59607846, 0.38039216, 0.23529412, 1, 0.7647059, 0.5411765, 0.3529412, 1, 0.87058824, 0.6901961, 0.5058824, 1)
-shader_parameter/soil_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.56, 0.78)
-shader_parameter/clay_palette = PackedVector4Array(0.30980393, 0.1764706, 0.15686275, 1, 0.52156866, 0.2627451, 0.19215687, 1, 0.7176471, 0.38431373, 0.2627451, 1, 0.84313726, 0.5529412, 0.3882353, 1, 0.9137255, 0.70980394, 0.5647059, 1)
-shader_parameter/clay_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.58, 0.82)
-shader_parameter/slate_palette = PackedVector4Array(0.16078432, 0.20784314, 0.25490198, 1, 0.29411766, 0.34901962, 0.4, 1, 0.47843137, 0.5294118, 0.5647059, 1, 0.6666667, 0.7058824, 0.70980394, 1, 0.8352941, 0.84705883, 0.8156863, 1)
-shader_parameter/slate_levels = PackedFloat32Array(0.04, 0.18, 0.32, 0.53, 0.78)
-shader_parameter/water_palette = PackedVector4Array(0.105882354, 0.20784314, 0.27058825, 1, 0.1764706, 0.34509805, 0.43137255, 1, 0.2784314, 0.49411765, 0.6, 1, 0.4745098, 0.6784314, 0.7529412, 1, 0.78039217, 0.8666667, 0.8901961, 1)
-shader_parameter/water_levels = PackedFloat32Array(0.12, 0.28, 0.448, 0.66, 0.85)
-shader_parameter/fruit_palette = PackedVector4Array(0.43137255, 0.14901961, 0.22745098, 1, 0.7882353, 0.3019608, 0.24705882, 1, 0.6666667, 0.44313726, 0.17254902, 1, 0.9098039, 0.7254902, 0.3137255, 1, 0.9529412, 0.8666667, 0.8156863, 1)
-shader_parameter/grid_ink = Vector4(0.21960784, 0.22352941, 0.18039216, 1)
-shader_parameter/material_kind = 0
-shader_parameter/hdr_2d = false
-shader_parameter/texture_is_linear = false
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_055dm"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jiwe7"]
 resource_name = "Road - Opening the Road"
 texture = ExtResource("2_o5y4u")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_1bhae")
 0:0/0/custom_data_4 = "Road"
 1:0/0 = 0
-1:0/0/material = SubResource("ShaderMaterial_1bhae")
 1:0/0/custom_data_4 = "Road"
 2:0/0 = 0
-2:0/0/material = SubResource("ShaderMaterial_1bhae")
 2:0/0/custom_data_4 = "Road"
 3:0/0 = 0
-3:0/0/material = SubResource("ShaderMaterial_1bhae")
 3:0/0/custom_data_4 = "Road"
 4:0/0 = 0
-4:0/0/material = SubResource("ShaderMaterial_1bhae")
 4:0/0/custom_data_4 = "Road"
 5:0/0 = 0
-5:0/0/material = SubResource("ShaderMaterial_1bhae")
 5:0/0/custom_data_4 = "Road"
 6:0/0 = 0
-6:0/0/material = SubResource("ShaderMaterial_1bhae")
 6:0/0/custom_data_4 = "Road"
 7:0/0 = 0
-7:0/0/material = SubResource("ShaderMaterial_1bhae")
 7:0/0/custom_data_4 = "Road"
 0:1/0 = 0
-0:1/0/material = SubResource("ShaderMaterial_1bhae")
 0:1/0/custom_data_4 = "Road"
 1:1/0 = 0
-1:1/0/material = SubResource("ShaderMaterial_1bhae")
 1:1/0/custom_data_4 = "Road"
 2:1/0 = 0
-2:1/0/material = SubResource("ShaderMaterial_1bhae")
 2:1/0/custom_data_4 = "Road"
 3:1/0 = 0
-3:1/0/material = SubResource("ShaderMaterial_1bhae")
 3:1/0/custom_data_4 = "Road"
 4:1/0 = 0
-4:1/0/material = SubResource("ShaderMaterial_1bhae")
 4:1/0/custom_data_4 = "Road"
 5:1/0 = 0
-5:1/0/material = SubResource("ShaderMaterial_1bhae")
 5:1/0/custom_data_4 = "Road"
 6:1/0 = 0
-6:1/0/material = SubResource("ShaderMaterial_1bhae")
 6:1/0/custom_data_4 = "Road"
 7:1/0 = 0
-7:1/0/material = SubResource("ShaderMaterial_1bhae")
 7:1/0/custom_data_4 = "Road"
 0:2/0 = 0
-0:2/0/material = SubResource("ShaderMaterial_1bhae")
 0:2/0/custom_data_4 = "Road"
 1:2/0 = 0
-1:2/0/material = SubResource("ShaderMaterial_1bhae")
 1:2/0/custom_data_4 = "Road"
 2:2/0 = 0
-2:2/0/material = SubResource("ShaderMaterial_1bhae")
 2:2/0/custom_data_4 = "Road"
 3:2/0 = 0
-3:2/0/material = SubResource("ShaderMaterial_1bhae")
 3:2/0/custom_data_4 = "Road"
 4:2/0 = 0
-4:2/0/material = SubResource("ShaderMaterial_1bhae")
 4:2/0/custom_data_4 = "Road"
 5:2/0 = 0
-5:2/0/material = SubResource("ShaderMaterial_1bhae")
 5:2/0/custom_data_4 = "Road"
 6:2/0 = 0
-6:2/0/material = SubResource("ShaderMaterial_1bhae")
 6:2/0/custom_data_4 = "Road"
 7:2/0 = 0
-7:2/0/material = SubResource("ShaderMaterial_1bhae")
 7:2/0/custom_data_4 = "Road"
 0:3/0 = 0
-0:3/0/material = SubResource("ShaderMaterial_1bhae")
 0:3/0/custom_data_4 = "Road"
 1:3/0 = 0
-1:3/0/material = SubResource("ShaderMaterial_1bhae")
 1:3/0/custom_data_4 = "Road"
 2:3/0 = 0
-2:3/0/material = SubResource("ShaderMaterial_1bhae")
 2:3/0/custom_data_4 = "Road"
+3:3/0 = 0
+3:3/0/custom_data_4 = "Road"
+4:3/0 = 0
+4:3/0/custom_data_4 = "Road"
+5:3/0 = 0
+5:3/0/custom_data_4 = "Road"
+6:3/0 = 0
+6:3/0/custom_data_4 = "Road"
+7:3/0 = 0
+7:3/0/custom_data_4 = "Road"
+0:4/0 = 0
+0:4/0/custom_data_4 = "Road"
+1:4/0 = 0
+1:4/0/custom_data_4 = "Road"
+2:4/0 = 0
+2:4/0/custom_data_4 = "Road"
+3:4/0 = 0
+3:4/0/custom_data_4 = "Road"
+4:4/0 = 0
+4:4/0/custom_data_4 = "Road"
+5:4/0 = 0
+5:4/0/custom_data_4 = "Road"
+6:4/0 = 0
+6:4/0/custom_data_4 = "Road"
+7:4/0 = 0
+7:4/0/custom_data_4 = "Road"
+0:5/0 = 0
+0:5/0/custom_data_4 = "Road"
+1:5/0 = 0
+1:5/0/custom_data_4 = "Road"
+2:5/0 = 0
+2:5/0/custom_data_4 = "Road"
+3:5/0 = 0
+3:5/0/custom_data_4 = "Road"
+4:5/0 = 0
+4:5/0/custom_data_4 = "Road"
+5:5/0 = 0
+5:5/0/custom_data_4 = "Road"
+6:5/0 = 0
+6:5/0/custom_data_4 = "Road"
+7:5/0 = 0
+7:5/0/custom_data_4 = "Road"
+0:6/0 = 0
+0:6/0/custom_data_4 = "Road"
+1:6/0 = 0
+1:6/0/custom_data_4 = "Road"
+2:6/0 = 0
+2:6/0/custom_data_4 = "Road"
+3:6/0 = 0
+3:6/0/custom_data_4 = "Road"
+4:6/0 = 0
+4:6/0/custom_data_4 = "Road"
+5:6/0 = 0
+5:6/0/custom_data_4 = "Road"
+6:6/0 = 0
+6:6/0/custom_data_4 = "Road"
+7:6/0 = 0
+7:6/0/custom_data_4 = "Road"
+0:7/0 = 0
+0:7/0/custom_data_4 = "Road"
+1:7/0 = 0
+1:7/0/custom_data_4 = "Road"
+2:7/0 = 0
+2:7/0/custom_data_4 = "Road"
+3:7/0 = 0
+3:7/0/custom_data_4 = "Road"
+4:7/0 = 0
+4:7/0/custom_data_4 = "Road"
+5:7/0 = 0
+5:7/0/custom_data_4 = "Road"
+6:7/0 = 0
+6:7/0/custom_data_4 = "Road"
+7:7/0 = 0
+7:7/0/custom_data_4 = "Road"
+0:8/0 = 0
+0:8/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yq6cd"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_o5y4u"]
 resource_name = "Road"
 texture = ExtResource("3_yxty2")
 texture_region_size = Vector2i(128, 128)
@@ -134,7 +162,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/1/flip_h = true
 0:0/1/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_71rnk"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yxty2"]
 resource_name = "Road"
 texture = ExtResource("4_d0ggj")
 texture_region_size = Vector2i(128, 128)
@@ -152,7 +180,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/3/flip_v = true
 0:0/3/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fliwi"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d0ggj"]
 resource_name = "Road"
 texture = ExtResource("5_le7cs")
 texture_region_size = Vector2i(128, 128)
@@ -170,7 +198,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/3/flip_v = true
 0:0/3/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mepi0"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_le7cs"]
 resource_name = "Road"
 texture = ExtResource("6_b4r7u")
 texture_region_size = Vector2i(128, 128)
@@ -181,14 +209,14 @@ texture_region_size = Vector2i(128, 128)
 0:0/1/flip_v = true
 0:0/1/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_f2rjc"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_b4r7u"]
 resource_name = "Road"
 texture = ExtResource("7_6vpbw")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
 0:0/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qs6kl"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6vpbw"]
 resource_name = "Road"
 texture = ExtResource("8_e11rv")
 texture_region_size = Vector2i(128, 128)
@@ -206,7 +234,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/3/flip_v = true
 0:0/3/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ph6na"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e11rv"]
 resource_name = "Road"
 texture = ExtResource("9_1kj2k")
 texture_region_size = Vector2i(128, 128)
@@ -217,7 +245,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/1/flip_v = true
 0:0/1/custom_data_4 = "Road"
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_jfih7"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1kj2k"]
 resource_name = "Alderbrook palette - roads"
 shader = ExtResource("1_jiwe7")
 shader_parameter/palette = PackedVector4Array(0.38431373, 0.32156864, 0.25882354, 1, 0.54901963, 0.4627451, 0.34509805, 1, 0.7019608, 0.6117647, 0.4509804, 1, 0.8156863, 0.7411765, 0.5803922, 1, 0.9098039, 0.85490197, 0.7411765, 1)
@@ -238,72 +266,72 @@ shader_parameter/material_kind = 0
 shader_parameter/hdr_2d = false
 shader_parameter/texture_is_linear = false
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fbctv"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wcx2s"]
 resource_name = "Road - 1. Quiet Approach"
 texture = ExtResource("10_wcx2s")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_jfih7")
+0:0/0/material = SubResource("ShaderMaterial_1kj2k")
 0:0/0/custom_data_4 = "Road"
 1:0/0 = 0
-1:0/0/material = SubResource("ShaderMaterial_jfih7")
+1:0/0/material = SubResource("ShaderMaterial_1kj2k")
 1:0/0/custom_data_4 = "Road"
 2:0/0 = 0
-2:0/0/material = SubResource("ShaderMaterial_jfih7")
+2:0/0/material = SubResource("ShaderMaterial_1kj2k")
 2:0/0/custom_data_4 = "Road"
 3:0/0 = 0
-3:0/0/material = SubResource("ShaderMaterial_jfih7")
+3:0/0/material = SubResource("ShaderMaterial_1kj2k")
 3:0/0/custom_data_4 = "Road"
 4:0/0 = 0
-4:0/0/material = SubResource("ShaderMaterial_jfih7")
+4:0/0/material = SubResource("ShaderMaterial_1kj2k")
 4:0/0/custom_data_4 = "Road"
 5:0/0 = 0
-5:0/0/material = SubResource("ShaderMaterial_jfih7")
+5:0/0/material = SubResource("ShaderMaterial_1kj2k")
 5:0/0/custom_data_4 = "Road"
 6:0/0 = 0
-6:0/0/material = SubResource("ShaderMaterial_jfih7")
+6:0/0/material = SubResource("ShaderMaterial_1kj2k")
 6:0/0/custom_data_4 = "Road"
 7:0/0 = 0
-7:0/0/material = SubResource("ShaderMaterial_jfih7")
+7:0/0/material = SubResource("ShaderMaterial_1kj2k")
 7:0/0/custom_data_4 = "Road"
 0:1/0 = 0
-0:1/0/material = SubResource("ShaderMaterial_jfih7")
+0:1/0/material = SubResource("ShaderMaterial_1kj2k")
 0:1/0/custom_data_4 = "Road"
 1:1/0 = 0
-1:1/0/material = SubResource("ShaderMaterial_jfih7")
+1:1/0/material = SubResource("ShaderMaterial_1kj2k")
 1:1/0/custom_data_4 = "Road"
 2:1/0 = 0
-2:1/0/material = SubResource("ShaderMaterial_jfih7")
+2:1/0/material = SubResource("ShaderMaterial_1kj2k")
 2:1/0/custom_data_4 = "Road"
 3:1/0 = 0
-3:1/0/material = SubResource("ShaderMaterial_jfih7")
+3:1/0/material = SubResource("ShaderMaterial_1kj2k")
 3:1/0/custom_data_4 = "Road"
 4:1/0 = 0
-4:1/0/material = SubResource("ShaderMaterial_jfih7")
+4:1/0/material = SubResource("ShaderMaterial_1kj2k")
 4:1/0/custom_data_4 = "Road"
 5:1/0 = 0
-5:1/0/material = SubResource("ShaderMaterial_jfih7")
+5:1/0/material = SubResource("ShaderMaterial_1kj2k")
 5:1/0/custom_data_4 = "Road"
 6:1/0 = 0
-6:1/0/material = SubResource("ShaderMaterial_jfih7")
+6:1/0/material = SubResource("ShaderMaterial_1kj2k")
 6:1/0/custom_data_4 = "Road"
 7:1/0 = 0
-7:1/0/material = SubResource("ShaderMaterial_jfih7")
+7:1/0/material = SubResource("ShaderMaterial_1kj2k")
 7:1/0/custom_data_4 = "Road"
 0:2/0 = 0
-0:2/0/material = SubResource("ShaderMaterial_jfih7")
+0:2/0/material = SubResource("ShaderMaterial_1kj2k")
 0:2/0/custom_data_4 = "Road"
 1:2/0 = 0
-1:2/0/material = SubResource("ShaderMaterial_jfih7")
+1:2/0/material = SubResource("ShaderMaterial_1kj2k")
 1:2/0/custom_data_4 = "Road"
 2:2/0 = 0
-2:2/0/material = SubResource("ShaderMaterial_jfih7")
+2:2/0/material = SubResource("ShaderMaterial_1kj2k")
 2:2/0/custom_data_4 = "Road"
 3:2/0 = 0
-3:2/0/material = SubResource("ShaderMaterial_jfih7")
+3:2/0/material = SubResource("ShaderMaterial_1kj2k")
 3:2/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iqc0x"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_g4svg"]
 resource_name = "Road - 2. Orchard Outpost"
 texture = ExtResource("11_g4svg")
 texture_region_size = Vector2i(128, 128)
@@ -356,7 +384,7 @@ texture_region_size = Vector2i(128, 128)
 7:2/0 = 0
 7:2/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kesye"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5r8qh"]
 resource_name = "Road - 3. The Roadblock"
 texture = ExtResource("12_5r8qh")
 texture_region_size = Vector2i(128, 128)
@@ -407,7 +435,7 @@ texture_region_size = Vector2i(128, 128)
 6:2/0 = 0
 6:2/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eayxm"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_l4ow5"]
 resource_name = "Road - 4. Two Crossings"
 texture = ExtResource("13_l4ow5")
 texture_region_size = Vector2i(128, 128)
@@ -526,7 +554,7 @@ texture_region_size = Vector2i(128, 128)
 0:7/0 = 0
 0:7/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bikv0"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gppla"]
 resource_name = "Road - Alderbrook village streets"
 texture = ExtResource("14_gppla")
 texture_region_size = Vector2i(128, 128)
@@ -795,7 +823,7 @@ texture_region_size = Vector2i(128, 128)
 3:16/0 = 0
 3:16/0/custom_data_4 = "Road"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_55tra"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_txrvr"]
 resource_name = "Road - Western Approach"
 texture = ExtResource("15_txrvr")
 texture_region_size = Vector2i(128, 128)
@@ -1080,17 +1108,17 @@ custom_data_layer_4/name = "name"
 custom_data_layer_4/type = 4
 custom_data_layer_5/name = "art_family"
 custom_data_layer_5/type = 4
-sources/18 = SubResource("TileSetAtlasSource_yq6cd")
-sources/19 = SubResource("TileSetAtlasSource_71rnk")
-sources/20 = SubResource("TileSetAtlasSource_fliwi")
-sources/21 = SubResource("TileSetAtlasSource_mepi0")
-sources/22 = SubResource("TileSetAtlasSource_f2rjc")
-sources/23 = SubResource("TileSetAtlasSource_qs6kl")
-sources/24 = SubResource("TileSetAtlasSource_ph6na")
-sources/26 = SubResource("TileSetAtlasSource_iqc0x")
-sources/27 = SubResource("TileSetAtlasSource_kesye")
-sources/28 = SubResource("TileSetAtlasSource_eayxm")
-sources/29 = SubResource("TileSetAtlasSource_bikv0")
-sources/30 = SubResource("TileSetAtlasSource_55tra")
-sources/25 = SubResource("TileSetAtlasSource_fbctv")
-sources/0 = SubResource("TileSetAtlasSource_055dm")
+sources/18 = SubResource("TileSetAtlasSource_o5y4u")
+sources/19 = SubResource("TileSetAtlasSource_yxty2")
+sources/20 = SubResource("TileSetAtlasSource_d0ggj")
+sources/21 = SubResource("TileSetAtlasSource_le7cs")
+sources/22 = SubResource("TileSetAtlasSource_b4r7u")
+sources/23 = SubResource("TileSetAtlasSource_6vpbw")
+sources/24 = SubResource("TileSetAtlasSource_e11rv")
+sources/26 = SubResource("TileSetAtlasSource_g4svg")
+sources/27 = SubResource("TileSetAtlasSource_5r8qh")
+sources/28 = SubResource("TileSetAtlasSource_l4ow5")
+sources/29 = SubResource("TileSetAtlasSource_gppla")
+sources/30 = SubResource("TileSetAtlasSource_txrvr")
+sources/25 = SubResource("TileSetAtlasSource_wcx2s")
+sources/0 = SubResource("TileSetAtlasSource_jiwe7")

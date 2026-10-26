@@ -1,13 +1,12 @@
 [gd_resource type="Resource" script_class="CampaignDefinition" format=3 uid="uid://dkwyr86ndhiix"]
 
-[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/01_quiet_approach.tscn" id="1_fsdvc"]
+[ext_resource type="PackedScene" uid="uid://dmtinufb721km" path="res://scenes/campaigns/alderbrook/00_opening_the_road.tscn" id="0_prologue"]
+[ext_resource type="PackedScene" uid="uid://cjhwy1xvxwke4" path="res://scenes/campaigns/alderbrook/01_quiet_approach.tscn" id="1_fsdvc"]
 [ext_resource type="PackedScene" uid="uid://d00oomiomkoqw" path="res://scenes/campaigns/alderbrook/02_orchard_outpost.tscn" id="2_3ia7j"]
-[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/03_the_roadblock.tscn" id="3_lpcmr"]
-[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/04_two_crossings.tscn" id="4_u5qlt"]
-[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/05_battle_for_alderbrook.tscn" id="5_cobea"]
+[ext_resource type="PackedScene" uid="uid://2r06nvlqt1y8" path="res://scenes/campaigns/alderbrook/03_the_roadblock.tscn" id="3_lpcmr"]
+[ext_resource type="PackedScene" uid="uid://cso8ek8tnkmej" path="res://scenes/campaigns/alderbrook/04_two_crossings.tscn" id="4_u5qlt"]
+[ext_resource type="PackedScene" uid="uid://cfwwwda3ogtl8" path="res://scenes/campaigns/alderbrook/05_battle_for_alderbrook.tscn" id="5_cobea"]
 [ext_resource type="Script" uid="uid://iodsnpnipb2l" path="res://resources/campaigns/campaign_definition.gd" id="6_a4x8y"]
-
-[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/00_opening_the_road.tscn" id="0_prologue"]
 
 [resource]
 script = ExtResource("6_a4x8y")

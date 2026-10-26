@@ -11,7 +11,7 @@ by the existing save system.
 
 | Mission | Player force | Enemy force | Default time | Major victory |
 | --- | --- | --- | --- | --- |
-| Prologue. Opening the Road | 3 rifles + 2 MGs + light mortar + platoon HQ + company HQ + off-map 105 mm battery | 2 rifles + MG + HQ | 10 min | Hold road A and farm B for 15 seconds each |
+| Prologue. Opening the Road | 3 rifles + 2 MGs + light mortar + platoon HQ + company HQ + off-map 105 mm battery | 2 rifles + MG + HQ | 12 min | Hold road A and farm B for 15 seconds each |
 | 1. Quiet Approach | 1 rifle squad + platoon HQ | 1 rifle squad + HQ | 10 min | Hold farm A for 15 seconds |
 | 2. Orchard Outpost | 3 rifles + MG + HQ | 2 rifles + MG + HQ | 10 min | Hold A for 30 seconds and destroy 2 units |
 | 3. The Roadblock | 3 rifles + 2 MGs + HQ | 2 small platoons + company HQ | 9 min | Destroy 2 units and prevent all enemy exits |
@@ -23,7 +23,15 @@ final battle are assessed at the deadline. Mission selection applies the
 authored time; the existing time control can still override it.
 
 The prologue gives the player eight units and a four-gun 105 mm battery with
-48 rounds against four dispersed defenders. Secure road A and farm B for major
+48 rounds against four dispersed defenders. Its 28 × 20 board has a road
+entering from the south, bending north through the walled outpost, and branching
+east toward the farm. Hedged crop fields, orchards, stone courts and irregular
+woodland pockets create separate approaches, with gates kept clear of roads.
+The layout draws on the hedge compartments, orchard strips and scattered farm
+courts in ASL boards [54](../../art/asl_mmp_geo_boards/bd54.gif) and
+[55](../../art/asl_mmp_geo_boards/bd55.gif), with separated copses inspired by
+board [84](../../art/asl_mmp_geo_boards/bd84.gif). The western hamlet lane
+provides a second branch for approaching the outpost through the fields. Secure road A and farm B for major
 victory; holding A for 15 seconds at the deadline earns a minor victory. Both
 unlock Quiet Approach. The company and its supporting weapons continue along
 the main road while a rifle squad and platoon HQ check the flank.

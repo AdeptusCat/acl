@@ -52,1087 +52,1087 @@
 [ext_resource type="Texture2D" path="res://assets/tiles/buildings/multihex/building_wood_01_2hex_a.png" id="50_iw70r"]
 [ext_resource type="Texture2D" path="res://assets/tiles/vegetation/woods_green_02.png" id="51_v8jjf"]
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_sx1c8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ckjad"]
 resource_name = "Wood Building 01 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 8, 0, 65536, 8, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_6a4nv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_tc8a2"]
 resource_name = "Wood Building 01 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65544, 0, 65536, 65544, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_a7lws"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_kocj6"]
 resource_name = "Wood Building 01 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262163, 0, 1, 262163, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_3fmuv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lf0f6"]
 resource_name = "Stone Building 03 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262178, 0, 1, 262178, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_vebya"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_gs043"]
 resource_name = "Stone Building 03 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327714, 0, 1, 327714, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ax8nx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lmdm4"]
 resource_name = "Stone Building 03 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 35, 0, 65536, 35, 1, 131072, 35, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hxbou"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5apqx"]
 resource_name = "Stone Building 03 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65571, 0, 1, 65571, 1, 65536, 65571, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hpuie"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_n5vuw"]
 resource_name = "Stone Building 03 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131107, 0, 1, 131107, 1, 0, 131107, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ibjm0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ugxb2"]
 resource_name = "Stone Building 03 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196643, 0, 65536, 196643, 1, 0, 196643, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_oldmq"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_xnyf7"]
 resource_name = "Stone Building 03 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262179, 0, 1, 262179, 1, 2, 262179, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hw23w"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_i407u"]
 resource_name = "Stone Building 03 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327715, 0, 1, 327715, 1, 65538, 327715, 2)
 metadata/multihex_building = "building_stone_03_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_tgni3"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_h850q"]
 resource_name = "ASL Wood - Long barn (2 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 37, 0, 65536, 37, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_3nlee"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_wqnpc"]
 resource_name = "ASL Wood - Long barn (2 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65573, 0, 65536, 65573, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_fajm0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_2tvxi"]
 resource_name = "Wood Building 01 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327699, 0, 1, 327699, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_npukt"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_v04d6"]
 resource_name = "ASL Wood - Long barn (2 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131109, 0, 0, 131109, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_pomf3"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_i3rtt"]
 resource_name = "ASL Wood - Long barn (2 hex) - 180 degrees"
 tile_data = PackedInt32Array(65536, 196645, 0, 0, 196645, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_u5g6n"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_mpp13"]
 resource_name = "ASL Wood - Long barn (2 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262181, 0, 1, 262181, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_xa3vy"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_3frpe"]
 resource_name = "ASL Wood - Long barn (2 hex) - 300 degrees"
 tile_data = PackedInt32Array(0, 327717, 0, 1, 327717, 1)
 metadata/multihex_building = "building_wood_asl_barn_2hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ku7dc"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ab3he"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 38, 0, 65536, 38, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_j7fa3"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_7bp3u"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65574, 0, 65536, 65574, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_lku0p"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_1bejd"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131110, 0, 0, 131110, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5ha2v"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_nfvo1"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 180 degrees"
 tile_data = PackedInt32Array(65536, 196646, 0, 0, 196646, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_sc4e8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_0f71x"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262182, 0, 1, 262182, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_27i7x"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hjt1q"]
 resource_name = "ASL Wood - Stepped workshop (2 hex) - 300 degrees"
 tile_data = PackedInt32Array(0, 327718, 0, 1, 327718, 1)
 metadata/multihex_building = "building_wood_asl_workshop_2hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rfsd8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_avosy"]
 resource_name = "Wood Building 01 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 20, 0, 65536, 20, 1, 131072, 20, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_yugrs"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_jq3jf"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 39, 0, 65536, 39, 1, 1, 39, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5t6wk"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_knexc"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65575, 0, 65536, 65575, 1, 65537, 65575, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_gtt71"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_imbwd"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131111, 0, 0, 131111, 1, 65536, 131111, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_k043r"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_wvr7v"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 180 degrees"
 tile_data = PackedInt32Array(65537, 196647, 0, 1, 196647, 1, 65536, 196647, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_2mgev"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_nsxmm"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262183, 0, 1, 262183, 1, 0, 262183, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_8ep4h"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_uvjhq"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex) - 300 degrees"
 tile_data = PackedInt32Array(65536, 327719, 0, 65537, 327719, 1, 1, 327719, 2)
 metadata/multihex_building = "building_wood_asl_farmhouse_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_1p5h0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_fdbx7"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 40, 0, 65536, 40, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_uaj76"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_dkfs0"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65576, 0, 65536, 65576, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_biv2p"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_obg1j"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131112, 0, 0, 131112, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_7q0c8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_4lael"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 180 degrees"
 tile_data = PackedInt32Array(65536, 196648, 0, 0, 196648, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_uqg1l"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_obv4e"]
 resource_name = "Wood Building 01 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65556, 0, 1, 65556, 1, 65536, 65556, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_apf77"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_3bmfv"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262184, 0, 1, 262184, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_syx6p"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_te6bd"]
 resource_name = "ASL Stone - Winged village inn (2 hex) - 300 degrees"
 tile_data = PackedInt32Array(0, 327720, 0, 1, 327720, 1)
 metadata/multihex_building = "building_stone_asl_inn_2hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_bqq2s"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ecltv"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 41, 0, 65536, 41, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_7jmxv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5btch"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65577, 0, 65536, 65577, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_vexh4"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_yc8em"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131113, 0, 0, 131113, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_clxmf"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_upx46"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 180 degrees"
 tile_data = PackedInt32Array(65536, 196649, 0, 0, 196649, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rorcr"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_8ylu5"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262185, 0, 1, 262185, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_h6dpx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_qteuy"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex) - 300 degrees"
 tile_data = PackedInt32Array(0, 327721, 0, 1, 327721, 1)
 metadata/multihex_building = "building_stone_asl_terrace_2hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_h6r8n"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ocqpl"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 0 degrees"
 tile_data = PackedInt32Array(0, 42, 0, 65536, 42, 1, 1, 42, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_te21u"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_23cr4"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 60 degrees"
 tile_data = PackedInt32Array(1, 65578, 0, 65536, 65578, 1, 65537, 65578, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_mo76e"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_bgwvl"]
 resource_name = "Wood Building 01 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131092, 0, 1, 131092, 1, 0, 131092, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_yn74p"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_8w7d3"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 120 degrees"
 tile_data = PackedInt32Array(1, 131114, 0, 0, 131114, 1, 65536, 131114, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_s5r30"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_25gtn"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 180 degrees"
 tile_data = PackedInt32Array(65537, 196650, 0, 1, 196650, 1, 65536, 196650, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_osl4o"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_iw70r"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 240 degrees"
 tile_data = PackedInt32Array(65536, 262186, 0, 1, 262186, 1, 0, 262186, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_je8xx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_v8jjf"]
 resource_name = "ASL Stone - Courtyard manor (3 hex) - 300 degrees"
 tile_data = PackedInt32Array(65536, 327722, 0, 65537, 327722, 1, 1, 327722, 2)
 metadata/multihex_building = "building_stone_asl_manor_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_bsvm8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_sx1c8"]
 resource_name = "3-hex Timber sawmill factory - 0 degrees"
 tile_data = PackedInt32Array(0, 43, 0, 65536, 43, 1, 131072, 43, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_lj03w"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_6a4nv"]
 resource_name = "3-hex Timber sawmill factory - 60 degrees"
 tile_data = PackedInt32Array(2, 65579, 0, 1, 65579, 1, 65536, 65579, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_w0a83"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_a7lws"]
 resource_name = "3-hex Timber sawmill factory - 120 degrees"
 tile_data = PackedInt32Array(65538, 131115, 0, 1, 131115, 1, 0, 131115, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_41mps"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_3fmuv"]
 resource_name = "3-hex Timber sawmill factory - 180 degrees"
 tile_data = PackedInt32Array(131072, 196651, 0, 65536, 196651, 1, 0, 196651, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_2xinw"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_vebya"]
 resource_name = "3-hex Timber sawmill factory - 240 degrees"
 tile_data = PackedInt32Array(65536, 262187, 0, 1, 262187, 1, 2, 262187, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ukpky"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ax8nx"]
 resource_name = "3-hex Timber sawmill factory - 300 degrees"
 tile_data = PackedInt32Array(0, 327723, 0, 1, 327723, 1, 65538, 327723, 2)
 metadata/multihex_building = "building_wood_sawmill_factory_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_jld40"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hxbou"]
 resource_name = "Wood Building 01 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196628, 0, 65536, 196628, 1, 0, 196628, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_0s1o5"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hpuie"]
 resource_name = "3-hex Timber granary - 0 degrees"
 tile_data = PackedInt32Array(0, 44, 0, 65536, 44, 1, 131072, 44, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_mqf1k"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ibjm0"]
 resource_name = "3-hex Timber granary - 60 degrees"
 tile_data = PackedInt32Array(2, 65580, 0, 1, 65580, 1, 65536, 65580, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_qf5m4"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_oldmq"]
 resource_name = "3-hex Timber granary - 120 degrees"
 tile_data = PackedInt32Array(65538, 131116, 0, 1, 131116, 1, 0, 131116, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_b8swx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hw23w"]
 resource_name = "3-hex Timber granary - 180 degrees"
 tile_data = PackedInt32Array(131072, 196652, 0, 65536, 196652, 1, 0, 196652, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_sfnrc"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_tgni3"]
 resource_name = "3-hex Timber granary - 240 degrees"
 tile_data = PackedInt32Array(65536, 262188, 0, 1, 262188, 1, 2, 262188, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_wt6p0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_3nlee"]
 resource_name = "3-hex Timber granary - 300 degrees"
 tile_data = PackedInt32Array(0, 327724, 0, 1, 327724, 1, 65538, 327724, 2)
 metadata/multihex_building = "building_wood_granary_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_bywhp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_fajm0"]
 resource_name = "3-hex Timber craft hall - 0 degrees"
 tile_data = PackedInt32Array(0, 45, 0, 65536, 45, 1, 1, 45, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_p6jb0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_npukt"]
 resource_name = "3-hex Timber craft hall - 60 degrees"
 tile_data = PackedInt32Array(1, 65581, 0, 65536, 65581, 1, 65537, 65581, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_2yaml"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_pomf3"]
 resource_name = "3-hex Timber craft hall - 120 degrees"
 tile_data = PackedInt32Array(1, 131117, 0, 0, 131117, 1, 65536, 131117, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_x0ljn"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_u5g6n"]
 resource_name = "3-hex Timber craft hall - 180 degrees"
 tile_data = PackedInt32Array(65537, 196653, 0, 1, 196653, 1, 65536, 196653, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_m81cv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_xa3vy"]
 resource_name = "Wood Building 01 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262164, 0, 1, 262164, 1, 2, 262164, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_cu4hc"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ku7dc"]
 resource_name = "3-hex Timber craft hall - 240 degrees"
 tile_data = PackedInt32Array(65536, 262189, 0, 1, 262189, 1, 0, 262189, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_8g4ga"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_j7fa3"]
 resource_name = "3-hex Timber craft hall - 300 degrees"
 tile_data = PackedInt32Array(65536, 327725, 0, 65537, 327725, 1, 1, 327725, 2)
 metadata/multihex_building = "building_wood_craft_hall_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_31r3w"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lku0p"]
 resource_name = "3-hex Stone textile factory - 0 degrees"
 tile_data = PackedInt32Array(0, 46, 0, 65536, 46, 1, 131072, 46, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_lbqh3"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5ha2v"]
 resource_name = "3-hex Stone textile factory - 60 degrees"
 tile_data = PackedInt32Array(2, 65582, 0, 1, 65582, 1, 65536, 65582, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rhq46"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_sc4e8"]
 resource_name = "3-hex Stone textile factory - 120 degrees"
 tile_data = PackedInt32Array(65538, 131118, 0, 1, 131118, 1, 0, 131118, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_bwxpg"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_27i7x"]
 resource_name = "3-hex Stone textile factory - 180 degrees"
 tile_data = PackedInt32Array(131072, 196654, 0, 65536, 196654, 1, 0, 196654, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hjvid"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rfsd8"]
 resource_name = "3-hex Stone textile factory - 240 degrees"
 tile_data = PackedInt32Array(65536, 262190, 0, 1, 262190, 1, 2, 262190, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ewode"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_yugrs"]
 resource_name = "3-hex Stone textile factory - 300 degrees"
 tile_data = PackedInt32Array(0, 327726, 0, 1, 327726, 1, 65538, 327726, 2)
 metadata/multihex_building = "building_stone_textile_factory_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_gx13b"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5t6wk"]
 resource_name = "3-hex Stone village church - 0 degrees"
 tile_data = PackedInt32Array(0, 47, 0, 65536, 47, 1, 1, 47, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_eete8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_gtt71"]
 resource_name = "3-hex Stone village church - 60 degrees"
 tile_data = PackedInt32Array(1, 65583, 0, 65536, 65583, 1, 65537, 65583, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_kap73"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_k043r"]
 resource_name = "Wood Building 01 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327700, 0, 1, 327700, 1, 65538, 327700, 2)
 metadata/multihex_building = "building_wood_01_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_l0g33"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_2mgev"]
 resource_name = "3-hex Stone village church - 120 degrees"
 tile_data = PackedInt32Array(1, 131119, 0, 0, 131119, 1, 65536, 131119, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_qtwmo"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_8ep4h"]
 resource_name = "3-hex Stone village church - 180 degrees"
 tile_data = PackedInt32Array(65537, 196655, 0, 1, 196655, 1, 65536, 196655, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_04w5r"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_1p5h0"]
 resource_name = "3-hex Stone village church - 240 degrees"
 tile_data = PackedInt32Array(65536, 262191, 0, 1, 262191, 1, 0, 262191, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_eh35h"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_uaj76"]
 resource_name = "3-hex Stone village church - 300 degrees"
 tile_data = PackedInt32Array(65536, 327727, 0, 65537, 327727, 1, 1, 327727, 2)
 metadata/multihex_building = "building_stone_church_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_x407s"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_biv2p"]
 resource_name = "3-hex Stone guildhall - 0 degrees"
 tile_data = PackedInt32Array(0, 48, 0, 65536, 48, 1, 1, 48, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_3pou6"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_7q0c8"]
 resource_name = "3-hex Stone guildhall - 60 degrees"
 tile_data = PackedInt32Array(1, 65584, 0, 65536, 65584, 1, 65537, 65584, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_qqj6r"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_uqg1l"]
 resource_name = "3-hex Stone guildhall - 120 degrees"
 tile_data = PackedInt32Array(1, 131120, 0, 0, 131120, 1, 65536, 131120, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_xv124"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_apf77"]
 resource_name = "3-hex Stone guildhall - 180 degrees"
 tile_data = PackedInt32Array(65537, 196656, 0, 1, 196656, 1, 65536, 196656, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_p5l5q"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_syx6p"]
 resource_name = "3-hex Stone guildhall - 240 degrees"
 tile_data = PackedInt32Array(65536, 262192, 0, 1, 262192, 1, 0, 262192, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_i2w7w"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_bqq2s"]
 resource_name = "3-hex Stone guildhall - 300 degrees"
 tile_data = PackedInt32Array(65536, 327728, 0, 65537, 327728, 1, 1, 327728, 2)
 metadata/multihex_building = "building_stone_guildhall_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_8hxfu"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_7jmxv"]
 resource_name = "Wood Building 02 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 21, 0, 65536, 21, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_n5wyq"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_vexh4"]
 resource_name = "Wood Building 02 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65557, 0, 65536, 65557, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_jcpam"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_clxmf"]
 resource_name = "Wood Building 01 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131080, 0, 0, 131080, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r7frp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rorcr"]
 resource_name = "Wood Building 02 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131093, 0, 0, 131093, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_xlcgp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_h6dpx"]
 resource_name = "Wood Building 02 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196629, 0, 0, 196629, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_nsrdv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_h6r8n"]
 resource_name = "Wood Building 02 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262165, 0, 1, 262165, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_a48r8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_te21u"]
 resource_name = "Wood Building 02 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327701, 0, 1, 327701, 1)
 metadata/multihex_building = "building_wood_02_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_qirfn"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_mo76e"]
 resource_name = "Wood Building 02 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 22, 0, 65536, 22, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_kxmk7"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_yn74p"]
 resource_name = "Wood Building 02 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65558, 0, 65536, 65558, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5jdhy"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_s5r30"]
 resource_name = "Wood Building 02 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131094, 0, 0, 131094, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_2xmf4"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_osl4o"]
 resource_name = "Wood Building 02 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196630, 0, 0, 196630, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_nygwe"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_je8xx"]
 resource_name = "Wood Building 02 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262166, 0, 1, 262166, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rij3v"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_bsvm8"]
 resource_name = "Wood Building 02 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327702, 0, 1, 327702, 1)
 metadata/multihex_building = "building_wood_02_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_jun72"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lj03w"]
 resource_name = "Wood Building 01 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196616, 0, 0, 196616, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_lwpad"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_w0a83"]
 resource_name = "Wood Building 02 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 23, 0, 65536, 23, 1, 131072, 23, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_p2x5n"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_41mps"]
 resource_name = "Wood Building 02 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65559, 0, 1, 65559, 1, 65536, 65559, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_n4r25"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_2xinw"]
 resource_name = "Wood Building 02 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131095, 0, 1, 131095, 1, 0, 131095, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r2mn8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ukpky"]
 resource_name = "Wood Building 02 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196631, 0, 65536, 196631, 1, 0, 196631, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_frvsv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_jld40"]
 resource_name = "Wood Building 02 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262167, 0, 1, 262167, 1, 2, 262167, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_wkrvl"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_0s1o5"]
 resource_name = "Wood Building 02 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327703, 0, 1, 327703, 1, 65538, 327703, 2)
 metadata/multihex_building = "building_wood_02_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_tudlo"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_mqf1k"]
 resource_name = "Wood Building 03 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 24, 0, 65536, 24, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_oxy3d"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_qf5m4"]
 resource_name = "Wood Building 03 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65560, 0, 65536, 65560, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rnbf2"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_b8swx"]
 resource_name = "Wood Building 03 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131096, 0, 0, 131096, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_aotp6"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_sfnrc"]
 resource_name = "Wood Building 03 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196632, 0, 0, 196632, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_kmn6v"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_wt6p0"]
 resource_name = "Wood Building 01 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262152, 0, 1, 262152, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_a1f0h"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_bywhp"]
 resource_name = "Wood Building 03 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262168, 0, 1, 262168, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_4fnpp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_p6jb0"]
 resource_name = "Wood Building 03 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327704, 0, 1, 327704, 1)
 metadata/multihex_building = "building_wood_03_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ajw88"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_2yaml"]
 resource_name = "Wood Building 03 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 25, 0, 65536, 25, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_f8s6a"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_x0ljn"]
 resource_name = "Wood Building 03 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65561, 0, 65536, 65561, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_wpykh"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_m81cv"]
 resource_name = "Wood Building 03 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131097, 0, 0, 131097, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_rfrmg"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_cu4hc"]
 resource_name = "Wood Building 03 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196633, 0, 0, 196633, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_flqff"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_8g4ga"]
 resource_name = "Wood Building 03 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262169, 0, 1, 262169, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5kvh1"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_31r3w"]
 resource_name = "Wood Building 03 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327705, 0, 1, 327705, 1)
 metadata/multihex_building = "building_wood_03_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r78uu"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lbqh3"]
 resource_name = "Wood Building 03 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 26, 0, 65536, 26, 1, 131072, 26, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_234vr"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rhq46"]
 resource_name = "Wood Building 03 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65562, 0, 1, 65562, 1, 65536, 65562, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_86oxv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_bwxpg"]
 resource_name = "Wood Building 01 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327688, 0, 1, 327688, 1)
 metadata/multihex_building = "building_wood_01_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_jo638"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hjvid"]
 resource_name = "Wood Building 03 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131098, 0, 1, 131098, 1, 0, 131098, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_26fu0"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ewode"]
 resource_name = "Wood Building 03 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196634, 0, 65536, 196634, 1, 0, 196634, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hgn6w"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_gx13b"]
 resource_name = "Wood Building 03 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262170, 0, 1, 262170, 1, 2, 262170, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_o7m4h"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_eete8"]
 resource_name = "Wood Building 03 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327706, 0, 1, 327706, 1, 65538, 327706, 2)
 metadata/multihex_building = "building_wood_03_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_xexan"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_kap73"]
 resource_name = "Stone Building 01 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 27, 0, 65536, 27, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_fpbnq"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_l0g33"]
 resource_name = "Stone Building 01 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65563, 0, 65536, 65563, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_2xcjk"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_qtwmo"]
 resource_name = "Stone Building 01 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131099, 0, 0, 131099, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ks2dm"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_04w5r"]
 resource_name = "Stone Building 01 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196635, 0, 0, 196635, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_qgxwj"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_eh35h"]
 resource_name = "Stone Building 01 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262171, 0, 1, 262171, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_iapfg"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_x407s"]
 resource_name = "Stone Building 01 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327707, 0, 1, 327707, 1)
 metadata/multihex_building = "building_stone_01_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_32715"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_3pou6"]
 resource_name = "Wood Building 01 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 19, 0, 65536, 19, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_fiy7m"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_qqj6r"]
 resource_name = "Stone Building 01 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 28, 0, 65536, 28, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r5vy8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_xv124"]
 resource_name = "Stone Building 01 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65564, 0, 65536, 65564, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_fylam"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_p5l5q"]
 resource_name = "Stone Building 01 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131100, 0, 0, 131100, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ua70o"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_i2w7w"]
 resource_name = "Stone Building 01 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196636, 0, 0, 196636, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_d0vq6"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_8hxfu"]
 resource_name = "Stone Building 01 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262172, 0, 1, 262172, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ujtvd"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_n5wyq"]
 resource_name = "Stone Building 01 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327708, 0, 1, 327708, 1)
 metadata/multihex_building = "building_stone_01_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_x3ydx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_jcpam"]
 resource_name = "Stone Building 01 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 29, 0, 65536, 29, 1, 131072, 29, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_3qv8k"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_r7frp"]
 resource_name = "Stone Building 01 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65565, 0, 1, 65565, 1, 65536, 65565, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5ci7x"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_xlcgp"]
 resource_name = "Stone Building 01 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131101, 0, 1, 131101, 1, 0, 131101, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_lb1fj"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_nsrdv"]
 resource_name = "Stone Building 01 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196637, 0, 65536, 196637, 1, 0, 196637, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ok7ov"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_a48r8"]
 resource_name = "Wood Building 01 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65555, 0, 65536, 65555, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_6gaqo"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_qirfn"]
 resource_name = "Stone Building 01 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262173, 0, 1, 262173, 1, 2, 262173, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_3pxke"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_kxmk7"]
 resource_name = "Stone Building 01 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327709, 0, 1, 327709, 1, 65538, 327709, 2)
 metadata/multihex_building = "building_stone_01_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_s2by1"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5jdhy"]
 resource_name = "Stone Building 02 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 30, 0, 65536, 30, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_afjri"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_2xmf4"]
 resource_name = "Stone Building 02 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65566, 0, 65536, 65566, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_dlrrj"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_nygwe"]
 resource_name = "Stone Building 02 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131102, 0, 0, 131102, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_07p1x"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rij3v"]
 resource_name = "Stone Building 02 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196638, 0, 0, 196638, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_gkryw"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_jun72"]
 resource_name = "Stone Building 02 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262174, 0, 1, 262174, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_33kso"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_lwpad"]
 resource_name = "Stone Building 02 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327710, 0, 1, 327710, 1)
 metadata/multihex_building = "building_stone_02_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r0n7m"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_p2x5n"]
 resource_name = "Stone Building 02 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 31, 0, 65536, 31, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_wu7pa"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_n4r25"]
 resource_name = "Stone Building 02 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65567, 0, 65536, 65567, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_0kk8c"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_r2mn8"]
 resource_name = "Wood Building 01 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131091, 0, 0, 131091, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_i4bmx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_frvsv"]
 resource_name = "Stone Building 02 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131103, 0, 0, 131103, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_r4wfk"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_wkrvl"]
 resource_name = "Stone Building 02 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196639, 0, 0, 196639, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5n4kh"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_tudlo"]
 resource_name = "Stone Building 02 - two hexes B - 240 degrees"
 tile_data = PackedInt32Array(65536, 262175, 0, 1, 262175, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_sl1uw"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_oxy3d"]
 resource_name = "Stone Building 02 - two hexes B - 300 degrees"
 tile_data = PackedInt32Array(0, 327711, 0, 1, 327711, 1)
 metadata/multihex_building = "building_stone_02_2hex_b"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_vcext"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rnbf2"]
 resource_name = "Stone Building 02 - three hexes - 0 degrees"
 tile_data = PackedInt32Array(0, 32, 0, 65536, 32, 1, 131072, 32, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_wqqrv"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_aotp6"]
 resource_name = "Stone Building 02 - three hexes - 60 degrees"
 tile_data = PackedInt32Array(2, 65568, 0, 1, 65568, 1, 65536, 65568, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_xnivc"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_kmn6v"]
 resource_name = "Stone Building 02 - three hexes - 120 degrees"
 tile_data = PackedInt32Array(65538, 131104, 0, 1, 131104, 1, 0, 131104, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_4hrt8"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_a1f0h"]
 resource_name = "Stone Building 02 - three hexes - 180 degrees"
 tile_data = PackedInt32Array(131072, 196640, 0, 65536, 196640, 1, 0, 196640, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_7om2l"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_4fnpp"]
 resource_name = "Stone Building 02 - three hexes - 240 degrees"
 tile_data = PackedInt32Array(65536, 262176, 0, 1, 262176, 1, 2, 262176, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_icu1u"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_ajw88"]
 resource_name = "Stone Building 02 - three hexes - 300 degrees"
 tile_data = PackedInt32Array(0, 327712, 0, 1, 327712, 1, 65538, 327712, 2)
 metadata/multihex_building = "building_stone_02_3hex"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_0xwpy"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_f8s6a"]
 resource_name = "Wood Building 01 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196627, 0, 0, 196627, 1)
 metadata/multihex_building = "building_wood_01_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_08frs"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_wpykh"]
 resource_name = "Stone Building 03 - two hexes A - 0 degrees"
 tile_data = PackedInt32Array(0, 33, 0, 65536, 33, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_4sfgp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_rfrmg"]
 resource_name = "Stone Building 03 - two hexes A - 60 degrees"
 tile_data = PackedInt32Array(1, 65569, 0, 65536, 65569, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_hgg7m"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_flqff"]
 resource_name = "Stone Building 03 - two hexes A - 120 degrees"
 tile_data = PackedInt32Array(1, 131105, 0, 0, 131105, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_c1ufe"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_5kvh1"]
 resource_name = "Stone Building 03 - two hexes A - 180 degrees"
 tile_data = PackedInt32Array(65536, 196641, 0, 0, 196641, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 180
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_ypc5g"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_r78uu"]
 resource_name = "Stone Building 03 - two hexes A - 240 degrees"
 tile_data = PackedInt32Array(65536, 262177, 0, 1, 262177, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 240
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_5klir"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_234vr"]
 resource_name = "Stone Building 03 - two hexes A - 300 degrees"
 tile_data = PackedInt32Array(0, 327713, 0, 1, 327713, 1)
 metadata/multihex_building = "building_stone_03_2hex_a"
 metadata/angle = 300
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_loduh"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_86oxv"]
 resource_name = "Stone Building 03 - two hexes B - 0 degrees"
 tile_data = PackedInt32Array(0, 34, 0, 65536, 34, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 0
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_16hnx"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_jo638"]
 resource_name = "Stone Building 03 - two hexes B - 60 degrees"
 tile_data = PackedInt32Array(1, 65570, 0, 65536, 65570, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 60
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_812nu"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_26fu0"]
 resource_name = "Stone Building 03 - two hexes B - 120 degrees"
 tile_data = PackedInt32Array(1, 131106, 0, 0, 131106, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 120
 
-[sub_resource type="TileMapPattern" id="TileMapPattern_j70jp"]
+[sub_resource type="TileMapPattern" id="TileMapPattern_hgn6w"]
 resource_name = "Stone Building 03 - two hexes B - 180 degrees"
 tile_data = PackedInt32Array(65536, 196642, 0, 0, 196642, 1)
 metadata/multihex_building = "building_stone_03_2hex_b"
 metadata/angle = 180
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_esvpm"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_o7m4h"]
 resource_name = "Stone Building 01"
 texture = ExtResource("1_ckjad")
 texture_region_size = Vector2i(128, 128)
@@ -1155,7 +1155,7 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 3
 5:0/0/custom_data_1 = "Stone Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0d7xw"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xexan"]
 resource_name = "Stone Building 02"
 texture = ExtResource("2_tc8a2")
 texture_region_size = Vector2i(128, 128)
@@ -1178,37 +1178,15 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 3
 5:0/0/custom_data_1 = "Stone Building"
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_d4so2"]
-resource_name = "Alderbrook palette - woods"
-shader = ExtResource("3_kocj6")
-shader_parameter/palette = PackedVector4Array(0.12156863, 0.11372549, 0.05490196, 1, 0.17254902, 0.16470589, 0.08627451, 1, 0.33333334, 0.37254903, 0.1764706, 1, 0.40392157, 0.4392157, 0.21568628, 1, 0.48235294, 0.5137255, 0.2784314, 1)
-shader_parameter/levels = PackedFloat32Array(0.06, 0.2, 0.5, 0.62, 0.85)
-shader_parameter/timber_palette = PackedVector4Array(0.21960784, 0.16862746, 0.15294118, 1, 0.39607844, 0.29411766, 0.21176471, 1, 0.5803922, 0.41960785, 0.28235295, 1, 0.74509805, 0.5921569, 0.42352942, 1, 0.8745098, 0.77254903, 0.627451, 1)
-shader_parameter/timber_levels = PackedFloat32Array(0.06, 0.2, 0.35, 0.57, 0.8)
-shader_parameter/soil_palette = PackedVector4Array(0.23137255, 0.16078432, 0.13725491, 1, 0.4, 0.2627451, 0.18431373, 1, 0.59607846, 0.38039216, 0.23529412, 1, 0.7647059, 0.5411765, 0.3529412, 1, 0.87058824, 0.6901961, 0.5058824, 1)
-shader_parameter/soil_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.56, 0.78)
-shader_parameter/clay_palette = PackedVector4Array(0.30980393, 0.1764706, 0.15686275, 1, 0.52156866, 0.2627451, 0.19215687, 1, 0.7176471, 0.38431373, 0.2627451, 1, 0.84313726, 0.5529412, 0.3882353, 1, 0.9137255, 0.70980394, 0.5647059, 1)
-shader_parameter/clay_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.58, 0.82)
-shader_parameter/slate_palette = PackedVector4Array(0.16078432, 0.20784314, 0.25490198, 1, 0.29411766, 0.34901962, 0.4, 1, 0.47843137, 0.5294118, 0.5647059, 1, 0.6666667, 0.7058824, 0.70980394, 1, 0.8352941, 0.84705883, 0.8156863, 1)
-shader_parameter/slate_levels = PackedFloat32Array(0.04, 0.18, 0.32, 0.53, 0.78)
-shader_parameter/water_palette = PackedVector4Array(0.105882354, 0.20784314, 0.27058825, 1, 0.1764706, 0.34509805, 0.43137255, 1, 0.2784314, 0.49411765, 0.6, 1, 0.4745098, 0.6784314, 0.7529412, 1, 0.78039217, 0.8666667, 0.8901961, 1)
-shader_parameter/water_levels = PackedFloat32Array(0.12, 0.28, 0.448, 0.66, 0.85)
-shader_parameter/fruit_palette = PackedVector4Array(0.43137255, 0.14901961, 0.22745098, 1, 0.7882353, 0.3019608, 0.24705882, 1, 0.6666667, 0.44313726, 0.17254902, 1, 0.9098039, 0.7254902, 0.3137255, 1, 0.9529412, 0.8666667, 0.8156863, 1)
-shader_parameter/grid_ink = Vector4(0.21960784, 0.22352941, 0.18039216, 1)
-shader_parameter/material_kind = 0
-shader_parameter/hdr_2d = false
-shader_parameter/texture_is_linear = false
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_moe1s"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fpbnq"]
 resource_name = "Woods 3"
 texture = ExtResource("4_lf0f6")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_d4so2")
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8ys7m"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2xcjk"]
 resource_name = "Alderbrook palette - woods"
 shader = ExtResource("3_kocj6")
 shader_parameter/palette = PackedVector4Array(0.12156863, 0.11372549, 0.05490196, 1, 0.17254902, 0.16470589, 0.08627451, 1, 0.33333334, 0.37254903, 0.1764706, 1, 0.40392157, 0.4392157, 0.21568628, 1, 0.48235294, 0.5137255, 0.2784314, 1)
@@ -1229,107 +1207,107 @@ shader_parameter/material_kind = 0
 shader_parameter/hdr_2d = false
 shader_parameter/texture_is_linear = false
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cwcfg"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ks2dm"]
 resource_name = "Connected terrain - 01_quiet_approach_woods"
 texture = ExtResource("5_gs043")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_8ys7m")
+0:0/0/material = SubResource("ShaderMaterial_2xcjk")
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 0:0/0/custom_data_2 = "woods"
 1:0/0 = 0
-1:0/0/material = SubResource("ShaderMaterial_8ys7m")
+1:0/0/material = SubResource("ShaderMaterial_2xcjk")
 1:0/0/custom_data_0 = 1
 1:0/0/custom_data_1 = "Woods"
 1:0/0/custom_data_2 = "woods"
 2:0/0 = 0
-2:0/0/material = SubResource("ShaderMaterial_8ys7m")
+2:0/0/material = SubResource("ShaderMaterial_2xcjk")
 2:0/0/custom_data_0 = 1
 2:0/0/custom_data_1 = "Woods"
 2:0/0/custom_data_2 = "woods"
 3:0/0 = 0
-3:0/0/material = SubResource("ShaderMaterial_8ys7m")
+3:0/0/material = SubResource("ShaderMaterial_2xcjk")
 3:0/0/custom_data_0 = 1
 3:0/0/custom_data_1 = "Woods"
 3:0/0/custom_data_2 = "woods"
 4:0/0 = 0
-4:0/0/material = SubResource("ShaderMaterial_8ys7m")
+4:0/0/material = SubResource("ShaderMaterial_2xcjk")
 4:0/0/custom_data_0 = 1
 4:0/0/custom_data_1 = "Woods"
 4:0/0/custom_data_2 = "woods"
 5:0/0 = 0
-5:0/0/material = SubResource("ShaderMaterial_8ys7m")
+5:0/0/material = SubResource("ShaderMaterial_2xcjk")
 5:0/0/custom_data_0 = 1
 5:0/0/custom_data_1 = "Woods"
 5:0/0/custom_data_2 = "woods"
 6:0/0 = 0
-6:0/0/material = SubResource("ShaderMaterial_8ys7m")
+6:0/0/material = SubResource("ShaderMaterial_2xcjk")
 6:0/0/custom_data_0 = 1
 6:0/0/custom_data_1 = "Woods"
 6:0/0/custom_data_2 = "woods"
 7:0/0 = 0
-7:0/0/material = SubResource("ShaderMaterial_8ys7m")
+7:0/0/material = SubResource("ShaderMaterial_2xcjk")
 7:0/0/custom_data_0 = 1
 7:0/0/custom_data_1 = "Woods"
 7:0/0/custom_data_2 = "woods"
 0:1/0 = 0
-0:1/0/material = SubResource("ShaderMaterial_8ys7m")
+0:1/0/material = SubResource("ShaderMaterial_2xcjk")
 0:1/0/custom_data_0 = 1
 0:1/0/custom_data_1 = "Woods"
 0:1/0/custom_data_2 = "woods"
 1:1/0 = 0
-1:1/0/material = SubResource("ShaderMaterial_8ys7m")
+1:1/0/material = SubResource("ShaderMaterial_2xcjk")
 1:1/0/custom_data_0 = 1
 1:1/0/custom_data_1 = "Woods"
 1:1/0/custom_data_2 = "woods"
 2:1/0 = 0
-2:1/0/material = SubResource("ShaderMaterial_8ys7m")
+2:1/0/material = SubResource("ShaderMaterial_2xcjk")
 2:1/0/custom_data_0 = 1
 2:1/0/custom_data_1 = "Woods"
 2:1/0/custom_data_2 = "woods"
 3:1/0 = 0
-3:1/0/material = SubResource("ShaderMaterial_8ys7m")
+3:1/0/material = SubResource("ShaderMaterial_2xcjk")
 3:1/0/custom_data_0 = 1
 3:1/0/custom_data_1 = "Woods"
 3:1/0/custom_data_2 = "woods"
 4:1/0 = 0
-4:1/0/material = SubResource("ShaderMaterial_8ys7m")
+4:1/0/material = SubResource("ShaderMaterial_2xcjk")
 4:1/0/custom_data_0 = 1
 4:1/0/custom_data_1 = "Woods"
 4:1/0/custom_data_2 = "woods"
 5:1/0 = 0
-5:1/0/material = SubResource("ShaderMaterial_8ys7m")
+5:1/0/material = SubResource("ShaderMaterial_2xcjk")
 5:1/0/custom_data_0 = 1
 5:1/0/custom_data_1 = "Woods"
 5:1/0/custom_data_2 = "woods"
 6:1/0 = 0
-6:1/0/material = SubResource("ShaderMaterial_8ys7m")
+6:1/0/material = SubResource("ShaderMaterial_2xcjk")
 6:1/0/custom_data_0 = 1
 6:1/0/custom_data_1 = "Woods"
 6:1/0/custom_data_2 = "woods"
 7:1/0 = 0
-7:1/0/material = SubResource("ShaderMaterial_8ys7m")
+7:1/0/material = SubResource("ShaderMaterial_2xcjk")
 7:1/0/custom_data_0 = 1
 7:1/0/custom_data_1 = "Woods"
 7:1/0/custom_data_2 = "woods"
 0:2/0 = 0
-0:2/0/material = SubResource("ShaderMaterial_8ys7m")
+0:2/0/material = SubResource("ShaderMaterial_2xcjk")
 0:2/0/custom_data_0 = 1
 0:2/0/custom_data_1 = "Woods"
 0:2/0/custom_data_2 = "woods"
 1:2/0 = 0
-1:2/0/material = SubResource("ShaderMaterial_8ys7m")
+1:2/0/material = SubResource("ShaderMaterial_2xcjk")
 1:2/0/custom_data_0 = 1
 1:2/0/custom_data_1 = "Woods"
 1:2/0/custom_data_2 = "woods"
 2:2/0 = 0
-2:2/0/material = SubResource("ShaderMaterial_8ys7m")
+2:2/0/material = SubResource("ShaderMaterial_2xcjk")
 2:2/0/custom_data_0 = 1
 2:2/0/custom_data_1 = "Woods"
 2:2/0/custom_data_2 = "woods"
 3:2/0 = 0
-3:2/0/material = SubResource("ShaderMaterial_8ys7m")
+3:2/0/material = SubResource("ShaderMaterial_2xcjk")
 3:2/0/custom_data_0 = 1
 3:2/0/custom_data_1 = "Woods"
 3:2/0/custom_data_2 = "woods"
@@ -1342,152 +1320,152 @@ texture_region_size = Vector2i(128, 128)
 5:2/0/custom_data_1 = "Woods"
 5:2/0/custom_data_2 = "woods"
 6:2/0 = 0
-6:2/0/material = SubResource("ShaderMaterial_8ys7m")
+6:2/0/material = SubResource("ShaderMaterial_2xcjk")
 6:2/0/custom_data_0 = 1
 6:2/0/custom_data_1 = "Woods"
 6:2/0/custom_data_2 = "woods"
 7:2/0 = 0
-7:2/0/material = SubResource("ShaderMaterial_8ys7m")
+7:2/0/material = SubResource("ShaderMaterial_2xcjk")
 7:2/0/custom_data_0 = 1
 7:2/0/custom_data_1 = "Woods"
 7:2/0/custom_data_2 = "woods"
 0:3/0 = 0
-0:3/0/material = SubResource("ShaderMaterial_8ys7m")
+0:3/0/material = SubResource("ShaderMaterial_2xcjk")
 0:3/0/custom_data_0 = 1
 0:3/0/custom_data_1 = "Woods"
 0:3/0/custom_data_2 = "woods"
 1:3/0 = 0
-1:3/0/material = SubResource("ShaderMaterial_8ys7m")
+1:3/0/material = SubResource("ShaderMaterial_2xcjk")
 1:3/0/custom_data_0 = 1
 1:3/0/custom_data_1 = "Woods"
 1:3/0/custom_data_2 = "woods"
 2:3/0 = 0
-2:3/0/material = SubResource("ShaderMaterial_8ys7m")
+2:3/0/material = SubResource("ShaderMaterial_2xcjk")
 2:3/0/custom_data_0 = 1
 2:3/0/custom_data_1 = "Woods"
 2:3/0/custom_data_2 = "woods"
 3:3/0 = 0
-3:3/0/material = SubResource("ShaderMaterial_8ys7m")
+3:3/0/material = SubResource("ShaderMaterial_2xcjk")
 3:3/0/custom_data_0 = 1
 3:3/0/custom_data_1 = "Woods"
 3:3/0/custom_data_2 = "woods"
 4:3/0 = 0
-4:3/0/material = SubResource("ShaderMaterial_8ys7m")
+4:3/0/material = SubResource("ShaderMaterial_2xcjk")
 4:3/0/custom_data_0 = 1
 4:3/0/custom_data_1 = "Woods"
 4:3/0/custom_data_2 = "woods"
 5:3/0 = 0
-5:3/0/material = SubResource("ShaderMaterial_8ys7m")
+5:3/0/material = SubResource("ShaderMaterial_2xcjk")
 5:3/0/custom_data_0 = 1
 5:3/0/custom_data_1 = "Woods"
 5:3/0/custom_data_2 = "woods"
 6:3/0 = 0
-6:3/0/material = SubResource("ShaderMaterial_8ys7m")
+6:3/0/material = SubResource("ShaderMaterial_2xcjk")
 6:3/0/custom_data_0 = 1
 6:3/0/custom_data_1 = "Woods"
 6:3/0/custom_data_2 = "woods"
 7:3/0 = 0
-7:3/0/material = SubResource("ShaderMaterial_8ys7m")
+7:3/0/material = SubResource("ShaderMaterial_2xcjk")
 7:3/0/custom_data_0 = 1
 7:3/0/custom_data_1 = "Woods"
 7:3/0/custom_data_2 = "woods"
 0:4/0 = 0
-0:4/0/material = SubResource("ShaderMaterial_8ys7m")
+0:4/0/material = SubResource("ShaderMaterial_2xcjk")
 0:4/0/custom_data_0 = 1
 0:4/0/custom_data_1 = "Woods"
 0:4/0/custom_data_2 = "woods"
 1:4/0 = 0
-1:4/0/material = SubResource("ShaderMaterial_8ys7m")
+1:4/0/material = SubResource("ShaderMaterial_2xcjk")
 1:4/0/custom_data_0 = 1
 1:4/0/custom_data_1 = "Woods"
 1:4/0/custom_data_2 = "woods"
 2:4/0 = 0
-2:4/0/material = SubResource("ShaderMaterial_8ys7m")
+2:4/0/material = SubResource("ShaderMaterial_2xcjk")
 2:4/0/custom_data_0 = 1
 2:4/0/custom_data_1 = "Woods"
 2:4/0/custom_data_2 = "woods"
 3:4/0 = 0
-3:4/0/material = SubResource("ShaderMaterial_8ys7m")
+3:4/0/material = SubResource("ShaderMaterial_2xcjk")
 3:4/0/custom_data_0 = 1
 3:4/0/custom_data_1 = "Woods"
 3:4/0/custom_data_2 = "woods"
 4:4/0 = 0
-4:4/0/material = SubResource("ShaderMaterial_8ys7m")
+4:4/0/material = SubResource("ShaderMaterial_2xcjk")
 4:4/0/custom_data_0 = 1
 4:4/0/custom_data_1 = "Woods"
 4:4/0/custom_data_2 = "woods"
 5:4/0 = 0
-5:4/0/material = SubResource("ShaderMaterial_8ys7m")
+5:4/0/material = SubResource("ShaderMaterial_2xcjk")
 5:4/0/custom_data_0 = 1
 5:4/0/custom_data_1 = "Woods"
 5:4/0/custom_data_2 = "woods"
 6:4/0 = 0
-6:4/0/material = SubResource("ShaderMaterial_8ys7m")
+6:4/0/material = SubResource("ShaderMaterial_2xcjk")
 6:4/0/custom_data_0 = 1
 6:4/0/custom_data_1 = "Woods"
 6:4/0/custom_data_2 = "woods"
 7:4/0 = 0
-7:4/0/material = SubResource("ShaderMaterial_8ys7m")
+7:4/0/material = SubResource("ShaderMaterial_2xcjk")
 7:4/0/custom_data_0 = 1
 7:4/0/custom_data_1 = "Woods"
 7:4/0/custom_data_2 = "woods"
 0:5/0 = 0
-0:5/0/material = SubResource("ShaderMaterial_8ys7m")
+0:5/0/material = SubResource("ShaderMaterial_2xcjk")
 0:5/0/custom_data_0 = 1
 0:5/0/custom_data_1 = "Woods"
 0:5/0/custom_data_2 = "woods"
 1:5/0 = 0
-1:5/0/material = SubResource("ShaderMaterial_8ys7m")
+1:5/0/material = SubResource("ShaderMaterial_2xcjk")
 1:5/0/custom_data_0 = 1
 1:5/0/custom_data_1 = "Woods"
 1:5/0/custom_data_2 = "woods"
 2:5/0 = 0
-2:5/0/material = SubResource("ShaderMaterial_8ys7m")
+2:5/0/material = SubResource("ShaderMaterial_2xcjk")
 2:5/0/custom_data_0 = 1
 2:5/0/custom_data_1 = "Woods"
 2:5/0/custom_data_2 = "woods"
 3:5/0 = 0
-3:5/0/material = SubResource("ShaderMaterial_8ys7m")
+3:5/0/material = SubResource("ShaderMaterial_2xcjk")
 3:5/0/custom_data_0 = 1
 3:5/0/custom_data_1 = "Woods"
 3:5/0/custom_data_2 = "woods"
 4:5/0 = 0
-4:5/0/material = SubResource("ShaderMaterial_8ys7m")
+4:5/0/material = SubResource("ShaderMaterial_2xcjk")
 4:5/0/custom_data_0 = 1
 4:5/0/custom_data_1 = "Woods"
 4:5/0/custom_data_2 = "woods"
 5:5/0 = 0
-5:5/0/material = SubResource("ShaderMaterial_8ys7m")
+5:5/0/material = SubResource("ShaderMaterial_2xcjk")
 5:5/0/custom_data_0 = 1
 5:5/0/custom_data_1 = "Woods"
 5:5/0/custom_data_2 = "woods"
 6:5/0 = 0
-6:5/0/material = SubResource("ShaderMaterial_8ys7m")
+6:5/0/material = SubResource("ShaderMaterial_2xcjk")
 6:5/0/custom_data_0 = 1
 6:5/0/custom_data_1 = "Woods"
 6:5/0/custom_data_2 = "woods"
 7:5/0 = 0
-7:5/0/material = SubResource("ShaderMaterial_8ys7m")
+7:5/0/material = SubResource("ShaderMaterial_2xcjk")
 7:5/0/custom_data_0 = 1
 7:5/0/custom_data_1 = "Woods"
 7:5/0/custom_data_2 = "woods"
 0:6/0 = 0
-0:6/0/material = SubResource("ShaderMaterial_8ys7m")
+0:6/0/material = SubResource("ShaderMaterial_2xcjk")
 0:6/0/custom_data_0 = 1
 0:6/0/custom_data_1 = "Woods"
 0:6/0/custom_data_2 = "woods"
 1:6/0 = 0
-1:6/0/material = SubResource("ShaderMaterial_8ys7m")
+1:6/0/material = SubResource("ShaderMaterial_2xcjk")
 1:6/0/custom_data_0 = 1
 1:6/0/custom_data_1 = "Woods"
 1:6/0/custom_data_2 = "woods"
 2:6/0 = 0
-2:6/0/material = SubResource("ShaderMaterial_8ys7m")
+2:6/0/material = SubResource("ShaderMaterial_2xcjk")
 2:6/0/custom_data_0 = 1
 2:6/0/custom_data_1 = "Woods"
 2:6/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s7v64"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qgxwj"]
 resource_name = "Connected terrain - 02_orchard_outpost_woods"
 texture = ExtResource("6_lmdm4")
 texture_region_size = Vector2i(128, 128)
@@ -1720,7 +1698,7 @@ texture_region_size = Vector2i(128, 128)
 0:7/0/custom_data_1 = "Woods"
 0:7/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5o4cn"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iapfg"]
 resource_name = "Connected terrain - 03_the_roadblock_woods"
 texture = ExtResource("7_5apqx")
 texture_region_size = Vector2i(128, 128)
@@ -1989,7 +1967,7 @@ texture_region_size = Vector2i(128, 128)
 1:8/0/custom_data_1 = "Woods"
 1:8/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_aspbd"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_32715"]
 resource_name = "Connected terrain - 04_two_crossings_woods"
 texture = ExtResource("8_n5vuw")
 texture_region_size = Vector2i(128, 128)
@@ -2294,7 +2272,7 @@ texture_region_size = Vector2i(128, 128)
 2:9/0/custom_data_1 = "Woods"
 2:9/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3o8sp"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fiy7m"]
 resource_name = "Connected terrain - 05_battle_for_alderbrook_woods"
 texture = ExtResource("9_ugxb2")
 texture_region_size = Vector2i(128, 128)
@@ -2587,7 +2565,7 @@ texture_region_size = Vector2i(128, 128)
 7:8/0/custom_data_1 = "Woods"
 7:8/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mnihf"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r5vy8"]
 resource_name = "Stone Building 03"
 texture = ExtResource("10_xnyf7")
 texture_region_size = Vector2i(128, 128)
@@ -2610,7 +2588,7 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 3
 5:0/0/custom_data_1 = "Stone Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5t42x"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fylam"]
 resource_name = "Woods"
 texture = ExtResource("11_i407u")
 texture_region_size = Vector2i(128, 128)
@@ -2618,7 +2596,7 @@ texture_region_size = Vector2i(128, 128)
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ilhvt"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ua70o"]
 resource_name = "Connected terrain - alderbrook_western_approach_woods"
 texture = ExtResource("12_h850q")
 texture_region_size = Vector2i(128, 128)
@@ -2791,7 +2769,7 @@ texture_region_size = Vector2i(128, 128)
 1:5/0/custom_data_1 = "Woods"
 1:5/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vxui5"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d0vq6"]
 resource_name = "Wood Building 01 - two hexes B"
 texture = ExtResource("13_wqnpc")
 texture_region_size = Vector2i(256, 256)
@@ -2890,7 +2868,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vvgwt"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ujtvd"]
 resource_name = "Wood Building 01"
 texture = ExtResource("14_2tvxi")
 texture_region_size = Vector2i(128, 128)
@@ -2913,7 +2891,7 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 2
 5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6j4xs"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x3ydx"]
 resource_name = "Wood Building 01 - three hexes"
 texture = ExtResource("15_v04d6")
 texture_region_size = Vector2i(384, 384)
@@ -3059,7 +3037,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06epy"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3qv8k"]
 resource_name = "Wood Building 02 - two hexes A"
 texture = ExtResource("16_i3rtt")
 texture_region_size = Vector2i(256, 256)
@@ -3158,7 +3136,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gjsf"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5ci7x"]
 resource_name = "Wood Building 02 - two hexes B"
 texture = ExtResource("17_mpp13")
 texture_region_size = Vector2i(256, 256)
@@ -3257,7 +3235,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qybrs"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lb1fj"]
 resource_name = "Wood Building 02 - three hexes"
 texture = ExtResource("18_3frpe")
 texture_region_size = Vector2i(384, 384)
@@ -3403,7 +3381,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4pkhc"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ok7ov"]
 resource_name = "Wood Building 03 - two hexes A"
 texture = ExtResource("19_ab3he")
 texture_region_size = Vector2i(256, 256)
@@ -3502,7 +3480,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_81had"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6gaqo"]
 resource_name = "Wood Building 03 - two hexes B"
 texture = ExtResource("20_7bp3u")
 texture_region_size = Vector2i(256, 256)
@@ -3601,7 +3579,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bl1jb"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3pxke"]
 resource_name = "Wood Building 03 - three hexes"
 texture = ExtResource("21_1bejd")
 texture_region_size = Vector2i(384, 384)
@@ -3747,7 +3725,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_isveb"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s2by1"]
 resource_name = "Stone Building 01 - two hexes A"
 texture = ExtResource("22_nfvo1")
 texture_region_size = Vector2i(256, 256)
@@ -3846,7 +3824,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s2oo0"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_afjri"]
 resource_name = "Stone Building 01 - two hexes B"
 texture = ExtResource("23_0f71x")
 texture_region_size = Vector2i(256, 256)
@@ -3945,7 +3923,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_osupm"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dlrrj"]
 resource_name = "Stone Building 01 - three hexes"
 texture = ExtResource("24_hjt1q")
 texture_region_size = Vector2i(384, 384)
@@ -4091,7 +4069,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pmqvu"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_07p1x"]
 resource_name = "Wood Building 02"
 texture = ExtResource("25_avosy")
 texture_region_size = Vector2i(128, 128)
@@ -4114,7 +4092,7 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 2
 5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_khn4w"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gkryw"]
 resource_name = "Stone Building 02 - two hexes A"
 texture = ExtResource("26_jq3jf")
 texture_region_size = Vector2i(256, 256)
@@ -4213,7 +4191,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ey8pm"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_33kso"]
 resource_name = "Stone Building 02 - two hexes B"
 texture = ExtResource("27_knexc")
 texture_region_size = Vector2i(256, 256)
@@ -4312,7 +4290,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0vglv"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r0n7m"]
 resource_name = "Stone Building 02 - three hexes"
 texture = ExtResource("28_imbwd")
 texture_region_size = Vector2i(384, 384)
@@ -4458,7 +4436,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ggj3r"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wu7pa"]
 resource_name = "Stone Building 03 - two hexes A"
 texture = ExtResource("29_wvr7v")
 texture_region_size = Vector2i(256, 256)
@@ -4557,7 +4535,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4pcuk"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0kk8c"]
 resource_name = "Stone Building 03 - two hexes B"
 texture = ExtResource("30_nsxmm")
 texture_region_size = Vector2i(256, 256)
@@ -4656,7 +4634,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xe1li"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_i4bmx"]
 resource_name = "Stone Building 03 - three hexes"
 texture = ExtResource("31_uvjhq")
 texture_region_size = Vector2i(384, 384)
@@ -4802,7 +4780,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_532y4"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r4wfk"]
 resource_name = "Connected terrain - 05_battle_for_alderbrook_village_woods"
 texture = ExtResource("32_fdbx7")
 texture_region_size = Vector2i(128, 128)
@@ -5035,7 +5013,7 @@ texture_region_size = Vector2i(128, 128)
 0:7/0/custom_data_1 = "Woods"
 0:7/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u4opl"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5n4kh"]
 resource_name = "ASL Wood - Long barn (2 hex)"
 texture = ExtResource("33_dkfs0")
 texture_region_size = Vector2i(256, 256)
@@ -5134,7 +5112,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3bf86"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sl1uw"]
 resource_name = "ASL Wood - Stepped workshop (2 hex)"
 texture = ExtResource("34_obg1j")
 texture_region_size = Vector2i(256, 256)
@@ -5233,7 +5211,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ytf2o"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vcext"]
 resource_name = "ASL Wood - L-shaped farmstead (3 hex)"
 texture = ExtResource("35_4lael")
 texture_region_size = Vector2i(384, 384)
@@ -5385,7 +5363,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_taleq"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wqqrv"]
 resource_name = "Wood Building 03"
 texture = ExtResource("36_obv4e")
 texture_region_size = Vector2i(128, 128)
@@ -5408,7 +5386,7 @@ texture_region_size = Vector2i(128, 128)
 5:0/0/custom_data_0 = 2
 5:0/0/custom_data_1 = "Wood Building"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_da3jj"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xnivc"]
 resource_name = "ASL Stone - Winged village inn (2 hex)"
 texture = ExtResource("37_3bmfv")
 texture_region_size = Vector2i(256, 256)
@@ -5507,7 +5485,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ct5mn"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4hrt8"]
 resource_name = "ASL Stone - Stepped town terrace (2 hex)"
 texture = ExtResource("38_te6bd")
 texture_region_size = Vector2i(256, 256)
@@ -5606,7 +5584,7 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xtina"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7om2l"]
 resource_name = "ASL Stone - Courtyard manor (3 hex)"
 texture = ExtResource("39_ecltv")
 texture_region_size = Vector2i(384, 384)
@@ -5758,7 +5736,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5sfmp"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_icu1u"]
 resource_name = "3-hex Timber sawmill factory"
 texture = ExtResource("40_5btch")
 texture_region_size = Vector2i(384, 384)
@@ -5904,7 +5882,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_g2l5s"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0xwpy"]
 resource_name = "3-hex Timber granary"
 texture = ExtResource("41_yc8em")
 texture_region_size = Vector2i(384, 384)
@@ -6050,7 +6028,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xwx7k"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_08frs"]
 resource_name = "3-hex Timber craft hall"
 texture = ExtResource("42_upx46")
 texture_region_size = Vector2i(384, 384)
@@ -6202,7 +6180,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m2plk"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4sfgp"]
 resource_name = "3-hex Stone textile factory"
 texture = ExtResource("43_8ylu5")
 texture_region_size = Vector2i(384, 384)
@@ -6348,7 +6326,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_et1q4"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hgg7m"]
 resource_name = "3-hex Stone village church"
 texture = ExtResource("44_qteuy")
 texture_region_size = Vector2i(384, 384)
@@ -6500,7 +6478,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fq1fp"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c1ufe"]
 resource_name = "3-hex Stone guildhall"
 texture = ExtResource("45_ocqpl")
 texture_region_size = Vector2i(384, 384)
@@ -6652,7 +6630,7 @@ texture_region_size = Vector2i(384, 384)
 5:2/0/custom_data_5 = 300
 5:2/0/custom_data_6 = 2
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ll7av"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ypc5g"]
 resource_name = "Connected terrain - 00_opening_the_road_woods"
 texture = ExtResource("46_23cr4")
 texture_region_size = Vector2i(128, 128)
@@ -6904,29 +6882,16 @@ texture_region_size = Vector2i(128, 128)
 5:7/0/custom_data_0 = 1
 5:7/0/custom_data_1 = "Woods"
 5:7/0/custom_data_2 = "woods"
-6:7/0 = 0
-6:7/0/custom_data_0 = 1
-6:7/0/custom_data_1 = "Woods"
-6:7/0/custom_data_2 = "woods"
-7:7/0 = 0
-7:7/0/custom_data_0 = 1
-7:7/0/custom_data_1 = "Woods"
-7:7/0/custom_data_2 = "woods"
-0:8/0 = 0
-0:8/0/custom_data_0 = 1
-0:8/0/custom_data_1 = "Woods"
-0:8/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2p4m2"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5klir"]
 resource_name = "Woods 1"
 texture = ExtResource("47_bgwvl")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_d4so2")
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pdgww"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_loduh"]
 resource_name = "Connected terrain - orchard_road_woods"
 texture = ExtResource("48_8w7d3")
 texture_region_size = Vector2i(128, 128)
@@ -6947,7 +6912,7 @@ texture_region_size = Vector2i(128, 128)
 3:0/0/custom_data_1 = "Woods"
 3:0/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rr228"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_16hnx"]
 resource_name = "Connected terrain - default_map_woods"
 texture = ExtResource("49_25gtn")
 texture_region_size = Vector2i(128, 128)
@@ -7296,7 +7261,7 @@ texture_region_size = Vector2i(128, 128)
 5:10/0/custom_data_1 = "Woods"
 5:10/0/custom_data_2 = "woods"
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n1cjr"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_812nu"]
 resource_name = "Wood Building 01 - two hexes A"
 texture = ExtResource("50_iw70r")
 texture_region_size = Vector2i(256, 256)
@@ -7395,12 +7360,11 @@ texture_region_size = Vector2i(256, 256)
 5:1/0/custom_data_5 = 300
 5:1/0/custom_data_6 = 1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lrbt6"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j70jp"]
 resource_name = "Woods 2"
 texture = ExtResource("51_v8jjf")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/material = SubResource("ShaderMaterial_d4so2")
 0:0/0/custom_data_0 = 1
 0:0/0/custom_data_1 = "Woods"
 
@@ -7422,233 +7386,233 @@ custom_data_layer_5/name = "building_angle"
 custom_data_layer_5/type = 2
 custom_data_layer_6/name = "building_part"
 custom_data_layer_6/type = 2
-sources/6 = SubResource("TileSetAtlasSource_pdgww")
-sources/7 = SubResource("TileSetAtlasSource_rr228")
-sources/12 = SubResource("TileSetAtlasSource_s7v64")
-sources/13 = SubResource("TileSetAtlasSource_5o4cn")
-sources/14 = SubResource("TileSetAtlasSource_aspbd")
-sources/15 = SubResource("TileSetAtlasSource_3o8sp")
-sources/0 = SubResource("TileSetAtlasSource_esvpm")
-sources/1 = SubResource("TileSetAtlasSource_0d7xw")
-sources/3 = SubResource("TileSetAtlasSource_pmqvu")
-sources/16 = SubResource("TileSetAtlasSource_mnihf")
-sources/17 = SubResource("TileSetAtlasSource_5t42x")
-sources/18 = SubResource("TileSetAtlasSource_ilhvt")
-sources/8 = SubResource("TileSetAtlasSource_n1cjr")
-sources/19 = SubResource("TileSetAtlasSource_vxui5")
-sources/20 = SubResource("TileSetAtlasSource_6j4xs")
-sources/21 = SubResource("TileSetAtlasSource_06epy")
-sources/22 = SubResource("TileSetAtlasSource_3gjsf")
-sources/23 = SubResource("TileSetAtlasSource_qybrs")
-sources/24 = SubResource("TileSetAtlasSource_4pkhc")
-sources/25 = SubResource("TileSetAtlasSource_81had")
-sources/26 = SubResource("TileSetAtlasSource_bl1jb")
-sources/27 = SubResource("TileSetAtlasSource_isveb")
-sources/28 = SubResource("TileSetAtlasSource_s2oo0")
-sources/29 = SubResource("TileSetAtlasSource_osupm")
-sources/30 = SubResource("TileSetAtlasSource_khn4w")
-sources/31 = SubResource("TileSetAtlasSource_ey8pm")
-sources/32 = SubResource("TileSetAtlasSource_0vglv")
-sources/33 = SubResource("TileSetAtlasSource_ggj3r")
-sources/34 = SubResource("TileSetAtlasSource_4pcuk")
-sources/35 = SubResource("TileSetAtlasSource_xe1li")
-sources/36 = SubResource("TileSetAtlasSource_532y4")
-sources/37 = SubResource("TileSetAtlasSource_u4opl")
-sources/38 = SubResource("TileSetAtlasSource_3bf86")
-sources/39 = SubResource("TileSetAtlasSource_ytf2o")
-sources/40 = SubResource("TileSetAtlasSource_da3jj")
-sources/41 = SubResource("TileSetAtlasSource_ct5mn")
-sources/42 = SubResource("TileSetAtlasSource_xtina")
-sources/43 = SubResource("TileSetAtlasSource_5sfmp")
-sources/44 = SubResource("TileSetAtlasSource_g2l5s")
-sources/45 = SubResource("TileSetAtlasSource_xwx7k")
-sources/46 = SubResource("TileSetAtlasSource_m2plk")
-sources/47 = SubResource("TileSetAtlasSource_et1q4")
-sources/48 = SubResource("TileSetAtlasSource_fq1fp")
-sources/11 = SubResource("TileSetAtlasSource_cwcfg")
-sources/4 = SubResource("TileSetAtlasSource_taleq")
-sources/5 = SubResource("TileSetAtlasSource_2p4m2")
-sources/9 = SubResource("TileSetAtlasSource_lrbt6")
-sources/10 = SubResource("TileSetAtlasSource_moe1s")
-sources/2 = SubResource("TileSetAtlasSource_vvgwt")
-sources/49 = SubResource("TileSetAtlasSource_ll7av")
-pattern_0 = SubResource("TileMapPattern_sx1c8")
-pattern_1 = SubResource("TileMapPattern_6a4nv")
-pattern_2 = SubResource("TileMapPattern_jcpam")
-pattern_3 = SubResource("TileMapPattern_jun72")
-pattern_4 = SubResource("TileMapPattern_kmn6v")
-pattern_5 = SubResource("TileMapPattern_86oxv")
-pattern_6 = SubResource("TileMapPattern_32715")
-pattern_7 = SubResource("TileMapPattern_ok7ov")
-pattern_8 = SubResource("TileMapPattern_0kk8c")
-pattern_9 = SubResource("TileMapPattern_0xwpy")
-pattern_10 = SubResource("TileMapPattern_a7lws")
-pattern_11 = SubResource("TileMapPattern_fajm0")
-pattern_12 = SubResource("TileMapPattern_rfsd8")
-pattern_13 = SubResource("TileMapPattern_uqg1l")
-pattern_14 = SubResource("TileMapPattern_mo76e")
-pattern_15 = SubResource("TileMapPattern_jld40")
-pattern_16 = SubResource("TileMapPattern_m81cv")
-pattern_17 = SubResource("TileMapPattern_kap73")
-pattern_18 = SubResource("TileMapPattern_8hxfu")
-pattern_19 = SubResource("TileMapPattern_n5wyq")
-pattern_20 = SubResource("TileMapPattern_r7frp")
-pattern_21 = SubResource("TileMapPattern_xlcgp")
-pattern_22 = SubResource("TileMapPattern_nsrdv")
-pattern_23 = SubResource("TileMapPattern_a48r8")
-pattern_24 = SubResource("TileMapPattern_qirfn")
-pattern_25 = SubResource("TileMapPattern_kxmk7")
-pattern_26 = SubResource("TileMapPattern_5jdhy")
-pattern_27 = SubResource("TileMapPattern_2xmf4")
-pattern_28 = SubResource("TileMapPattern_nygwe")
-pattern_29 = SubResource("TileMapPattern_rij3v")
-pattern_30 = SubResource("TileMapPattern_lwpad")
-pattern_31 = SubResource("TileMapPattern_p2x5n")
-pattern_32 = SubResource("TileMapPattern_n4r25")
-pattern_33 = SubResource("TileMapPattern_r2mn8")
-pattern_34 = SubResource("TileMapPattern_frvsv")
-pattern_35 = SubResource("TileMapPattern_wkrvl")
-pattern_36 = SubResource("TileMapPattern_tudlo")
-pattern_37 = SubResource("TileMapPattern_oxy3d")
-pattern_38 = SubResource("TileMapPattern_rnbf2")
-pattern_39 = SubResource("TileMapPattern_aotp6")
-pattern_40 = SubResource("TileMapPattern_a1f0h")
-pattern_41 = SubResource("TileMapPattern_4fnpp")
-pattern_42 = SubResource("TileMapPattern_ajw88")
-pattern_43 = SubResource("TileMapPattern_f8s6a")
-pattern_44 = SubResource("TileMapPattern_wpykh")
-pattern_45 = SubResource("TileMapPattern_rfrmg")
-pattern_46 = SubResource("TileMapPattern_flqff")
-pattern_47 = SubResource("TileMapPattern_5kvh1")
-pattern_48 = SubResource("TileMapPattern_r78uu")
-pattern_49 = SubResource("TileMapPattern_234vr")
-pattern_50 = SubResource("TileMapPattern_jo638")
-pattern_51 = SubResource("TileMapPattern_26fu0")
-pattern_52 = SubResource("TileMapPattern_hgn6w")
-pattern_53 = SubResource("TileMapPattern_o7m4h")
-pattern_54 = SubResource("TileMapPattern_xexan")
-pattern_55 = SubResource("TileMapPattern_fpbnq")
-pattern_56 = SubResource("TileMapPattern_2xcjk")
-pattern_57 = SubResource("TileMapPattern_ks2dm")
-pattern_58 = SubResource("TileMapPattern_qgxwj")
-pattern_59 = SubResource("TileMapPattern_iapfg")
-pattern_60 = SubResource("TileMapPattern_fiy7m")
-pattern_61 = SubResource("TileMapPattern_r5vy8")
-pattern_62 = SubResource("TileMapPattern_fylam")
-pattern_63 = SubResource("TileMapPattern_ua70o")
-pattern_64 = SubResource("TileMapPattern_d0vq6")
-pattern_65 = SubResource("TileMapPattern_ujtvd")
-pattern_66 = SubResource("TileMapPattern_x3ydx")
-pattern_67 = SubResource("TileMapPattern_3qv8k")
-pattern_68 = SubResource("TileMapPattern_5ci7x")
-pattern_69 = SubResource("TileMapPattern_lb1fj")
-pattern_70 = SubResource("TileMapPattern_6gaqo")
-pattern_71 = SubResource("TileMapPattern_3pxke")
-pattern_72 = SubResource("TileMapPattern_s2by1")
-pattern_73 = SubResource("TileMapPattern_afjri")
-pattern_74 = SubResource("TileMapPattern_dlrrj")
-pattern_75 = SubResource("TileMapPattern_07p1x")
-pattern_76 = SubResource("TileMapPattern_gkryw")
-pattern_77 = SubResource("TileMapPattern_33kso")
-pattern_78 = SubResource("TileMapPattern_r0n7m")
-pattern_79 = SubResource("TileMapPattern_wu7pa")
-pattern_80 = SubResource("TileMapPattern_i4bmx")
-pattern_81 = SubResource("TileMapPattern_r4wfk")
-pattern_82 = SubResource("TileMapPattern_5n4kh")
-pattern_83 = SubResource("TileMapPattern_sl1uw")
-pattern_84 = SubResource("TileMapPattern_vcext")
-pattern_85 = SubResource("TileMapPattern_wqqrv")
-pattern_86 = SubResource("TileMapPattern_xnivc")
-pattern_87 = SubResource("TileMapPattern_4hrt8")
-pattern_88 = SubResource("TileMapPattern_7om2l")
-pattern_89 = SubResource("TileMapPattern_icu1u")
-pattern_90 = SubResource("TileMapPattern_08frs")
-pattern_91 = SubResource("TileMapPattern_4sfgp")
-pattern_92 = SubResource("TileMapPattern_hgg7m")
-pattern_93 = SubResource("TileMapPattern_c1ufe")
-pattern_94 = SubResource("TileMapPattern_ypc5g")
-pattern_95 = SubResource("TileMapPattern_5klir")
-pattern_96 = SubResource("TileMapPattern_loduh")
-pattern_97 = SubResource("TileMapPattern_16hnx")
-pattern_98 = SubResource("TileMapPattern_812nu")
-pattern_99 = SubResource("TileMapPattern_j70jp")
-pattern_100 = SubResource("TileMapPattern_3fmuv")
-pattern_101 = SubResource("TileMapPattern_vebya")
-pattern_102 = SubResource("TileMapPattern_ax8nx")
-pattern_103 = SubResource("TileMapPattern_hxbou")
-pattern_104 = SubResource("TileMapPattern_hpuie")
-pattern_105 = SubResource("TileMapPattern_ibjm0")
-pattern_106 = SubResource("TileMapPattern_oldmq")
-pattern_107 = SubResource("TileMapPattern_hw23w")
-pattern_108 = SubResource("TileMapPattern_tgni3")
-pattern_109 = SubResource("TileMapPattern_3nlee")
-pattern_110 = SubResource("TileMapPattern_npukt")
-pattern_111 = SubResource("TileMapPattern_pomf3")
-pattern_112 = SubResource("TileMapPattern_u5g6n")
-pattern_113 = SubResource("TileMapPattern_xa3vy")
-pattern_114 = SubResource("TileMapPattern_ku7dc")
-pattern_115 = SubResource("TileMapPattern_j7fa3")
-pattern_116 = SubResource("TileMapPattern_lku0p")
-pattern_117 = SubResource("TileMapPattern_5ha2v")
-pattern_118 = SubResource("TileMapPattern_sc4e8")
-pattern_119 = SubResource("TileMapPattern_27i7x")
-pattern_120 = SubResource("TileMapPattern_yugrs")
-pattern_121 = SubResource("TileMapPattern_5t6wk")
-pattern_122 = SubResource("TileMapPattern_gtt71")
-pattern_123 = SubResource("TileMapPattern_k043r")
-pattern_124 = SubResource("TileMapPattern_2mgev")
-pattern_125 = SubResource("TileMapPattern_8ep4h")
-pattern_126 = SubResource("TileMapPattern_1p5h0")
-pattern_127 = SubResource("TileMapPattern_uaj76")
-pattern_128 = SubResource("TileMapPattern_biv2p")
-pattern_129 = SubResource("TileMapPattern_7q0c8")
-pattern_130 = SubResource("TileMapPattern_apf77")
-pattern_131 = SubResource("TileMapPattern_syx6p")
-pattern_132 = SubResource("TileMapPattern_bqq2s")
-pattern_133 = SubResource("TileMapPattern_7jmxv")
-pattern_134 = SubResource("TileMapPattern_vexh4")
-pattern_135 = SubResource("TileMapPattern_clxmf")
-pattern_136 = SubResource("TileMapPattern_rorcr")
-pattern_137 = SubResource("TileMapPattern_h6dpx")
-pattern_138 = SubResource("TileMapPattern_h6r8n")
-pattern_139 = SubResource("TileMapPattern_te21u")
-pattern_140 = SubResource("TileMapPattern_yn74p")
-pattern_141 = SubResource("TileMapPattern_s5r30")
-pattern_142 = SubResource("TileMapPattern_osl4o")
-pattern_143 = SubResource("TileMapPattern_je8xx")
-pattern_144 = SubResource("TileMapPattern_bsvm8")
-pattern_145 = SubResource("TileMapPattern_lj03w")
-pattern_146 = SubResource("TileMapPattern_w0a83")
-pattern_147 = SubResource("TileMapPattern_41mps")
-pattern_148 = SubResource("TileMapPattern_2xinw")
-pattern_149 = SubResource("TileMapPattern_ukpky")
-pattern_150 = SubResource("TileMapPattern_0s1o5")
-pattern_151 = SubResource("TileMapPattern_mqf1k")
-pattern_152 = SubResource("TileMapPattern_qf5m4")
-pattern_153 = SubResource("TileMapPattern_b8swx")
-pattern_154 = SubResource("TileMapPattern_sfnrc")
-pattern_155 = SubResource("TileMapPattern_wt6p0")
-pattern_156 = SubResource("TileMapPattern_bywhp")
-pattern_157 = SubResource("TileMapPattern_p6jb0")
-pattern_158 = SubResource("TileMapPattern_2yaml")
-pattern_159 = SubResource("TileMapPattern_x0ljn")
-pattern_160 = SubResource("TileMapPattern_cu4hc")
-pattern_161 = SubResource("TileMapPattern_8g4ga")
-pattern_162 = SubResource("TileMapPattern_31r3w")
-pattern_163 = SubResource("TileMapPattern_lbqh3")
-pattern_164 = SubResource("TileMapPattern_rhq46")
-pattern_165 = SubResource("TileMapPattern_bwxpg")
-pattern_166 = SubResource("TileMapPattern_hjvid")
-pattern_167 = SubResource("TileMapPattern_ewode")
-pattern_168 = SubResource("TileMapPattern_gx13b")
-pattern_169 = SubResource("TileMapPattern_eete8")
-pattern_170 = SubResource("TileMapPattern_l0g33")
-pattern_171 = SubResource("TileMapPattern_qtwmo")
-pattern_172 = SubResource("TileMapPattern_04w5r")
-pattern_173 = SubResource("TileMapPattern_eh35h")
-pattern_174 = SubResource("TileMapPattern_x407s")
-pattern_175 = SubResource("TileMapPattern_3pou6")
-pattern_176 = SubResource("TileMapPattern_qqj6r")
-pattern_177 = SubResource("TileMapPattern_xv124")
-pattern_178 = SubResource("TileMapPattern_p5l5q")
-pattern_179 = SubResource("TileMapPattern_i2w7w")
+sources/5 = SubResource("TileSetAtlasSource_5klir")
+sources/6 = SubResource("TileSetAtlasSource_loduh")
+sources/7 = SubResource("TileSetAtlasSource_16hnx")
+sources/9 = SubResource("TileSetAtlasSource_j70jp")
+sources/10 = SubResource("TileSetAtlasSource_fpbnq")
+sources/12 = SubResource("TileSetAtlasSource_qgxwj")
+sources/13 = SubResource("TileSetAtlasSource_iapfg")
+sources/14 = SubResource("TileSetAtlasSource_32715")
+sources/15 = SubResource("TileSetAtlasSource_fiy7m")
+sources/0 = SubResource("TileSetAtlasSource_o7m4h")
+sources/1 = SubResource("TileSetAtlasSource_xexan")
+sources/2 = SubResource("TileSetAtlasSource_ujtvd")
+sources/3 = SubResource("TileSetAtlasSource_07p1x")
+sources/16 = SubResource("TileSetAtlasSource_r5vy8")
+sources/17 = SubResource("TileSetAtlasSource_fylam")
+sources/18 = SubResource("TileSetAtlasSource_ua70o")
+sources/8 = SubResource("TileSetAtlasSource_812nu")
+sources/19 = SubResource("TileSetAtlasSource_d0vq6")
+sources/20 = SubResource("TileSetAtlasSource_x3ydx")
+sources/21 = SubResource("TileSetAtlasSource_3qv8k")
+sources/22 = SubResource("TileSetAtlasSource_5ci7x")
+sources/23 = SubResource("TileSetAtlasSource_lb1fj")
+sources/24 = SubResource("TileSetAtlasSource_ok7ov")
+sources/25 = SubResource("TileSetAtlasSource_6gaqo")
+sources/26 = SubResource("TileSetAtlasSource_3pxke")
+sources/27 = SubResource("TileSetAtlasSource_s2by1")
+sources/28 = SubResource("TileSetAtlasSource_afjri")
+sources/29 = SubResource("TileSetAtlasSource_dlrrj")
+sources/30 = SubResource("TileSetAtlasSource_gkryw")
+sources/31 = SubResource("TileSetAtlasSource_33kso")
+sources/32 = SubResource("TileSetAtlasSource_r0n7m")
+sources/33 = SubResource("TileSetAtlasSource_wu7pa")
+sources/34 = SubResource("TileSetAtlasSource_0kk8c")
+sources/35 = SubResource("TileSetAtlasSource_i4bmx")
+sources/36 = SubResource("TileSetAtlasSource_r4wfk")
+sources/37 = SubResource("TileSetAtlasSource_5n4kh")
+sources/38 = SubResource("TileSetAtlasSource_sl1uw")
+sources/39 = SubResource("TileSetAtlasSource_vcext")
+sources/40 = SubResource("TileSetAtlasSource_xnivc")
+sources/41 = SubResource("TileSetAtlasSource_4hrt8")
+sources/42 = SubResource("TileSetAtlasSource_7om2l")
+sources/43 = SubResource("TileSetAtlasSource_icu1u")
+sources/44 = SubResource("TileSetAtlasSource_0xwpy")
+sources/45 = SubResource("TileSetAtlasSource_08frs")
+sources/46 = SubResource("TileSetAtlasSource_4sfgp")
+sources/47 = SubResource("TileSetAtlasSource_hgg7m")
+sources/48 = SubResource("TileSetAtlasSource_c1ufe")
+sources/11 = SubResource("TileSetAtlasSource_ks2dm")
+sources/4 = SubResource("TileSetAtlasSource_wqqrv")
+sources/49 = SubResource("TileSetAtlasSource_ypc5g")
+pattern_0 = SubResource("TileMapPattern_ckjad")
+pattern_1 = SubResource("TileMapPattern_tc8a2")
+pattern_2 = SubResource("TileMapPattern_clxmf")
+pattern_3 = SubResource("TileMapPattern_lj03w")
+pattern_4 = SubResource("TileMapPattern_wt6p0")
+pattern_5 = SubResource("TileMapPattern_bwxpg")
+pattern_6 = SubResource("TileMapPattern_3pou6")
+pattern_7 = SubResource("TileMapPattern_a48r8")
+pattern_8 = SubResource("TileMapPattern_r2mn8")
+pattern_9 = SubResource("TileMapPattern_f8s6a")
+pattern_10 = SubResource("TileMapPattern_kocj6")
+pattern_11 = SubResource("TileMapPattern_2tvxi")
+pattern_12 = SubResource("TileMapPattern_avosy")
+pattern_13 = SubResource("TileMapPattern_obv4e")
+pattern_14 = SubResource("TileMapPattern_bgwvl")
+pattern_15 = SubResource("TileMapPattern_hxbou")
+pattern_16 = SubResource("TileMapPattern_xa3vy")
+pattern_17 = SubResource("TileMapPattern_k043r")
+pattern_18 = SubResource("TileMapPattern_7jmxv")
+pattern_19 = SubResource("TileMapPattern_vexh4")
+pattern_20 = SubResource("TileMapPattern_rorcr")
+pattern_21 = SubResource("TileMapPattern_h6dpx")
+pattern_22 = SubResource("TileMapPattern_h6r8n")
+pattern_23 = SubResource("TileMapPattern_te21u")
+pattern_24 = SubResource("TileMapPattern_mo76e")
+pattern_25 = SubResource("TileMapPattern_yn74p")
+pattern_26 = SubResource("TileMapPattern_s5r30")
+pattern_27 = SubResource("TileMapPattern_osl4o")
+pattern_28 = SubResource("TileMapPattern_je8xx")
+pattern_29 = SubResource("TileMapPattern_bsvm8")
+pattern_30 = SubResource("TileMapPattern_w0a83")
+pattern_31 = SubResource("TileMapPattern_41mps")
+pattern_32 = SubResource("TileMapPattern_2xinw")
+pattern_33 = SubResource("TileMapPattern_ukpky")
+pattern_34 = SubResource("TileMapPattern_jld40")
+pattern_35 = SubResource("TileMapPattern_0s1o5")
+pattern_36 = SubResource("TileMapPattern_mqf1k")
+pattern_37 = SubResource("TileMapPattern_qf5m4")
+pattern_38 = SubResource("TileMapPattern_b8swx")
+pattern_39 = SubResource("TileMapPattern_sfnrc")
+pattern_40 = SubResource("TileMapPattern_bywhp")
+pattern_41 = SubResource("TileMapPattern_p6jb0")
+pattern_42 = SubResource("TileMapPattern_2yaml")
+pattern_43 = SubResource("TileMapPattern_x0ljn")
+pattern_44 = SubResource("TileMapPattern_m81cv")
+pattern_45 = SubResource("TileMapPattern_cu4hc")
+pattern_46 = SubResource("TileMapPattern_8g4ga")
+pattern_47 = SubResource("TileMapPattern_31r3w")
+pattern_48 = SubResource("TileMapPattern_lbqh3")
+pattern_49 = SubResource("TileMapPattern_rhq46")
+pattern_50 = SubResource("TileMapPattern_hjvid")
+pattern_51 = SubResource("TileMapPattern_ewode")
+pattern_52 = SubResource("TileMapPattern_gx13b")
+pattern_53 = SubResource("TileMapPattern_eete8")
+pattern_54 = SubResource("TileMapPattern_kap73")
+pattern_55 = SubResource("TileMapPattern_l0g33")
+pattern_56 = SubResource("TileMapPattern_qtwmo")
+pattern_57 = SubResource("TileMapPattern_04w5r")
+pattern_58 = SubResource("TileMapPattern_eh35h")
+pattern_59 = SubResource("TileMapPattern_x407s")
+pattern_60 = SubResource("TileMapPattern_qqj6r")
+pattern_61 = SubResource("TileMapPattern_xv124")
+pattern_62 = SubResource("TileMapPattern_p5l5q")
+pattern_63 = SubResource("TileMapPattern_i2w7w")
+pattern_64 = SubResource("TileMapPattern_8hxfu")
+pattern_65 = SubResource("TileMapPattern_n5wyq")
+pattern_66 = SubResource("TileMapPattern_jcpam")
+pattern_67 = SubResource("TileMapPattern_r7frp")
+pattern_68 = SubResource("TileMapPattern_xlcgp")
+pattern_69 = SubResource("TileMapPattern_nsrdv")
+pattern_70 = SubResource("TileMapPattern_qirfn")
+pattern_71 = SubResource("TileMapPattern_kxmk7")
+pattern_72 = SubResource("TileMapPattern_5jdhy")
+pattern_73 = SubResource("TileMapPattern_2xmf4")
+pattern_74 = SubResource("TileMapPattern_nygwe")
+pattern_75 = SubResource("TileMapPattern_rij3v")
+pattern_76 = SubResource("TileMapPattern_jun72")
+pattern_77 = SubResource("TileMapPattern_lwpad")
+pattern_78 = SubResource("TileMapPattern_p2x5n")
+pattern_79 = SubResource("TileMapPattern_n4r25")
+pattern_80 = SubResource("TileMapPattern_frvsv")
+pattern_81 = SubResource("TileMapPattern_wkrvl")
+pattern_82 = SubResource("TileMapPattern_tudlo")
+pattern_83 = SubResource("TileMapPattern_oxy3d")
+pattern_84 = SubResource("TileMapPattern_rnbf2")
+pattern_85 = SubResource("TileMapPattern_aotp6")
+pattern_86 = SubResource("TileMapPattern_kmn6v")
+pattern_87 = SubResource("TileMapPattern_a1f0h")
+pattern_88 = SubResource("TileMapPattern_4fnpp")
+pattern_89 = SubResource("TileMapPattern_ajw88")
+pattern_90 = SubResource("TileMapPattern_wpykh")
+pattern_91 = SubResource("TileMapPattern_rfrmg")
+pattern_92 = SubResource("TileMapPattern_flqff")
+pattern_93 = SubResource("TileMapPattern_5kvh1")
+pattern_94 = SubResource("TileMapPattern_r78uu")
+pattern_95 = SubResource("TileMapPattern_234vr")
+pattern_96 = SubResource("TileMapPattern_86oxv")
+pattern_97 = SubResource("TileMapPattern_jo638")
+pattern_98 = SubResource("TileMapPattern_26fu0")
+pattern_99 = SubResource("TileMapPattern_hgn6w")
+pattern_100 = SubResource("TileMapPattern_lf0f6")
+pattern_101 = SubResource("TileMapPattern_gs043")
+pattern_102 = SubResource("TileMapPattern_lmdm4")
+pattern_103 = SubResource("TileMapPattern_5apqx")
+pattern_104 = SubResource("TileMapPattern_n5vuw")
+pattern_105 = SubResource("TileMapPattern_ugxb2")
+pattern_106 = SubResource("TileMapPattern_xnyf7")
+pattern_107 = SubResource("TileMapPattern_i407u")
+pattern_108 = SubResource("TileMapPattern_h850q")
+pattern_109 = SubResource("TileMapPattern_wqnpc")
+pattern_110 = SubResource("TileMapPattern_v04d6")
+pattern_111 = SubResource("TileMapPattern_i3rtt")
+pattern_112 = SubResource("TileMapPattern_mpp13")
+pattern_113 = SubResource("TileMapPattern_3frpe")
+pattern_114 = SubResource("TileMapPattern_ab3he")
+pattern_115 = SubResource("TileMapPattern_7bp3u")
+pattern_116 = SubResource("TileMapPattern_1bejd")
+pattern_117 = SubResource("TileMapPattern_nfvo1")
+pattern_118 = SubResource("TileMapPattern_0f71x")
+pattern_119 = SubResource("TileMapPattern_hjt1q")
+pattern_120 = SubResource("TileMapPattern_jq3jf")
+pattern_121 = SubResource("TileMapPattern_knexc")
+pattern_122 = SubResource("TileMapPattern_imbwd")
+pattern_123 = SubResource("TileMapPattern_wvr7v")
+pattern_124 = SubResource("TileMapPattern_nsxmm")
+pattern_125 = SubResource("TileMapPattern_uvjhq")
+pattern_126 = SubResource("TileMapPattern_fdbx7")
+pattern_127 = SubResource("TileMapPattern_dkfs0")
+pattern_128 = SubResource("TileMapPattern_obg1j")
+pattern_129 = SubResource("TileMapPattern_4lael")
+pattern_130 = SubResource("TileMapPattern_3bmfv")
+pattern_131 = SubResource("TileMapPattern_te6bd")
+pattern_132 = SubResource("TileMapPattern_ecltv")
+pattern_133 = SubResource("TileMapPattern_5btch")
+pattern_134 = SubResource("TileMapPattern_yc8em")
+pattern_135 = SubResource("TileMapPattern_upx46")
+pattern_136 = SubResource("TileMapPattern_8ylu5")
+pattern_137 = SubResource("TileMapPattern_qteuy")
+pattern_138 = SubResource("TileMapPattern_ocqpl")
+pattern_139 = SubResource("TileMapPattern_23cr4")
+pattern_140 = SubResource("TileMapPattern_8w7d3")
+pattern_141 = SubResource("TileMapPattern_25gtn")
+pattern_142 = SubResource("TileMapPattern_iw70r")
+pattern_143 = SubResource("TileMapPattern_v8jjf")
+pattern_144 = SubResource("TileMapPattern_sx1c8")
+pattern_145 = SubResource("TileMapPattern_6a4nv")
+pattern_146 = SubResource("TileMapPattern_a7lws")
+pattern_147 = SubResource("TileMapPattern_3fmuv")
+pattern_148 = SubResource("TileMapPattern_vebya")
+pattern_149 = SubResource("TileMapPattern_ax8nx")
+pattern_150 = SubResource("TileMapPattern_hpuie")
+pattern_151 = SubResource("TileMapPattern_ibjm0")
+pattern_152 = SubResource("TileMapPattern_oldmq")
+pattern_153 = SubResource("TileMapPattern_hw23w")
+pattern_154 = SubResource("TileMapPattern_tgni3")
+pattern_155 = SubResource("TileMapPattern_3nlee")
+pattern_156 = SubResource("TileMapPattern_fajm0")
+pattern_157 = SubResource("TileMapPattern_npukt")
+pattern_158 = SubResource("TileMapPattern_pomf3")
+pattern_159 = SubResource("TileMapPattern_u5g6n")
+pattern_160 = SubResource("TileMapPattern_ku7dc")
+pattern_161 = SubResource("TileMapPattern_j7fa3")
+pattern_162 = SubResource("TileMapPattern_lku0p")
+pattern_163 = SubResource("TileMapPattern_5ha2v")
+pattern_164 = SubResource("TileMapPattern_sc4e8")
+pattern_165 = SubResource("TileMapPattern_27i7x")
+pattern_166 = SubResource("TileMapPattern_rfsd8")
+pattern_167 = SubResource("TileMapPattern_yugrs")
+pattern_168 = SubResource("TileMapPattern_5t6wk")
+pattern_169 = SubResource("TileMapPattern_gtt71")
+pattern_170 = SubResource("TileMapPattern_2mgev")
+pattern_171 = SubResource("TileMapPattern_8ep4h")
+pattern_172 = SubResource("TileMapPattern_1p5h0")
+pattern_173 = SubResource("TileMapPattern_uaj76")
+pattern_174 = SubResource("TileMapPattern_biv2p")
+pattern_175 = SubResource("TileMapPattern_7q0c8")
+pattern_176 = SubResource("TileMapPattern_uqg1l")
+pattern_177 = SubResource("TileMapPattern_apf77")
+pattern_178 = SubResource("TileMapPattern_syx6p")
+pattern_179 = SubResource("TileMapPattern_bqq2s")

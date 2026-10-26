@@ -25,7 +25,10 @@ func _run() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--mission="):
 			mission = argument.trim_prefix("--mission=").to_int()
-	if mission > 0:
+	if OS.get_cmdline_user_args().has("--prologue-layout-only"):
+		_test_prologue()
+		_test_roads()
+	elif mission > 0:
 		if mission <= 2:
 			_test_prologue()
 			_test_quiet_start()
@@ -152,6 +155,7 @@ func _test_content() -> void:
 func _test_prologue() -> void:
 	var scenario: Scenario = campaign_maps[0].get_scenario(0)
 	_check(scenario.scenario_id == "alderbrook_00_opening_the_road", "The prologue leads the campaign with its own stable save ID")
+	_test_prologue_landscape(campaign_maps[0])
 	var counts: Dictionary[int, int] = {}
 	var defenders: int = 0
 	for unit: Unit in scenario.get_units():
@@ -177,6 +181,39 @@ func _test_prologue() -> void:
 		else:
 			minor_holds += 1
 	_check(major_holds == 2 and minor_holds == 1, "Both objectives are needed for major victory; the road alone permits minor victory")
+
+
+func _test_prologue_landscape(map: Map) -> void:
+	_check(map.grid_size.x >= 28 and map.grid_size.y >= 20, "The prologue has room for separate field and farm approaches")
+	var roads: HexagonTileMapLayer = map.get_road_layer()
+	var north: bool = false
+	var south: bool = false
+	var west_or_east: bool = false
+	for cell: Vector2i in roads.get_used_cells():
+		north = north or cell.y == 0
+		south = south or cell.y == map.grid_size.y - 1
+		west_or_east = west_or_east or cell.x == 0 or cell.x == map.grid_size.x - 1
+		_check(map.get_building_layer().get_cell_source_id(cell) < 0, "The winding road stays clear of buildings and woodland")
+	_check(north and south and not west_or_east, "The prologue road runs south to north rather than across the map")
+	var kinds: Dictionary[int, int] = {1: 0, 2: 0}
+	var walls: WallTileMapLayer = map.get_wall_layer() as WallTileMapLayer
+	for cell: Vector2i in walls.get_used_cells():
+		var data: TileData = walls.get_cell_tile_data(cell)
+		_check(ConnectedWalls.is_barrier(data), "Prologue boundaries use directional edge cover")
+		var cover: int = int(data.get_custom_data("cover"))
+		kinds[cover] = kinds.get(cover, 0) + 1
+		for side: int in range(6):
+			if (walls.get_edge_mask(cell) & (1 << side)) == 0:
+				continue
+			var neighbor: Vector2i = walls.get_neighbor_cell(cell, ConnectedWalls.SIDES[side])
+			_check(roads.get_cell_source_id(cell) < 0 and roads.get_cell_source_id(neighbor) < 0, "Boundary gates leave the road verges open")
+			_check((walls.get_edge_mask(neighbor) & (1 << ((side + 3) % 6))) == 0, "Each field boundary has a single edge owner")
+	_check(kinds[1] >= 60 and kinds[2] >= 12, "Hedged fields and stone courts both provide substantial cover")
+	var ground: HexagonTileMapLayer = map.get_ground_layer()
+	var start: int = ground.astar.get_closest_point(ground.map_to_local(Vector2i(5, 17)))
+	for target: Vector2i in [Vector2i(19, 9), Vector2i(23, 13)]:
+		var finish: int = ground.astar.get_closest_point(ground.map_to_local(target))
+		_check(not ground.astar.get_id_path(start, finish).is_empty(), "Both objectives remain reachable from the southern deployment")
 
 
 func _markers(scenario: Scenario, team: Globals.Team, id: int) -> Array[Vector2i]:
@@ -347,18 +384,19 @@ func _test_roads() -> void:
 		var corridor: Dictionary[Vector2i, bool] = {}
 		var variants: Dictionary[Vector2i, bool] = {}
 		var frontier: Array[Vector2i] = []
+		var prologue: bool = map.name == &"AlderbrookPrologue"
 		for cell: Vector2i in roads.get_used_cells():
 			corridor[cell] = true
 			variants[roads.get_cell_atlas_coords(cell)] = true
 			_check(ground.get_cell_source_id(cell) >= 0, "Road corridors have playable ground")
 			_check(not bool(roads.get_cell_tile_data(cell).get_custom_data("hindrance")) and not bool(roads.get_cell_tile_data(cell).get_custom_data("blocking")), "Curved road pieces preserve open-road LOS rules")
-			if cell.x == 0:
+			if (prologue and cell.y == map.grid_size.y - 1) or (not prologue and cell.x == 0):
 				frontier.append(cell)
 		for cell: Vector2i in water.get_used_cells():
 			if water.get_cell_source_id(cell) == 1:
 				corridor[cell] = true
 		_check(variants.size() >= 12, "Each mission uses distinct road pieces instead of a repeated chevron")
-		_check(not frontier.is_empty(), "Each road network enters from the western map edge")
+		_check(not frontier.is_empty(), "Each road network enters from its deployment edge")
 		var reached: Dictionary[Vector2i, bool] = {}
 		for start: Vector2i in frontier:
 			reached[start] = true
@@ -370,12 +408,12 @@ func _test_roads() -> void:
 				if corridor.has(neighbor) and not reached.has(neighbor):
 					reached[neighbor] = true
 					frontier.append(neighbor)
-		_check(reached.size() == corridor.size(), "All road and bridge pieces belong to continuous routes from the western bank")
+		_check(reached.size() == corridor.size(), "All road and bridge pieces belong to continuous routes from the deployment edge")
 		var eastern_connections: int = 0
 		for cell: Vector2i in reached:
-			if cell.x == map.grid_size.x - 1:
+			if (prologue and cell.y == 0) or (not prologue and cell.x == map.grid_size.x - 1):
 				eastern_connections += 1
-		_check(eastern_connections > 0, "The curved road network reaches the eastern map edge")
+		_check(eastern_connections > 0, "The curved road network reaches its far map edge")
 
 
 func _test_match(index: int) -> void:
@@ -403,7 +441,7 @@ func _test_match(index: int) -> void:
 		_check(support != null and support.assets.size() == 2, "The live prologue exposes onboard mortar and off-map artillery in the support tray")
 		if support != null and support.assets.size() == 2:
 			_check(support.available_guns(1) == 4 and support.ammunition(1) == 48, "The live artillery battery retains its four guns and ammunition")
-			_check(support.request(1, Vector2i(13, 6), 15.0, FireSupportMission.Intensity.INTENSE), "The prologue artillery accepts an actual fire mission")
+			_check(support.request(1, Vector2i(19, 9), 15.0, FireSupportMission.Intensity.INTENSE), "The prologue artillery accepts an actual fire mission")
 	var planner: PlatoonAI = world.game_controller.platoon_ai
 	for frame: int in range(2400):
 		await get_tree().process_frame
