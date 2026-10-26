@@ -3,11 +3,15 @@ class_name FireSupportPanel
 
 const MORTAR_ICON: Texture2D = preload("res://assets/ui/hud/units/mortar.svg")
 const HOWITZER_ICON: Texture2D = preload("res://assets/ui/hud/units/howitzer.svg")
+const STACK_LAYERS: int = 3
+const STACK_OFFSET: int = 4
 
 var support: FireSupportController
 var icon_bar: ScrollContainer
 var icon_row: HBoxContainer
 var asset_buttons: Array[Button] = []
+var card_slots: Array[MarginContainer] = []
+var stack_edges: Array[Panel] = []
 var launch_bars: Array[ProgressBar] = []
 var launch_clocks: Array[Label] = []
 var tray: PanelContainer
@@ -158,13 +162,21 @@ func _open_asset(index: int) -> void:
 
 func _refresh_icons() -> void:
 	if asset_buttons.size() != support.assets.size():
-		for button: Button in asset_buttons:
-			icon_row.remove_child(button)
-			button.queue_free()
+		for slot: MarginContainer in card_slots:
+			icon_row.remove_child(slot)
+			slot.queue_free()
 		asset_buttons.clear()
+		card_slots.clear()
+		stack_edges.clear()
 		launch_bars.clear()
 		launch_clocks.clear()
 		for index: int in range(support.assets.size()):
+			var slot: MarginContainer = MarginContainer.new()
+			slot.mouse_filter = Control.MOUSE_FILTER_STOP
+			slot.add_theme_constant_override("margin_top", STACK_LAYERS * STACK_OFFSET)
+			slot.add_theme_constant_override("margin_right", STACK_LAYERS * STACK_OFFSET)
+			icon_row.add_child(slot)
+			card_slots.append(slot)
 			var button: Button = Button.new()
 			button.custom_minimum_size = Vector2(88, 128)
 			button.expand_icon = true
@@ -173,8 +185,27 @@ func _refresh_icons() -> void:
 			button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 			button.pressed.connect(_open_asset.bind(index))
-			icon_row.add_child(button)
+			slot.add_child(button)
 			asset_buttons.append(button)
+			for layer: int in range(STACK_LAYERS, 0, -1):
+				var edge: Panel = Panel.new()
+				edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				edge.show_behind_parent = true
+				edge.set_meta("asset_index", index)
+				edge.set_meta("layer", layer)
+				var card_style: StyleBoxFlat = StyleBoxFlat.new()
+				card_style.bg_color = Color(0.12, 0.13, 0.09)
+				card_style.set_border_width_all(1)
+				card_style.border_color = Color(0.55, 0.55, 0.39)
+				edge.add_theme_stylebox_override("panel", card_style)
+				button.add_child(edge)
+				edge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+				var offset: float = float(layer * STACK_OFFSET)
+				edge.offset_left = offset
+				edge.offset_right = offset
+				edge.offset_top = -offset
+				edge.offset_bottom = -offset
+				stack_edges.append(edge)
 			var bar: ProgressBar = ProgressBar.new()
 			bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			bar.show_percentage = false
@@ -226,6 +257,9 @@ func _refresh_icons() -> void:
 			button.self_modulate = Color(1.0, 0.78, 0.42)
 		elif support.ammunition(index) <= 0:
 			button.self_modulate = Color(0.55, 0.55, 0.55)
+	for edge: Panel in stack_edges:
+		var index: int = int(edge.get_meta("asset_index"))
+		edge.visible = support.available_guns(index) > int(edge.get_meta("layer"))
 	icon_bar.visible = not asset_buttons.is_empty()
 	_refresh_launch_progress()
 
@@ -352,7 +386,7 @@ func _layout() -> void:
 	if not is_node_ready():
 		return
 	var area: Vector2 = (get_parent() as Control).size
-	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 146.0)
+	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 160.0)
 	icon_bar.position = Vector2(maxf(12.0, (area.x - icon_bar.size.x) * 0.5), area.y - icon_bar.size.y - 12.0)
 	tray.size = Vector2(minf(460.0, area.x - 24.0), tray.get_combined_minimum_size().y)
 	tray.position = Vector2(maxf(12.0, (area.x - tray.size.x) * 0.5), maxf(12.0, icon_bar.position.y - tray.size.y - 8.0))
