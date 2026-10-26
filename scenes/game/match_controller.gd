@@ -392,6 +392,7 @@ func _on_key_space_pressed(_event_pos: Vector2) -> void:
 
 func _select_unit(unit: Unit) -> void:
 	MatchInteractionHandler.select_unit(self, unit)
+	show_visible_units()
 
 
 func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
@@ -411,6 +412,7 @@ func select_and_center_unit(unit: Unit) -> void:
 
 func _deselect_unit(unit: Unit) -> void:
 	MatchInteractionHandler.deselect_unit(self, unit)
+	show_visible_units()
 
 
 func _is_exit_hex(team: Globals.Team, hex: Vector2i) -> bool:

@@ -271,6 +271,12 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 
 
 
+func set_indirect_contact(dimmed: bool) -> void:
+	var sprite_material: ShaderMaterial = sprite_node.material as ShaderMaterial
+	if sprite_material != null:
+		sprite_material.set_shader_parameter("indirect_contact", dimmed)
+
+
 func select() -> void:
 	unit_selected_sprite.visible = true
 	if detail_ui:

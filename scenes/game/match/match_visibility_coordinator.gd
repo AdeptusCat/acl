@@ -1,6 +1,8 @@
 extends RefCounted
 class_name MatchVisibilityCoordinator
 
+const INDIRECT_CONTACT_TINT: Color = Color(0.45, 0.45, 0.45, 0.6)
+
 # Synchronous MatchVisibilityCoordinator operations; state and scene identity stay on the caller.
 
 
@@ -9,39 +11,31 @@ static func draw_fog(controller: Node2D) -> void:
 
 
 static func show_visible_units(controller: Node2D) -> void:
+	var observer: Unit = controller.selected_unit
+	var inspect_sight: bool = is_instance_valid(observer) and observer.team == Globals.team_player and observer.is_active() and not observer.surrendered
+	var directly_seen: Array = []
+	if inspect_sight:
+		directly_seen = Globals.unit_visible_enemies.get(observer, [])
+	var units: Array[Unit] = Globals.get_units()
 	var units_seen: Array = []
-	#for u in Globals.units:
-		#if not is_instance_valid(u):
-			#continue
-		#if not u.team == Globals.team_player:
-			#u.visible = false
-	for u: Unit in Globals.get_units():
-		if not is_instance_valid(u):
+	for unit: Unit in units:
+		if unit.team != Globals.team_player or unit.surrendered:
 			continue
-		if u.surrendered:
-			continue
-		if u.team == Globals.team_player:
-			var units_in_los: Array = Globals.unit_visible_enemies.get(u, [])
-			for unit_in_los: Unit in units_in_los:
-				if not units_seen.has(unit_in_los):
-					units_seen.append(unit_in_los)
-	
-	for u: Unit in Globals.get_units():
-		if not is_instance_valid(u):
-				continue
-		if not u.team == Globals.team_player:
-			if units_seen.has(u):
-				u.visible = true
-			else:
-				u.visible = false
-	
-	if Debug.show_enemies:
-		for u: Unit in Globals.get_units():
-			u.visible = true
-			#if LOSHelper.visible_hexes[Globals.team_player].has(u.current_hex):
-				#u.visible = true
-			#else:
-				#u.visible = false
+		for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+			if not units_seen.has(enemy):
+				units_seen.append(enemy)
+	# Team-wide spotting still controls what can be revealed. Selection only
+	# distinguishes this squad's own sightings from contacts supplied by others.
+	for unit: Unit in units:
+		if unit.team != Globals.team_player:
+			unit.visible = Debug.show_enemies or units_seen.has(unit)
+		elif Debug.show_enemies:
+			unit.show()
+		var dimmed: bool = inspect_sight and unit.team != Globals.team_player and not directly_seen.has(unit)
+		unit.modulate = Color.WHITE
+		if dimmed:
+			unit.modulate = INDIRECT_CONTACT_TINT
+		unit.ui.set_indirect_contact(dimmed)
 
 
 static func update_visible_hexes(controller: Node2D) -> void:

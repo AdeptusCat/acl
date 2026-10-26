@@ -76,6 +76,7 @@ func _run() -> void:
 	await _test_passive_controls()
 	_test_stack_selection()
 	await _test_pointer_stack_input(input)
+	await _test_selected_visibility()
 	for unit: Unit in units:
 		unit.squad_fire.calc.free()
 		unit.free()
@@ -83,6 +84,85 @@ func _run() -> void:
 	controller.free()
 	print("Battlefield selection checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_selected_visibility() -> void:
+	var original_sight: Dictionary = Globals.unit_visible_enemies.duplicate()
+	var original_debug: bool = Debug.show_enemies
+	Debug.show_enemies = false
+	var first: Unit = _unit(Globals.Team.ALLIES, Vector2i(1, 1))
+	var second: Unit = _unit(Globals.Team.ALLIES, Vector2i(2, 1))
+	var direct: Unit = _unit(Globals.Team.AXIS, Vector2i(3, 1))
+	var indirect: Unit = _unit(Globals.Team.AXIS, Vector2i(4, 1))
+	var hidden: Unit = _unit(Globals.Team.AXIS, Vector2i(5, 1))
+	Globals.unit_visible_enemies = {first: [direct], second: [indirect]}
+	controller.selected_unit = first
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(direct.visible and direct.modulate == Color.WHITE, "The selected squad's own sighting stays fully visible")
+	_check(indirect.visible and indirect.modulate == MatchVisibilityCoordinator.INDIRECT_CONTACT_TINT, "An enemy seen only by another squad is dimmed")
+	_check(not hidden.visible, "Selection never reveals an enemy unknown to the team")
+	_check(first.modulate == Color.WHITE and second.modulate == Color.WHITE, "Friendly counters keep their normal appearance")
+	var direct_material: ShaderMaterial = direct.ui.sprite_node.material as ShaderMaterial
+	var indirect_material: ShaderMaterial = indirect.ui.sprite_node.material as ShaderMaterial
+	_check(not bool(direct_material.get_shader_parameter("indirect_contact")) and bool(indirect_material.get_shader_parameter("indirect_contact")), "The counter shader distinguishes direct and indirect contacts independently")
+	if OS.get_cmdline_user_args().has("--render"):
+		await _render_sight_comparison(direct, indirect)
+	controller.selected_unit = second
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(direct.modulate == MatchVisibilityCoordinator.INDIRECT_CONTACT_TINT and indirect.modulate == Color.WHITE, "Switching squads swaps which enemy sightings are emphasized")
+	Globals.unit_visible_enemies[second] = [direct, indirect]
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(direct.modulate == Color.WHITE and not bool(direct_material.get_shader_parameter("indirect_contact")), "New sightings restore the selected squad's contacts")
+	Globals.unit_visible_enemies[second] = [indirect]
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(direct.modulate == MatchVisibilityCoordinator.INDIRECT_CONTACT_TINT, "Losing a sighting dims a contact still seen by another squad")
+	controller.selected_unit = null
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(direct.modulate == Color.WHITE and indirect.modulate == Color.WHITE and not hidden.visible, "Deselecting restores team-wide contact appearance without revealing hidden enemies")
+	controller.selected_unit = first
+	Debug.show_enemies = true
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(hidden.visible and hidden.modulate == MatchVisibilityCoordinator.INDIRECT_CONTACT_TINT, "Debug reveal still identifies enemies the selected squad cannot see")
+	first.surrendered = true
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(indirect.modulate == Color.WHITE, "An unavailable selected squad does not retain sight filtering")
+	first.surrendered = false
+	controller.selected_unit = null
+	Globals.unit_visible_enemies = original_sight
+	Debug.show_enemies = original_debug
+	MatchVisibilityCoordinator.show_visible_units(controller)
+
+
+func _render_sight_comparison(direct: Unit, indirect: Unit) -> void:
+	var viewport: SubViewport = SubViewport.new()
+	viewport.size = Vector2i(600, 230)
+	viewport.world_2d = World2D.new()
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(viewport)
+	var index: int = 0
+	for enemy: Unit in [direct, indirect]:
+		var old_position: Vector2 = enemy.position
+		enemy.set_meta("sight_preview_position", old_position)
+		enemy.reparent(viewport)
+		enemy.position = Vector2(110.0 + float(index) * 300.0, 70.0)
+		enemy.ui.update_team_sprite(enemy.team, Globals.SquadType.Rifle)
+		enemy.ui.set_members_alive(8)
+		var caption: Label = Label.new()
+		caption.position = Vector2(40.0 + float(index) * 300.0, 170.0)
+		caption.text = "Selected squad sees this"
+		if index == 1:
+			caption.text = "Seen by another squad only"
+		viewport.add_child(caption)
+		index += 1
+	await get_tree().process_frame
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	_check(viewport.get_texture().get_image().save_png("/tmp/acl-selected-sight.png") == OK, "Render direct and indirect enemy contacts together")
+	for enemy: Unit in [direct, indirect]:
+		enemy.reparent(controller)
+		enemy.position = enemy.get_meta("sight_preview_position") as Vector2
+		enemy.remove_meta("sight_preview_position")
+	viewport.free()
 
 
 func _test_unavailable_map() -> void:
