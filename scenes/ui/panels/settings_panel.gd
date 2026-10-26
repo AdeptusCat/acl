@@ -29,6 +29,7 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 @onready var master_label: Label = $Menu/Scroll/Content/MasterLabel
 @onready var music_label: Label = $Menu/Scroll/Content/MusicLabel
 @onready var command_links: CheckBox = $Menu/Scroll/Content/ShowCmdConnectivity
+@onready var capture_logs: CheckBox = $Menu/Scroll/Content/CaptureLogs
 @onready var control_rows: VBoxContainer = $Controls/Scroll/Content/Rows
 @onready var mode_selector: OptionButton = $Menu/Scroll/Content/WindowMode
 @onready var resolution_selector: OptionButton = $Menu/Scroll/Content/WindowSize
@@ -52,6 +53,9 @@ func _ready() -> void:
 	s1.value_changed.connect(_on_volume_slider_value_changed)
 	s2.value_changed.connect(_on_volume_slider_2_value_changed)
 	command_links.toggled.connect(_on_check_box_toggled)
+	capture_logs.toggled.connect(_on_capture_logs_toggled)
+	SessionSettings.log_capture_changed.connect(_sync_log_capture)
+	_sync_log_capture(SessionSettings.capture_logs)
 	command_view_button.toggled.connect(_on_check_box_toggled)
 	SessionSettings.command_view_changed.connect(_sync_command_view)
 	_sync_command_view(SessionSettings.showCmdConnectivity)
@@ -267,3 +271,11 @@ func _on_check_box_toggled(toggled_on: bool) -> void:
 func _sync_command_view(enabled: bool) -> void:
 	command_links.set_pressed_no_signal(enabled)
 	command_view_button.set_pressed_no_signal(enabled)
+
+
+func _on_capture_logs_toggled(enabled: bool) -> void:
+	SessionSettings.capture_logs = enabled
+
+
+func _sync_log_capture(enabled: bool) -> void:
+	capture_logs.set_pressed_no_signal(enabled)

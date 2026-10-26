@@ -37,13 +37,13 @@ var _started_physics_frame: int = 0
 var _result: Dictionary = {}
 
 
-func _debug_allowed() -> bool:
-	return OS.is_debug_build() and not Engine.is_editor_hint()
+func _capture_allowed() -> bool:
+	return SessionSettings.capture_logs and not Engine.is_editor_hint()
 
 
 func start_capture(controller: Node, root_directory: String = ROOT_DIRECTORY) -> bool:
 	finish("replaced")
-	if not _debug_allowed() or not is_instance_valid(controller):
+	if not _capture_allowed() or not is_instance_valid(controller):
 		return false
 	var stamp: String = Time.get_datetime_string_from_system(true).replace(":", "-")
 	# Crypto does not consume the gameplay random stream.
@@ -84,8 +84,8 @@ func start_capture(controller: Node, root_directory: String = ROOT_DIRECTORY) ->
 func _process(delta: float) -> void:
 	if not active:
 		return
-	if not _debug_allowed():
-		finish("debug_disabled")
+	if not _capture_allowed():
+		finish("capture_disabled")
 		return
 	_elapsed_s += delta
 	_sample_elapsed_s += delta
@@ -117,7 +117,7 @@ func finish(reason: String) -> void:
 
 
 func record_event(kind: String, data: Dictionary) -> int:
-	if not active or not _debug_allowed():
+	if not active or not _capture_allowed():
 		return -1
 	_sequence += 1
 	var row: Dictionary = {"schema_version": 1, "seq": _sequence, "time_s": _elapsed_s, "physics_frame": Engine.get_physics_frames() - _started_physics_frame, "type": kind, "data": data}
@@ -126,7 +126,7 @@ func record_event(kind: String, data: Dictionary) -> int:
 
 
 func tracks(unit: Unit) -> bool:
-	if not active or not _debug_allowed() or not is_instance_valid(unit) or _owner == null:
+	if not active or not _capture_allowed() or not is_instance_valid(unit) or _owner == null:
 		return false
 	var host: Node = _owner.get_ref() as Node
 	return is_instance_valid(host) and host.is_ancestor_of(unit)

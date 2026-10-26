@@ -35,10 +35,29 @@ var influence_map_name: String = ""
 var influence_map_team_name: String = ""
 
 var engagement_recorder: EngagementRecorder
+var _capture_controller: WeakRef
+
+
+func _ready() -> void:
+	SessionSettings.log_capture_changed.connect(_on_log_capture_changed)
+
+
+func _on_log_capture_changed(enabled: bool) -> void:
+	if not enabled:
+		if is_instance_valid(engagement_recorder):
+			engagement_recorder.finish("capture_disabled")
+		return
+	if _capture_controller != null:
+		var controller: Node = _capture_controller.get_ref() as Node
+		if is_instance_valid(controller) and controller.is_inside_tree():
+			start_engagement_capture(controller)
 
 
 func start_engagement_capture(controller: Node) -> void:
-	if not OS.is_debug_build() or Engine.is_editor_hint():
+	if not is_instance_valid(controller):
+		return
+	_capture_controller = weakref(controller)
+	if not SessionSettings.capture_logs or Engine.is_editor_hint():
 		return
 	if not is_instance_valid(engagement_recorder):
 		engagement_recorder = EngagementRecorder.new()
@@ -47,5 +66,6 @@ func start_engagement_capture(controller: Node) -> void:
 
 
 func finish_engagement_capture(reason: String) -> void:
+	_capture_controller = null
 	if is_instance_valid(engagement_recorder):
 		engagement_recorder.finish(reason)

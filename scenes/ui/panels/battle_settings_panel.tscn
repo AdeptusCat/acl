@@ -116,6 +116,11 @@ layout_mode = 2
 tooltip_text = "Show all command links. Selection highlights remain available when off.\nSolid: connected · Dashed: limited · Broken: no contact"
 text = "Command view"
 
+[node name="CaptureLogs" type="CheckBox" parent="Menu/Scroll/Content"]
+layout_mode = 2
+tooltip_text = "Save battle logs for troubleshooting. Turn off to stop recording."
+text = "Capture logs"
+
 [node name="Controls" type="PanelContainer" parent="."]
 visible = false
 layout_mode = 0

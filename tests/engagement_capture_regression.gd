@@ -1,7 +1,7 @@
 extends Node
 
 class DisabledRecorder extends EngagementRecorder:
-	func _debug_allowed() -> bool:
+	func _capture_allowed() -> bool:
 		return false
 
 
@@ -27,10 +27,75 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	_check(not SessionSettings.capture_logs, "Capture is off by default, including debug builds")
+	_test_preferences()
+	_test_menu_and_toggle()
 	await _test_gate_and_lifecycle()
 	await _test_live_map()
+	SessionSettings.capture_logs = false
 	print("Engagement capture checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_preferences() -> void:
+	var original_path: String = SessionSettings.preferences_path
+	var test_path: String = "user://log_capture_preferences.cfg"
+	SessionSettings.preferences_path = test_path
+	SessionSettings.capture_logs = true
+	var config: ConfigFile = ConfigFile.new()
+	_check(config.load(test_path) == OK and config.get_value("logging", "capture_logs", false) == true, "Enabling capture saves the preference")
+	SessionSettings.preferences_path = ""
+	SessionSettings.capture_logs = false
+	SessionSettings.preferences_path = test_path
+	SessionSettings.load_preferences()
+	_check(SessionSettings.capture_logs, "Capture preference survives a reload")
+	config.set_value("logging", "capture_logs", "true")
+	config.save(test_path)
+	SessionSettings.load_preferences()
+	_check(not SessionSettings.capture_logs, "Invalid saved values cannot enable capture")
+	SessionSettings.preferences_path = original_path
+	DirAccess.remove_absolute(test_path)
+
+
+func _test_menu_and_toggle() -> void:
+	var host: HostProbe = HostProbe.new()
+	add_child(host)
+	Debug.start_engagement_capture(host)
+	_check(not is_instance_valid(Debug.engagement_recorder) or not Debug.engagement_recorder.active, "Starting a battle with capture off does not start debug logging")
+	var direct: EngagementRecorder = EngagementRecorder.new()
+	add_child(direct)
+	_check(not direct.start_capture(host, "user://settings_disabled_capture") and not DirAccess.dir_exists_absolute("user://settings_disabled_capture"), "Direct recorder calls cannot bypass the disabled setting")
+	direct.free()
+	var hud: Control = Control.new()
+	hud.size = Vector2(1280.0, 720.0)
+	add_child(hud)
+	var panel_scene: PackedScene = load("res://scenes/ui/panels/battle_settings_panel.tscn") as PackedScene
+	var panel: Control = panel_scene.instantiate() as Control
+	var second_panel: Control = panel_scene.instantiate() as Control
+	hud.add_child(panel)
+	hud.add_child(second_panel)
+	var toggle: CheckBox = panel.get_node("Menu/Scroll/Content/CaptureLogs") as CheckBox
+	var second_toggle: CheckBox = second_panel.get_node("Menu/Scroll/Content/CaptureLogs") as CheckBox
+	_check(not toggle.button_pressed, "The settings checkbox reflects the disabled preference")
+	toggle.button_pressed = true
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	_check(SessionSettings.capture_logs and second_toggle.button_pressed and is_instance_valid(recorder) and recorder.active, "Enabling the menu checkbox starts capture mid-battle and synchronizes other menus")
+	var first: String = recorder.directory
+	toggle.button_pressed = false
+	_check(not recorder.active and recorder._events == null and recorder._snapshots == null, "Disabling capture immediately closes the log streams")
+	_check(_json(first.path_join("summary.json")).reason == "capture_disabled" and bool(_json(first.path_join("summary.json")).complete), "Disabling capture finalizes the saved session")
+	var bytes_before: int = FileAccess.get_file_as_bytes(first.path_join("events.jsonl")).size()
+	_check(recorder.record_event("disabled", {}) == -1, "Disabled capture rejects further events")
+	recorder._process(2.0)
+	_check(FileAccess.get_file_as_bytes(first.path_join("events.jsonl")).size() == bytes_before, "Disabled capture cannot append log data")
+	toggle.button_pressed = true
+	_check(recorder.active and recorder.directory != first, "Re-enabling capture starts a fresh log session")
+	Debug.finish_engagement_capture("test_finished")
+	SessionSettings.capture_logs = false
+	SessionSettings.capture_logs = true
+	_check(not recorder.active, "A finished battle is not restarted by a later settings change")
+	hud.free()
+	host.free()
 
 
 func _test_gate_and_lifecycle() -> void:
@@ -38,7 +103,7 @@ func _test_gate_and_lifecycle() -> void:
 	add_child(host)
 	var disabled: EngagementRecorder = DisabledRecorder.new()
 	add_child(disabled)
-	_check(not disabled.start_capture(host, "user://disabled_capture"), "Disabled debug gate rejects capture")
+	_check(not disabled.start_capture(host, "user://disabled_capture"), "Disabled capture gate rejects capture")
 	_check(not DirAccess.dir_exists_absolute("user://disabled_capture"), "Disabled capture creates no directory or files")
 	_check(disabled.record_event("ignored", {}) == -1, "Disabled capture does not record events")
 	disabled.free()
@@ -52,7 +117,7 @@ func _test_gate_and_lifecycle() -> void:
 	seed(1978)
 	var expected_random: float = randf()
 	seed(1978)
-	_check(recorder.start_capture(host, "user://capture_probes"), "Debug capture opens streams")
+	_check(recorder.start_capture(host, "user://capture_probes"), "Opted-in capture opens streams")
 	var first: String = recorder.directory
 	_check(not bool(_json(first.path_join("summary.json")).complete), "A newly started capture has an incomplete manifest for crash recovery")
 	recorder.record_event("probe", {"value": 12})
@@ -88,7 +153,7 @@ func _test_live_map() -> void:
 	await world._on_game_started(map, scenario, scenario.player_team, Globals.GameMode.ATTACK)
 	_freeze(main)
 	var recorder: EngagementRecorder = Debug.engagement_recorder
-	_check(is_instance_valid(recorder) and recorder.active, "Starting an actual map automatically starts debug capture")
+	_check(is_instance_valid(recorder) and recorder.active, "Starting an actual map with the setting enabled starts capture")
 	if not is_instance_valid(recorder) or not recorder.active:
 		main.queue_free()
 		await get_tree().process_frame

@@ -62,31 +62,38 @@ text_overrun_behavior = 3
 clip_text = true
 theme_type_variation = &"HudSecondary"
 
-[node name="Status" type="HBoxContainer" parent="Scroll/Summary"]
+[node name="Status" type="VBoxContainer" parent="Scroll/Summary"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 2
 
-[node name="Command" type="Label" parent="Scroll/Summary"]
-layout_mode = 2
-mouse_filter = 1
-text = "Contact: Connected"
-theme_type_variation = &"HudSecondary"
-text_overrun_behavior = 3
-clip_text = true
-
-[node name="Strength" type="Label" parent="Scroll/Summary/Status"]
+[node name="Headcount" type="VBoxContainer" parent="Scroll/Summary/Status"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Strength" type="Label" parent="Scroll/Summary/Status/Headcount"]
+layout_mode = 2
 mouse_filter = 1
-text = "12/12 soldiers"
+theme_override_colors/font_color = Color(1, 0.9, 0.66, 1)
+theme_override_font_sizes/font_size = 26
+text = "12/12 Soldiers"
 clip_text = true
 
 [node name="Morale" type="Label" parent="Scroll/Summary/Status"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 mouse_filter = 1
 text = "Ok"
 horizontal_alignment = 2
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="Command" type="Label" parent="Scroll/Summary"]
+layout_mode = 2
+mouse_filter = 1
+text = "HQ: Connected"
+theme_type_variation = &"HudSecondary"
 text_overrun_behavior = 3
 clip_text = true
 

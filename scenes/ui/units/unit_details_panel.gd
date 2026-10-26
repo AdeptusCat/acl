@@ -11,7 +11,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var unit_type_label: Label = $Scroll/Summary/Identity
 @onready var formation_label: Label = $Scroll/Summary/Formation
 @onready var command_label: Label = $Scroll/Summary/Command
-@onready var strength_label: Label = $Scroll/Summary/Status/Strength
+@onready var strength_label: Label = $Scroll/Summary/Status/Headcount/Strength
 @onready var unit_status_label: Label = $Scroll/Summary/Status/Morale
 @onready var order_label: Label = $Scroll/Summary/Order
 @onready var cohesion: Label = $Scroll/Summary/Details/Content/Readiness/Cohesion
@@ -210,8 +210,9 @@ func _refresh_summary() -> void:
 	formation_label.text = unit.get_formation_name()
 	formation_label.tooltip_text = formation_label.text
 	_refresh_command_summary()
-	strength_label.text = "%d/%d soldiers" % [unit.squad_fire.soldiers.size(), unit.original_size]
-	strength_label.tooltip_text = strength_label.text
+	var remaining: int = unit.squad_fire.soldiers.size()
+	strength_label.text = "%d/%d Soldiers" % [remaining, unit.original_size]
+	strength_label.tooltip_text = "%d of %d soldiers remaining" % [remaining, unit.original_size]
 	_on_state_changed(unit.stress_system.state)
 	order_label.text = "Order: " + _current_order_text()
 	order_label.tooltip_text = order_label.text
@@ -225,9 +226,9 @@ func _refresh_summary() -> void:
 
 func _refresh_command_summary() -> void:
 	var contact: CommandConnectivity.ContactState = CommandConnectivity.contact_state_for(unit)
-	command_label.text = "Contact: " + CommandConnectivity.contact_text(contact)
+	command_label.text = "HQ: " + CommandConnectivity.contact_text(contact)
 	if not CommandConnectivity.needs_command_contact(unit):
-		command_label.text = "Command: Top-level HQ"
+		command_label.text = "HQ: Top-level"
 	command_label.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
 	var commander_name: String = "Unavailable"
 	if is_instance_valid(unit.command_squad):
