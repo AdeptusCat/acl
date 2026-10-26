@@ -2,6 +2,7 @@
 extends Resource
 class_name UnitSaveData
 
+@export var map_unit_id: String = ""
 @export var unit_id: int = -1
 @export var unit_scene_path: String = ""
 @export var team: Globals.Team

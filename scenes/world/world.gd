@@ -308,6 +308,9 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 	var board_cells: Array[Vector2i] = fog_cells.keys()
 	fog_of_war.configure(ground_layer, map.grid_size, board_cells)
 	
+	game_controller.reinforcements = MatchReinforcementController.new()
+	game_controller.add_child(game_controller.reinforcements)
+	game_controller.reinforcements.prepare(game_controller, scenario)
 	var units: Array[Node] = scenario.get_units()
 	for unit: Node in units:
 		unit.setup()
@@ -446,6 +449,8 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	ui.hide_target_hex_cover_distance()
 	var match_save: MatchSaveData = MatchSaveData.new()
 	
+	if game_controller.reinforcements != null:
+		game_controller.reinforcements.save_to(match_save)
 	match_save.match_id = Globals.scenario_chosen.get_save_id()
 	match_save.scenario_id = Globals.scenario_chosen.scenario_name
 	if not Globals.scenario_chosen.scenario_id.is_empty():

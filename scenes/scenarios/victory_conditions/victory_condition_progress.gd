@@ -84,6 +84,9 @@ static func outcome_complete(conditions: Array[VictoryCondition], owner: Globals
 
 static func outcome_possible(conditions: Array[VictoryCondition], owner: Globals.Team, level: VictoryCondition.OutcomeLevel) -> bool:
 	var units: Array[Unit] = Globals.get_units()
+	for node: Node in Globals.get_tree().get_nodes_in_group("pending_reinforcements"):
+		if node is Unit:
+			units.append(node as Unit)
 	var friendly_count: int = _remaining_units(units, owner)
 	var enemy_team: Globals.Team = Globals.get_enemy_team(owner)
 	var enemy_count: int = _remaining_units(units, enemy_team)

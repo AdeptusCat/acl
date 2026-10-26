@@ -35,6 +35,9 @@ var position_advice: PositionResult
 var influence_map: PackedFloat32Array
 var best_index: int = -1
 
+## Persistent editor identity, independent of runtime instance IDs and formation numbering.
+@export_storage var map_unit_id: String = ""
+
 @export var squad: int = 0 : set = set_squad_nr
 @export var platoon: int = 0 : set = set_platoon_nr
 @export var company: Company = Company.A : set = set_company_nr

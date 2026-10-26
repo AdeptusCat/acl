@@ -7,6 +7,7 @@ class_name UnitSaveCodec
 static func create_save_data(unit: Unit) -> UnitSaveData:
 	var data: UnitSaveData = UnitSaveData.new()
 
+	data.map_unit_id = unit.map_unit_id
 	data.unit_scene_path = unit.scene_file_path
 	data.team = unit.team
 	data.casualty_records.assign(unit.casualty_records)
@@ -33,7 +34,7 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 
 
 static func apply_save_data(unit: Unit, data: UnitSaveData) -> void:
-	#id = data.unit_id
+	unit.map_unit_id = data.map_unit_id
 	unit.team = data.team
 
 	unit.squad_fire.soldiers.clear()

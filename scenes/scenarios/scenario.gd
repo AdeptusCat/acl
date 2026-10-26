@@ -160,3 +160,13 @@ func get_victory_conditions() -> Dictionary[Globals.Team, VictoryConditionCollec
 
 func get_units() -> Array[Node]:
 	return units.get_children()
+
+
+func get_reinforcements() -> Array[ReinforcementDefinition]:
+	var result: Array[ReinforcementDefinition] = []
+	var branch: Node = get_node_or_null("Reinforcements")
+	if branch != null:
+		for child: Node in branch.get_children():
+			if child is ReinforcementDefinition:
+				result.append(child as ReinforcementDefinition)
+	return result

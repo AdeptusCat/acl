@@ -13,6 +13,8 @@ const OBJECTIVE_NAMES: Array[String] = ["Exit", "A", "B", "C"]
 @onready var scroll: ScrollContainer = $Objectives/Scroll
 @onready var rows: VBoxContainer = $Objectives/Scroll/Rows
 
+var _reinforcement_team: Globals.Team = Globals.Team.AXIS
+var reinforcement_status: Label
 var conditions: Array[VictoryCondition] = []
 var group_headings: Dictionary[VictoryCondition.OutcomeLevel, Label] = {}
 var capture_buttons: Dictionary[int, ObjectiveCaptureButton] = {}
@@ -54,6 +56,8 @@ func _on_folding_changed(_folded: bool) -> void:
 
 
 func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Team, remaining_seconds: float) -> void:
+	_reinforcement_team = player_team
+	reinforcement_status = null
 	conditions.clear()
 	_last_focused_hexes.clear()
 	_metric_rows.clear()
@@ -109,10 +113,14 @@ func setup(scenario_conditions: Array[VictoryCondition], player_team: Globals.Te
 			else:
 				card.add_child(status)
 			status_labels.append(status)
+	if not _reinforcement_briefing().is_empty():
+		reinforcement_status = Label.new()
+		reinforcement_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rows.add_child(reinforcement_status)
 	time_left_seconds = remaining_seconds
 	_refresh_elapsed_s = 0.0
 	section.expand()
-	visible = not conditions.is_empty()
+	visible = not conditions.is_empty() or not _reinforcement_briefing().is_empty()
 	set_process(visible)
 	refresh()
 
@@ -168,6 +176,9 @@ func update_time(remaining_seconds: float) -> void:
 
 
 func refresh() -> void:
+	if reinforcement_status != null:
+		reinforcement_status.text = _reinforcement_briefing()
+		reinforcement_status.visible = not reinforcement_status.text.is_empty()
 	var units: Array[Unit] = Globals.get_units()
 	for index: int in range(conditions.size()):
 		var condition: VictoryCondition = conditions[index]
@@ -325,3 +336,10 @@ func _on_row_input(event: InputEvent, condition: VictoryCondition) -> void:
 		if click.button_index == MOUSE_BUTTON_LEFT and click.pressed:
 			if _focus_next_hex(condition):
 				accept_event()
+
+
+func _reinforcement_briefing() -> String:
+	var runtime: MatchReinforcementController = get_tree().get_first_node_in_group("reinforcement_runtime") as MatchReinforcementController
+	if runtime == null:
+		return ""
+	return runtime.player_briefing(_reinforcement_team)

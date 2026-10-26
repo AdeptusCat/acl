@@ -33,6 +33,7 @@ var overtime_packages: Array[VictoryConditionCollection] = []
 
 var selected_unit: Unit = null
 var stack_presenter: BattlefieldStacks
+var reinforcements: MatchReinforcementController
 var fire_support: FireSupportController
 
 
@@ -99,24 +100,8 @@ func setup() -> void:
 	#for child in $"../UnitManager".get_children():
 		#child.unit_arrived_at_hex.connect(move_sys._on_arrived)
 	for unit: Unit in get_tree().get_nodes_in_group("units"):
-		if unit is Unit:
-			unit.unit_died.connect(_on_unit_died)
-			unit.unit_exited.connect(_on_unit_exited)
-			unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
-			unit.unit_entered_hex.connect(_on_unit_entered_hex)
-			unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
-			unit.current_hex = ground_layer.local_to_map(unit.global_position)
-			unit.current_cube = ground_layer.map_to_cube(unit.current_hex)
-			unit.deselect_unit.connect(_deselect_unit)
-			unit.started_moving.connect(_on_started_moving)
-			unit.unit_surrendered.connect(_on_unit_surrendered)
-			unit.squad_fire.draw_los_to_target_unit.connect(los_renderer._on_draw_los_to_target_unit)
-			unit.movement.draw_movement_path.connect(los_renderer._on_draw_draw_movement_path)
-			unit.draw_command_link_strength.connect(los_renderer._on_draw_command_link_strength)
-			unit.draw_leader_presence_strength.connect(los_renderer._on_draw_leader_presence_strength)
-			unit.squad_fire.shooting.connect(_on_unit_shooting)
-			Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
-			
+		MatchUnitSpawner.register_authored_unit(self, unit)
+
 	for unit: Unit in Globals.get_units():
 		if unit is Unit:
 			# assign platoon headquarter to squad 
@@ -547,6 +532,10 @@ func start_game(team: Globals.Team, time: float) -> void:
 	#defense_director.manual_threat_axes = create_test_axes()
 	influence_map_controller.reset_for_match()
 	_configure_platoon_ai()
+	if reinforcements != null:
+		reinforcements.advance(0.0)
+		if Globals.get_units_for_team(team).is_empty() and not reinforcements.pending.is_empty():
+			_on_started_moving()
 	Debug.start_engagement_capture(self)
 	#var ai_mission_mode: GoapTypes.FormationMissionMode
 	#ai_mission_mode = GoapTypes.FormationMissionMode.ATTACK
@@ -748,6 +737,8 @@ func _process(delta: float) -> void:
 		if overtime_active:
 			elapsed = delta
 			overtime_elapsed_seconds += elapsed
+		if reinforcements != null and not end_game_handled:
+			reinforcements.advance(elapsed)
 		if elapsed > 0.0 and not end_game_handled:
 			for unit: Unit in Globals.get_units():
 				if unit.is_active() and not unit.surrendered and _is_exit_hex(unit.team, unit.current_hex):
@@ -958,7 +949,9 @@ func _on_unit_shooting(shooter: Unit) -> void:
 
 func spawn_units_from_match_save(match_save: MatchSaveData) -> void:
 	MatchUnitSpawner.spawn_units_from_match_save(self, match_save)
+	if reinforcements != null and not match_save.reinforcement_states.is_empty():
+		reinforcements.restore_from(match_save)
 
 
-func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int) -> void:
-	MatchUnitSpawner.spawn_unit_from_save(self, team, location, squad_loadout, formation_id)
+func spawn_unit_from_save(team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int, map_unit_id: String = "") -> void:
+	MatchUnitSpawner.spawn_unit_from_save(self, team, location, squad_loadout, formation_id, map_unit_id)

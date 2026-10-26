@@ -1,7 +1,10 @@
 extends Resource
 class_name MatchSaveData
 
-@export var save_version: int = 4
+@export var save_version: int = 5
+
+@export var reinforcement_elapsed_seconds: float = 0.0
+@export var reinforcement_states: Array[ReinforcementState] = []
 
 @export var match_id: String = ""
 @export var scenario_id: String = ""

@@ -139,6 +139,8 @@ allies_ai_mode = 1
 
 [node name="Units" type="Node2D" parent="." unique_id=1365216721]
 
+[node name="Reinforcements" type="Node" parent="."]
+
 [node name="Objectives" type="Node2D" parent="." unique_id=1566573026]
 
 [node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Objectives" unique_id=1637617708]

@@ -128,6 +128,9 @@ static func can_finish_after_enemy_departure() -> bool:
 	var scenario: Scenario = Globals.scenario_chosen
 	if not is_instance_valid(scenario) or not scenario.end_when_objectives_secured_and_enemy_gone:
 		return false
+	for node: Node in Globals.get_tree().get_nodes_in_group("pending_reinforcements"):
+		if node is Unit and (node as Unit).team == Globals.get_enemy_team(Globals.team_player):
+			return false
 	for unit: Unit in Globals.get_units_for_team(Globals.get_enemy_team(Globals.team_player)):
 		if unit.is_active() and not unit.surrendered:
 			return false
@@ -167,6 +170,9 @@ static func _defeated_teams() -> Array[Globals.Team]:
 	var surviving: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
 	var defeated: Dictionary[Globals.Team, bool] = {Globals.Team.AXIS: false, Globals.Team.ALLIES: false}
 	var roster: Array[Unit] = Globals.get_units()
+	for node: Node in Globals.get_tree().get_nodes_in_group("pending_reinforcements"):
+		if node is Unit:
+			roster.append(node as Unit)
 	roster.append_array(Globals.get_exited_units())
 	for node: Node in Globals.get_tree().get_nodes_in_group("dead_units"):
 		if node is Unit:

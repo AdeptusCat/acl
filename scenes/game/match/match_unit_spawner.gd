@@ -35,7 +35,7 @@ static func spawn_unit(controller: Node2D, team: Globals.Team, location: Vector2
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
-	unit.current_hex = controller.ground_layer.local_to_map(unit.global_position)
+	unit.current_hex = controller.ground_layer.local_to_map(controller.ground_layer.to_local(unit.global_position))
 	unit.current_cube = controller.ground_layer.map_to_cube(unit.current_hex)
 	unit.deselect_unit.connect(controller._deselect_unit)
 	unit.started_moving.connect(controller._on_started_moving)
@@ -71,7 +71,7 @@ static func spawn_units_from_match_save(controller: Node2D, match_save: MatchSav
 		if packed_scene == null:
 			push_error("Could not load unit scene: %s" % data.unit_scene_path)
 			continue
-		controller.spawn_unit_from_save(data.team, Vector2.ZERO, data.squad_loadout, 0)
+		controller.spawn_unit_from_save(data.team, Vector2.ZERO, data.squad_loadout, 0, data.map_unit_id)
 		#var unit: Unit = packed_scene.instantiate() as Unit
 #
 		#if unit == null:
@@ -98,8 +98,9 @@ static func spawn_units_from_match_save(controller: Node2D, match_save: MatchSav
 				condition.record_unit_entry(unit, unit.current_hex)
 
 
-static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int) -> void:
+static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, location: Vector2i, squad_loadout: SquadLoadoutSpec, formation_id: int, map_unit_id: String = "") -> void:
 	var unit: Unit = controller.unit_scene.instantiate()
+	unit.map_unit_id = map_unit_id
 	controller.get_node("UnitContainer").add_child(unit)
 	unit.ground_map = controller.ground_layer
 	unit.team = team
@@ -134,7 +135,7 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
 	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
-	unit.current_hex = controller.ground_layer.local_to_map(unit.global_position)
+	unit.current_hex = controller.ground_layer.local_to_map(controller.ground_layer.to_local(unit.global_position))
 	unit.current_cube = controller.ground_layer.map_to_cube(unit.current_hex)
 	unit.deselect_unit.connect(controller._deselect_unit)
 	unit.started_moving.connect(controller._on_started_moving)
@@ -154,3 +155,46 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 	if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 		unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 	controller.register_ai_unit(unit)
+
+
+static func register_authored_unit(controller: Node2D, unit: Unit) -> void:
+	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_exited.connect(controller._on_unit_exited)
+	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
+	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
+	unit.unit_arrived_at_hex.connect(MovementSystem._on_arrived)
+	unit.current_hex = controller.ground_layer.local_to_map(controller.ground_layer.to_local(unit.global_position))
+	unit.current_cube = controller.ground_layer.map_to_cube(unit.current_hex)
+	unit.deselect_unit.connect(controller._deselect_unit)
+	unit.started_moving.connect(controller._on_started_moving)
+	unit.unit_surrendered.connect(controller._on_unit_surrendered)
+	unit.squad_fire.draw_los_to_target_unit.connect(controller.los_renderer._on_draw_los_to_target_unit)
+	unit.movement.draw_movement_path.connect(controller.los_renderer._on_draw_draw_movement_path)
+	unit.draw_command_link_strength.connect(controller.los_renderer._on_draw_command_link_strength)
+	unit.draw_leader_presence_strength.connect(controller.los_renderer._on_draw_leader_presence_strength)
+	unit.squad_fire.shooting.connect(controller._on_unit_shooting)
+	Globals.register_unit(unit.team, unit.company, unit.platoon, unit.squad, unit)
+
+
+static func activate_authored_unit(controller: Node2D, unit: Unit) -> void:
+	unit.reparent(controller.unit_container)
+	unit.ground_map = controller.ground_layer
+	unit.current_hex = controller.ground_layer.local_to_map(controller.ground_layer.to_local(unit.global_position))
+	unit.current_cube = controller.ground_layer.map_to_cube(unit.current_hex)
+	unit.setup()
+	unit.add_to_group("units")
+	unit.game_start()
+	register_authored_unit(controller, unit)
+	unit.update_terrain_defense_bonus()
+	# Reconnect every squad when a late HQ arrives, including earlier reinforcements.
+	for active: Unit in Globals.get_units():
+		if active.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
+			active.command_squad = Globals.get_unit(active.team, active.company, 0, 0)
+		elif active.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
+			active.command_squad = Globals.get_unit(active.team, active.company, active.platoon, 0)
+		active._on_command_connectivity_timeout()
+	controller.register_ai_unit(unit)
+	LOS._on_unit_entered_hex(unit, unit.current_hex)
+	controller.update_visible_hexes()
+	controller.draw_fog()
+	controller.show_visible_units()
