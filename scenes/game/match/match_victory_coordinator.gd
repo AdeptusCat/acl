@@ -253,8 +253,15 @@ static func on_win_condition_timer_timeout(controller: Node2D) -> void:
 			for condition: VictoryCondition in collection.victory_conditions:
 				if condition is OccupyObjectiveCondition:
 					var occupation: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
-					if defeated_teams.has(Globals.get_enemy_team(occupation.team)):
-						occupation.complete_after_enemy_defeat(capture_all and not defeated_teams.has(occupation.team))
+					var enemy_team: Globals.Team = Globals.get_enemy_team(occupation.team)
+					if defeated_teams.has(occupation.team):
+						# Persistent capture credit cannot survive the owner's elimination.
+						var new_owner: int = enemy_team
+						if defeated_teams.has(enemy_team):
+							new_owner = -1
+						occupation.relinquish_after_defeat(new_owner)
+					elif defeated_teams.has(enemy_team):
+						occupation.complete_after_enemy_defeat(capture_all)
 					else:
 						occupation.refresh_control()
 	elif controller.time_left_seconds <= 0.0:

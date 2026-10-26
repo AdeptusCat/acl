@@ -89,6 +89,16 @@ func complete_after_enemy_defeat(capture_all: bool = false) -> void:
 			state.controlling_teams[hex] = team
 
 
+func relinquish_after_defeat(new_owner: int) -> void:
+	if state == null:
+		return
+	for hex: Vector2i in state.hexes:
+		state.required_times_reached_s[hex] = 0.0
+		state.enemy_hold_times_s[hex] = 0.0
+		state.victory_conditions_met[hex] = false
+		state.controlling_teams[hex] = new_owner
+
+
 func _update_control(delta: float) -> void:
 	if state == null:
 		return

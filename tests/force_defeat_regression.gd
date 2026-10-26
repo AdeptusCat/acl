@@ -133,6 +133,8 @@ func _run() -> void:
 	_check(winners.size() == 1 and winners[0]["level"] == VictoryCondition.OutcomeLevel.MAJOR and occupation.is_condition_met(), "Eliminating the enemy completes an occupation already running during overtime")
 	await _test_running_occupation()
 	await _test_unoccupied_objectives()
+	await _test_prologue_capture_result()
+	_test_defeated_capture_owners()
 	for unit: Unit in [friends, enemies[0], enemies[1]]:
 		unit.squad_fire.calc.free()
 		unit.free()
@@ -259,6 +261,80 @@ func _test_unoccupied_objectives() -> void:
 		unit.surrendered = true
 	MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
 	_check(not occupation.is_condition_met(), "A force with no surviving squads cannot automatically capture objectives")
+
+
+func _test_prologue_capture_result() -> void:
+	var original: Scenario = Globals.scenario_chosen
+	for surrender: bool in [true, false]:
+		_reset()
+		var map: Map = load("res://scenes/campaigns/alderbrook/00_opening_the_road.tscn").instantiate() as Map
+		var scenario: Scenario = map.get_node("Scenarios/Mission") as Scenario
+		scenario.axis_objectives_tile_map_layer = scenario.get_node("Objectives/AxisObjectivesTileMapLayer") as HexagonTileMapLayer
+		scenario.allied_objectives_tile_map_layer = scenario.get_node("Objectives/AlliedObjectivesTileMapLayer") as HexagonTileMapLayer
+		scenario.axis_objectives_tile_map_layer._on_tileset_changed()
+		scenario.allied_objectives_tile_map_layer._on_tileset_changed()
+		Globals.scenario_chosen = scenario
+		Globals.objectives = scenario.get_objectives()
+		Globals.victory_conditions = scenario.get_victory_conditions()
+		MatchVictoryCoordinator.set_victory_conditions(host)
+		var defender: OccupyObjectiveCondition = Globals.victory_conditions[Globals.Team.AXIS].victory_conditions[0] as OccupyObjectiveCondition
+		_check(defender.is_condition_met(), "The prologue starts with the defender controlling the outpost")
+		friends.current_hex = Vector2i(-20, -20)
+		for enemy: Unit in enemies:
+			enemy.surrendered = surrender
+			if not surrender:
+				enemy.alive = false
+				enemy.remove_from_group("units")
+				enemy.add_to_group("dead_units")
+		if surrender:
+			host._on_unit_surrendered(enemies[1])
+		else:
+			host._on_unit_died(enemies[1])
+		await get_tree().process_frame
+		_check(winners.size() == 1 and winners[0]["team"] == friends.team and winners[0]["level"] == VictoryCondition.OutcomeLevel.MAJOR, "Eliminating the prologue defenders awards major victory rather than a simultaneous capture draw")
+		_check(not defender.is_condition_met(), "A defeated defender loses its initial outpost capture credit")
+		_check(VictoryConditionProgress.outcome_complete(scenario.victory_conditions, friends.team, VictoryCondition.OutcomeLevel.MAJOR, true), "The prologue victory agrees with all completed player objectives")
+		var results: CanvasLayer = load("res://scenes/ui/screens/match_result_screen.tscn").instantiate()
+		add_child(results)
+		results._on_show_winner(winners[0]["team"], winners[0]["level"], winners[0]["timeout"])
+		_check(results.result_label.text == "Major Victory", "The prologue after-action report shows victory when all capture objectives are awarded")
+		for row: VictoryConditionResult in results.major_victory_conditions_v_box_container.get_children():
+			_check(row.check_box.button_pressed, "The winning prologue report credits every major capture objective")
+		results.free()
+		Globals.scenario_chosen = original
+		Globals.objectives.clear()
+		Globals.victory_conditions.clear()
+		map.free()
+	_reset()
+
+
+func _test_defeated_capture_owners() -> void:
+	for defeated: Array in [[Globals.Team.ALLIES], [Globals.Team.AXIS], [Globals.Team.ALLIES, Globals.Team.AXIS]]:
+		_reset()
+		for team: Globals.Team in Globals.victory_conditions:
+			var capture: OccupyObjectiveCondition = _occupation(team, [Vector2i.ZERO], 10.0)
+			capture.state.victory_conditions_met[Vector2i.ZERO] = true
+			capture.state.controlling_teams[Vector2i.ZERO] = team
+			Globals.victory_conditions[team].victory_conditions = [capture]
+		if defeated.has(friends.team):
+			friends.alive = false
+		if defeated.has(Globals.Team.AXIS):
+			for enemy: Unit in enemies:
+				enemy.surrendered = true
+		MatchVictoryCoordinator.on_win_condition_timer_timeout(host)
+		var expected_winner: int = -1
+		if defeated.size() == 1:
+			expected_winner = Globals.get_enemy_team(defeated[0])
+			_check(winners.size() == 1 and winners[0]["team"] == expected_winner, "Capture elimination scoring treats both factions symmetrically")
+		else:
+			_check(winners.size() == 1 and (winners[0]["team"] == -1 or winners[0]["level"] != VictoryCondition.OutcomeLevel.MAJOR), "Mutual elimination cannot award a major capture victory")
+		for team: Globals.Team in Globals.victory_conditions:
+			if not defeated.has(team):
+				continue
+			var capture: OccupyObjectiveCondition = Globals.victory_conditions[team].victory_conditions[0] as OccupyObjectiveCondition
+			_check(not capture.is_condition_met() and is_zero_approx(capture.state.required_times_reached_s[Vector2i.ZERO]), "Eliminated forces lose both their capture credit and held time")
+			_check(capture.state.controlling_teams[Vector2i.ZERO] == expected_winner, "A defeated objective transfers to the survivor or becomes neutral after mutual elimination")
+	_reset()
 
 
 func _occupation(team: Globals.Team, hexes: Array[Vector2i] = [Vector2i.ZERO], held_seconds: float = 2.0) -> OccupyObjectiveCondition:
