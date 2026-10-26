@@ -29,6 +29,8 @@ func _run() -> void:
 	controller = world.game_controller
 	_freeze_simulation(main)
 	Debug.no_damage = false
+	_test_feedback()
+	await _clear_fixtures()
 	_test_admission_and_surrender()
 	await _clear_fixtures()
 	_test_external_casualties()
@@ -66,6 +68,58 @@ func _run() -> void:
 	Globals.casualty_history = original_history
 	print("Close combat regression failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_feedback() -> void:
+	var original_fog: bool = Debug.hide_fog_of_war
+	var original_show_enemies: bool = Debug.show_enemies
+	var old_visible: Array = LOSHelper.visible_hexes[Globals.team_player].duplicate()
+	Debug.hide_fog_of_war = true
+	Debug.show_enemies = false
+	var axis: Unit = _create_unit(Globals.Team.AXIS, 3)
+	axis.is_moving = true
+	var allies: Unit = _create_unit(Globals.Team.ALLIES, 4)
+	var combat: CloseCombatInstance = _discover_combat()
+	var feedback: Node2D = combat._feedback
+	_check(is_instance_valid(feedback) and feedback.global_position.is_equal_approx(combat.global_position), "Close combat creates one marker at the engaged hex")
+	_check(feedback.counts[Globals.Team.AXIS] == 3 and feedback.counts[Globals.Team.ALLIES] == 4, "The marker reports live soldiers rather than squad counts")
+	_check(feedback.roles[Globals.Team.AXIS] == "ATTACKING" and feedback.roles[Globals.Team.ALLIES] == "DEFENDING", "The marker distinguishes assault and defense")
+	seed(731)
+	for tick: int in range(64):
+		if allies.members_alive < 4 or not combat.ongoing:
+			break
+		axis.squad_fire.soldiers[0].cooldown_remaining = 0.0
+		combat._on_timer_timeout()
+	_check(allies.members_alive < 4 and not feedback.strikes.is_empty(), "Real resolved attacks drive combat flashes and casualties")
+	_check(feedback.counts[Globals.Team.ALLIES] == allies.members_alive and feedback.recent_losses[Globals.Team.ALLIES] == 4 - allies.members_alive, "The displayed roster and casualty cue match actual losses")
+	feedback.advance(2.0)
+	Debug.hide_fog_of_war = false
+	LOSHelper.visible_hexes[Globals.team_player] = [COMBAT_HEX]
+	var hidden: Unit = axis
+	if axis.team == Globals.team_player:
+		hidden = allies
+	hidden.hide()
+	combat._sync_feedback()
+	_check(feedback.counts[hidden.team] == -1, "An undetected enemy's troop count is withheld")
+	feedback.record_exchange(Globals.get_enemy_team(hidden.team), hidden.team, true)
+	_check(feedback.recent_losses[hidden.team] == 0, "Unknown enemy casualties are not confirmed by the visual overlay")
+	LOSHelper.visible_hexes[Globals.team_player] = []
+	feedback.advance(0.0)
+	feedback.record_exchange(axis.team, allies.team, true)
+	_check(not feedback.visible and feedback.strikes.is_empty(), "Fog hides the combat marker and discards hidden attack effects")
+	hidden.show()
+	LOSHelper.visible_hexes[Globals.team_player] = [COMBAT_HEX]
+	feedback.advance(0.0)
+	combat._sync_feedback()
+	_check(feedback.visible and feedback.strikes.is_empty(), "Revealing the hex does not replay hidden exchanges")
+	allies.die()
+	_check(feedback.resolved and feedback.result_text == "GER HOLDS HEX", "The final surviving side receives a factual encounter outcome")
+	_check(feedback.get_parent() == controller.close_combat_locations and not feedback.is_queued_for_deletion(), "The outcome briefly survives the finished combat instance")
+	feedback.advance(feedback.RESULT_SECONDS)
+	_check(feedback.is_queued_for_deletion(), "The result marker cleans itself up")
+	Debug.hide_fog_of_war = original_fog
+	Debug.show_enemies = original_show_enemies
+	LOSHelper.visible_hexes[Globals.team_player] = old_visible
 
 
 func _test_admission_and_surrender() -> void:
@@ -195,12 +249,16 @@ func _test_last_side_and_same_frame_reentry() -> void:
 	var axis: Unit = _create_unit(Globals.Team.AXIS, 1)
 	var allies: Unit = _create_unit(Globals.Team.ALLIES, 1)
 	var old_combat: CloseCombatInstance = _discover_combat()
+	var old_feedback: Node2D = old_combat._feedback
+	old_feedback.visibility_test = func() -> bool: return true
+	old_feedback.advance(0.0)
 	allies.surrender()
 	_check(not old_combat.ongoing and old_combat.is_queued_for_deletion(), "Last opposing surrender ends combat immediately")
 	_check(not axis.in_close_combat and not allies.in_close_combat, "Combat end releases both sides")
 	_check(old_combat.get_node("Timer").is_stopped() and not old_combat.visible, "Ended combat stops its timer and hides its marker")
 	var reinforcement: Unit = _create_unit(Globals.Team.ALLIES, 1)
 	var new_combat: CloseCombatInstance = _discover_combat()
+	_check(old_feedback.is_queued_for_deletion() and not old_feedback.visible, "Renewed fighting replaces the old outcome instead of stacking labels")
 	_check(new_combat != old_combat and new_combat != null, "Same-frame reinforcement creates a fresh combat instance")
 	_check(axis.in_close_combat and reinforcement.in_close_combat, "New combat owns surviving units' flags")
 	old_combat._on_timer_timeout()

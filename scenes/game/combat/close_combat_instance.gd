@@ -1,6 +1,69 @@
 extends Node2D
 class_name CloseCombatInstance
 
+const FEEDBACK: Script = preload("res://scenes/game/effects/close_combat_feedback.gd")
+
+var _feedback: FEEDBACK
+
+
+func _ready() -> void:
+	_sync_feedback()
+
+
+func _sync_feedback() -> void:
+	if not is_inside_tree() or not ongoing:
+		return
+	if not is_instance_valid(_feedback):
+		if participants.is_empty():
+			return
+		_feedback = FEEDBACK.new()
+		_feedback.hex = hex
+		var host: Node = get_tree().current_scene
+		if get_parent() != null and get_parent().get_parent() != null:
+			var markers: Node = get_parent().get_parent().get_node_or_null("CloseCombatLocations")
+			if markers != null:
+				host = markers
+		for child: Node in host.get_children():
+			if child.get_script() != FEEDBACK:
+				continue
+			var previous: FEEDBACK = child as FEEDBACK
+			if previous.hex == hex and previous.resolved:
+				previous.hide()
+				previous.queue_free()
+		host.add_child(_feedback)
+		_feedback.global_position = global_position
+		var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+		if is_instance_valid(ground) and ground.geometry_tile_shape != null and ground.geometry_tile_shape.shape is ConvexPolygonShape2D:
+			var shape: ConvexPolygonShape2D = ground.geometry_tile_shape.shape as ConvexPolygonShape2D
+			var corners: PackedVector2Array = PackedVector2Array()
+			for corner: Vector2 in shape.points:
+				corners.append(ground.global_transform.basis_xform(corner))
+			_feedback.outline = corners
+	for team: Globals.Team in units_by_team:
+		var living: int = 0
+		var unknown: bool = false
+		var attacking: bool = false
+		var defending: bool = false
+		for participant: Participant in participants:
+			if not participant.active or participant.team != team or not is_instance_valid(participant.unit):
+				continue
+			var unit: Unit = participant.unit
+			if team != Globals.team_player and not Debug.show_enemies and not Debug.hide_fog_of_war and not unit.is_visible_in_tree():
+				unknown = true
+			for soldier: Soldier in unit.squad_fire.soldiers:
+				if soldier.is_alive:
+					living += 1
+			attacking = attacking or participant.side_role == SideRole.ATTACKER
+			defending = defending or participant.side_role == SideRole.DEFENDER
+		var role: String = "ENGAGED"
+		if attacking and not defending:
+			role = "ATTACKING"
+		elif defending and not attacking:
+			role = "DEFENDING"
+		if unknown:
+			living = -1
+			role = "ENGAGED"
+		_feedback.set_force(team, living, role)
 
 enum EngagementType {
 	ASSAULT,
@@ -130,6 +193,7 @@ func add_unit(unit: Unit) -> void:
 		unit.action_controller.clear_orders()
 	elif unit.movement != null:
 		unit.movement.stop()
+	_sync_feedback()
 
 
 func remove_unit(unit: Unit) -> void:
@@ -185,6 +249,7 @@ func refresh_participants() -> void:
 		for soldier: Soldier in participant.unit.squad_fire.soldiers:
 			if soldier.is_alive:
 				soldiers_by_team[participant.team].append(soldier)
+	_sync_feedback()
 	if soldiers_by_team[Globals.Team.AXIS].is_empty() or soldiers_by_team[Globals.Team.ALLIES].is_empty():
 		quit_close_combat()
 
@@ -384,11 +449,17 @@ func _on_timer_timeout() -> void:
 				var roll: float = randf()
 				if roll < casualty_chance:
 					#continue
-					if enemy_soldier.unit.apply_specific_casualty(enemy_soldier):
+					var victim_team: Globals.Team = enemy_soldier.unit.team
+					var eliminated: bool = enemy_soldier.unit.apply_specific_casualty(enemy_soldier)
+					if is_instance_valid(_feedback):
+						_feedback.record_exchange(participant.team, victim_team, not enemy_soldier.is_alive)
+					if eliminated:
 						enemy_soldier.unit._set_combat_ineffective()
 					refresh_participants()
 					if not ongoing:
 						return
+				elif is_instance_valid(_feedback):
+					_feedback.record_exchange(participant.team, enemy_soldier.unit.team, false)
 
 
 func _clear_participants() -> void:
@@ -401,6 +472,10 @@ func _clear_participants() -> void:
 func quit_close_combat() -> void:
 	if not ongoing:
 		return
+	_sync_feedback()
+	if is_instance_valid(_feedback):
+		_feedback.finish()
+		_feedback = null
 	ongoing = false
 	var timer: Timer = get_node_or_null("Timer") as Timer
 	if timer != null:
@@ -411,6 +486,8 @@ func quit_close_combat() -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(_feedback):
+		_feedback.queue_free()
 	ongoing = false
 	_clear_participants()
 
