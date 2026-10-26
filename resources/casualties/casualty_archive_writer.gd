@@ -1,7 +1,7 @@
 extends RefCounted
 
-# Only immutable historical records cross into this worker. The array itself is
-# copied on the main thread; serialization uses worker-owned resource copies.
+# Threaded builds serialize immutable historical snapshots in a worker.
+# Single-thread builds drain the same queue through the gameplay frame pump.
 class Snapshot extends RefCounted:
 	var path: String
 	var save_version: int
@@ -16,18 +16,31 @@ class Snapshot extends RefCounted:
 
 
 var _thread: Thread
-var _mutex: Mutex = Mutex.new()
-var _work: Semaphore = Semaphore.new()
-var _completed: Semaphore = Semaphore.new()
+var _use_threads: bool = false
+var _mutex: Mutex
+var _work: Semaphore
+var _completed: Semaphore
 var _pending: Dictionary[String, Snapshot] = {}
 var _results: Array[Dictionary] = []
 var _busy: bool = false
 var _stopping: bool = false
 
 
+func _init(allow_threads: bool = true) -> void:
+	_use_threads = allow_threads and OS.has_feature("threads")
+	if _use_threads:
+		_mutex = Mutex.new()
+		_work = Semaphore.new()
+		_completed = Semaphore.new()
+
+
 func queue_save(history: CasualtyHistory) -> Error:
 	if _stopping:
 		return ERR_UNAVAILABLE
+	if not _use_threads:
+		# The frame pump writes the newest snapshot for each archive, not each death.
+		_pending[history.storage_path] = Snapshot.new(history)
+		return OK
 	if _thread == null:
 		_thread = Thread.new()
 		var error: Error = _thread.start(_run)
@@ -47,14 +60,32 @@ func queue_save(history: CasualtyHistory) -> Error:
 
 
 func take_results() -> Array[Dictionary]:
-	_mutex.lock()
+	if _use_threads:
+		_mutex.lock()
 	var results: Array[Dictionary] = _results
 	_results = []
-	_mutex.unlock()
+	if _use_threads:
+		_mutex.unlock()
 	return results
 
 
+func process_pending() -> void:
+	# Single-thread exports save at most one coalesced archive per frame.
+	if _use_threads or _pending.is_empty():
+		return
+	var path: String = _pending.keys()[0]
+	var snapshot: Snapshot = _pending[path]
+	_pending.erase(path)
+	var started: int = Time.get_ticks_usec()
+	var error: Error = _write_snapshot(snapshot)
+	_results.append({"path": path, "error": error, "records": snapshot.records.size(), "duration_us": Time.get_ticks_usec() - started})
+
+
 func flush() -> void:
+	if not _use_threads:
+		while not _pending.is_empty():
+			process_pending()
+		return
 	while true:
 		_mutex.lock()
 		var finished: bool = _pending.is_empty() and not _busy
@@ -66,6 +97,9 @@ func flush() -> void:
 
 func shutdown() -> void:
 	flush()
+	if not _use_threads:
+		_stopping = true
+		return
 	_mutex.lock()
 	_stopping = true
 	_mutex.unlock()

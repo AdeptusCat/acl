@@ -242,6 +242,7 @@ func _save_casualty_history() -> void:
 func _report_casualty_save_results() -> void:
 	if _casualty_writer == null:
 		return
+	_casualty_writer.process_pending()
 	for result: Dictionary in _casualty_writer.take_results():
 		if result["error"] != OK:
 			push_error("Could not save casualty history '%s': %s" % [result["path"], error_string(result["error"])])
