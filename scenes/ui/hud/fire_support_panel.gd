@@ -321,6 +321,7 @@ func _fire() -> void:
 		return
 	if support.request(support.selected_asset, support.target, support.selected_length, support.selected_intensity, support.target_cells, support.target_shape, support.target_end, support.target_radius, support.selected_guns(support.selected_asset)):
 		support.host.get_parent().ui.hide_target_hex_cover_distance()
+		_close()
 	refresh()
 
 func _cease() -> void:
@@ -407,6 +408,11 @@ func _process(delta: float) -> void:
 	if _refresh_elapsed >= 0.25:
 		_refresh_elapsed = 0.0
 		refresh()
+
+func _input(event: InputEvent) -> void:
+	if tray.visible and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		_close()
+		get_viewport().set_input_as_handled()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is not InputEventKey or not event.pressed or event.echo:

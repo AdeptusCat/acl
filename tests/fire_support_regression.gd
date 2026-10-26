@@ -48,6 +48,8 @@ func _run() -> void:
 	support.panel.asset_buttons[1].pressed.emit()
 	_check(support.panel.tray.visible and support.selected_asset == 1, "Clicking a different support icon switches the open panel to that battery")
 	_check(support.panel.tray.find_children("*", "OptionButton", true, false).size() == 2, "The support panel exposes independent length and intensity dropdowns")
+	_right_click_at(support.panel.tray.get_global_rect().get_center())
+	_check(not support.panel.tray.visible and not support.choosing_target, "Right-clicking over the support panel closes it")
 	support.panel._close()
 	support.selected_asset = 0
 	var target: Vector2i = mortar.current_hex
@@ -77,12 +79,21 @@ func _run() -> void:
 	host._on_mouse_button_left_pressed(second_point)
 	support.end_target(second_point)
 	_check(support.target == mortar.current_hex and support.choosing_target and host.selected_unit == selected, "A second map click replaces the target while the panel stays open")
+	_right_click_at(point)
+	_check(not support.panel.tray.visible and not support.choosing_target and not support.has_target and not support.dragging, "Right-clicking the battlefield closes support and clears the target preview")
+	_check(host.selected_unit == selected and not world.ui.selection_wheel_alt.is_open() and not world.input_manager._right_button_held, "Dismissing support does not select a different squad or open the command wheel")
+	support.panel.toggle_tray()
 	host._on_mouse_button_left_pressed(point)
 	support.end_target(point)
 	_check(support.preview(0, mortar.current_hex).contains("FRIENDLY"), "The preview identifies friendly troops in the struck hex")
-	_check(support.request(0, target, 15.0, FireSupportMission.Intensity.INTENSE), "A 15-second intense onboard mission is accepted without an artificial call-in delay")
-	_check(support.choosing_target and support.panel.tray.visible, "Assigning a mission keeps map targeting enabled while the support panel is open")
+	support.panel.fire_button.pressed.emit()
+	_check(support.asset_mission(0) != null, "The Fire Mission button issues the prepared onboard mission")
+	_check(not support.choosing_target and not support.panel.tray.visible and not support.has_target, "The Fire Mission button closes the panel and exits target selection")
 	var short_mission: FireSupportMission = support.asset_mission(0)
+	support.panel.toggle_tray()
+	_right_click_at(point)
+	_check(short_mission.active and support.asset_mission(0) == short_mission, "Right-click dismissal leaves an assigned fire mission running")
+	support.panel.toggle_tray()
 	_check(not support.request(0, target, 15.0, FireSupportMission.Intensity.INTENSE), "A busy battery rejects overlapping fire missions")
 	gunner.setup_weapon_task.done = false
 	gunner.setup_weapon_task.start_time_s = 2.0
@@ -402,6 +413,17 @@ func _test_volleys(support: FireSupportController, target: Vector2i) -> void:
 	_check(not mission.active and mission.fired == 1 and weapon.ammunition == 5 and support.pending_volley.is_empty(), "The duration limit cancels pending volley guns before they can launch late")
 	weapon.ammunition = stock
 	support.panel._open_asset(0)
+
+func _right_click_at(point: Vector2) -> void:
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.position = point
+	click.global_position = point
+	click.button_index = MOUSE_BUTTON_RIGHT
+	click.pressed = true
+	get_viewport().push_input(click, true)
+	click = click.duplicate() as InputEventMouseButton
+	click.pressed = false
+	get_viewport().push_input(click, true)
 
 func _ready_gunner(soldier: Soldier) -> void:
 	soldier.setup_weapon_task.done = true
