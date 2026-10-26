@@ -21,6 +21,11 @@ var first_launch_at: float = -1.0
 var planned_rounds: int = 0
 var guns: int = 1
 var pending_guns: int = 0
+var onboard_guns: Array[Soldier] = []
+var onboard_due: Dictionary[Soldier, float] = {}
+var onboard_volley_at: float = 0.0
+var onboard_volley_launched: bool = false
+
 var remaining: int = 0
 var fired: int = 0
 var elapsed: float = 0.0
@@ -31,6 +36,39 @@ var active: bool = true
 var result: String = "Preparing"
 var _area_cycle: Array[Vector2i] = []
 var _cycle_number: int = -1
+
+func gun_ready(soldier: Soldier) -> bool:
+	if not onboard_guns.has(soldier):
+		return false
+	if guns == 1:
+		return ready_to_fire()
+	return active and remaining > 0 and not time_expired() and onboard_due.has(soldier) and elapsed >= onboard_due[soldier]
+
+func begin_onboard_volley() -> void:
+	onboard_volley_at = elapsed
+	onboard_volley_launched = false
+	var count: int = mini(onboard_guns.size(), remaining)
+	onboard_due.clear()
+	for index: int in range(count):
+		var delay: float = 0.0
+		if index > 0:
+			delay = float(index) / float(maxi(count - 1, 1)) * 0.45
+		onboard_due[onboard_guns[index]] = elapsed + delay
+	pending_guns = count
+
+func commit_gun(soldier: Soldier, rounds: int) -> void:
+	if guns > 1 and not onboard_volley_launched:
+		var offset: float = elapsed - onboard_volley_at
+		for gun: Soldier in onboard_due:
+			onboard_due[gun] += offset
+		onboard_volley_at = elapsed
+		onboard_volley_launched = true
+	onboard_due.erase(soldier)
+	pending_guns = onboard_due.size()
+	commit_rounds(rounds)
+	if guns > 1:
+		last_launch_at = onboard_volley_at
+		next_round = onboard_volley_at + INTERVALS[intensity]
 
 func next_target() -> Vector2i:
 	if cells.is_empty():

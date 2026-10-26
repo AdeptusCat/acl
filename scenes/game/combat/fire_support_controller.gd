@@ -31,7 +31,19 @@ func setup(controller: Node2D) -> void:
 	host.get_parent().input_manager.mouse_button_left_released.connect(end_target)
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
 		if unit.squad_type == Globals.SquadType.MORTAR:
-			assets.append({"id": "unit_%d" % unit.get_instance_id(), "name": unit.get_hud_name() + " · Onboard", "unit": unit, "battery": null})
+			var id: String = "platoon_%d_%d_%d" % [unit.team, unit.company, unit.platoon]
+			var group: Dictionary = {}
+			for asset: Dictionary in assets:
+				if asset["id"] == id:
+					group = asset
+					break
+			if group.is_empty():
+				var units: Array[Unit] = []
+				group = {"id": id, "name": unit.get_formation_name() + " · Mortar battery · Onboard", "unit": unit, "units": units, "battery": null}
+				assets.append(group)
+			(group["units"] as Array[Unit]).append(unit)
+	for index: int in range(assets.size()):
+		assets[index]["selected_guns"] = available_guns(index)
 	for definition: OffboardBattery in Globals.scenario_chosen.offboard_batteries:
 		if definition == null or definition.team != Globals.team_player or not definition.is_valid():
 			continue
@@ -71,7 +83,41 @@ func available_guns(index: int) -> int:
 	var battery: OffboardBattery = assets[index]["battery"]
 	if battery != null:
 		return battery.gun_count
-	return 1
+	var count: int = 0
+	for unit: Unit in assets[index]["units"]:
+		if not is_instance_valid(unit) or not unit.is_active():
+			continue
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
+				count += 1
+	return maxi(1, count)
+
+func representative_unit(index: int) -> Unit:
+	var asset: Dictionary = assets[index]
+	if asset["battery"] == null:
+		for unit: Unit in asset["units"]:
+			if is_instance_valid(unit) and unit.is_active():
+				return unit
+	return asset["unit"] as Unit
+
+func eligible_guns(index: int, cells: Array[Vector2i]) -> Array[Soldier]:
+	var result: Array[Soldier] = []
+	if assets[index]["battery"] != null:
+		return result
+	for unit: Unit in assets[index]["units"]:
+		if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat:
+			continue
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if not soldier.is_alive or soldier.weapon == null or soldier.weapon.family != WeaponSpec.Family.MORTAR or soldier.weapon.ammunition <= 0:
+				continue
+			var reachable: bool = true
+			for cell: Vector2i in cells:
+				if host.ground_layer.cube_distance(unit.current_cube, host.ground_layer.map_to_cube(cell)) > soldier.weapon.range_hexes:
+					reachable = false
+					break
+			if reachable:
+				result.append(soldier)
+	return result
 
 func selected_guns(index: int) -> int:
 	if index < 0 or index >= assets.size():
@@ -82,10 +128,11 @@ func asset_weapon(index: int) -> WeaponSpec:
 	var asset: Dictionary = assets[index]
 	if asset["battery"] != null:
 		return asset["weapon"] as WeaponSpec
-	var unit: Unit = asset["unit"]
-	if is_instance_valid(unit):
+	for unit: Unit in asset["units"]:
+		if not is_instance_valid(unit) or not unit.is_active():
+			continue
 		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
+			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
 				return soldier.weapon
 	return null
 
@@ -93,13 +140,13 @@ func ammunition(index: int) -> int:
 	var asset: Dictionary = assets[index]
 	if asset["battery"] != null:
 		return (asset["weapon"] as WeaponSpec).ammunition
-	var unit: Unit = asset["unit"]
-	if not is_instance_valid(unit) or not unit.is_active():
-		return 0
 	var count: int = 0
-	for soldier: Soldier in unit.squad_fire.soldiers:
-		if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
-			count += soldier.weapon.ammunition
+	for unit: Unit in asset["units"]:
+		if not is_instance_valid(unit) or not unit.is_active():
+			continue
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
+				count += soldier.weapon.ammunition
 	return count
 
 func asset_status(index: int) -> String:
@@ -114,14 +161,13 @@ func asset_status(index: int) -> String:
 	if ammunition(index) <= 0:
 		return "Empty / unavailable"
 	if asset["battery"] == null:
-		var unit: Unit = asset["unit"]
-		if not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat:
+		var pool: Array[Soldier] = eligible_guns(index, [])
+		if pool.is_empty():
 			return "Unavailable"
-		if unit.is_moving:
-			return "Moving"
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR and not soldier.setup_weapon_task.done:
-				return "Deploying"
+		for soldier: Soldier in pool:
+			if not soldier.unit.is_moving and soldier.setup_weapon_task.done:
+				return "Ready"
+		return "Deploying"
 	return "Ready"
 
 func asset_launch_progress(index: int) -> Dictionary:
@@ -136,16 +182,16 @@ func asset_launch_progress(index: int) -> Dictionary:
 	var label: String = "Next shell"
 	var remaining: float = wait
 	if assets[index]["battery"] == null:
-		var unit: Unit = assets[index]["unit"]
-		if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat or unit.is_moving:
-			return {"fill": 0.0, "seconds": -1.0, "label": "Waiting for mortar"}
-		remaining = INF
-		var setup_rate: float = maxf(unit.squad_fire.state_acquire_mults[unit.stress_system.state], 0.001)
-		var loaders: int = unit.squad_fire._count_role(RankGrades.Role.LOADER)
-		var assistants: int = unit.squad_fire._count_role(RankGrades.Role.ASSISTANT)
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			if not soldier.is_alive or soldier.weapon == null or soldier.weapon.family != WeaponSpec.Family.MORTAR or soldier.weapon.ammunition <= 0:
+		remaining = 0.0
+		for soldier: Soldier in mission.onboard_guns:
+			if not soldier.is_alive or soldier.weapon == null or soldier.weapon.ammunition <= 0:
 				continue
+			var unit: Unit = soldier.unit
+			if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat or unit.is_moving:
+				return {"fill": 0.0, "seconds": -1.0, "label": "Waiting for battery"}
+			var setup_rate: float = maxf(unit.squad_fire.state_acquire_mults[unit.stress_system.state], 0.001)
+			var loaders: int = unit.squad_fire._count_role(RankGrades.Role.LOADER)
+			var assistants: int = unit.squad_fire._count_role(RankGrades.Role.ASSISTANT)
 			var setup: float = 0.0
 			var reload: float = 0.0
 			var aim: float = 0.0
@@ -172,7 +218,7 @@ func asset_launch_progress(index: int) -> Dictionary:
 			aim /= crew_rate
 			full_aim /= crew_rate
 			var work: float = maxf(wait, setup + reload + aim)
-			if work < remaining:
+			if work >= remaining:
 				remaining = work
 				duration = maxf(scheduled_duration, full_setup + full_reload + full_aim)
 		if not is_finite(remaining):
@@ -200,16 +246,8 @@ func restriction(index: int, cell: Vector2i) -> String:
 		return "No mortar/artillery ammunition remaining."
 	var asset: Dictionary = assets[index]
 	if asset["battery"] == null:
-		var unit: Unit = asset["unit"]
-		if not is_instance_valid(unit) or not unit.is_active() or unit.surrendered or unit.broken or unit.in_close_combat:
-			return "Mortar squad unavailable."
-		var distance: int = host.ground_layer.cube_distance(unit.current_cube, host.ground_layer.map_to_cube(cell))
-		var reachable: bool = false
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR and soldier.weapon.ammunition > 0 and distance <= soldier.weapon.range_hexes:
-				reachable = true
-		if not reachable:
-			return "Outside this mortar's range."
+		if eligible_guns(index, [cell]).is_empty():
+			return "No available mortar can reach this hex."
 	return ""
 
 func footprint_restriction(index: int, cells: Array[Vector2i]) -> String:
@@ -221,14 +259,32 @@ func footprint_restriction(index: int, cells: Array[Vector2i]) -> String:
 			return reason
 	return ""
 
-func planned_rounds(index: int, length: float, intensity: FireSupportMission.Intensity, guns: int = 1) -> int:
+func mission_restriction(index: int, cells: Array[Vector2i], guns: int) -> String:
+	var reason: String = footprint_restriction(index, cells)
+	if not reason.is_empty():
+		return reason
+	if guns < 1 or guns > available_guns(index):
+		return "Choose an available gun count."
+	if assets[index]["battery"] == null:
+		var count: int = eligible_guns(index, cells).size()
+		if count < guns:
+			return "Only %d guns can reach the whole footprint." % count
+	return ""
+
+func planned_rounds(index: int, length: float, intensity: FireSupportMission.Intensity, guns: int = 1, cells: Array[Vector2i] = []) -> int:
 	if index < 0 or index >= assets.size():
 		return 0
 	var interval: float = FireSupportMission.INTERVALS[intensity]
-	var weapon: WeaponSpec = asset_weapon(index)
-	if weapon != null:
-		interval = maxf(interval, weapon.reload_s)
-	return mini(ammunition(index), ceili(length / interval) * clampi(guns, 1, available_guns(index)))
+	var stock: int = ammunition(index)
+	if assets[index]["battery"] == null:
+		stock = 0
+		var pool: Array[Soldier] = eligible_guns(index, cells)
+		for gun: int in range(mini(guns, pool.size())):
+			stock += pool[gun].weapon.ammunition
+			interval = maxf(interval, pool[gun].weapon.reload_s)
+	else:
+		interval = maxf(interval, (assets[index]["weapon"] as WeaponSpec).reload_s)
+	return mini(stock, ceili(length / interval) * clampi(guns, 1, available_guns(index)))
 
 func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMission.Intensity, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1, guns: int = 1) -> bool:
 	if not is_finite(length) or length <= 0.0 or intensity < 0 or intensity >= FireSupportMission.INTERVALS.size():
@@ -236,14 +292,14 @@ func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMi
 	var footprint: Array[Vector2i] = cells.duplicate()
 	if footprint.is_empty():
 		footprint.append(cell)
-	var reason: String = footprint_restriction(index, footprint)
+	var reason: String = mission_restriction(index, footprint, guns)
 	if not reason.is_empty():
 		host.order_feedback.emit(false, "Fire support", reason)
 		return false
-	if guns < 1 or guns > available_guns(index):
-		host.order_feedback.emit(false, "Fire support", "Choose an available gun count.")
-		return false
 	var asset: Dictionary = assets[index]
+	var participants: Array[Soldier] = []
+	if asset["battery"] == null:
+		participants = eligible_guns(index, footprint)
 	var mission: FireSupportMission = asset_mission(index)
 	if mission != null:
 		missions.erase(mission)
@@ -257,16 +313,24 @@ func request(index: int, cell: Vector2i, length: float, intensity: FireSupportMi
 	mission.duration_seconds = length
 	mission.intensity = intensity
 	mission.guns = guns
-	mission.planned_rounds = planned_rounds(index, length, intensity, guns)
+	mission.planned_rounds = planned_rounds(index, length, intensity, guns, footprint)
 	mission.remaining = mission.planned_rounds
 	missions.append(mission)
 	var unit: Unit = asset["unit"]
 	if asset["battery"] == null:
-		unit.clear_orders()
-		unit.fire_mortar(cell)
-		unit.attack_ground_rounds_budget = mission.remaining
-		unit.squad_fire.fire_support_mission = mission
-		unit.squad_fire.fire_support_hold = false
+		for gun: int in range(guns):
+			mission.onboard_guns.append(participants[gun])
+		var assigned: Array[Unit] = []
+		for soldier: Soldier in mission.onboard_guns:
+			unit = soldier.unit
+			if assigned.has(unit):
+				continue
+			assigned.append(unit)
+			unit.clear_orders()
+			unit.fire_mortar(cell)
+			unit.attack_ground_rounds_budget = mission.remaining
+			unit.squad_fire.fire_support_mission = mission
+			unit.squad_fire.fire_support_hold = false
 	else:
 		mission.next_round = (asset["battery"] as OffboardBattery).response_seconds
 	asset_launch_progress(index)
@@ -291,12 +355,13 @@ func cease(index: int) -> void:
 func _release_onboard(asset: Dictionary, mission: FireSupportMission) -> void:
 	if asset["battery"] != null:
 		return
-	var unit: Unit = asset["unit"]
-	if is_instance_valid(unit) and unit.squad_fire.fire_support_mission == mission:
-		unit.squad_fire.fire_support_mission = null
-		# Keep a ceased battery silent until the player assigns a new fire order.
-		unit.squad_fire.fire_support_hold = true
-		unit.squad_fire.clear_target()
+	mission.onboard_due.clear()
+	mission.pending_guns = 0
+	for unit: Unit in asset["units"]:
+		if is_instance_valid(unit) and unit.squad_fire.fire_support_mission == mission:
+			unit.squad_fire.fire_support_mission = null
+			unit.squad_fire.fire_support_hold = true
+			unit.squad_fire.clear_target()
 
 func pick_target(screen_point: Vector2) -> void:
 	var focus: Control = get_viewport().gui_get_focus_owner()
@@ -406,7 +471,7 @@ func build_footprint(start: Vector2i, end: Vector2i, shape: FireSupportMission.S
 	return cells
 
 func coverage_text() -> String:
-	var rounds: int = planned_rounds(selected_asset, selected_length, selected_intensity, selected_guns(selected_asset))
+	var rounds: int = planned_rounds(selected_asset, selected_length, selected_intensity, selected_guns(selected_asset), target_cells)
 	var text: String = "Up to %d rounds across %d hexes" % [rounds, target_cells.size()]
 	if rounds < target_cells.size():
 		text += " · sparse coverage"
@@ -425,8 +490,11 @@ func hover_target(screen_point: Vector2) -> void:
 		LOSHelper.clear_los()
 		return
 	var asset: Dictionary = assets[selected_asset]
-	if asset["battery"] == null and is_instance_valid(asset["unit"]):
-		var unit: Unit = asset["unit"]
+	if asset["battery"] == null and is_instance_valid(representative_unit(selected_asset)):
+		var unit: Unit = representative_unit(selected_asset)
+		var pool: Array[Soldier] = eligible_guns(selected_asset, [cell])
+		if not pool.is_empty():
+			unit = pool[0].unit
 		var feedback: Dictionary = MatchInteractionHandler.unit_target_feedback(unit, cell)
 		LOSHelper.draw_los(unit.position, point, float(feedback["firepower"]))
 
@@ -459,18 +527,21 @@ func preview(index: int, cell: Vector2i, cells: Array[Vector2i] = []) -> String:
 		var battery: OffboardBattery = asset["battery"]
 		eta = battery.response_seconds + battery.flight_seconds
 	else:
-		var unit: Unit = asset["unit"]
-		for soldier: Soldier in unit.squad_fire.soldiers:
-			if soldier.is_alive and soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
-				var setup: float = 0.0
-				var reload: float = 0.0
-				if not soldier.setup_weapon_task.done:
-					setup = soldier.setup_weapon_task.remaining_time_s
-				if not soldier.reload_task.done:
-					reload = soldier.reload_task.remaining_time_s
-				eta = setup + reload + soldier.weapon.raise_s + soldier.weapon.aim_s + unit.global_position.distance_to(host.ground_layer.to_global(host.ground_layer.map_to_local(cell))) / maxf(float(soldier.weapon.projectile_speed), 1.0)
-				break
-		if unit.is_moving:
+		var pool: Array[Soldier] = eligible_guns(index, footprint)
+		var moving: bool = false
+		for gun: int in range(mini(selected_guns(index), pool.size())):
+			var soldier: Soldier = pool[gun]
+			var unit: Unit = soldier.unit
+			var setup: float = 0.0
+			var reload: float = 0.0
+			if not soldier.setup_weapon_task.done:
+				setup = soldier.setup_weapon_task.remaining_time_s
+			if not soldier.reload_task.done:
+				reload = soldier.reload_task.remaining_time_s
+			var gun_eta: float = setup + reload + soldier.weapon.raise_s + soldier.weapon.aim_s + unit.global_position.distance_to(host.ground_layer.to_global(host.ground_layer.map_to_local(cell))) / maxf(float(soldier.weapon.projectile_speed), 1.0)
+			eta = maxf(eta, gun_eta)
+			moving = moving or unit.is_moving
+		if moving:
 			text += "\nMortar will halt and deploy"
 	text += "\nEstimated first impact: about %d s" % ceili(eta)
 	if friends > 0:
@@ -510,13 +581,7 @@ func _process(delta: float) -> void:
 			if mission.ready_to_fire() and mission.pending_guns == 0:
 				_begin_volley(asset, mission)
 		else:
-			var unit: Unit = asset["unit"]
-			if not is_instance_valid(unit) or not unit.is_active() or unit.broken or unit.surrendered or unit.in_close_combat:
-				mission.stop("Interrupted · mortar unavailable")
-			elif unit.attackState != Unit.AttackState.MANUAL_GROUND or unit.squad_fire.mortar_target_hex != mission.target or not unit.squad_fire.has_mortar_target_hex:
-				mission.stop("Interrupted by another order")
-				# Do not clear the replacement order.
-				unit.squad_fire.fire_support_mission = null
+			_update_onboard(asset, mission)
 	for shot: Dictionary in pending_volley.duplicate():
 		var mission: FireSupportMission = shot["mission"]
 		if not mission.active or mission.time_expired():
@@ -537,6 +602,43 @@ func _process(delta: float) -> void:
 			source.squad_fire.fire_at(1, flight["weapon"], false, flight["target"], 0, int(flight["cover"]), targets, flight["origin"])
 			flights.erase(flight)
 	queue_redraw()
+
+func _update_onboard(asset: Dictionary, mission: FireSupportMission) -> void:
+	for soldier: Soldier in mission.onboard_guns.duplicate():
+		var unit: Unit = soldier.unit
+		var keep: bool = is_instance_valid(unit) and unit.is_active() and not unit.broken and not unit.surrendered and not unit.in_close_combat
+		if keep:
+			keep = soldier.is_alive and soldier.weapon.ammunition > 0 and unit.squad_fire.fire_support_mission == mission and _has_mission_order(unit, mission)
+		if not keep:
+			mission.onboard_guns.erase(soldier)
+			mission.onboard_due.erase(soldier)
+	mission.pending_guns = mission.onboard_due.size()
+	for unit: Unit in asset["units"]:
+		if not is_instance_valid(unit) or unit.squad_fire.fire_support_mission != mission:
+			continue
+		var participating: bool = false
+		for soldier: Soldier in mission.onboard_guns:
+			if soldier.unit == unit:
+				participating = true
+		if not participating:
+			unit.squad_fire.fire_support_mission = null
+			if _has_mission_order(unit, mission):
+				unit.squad_fire.fire_support_hold = true
+				unit.squad_fire.clear_target()
+	if mission.onboard_guns.is_empty():
+		mission.stop("Interrupted · no participating guns available")
+		return
+	if mission.guns > 1 and mission.pending_guns == 0 and mission.ready_to_fire():
+		for soldier: Soldier in mission.onboard_guns:
+			if soldier.unit.is_moving or not _crew_task_ready(soldier.setup_weapon_task) or not _crew_task_ready(soldier.reload_task) or not _crew_task_ready(soldier.aquire_target_task):
+				return
+		mission.begin_onboard_volley()
+
+func _has_mission_order(unit: Unit, mission: FireSupportMission) -> bool:
+	return unit.attackState == Unit.AttackState.MANUAL_GROUND and unit.squad_fire.has_mortar_target_hex and unit.squad_fire.mortar_target_hex == mission.target
+
+func _crew_task_ready(task: SoldierTask) -> bool:
+	return task.done or task.remaining_time_s <= 0.0
 
 func _cancel_volley(mission: FireSupportMission) -> void:
 	for shot: Dictionary in pending_volley.duplicate():

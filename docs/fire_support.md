@@ -23,7 +23,11 @@ Mission settings are independent:
 
 The preview shows the maximum planned rounds for the selected window and intensity, capped by available ammunition and weapon reload speed. Missions stop when their time expires, their planned rounds have fired, ammunition runs out or fire is ceased. Delayed shells are never launched after the firing window closes. Unfired planned rounds remain in battery ammunition; the icon's mission count reaches zero when the order ends.
 
-Offboard batteries have an authored **gun_count** (1–24). **Guns firing** in the panel selects how many participate in the next mission, up to that battery's available count. Existing batteries default to one gun. Onboard mortar icons continue to represent one squad's weapon.
+Offboard batteries have an authored **gun_count** (1–24). **Guns firing** in the panel selects how many participate in the next mission, up to that battery's available count. Existing offboard batteries default to one gun.
+
+Onboard mortar squads with the same **team, company and platoon** form one battery automatically. Their card stack represents the platoon's guns, and the battery ammunition counter sums their surviving weapons. Other companies and platoons stay separate. Gun selection assigns only the chosen number of crews that can reach the entire footprint. Each gun keeps its own ammunition and crew preparation; ammunition is not transferred between squads.
+
+Selected onboard crews prepare together before each volley, then launch their own shells with a short stagger through the native firing system. Cease fire stops every assigned squad. A crew that becomes unavailable or receives another order drops out; remaining participants continue, and replacement orders are preserved. **Locate mortar** centers an active squad from the platoon.
 
 With multiple guns selected, intensity is shown in seconds **per volley**. Each participating gun launches one shell in a staggered group lasting roughly half a second. Every shell follows the Point/Line/Area distribution and resolves independently. The next volley interval is measured from the first gun so stagger does not accumulate into cadence drift. The icon says **Volley** during the launch group, then resumes its next-volley countdown.
 

@@ -312,7 +312,7 @@ func _cancel_or_close() -> void:
 
 func _locate() -> void:
 	if support.selected_asset < support.assets.size():
-		var unit: Unit = support.assets[support.selected_asset]["unit"]
+		var unit: Unit = support.representative_unit(support.selected_asset)
 		if is_instance_valid(unit):
 			support.host.move_camera(unit.current_hex)
 
@@ -364,22 +364,32 @@ func refresh() -> void:
 		if support.dragging:
 			target_label.text += "\nRelease to prepare · Enter to confirm · Escape to cancel"
 	status_label.text = "No fire support assets assigned to this scenario."
-	fire_button.disabled = true
-	cease_button.disabled = true
-	locate_button.disabled = true
+	var fire_disabled: bool = true
+	var cease_disabled: bool = true
+	var locate_disabled: bool = true
+	var fire_reason: String = "Choose a target hex or drag a footprint first."
 	if not support.assets.is_empty():
 		var mission: FireSupportMission = support.asset_mission(selection)
-		locate_button.disabled = support.assets[selection]["battery"] != null
+		locate_disabled = support.assets[selection]["battery"] != null
 		status_label.text = "Ready · %d guns · %d s · %s" % [support.selected_guns(selection), ceili(support.selected_length), FireSupportMission.intensity_text(support.selected_intensity, support.selected_guns(selection))]
 		if mission != null:
 			status_label.text = "%s\n%d guns · %s · %d hexes · %d fired · %d remaining" % [mission.result, mission.guns, FireSupportMission.SHAPE_NAMES[mission.shape], mission.cells.size(), mission.fired, mission.remaining]
 			if mission.active:
 				status_label.text += "\n%d s remaining · %s" % [ceili(mission.seconds_left()), FireSupportMission.intensity_text(mission.intensity, mission.guns)]
-				cease_button.disabled = false
+				cease_disabled = false
 				if mission.next_round > mission.elapsed:
 					status_label.text += "\nNext launch in at least %d s" % ceili(mission.next_round - mission.elapsed)
 		if support.has_target:
-			fire_button.disabled = not support.footprint_restriction(selection, support.target_cells).is_empty()
+			fire_reason = support.mission_restriction(selection, support.target_cells, support.selected_guns(selection))
+			fire_disabled = not fire_reason.is_empty()
+	# Toggling disabled on and off cancels a mouse press held across this refresh.
+	if fire_button.disabled != fire_disabled:
+		fire_button.disabled = fire_disabled
+	if cease_button.disabled != cease_disabled:
+		cease_button.disabled = cease_disabled
+	if locate_button.disabled != locate_disabled:
+		locate_button.disabled = locate_disabled
+	fire_button.tooltip_text = fire_reason
 	_layout.call_deferred()
 
 func _layout() -> void:

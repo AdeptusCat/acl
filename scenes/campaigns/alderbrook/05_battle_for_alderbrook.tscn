@@ -797,6 +797,18 @@ default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
 squad_type = 3
 
+[node name="CA_P1_S1_Allies_Mortar" parent="Scenarios/Mission/Units" unique_id=1392265203 instance=ExtResource("22_iyxsn")]
+position = Vector2(160, 1408)
+squad = 1
+platoon = 1
+team = 1
+loadouts = Array[ExtResource("24_q36b3")]([ExtResource("32_uam5t"), SubResource("Resource_rxxvr"), ExtResource("34_jqe2x"), ExtResource("39_2oei0"), ExtResource("39_2oei0")])
+squad_loadout = ExtResource("45_qx70h")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squad_type = 3
+
 [node name="CA_P1_S0_Axis_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=43692690 instance=ExtResource("22_iyxsn")]
 position = Vector2(1696, 640)
 platoon = 1

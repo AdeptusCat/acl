@@ -585,7 +585,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if not s.is_acquiring_target_done(delta_mod):
 		return 0
 	# Crew preparation runs during the scheduled interval, rather than after it.
-	if fire_support_mission != null and not fire_support_mission.ready_to_fire():
+	if fire_support_mission != null and not fire_support_mission.gun_ready(s):
 		return 0
 	
 	if Debug.dont_fire_wepaons:
@@ -668,7 +668,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		shots = mini(shots, fire_support_mission.remaining)
 		if shots <= 0:
 			return 0
-		fire_support_mission.commit_rounds(shots)
+		fire_support_mission.commit_gun(s, shots)
 	if personal_ground_fire:
 		shots = mini(shots, unit.attack_ground_rounds_budget)
 	
