@@ -389,6 +389,17 @@ func _test_stack_selection() -> void:
 	enemy.z_index = 3
 	controller.click(enemy.ui.sprite_node.get_global_transform_with_canvas() * Vector2(32.0, 8.0))
 	_check(controller.selected_unit == enemy, "Clicking a visible enemy counter inspects it without enabling debug command access")
+	enemy.surrendered = true
+	controller.click(enemy.ui.sprite_node.get_global_transform_with_canvas() * Vector2(32.0, 8.0))
+	_check(controller.selected_unit == first or controller.selected_unit == second, "A surrendered enemy cannot intercept clicks on friendlies in the same hex")
+	var friendly_selection: Unit = controller.selected_unit
+	Debug.enemy_selectable = true
+	MatchInteractionHandler.select_unit(controller, enemy)
+	_check(controller.selected_unit == friendly_selection, "Debug enemy selection cannot select a surrendered enemy")
+	controller.click(point)
+	_check(controller.selected_unit != enemy, "Debug pointer selection also excludes surrendered enemies")
+	Debug.enemy_selectable = false
+	enemy.surrendered = false
 	enemy.z_index = 0
 	enemy.hide()
 	Debug.enemy_selectable = true

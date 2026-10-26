@@ -149,6 +149,8 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 	controller.hex_selected.emit(map_hex, local_point)
 	var candidates: Array[Unit] = []
 	for candidate: Unit in Globals.get_units():
+		if candidate.team != Globals.team_player and candidate.surrendered:
+			continue
 		if candidate.is_active() and candidate.is_visible_in_tree():
 			candidates.append(candidate)
 	# Stacked and moving counters can extend into the neighboring hex on screen.
@@ -264,7 +266,7 @@ static func hex_glow(controller: Node2D, pos: Vector2) -> void:
 static func select_unit(controller: Node2D, unit: Unit) -> void:
 	if not unit.is_active():
 		return
-	if unit.team != Globals.team_player and not unit.is_visible_in_tree():
+	if unit.team != Globals.team_player and (unit.surrendered or not unit.is_visible_in_tree()):
 		return
 	controller.influence_map_controller.clear_inspection_queries()
 	if controller.selected_unit:

@@ -460,7 +460,10 @@ func _on_unit_exited(unit: Unit) -> void:
 		_on_win_condition_timer_timeout.call_deferred()
 
 
-func _on_unit_surrendered(_unit: Unit) -> void:
+func _on_unit_surrendered(unit: Unit) -> void:
+	if unit.team != Globals.team_player and selected_unit == unit:
+		_deselect_unit(unit)
+		hide_unit_details_in_ui.emit()
 	if MatchVictoryCoordinator.can_finish_after_force_defeat() or MatchVictoryCoordinator.can_finish_after_objective_defeat(self):
 		_on_win_condition_timer_timeout.call_deferred()
 
