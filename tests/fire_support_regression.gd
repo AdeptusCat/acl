@@ -68,11 +68,15 @@ func _run() -> void:
 	_check(support.choosing_target, "Opening fire support immediately enters target selection")
 	var point: Vector2 = host.ground_layer.get_global_transform_with_canvas() * host.ground_layer.map_to_local(target)
 	host._on_mouse_button_left_pressed(point)
+	_check(support.dragging and not support.has_target, "Press previews without firing or confirming a target")
+	world.input_manager.mouse_button_left_released.emit(point)
 	_check(support.has_target and support.target == target and host.selected_unit == selected, "Picking a fire mission hex preserves the selected infantry squad")
 	var second_point: Vector2 = host.ground_layer.get_global_transform_with_canvas() * host.ground_layer.map_to_local(mortar.current_hex)
 	host._on_mouse_button_left_pressed(second_point)
+	support.end_target(second_point)
 	_check(support.target == mortar.current_hex and support.choosing_target and host.selected_unit == selected, "A second map click replaces the target while the panel stays open")
 	host._on_mouse_button_left_pressed(point)
+	support.end_target(point)
 	_check(support.preview(0, mortar.current_hex).contains("FRIENDLY"), "The preview identifies friendly troops in the struck hex")
 	_check(support.request(0, target, FireSupportMission.Mode.QUICK), "A quick onboard mission is accepted without an artificial call-in delay")
 	_check(support.choosing_target and support.panel.tray.visible, "Assigning a mission keeps map targeting enabled while the support panel is open")
@@ -141,8 +145,7 @@ func _run() -> void:
 	(support.assets[2]["weapon"] as WeaponSpec).ammunition = 0
 	_check(not support.request(2, target, FireSupportMission.Mode.QUICK), "Empty offboard batteries reject fire requests")
 	support.selected_asset = 0
-	support.has_target = true
-	support.target = target
+	support.pick_target(point)
 	support.panel.refresh()
 	_check(not support.panel.fire_button.disabled and host.selected_unit == selected, "The HUD can prepare another fire mission while preserving infantry selection")
 	support.panel._close()
@@ -155,13 +158,16 @@ func _run() -> void:
 	support.panel._unhandled_key_input(shortcut)
 	_check(not support.panel.tray.visible and not support.choosing_target and host.selected_unit == selected, "Escape cancels support targeting without changing infantry selection")
 	support.panel.toggle_tray()
-	support.has_target = true
-	support.target = target
-	support.choosing_target = false
+	await _test_shapes(support, mortar, gunner, target, selected)
+	support.pick_target(point)
 	support.selected_mode = FireSupportMission.Mode.HARASSING
 	support.panel.mode.select(2)
 	support.panel.refresh()
 	if OS.get_cmdline_user_args().has("--capture"):
+		point = get_viewport().get_visible_rect().size * Vector2(0.68, 0.35)
+		support.select_shape(FireSupportMission.Shape.AREA)
+		support.begin_target(point)
+		support.end_target(point + Vector2(180, -100))
 		world.ui.get_node("Control/OrderFeedback").hide()
 		await get_tree().process_frame
 		await get_tree().process_frame
@@ -171,6 +177,90 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("Fire support checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+func _test_shapes(support: FireSupportController, mortar: Unit, gunner: Soldier, start: Vector2i, selected: Unit) -> void:
+	var ground: HexagonTileMapLayer = support.host.ground_layer
+	var end: Vector2i = start
+	for cell: Vector2i in ground.get_surrounding_cells(start):
+		if ground.get_cell_source_id(cell) != -1 and LOSHelper.find_units_at(cell).is_empty():
+			end = cell
+			break
+	var a: Vector2 = ground.get_global_transform_with_canvas() * ground.map_to_local(start)
+	var b: Vector2 = ground.get_global_transform_with_canvas() * ground.map_to_local(end)
+	var ammo: int = support.ammunition(0)
+	support.begin_target(a)
+	support.update_drag(a + Vector2(3, 0))
+	_check(support.target_shape == FireSupportMission.Shape.POINT, "Small pointer jitter retains point fire")
+	support.end_target(a)
+	_check(support.has_target and support.ammunition(0) == ammo, "Releasing prepares the target without spending ammunition")
+	support.begin_target(a)
+	support.update_drag(b)
+	_check(support.dragging and support.target_shape == FireSupportMission.Shape.LINE and support.target_cells.size() == 2, "Plain dragging previews a line between hexes")
+	support.end_target(b)
+	var line: Array[Vector2i] = support.target_cells.duplicate()
+	_check(line == [start, end] and support.has_target and support.host.selected_unit == selected, "Release keeps ordered line coverage and infantry selection")
+	_check(support.build_footprint(end, start, FireSupportMission.Shape.LINE, 1) == [end, start], "Reversing the line reverses its sweep")
+	support.begin_target(a, true)
+	support.end_target(b)
+	_check(support.target_shape == FireSupportMission.Shape.AREA and support.target_cells.size() > 1, "Shift-drag prepares circular area coverage")
+	support.select_shape(FireSupportMission.Shape.AREA)
+	support.begin_target(a)
+	support.end_target(b)
+	_check(support.target_shape == FireSupportMission.Shape.AREA, "The Area button enables area drag without Shift")
+	var area: Array[Vector2i] = support.build_footprint(start, end, FireSupportMission.Shape.AREA, 3)
+	support.target_cells = area.duplicate()
+	support.selected_mode = FireSupportMission.Mode.QUICK
+	_check(support.coverage_text().contains("sparse coverage"), "Large quick-fire areas warn about sparse coverage")
+	_check(support.preview(0, start, area).contains("FRIENDLY"), "Area warnings include friendlies away from the center")
+	var escape: InputEventKey = InputEventKey.new()
+	escape.pressed = true
+	escape.keycode = KEY_ESCAPE
+	support.panel._unhandled_key_input(escape)
+	_check(not support.has_target and not support.dragging and support.panel.tray.visible, "Escape cancels the footprint and keeps the panel open")
+	support.select_shape(FireSupportMission.Shape.LINE)
+	support.begin_target(a)
+	support.end_target(b)
+	_check(support.target_shape == FireSupportMission.Shape.LINE, "The Line button supports dragging without modifiers")
+	var original_range: int = gunner.weapon.range_hexes
+	gunner.weapon.range_hexes = 0
+	var partly_out_of_range: Array[Vector2i] = [mortar.current_hex, start]
+	_check(not support.request(0, mortar.current_hex, FireSupportMission.Mode.QUICK, partly_out_of_range, FireSupportMission.Shape.LINE, start), "A footprint is rejected if any covered hex exceeds onboard range")
+	gunner.weapon.range_hexes = original_range
+	_check(support.request(0, start, FireSupportMission.Mode.QUICK, line, FireSupportMission.Shape.LINE, end), "Onboard mortars accept line missions")
+	var impacts: Array[Vector2i] = []
+	var record: Callable = func(_weapon: WeaponSpec, cell: Vector2i, _origin: Vector2, _impact: Vector2) -> void: impacts.append(cell)
+	mortar.squad_fire.fire_shot.connect(record)
+	for shot: int in range(3):
+		_ready_gunner(gunner)
+		await mortar.squad_fire._try_fire_soldier(0.1, gunner, true, 1, 1, 2, 0)
+	mortar.squad_fire.fire_shot.disconnect(record)
+	_check(impacts == [start, end, start] and support.ammunition(0) == ammo - 3, "Real onboard rounds sweep the line with only three rounds spent")
+	support._process(0.01)
+	var pattern: FireSupportMission = FireSupportMission.new()
+	pattern.shape = FireSupportMission.Shape.AREA
+	pattern.cells.assign(area)
+	pattern.mode = FireSupportMission.Mode.HARASSING
+	pattern.remaining = area.size() * 2
+	for cycle: int in range(2):
+		var visited: Array[Vector2i] = []
+		for shot: int in range(area.size()):
+			var cell: Vector2i = pattern.next_target()
+			_check(not visited.has(cell) and area.has(cell) and pattern.next_target() == cell, "Area fire covers every hex once per cycle and retains its pending target")
+			visited.append(cell)
+			pattern.commit_rounds(1)
+	var invalid: Array[Vector2i] = [start, Vector2i(-9999, -9999)]
+	_check(not support.request(1, start, FireSupportMission.Mode.QUICK, invalid, FireSupportMission.Shape.LINE, end), "An invalid footprint is rejected atomically")
+	var before: int = support.ammunition(1)
+	_check(support.request(1, start, FireSupportMission.Mode.QUICK, area, FireSupportMission.Shape.AREA, end, 3), "Offboard batteries accept area missions")
+	var mission: FireSupportMission = support.asset_mission(1)
+	var landed_cells: Array[Vector2i] = []
+	for shot: int in range(3):
+		support._launch_offboard(support.assets[1], mission)
+		var impact: Vector2i = support.flights.back()["target"]
+		_check(area.has(impact) and not landed_cells.has(impact), "Offboard shells retain distinct individual impact hexes in their area")
+		landed_cells.append(impact)
+	_check(not mission.active and mission.fired == 3 and support.ammunition(1) == before - 3, "Area size does not multiply quick mission ammunition")
+	support.select_shape(FireSupportMission.Shape.POINT)
 
 func _ready_gunner(soldier: Soldier) -> void:
 	soldier.setup_weapon_task.done = true

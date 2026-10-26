@@ -329,7 +329,7 @@ var selected_hex_index: int = 0
 
 func _on_mouse_button_left_pressed(event_pos: Vector2) -> void:
 	if fire_support != null and fire_support.choosing_target:
-		fire_support.pick_target(event_pos)
+		fire_support.begin_target(event_pos, Input.is_key_pressed(KEY_SHIFT))
 		return
 	MatchInteractionHandler.on_mouse_button_left_pressed(self, event_pos)
 

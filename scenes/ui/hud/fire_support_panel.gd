@@ -16,6 +16,8 @@ var status_label: Label
 var fire_button: Button
 var cease_button: Button
 var locate_button: Button
+var shape_buttons: Array[Button] = []
+var gesture_hint: Label
 var _refresh_elapsed: float = 0.0
 
 func _ready() -> void:
@@ -47,6 +49,19 @@ func _ready() -> void:
 		mode.add_item(name)
 	mode.item_selected.connect(_select_mode)
 	content.add_child(mode)
+	var shapes: HBoxContainer = HBoxContainer.new()
+	content.add_child(shapes)
+	for index: int in range(FireSupportMission.SHAPE_NAMES.size()):
+		var button: Button = Button.new()
+		button.text = FireSupportMission.SHAPE_NAMES[index]
+		button.toggle_mode = true
+		button.pressed.connect(_select_shape.bind(index))
+		shapes.add_child(button)
+		shape_buttons.append(button)
+	gesture_hint = Label.new()
+	gesture_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	gesture_hint.theme_type_variation = &"HudSecondary"
+	content.add_child(gesture_hint)
 	var actions: HBoxContainer = HBoxContainer.new()
 	content.add_child(actions)
 	locate_button = Button.new()
@@ -94,7 +109,7 @@ func toggle_tray() -> void:
 func _close() -> void:
 	tray.hide()
 	support.choosing_target = false
-	support.has_target = false
+	support.cancel_preview()
 	LOSHelper.clear_los()
 	support.queue_redraw()
 	_refresh_icons()
@@ -104,6 +119,7 @@ func _open_asset(index: int) -> void:
 		_close()
 		return
 	support.selected_asset = index
+	support.dragging = false
 	tray.show()
 	support.choosing_target = true
 	refresh()
@@ -151,6 +167,15 @@ func _select_mode(index: int) -> void:
 	support.selected_mode = index as FireSupportMission.Mode
 	refresh()
 
+func _select_shape(index: int) -> void:
+	support.select_shape(index as FireSupportMission.Shape)
+
+func _cancel_or_close() -> void:
+	if support.has_target or support.dragging:
+		support.cancel_preview()
+	else:
+		_close()
+
 func _locate() -> void:
 	if support.selected_asset < support.assets.size():
 		var unit: Unit = support.assets[support.selected_asset]["unit"]
@@ -160,7 +185,7 @@ func _locate() -> void:
 func _fire() -> void:
 	if not support.has_target:
 		return
-	if support.request(support.selected_asset, support.target, support.selected_mode):
+	if support.request(support.selected_asset, support.target, support.selected_mode, support.target_cells, support.target_shape, support.target_end, support.target_radius):
 		support.host.get_parent().ui.hide_target_hex_cover_distance()
 	refresh()
 
@@ -176,10 +201,23 @@ func refresh() -> void:
 	if not support.assets.is_empty():
 		asset_label.text = "%s\n%s · %d rounds" % [support.assets[selection]["name"], support.asset_status(selection), support.ammunition(selection)]
 	mode.disabled = support.assets.is_empty()
+	var shown_shape: FireSupportMission.Shape = support.selected_shape
+	if support.has_target or support.dragging:
+		shown_shape = support.target_shape
+	for index: int in range(shape_buttons.size()):
+		shape_buttons[index].set_pressed_no_signal(index == shown_shape)
+		shape_buttons[index].disabled = support.assets.is_empty()
+	gesture_hint.text = "Click: point · Drag: line · Shift-drag: area"
+	if support.selected_shape == FireSupportMission.Shape.LINE:
+		gesture_hint.text = "Drag from start to end · Click: point · Shift-drag: area"
+	elif support.selected_shape == FireSupportMission.Shape.AREA:
+		gesture_hint.text = "Drag from center to edge · Radius: 1–3 hexes"
 	_refresh_icons()
 	target_label.text = "Click a battlefield hex to choose the target."
-	if support.has_target:
-		target_label.text = "Target (%d, %d)\n%s" % [support.target.x, support.target.y, support.preview(selection, support.target)]
+	if support.has_target or support.dragging:
+		target_label.text = "%s target (%d, %d) · %s\n%s" % [FireSupportMission.SHAPE_NAMES[support.target_shape], support.target.x, support.target.y, support.coverage_text(), support.preview(selection, support.target, support.target_cells)]
+		if support.dragging:
+			target_label.text += "\nRelease to prepare · Enter to confirm · Escape to cancel"
 	status_label.text = "No fire support assets assigned to this scenario."
 	fire_button.disabled = true
 	cease_button.disabled = true
@@ -189,13 +227,13 @@ func refresh() -> void:
 		locate_button.disabled = support.assets[selection]["battery"] != null
 		status_label.text = "Ready · " + FireSupportMission.MODE_NAMES[support.selected_mode]
 		if mission != null:
-			status_label.text = "%s\nTarget (%d, %d) · %d fired · %d remaining" % [mission.result, mission.target.x, mission.target.y, mission.fired, mission.remaining]
+			status_label.text = "%s\n%s · %d hexes · %d fired · %d remaining" % [mission.result, FireSupportMission.SHAPE_NAMES[mission.shape], mission.cells.size(), mission.fired, mission.remaining]
 			if mission.active:
 				cease_button.disabled = false
 				if mission.next_round > mission.elapsed:
 					status_label.text += "\nNext launch in at least %d s" % ceili(mission.next_round - mission.elapsed)
 		if support.has_target:
-			fire_button.disabled = not support.restriction(selection, support.target).is_empty()
+			fire_button.disabled = not support.footprint_restriction(selection, support.target_cells).is_empty()
 	_layout.call_deferred()
 
 func _layout() -> void:
@@ -219,7 +257,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.keycode == KEY_F:
 		toggle_tray()
 	elif event.keycode == KEY_ESCAPE and tray.visible:
-		_close()
+		_cancel_or_close()
 	elif event.keycode == KEY_ENTER and tray.visible and not fire_button.disabled:
 		_fire()
 	else:

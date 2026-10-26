@@ -1,6 +1,7 @@
 extends Node
 
 signal mouse_button_left_pressed(event_pos: Vector2)
+signal mouse_button_left_released(event_pos: Vector2)
 signal mouse_button_right_pressed(event_pos: Vector2)
 signal right_button_pressed()
 signal right_button_released()
@@ -43,6 +44,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		pointer_position = event.position
+	# Complete map drags even when the pointer is released over a HUD control.
+	if _battle_input_enabled and event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		mouse_button_left_released.emit(event.position)
 	if _battle_input_enabled and _right_button_held and event.is_action_released("RIGHT"):
 		_right_button_held = false
 		right_button_released.emit()

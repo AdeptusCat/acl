@@ -2,6 +2,16 @@
 
 Click a support weapon icon, click a target hex, then press **Enter** to assign a fire mission. Each onboard mortar or offboard battery has its own mortar/howitzer icon showing remaining rounds; active missions are highlighted. Clicking the same icon again closes the panel; clicking another icon switches batteries. Every battlefield click while the panel is open selects or replaces the target hex. **F** toggles the currently selected asset. Infantry selection is preserved. Use **Locate mortar** to center an onboard mortar.
 
+Target shapes use direct battlefield gestures:
+
+- **Point:** click a hex. Small pointer movements are ignored.
+- **Line:** drag from the first hex to the last. Fire sweeps along the crossed hexes in that order, repeating when needed.
+- **Area:** hold **Shift** and drag from the center to the edge, or select the **Area** button and drag without a modifier. Circular radius is limited to 1–3 hex spacings; only battlefield hex centers inside the circle are eligible. Rounds visit shuffled hexes without repeats until every hex has been covered.
+
+Point, Line and Area buttons provide visible alternatives to the gestures. Releasing the mouse prepares the footprint; it never fires immediately. **Enter / Fire mission** confirms. Another click or drag replaces the preview. **Escape** cancels the preview first; a second Escape closes the panel. Releasing a drag over the HUD cancels it.
+
+The live preview shades eligible hexes, shows line sweep direction or the area circle, highlights friendly troops inside it and reports rounds versus covered hexes. Broad footprints with fewer rounds than hexes show **sparse coverage**. The total mission ammunition is unchanged by target shape. Each round resolves through the existing single-hex HE system.
+
 - **Quick:** 3 rounds, as fast as the real weapon can prepare and reload.
 - **Standard:** 6 rounds, at least 4 seconds between launches.
 - **Harassing:** one round every 15–25 seconds until **Cease fire** or ammunition exhaustion.

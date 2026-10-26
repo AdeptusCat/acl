@@ -12,10 +12,21 @@ var selected_mode: FireSupportMission.Mode = FireSupportMission.Mode.QUICK
 var choosing_target: bool = false
 var has_target: bool = false
 var target: Vector2i
+var selected_shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT
+var target_shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT
+var target_cells: Array[Vector2i] = []
+var target_end: Vector2i
+var target_radius: int = 1
+var dragging: bool = false
+var _drag_start: Vector2
+var _drag_area: bool = false
+const DRAG_THRESHOLD: float = 10.0
 var panel: FireSupportPanel
 
 func setup(controller: Node2D) -> void:
 	host = controller
+	z_index = 6
+	host.get_parent().input_manager.mouse_button_left_released.connect(end_target)
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
 		if unit.squad_type == Globals.SquadType.MORTAR:
 			assets.append({"id": "unit_%d" % unit.get_instance_id(), "name": unit.get_hud_name() + " · Onboard", "unit": unit, "battery": null})
@@ -122,8 +133,20 @@ func restriction(index: int, cell: Vector2i) -> String:
 			return "Outside this mortar's range."
 	return ""
 
-func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode) -> bool:
-	var reason: String = restriction(index, cell)
+func footprint_restriction(index: int, cells: Array[Vector2i]) -> String:
+	if cells.is_empty():
+		return "Choose a battlefield target."
+	for cell: Vector2i in cells:
+		var reason: String = restriction(index, cell)
+		if not reason.is_empty():
+			return reason
+	return ""
+
+func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode, cells: Array[Vector2i] = [], shape: FireSupportMission.Shape = FireSupportMission.Shape.POINT, end: Vector2i = Vector2i.ZERO, radius: int = 1) -> bool:
+	var footprint: Array[Vector2i] = cells.duplicate()
+	if footprint.is_empty():
+		footprint.append(cell)
+	var reason: String = footprint_restriction(index, footprint)
 	if not reason.is_empty():
 		host.order_feedback.emit(false, "Fire support", reason)
 		return false
@@ -134,6 +157,10 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode) -> bool:
 	mission = FireSupportMission.new()
 	mission.asset_id = asset["id"]
 	mission.target = cell
+	mission.cells.assign(footprint)
+	mission.shape = shape
+	mission.end = end
+	mission.radius = radius
 	mission.mode = mode
 	mission.remaining = mini(3, ammunition(index))
 	if mode == FireSupportMission.Mode.STANDARD:
@@ -152,6 +179,8 @@ func request(index: int, cell: Vector2i, mode: FireSupportMission.Mode) -> bool:
 		mission.next_round = (asset["battery"] as OffboardBattery).response_seconds
 	choosing_target = panel != null and panel.tray.visible and not assets.is_empty()
 	has_target = false
+	dragging = false
+	target_cells.clear()
 	LOSHelper.clear_los()
 	host._on_started_moving()
 	host.order_feedback.emit(true, "Fire mission", FireSupportMission.MODE_NAMES[mode])
@@ -181,13 +210,124 @@ func pick_target(screen_point: Vector2) -> void:
 		focus.release_focus()
 	var ground: HexagonTileMapLayer = host.ground_layer
 	target = ground.local_to_map(ground.get_global_transform_with_canvas().affine_inverse() * screen_point)
+	target_shape = FireSupportMission.Shape.POINT
+	target_end = target
+	target_cells = build_footprint(target, target, target_shape, 1)
 	has_target = true
 	choosing_target = panel != null and panel.tray.visible and not assets.is_empty()
 	LOSHelper.clear_los()
 	queue_redraw()
 	panel.refresh()
 
+func cancel_preview() -> void:
+	dragging = false
+	has_target = false
+	target_cells.clear()
+	LOSHelper.clear_los()
+	queue_redraw()
+	panel.refresh()
+
+func select_shape(shape: FireSupportMission.Shape) -> void:
+	selected_shape = shape
+	cancel_preview()
+
+func begin_target(screen_point: Vector2, shift: bool = false) -> void:
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var cell: Vector2i = ground.local_to_map(ground.get_global_transform_with_canvas().affine_inverse() * screen_point)
+	if ground.get_cell_source_id(cell) == -1:
+		return
+	_drag_start = screen_point
+	_drag_area = shift or selected_shape == FireSupportMission.Shape.AREA
+	dragging = true
+	has_target = false
+	target = cell
+	target_end = cell
+	update_drag(screen_point)
+
+func update_drag(screen_point: Vector2) -> void:
+	if not dragging:
+		return
+	var ground: HexagonTileMapLayer = host.ground_layer
+	target_end = ground.local_to_map(ground.get_global_transform_with_canvas().affine_inverse() * screen_point)
+	target_shape = FireSupportMission.Shape.POINT
+	if _drag_area:
+		target_shape = FireSupportMission.Shape.AREA
+	elif screen_point.distance_to(_drag_start) >= DRAG_THRESHOLD and target_end != target:
+		target_shape = FireSupportMission.Shape.LINE
+	var center: Vector2 = ground.to_global(ground.map_to_local(target))
+	var edge: Vector2 = ground.to_global(ground.map_to_local(target_end))
+	target_radius = clampi(ceili(center.distance_to(edge) / hex_spacing()), 1, 3)
+	target_cells = build_footprint(target, target_end, target_shape, target_radius)
+	queue_redraw()
+	panel.refresh()
+
+func end_target(screen_point: Vector2) -> void:
+	if not dragging:
+		return
+	var hovered: Control = get_viewport().gui_get_hovered_control()
+	if hovered != null and hovered.get_global_rect().has_point(screen_point):
+		cancel_preview()
+		return
+	update_drag(screen_point)
+	dragging = false
+	has_target = not target_cells.is_empty()
+	var focus: Control = get_viewport().gui_get_focus_owner()
+	if focus != null:
+		focus.release_focus()
+	LOSHelper.clear_los()
+	queue_redraw()
+	panel.refresh()
+
+func hex_spacing() -> float:
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var center: Vector2 = ground.to_global(ground.map_to_local(target))
+	var spacing: float = 1.0
+	for neighbor: Vector2i in ground.get_surrounding_cells(target):
+		spacing = maxf(spacing, center.distance_to(ground.to_global(ground.map_to_local(neighbor))))
+	return spacing
+
+func build_footprint(start: Vector2i, end: Vector2i, shape: FireSupportMission.Shape, radius: int) -> Array[Vector2i]:
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var cells: Array[Vector2i] = []
+	if shape == FireSupportMission.Shape.POINT:
+		if ground.get_cell_source_id(start) != -1:
+			cells.append(start)
+	elif shape == FireSupportMission.Shape.LINE:
+		var a: Vector3 = Vector3(ground.map_to_cube(start)) + Vector3(0.000001, 0.000002, -0.000003)
+		var b: Vector3 = Vector3(ground.map_to_cube(end)) + Vector3(0.000001, 0.000002, -0.000003)
+		var steps: int = ground.cube_distance(ground.map_to_cube(start), ground.map_to_cube(end))
+		for index: int in range(steps + 1):
+			var cell: Vector2i = ground.cube_to_map(ground.cube_round(a.lerp(b, float(index) / float(maxi(steps, 1)))))
+			if ground.get_cell_source_id(cell) != -1 and not cells.has(cell):
+				cells.append(cell)
+	else:
+		var center: Vector2 = ground.to_global(ground.map_to_local(start))
+		var spacing: float = 1.0
+		for neighbor: Vector2i in ground.get_surrounding_cells(start):
+			spacing = maxf(spacing, center.distance_to(ground.to_global(ground.map_to_local(neighbor))))
+		var distance: float = spacing * float(clampi(radius, 1, 3))
+		for cell: Vector2i in ground.get_used_cells():
+			if center.distance_to(ground.to_global(ground.map_to_local(cell))) <= distance + 0.01:
+				cells.append(cell)
+	return cells
+
+func coverage_text() -> String:
+	var rounds: int = 0
+	if selected_asset >= 0 and selected_asset < assets.size():
+		rounds = ammunition(selected_asset)
+	if selected_mode == FireSupportMission.Mode.QUICK:
+		rounds = mini(rounds, 3)
+	elif selected_mode == FireSupportMission.Mode.STANDARD:
+		rounds = mini(rounds, 6)
+	var text: String = "%d rounds across %d hexes" % [rounds, target_cells.size()]
+	if rounds < target_cells.size():
+		text += " · sparse coverage"
+	return text
+
 func hover_target(screen_point: Vector2) -> void:
+	if dragging:
+		update_drag(screen_point)
+		return
 	if selected_asset < 0 or selected_asset >= assets.size():
 		return
 	var ground: HexagonTileMapLayer = host.ground_layer
@@ -202,22 +342,29 @@ func hover_target(screen_point: Vector2) -> void:
 		var feedback: Dictionary = MatchInteractionHandler.unit_target_feedback(unit, cell)
 		LOSHelper.draw_los(unit.position, point, float(feedback["firepower"]))
 
-func preview(index: int, cell: Vector2i) -> String:
-	var reason: String = restriction(index, cell)
+func preview(index: int, cell: Vector2i, cells: Array[Vector2i] = []) -> String:
+	var footprint: Array[Vector2i] = cells
+	if footprint.is_empty():
+		footprint = [cell]
+	var reason: String = footprint_restriction(index, footprint)
 	if not reason.is_empty():
 		return reason
-	var observed: bool = false
+	var observed_cells: Dictionary[Vector2i, bool] = {}
 	var friends: int = 0
 	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
 		if not unit.is_active() or unit.surrendered:
 			continue
-		if unit.current_hex == cell:
+		if footprint.has(unit.current_hex):
 			friends += 1
-		if LOSHelper.los_lookup.get(unit.current_hex, {}).has(cell):
-			observed = true
+		var visibility: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
+		for covered: Vector2i in footprint:
+			if visibility.has(covered):
+				observed_cells[covered] = true
 	var text: String = "Unobserved · map fire"
-	if observed:
+	if observed_cells.size() == footprint.size():
 		text = "Observed by friendly troops"
+	elif not observed_cells.is_empty():
+		text = "Partly observed · %d/%d hexes" % [observed_cells.size(), footprint.size()]
 	var asset: Dictionary = assets[index]
 	var eta: float = 0.0
 	if asset["battery"] != null:
@@ -239,7 +386,7 @@ func preview(index: int, cell: Vector2i) -> String:
 			text += "\nMortar will halt and deploy"
 	text += "\nEstimated first impact: about %d s" % ceili(eta)
 	if friends > 0:
-		text += "\nFRIENDLY TROOPS IN TARGET HEX"
+		text += "\nFRIENDLY TROOPS IN TARGET FOOTPRINT"
 	return text
 
 func _process(delta: float) -> void:
@@ -250,6 +397,8 @@ func _process(delta: float) -> void:
 			cease(index)
 		flights.clear()
 		choosing_target = false
+		dragging = false
+		has_target = false
 		return
 	for mission: FireSupportMission in missions:
 		mission.elapsed += delta
@@ -291,16 +440,17 @@ func _process(delta: float) -> void:
 func _launch_offboard(asset: Dictionary, mission: FireSupportMission) -> void:
 	var battery: OffboardBattery = asset["battery"]
 	var weapon: WeaponSpec = asset["weapon"]
+	var impact_cell: Vector2i = mission.next_target()
 	weapon.ammunition -= 1
 	mission.commit_rounds(1)
 	if mission.mode != FireSupportMission.Mode.HARASSING:
 		mission.next_round = maxf(mission.next_round, mission.elapsed + maxf(weapon.reload_s, 2.0))
 	var ground: HexagonTileMapLayer = host.ground_layer
-	var finish: Vector2 = ground.to_global(ground.map_to_local(mission.target))
+	var finish: Vector2 = ground.to_global(ground.map_to_local(impact_cell))
 	var origin: Vector2 = _offboard_origin(finish, float(weapon.projectile_speed) * battery.flight_seconds)
 	var source: Unit = asset["unit"]
 	source.position = origin
-	flights.append({"source": source, "weapon": weapon, "target": mission.target, "time": battery.flight_seconds, "cover": LOSHelper.is_sample_point_in_building(ground.map_to_local(mission.target)), "origin": origin, "new": true})
+	flights.append({"source": source, "weapon": weapon, "target": impact_cell, "time": battery.flight_seconds, "cover": LOSHelper.is_sample_point_in_building(ground.map_to_local(impact_cell)), "origin": origin, "new": true})
 	var effect: BattlefieldTracer = BattlefieldEffects.for_scene(self).fire(origin, finish, weapon, BattlefieldTracer.Kind.MORTAR, TRACER_SCENE)
 	if effect != null:
 		# Extending the approach beyond the board must preserve the authored impact time.
@@ -339,9 +489,37 @@ func _draw() -> void:
 		return
 	for mission: FireSupportMission in missions:
 		if mission.active:
-			_draw_marker(mission.target, Color(1.0, 0.48, 0.25, 0.8))
-	if has_target:
-		_draw_marker(target, Color(1.0, 0.85, 0.35, 0.9))
+			_draw_footprint(mission.cells, mission.shape, mission.target, mission.end, mission.radius, Color(1.0, 0.48, 0.25, 0.65))
+	if has_target or dragging:
+		_draw_footprint(target_cells, target_shape, target, target_end, target_radius, Color(1.0, 0.28, 0.18, 0.9))
+		for unit: Unit in Globals.get_units_for_team(Globals.team_player):
+			if unit.is_active() and target_cells.has(unit.current_hex):
+				var center: Vector2 = to_local(unit.global_position)
+				draw_arc(center, 48.0, 0.0, TAU, 40, Color(1.0, 0.78, 0.2), 4.0, true)
+
+func _draw_footprint(cells: Array[Vector2i], shape: FireSupportMission.Shape, start: Vector2i, end: Vector2i, radius: int, color: Color) -> void:
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var tile_shape: ConvexPolygonShape2D = ground.geometry_tile_shape.shape as ConvexPolygonShape2D
+	for cell: Vector2i in cells:
+		var points: PackedVector2Array = PackedVector2Array()
+		for corner: Vector2 in tile_shape.points:
+			points.append(to_local(ground.to_global(ground.map_to_local(cell) + corner * 0.94)))
+		draw_colored_polygon(points, Color(color, color.a * 0.16))
+		points.append(points[0])
+		draw_polyline(points, Color(color, color.a * 0.55), 1.5, true)
+	var center: Vector2 = to_local(ground.to_global(ground.map_to_local(start)))
+	if shape == FireSupportMission.Shape.LINE:
+		var finish: Vector2 = to_local(ground.to_global(ground.map_to_local(end)))
+		draw_line(center, finish, color, 3.0, true)
+		var arrow: Vector2 = finish.direction_to(center).rotated(0.5) * 16.0
+		draw_line(finish, finish + arrow, color, 3.0, true)
+		draw_line(finish, finish + arrow.rotated(-1.0), color, 3.0, true)
+	elif shape == FireSupportMission.Shape.AREA:
+		var spacing: float = 1.0
+		for neighbor: Vector2i in ground.get_surrounding_cells(start):
+			spacing = maxf(spacing, center.distance_to(to_local(ground.to_global(ground.map_to_local(neighbor)))))
+		draw_arc(center, spacing * float(radius), 0.0, TAU, 64, color, 2.0, true)
+	_draw_marker(start, color)
 
 func _draw_marker(cell: Vector2i, color: Color) -> void:
 	var center: Vector2 = to_local(host.ground_layer.to_global(host.ground_layer.map_to_local(cell)))

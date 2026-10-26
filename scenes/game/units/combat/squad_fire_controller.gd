@@ -569,6 +569,8 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		_target_hex = personal_target_hex
 	elif s.weapon.family == WeaponSpec.Family.MORTAR:
 		_target_hex = mortar_target_hex
+		if fire_support_mission != null:
+			_target_hex = fire_support_mission.next_target()
 	
 	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
 		pass
