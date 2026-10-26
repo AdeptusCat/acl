@@ -1,6 +1,6 @@
 # Fire support
 
-Press **F**, click a target hex, then press **Enter** to assign a fire mission. The persistent **Fire Support** button opens the same tray. Infantry selection is preserved. Choose another battery in the dropdown or use **Locate mortar** to center an onboard mortar.
+Click a support weapon icon, click a target hex, then press **Enter** to assign a fire mission. Each onboard mortar or offboard battery has its own mortar/howitzer icon showing remaining rounds; active missions are highlighted. **F** opens the currently selected asset. Infantry selection is preserved. Choose another battery in the dropdown or use **Locate mortar** to center an onboard mortar.
 
 - **Quick:** 3 rounds, as fast as the real weapon can prepare and reload.
 - **Standard:** 6 rounds, at least 4 seconds between launches.
@@ -11,6 +11,8 @@ Onboard missions use the existing gunner, ammunition, crew, setup, reload, proje
 Targets need not be visible to the mortar. The preview identifies friendly observation and friendly troops in the target hex. Existing HE resolution affects the struck hex, so the mission marker represents that hex rather than promising damage to adjacent cells.
 
 Mortar and artillery shells and explosions remain visible above fog of war, including enemy fire. These effects do not reveal units or terrain visibility.
+
+Offboard rounds approach from the direction of the player's start hex, with their origin beyond the battlefield edge. Configured flight times are preserved. A target on the start hex uses the direction away from the enemy start as its fallback.
 
 Offboard support is assigned per scenario through **offboard_batteries**, an array of **OffboardBattery** resources. Each definition specifies its faction, weapon, rounds, response delay and flight time. Definitions are copied into independent runtime batteries; they do not create battlefield counters, observers or objectives. Existing scenario balance is unchanged unless a designer assigns support.
 

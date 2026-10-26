@@ -12,6 +12,8 @@
 [ext_resource type="TileSet" uid="uid://dky7ipek6sjb4" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_hfvsb"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/building_tile_map_layer.tscn" id="15_fy3lb"]
 [ext_resource type="Script" uid="uid://cdv7kxgdwq1so" path="res://resources/weapons/offboard_battery.gd" id="16_qktt2"]
+[ext_resource type="Resource" path="res://resources/weapons/offboard_105mm_he.tres" id="17_yycqq"]
+[ext_resource type="Resource" uid="uid://cg2ua8j6pxhkn" path="res://resources/weapons/m1_81mm_mortar.tres" id="18_7c7xa"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_yycqq"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="21_hi3l8"]
 [ext_resource type="Resource" uid="uid://cntsjxepp043a" path="res://resources/soldiers/united_states/platoon_leader.tres" id="22_fy3lb"]
@@ -99,15 +101,13 @@ sources/4 = SubResource("TileSetAtlasSource_wi054")
 
 [sub_resource type="Resource" id="Resource_harg6"]
 script = ExtResource("16_qktt2")
+battery_name = "howitzer"
+weapon = ExtResource("17_yycqq")
 metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
-
-[sub_resource type="Resource" id="Resource_yycqq"]
-script = ExtResource("26_yac84")
-metadata/_custom_type_script = "uid://bikdnoi2rxdle"
 
 [sub_resource type="Resource" id="Resource_qktt2"]
 script = ExtResource("16_qktt2")
-weapon = SubResource("Resource_yycqq")
+weapon = ExtResource("18_7c7xa")
 metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
 
 [sub_resource type="Resource" id="Resource_h7ai6"]

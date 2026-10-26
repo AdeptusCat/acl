@@ -33,6 +33,12 @@ func _run() -> void:
 	var host: Node2D = world.game_controller
 	var support: FireSupportController = host.fire_support
 	_check(support.assets.size() == 3, "Onboard mortars and both authored offboard batteries share one tray")
+	_check(support.panel.asset_buttons.size() == 3, "Every support asset has its own HUD icon")
+	_check(support.panel.asset_buttons[0].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[1].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[2].icon == FireSupportPanel.HOWITZER_ICON, "Support icons distinguish actual mortar and howitzer weapon families")
+	support.panel.asset_buttons[2].pressed.emit()
+	_check(support.panel.tray.visible and support.selected_asset == 2 and support.panel.assets.selected == 2, "Clicking a howitzer icon opens its battery directly")
+	support.panel._close()
+	support.selected_asset = 0
 	var target: Vector2i = mortar.current_hex
 	for cell: Vector2i in host.ground_layer.get_used_cells():
 		var distance: int = host.ground_layer.cube_distance(mortar.current_cube, host.ground_layer.map_to_cube(cell))
@@ -96,6 +102,24 @@ func _run() -> void:
 	_check(support.ammunition(1) == before, "Offboard batteries honor their authored response delay")
 	support._process(1.0)
 	_check(support.ammunition(1) == before - 1 and support.flights.size() == 1, "Offboard launch spends ammunition and creates an in-flight shell")
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var finish: Vector2 = ground.to_global(ground.map_to_local(enemy.current_hex))
+	var start: Vector2 = ground.to_global(ground.map_to_local(scenario.start_hex[Globals.team_player]))
+	var origin: Vector2 = support.flights[0]["origin"]
+	_check((origin - finish).normalized().dot((start - finish).normalized()) > 0.999, "Offboard rounds approach from the player start hex direction")
+	var board_bounds: Rect2 = Rect2(finish, Vector2.ZERO)
+	for cell: Vector2i in ground.get_used_cells():
+		board_bounds = board_bounds.expand(ground.to_global(ground.map_to_local(cell)))
+	_check(not board_bounds.has_point(origin), "Offboard launch originates beyond the battlefield bounds")
+	var near_origin: Vector2 = support._offboard_origin(finish, 1.0)
+	_check(not board_bounds.has_point(near_origin), "Even short configured flight distances launch beyond the board")
+	_check(support._offboard_origin(start, 1.0).is_finite() and not board_bounds.has_point(support._offboard_origin(start, 1.0)), "Firing at the player start uses a finite offboard fallback direction")
+	var effects: BattlefieldEffects = BattlefieldEffects.for_scene(support)
+	var timed_effect: bool = false
+	for tracer: BattlefieldTracer in effects._all:
+		if tracer.active and tracer.origin == origin:
+			timed_effect = is_equal_approx(tracer.flight_time, 4.0) and is_equal_approx(tracer.speed * tracer.flight_time, origin.distance_to(finish))
+	_check(timed_effect, "Offboard visual flight time stays synchronized with impact after extending the approach")
 	support.cease(1)
 	support._process(4.0)
 	await get_tree().process_frame

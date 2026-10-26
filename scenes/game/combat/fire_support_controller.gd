@@ -52,6 +52,17 @@ func asset_mission(index: int) -> FireSupportMission:
 			return mission
 	return null
 
+func asset_weapon(index: int) -> WeaponSpec:
+	var asset: Dictionary = assets[index]
+	if asset["battery"] != null:
+		return asset["weapon"] as WeaponSpec
+	var unit: Unit = asset["unit"]
+	if is_instance_valid(unit):
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			if soldier.weapon != null and soldier.weapon.family == WeaponSpec.Family.MORTAR:
+				return soldier.weapon
+	return null
+
 func ammunition(index: int) -> int:
 	var asset: Dictionary = assets[index]
 	if asset["battery"] != null:
@@ -286,11 +297,42 @@ func _launch_offboard(asset: Dictionary, mission: FireSupportMission) -> void:
 		mission.next_round = maxf(mission.next_round, mission.elapsed + maxf(weapon.reload_s, 2.0))
 	var ground: HexagonTileMapLayer = host.ground_layer
 	var finish: Vector2 = ground.to_global(ground.map_to_local(mission.target))
-	var origin: Vector2 = finish + Vector2(0.0, -float(weapon.projectile_speed) * battery.flight_seconds)
+	var origin: Vector2 = _offboard_origin(finish, float(weapon.projectile_speed) * battery.flight_seconds)
 	var source: Unit = asset["unit"]
 	source.position = origin
 	flights.append({"source": source, "weapon": weapon, "target": mission.target, "time": battery.flight_seconds, "cover": LOSHelper.is_sample_point_in_building(ground.map_to_local(mission.target)), "origin": origin, "new": true})
-	BattlefieldEffects.for_scene(self).fire(origin, finish, weapon, BattlefieldTracer.Kind.MORTAR, TRACER_SCENE)
+	var effect: BattlefieldTracer = BattlefieldEffects.for_scene(self).fire(origin, finish, weapon, BattlefieldTracer.Kind.MORTAR, TRACER_SCENE)
+	if effect != null:
+		# Extending the approach beyond the board must preserve the authored impact time.
+		effect.flight_time = battery.flight_seconds
+		effect.speed = origin.distance_to(finish) / battery.flight_seconds
+
+func _offboard_origin(finish: Vector2, flight_distance: float) -> Vector2:
+	var ground: HexagonTileMapLayer = host.ground_layer
+	var scenario: Scenario = Globals.scenario_chosen
+	var start: Vector2 = ground.to_global(ground.map_to_local(scenario.start_hex[Globals.team_player]))
+	var direction: Vector2 = finish.direction_to(start)
+	if direction.is_zero_approx():
+		var enemy_start: Vector2 = ground.to_global(ground.map_to_local(scenario.start_hex[Globals.get_enemy_team(Globals.team_player)]))
+		direction = enemy_start.direction_to(start)
+	if direction.is_zero_approx():
+		direction = Vector2.DOWN
+	var bounds: Rect2 = Rect2(finish, Vector2.ZERO)
+	for cell: Vector2i in ground.get_used_cells():
+		bounds = bounds.expand(ground.to_global(ground.map_to_local(cell)))
+	# A full tile diagonal keeps the launch outside even the outermost hex corners.
+	var margin: float = Vector2(ground.tile_set.tile_size).length() * maxf(ground.global_transform.x.length(), ground.global_transform.y.length())
+	bounds = bounds.grow(margin)
+	var exit_distance: float = INF
+	if direction.x > 0.00001:
+		exit_distance = minf(exit_distance, (bounds.end.x - finish.x) / direction.x)
+	elif direction.x < -0.00001:
+		exit_distance = minf(exit_distance, (bounds.position.x - finish.x) / direction.x)
+	if direction.y > 0.00001:
+		exit_distance = minf(exit_distance, (bounds.end.y - finish.y) / direction.y)
+	elif direction.y < -0.00001:
+		exit_distance = minf(exit_distance, (bounds.position.y - finish.y) / direction.y)
+	return finish + direction * maxf(flight_distance, exit_distance + margin)
 
 func _draw() -> void:
 	if not is_instance_valid(host) or not is_instance_valid(host.ground_layer):

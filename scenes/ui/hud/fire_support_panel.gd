@@ -1,8 +1,13 @@
 extends Control
 class_name FireSupportPanel
 
+const MORTAR_ICON: Texture2D = preload("res://assets/ui/hud/units/mortar.svg")
+const HOWITZER_ICON: Texture2D = preload("res://assets/ui/hud/units/howitzer.svg")
+
 var support: FireSupportController
-var toggle: Button
+var icon_bar: ScrollContainer
+var icon_row: HBoxContainer
+var asset_buttons: Array[Button] = []
 var tray: PanelContainer
 var assets: OptionButton
 var mode: OptionButton
@@ -17,11 +22,13 @@ var _refresh_elapsed: float = 0.0
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	z_index = 8
-	toggle = Button.new()
-	toggle.text = "Fire Support [F]"
-	toggle.custom_minimum_size = Vector2(180, 34)
-	toggle.pressed.connect(toggle_tray)
-	add_child(toggle)
+	icon_bar = ScrollContainer.new()
+	icon_bar.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	icon_bar.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	add_child(icon_bar)
+	icon_row = HBoxContainer.new()
+	icon_row.add_theme_constant_override("separation", 6)
+	icon_bar.add_child(icon_row)
 	tray = PanelContainer.new()
 	tray.custom_minimum_size.x = 430.0
 	tray.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -97,6 +104,7 @@ func _close() -> void:
 	support.has_target = false
 	LOSHelper.clear_los()
 	support.queue_redraw()
+	_refresh_icons()
 
 func _choose_target() -> void:
 	support.choosing_target = true
@@ -106,6 +114,47 @@ func _choose_target() -> void:
 func _select_asset(index: int) -> void:
 	support.selected_asset = index
 	refresh()
+
+func _open_asset(index: int) -> void:
+	support.selected_asset = index
+	tray.show()
+	support.choosing_target = not support.has_target
+	refresh()
+
+func _refresh_icons() -> void:
+	if asset_buttons.size() != support.assets.size():
+		for button: Button in asset_buttons:
+			icon_row.remove_child(button)
+			button.queue_free()
+		asset_buttons.clear()
+		for index: int in range(support.assets.size()):
+			var button: Button = Button.new()
+			button.custom_minimum_size = Vector2(68, 48)
+			button.toggle_mode = true
+			button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			button.pressed.connect(_open_asset.bind(index))
+			icon_row.add_child(button)
+			asset_buttons.append(button)
+	for index: int in range(asset_buttons.size()):
+		var button: Button = asset_buttons[index]
+		var weapon: WeaponSpec = support.asset_weapon(index)
+		button.icon = MORTAR_ICON
+		var weapon_name: String = "Mortar"
+		if weapon != null:
+			weapon_name = weapon.name
+			if weapon.family == WeaponSpec.Family.HOWITZER:
+				button.icon = HOWITZER_ICON
+		button.text = str(support.ammunition(index))
+		button.set_pressed_no_signal(tray.visible and support.selected_asset == index)
+		button.tooltip_text = "%s\n%s · %s\n%d rounds · Fire support [F]" % [support.assets[index]["name"], weapon_name, support.asset_status(index), support.ammunition(index)]
+		var mission: FireSupportMission = support.asset_mission(index)
+		button.self_modulate = Color.WHITE
+		if mission != null and mission.active:
+			button.self_modulate = Color(1.0, 0.78, 0.42)
+		elif support.ammunition(index) <= 0:
+			button.self_modulate = Color(0.55, 0.55, 0.55)
+	icon_bar.visible = not asset_buttons.is_empty()
 
 func _select_mode(index: int) -> void:
 	support.selected_mode = index as FireSupportMission.Mode
@@ -143,7 +192,7 @@ func refresh() -> void:
 	assets.disabled = support.assets.is_empty()
 	pick_button.disabled = support.assets.is_empty()
 	mode.disabled = support.assets.is_empty()
-	toggle.text = "Fire Support [F] · %d" % support.assets.size()
+	_refresh_icons()
 	target_label.text = "Click a battlefield hex to choose the target."
 	if support.has_target:
 		target_label.text = "Target (%d, %d)\n%s" % [support.target.x, support.target.y, support.preview(selection, support.target)]
@@ -171,9 +220,10 @@ func _layout() -> void:
 	if not is_node_ready():
 		return
 	var area: Vector2 = (get_parent() as Control).size
-	toggle.position = Vector2(maxf(12.0, (area.x - toggle.size.x) * 0.5), area.y - toggle.size.y - 12.0)
+	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 78.0)
+	icon_bar.position = Vector2(maxf(12.0, (area.x - icon_bar.size.x) * 0.5), area.y - icon_bar.size.y - 12.0)
 	tray.size = Vector2(minf(460.0, area.x - 24.0), tray.get_combined_minimum_size().y)
-	tray.position = Vector2(maxf(12.0, (area.x - tray.size.x) * 0.5), maxf(12.0, toggle.position.y - tray.size.y - 8.0))
+	tray.position = Vector2(maxf(12.0, (area.x - tray.size.x) * 0.5), maxf(12.0, icon_bar.position.y - tray.size.y - 8.0))
 
 func _process(delta: float) -> void:
 	_refresh_elapsed += delta
