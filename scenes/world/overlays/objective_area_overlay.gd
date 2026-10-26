@@ -4,6 +4,8 @@ class_name ObjectiveAreaOverlay
 const AREA_SHADER: Shader = preload("res://assets/shader/objective_area.gdshader")
 const FRIENDLY_COLOR: Color = Color(0.48, 0.85, 0.60)
 const ENEMY_COLOR: Color = Color(0.96, 0.40, 0.30)
+const PLAYER_EXIT_COLOR: Color = Color(0.48, 0.83, 0.85)
+const ENEMY_EXIT_COLOR: Color = ENEMY_COLOR
 const REFRESH_INTERVAL_S: float = 0.05
 const FONT: Font = preload("res://assets/fonts/courier_prime/Courier Prime.ttf")
 const NAMES: Array[String] = ["EXIT", "A", "B", "C", "START"]
@@ -109,7 +111,7 @@ func setup(target: HexagonTileMapLayer, owner_team: Globals.Team, exits_only: bo
 		shader_material.set_shader_parameter("objective_phase", float(id) * 2.1)
 		var color: Color = COLORS[id]
 		if is_exit:
-			color = COLORS[ExitUnitsCondition.ObjectiveId.EXIT]
+			color = exit_color(team)
 		shader_material.set_shader_parameter("area_color", color)
 		var polygon: Polygon2D = Polygon2D.new()
 		polygon.polygon = points
@@ -147,11 +149,11 @@ func _update_colors() -> void:
 	for marker: Dictionary in markers:
 		var color: Color = COLORS[int(marker["id"])]
 		if bool(marker["is_exit"]):
-			color = COLORS[ExitUnitsCondition.ObjectiveId.EXIT]
+			color = exit_color(team)
 		var capture_progress: float = 0.0
 		var capture_color: Color = FRIENDLY_COLOR
 		for condition: VictoryCondition in collection.victory_conditions:
-			if condition is not OccupyObjectiveCondition:
+			if condition is not OccupyObjectiveCondition or bool(marker["is_exit"]):
 				continue
 			var occupy: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
 			if occupy.objective_id != int(marker["id"]) or occupy.state == null:
@@ -198,13 +200,30 @@ static func capture_style(occupy: OccupyObjectiveCondition, hex: Vector2i) -> Di
 	return {"color": color, "progress": progress, "capture_color": capture_color}
 
 
+static func exit_color(owner_team: Globals.Team) -> Color:
+	if owner_team == Globals.team_player:
+		return PLAYER_EXIT_COLOR
+	return ENEMY_EXIT_COLOR
+
+
+static func exit_label(owner_team: Globals.Team, objective_id: int) -> String:
+	var text: String = "ENEMY EXIT"
+	if owner_team == Globals.team_player:
+		text = "YOUR EXIT"
+	if objective_id != ExitUnitsCondition.ObjectiveId.EXIT:
+		text += " " + NAMES[objective_id]
+	return text
+
+
 func _draw() -> void:
 	for marker: Dictionary in markers:
 		var text: String = NAMES[int(marker["id"])]
-		if bool(marker["is_exit"]) and int(marker["id"]) != ExitUnitsCondition.ObjectiveId.EXIT:
-			text = "EXIT " + text
+		var text_color: Color = Color(0.97, 0.91, 0.73, 0.9)
+		if bool(marker["is_exit"]):
+			text = exit_label(team, int(marker["id"]))
+			text_color = exit_color(team).lightened(0.3)
 		var center: Vector2 = marker["center"]
 		var extent: Vector2 = FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13)
 		var baseline: Vector2 = center + Vector2(-extent.x * 0.5, 4.0)
 		draw_string_outline(FONT, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, 3, Color(0.07, 0.09, 0.08, 0.9))
-		draw_string(FONT, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, Color(0.97, 0.91, 0.73, 0.9))
+		draw_string(FONT, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, text_color)

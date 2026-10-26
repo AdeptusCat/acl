@@ -538,11 +538,20 @@ func _check_exit_shader(world: Node) -> void:
 	var enemy_overlay: ObjectiveAreaOverlay = enemy_layer.get_parent().get_node("EnemyExitArea") as ObjectiveAreaOverlay
 	_check(own_overlay.markers.size() == 2 and enemy_overlay.markers.size() == 3, "Both player and enemy exit hexes receive shader markers")
 	_check(enemy_overlay.is_visible_in_tree() and not enemy_layer.visible, "Enemy exit effects remain visible while enemy capture markers stay hidden")
+	for marker: Dictionary in own_overlay.markers:
+		var shader_material: ShaderMaterial = marker["material"]
+		_check(shader_material.get_shader_parameter("area_color") == ObjectiveAreaOverlay.PLAYER_EXIT_COLOR, "Player exit routes use cyan markings")
+	_check(ObjectiveAreaOverlay.exit_label(Globals.team_player, 0) == "YOUR EXIT" and ObjectiveAreaOverlay.exit_label(Globals.team_player, 1) == "YOUR EXIT A", "Player exit labels identify their purpose and retain named markers")
+	_check(ObjectiveAreaOverlay.exit_label(Globals.get_enemy_team(Globals.team_player), 0) == "ENEMY EXIT" and ObjectiveAreaOverlay.exit_label(Globals.get_enemy_team(Globals.team_player), 1) == "ENEMY EXIT A", "Enemy exit labels distinguish enemy routes including named exits")
+	var previous_player: Globals.Team = Globals.team_player
+	Globals.team_player = Globals.get_enemy_team(previous_player)
+	_check(ObjectiveAreaOverlay.exit_color(Globals.team_player) == ObjectiveAreaOverlay.PLAYER_EXIT_COLOR and ObjectiveAreaOverlay.exit_color(previous_player) == ObjectiveAreaOverlay.ENEMY_EXIT_COLOR, "Exit colors follow the player perspective when playing the opposite faction")
+	Globals.team_player = previous_player
 	var exposed: int = 0
 	for marker: Dictionary in enemy_overlay.markers:
 		_check(bool(marker["is_exit"]) and marker["hex"] != hidden_capture, "The enemy overlay only reveals exit routes, including named exits")
 		var shader_material: ShaderMaterial = marker["material"]
-		_check(shader_material.shader == ObjectiveAreaOverlay.AREA_SHADER and shader_material.get_shader_parameter("area_color") == ObjectiveAreaOverlay.COLORS[0], "Exit routes use the objective animation shader with cyan markings")
+		_check(shader_material.shader == ObjectiveAreaOverlay.AREA_SHADER and shader_material.get_shader_parameter("area_color") == ObjectiveAreaOverlay.ENEMY_EXIT_COLOR, "Enemy exit routes use the objective animation shader with red markings")
 		if int(marker["id"]) == 0:
 			for edge: float in marker["edges"]:
 				exposed += int(edge)
