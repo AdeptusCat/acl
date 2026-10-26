@@ -1089,7 +1089,7 @@ func _draw() -> void:
 		var crossings: PackedVector2Array = PackedVector2Array()
 		for point: Vector2 in line_data["hindrance_points"]:
 			crossings.append(to_local(ground_layer.to_global(point)))
-		SightLineGraphic.draw(self, origin_pos, target_pos, bool(line_data["blocked"]), block_point, decorated, 1.0, crossings)
+		SightLineGraphic.draw(self, origin_pos, target_pos, bool(line_data["blocked"]), block_point, decorated, 1.0, crossings, line_data.get("firepower_color", Color.TRANSPARENT))
 
 
 func generate_los_lines_for_debug() -> void:
@@ -1130,7 +1130,7 @@ func generate_los_lines_for_debug() -> void:
 # Nullable tile coordinates: Vector2i when present, null when cleared.
 var _target_hex: Variant
 var _origin_hex: Variant
-func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
+func draw_los(origin_pos: Vector2, target_pos: Vector2, firepower: float = -1.0) -> void:
 	if not _has_map_layers():
 		clear_los()
 		return
@@ -1139,7 +1139,14 @@ func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 	if origin_hex == target_hex:
 		clear_los()
 		return
+	var color: Color = Color.TRANSPARENT
+	if firepower >= 0.0:
+		color = SquadFireMath.firepower_feedback(firepower)["color"]
 	if target_hex == _target_hex and origin_hex == _origin_hex:
+		# Firepower can change without either endpoint leaving its hex.
+		if not los_lines.is_empty():
+			los_lines[0]["firepower_color"] = color
+			queue_redraw()
 		return
 	los_lines.clear()
 	_target_hex = target_hex
@@ -1152,6 +1159,7 @@ func draw_los(origin_pos: Vector2, target_pos: Vector2) -> void:
 	if los_result["blocked"] == true:
 		pass
 	los_lines.append({
+		"firepower_color": color,
 		"target_pos": target_pos,
 		"blocked": los_result["blocked"],
 		"block_point": los_result["block_point"],

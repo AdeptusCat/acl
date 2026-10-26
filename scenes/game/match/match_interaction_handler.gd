@@ -250,7 +250,7 @@ static func refresh_target_preview(controller: Node2D, local_point: Vector2, scr
 	controller.distance = int(data["distance"])
 	controller.targetCover = int(data["cover"])
 	controller.firepower = float(data["firepower"])
-	LOSHelper.draw_los(controller.selected_unit.position, local_point)
+	LOSHelper.draw_los(controller.selected_unit.position, local_point, controller.firepower)
 	world.ui.show_target_hex_cover_distance(screen_point, controller.targetCover, controller.distance, controller.firepower, bool(data["sight_clear"]), bool(data["indirect"]), bool(data["in_range"]))
 
 

@@ -138,6 +138,8 @@ func _run() -> void:
 	for power: float in [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]:
 		world.ui.show_target_hex_cover_distance(target_point, 2, 3, power)
 		var style: Dictionary = SquadFireMath.firepower_feedback(power)
+		LOSHelper.draw_los(unit.position, ground.map_to_local(destination), power)
+		_check(not LOSHelper.los_lines.is_empty() and LOSHelper.los_lines[0]["firepower_color"] == style["color"], "The hover line updates to the same firepower color without changing hexes")
 		_check(hint.firepower_display.visible and hint.firepower_rating.text == str(style["rating"]).to_upper() and hint.firepower_meter.value == float(style["level"]), "The hover preview prominently rates firepower %.2f with the shared scale" % power)
 		if OS.get_cmdline_user_args().has("--capture") and power in [0.25, 4.0]:
 			await _capture("firepower-" + str(power))

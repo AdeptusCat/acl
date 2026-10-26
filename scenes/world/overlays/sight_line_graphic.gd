@@ -9,7 +9,7 @@ const HINDRANCE_COLORS: Array[Color] = [
 ]
 
 
-static func draw(canvas: CanvasItem, origin: Vector2, target: Vector2, blocked: bool, obstruction: Vector2, decorated: bool = true, opacity: float = 1.0, hindrance_points: PackedVector2Array = PackedVector2Array()) -> void:
+static func draw(canvas: CanvasItem, origin: Vector2, target: Vector2, blocked: bool, obstruction: Vector2, decorated: bool = true, opacity: float = 1.0, hindrance_points: PackedVector2Array = PackedVector2Array(), line_color: Color = Color.TRANSPARENT) -> void:
 	var length: float = origin.distance_to(target)
 	if length < 0.01 or not origin.is_finite() or not target.is_finite():
 		return
@@ -25,8 +25,7 @@ static func draw(canvas: CanvasItem, origin: Vector2, target: Vector2, blocked: 
 		inset_end = minf(13.0 * pixel, length * 0.2)
 	var start: Vector2 = origin + direction * inset_start
 	var finish: Vector2 = target - direction * inset_end
-	var clear_color: Color = CLEAR
-	clear_color.a = opacity
+	var clear_color: Color = _hindrance_color(0, opacity, line_color)
 	var blocked_color: Color = BLOCKED
 	blocked_color.a = opacity * 0.85
 	var target_color: Color = clear_color
@@ -37,21 +36,23 @@ static func draw(canvas: CanvasItem, origin: Vector2, target: Vector2, blocked: 
 		var stop_distance: float = origin.distance_to(stop)
 		var clear_end: Vector2 = origin + direction * clampf(stop_distance - 3.0 * pixel, inset_start, length - inset_end)
 		var blocked_start: Vector2 = origin + direction * clampf(stop_distance + 5.0 * pixel, inset_start, length - inset_end)
-		_hindered_line(canvas, origin, start, clear_end, direction, normal, hindrance_points, pixel, opacity, decorated)
+		_hindered_line(canvas, origin, start, clear_end, direction, normal, hindrance_points, pixel, opacity, decorated, line_color)
 		_dashes(canvas, blocked_start, finish, blocked_color, pixel)
 		if decorated:
 			_stop_marker(canvas, stop, direction, normal, blocked_color, pixel)
 		target_color = blocked_color
 	else:
-		target_color = _hindered_line(canvas, origin, start, finish, direction, normal, hindrance_points, pixel, opacity, decorated)
+		target_color = _hindered_line(canvas, origin, start, finish, direction, normal, hindrance_points, pixel, opacity, decorated, line_color)
 	if decorated:
 		_reticle(canvas, target, target_color, pixel, not blocked and hindrance_points.size() >= 3)
 		_arc(canvas, origin, 3.5 * pixel, 0.0, TAU, clear_color, 1.2 * pixel)
 
 
-static func _hindrance_color(count: int, opacity: float) -> Color:
+static func _hindrance_color(count: int, opacity: float, line_color: Color = Color.TRANSPARENT) -> Color:
 	var color: Color = CLEAR
-	if count > 0:
+	if line_color.a > 0.0:
+		color = line_color
+	elif count > 0:
 		color = HINDRANCE_COLORS[mini(count - 1, HINDRANCE_COLORS.size() - 1)]
 		if count > HINDRANCE_COLORS.size():
 			color = color.darkened(1.0 - pow(0.88, float(count - HINDRANCE_COLORS.size())))
@@ -59,7 +60,7 @@ static func _hindrance_color(count: int, opacity: float) -> Color:
 	return color
 
 
-static func _hindered_line(canvas: CanvasItem, origin: Vector2, start: Vector2, finish: Vector2, direction: Vector2, normal: Vector2, crossings: PackedVector2Array, pixel: float, opacity: float, decorated: bool) -> Color:
+static func _hindered_line(canvas: CanvasItem, origin: Vector2, start: Vector2, finish: Vector2, direction: Vector2, normal: Vector2, crossings: PackedVector2Array, pixel: float, opacity: float, decorated: bool, line_color: Color) -> Color:
 	var span_start: Vector2 = start
 	var count: int = 0
 	var start_distance: float = (start - origin).dot(direction)
@@ -69,20 +70,20 @@ static func _hindered_line(canvas: CanvasItem, origin: Vector2, start: Vector2, 
 			continue
 		var distance: float = (point - origin).dot(direction)
 		var span_end: Vector2 = origin + direction * clampf(distance, start_distance, end_distance)
-		_hindrance_span(canvas, span_start, span_end, direction, normal, count, pixel, opacity, decorated)
+		_hindrance_span(canvas, span_start, span_end, direction, normal, count, pixel, opacity, decorated, line_color)
 		span_start = span_end
 		count += 1
-	_hindrance_span(canvas, span_start, finish, direction, normal, count, pixel, opacity, decorated)
+	_hindrance_span(canvas, span_start, finish, direction, normal, count, pixel, opacity, decorated, line_color)
 	if decorated:
 		for point: Vector2 in crossings:
 			var distance: float = (point - origin).dot(direction)
 			if point.is_finite() and distance >= start_distance and distance <= end_distance:
 				_hindrance_marker(canvas, point, direction, normal, pixel, opacity)
-	return _hindrance_color(count, opacity)
+	return _hindrance_color(count, opacity, line_color)
 
 
-static func _hindrance_span(canvas: CanvasItem, start: Vector2, finish: Vector2, direction: Vector2, normal: Vector2, count: int, pixel: float, opacity: float, decorated: bool) -> void:
-	var color: Color = _hindrance_color(count, opacity)
+static func _hindrance_span(canvas: CanvasItem, start: Vector2, finish: Vector2, direction: Vector2, normal: Vector2, count: int, pixel: float, opacity: float, decorated: bool, line_color: Color) -> void:
+	var color: Color = _hindrance_color(count, opacity, line_color)
 	_stroke(canvas, start, finish, color, 1.8 * pixel, count >= 3)
 	if decorated:
 		_ticks(canvas, start, finish, direction, normal, color, pixel, count >= 3)
