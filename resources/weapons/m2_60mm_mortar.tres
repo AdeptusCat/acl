@@ -1,12 +1,14 @@
 [gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://tpc4fivssvv0"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_45qbe"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/fire_support/m2_60mm_mortar.png" id="4_icon"]
 [ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2_c3y5b"]
 [ext_resource type="AudioStream" uid="uid://ckfcdihaq1min" path="res://assets/audio/fx/weapons/mortar/mortar-96223.mp3" id="3_cvkm3"]
 
 [resource]
 script = ExtResource("1_45qbe")
 name = "M2 moartar (60 mm)"
+hud_icon = ExtResource("4_icon")
 mag_capacity = 1
 range_hexes = 20
 family = 3

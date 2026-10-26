@@ -1,12 +1,14 @@
 [gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://cg2ua8j6pxhkn"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_adqvj"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/fire_support/m1_81mm_mortar.png" id="4_icon"]
 [ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2_o20th"]
 [ext_resource type="AudioStream" uid="uid://ckfcdihaq1min" path="res://assets/audio/fx/weapons/mortar/mortar-96223.mp3" id="3_782b1"]
 
 [resource]
 script = ExtResource("1_adqvj")
 name = "M1 mortar (81 mm)"
+hud_icon = ExtResource("4_icon")
 mag_capacity = 1
 range_hexes = 20
 family = 3

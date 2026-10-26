@@ -34,7 +34,10 @@ func _run() -> void:
 	var support: FireSupportController = host.fire_support
 	_check(support.assets.size() == 3, "Onboard mortars and both authored offboard batteries share one tray")
 	_check(support.panel.asset_buttons.size() == 3, "Every support asset has its own HUD icon")
-	_check(support.panel.asset_buttons[0].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[1].icon == FireSupportPanel.MORTAR_ICON and support.panel.asset_buttons[2].icon == FireSupportPanel.HOWITZER_ICON, "Support icons distinguish actual mortar and howitzer weapon families")
+	_check(support.panel.asset_buttons[0].icon == load("res://assets/ui/hud/fire_support/m2_60mm_mortar.png") and support.panel.asset_buttons[1].icon == load("res://assets/ui/hud/fire_support/m1_81mm_mortar.png") and support.panel.asset_buttons[2].icon == load("res://assets/ui/hud/fire_support/m2a1_105mm_howitzer.png"), "Support assets display their individual M2, M1 and 105 mm weapon artwork")
+	for button: Button in support.panel.asset_buttons:
+		var artwork: Image = button.icon.get_image()
+		_check(artwork.get_pixel(0, 0).a == 0.0 and artwork.detect_alpha() != Image.ALPHA_NONE, "Weapon artwork retains a transparent background")
 	support.panel.asset_buttons[2].pressed.emit()
 	_check(support.panel.tray.visible and support.selected_asset == 2 and support.panel.asset_label.text.contains(support.assets[2]["name"]), "Clicking a howitzer icon opens its battery directly")
 	support.panel.asset_buttons[2].pressed.emit()

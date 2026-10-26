@@ -23,6 +23,7 @@ enum Family { SMALL_ARM, SPIGOT_LAUNCHER, ROCKET_LAUNCHER, MORTAR, GUN, AUTOCANN
 enum FireMode { SINGLE, BURST, MANUAL }
 
 @export var name: String = "Rifle"
+@export var hud_icon: Texture2D
 @export var rpm: float = 600.0
 @export var burst_rounds: int = 1              # rifles 1, SMG 2–3, MG 4–6
 @export var burst_pause_s: float = 0.35        # rest between bursts (not including firing time)

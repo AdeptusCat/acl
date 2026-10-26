@@ -116,7 +116,9 @@ func _refresh_icons() -> void:
 		asset_buttons.clear()
 		for index: int in range(support.assets.size()):
 			var button: Button = Button.new()
-			button.custom_minimum_size = Vector2(68, 48)
+			button.custom_minimum_size = Vector2(88, 96)
+			button.expand_icon = true
+			button.add_theme_constant_override("icon_max_width", 64)
 			button.toggle_mode = true
 			button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
@@ -132,6 +134,8 @@ func _refresh_icons() -> void:
 			weapon_name = weapon.name
 			if weapon.family == WeaponSpec.Family.HOWITZER:
 				button.icon = HOWITZER_ICON
+			if weapon.hud_icon != null:
+				button.icon = weapon.hud_icon
 		button.text = str(support.ammunition(index))
 		button.set_pressed_no_signal(tray.visible and support.selected_asset == index)
 		button.tooltip_text = "%s\n%s · %s\n%d rounds · Fire support [F]" % [support.assets[index]["name"], weapon_name, support.asset_status(index), support.ammunition(index)]
@@ -198,7 +202,7 @@ func _layout() -> void:
 	if not is_node_ready():
 		return
 	var area: Vector2 = (get_parent() as Control).size
-	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 78.0)
+	icon_bar.size = Vector2(minf(icon_row.get_combined_minimum_size().x, area.x - 24.0), 114.0)
 	icon_bar.position = Vector2(maxf(12.0, (area.x - icon_bar.size.x) * 0.5), area.y - icon_bar.size.y - 12.0)
 	tray.size = Vector2(minf(460.0, area.x - 24.0), tray.get_combined_minimum_size().y)
 	tray.position = Vector2(maxf(12.0, (area.x - tray.size.x) * 0.5), maxf(12.0, icon_bar.position.y - tray.size.y - 8.0))
