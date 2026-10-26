@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="OffboardBattery" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/offboard_battery.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/offboard_105mm_he.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+team = 1
+weapon = ExtResource("2")
+gun_count = 4
+rounds = 48
+response_seconds = 8.0
+flight_seconds = 5.0

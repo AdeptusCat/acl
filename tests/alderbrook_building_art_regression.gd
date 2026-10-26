@@ -19,6 +19,8 @@ func _run() -> void:
 	var maps: Array[Map] = []
 	var base_maps: Array[Map] = []
 	for map: Map in main.world.maps.get_children():
+		if map.name == &"AlderbrookPrologue":
+			continue
 		if map.campaign_name == "Road to Alderbrook" or map.name == &"WesternApproach":
 			maps.append(map)
 		else:

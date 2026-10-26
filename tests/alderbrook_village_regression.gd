@@ -28,7 +28,7 @@ func _run() -> void:
 
 func _test_content() -> void:
 	var scenario: Scenario = map.get_scenario(0)
-	_check(scenario.scenario_id == "alderbrook_05_battle_for_alderbrook" and scenario.campaign_mission == 5, "Campaign identity stays compatible with saved progress")
+	_check(scenario.scenario_id == "alderbrook_05_battle_for_alderbrook" and scenario.campaign_mission == 6, "Campaign identity stays compatible with saved progress")
 	_check(scenario.get_units().size() == 31 and scenario.victory_conditions.size() == 12, "Existing company forces and victory rules are retained")
 	var used: Dictionary[Vector2i, bool] = {}
 	for unit: Unit in scenario.get_units():

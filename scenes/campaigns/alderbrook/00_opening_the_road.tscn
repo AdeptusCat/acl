@@ -1,0 +1,2028 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://scenes/world/maps/map.gd" id="1_l6o7s"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/ground_tile_map_layer.tscn" id="2_f5u2e"]
+[ext_resource type="Texture2D" path="res://assets/tiles/elevation/crest_line.png" id="3_2skvi"]
+[ext_resource type="Shader" path="res://assets/shader/terrain_palette.gdshader" id="4_md6vs"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_01.png" id="5_12ogf"]
+[ext_resource type="Texture2D" path="res://assets/tiles/16x16_2b - Kopie.png" id="6_a2wwc"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_02.png" id="7_mylo0"]
+[ext_resource type="Texture2D" path="res://assets/tiles/vegetation/open_ground_green_03.png" id="8_pf63f"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/ground_tile_map_layer.gd" id="9_g3s1i"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_water.tres" id="10_aksrg"]
+[ext_resource type="Script" path="res://addons/hexagon_tilemaplayer/hexagon_tilemaplayer.gd" id="11_0ep6y"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_prologue_terrain.tres" id="12_scktk"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_prologue_roads.tres" id="15_6td8r"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/terrain_tile_map_layer.gd" id="31_1xlj4"]
+[ext_resource type="TileSet" path="res://resources/campaigns/alderbrook_prologue_buildings.tres" id="32_coj4t"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/road_tile_map_layer.tscn" id="32_gbcdi"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/road_tile_map_layer.gd" id="47_sjmjp"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/wall_tile_map_layer.tscn" id="48_u36mt"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_stone_00.png" id="49_ti3pk"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_stone_01.png" id="50_djwp1"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/stone_connections.png" id="51_kx6n2"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/hedge_connections.png" id="52_uakhw"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_stone_02.png" id="53_3bft1"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_03.png" id="54_xribq"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_stone_04.png" id="55_1b818"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_05.png" id="56_n7kvc"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_06.png" id="57_xs1sp"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_07.png" id="58_rjk32"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_08.png" id="59_0w3g2"]
+[ext_resource type="Texture2D" path="res://assets/tiles/walls/connected/legacy_hedge_09.png" id="60_u4ou3"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/wall_tile_map_layer.gd" id="61_th8l5"]
+[ext_resource type="PackedScene" path="res://scenes/world/maps/layers/building_tile_map_layer.tscn" id="62_a2x0h"]
+[ext_resource type="Script" path="res://scenes/world/maps/layers/building_tile_map_layer.gd" id="109_qfrkh"]
+[ext_resource type="Script" path="res://scenes/scenarios/scenario.gd" id="110_wv8uv"]
+[ext_resource type="Script" path="res://resources/weapons/offboard_battery.gd" id="111_n7hvg"]
+[ext_resource type="Resource" path="res://resources/fire_support/alderbrook_prologue_105mm.tres" id="112_eh1wx"]
+[ext_resource type="Script" path="res://scenes/scenarios/victory_conditions/victory_condition.gd" id="113_i7fqp"]
+[ext_resource type="Script" path="res://scenes/scenarios/victory_conditions/occupy_objective_condition.gd" id="114_xdsol"]
+[ext_resource type="PackedScene" path="res://scenes/game/units/unit.tscn" id="115_r4afm"]
+[ext_resource type="Script" path="res://scenes/game/units/unit.gd" id="116_2sle7"]
+[ext_resource type="Script" path="res://resources/soldiers/soldier_loadout.gd" id="117_w44ba"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/company_leader.tres" id="118_a1hhw"]
+[ext_resource type="Resource" path="res://resources/weapons/m1_carbine.tres" id="119_tc5q8"]
+[ext_resource type="Resource" path="res://resources/weapons/springfield_1903_riflegrenade.tres" id="120_01art"]
+[ext_resource type="Resource" path="res://resources/weapons/m1_garand.tres" id="121_54mkp"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/company_hq.tres" id="122_wxibc"]
+[ext_resource type="Script" path="res://resources/weapons/weapon_spec.gd" id="123_yody1"]
+[ext_resource type="Resource" path="res://resources/squads/team_squad_loadout_catalog.tres" id="124_lmync"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/platoon_leader.tres" id="125_42ujl"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/platoon_hq.tres" id="126_kmjn2"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/squad_leader.tres" id="127_6dkp3"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/team_leader.tres" id="128_clu7a"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/mg_gunner.tres" id="129_nedix"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/loader.tres" id="130_tfbkk"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/rifle_grenadier.tres" id="131_pl8jw"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/rifleman.tres" id="132_n00oe"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/rifle_squad.tres" id="133_5fpyi"]
+[ext_resource type="Resource" path="res://resources/weapons/m1919a4.tres" id="134_3pkja"]
+[ext_resource type="Resource" path="res://resources/soldiers/united_states/assistant.tres" id="135_6e5nt"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/lmg_squad.tres" id="136_0ohh3"]
+[ext_resource type="Resource" path="res://resources/weapons/m2_60mm_mortar.tres" id="137_htb4w"]
+[ext_resource type="Resource" path="res://resources/squads/united_states/light_mortar_squad.tres" id="138_ntts8"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/platoon_leader.tres" id="139_e7s1w"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/squad_leader_assistant.tres" id="140_ef6o4"]
+[ext_resource type="Resource" path="res://resources/weapons/kar98.tres" id="141_53nlg"]
+[ext_resource type="Resource" path="res://resources/squads/germany/platoon_hq.tres" id="142_id67q"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/squad_leader.tres" id="143_1hvxm"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/mg_gunner.tres" id="144_71yq3"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/loader.tres" id="145_1cy72"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/rifle_grenadier.tres" id="146_7xbpv"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/rifleman.tres" id="147_x2de4"]
+[ext_resource type="Resource" path="res://resources/squads/germany/rifle_squad.tres" id="148_t0y37"]
+[ext_resource type="Resource" path="res://resources/weapons/mg34_heavy.tres" id="149_k23js"]
+[ext_resource type="Resource" path="res://resources/soldiers/germany/assistant.tres" id="150_hw358"]
+[ext_resource type="Resource" path="res://resources/squads/germany/lmg_squad.tres" id="151_ip2a4"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_exit.png" id="152_wbgo4"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_a.png" id="153_gowp1"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_b.png" id="154_ukoeg"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_c.png" id="155_b68o4"]
+[ext_resource type="Texture2D" path="res://assets/objectives/axis_start.png" id="156_yedvx"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_exit.png" id="157_get5f"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_start.png" id="158_fcqgi"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_a.png" id="159_xxryo"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_b.png" id="160_28vc3"]
+[ext_resource type="Texture2D" path="res://assets/objectives/allies_c.png" id="161_1o5ne"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3e6j7"]
+texture = ExtResource("3_2skvi")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-12.6871, -25.6564, -13.2651, -9.31382, -20.0388, 5.3625, -15.1708, 24.4146, -9.07447, 27.4628, -12.7007, 4.23355, -5.92697, -9.31382, -5.91341, -29.0433)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uu5pe"]
+resource_name = "Alderbrook palette - open_ground"
+shader = ExtResource("4_md6vs")
+shader_parameter/palette = PackedVector4Array(0.14509805, 0.23921569, 0.039215688, 1, 0.20784314, 0.34117648, 0.050980393, 1, 0.25882354, 0.4392157, 0.07058824, 1, 0.41568628, 0.5686275, 0.1764706, 1, 0.6313726, 0.7058824, 0.3647059, 1)
+shader_parameter/levels = PackedFloat32Array(0.28, 0.4, 0.515, 0.62, 0.74)
+shader_parameter/timber_palette = PackedVector4Array(0.21960784, 0.16862746, 0.15294118, 1, 0.39607844, 0.29411766, 0.21176471, 1, 0.5803922, 0.41960785, 0.28235295, 1, 0.74509805, 0.5921569, 0.42352942, 1, 0.8745098, 0.77254903, 0.627451, 1)
+shader_parameter/timber_levels = PackedFloat32Array(0.06, 0.2, 0.35, 0.57, 0.8)
+shader_parameter/soil_palette = PackedVector4Array(0.23137255, 0.16078432, 0.13725491, 1, 0.4, 0.2627451, 0.18431373, 1, 0.59607846, 0.38039216, 0.23529412, 1, 0.7647059, 0.5411765, 0.3529412, 1, 0.87058824, 0.6901961, 0.5058824, 1)
+shader_parameter/soil_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.56, 0.78)
+shader_parameter/clay_palette = PackedVector4Array(0.30980393, 0.1764706, 0.15686275, 1, 0.52156866, 0.2627451, 0.19215687, 1, 0.7176471, 0.38431373, 0.2627451, 1, 0.84313726, 0.5529412, 0.3882353, 1, 0.9137255, 0.70980394, 0.5647059, 1)
+shader_parameter/clay_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.58, 0.82)
+shader_parameter/slate_palette = PackedVector4Array(0.16078432, 0.20784314, 0.25490198, 1, 0.29411766, 0.34901962, 0.4, 1, 0.47843137, 0.5294118, 0.5647059, 1, 0.6666667, 0.7058824, 0.70980394, 1, 0.8352941, 0.84705883, 0.8156863, 1)
+shader_parameter/slate_levels = PackedFloat32Array(0.04, 0.18, 0.32, 0.53, 0.78)
+shader_parameter/water_palette = PackedVector4Array(0.105882354, 0.20784314, 0.27058825, 1, 0.1764706, 0.34509805, 0.43137255, 1, 0.2784314, 0.49411765, 0.6, 1, 0.4745098, 0.6784314, 0.7529412, 1, 0.78039217, 0.8666667, 0.8901961, 1)
+shader_parameter/water_levels = PackedFloat32Array(0.12, 0.28, 0.448, 0.66, 0.85)
+shader_parameter/fruit_palette = PackedVector4Array(0.43137255, 0.14901961, 0.22745098, 1, 0.7882353, 0.3019608, 0.24705882, 1, 0.6666667, 0.44313726, 0.17254902, 1, 0.9098039, 0.7254902, 0.3137255, 1, 0.9529412, 0.8666667, 0.8156863, 1)
+shader_parameter/grid_ink = Vector4(0.21960784, 0.22352941, 0.18039216, 1)
+shader_parameter/material_kind = 1
+shader_parameter/hdr_2d = false
+shader_parameter/texture_is_linear = false
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8skyg"]
+resource_name = "Open Ground 1"
+texture = ExtResource("5_12ogf")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/material = SubResource("ShaderMaterial_uu5pe")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_754fh"]
+texture = ExtResource("6_a2wwc")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h86aw"]
+resource_name = "Open Ground 2"
+texture = ExtResource("7_mylo0")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/material = SubResource("ShaderMaterial_uu5pe")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_f1cbq"]
+resource_name = "Open Ground 3"
+texture = ExtResource("8_pf63f")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/material = SubResource("ShaderMaterial_uu5pe")
+
+[sub_resource type="TileSet" id="TileSet_maoo6"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+physics_layer_0/collision_layer = 4
+physics_layer_0/collision_mask = 4
+custom_data_layer_0/name = "elevation"
+custom_data_layer_0/type = 2
+sources/0 = SubResource("TileSetAtlasSource_3e6j7")
+sources/2 = SubResource("TileSetAtlasSource_754fh")
+sources/4 = SubResource("TileSetAtlasSource_f1cbq")
+sources/3 = SubResource("TileSetAtlasSource_h86aw")
+sources/1 = SubResource("TileSetAtlasSource_8skyg")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jnoqe"]
+resource_name = "Legacy stone edge 0"
+texture = ExtResource("49_ti3pk")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_4 = true
+0:0/0/custom_data_7 = "Wall"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_1 = true
+0:0/1/custom_data_7 = "Wall"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5rls1"]
+resource_name = "Legacy stone edge 1"
+texture = ExtResource("50_djwp1")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Wall"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Wall"
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/custom_data_0 = 2
+0:0/2/custom_data_3 = true
+0:0/2/custom_data_7 = "Wall"
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 2
+0:0/3/custom_data_2 = true
+0:0/3/custom_data_7 = "Wall"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_52ejc"]
+resource_name = "Alderbrook palette - stone"
+shader = ExtResource("4_md6vs")
+shader_parameter/palette = PackedVector4Array(0.24705882, 0.25490198, 0.2509804, 1, 0.4, 0.42745098, 0.4, 1, 0.5882353, 0.60784316, 0.5372549, 1, 0.75686276, 0.7607843, 0.6745098, 1, 0.8784314, 0.8627451, 0.77254903, 1)
+shader_parameter/levels = PackedFloat32Array(0.05, 0.2, 0.39, 0.6, 0.84)
+shader_parameter/timber_palette = PackedVector4Array(0.21960784, 0.16862746, 0.15294118, 1, 0.39607844, 0.29411766, 0.21176471, 1, 0.5803922, 0.41960785, 0.28235295, 1, 0.74509805, 0.5921569, 0.42352942, 1, 0.8745098, 0.77254903, 0.627451, 1)
+shader_parameter/timber_levels = PackedFloat32Array(0.06, 0.2, 0.35, 0.57, 0.8)
+shader_parameter/soil_palette = PackedVector4Array(0.23137255, 0.16078432, 0.13725491, 1, 0.4, 0.2627451, 0.18431373, 1, 0.59607846, 0.38039216, 0.23529412, 1, 0.7647059, 0.5411765, 0.3529412, 1, 0.87058824, 0.6901961, 0.5058824, 1)
+shader_parameter/soil_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.56, 0.78)
+shader_parameter/clay_palette = PackedVector4Array(0.30980393, 0.1764706, 0.15686275, 1, 0.52156866, 0.2627451, 0.19215687, 1, 0.7176471, 0.38431373, 0.2627451, 1, 0.84313726, 0.5529412, 0.3882353, 1, 0.9137255, 0.70980394, 0.5647059, 1)
+shader_parameter/clay_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.58, 0.82)
+shader_parameter/slate_palette = PackedVector4Array(0.16078432, 0.20784314, 0.25490198, 1, 0.29411766, 0.34901962, 0.4, 1, 0.47843137, 0.5294118, 0.5647059, 1, 0.6666667, 0.7058824, 0.70980394, 1, 0.8352941, 0.84705883, 0.8156863, 1)
+shader_parameter/slate_levels = PackedFloat32Array(0.04, 0.18, 0.32, 0.53, 0.78)
+shader_parameter/water_palette = PackedVector4Array(0.105882354, 0.20784314, 0.27058825, 1, 0.1764706, 0.34509805, 0.43137255, 1, 0.2784314, 0.49411765, 0.6, 1, 0.4745098, 0.6784314, 0.7529412, 1, 0.78039217, 0.8666667, 0.8901961, 1)
+shader_parameter/water_levels = PackedFloat32Array(0.12, 0.28, 0.448, 0.66, 0.85)
+shader_parameter/fruit_palette = PackedVector4Array(0.43137255, 0.14901961, 0.22745098, 1, 0.7882353, 0.3019608, 0.24705882, 1, 0.6666667, 0.44313726, 0.17254902, 1, 0.9098039, 0.7254902, 0.3137255, 1, 0.9529412, 0.8666667, 0.8156863, 1)
+shader_parameter/grid_ink = Vector4(0.21960784, 0.22352941, 0.18039216, 1)
+shader_parameter/material_kind = 5
+shader_parameter/hdr_2d = false
+shader_parameter/texture_is_linear = false
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ymy80"]
+resource_name = "Stone Wall Edges"
+texture = ExtResource("51_kx6n2")
+texture_region_size = Vector2i(160, 160)
+1:0/0 = 0
+1:0/0/custom_data_0 = 2
+1:0/0/custom_data_1 = true
+1:0/0/custom_data_7 = "Wall"
+1:0/0/custom_data_8 = true
+1:0/0/custom_data_9 = 1
+2:0/0 = 0
+2:0/0/custom_data_0 = 2
+2:0/0/custom_data_2 = true
+2:0/0/custom_data_7 = "Wall"
+2:0/0/custom_data_8 = true
+2:0/0/custom_data_9 = 2
+3:0/0 = 0
+3:0/0/material = SubResource("ShaderMaterial_52ejc")
+3:0/0/custom_data_0 = 2
+3:0/0/custom_data_1 = true
+3:0/0/custom_data_2 = true
+3:0/0/custom_data_7 = "Wall"
+3:0/0/custom_data_8 = true
+3:0/0/custom_data_9 = 3
+4:0/0 = 0
+4:0/0/custom_data_0 = 2
+4:0/0/custom_data_3 = true
+4:0/0/custom_data_7 = "Wall"
+4:0/0/custom_data_8 = true
+4:0/0/custom_data_9 = 4
+5:0/0 = 0
+5:0/0/custom_data_0 = 2
+5:0/0/custom_data_1 = true
+5:0/0/custom_data_3 = true
+5:0/0/custom_data_7 = "Wall"
+5:0/0/custom_data_8 = true
+5:0/0/custom_data_9 = 5
+6:0/0 = 0
+6:0/0/custom_data_0 = 2
+6:0/0/custom_data_2 = true
+6:0/0/custom_data_3 = true
+6:0/0/custom_data_7 = "Wall"
+6:0/0/custom_data_8 = true
+6:0/0/custom_data_9 = 6
+7:0/0 = 0
+7:0/0/custom_data_0 = 2
+7:0/0/custom_data_1 = true
+7:0/0/custom_data_2 = true
+7:0/0/custom_data_3 = true
+7:0/0/custom_data_7 = "Wall"
+7:0/0/custom_data_8 = true
+7:0/0/custom_data_9 = 7
+0:1/0 = 0
+0:1/0/material = SubResource("ShaderMaterial_52ejc")
+0:1/0/custom_data_0 = 2
+0:1/0/custom_data_4 = true
+0:1/0/custom_data_7 = "Wall"
+0:1/0/custom_data_8 = true
+0:1/0/custom_data_9 = 8
+1:1/0 = 0
+1:1/0/custom_data_0 = 2
+1:1/0/custom_data_1 = true
+1:1/0/custom_data_4 = true
+1:1/0/custom_data_7 = "Wall"
+1:1/0/custom_data_8 = true
+1:1/0/custom_data_9 = 9
+2:1/0 = 0
+2:1/0/custom_data_0 = 2
+2:1/0/custom_data_2 = true
+2:1/0/custom_data_4 = true
+2:1/0/custom_data_7 = "Wall"
+2:1/0/custom_data_8 = true
+2:1/0/custom_data_9 = 10
+3:1/0 = 0
+3:1/0/custom_data_0 = 2
+3:1/0/custom_data_1 = true
+3:1/0/custom_data_2 = true
+3:1/0/custom_data_4 = true
+3:1/0/custom_data_7 = "Wall"
+3:1/0/custom_data_8 = true
+3:1/0/custom_data_9 = 11
+4:1/0 = 0
+4:1/0/material = SubResource("ShaderMaterial_52ejc")
+4:1/0/custom_data_0 = 2
+4:1/0/custom_data_3 = true
+4:1/0/custom_data_4 = true
+4:1/0/custom_data_7 = "Wall"
+4:1/0/custom_data_8 = true
+4:1/0/custom_data_9 = 12
+5:1/0 = 0
+5:1/0/custom_data_0 = 2
+5:1/0/custom_data_1 = true
+5:1/0/custom_data_3 = true
+5:1/0/custom_data_4 = true
+5:1/0/custom_data_7 = "Wall"
+5:1/0/custom_data_8 = true
+5:1/0/custom_data_9 = 13
+6:1/0 = 0
+6:1/0/custom_data_0 = 2
+6:1/0/custom_data_2 = true
+6:1/0/custom_data_3 = true
+6:1/0/custom_data_4 = true
+6:1/0/custom_data_7 = "Wall"
+6:1/0/custom_data_8 = true
+6:1/0/custom_data_9 = 14
+7:1/0 = 0
+7:1/0/custom_data_0 = 2
+7:1/0/custom_data_1 = true
+7:1/0/custom_data_2 = true
+7:1/0/custom_data_3 = true
+7:1/0/custom_data_4 = true
+7:1/0/custom_data_7 = "Wall"
+7:1/0/custom_data_8 = true
+7:1/0/custom_data_9 = 15
+0:2/0 = 0
+0:2/0/custom_data_0 = 2
+0:2/0/custom_data_5 = true
+0:2/0/custom_data_7 = "Wall"
+0:2/0/custom_data_8 = true
+0:2/0/custom_data_9 = 16
+1:2/0 = 0
+1:2/0/custom_data_0 = 2
+1:2/0/custom_data_1 = true
+1:2/0/custom_data_5 = true
+1:2/0/custom_data_7 = "Wall"
+1:2/0/custom_data_8 = true
+1:2/0/custom_data_9 = 17
+2:2/0 = 0
+2:2/0/custom_data_0 = 2
+2:2/0/custom_data_2 = true
+2:2/0/custom_data_5 = true
+2:2/0/custom_data_7 = "Wall"
+2:2/0/custom_data_8 = true
+2:2/0/custom_data_9 = 18
+3:2/0 = 0
+3:2/0/custom_data_0 = 2
+3:2/0/custom_data_1 = true
+3:2/0/custom_data_2 = true
+3:2/0/custom_data_5 = true
+3:2/0/custom_data_7 = "Wall"
+3:2/0/custom_data_8 = true
+3:2/0/custom_data_9 = 19
+4:2/0 = 0
+4:2/0/custom_data_0 = 2
+4:2/0/custom_data_3 = true
+4:2/0/custom_data_5 = true
+4:2/0/custom_data_7 = "Wall"
+4:2/0/custom_data_8 = true
+4:2/0/custom_data_9 = 20
+5:2/0 = 0
+5:2/0/custom_data_0 = 2
+5:2/0/custom_data_1 = true
+5:2/0/custom_data_3 = true
+5:2/0/custom_data_5 = true
+5:2/0/custom_data_7 = "Wall"
+5:2/0/custom_data_8 = true
+5:2/0/custom_data_9 = 21
+6:2/0 = 0
+6:2/0/custom_data_0 = 2
+6:2/0/custom_data_2 = true
+6:2/0/custom_data_3 = true
+6:2/0/custom_data_5 = true
+6:2/0/custom_data_7 = "Wall"
+6:2/0/custom_data_8 = true
+6:2/0/custom_data_9 = 22
+7:2/0 = 0
+7:2/0/custom_data_0 = 2
+7:2/0/custom_data_1 = true
+7:2/0/custom_data_2 = true
+7:2/0/custom_data_3 = true
+7:2/0/custom_data_5 = true
+7:2/0/custom_data_7 = "Wall"
+7:2/0/custom_data_8 = true
+7:2/0/custom_data_9 = 23
+0:3/0 = 0
+0:3/0/custom_data_0 = 2
+0:3/0/custom_data_4 = true
+0:3/0/custom_data_5 = true
+0:3/0/custom_data_7 = "Wall"
+0:3/0/custom_data_8 = true
+0:3/0/custom_data_9 = 24
+1:3/0 = 0
+1:3/0/custom_data_0 = 2
+1:3/0/custom_data_1 = true
+1:3/0/custom_data_4 = true
+1:3/0/custom_data_5 = true
+1:3/0/custom_data_7 = "Wall"
+1:3/0/custom_data_8 = true
+1:3/0/custom_data_9 = 25
+2:3/0 = 0
+2:3/0/custom_data_0 = 2
+2:3/0/custom_data_2 = true
+2:3/0/custom_data_4 = true
+2:3/0/custom_data_5 = true
+2:3/0/custom_data_7 = "Wall"
+2:3/0/custom_data_8 = true
+2:3/0/custom_data_9 = 26
+3:3/0 = 0
+3:3/0/custom_data_0 = 2
+3:3/0/custom_data_1 = true
+3:3/0/custom_data_2 = true
+3:3/0/custom_data_4 = true
+3:3/0/custom_data_5 = true
+3:3/0/custom_data_7 = "Wall"
+3:3/0/custom_data_8 = true
+3:3/0/custom_data_9 = 27
+4:3/0 = 0
+4:3/0/custom_data_0 = 2
+4:3/0/custom_data_3 = true
+4:3/0/custom_data_4 = true
+4:3/0/custom_data_5 = true
+4:3/0/custom_data_7 = "Wall"
+4:3/0/custom_data_8 = true
+4:3/0/custom_data_9 = 28
+5:3/0 = 0
+5:3/0/custom_data_0 = 2
+5:3/0/custom_data_1 = true
+5:3/0/custom_data_3 = true
+5:3/0/custom_data_4 = true
+5:3/0/custom_data_5 = true
+5:3/0/custom_data_7 = "Wall"
+5:3/0/custom_data_8 = true
+5:3/0/custom_data_9 = 29
+6:3/0 = 0
+6:3/0/custom_data_0 = 2
+6:3/0/custom_data_2 = true
+6:3/0/custom_data_3 = true
+6:3/0/custom_data_4 = true
+6:3/0/custom_data_5 = true
+6:3/0/custom_data_7 = "Wall"
+6:3/0/custom_data_8 = true
+6:3/0/custom_data_9 = 30
+7:3/0 = 0
+7:3/0/custom_data_0 = 2
+7:3/0/custom_data_1 = true
+7:3/0/custom_data_2 = true
+7:3/0/custom_data_3 = true
+7:3/0/custom_data_4 = true
+7:3/0/custom_data_5 = true
+7:3/0/custom_data_7 = "Wall"
+7:3/0/custom_data_8 = true
+7:3/0/custom_data_9 = 31
+0:4/0 = 0
+0:4/0/custom_data_0 = 2
+0:4/0/custom_data_6 = true
+0:4/0/custom_data_7 = "Wall"
+0:4/0/custom_data_8 = true
+0:4/0/custom_data_9 = 32
+1:4/0 = 0
+1:4/0/custom_data_0 = 2
+1:4/0/custom_data_1 = true
+1:4/0/custom_data_6 = true
+1:4/0/custom_data_7 = "Wall"
+1:4/0/custom_data_8 = true
+1:4/0/custom_data_9 = 33
+2:4/0 = 0
+2:4/0/custom_data_0 = 2
+2:4/0/custom_data_2 = true
+2:4/0/custom_data_6 = true
+2:4/0/custom_data_7 = "Wall"
+2:4/0/custom_data_8 = true
+2:4/0/custom_data_9 = 34
+3:4/0 = 0
+3:4/0/custom_data_0 = 2
+3:4/0/custom_data_1 = true
+3:4/0/custom_data_2 = true
+3:4/0/custom_data_6 = true
+3:4/0/custom_data_7 = "Wall"
+3:4/0/custom_data_8 = true
+3:4/0/custom_data_9 = 35
+4:4/0 = 0
+4:4/0/custom_data_0 = 2
+4:4/0/custom_data_3 = true
+4:4/0/custom_data_6 = true
+4:4/0/custom_data_7 = "Wall"
+4:4/0/custom_data_8 = true
+4:4/0/custom_data_9 = 36
+5:4/0 = 0
+5:4/0/custom_data_0 = 2
+5:4/0/custom_data_1 = true
+5:4/0/custom_data_3 = true
+5:4/0/custom_data_6 = true
+5:4/0/custom_data_7 = "Wall"
+5:4/0/custom_data_8 = true
+5:4/0/custom_data_9 = 37
+6:4/0 = 0
+6:4/0/custom_data_0 = 2
+6:4/0/custom_data_2 = true
+6:4/0/custom_data_3 = true
+6:4/0/custom_data_6 = true
+6:4/0/custom_data_7 = "Wall"
+6:4/0/custom_data_8 = true
+6:4/0/custom_data_9 = 38
+7:4/0 = 0
+7:4/0/custom_data_0 = 2
+7:4/0/custom_data_1 = true
+7:4/0/custom_data_2 = true
+7:4/0/custom_data_3 = true
+7:4/0/custom_data_6 = true
+7:4/0/custom_data_7 = "Wall"
+7:4/0/custom_data_8 = true
+7:4/0/custom_data_9 = 39
+0:5/0 = 0
+0:5/0/custom_data_0 = 2
+0:5/0/custom_data_4 = true
+0:5/0/custom_data_6 = true
+0:5/0/custom_data_7 = "Wall"
+0:5/0/custom_data_8 = true
+0:5/0/custom_data_9 = 40
+1:5/0 = 0
+1:5/0/custom_data_0 = 2
+1:5/0/custom_data_1 = true
+1:5/0/custom_data_4 = true
+1:5/0/custom_data_6 = true
+1:5/0/custom_data_7 = "Wall"
+1:5/0/custom_data_8 = true
+1:5/0/custom_data_9 = 41
+2:5/0 = 0
+2:5/0/custom_data_0 = 2
+2:5/0/custom_data_2 = true
+2:5/0/custom_data_4 = true
+2:5/0/custom_data_6 = true
+2:5/0/custom_data_7 = "Wall"
+2:5/0/custom_data_8 = true
+2:5/0/custom_data_9 = 42
+3:5/0 = 0
+3:5/0/custom_data_0 = 2
+3:5/0/custom_data_1 = true
+3:5/0/custom_data_2 = true
+3:5/0/custom_data_4 = true
+3:5/0/custom_data_6 = true
+3:5/0/custom_data_7 = "Wall"
+3:5/0/custom_data_8 = true
+3:5/0/custom_data_9 = 43
+4:5/0 = 0
+4:5/0/custom_data_0 = 2
+4:5/0/custom_data_3 = true
+4:5/0/custom_data_4 = true
+4:5/0/custom_data_6 = true
+4:5/0/custom_data_7 = "Wall"
+4:5/0/custom_data_8 = true
+4:5/0/custom_data_9 = 44
+5:5/0 = 0
+5:5/0/custom_data_0 = 2
+5:5/0/custom_data_1 = true
+5:5/0/custom_data_3 = true
+5:5/0/custom_data_4 = true
+5:5/0/custom_data_6 = true
+5:5/0/custom_data_7 = "Wall"
+5:5/0/custom_data_8 = true
+5:5/0/custom_data_9 = 45
+6:5/0 = 0
+6:5/0/custom_data_0 = 2
+6:5/0/custom_data_2 = true
+6:5/0/custom_data_3 = true
+6:5/0/custom_data_4 = true
+6:5/0/custom_data_6 = true
+6:5/0/custom_data_7 = "Wall"
+6:5/0/custom_data_8 = true
+6:5/0/custom_data_9 = 46
+7:5/0 = 0
+7:5/0/custom_data_0 = 2
+7:5/0/custom_data_1 = true
+7:5/0/custom_data_2 = true
+7:5/0/custom_data_3 = true
+7:5/0/custom_data_4 = true
+7:5/0/custom_data_6 = true
+7:5/0/custom_data_7 = "Wall"
+7:5/0/custom_data_8 = true
+7:5/0/custom_data_9 = 47
+0:6/0 = 0
+0:6/0/custom_data_0 = 2
+0:6/0/custom_data_5 = true
+0:6/0/custom_data_6 = true
+0:6/0/custom_data_7 = "Wall"
+0:6/0/custom_data_8 = true
+0:6/0/custom_data_9 = 48
+1:6/0 = 0
+1:6/0/custom_data_0 = 2
+1:6/0/custom_data_1 = true
+1:6/0/custom_data_5 = true
+1:6/0/custom_data_6 = true
+1:6/0/custom_data_7 = "Wall"
+1:6/0/custom_data_8 = true
+1:6/0/custom_data_9 = 49
+2:6/0 = 0
+2:6/0/custom_data_0 = 2
+2:6/0/custom_data_2 = true
+2:6/0/custom_data_5 = true
+2:6/0/custom_data_6 = true
+2:6/0/custom_data_7 = "Wall"
+2:6/0/custom_data_8 = true
+2:6/0/custom_data_9 = 50
+3:6/0 = 0
+3:6/0/custom_data_0 = 2
+3:6/0/custom_data_1 = true
+3:6/0/custom_data_2 = true
+3:6/0/custom_data_5 = true
+3:6/0/custom_data_6 = true
+3:6/0/custom_data_7 = "Wall"
+3:6/0/custom_data_8 = true
+3:6/0/custom_data_9 = 51
+4:6/0 = 0
+4:6/0/custom_data_0 = 2
+4:6/0/custom_data_3 = true
+4:6/0/custom_data_5 = true
+4:6/0/custom_data_6 = true
+4:6/0/custom_data_7 = "Wall"
+4:6/0/custom_data_8 = true
+4:6/0/custom_data_9 = 52
+5:6/0 = 0
+5:6/0/custom_data_0 = 2
+5:6/0/custom_data_1 = true
+5:6/0/custom_data_3 = true
+5:6/0/custom_data_5 = true
+5:6/0/custom_data_6 = true
+5:6/0/custom_data_7 = "Wall"
+5:6/0/custom_data_8 = true
+5:6/0/custom_data_9 = 53
+6:6/0 = 0
+6:6/0/custom_data_0 = 2
+6:6/0/custom_data_2 = true
+6:6/0/custom_data_3 = true
+6:6/0/custom_data_5 = true
+6:6/0/custom_data_6 = true
+6:6/0/custom_data_7 = "Wall"
+6:6/0/custom_data_8 = true
+6:6/0/custom_data_9 = 54
+7:6/0 = 0
+7:6/0/custom_data_0 = 2
+7:6/0/custom_data_1 = true
+7:6/0/custom_data_2 = true
+7:6/0/custom_data_3 = true
+7:6/0/custom_data_5 = true
+7:6/0/custom_data_6 = true
+7:6/0/custom_data_7 = "Wall"
+7:6/0/custom_data_8 = true
+7:6/0/custom_data_9 = 55
+0:7/0 = 0
+0:7/0/custom_data_0 = 2
+0:7/0/custom_data_4 = true
+0:7/0/custom_data_5 = true
+0:7/0/custom_data_6 = true
+0:7/0/custom_data_7 = "Wall"
+0:7/0/custom_data_8 = true
+0:7/0/custom_data_9 = 56
+1:7/0 = 0
+1:7/0/custom_data_0 = 2
+1:7/0/custom_data_1 = true
+1:7/0/custom_data_4 = true
+1:7/0/custom_data_5 = true
+1:7/0/custom_data_6 = true
+1:7/0/custom_data_7 = "Wall"
+1:7/0/custom_data_8 = true
+1:7/0/custom_data_9 = 57
+2:7/0 = 0
+2:7/0/custom_data_0 = 2
+2:7/0/custom_data_2 = true
+2:7/0/custom_data_4 = true
+2:7/0/custom_data_5 = true
+2:7/0/custom_data_6 = true
+2:7/0/custom_data_7 = "Wall"
+2:7/0/custom_data_8 = true
+2:7/0/custom_data_9 = 58
+3:7/0 = 0
+3:7/0/custom_data_0 = 2
+3:7/0/custom_data_1 = true
+3:7/0/custom_data_2 = true
+3:7/0/custom_data_4 = true
+3:7/0/custom_data_5 = true
+3:7/0/custom_data_6 = true
+3:7/0/custom_data_7 = "Wall"
+3:7/0/custom_data_8 = true
+3:7/0/custom_data_9 = 59
+4:7/0 = 0
+4:7/0/custom_data_0 = 2
+4:7/0/custom_data_3 = true
+4:7/0/custom_data_4 = true
+4:7/0/custom_data_5 = true
+4:7/0/custom_data_6 = true
+4:7/0/custom_data_7 = "Wall"
+4:7/0/custom_data_8 = true
+4:7/0/custom_data_9 = 60
+5:7/0 = 0
+5:7/0/custom_data_0 = 2
+5:7/0/custom_data_1 = true
+5:7/0/custom_data_3 = true
+5:7/0/custom_data_4 = true
+5:7/0/custom_data_5 = true
+5:7/0/custom_data_6 = true
+5:7/0/custom_data_7 = "Wall"
+5:7/0/custom_data_8 = true
+5:7/0/custom_data_9 = 61
+6:7/0 = 0
+6:7/0/custom_data_0 = 2
+6:7/0/custom_data_2 = true
+6:7/0/custom_data_3 = true
+6:7/0/custom_data_4 = true
+6:7/0/custom_data_5 = true
+6:7/0/custom_data_6 = true
+6:7/0/custom_data_7 = "Wall"
+6:7/0/custom_data_8 = true
+6:7/0/custom_data_9 = 62
+7:7/0 = 0
+7:7/0/custom_data_0 = 2
+7:7/0/custom_data_1 = true
+7:7/0/custom_data_2 = true
+7:7/0/custom_data_3 = true
+7:7/0/custom_data_4 = true
+7:7/0/custom_data_5 = true
+7:7/0/custom_data_6 = true
+7:7/0/custom_data_7 = "Wall"
+7:7/0/custom_data_8 = true
+7:7/0/custom_data_9 = 63
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yamsn"]
+resource_name = "Alderbrook palette - hedges"
+shader = ExtResource("4_md6vs")
+shader_parameter/palette = PackedVector4Array(0.105882354, 0.1882353, 0.09019608, 1, 0.1882353, 0.3019608, 0.1254902, 1, 0.29411766, 0.42745098, 0.16862746, 1, 0.45882353, 0.5686275, 0.24705882, 1, 0.64705884, 0.70980394, 0.39607844, 1)
+shader_parameter/levels = PackedFloat32Array(0.06, 0.2, 0.4, 0.62, 0.85)
+shader_parameter/timber_palette = PackedVector4Array(0.21960784, 0.16862746, 0.15294118, 1, 0.39607844, 0.29411766, 0.21176471, 1, 0.5803922, 0.41960785, 0.28235295, 1, 0.74509805, 0.5921569, 0.42352942, 1, 0.8745098, 0.77254903, 0.627451, 1)
+shader_parameter/timber_levels = PackedFloat32Array(0.06, 0.2, 0.35, 0.57, 0.8)
+shader_parameter/soil_palette = PackedVector4Array(0.23137255, 0.16078432, 0.13725491, 1, 0.4, 0.2627451, 0.18431373, 1, 0.59607846, 0.38039216, 0.23529412, 1, 0.7647059, 0.5411765, 0.3529412, 1, 0.87058824, 0.6901961, 0.5058824, 1)
+shader_parameter/soil_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.56, 0.78)
+shader_parameter/clay_palette = PackedVector4Array(0.30980393, 0.1764706, 0.15686275, 1, 0.52156866, 0.2627451, 0.19215687, 1, 0.7176471, 0.38431373, 0.2627451, 1, 0.84313726, 0.5529412, 0.3882353, 1, 0.9137255, 0.70980394, 0.5647059, 1)
+shader_parameter/clay_levels = PackedFloat32Array(0.06, 0.2, 0.36, 0.58, 0.82)
+shader_parameter/slate_palette = PackedVector4Array(0.16078432, 0.20784314, 0.25490198, 1, 0.29411766, 0.34901962, 0.4, 1, 0.47843137, 0.5294118, 0.5647059, 1, 0.6666667, 0.7058824, 0.70980394, 1, 0.8352941, 0.84705883, 0.8156863, 1)
+shader_parameter/slate_levels = PackedFloat32Array(0.04, 0.18, 0.32, 0.53, 0.78)
+shader_parameter/water_palette = PackedVector4Array(0.105882354, 0.20784314, 0.27058825, 1, 0.1764706, 0.34509805, 0.43137255, 1, 0.2784314, 0.49411765, 0.6, 1, 0.4745098, 0.6784314, 0.7529412, 1, 0.78039217, 0.8666667, 0.8901961, 1)
+shader_parameter/water_levels = PackedFloat32Array(0.12, 0.28, 0.448, 0.66, 0.85)
+shader_parameter/fruit_palette = PackedVector4Array(0.43137255, 0.14901961, 0.22745098, 1, 0.7882353, 0.3019608, 0.24705882, 1, 0.6666667, 0.44313726, 0.17254902, 1, 0.9098039, 0.7254902, 0.3137255, 1, 0.9529412, 0.8666667, 0.8156863, 1)
+shader_parameter/grid_ink = Vector4(0.21960784, 0.22352941, 0.18039216, 1)
+shader_parameter/material_kind = 2
+shader_parameter/hdr_2d = false
+shader_parameter/texture_is_linear = false
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_83x8k"]
+resource_name = "Hedge Edges"
+texture = ExtResource("52_uakhw")
+texture_region_size = Vector2i(160, 160)
+1:0/0 = 0
+1:0/0/custom_data_0 = 1
+1:0/0/custom_data_1 = true
+1:0/0/custom_data_7 = "Hedge"
+1:0/0/custom_data_8 = true
+1:0/0/custom_data_9 = 1
+2:0/0 = 0
+2:0/0/material = SubResource("ShaderMaterial_yamsn")
+2:0/0/custom_data_0 = 1
+2:0/0/custom_data_2 = true
+2:0/0/custom_data_7 = "Hedge"
+2:0/0/custom_data_8 = true
+2:0/0/custom_data_9 = 2
+3:0/0 = 0
+3:0/0/custom_data_0 = 1
+3:0/0/custom_data_1 = true
+3:0/0/custom_data_2 = true
+3:0/0/custom_data_7 = "Hedge"
+3:0/0/custom_data_8 = true
+3:0/0/custom_data_9 = 3
+4:0/0 = 0
+4:0/0/custom_data_0 = 1
+4:0/0/custom_data_3 = true
+4:0/0/custom_data_7 = "Hedge"
+4:0/0/custom_data_8 = true
+4:0/0/custom_data_9 = 4
+5:0/0 = 0
+5:0/0/custom_data_0 = 1
+5:0/0/custom_data_1 = true
+5:0/0/custom_data_3 = true
+5:0/0/custom_data_7 = "Hedge"
+5:0/0/custom_data_8 = true
+5:0/0/custom_data_9 = 5
+6:0/0 = 0
+6:0/0/material = SubResource("ShaderMaterial_yamsn")
+6:0/0/custom_data_0 = 1
+6:0/0/custom_data_2 = true
+6:0/0/custom_data_3 = true
+6:0/0/custom_data_7 = "Hedge"
+6:0/0/custom_data_8 = true
+6:0/0/custom_data_9 = 6
+7:0/0 = 0
+7:0/0/custom_data_0 = 1
+7:0/0/custom_data_1 = true
+7:0/0/custom_data_2 = true
+7:0/0/custom_data_3 = true
+7:0/0/custom_data_7 = "Hedge"
+7:0/0/custom_data_8 = true
+7:0/0/custom_data_9 = 7
+0:1/0 = 0
+0:1/0/material = SubResource("ShaderMaterial_yamsn")
+0:1/0/custom_data_0 = 1
+0:1/0/custom_data_4 = true
+0:1/0/custom_data_7 = "Hedge"
+0:1/0/custom_data_8 = true
+0:1/0/custom_data_9 = 8
+1:1/0 = 0
+1:1/0/custom_data_0 = 1
+1:1/0/custom_data_1 = true
+1:1/0/custom_data_4 = true
+1:1/0/custom_data_7 = "Hedge"
+1:1/0/custom_data_8 = true
+1:1/0/custom_data_9 = 9
+2:1/0 = 0
+2:1/0/custom_data_0 = 1
+2:1/0/custom_data_2 = true
+2:1/0/custom_data_4 = true
+2:1/0/custom_data_7 = "Hedge"
+2:1/0/custom_data_8 = true
+2:1/0/custom_data_9 = 10
+3:1/0 = 0
+3:1/0/custom_data_0 = 1
+3:1/0/custom_data_1 = true
+3:1/0/custom_data_2 = true
+3:1/0/custom_data_4 = true
+3:1/0/custom_data_7 = "Hedge"
+3:1/0/custom_data_8 = true
+3:1/0/custom_data_9 = 11
+4:1/0 = 0
+4:1/0/custom_data_0 = 1
+4:1/0/custom_data_3 = true
+4:1/0/custom_data_4 = true
+4:1/0/custom_data_7 = "Hedge"
+4:1/0/custom_data_8 = true
+4:1/0/custom_data_9 = 12
+5:1/0 = 0
+5:1/0/custom_data_0 = 1
+5:1/0/custom_data_1 = true
+5:1/0/custom_data_3 = true
+5:1/0/custom_data_4 = true
+5:1/0/custom_data_7 = "Hedge"
+5:1/0/custom_data_8 = true
+5:1/0/custom_data_9 = 13
+6:1/0 = 0
+6:1/0/material = SubResource("ShaderMaterial_yamsn")
+6:1/0/custom_data_0 = 1
+6:1/0/custom_data_2 = true
+6:1/0/custom_data_3 = true
+6:1/0/custom_data_4 = true
+6:1/0/custom_data_7 = "Hedge"
+6:1/0/custom_data_8 = true
+6:1/0/custom_data_9 = 14
+7:1/0 = 0
+7:1/0/custom_data_0 = 1
+7:1/0/custom_data_1 = true
+7:1/0/custom_data_2 = true
+7:1/0/custom_data_3 = true
+7:1/0/custom_data_4 = true
+7:1/0/custom_data_7 = "Hedge"
+7:1/0/custom_data_8 = true
+7:1/0/custom_data_9 = 15
+0:2/0 = 0
+0:2/0/custom_data_0 = 1
+0:2/0/custom_data_5 = true
+0:2/0/custom_data_7 = "Hedge"
+0:2/0/custom_data_8 = true
+0:2/0/custom_data_9 = 16
+1:2/0 = 0
+1:2/0/custom_data_0 = 1
+1:2/0/custom_data_1 = true
+1:2/0/custom_data_5 = true
+1:2/0/custom_data_7 = "Hedge"
+1:2/0/custom_data_8 = true
+1:2/0/custom_data_9 = 17
+2:2/0 = 0
+2:2/0/custom_data_0 = 1
+2:2/0/custom_data_2 = true
+2:2/0/custom_data_5 = true
+2:2/0/custom_data_7 = "Hedge"
+2:2/0/custom_data_8 = true
+2:2/0/custom_data_9 = 18
+3:2/0 = 0
+3:2/0/custom_data_0 = 1
+3:2/0/custom_data_1 = true
+3:2/0/custom_data_2 = true
+3:2/0/custom_data_5 = true
+3:2/0/custom_data_7 = "Hedge"
+3:2/0/custom_data_8 = true
+3:2/0/custom_data_9 = 19
+4:2/0 = 0
+4:2/0/custom_data_0 = 1
+4:2/0/custom_data_3 = true
+4:2/0/custom_data_5 = true
+4:2/0/custom_data_7 = "Hedge"
+4:2/0/custom_data_8 = true
+4:2/0/custom_data_9 = 20
+5:2/0 = 0
+5:2/0/custom_data_0 = 1
+5:2/0/custom_data_1 = true
+5:2/0/custom_data_3 = true
+5:2/0/custom_data_5 = true
+5:2/0/custom_data_7 = "Hedge"
+5:2/0/custom_data_8 = true
+5:2/0/custom_data_9 = 21
+6:2/0 = 0
+6:2/0/custom_data_0 = 1
+6:2/0/custom_data_2 = true
+6:2/0/custom_data_3 = true
+6:2/0/custom_data_5 = true
+6:2/0/custom_data_7 = "Hedge"
+6:2/0/custom_data_8 = true
+6:2/0/custom_data_9 = 22
+7:2/0 = 0
+7:2/0/custom_data_0 = 1
+7:2/0/custom_data_1 = true
+7:2/0/custom_data_2 = true
+7:2/0/custom_data_3 = true
+7:2/0/custom_data_5 = true
+7:2/0/custom_data_7 = "Hedge"
+7:2/0/custom_data_8 = true
+7:2/0/custom_data_9 = 23
+0:3/0 = 0
+0:3/0/custom_data_0 = 1
+0:3/0/custom_data_4 = true
+0:3/0/custom_data_5 = true
+0:3/0/custom_data_7 = "Hedge"
+0:3/0/custom_data_8 = true
+0:3/0/custom_data_9 = 24
+1:3/0 = 0
+1:3/0/custom_data_0 = 1
+1:3/0/custom_data_1 = true
+1:3/0/custom_data_4 = true
+1:3/0/custom_data_5 = true
+1:3/0/custom_data_7 = "Hedge"
+1:3/0/custom_data_8 = true
+1:3/0/custom_data_9 = 25
+2:3/0 = 0
+2:3/0/custom_data_0 = 1
+2:3/0/custom_data_2 = true
+2:3/0/custom_data_4 = true
+2:3/0/custom_data_5 = true
+2:3/0/custom_data_7 = "Hedge"
+2:3/0/custom_data_8 = true
+2:3/0/custom_data_9 = 26
+3:3/0 = 0
+3:3/0/custom_data_0 = 1
+3:3/0/custom_data_1 = true
+3:3/0/custom_data_2 = true
+3:3/0/custom_data_4 = true
+3:3/0/custom_data_5 = true
+3:3/0/custom_data_7 = "Hedge"
+3:3/0/custom_data_8 = true
+3:3/0/custom_data_9 = 27
+4:3/0 = 0
+4:3/0/custom_data_0 = 1
+4:3/0/custom_data_3 = true
+4:3/0/custom_data_4 = true
+4:3/0/custom_data_5 = true
+4:3/0/custom_data_7 = "Hedge"
+4:3/0/custom_data_8 = true
+4:3/0/custom_data_9 = 28
+5:3/0 = 0
+5:3/0/custom_data_0 = 1
+5:3/0/custom_data_1 = true
+5:3/0/custom_data_3 = true
+5:3/0/custom_data_4 = true
+5:3/0/custom_data_5 = true
+5:3/0/custom_data_7 = "Hedge"
+5:3/0/custom_data_8 = true
+5:3/0/custom_data_9 = 29
+6:3/0 = 0
+6:3/0/custom_data_0 = 1
+6:3/0/custom_data_2 = true
+6:3/0/custom_data_3 = true
+6:3/0/custom_data_4 = true
+6:3/0/custom_data_5 = true
+6:3/0/custom_data_7 = "Hedge"
+6:3/0/custom_data_8 = true
+6:3/0/custom_data_9 = 30
+7:3/0 = 0
+7:3/0/custom_data_0 = 1
+7:3/0/custom_data_1 = true
+7:3/0/custom_data_2 = true
+7:3/0/custom_data_3 = true
+7:3/0/custom_data_4 = true
+7:3/0/custom_data_5 = true
+7:3/0/custom_data_7 = "Hedge"
+7:3/0/custom_data_8 = true
+7:3/0/custom_data_9 = 31
+0:4/0 = 0
+0:4/0/custom_data_0 = 1
+0:4/0/custom_data_6 = true
+0:4/0/custom_data_7 = "Hedge"
+0:4/0/custom_data_8 = true
+0:4/0/custom_data_9 = 32
+1:4/0 = 0
+1:4/0/custom_data_0 = 1
+1:4/0/custom_data_1 = true
+1:4/0/custom_data_6 = true
+1:4/0/custom_data_7 = "Hedge"
+1:4/0/custom_data_8 = true
+1:4/0/custom_data_9 = 33
+2:4/0 = 0
+2:4/0/custom_data_0 = 1
+2:4/0/custom_data_2 = true
+2:4/0/custom_data_6 = true
+2:4/0/custom_data_7 = "Hedge"
+2:4/0/custom_data_8 = true
+2:4/0/custom_data_9 = 34
+3:4/0 = 0
+3:4/0/custom_data_0 = 1
+3:4/0/custom_data_1 = true
+3:4/0/custom_data_2 = true
+3:4/0/custom_data_6 = true
+3:4/0/custom_data_7 = "Hedge"
+3:4/0/custom_data_8 = true
+3:4/0/custom_data_9 = 35
+4:4/0 = 0
+4:4/0/custom_data_0 = 1
+4:4/0/custom_data_3 = true
+4:4/0/custom_data_6 = true
+4:4/0/custom_data_7 = "Hedge"
+4:4/0/custom_data_8 = true
+4:4/0/custom_data_9 = 36
+5:4/0 = 0
+5:4/0/custom_data_0 = 1
+5:4/0/custom_data_1 = true
+5:4/0/custom_data_3 = true
+5:4/0/custom_data_6 = true
+5:4/0/custom_data_7 = "Hedge"
+5:4/0/custom_data_8 = true
+5:4/0/custom_data_9 = 37
+6:4/0 = 0
+6:4/0/custom_data_0 = 1
+6:4/0/custom_data_2 = true
+6:4/0/custom_data_3 = true
+6:4/0/custom_data_6 = true
+6:4/0/custom_data_7 = "Hedge"
+6:4/0/custom_data_8 = true
+6:4/0/custom_data_9 = 38
+7:4/0 = 0
+7:4/0/custom_data_0 = 1
+7:4/0/custom_data_1 = true
+7:4/0/custom_data_2 = true
+7:4/0/custom_data_3 = true
+7:4/0/custom_data_6 = true
+7:4/0/custom_data_7 = "Hedge"
+7:4/0/custom_data_8 = true
+7:4/0/custom_data_9 = 39
+0:5/0 = 0
+0:5/0/custom_data_0 = 1
+0:5/0/custom_data_4 = true
+0:5/0/custom_data_6 = true
+0:5/0/custom_data_7 = "Hedge"
+0:5/0/custom_data_8 = true
+0:5/0/custom_data_9 = 40
+1:5/0 = 0
+1:5/0/custom_data_0 = 1
+1:5/0/custom_data_1 = true
+1:5/0/custom_data_4 = true
+1:5/0/custom_data_6 = true
+1:5/0/custom_data_7 = "Hedge"
+1:5/0/custom_data_8 = true
+1:5/0/custom_data_9 = 41
+2:5/0 = 0
+2:5/0/custom_data_0 = 1
+2:5/0/custom_data_2 = true
+2:5/0/custom_data_4 = true
+2:5/0/custom_data_6 = true
+2:5/0/custom_data_7 = "Hedge"
+2:5/0/custom_data_8 = true
+2:5/0/custom_data_9 = 42
+3:5/0 = 0
+3:5/0/custom_data_0 = 1
+3:5/0/custom_data_1 = true
+3:5/0/custom_data_2 = true
+3:5/0/custom_data_4 = true
+3:5/0/custom_data_6 = true
+3:5/0/custom_data_7 = "Hedge"
+3:5/0/custom_data_8 = true
+3:5/0/custom_data_9 = 43
+4:5/0 = 0
+4:5/0/custom_data_0 = 1
+4:5/0/custom_data_3 = true
+4:5/0/custom_data_4 = true
+4:5/0/custom_data_6 = true
+4:5/0/custom_data_7 = "Hedge"
+4:5/0/custom_data_8 = true
+4:5/0/custom_data_9 = 44
+5:5/0 = 0
+5:5/0/custom_data_0 = 1
+5:5/0/custom_data_1 = true
+5:5/0/custom_data_3 = true
+5:5/0/custom_data_4 = true
+5:5/0/custom_data_6 = true
+5:5/0/custom_data_7 = "Hedge"
+5:5/0/custom_data_8 = true
+5:5/0/custom_data_9 = 45
+6:5/0 = 0
+6:5/0/custom_data_0 = 1
+6:5/0/custom_data_2 = true
+6:5/0/custom_data_3 = true
+6:5/0/custom_data_4 = true
+6:5/0/custom_data_6 = true
+6:5/0/custom_data_7 = "Hedge"
+6:5/0/custom_data_8 = true
+6:5/0/custom_data_9 = 46
+7:5/0 = 0
+7:5/0/custom_data_0 = 1
+7:5/0/custom_data_1 = true
+7:5/0/custom_data_2 = true
+7:5/0/custom_data_3 = true
+7:5/0/custom_data_4 = true
+7:5/0/custom_data_6 = true
+7:5/0/custom_data_7 = "Hedge"
+7:5/0/custom_data_8 = true
+7:5/0/custom_data_9 = 47
+0:6/0 = 0
+0:6/0/custom_data_0 = 1
+0:6/0/custom_data_5 = true
+0:6/0/custom_data_6 = true
+0:6/0/custom_data_7 = "Hedge"
+0:6/0/custom_data_8 = true
+0:6/0/custom_data_9 = 48
+1:6/0 = 0
+1:6/0/custom_data_0 = 1
+1:6/0/custom_data_1 = true
+1:6/0/custom_data_5 = true
+1:6/0/custom_data_6 = true
+1:6/0/custom_data_7 = "Hedge"
+1:6/0/custom_data_8 = true
+1:6/0/custom_data_9 = 49
+2:6/0 = 0
+2:6/0/custom_data_0 = 1
+2:6/0/custom_data_2 = true
+2:6/0/custom_data_5 = true
+2:6/0/custom_data_6 = true
+2:6/0/custom_data_7 = "Hedge"
+2:6/0/custom_data_8 = true
+2:6/0/custom_data_9 = 50
+3:6/0 = 0
+3:6/0/custom_data_0 = 1
+3:6/0/custom_data_1 = true
+3:6/0/custom_data_2 = true
+3:6/0/custom_data_5 = true
+3:6/0/custom_data_6 = true
+3:6/0/custom_data_7 = "Hedge"
+3:6/0/custom_data_8 = true
+3:6/0/custom_data_9 = 51
+4:6/0 = 0
+4:6/0/custom_data_0 = 1
+4:6/0/custom_data_3 = true
+4:6/0/custom_data_5 = true
+4:6/0/custom_data_6 = true
+4:6/0/custom_data_7 = "Hedge"
+4:6/0/custom_data_8 = true
+4:6/0/custom_data_9 = 52
+5:6/0 = 0
+5:6/0/custom_data_0 = 1
+5:6/0/custom_data_1 = true
+5:6/0/custom_data_3 = true
+5:6/0/custom_data_5 = true
+5:6/0/custom_data_6 = true
+5:6/0/custom_data_7 = "Hedge"
+5:6/0/custom_data_8 = true
+5:6/0/custom_data_9 = 53
+6:6/0 = 0
+6:6/0/custom_data_0 = 1
+6:6/0/custom_data_2 = true
+6:6/0/custom_data_3 = true
+6:6/0/custom_data_5 = true
+6:6/0/custom_data_6 = true
+6:6/0/custom_data_7 = "Hedge"
+6:6/0/custom_data_8 = true
+6:6/0/custom_data_9 = 54
+7:6/0 = 0
+7:6/0/custom_data_0 = 1
+7:6/0/custom_data_1 = true
+7:6/0/custom_data_2 = true
+7:6/0/custom_data_3 = true
+7:6/0/custom_data_5 = true
+7:6/0/custom_data_6 = true
+7:6/0/custom_data_7 = "Hedge"
+7:6/0/custom_data_8 = true
+7:6/0/custom_data_9 = 55
+0:7/0 = 0
+0:7/0/custom_data_0 = 1
+0:7/0/custom_data_4 = true
+0:7/0/custom_data_5 = true
+0:7/0/custom_data_6 = true
+0:7/0/custom_data_7 = "Hedge"
+0:7/0/custom_data_8 = true
+0:7/0/custom_data_9 = 56
+1:7/0 = 0
+1:7/0/custom_data_0 = 1
+1:7/0/custom_data_1 = true
+1:7/0/custom_data_4 = true
+1:7/0/custom_data_5 = true
+1:7/0/custom_data_6 = true
+1:7/0/custom_data_7 = "Hedge"
+1:7/0/custom_data_8 = true
+1:7/0/custom_data_9 = 57
+2:7/0 = 0
+2:7/0/custom_data_0 = 1
+2:7/0/custom_data_2 = true
+2:7/0/custom_data_4 = true
+2:7/0/custom_data_5 = true
+2:7/0/custom_data_6 = true
+2:7/0/custom_data_7 = "Hedge"
+2:7/0/custom_data_8 = true
+2:7/0/custom_data_9 = 58
+3:7/0 = 0
+3:7/0/custom_data_0 = 1
+3:7/0/custom_data_1 = true
+3:7/0/custom_data_2 = true
+3:7/0/custom_data_4 = true
+3:7/0/custom_data_5 = true
+3:7/0/custom_data_6 = true
+3:7/0/custom_data_7 = "Hedge"
+3:7/0/custom_data_8 = true
+3:7/0/custom_data_9 = 59
+4:7/0 = 0
+4:7/0/custom_data_0 = 1
+4:7/0/custom_data_3 = true
+4:7/0/custom_data_4 = true
+4:7/0/custom_data_5 = true
+4:7/0/custom_data_6 = true
+4:7/0/custom_data_7 = "Hedge"
+4:7/0/custom_data_8 = true
+4:7/0/custom_data_9 = 60
+5:7/0 = 0
+5:7/0/custom_data_0 = 1
+5:7/0/custom_data_1 = true
+5:7/0/custom_data_3 = true
+5:7/0/custom_data_4 = true
+5:7/0/custom_data_5 = true
+5:7/0/custom_data_6 = true
+5:7/0/custom_data_7 = "Hedge"
+5:7/0/custom_data_8 = true
+5:7/0/custom_data_9 = 61
+6:7/0 = 0
+6:7/0/custom_data_0 = 1
+6:7/0/custom_data_2 = true
+6:7/0/custom_data_3 = true
+6:7/0/custom_data_4 = true
+6:7/0/custom_data_5 = true
+6:7/0/custom_data_6 = true
+6:7/0/custom_data_7 = "Hedge"
+6:7/0/custom_data_8 = true
+6:7/0/custom_data_9 = 62
+7:7/0 = 0
+7:7/0/custom_data_0 = 1
+7:7/0/custom_data_1 = true
+7:7/0/custom_data_2 = true
+7:7/0/custom_data_3 = true
+7:7/0/custom_data_4 = true
+7:7/0/custom_data_5 = true
+7:7/0/custom_data_6 = true
+7:7/0/custom_data_7 = "Hedge"
+7:7/0/custom_data_8 = true
+7:7/0/custom_data_9 = 63
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1tujg"]
+resource_name = "Legacy stone edge 2"
+texture = ExtResource("53_3bft1")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_4 = true
+0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Wall"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_3 = true
+0:0/1/custom_data_4 = true
+0:0/1/custom_data_7 = "Wall"
+0:0/2 = 2
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 2
+0:0/2/custom_data_1 = true
+0:0/2/custom_data_6 = true
+0:0/2/custom_data_7 = "Wall"
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 2
+0:0/3/custom_data_1 = true
+0:0/3/custom_data_2 = true
+0:0/3/custom_data_7 = "Wall"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cc7j2"]
+resource_name = "Legacy hedge edge 3"
+texture = ExtResource("54_xribq")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_7 = "Hedge"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 1
+0:0/1/custom_data_7 = "Hedge"
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 1
+0:0/2/custom_data_7 = "Hedge"
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/custom_data_0 = 1
+0:0/3/custom_data_7 = "Hedge"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m4o3a"]
+resource_name = "Legacy stone edge 4"
+texture = ExtResource("55_1b818")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_2 = true
+0:0/0/custom_data_3 = true
+0:0/0/custom_data_7 = "Wall"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 2
+0:0/1/custom_data_5 = true
+0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Wall"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_slcu4"]
+resource_name = "Legacy hedge edge 5"
+texture = ExtResource("56_n7kvc")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_4 = true
+0:0/0/custom_data_5 = true
+0:0/0/custom_data_7 = "Hedge"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 1
+0:0/1/custom_data_3 = true
+0:0/1/custom_data_4 = true
+0:0/1/custom_data_7 = "Hedge"
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 1
+0:0/2/custom_data_1 = true
+0:0/2/custom_data_2 = true
+0:0/2/custom_data_7 = "Hedge"
+0:0/3 = 3
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 1
+0:0/3/custom_data_1 = true
+0:0/3/custom_data_6 = true
+0:0/3/custom_data_7 = "Hedge"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vmqce"]
+resource_name = "Legacy hedge edge 6"
+texture = ExtResource("57_xs1sp")
+texture_region_size = Vector2i(160, 160)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eoxga"]
+resource_name = "Legacy hedge edge 7"
+texture = ExtResource("58_rjk32")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_3 = true
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 1
+0:0/1/custom_data_5 = true
+0:0/2 = 2
+0:0/2/flip_v = true
+0:0/2/custom_data_0 = 1
+0:0/2/custom_data_2 = true
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_0 = 1
+0:0/3/custom_data_6 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wey13"]
+resource_name = "Legacy hedge edge 8"
+texture = ExtResource("59_0w3g2")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_2 = true
+0:0/0/custom_data_3 = true
+0:0/0/custom_data_7 = "Hedge"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_0 = 1
+0:0/1/custom_data_5 = true
+0:0/1/custom_data_6 = true
+0:0/1/custom_data_7 = "Hedge"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ha2ki"]
+resource_name = "Legacy hedge edge 9"
+texture = ExtResource("60_u4ou3")
+texture_region_size = Vector2i(160, 160)
+0:0/next_alternative_id = 3
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_4 = true
+0:0/0/custom_data_7 = "Hedge"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_0 = 1
+0:0/1/custom_data_1 = true
+0:0/1/custom_data_7 = "Hedge"
+
+[sub_resource type="TileSet" id="TileSet_ng5pv"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "cover"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "n"
+custom_data_layer_1/type = 1
+custom_data_layer_2/name = "ne"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "se"
+custom_data_layer_3/type = 1
+custom_data_layer_4/name = "s"
+custom_data_layer_4/type = 1
+custom_data_layer_5/name = "sw"
+custom_data_layer_5/type = 1
+custom_data_layer_6/name = "nw"
+custom_data_layer_6/type = 1
+custom_data_layer_7/name = "name"
+custom_data_layer_7/type = 4
+custom_data_layer_8/name = "barrier_connected"
+custom_data_layer_8/type = 1
+custom_data_layer_9/name = "connections"
+custom_data_layer_9/type = 2
+sources/0 = SubResource("TileSetAtlasSource_jnoqe")
+sources/1 = SubResource("TileSetAtlasSource_5rls1")
+sources/2 = SubResource("TileSetAtlasSource_1tujg")
+sources/4 = SubResource("TileSetAtlasSource_m4o3a")
+sources/3 = SubResource("TileSetAtlasSource_cc7j2")
+sources/5 = SubResource("TileSetAtlasSource_slcu4")
+sources/6 = SubResource("TileSetAtlasSource_vmqce")
+sources/7 = SubResource("TileSetAtlasSource_eoxga")
+sources/8 = SubResource("TileSetAtlasSource_wey13")
+sources/9 = SubResource("TileSetAtlasSource_ha2ki")
+sources/10 = SubResource("TileSetAtlasSource_ymy80")
+sources/11 = SubResource("TileSetAtlasSource_83x8k")
+
+[sub_resource type="Resource" id="Resource_v13uw"]
+script = ExtResource("114_xdsol")
+required_time_s = 15.0
+team = 1
+
+[sub_resource type="Resource" id="Resource_n8dhh"]
+script = ExtResource("114_xdsol")
+objective_id = 2
+required_time_s = 15.0
+team = 1
+
+[sub_resource type="Resource" id="Resource_id4m7"]
+script = ExtResource("114_xdsol")
+required_time_s = 15.0
+team = 1
+outcome_level = 0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_81yaa"]
+script = ExtResource("114_xdsol")
+required_time_s = 15.0
+test_at_scenario_end = true
+
+[sub_resource type="Resource" id="Resource_ugw8x"]
+script = ExtResource("117_w44ba")
+nickname = "Executive Officer"
+rank_grade = 4
+role = 8
+weapon = ExtResource("119_tc5q8")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_opqin"]
+script = ExtResource("117_w44ba")
+nickname = "First Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("119_tc5q8")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_m0wo0"]
+script = ExtResource("117_w44ba")
+nickname = "Communications Sergeant"
+rank_grade = 3
+role = 6
+weapon = ExtResource("120_01art")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_gfsc7"]
+script = ExtResource("117_w44ba")
+nickname = "Bugler"
+rank_grade = 1
+role = 6
+weapon = ExtResource("119_tc5q8")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_5hgqf"]
+script = ExtResource("117_w44ba")
+nickname = "Messenger 1"
+weapon = ExtResource("121_54mkp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_yyuxn"]
+script = ExtResource("117_w44ba")
+nickname = "Messenger 2"
+weapon = ExtResource("121_54mkp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_v8x2n"]
+script = ExtResource("123_yody1")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_b5oeb"]
+script = ExtResource("123_yody1")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_ga1pk"]
+script = ExtResource("123_yody1")
+metadata/_custom_type_script = "uid://bikdnoi2rxdle"
+
+[sub_resource type="Resource" id="Resource_dlmmx"]
+script = ExtResource("117_w44ba")
+nickname = "Platoon Seargeant"
+rank_grade = 3
+role = 8
+weapon = ExtResource("121_54mkp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ahjmf"]
+script = ExtResource("117_w44ba")
+nickname = "Platoon Guide"
+rank_grade = 3
+role = 6
+weapon = ExtResource("120_01art")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_asadm"]
+script = ExtResource("117_w44ba")
+nickname = "Messenger 1"
+weapon = ExtResource("121_54mkp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ihjum"]
+script = ExtResource("117_w44ba")
+nickname = "Messenger 2"
+weapon = ExtResource("121_54mkp")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_jsgmt"]
+script = ExtResource("117_w44ba")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("134_3pkja")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_rxxvr"]
+script = ExtResource("117_w44ba")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("137_htb4w")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_rwfxm"]
+script = ExtResource("117_w44ba")
+nickname = "Sanitäter"
+rank_grade = 3
+role = 6
+weapon = ExtResource("141_53nlg")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_h7cha"]
+script = ExtResource("117_w44ba")
+nickname = "Melder"
+rank_grade = 3
+role = 6
+weapon = ExtResource("141_53nlg")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_vumxo"]
+script = ExtResource("117_w44ba")
+nickname = "Funker"
+role = 6
+weapon = ExtResource("141_53nlg")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_vcyyo"]
+script = ExtResource("117_w44ba")
+nickname = "Bote 1"
+weapon = ExtResource("141_53nlg")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_ryqsp"]
+script = ExtResource("117_w44ba")
+nickname = "Bote 2"
+weapon = ExtResource("141_53nlg")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="Resource" id="Resource_g85e3"]
+script = ExtResource("117_w44ba")
+nickname = "Gunner"
+role = 1
+weapon = ExtResource("149_k23js")
+metadata/_custom_type_script = "uid://doub5i2qbimo0"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06hnl"]
+texture = ExtResource("152_wbgo4")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_2 = "Exit"
+0:0/0/custom_data_3 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28uas"]
+texture = ExtResource("153_gowp1")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cu88"]
+texture = ExtResource("154_ukoeg")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq3s3"]
+texture = ExtResource("155_b68o4")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0jm0n"]
+texture = ExtResource("156_yedvx")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 4
+0:0/0/custom_data_3 = "Start"
+
+[sub_resource type="TileSet" id="TileSet_0jm0n"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "objective_id"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "display_name"
+custom_data_layer_2/type = 4
+custom_data_layer_3/name = "zone_type"
+custom_data_layer_3/type = 4
+sources/3 = SubResource("TileSetAtlasSource_28uas")
+sources/4 = SubResource("TileSetAtlasSource_4cu88")
+sources/5 = SubResource("TileSetAtlasSource_eq3s3")
+sources/1 = SubResource("TileSetAtlasSource_06hnl")
+sources/9 = SubResource("TileSetAtlasSource_0jm0n")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kp5un"]
+texture = ExtResource("157_get5f")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Exit"
+0:0/0/custom_data_3 = "Exit"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ofo72"]
+texture = ExtResource("158_fcqgi")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 4
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_3 = "Start"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fcp7w"]
+texture = ExtResource("159_xxryo")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 1
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective A"
+0:0/0/custom_data_3 = "A"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_int16"]
+texture = ExtResource("160_28vc3")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 2
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective B"
+0:0/0/custom_data_3 = "B"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ys5q"]
+texture = ExtResource("161_1o5ne")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = 3
+0:0/0/custom_data_1 = 1
+0:0/0/custom_data_2 = "Objective C"
+0:0/0/custom_data_3 = "C"
+
+[sub_resource type="TileSet" id="TileSet_cwow2"]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "objective_id"
+custom_data_layer_0/type = 2
+custom_data_layer_1/name = "team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "display_name"
+custom_data_layer_2/type = 4
+custom_data_layer_3/name = "zone_type"
+custom_data_layer_3/type = 4
+sources/6 = SubResource("TileSetAtlasSource_fcp7w")
+sources/7 = SubResource("TileSetAtlasSource_int16")
+sources/8 = SubResource("TileSetAtlasSource_6ys5q")
+sources/2 = SubResource("TileSetAtlasSource_ofo72")
+sources/0 = SubResource("TileSetAtlasSource_kp5un")
+
+[node name="AlderbrookPrologue" type="Node2D" unique_id=1128763383]
+script = ExtResource("1_l6o7s")
+grid_size = Vector2i(20, 12)
+map_name = "Alderbrook Forward Road"
+campaign_name = "Road to Alderbrook"
+los_resource_path = "res://resources/los/alderbrook_00_opening_the_road.res"
+
+[node name="TileMapLayers" type="Node2D" parent="." unique_id=1478662733]
+
+[node name="GroundTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1569268173 instance=ExtResource("2_f5u2e")]
+tile_map_data = PackedByteArray("AAAAAAAABAAAAAAAAAABAAAABAAAAAAAAAACAAAABAAAAAAAAAADAAAABAAAAAAAAAACAAEABAAAAAAAAAABAAEABAAAAAAAAAAAAAEABAAAAAAAAAAAAAIABAAAAAAAAAABAAIABAAAAAAAAAACAAIABAAAAAAAAAADAAIABAAAAAAAAAAAAAMAAwAAAAAAAAABAAMAAQAAAAAAAAACAAMAAQAAAAAAAAADAAMAAwAAAAAAAAADAAEABAAAAAAAAAAEAAAABAAAAAAAAAAFAAAABAAAAAAAAAAFAAQABAAAAAAAAAADAAQAAwAAAAAAAAACAAQAAwAAAAAAAAABAAQAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAAUAAwAAAAAAAAABAAUAAwAAAAAAAAACAAUABAAAAAAAAAAEAAUABAAAAAAAAAAAAAYAAQAAAAAAAAABAAYAAQAAAAAAAAACAAYAAQAAAAAAAAADAAYAAQAAAAAAAAAEAAYAAQAAAAAAAAAGAAYAAQAAAAAAAAAFAAYAAQAAAAAAAAAFAAUABAAAAAAAAAAGAAUABAAAAAAAAAAGAAQABAAAAAAAAAAGAAMABAAAAAAAAAAGAAIABAAAAAAAAAAGAAEABAAAAAAAAAAGAAAABAAAAAAAAAAFAAEABAAAAAAAAAAHAAAABAAAAAAAAAAHAAIABAAAAAAAAAADAAUABAAAAAAAAAAEAAQAAwAAAAAAAAAFAAMABAAAAAAAAAAFAAIABAAAAAAAAAAEAAMAAwAAAAAAAAAEAAIABAAAAAAAAAAEAAEABAAAAAAAAAAIAAAABAAAAAAAAAAHAAEABAAAAAAAAAAIAAIABAAAAAAAAAAHAAMABAAAAAAAAAAIAAMABAAAAAAAAAAIAAQAAwAAAAAAAAAIAAUAAQAAAAAAAAAIAAEABAAAAAAAAAAHAAQABAAAAAAAAAAHAAUABAAAAAAAAAAIAAYAAQAAAAAAAAAIAAcAAQAAAAAAAAAIAAgAAQAAAAAAAAAHAAgABAAAAAAAAAAGAAgABAAAAAAAAAAFAAgABAAAAAAAAAAEAAgAAwAAAAAAAAADAAgAAwAAAAAAAAACAAgAAwAAAAAAAAABAAgABAAAAAAAAAAAAAgABAAAAAAAAAAAAAcAAQAAAAAAAAABAAcABAAAAAAAAAACAAcAAQAAAAAAAAADAAcABAAAAAAAAAAEAAcAAQAAAAAAAAAFAAcABAAAAAAAAAAGAAcABAAAAAAAAAAHAAcABAAAAAAAAAAHAAYAAQAAAAAAAAAJAAAABAAAAAAAAAAKAAEABAAAAAAAAAALAAAABAAAAAAAAAAMAAEABAAAAAAAAAAMAAAABAAAAAAAAAAKAAAABAAAAAAAAAANAAAABAAAAAAAAAAOAAAABAAAAAAAAAAPAAAABAAAAAAAAAAQAAEABAAAAAAAAAARAAAABAAAAAAAAAAQAAAABAAAAAAAAAASAAAABAAAAAAAAAATAAAABAAAAAAAAAAUAAAA//////////8VAAAA//////////8WAAAA//////////8WAAEA//////////8XAAAA//////////8WAAIA//////////8WAAMA//////////8WAAQA//////////8WAAUA//////////8WAAYA//////////8KAAIABAAAAAAAAAAJAAEABAAAAAAAAAALAAIABAAAAAAAAAAMAAIABAAAAAAAAAANAAIABAAAAAAAAAANAAEABAAAAAAAAAALAAEABAAAAAAAAAAOAAEABAAAAAAAAAAPAAEABAAAAAAAAAAOAAIABAAAAAAAAAAJAAIABAAAAAAAAAAJAAMAAwAAAAAAAAAKAAMAAwAAAAAAAAALAAMAAwAAAAAAAAAMAAMAAwAAAAAAAAANAAMAAQAAAAAAAAAOAAMAAQAAAAAAAAAKAAQAAwAAAAAAAAALAAQAAwAAAAAAAAAMAAQAAwAAAAAAAAAOAAQAAQAAAAAAAAANAAQAAwAAAAAAAAAKAAUAAwAAAAAAAAAJAAQAAwAAAAAAAAAMAAUAAwAAAAAAAAALAAUAAwAAAAAAAAANAAUAAwAAAAAAAAAMAAYAAwAAAAAAAAAJAAUAAwAAAAAAAAAJAAYAAQAAAAAAAAAKAAYAAQAAAAAAAAALAAYAAQAAAAAAAAANAAYAAQAAAAAAAAAKAAcAAQAAAAAAAAAJAAcAAQAAAAAAAAAKAAgAAwAAAAAAAAALAAcAAwAAAAAAAAAAAAkABAAAAAAAAAACAAkABAAAAAAAAAAEAAkABAAAAAAAAAAFAAkABAAAAAAAAAADAAkABAAAAAAAAAABAAkABAAAAAAAAAAGAAkABAAAAAAAAAAHAAkABAAAAAAAAAAIAAkABAAAAAAAAAAJAAkABAAAAAAAAAAKAAkABAAAAAAAAAAJAAgAAQAAAAAAAAALAAkABAAAAAAAAAAMAAkABAAAAAAAAAANAAkABAAAAAAAAAAOAAkABAAAAAAAAAAPAAkABAAAAAAAAAAQAAkABAAAAAAAAAARAAkABAAAAAAAAAASAAkABAAAAAAAAAATAAkABAAAAAAAAAAUAAkA//////////8VAAkA//////////8WAAkA//////////8XAAkA//////////8XAAgA//////////8XAAcA//////////8XAAYA//////////8XAAUA//////////8XAAQA//////////8XAAMA//////////8XAAIA//////////8XAAEA//////////8WAAcA//////////8VAAcA//////////8WAAgA//////////8VAAgA//////////8UAAgA//////////8TAAgABAAAAAAAAAASAAgABAAAAAAAAAARAAgABAAAAAAAAAAQAAgAAwAAAAAAAAAPAAgAAQAAAAAAAAAOAAgAAQAAAAAAAAANAAgAAQAAAAAAAAAMAAgAAQAAAAAAAAALAAgAAQAAAAAAAAARAAcAAQAAAAAAAAAPAAcAAQAAAAAAAAAOAAcAAQAAAAAAAAANAAcAAQAAAAAAAAAQAAcAAQAAAAAAAAASAAcAAQAAAAAAAAATAAYAAQAAAAAAAAAUAAcA//////////8RAAYAAQAAAAAAAAAPAAYAAQAAAAAAAAASAAYABAAAAAAAAAAUAAYA//////////8TAAcAAQAAAAAAAAAVAAYA//////////8VAAUA//////////8TAAUABAAAAAAAAAAUAAUA//////////8SAAUABAAAAAAAAAARAAUABAAAAAAAAAATAAQABAAAAAAAAAARAAQAAwAAAAAAAAAQAAQAAwAAAAAAAAAPAAQAAQAAAAAAAAAOAAUAAwAAAAAAAAAOAAYAAQAAAAAAAAAPAAUAAwAAAAAAAAAQAAYAAwAAAAAAAAAQAAUAAwAAAAAAAAASAAQABAAAAAAAAAATAAMABAAAAAAAAAARAAMAAwAAAAAAAAAPAAMAAQAAAAAAAAASAAMAAwAAAAAAAAARAAIABAAAAAAAAAAQAAMAAQAAAAAAAAAPAAIABAAAAAAAAAATAAIABAAAAAAAAAAUAAIA//////////8TAAEABAAAAAAAAAASAAIABAAAAAAAAAARAAEABAAAAAAAAAAQAAIABAAAAAAAAAASAAEABAAAAAAAAAAVAAEA//////////8UAAEA//////////8VAAIA//////////8VAAMA//////////8UAAQA//////////8VAAQA//////////8UAAMA//////////8MAAcAAQAAAAAAAAAAAAoABAAAAAAAAAAAAAsABAAAAAAAAAABAAoABAAAAAAAAAABAAsABAAAAAAAAAACAAoABAAAAAAAAAACAAsABAAAAAAAAAADAAoABAAAAAAAAAADAAsABAAAAAAAAAAEAAoABAAAAAAAAAAEAAsABAAAAAAAAAAFAAoABAAAAAAAAAAFAAsABAAAAAAAAAAGAAoABAAAAAAAAAAGAAsABAAAAAAAAAAHAAoABAAAAAAAAAAHAAsABAAAAAAAAAAIAAoABAAAAAAAAAAIAAsABAAAAAAAAAAJAAoABAAAAAAAAAAJAAsABAAAAAAAAAAKAAoABAAAAAAAAAAKAAsABAAAAAAAAAALAAoABAAAAAAAAAALAAsABAAAAAAAAAAMAAoABAAAAAAAAAAMAAsABAAAAAAAAAANAAoABAAAAAAAAAANAAsABAAAAAAAAAAOAAoABAAAAAAAAAAOAAsABAAAAAAAAAAPAAoABAAAAAAAAAAPAAsABAAAAAAAAAAQAAoABAAAAAAAAAAQAAsABAAAAAAAAAARAAoABAAAAAAAAAARAAsABAAAAAAAAAASAAoABAAAAAAAAAASAAsABAAAAAAAAAATAAoABAAAAAAAAAATAAsABAAAAAAAAAA=")
+tile_set = SubResource("TileSet_maoo6")
+script = ExtResource("9_g3s1i")
+pathfinding_enabled = true
+metadata/_edit_lock_ = true
+
+[node name="WaterTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=180594621]
+tile_set = ExtResource("10_aksrg")
+script = ExtResource("11_0ep6y")
+
+[node name="TerrainTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1139812839]
+tile_map_data = PackedByteArray("AAABAAAAAAAAAAAAAAABAAEAAAABAAAAAAABAAoAAAACAAAAAAABAAsAAAADAAAAAAACAAAAAAAEAAAAAAACAAEAAAAFAAAAAAACAAoAAAAGAAAAAAACAAsAAAAHAAAAAAADAAAAAAAAAAEAAAADAAEAAAABAAEAAAADAAoAAAACAAEAAAADAAsAAAADAAEAAAAFAAAAAAAGAAEAAAAFAAEAAAAHAAEAAAAFAAoAAAADAAIAAAAFAAsAAAAEAAIAAAAGAAAAAAAFAAIAAAAGAAEAAAAGAAIAAAAGAAoAAAAEAAMAAAAGAAsAAAAFAAMAAAAHAAAAAAAGAAMAAAAHAAEAAAAHAAMAAAAHAAoAAAAAAAQAAAAHAAsAAAABAAQAAAAJAAAAAAACAAQAAAAJAAEAAAADAAQAAAAJAAoAAAAFAAQAAAAJAAsAAAAGAAQAAAAKAAAAAAAHAAQAAAAKAAEAAAAAAAUAAAAKAAoAAAAEAAUAAAAKAAsAAAAFAAUAAAALAAAAAAAGAAUAAAALAAEAAAAHAAUAAAALAAoAAAAEAAYAAAALAAsAAAAFAAYAAAANAAAAAAAAAAcAAAANAAEAAAABAAcAAAANAAoAAAACAAcAAAANAAsAAAADAAcAAAAOAAAAAAAEAAcAAAAOAAEAAAAFAAcAAAAOAAoAAAAGAAcAAAAOAAsAAAAHAAcAAAAPAAAAAAAAAAgAAAAPAAEAAAABAAgAAAAPAAoAAAACAAgAAAAPAAsAAAADAAgAAAARAAAAAAAEAAgAAAARAAEAAAAFAAgAAAARAAoAAAAGAAgAAAARAAsAAAAHAAgAAAASAAAAAAAAAAkAAAASAAEAAAABAAkAAAASAAoAAAACAAkAAAASAAsAAAADAAkAAAATAAAAAAAEAAkAAAATAAEAAAAFAAkAAAATAAoAAAAGAAkAAAATAAsAAAAHAAkAAAAGAAIAAAAHAAIAAAAGAAMAAAAAAAMAAAAGAAQAAAABAAMAAAAGAAgAAAACAAMAAAAGAAkAAAADAAMAAAAKAAMAAAACAAUAAAAKAAQAAAADAAUAAAALAAMAAAABAAYAAAALAAQAAAACAAYAAAAEAAIAAAAEAAEAAAAEAAMAAAAFAAEAAAAFAAIAAAAAAAIAAAAFAAMAAAABAAIAAAAKAAIAAAABAAUAAAALAAIAAAAAAAYAAAAMAAIAAAAGAAYAAAAMAAMAAAAHAAYAAAAFAAcAAAACAAIAAAAJAAcAAAAEAAQAAAALAAcAAAADAAYAAAA=")
+tile_set = ExtResource("12_scktk")
+script = ExtResource("31_1xlj4")
+
+[node name="RoadTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=534906821 groups=["tilemaplayers"] instance=ExtResource("32_gbcdi")]
+tile_map_data = PackedByteArray("AAAAAAYAAAAAAAAAAAAAAAcAAAABAAAAAAABAAYAAAACAAAAAAACAAYAAAADAAAAAAACAAcAAAAEAAAAAAADAAYAAAAFAAAAAAAEAAYAAAAGAAAAAAAEAAcAAAAHAAAAAAAFAAYAAAAAAAEAAAAGAAYAAAABAAEAAAAHAAYAAAACAAEAAAAIAAYAAAADAAEAAAAJAAYAAAAEAAEAAAAKAAYAAAAFAAEAAAAKAAcAAAAGAAEAAAALAAYAAAAHAAEAAAAMAAcAAAAAAAIAAAANAAYAAAABAAIAAAAOAAcAAAACAAIAAAAPAAYAAAADAAIAAAAPAAcAAAAEAAIAAAAQAAcAAAAFAAIAAAARAAYAAAAGAAIAAAARAAcAAAAHAAIAAAASAAcAAAAAAAMAAAATAAYAAAABAAMAAAATAAcAAAACAAMAAAA=")
+tile_set = ExtResource("15_6td8r")
+script = ExtResource("47_sjmjp")
+
+[node name="WallTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=1178811612 groups=["tilemaplayers"] instance=ExtResource("48_u36mt")]
+tile_set = SubResource("TileSet_ng5pv")
+script = ExtResource("61_th8l5")
+
+[node name="BuildingTileMapLayer" type="TileMapLayer" parent="TileMapLayers" unique_id=2068335072 groups=["tilemaplayers"] instance=ExtResource("62_a2x0h")]
+tile_map_data = PackedByteArray("AAABAAAAMQAAAAAAAAABAAEAMQABAAAAAAABAAoAMQACAAAAAAABAAsAMQADAAAAAAACAAAAMQAEAAAAAAACAAEAMQAFAAAAAAACAAoAMQAGAAAAAAACAAsAMQAHAAAAAAADAAAAMQAAAAEAAAADAAEAMQABAAEAAAADAAoAMQACAAEAAAADAAsAMQADAAEAAAAFAAAAMQAEAAEAAAAFAAEAMQAFAAEAAAAFAAoAMQAGAAEAAAAFAAsAMQAHAAEAAAAGAAAAMQAAAAIAAAAGAAEAMQABAAIAAAAGAAoAMQAHAAIAAAAGAAsAMQAAAAMAAAAHAAAAMQABAAMAAAAHAAEAMQACAAMAAAAHAAoAMQADAAMAAAAHAAsAMQAEAAMAAAAJAAAAMQAFAAMAAAAJAAEAMQAGAAMAAAAJAAoAMQAHAAMAAAAJAAsAMQAAAAQAAAAKAAAAMQABAAQAAAAKAAEAMQACAAQAAAAKAAoAMQADAAQAAAAKAAsAMQAEAAQAAAALAAAAMQAFAAQAAAALAAEAMQAGAAQAAAALAAoAMQAHAAQAAAALAAsAMQAAAAUAAAANAAAAMQABAAUAAAANAAEAMQACAAUAAAANAAoAMQADAAUAAAANAAsAMQAEAAUAAAAOAAAAMQAFAAUAAAAOAAEAMQAGAAUAAAAOAAoAMQAHAAUAAAAOAAsAMQAAAAYAAAAPAAAAMQABAAYAAAAPAAEAMQACAAYAAAAPAAoAMQADAAYAAAAPAAsAMQAEAAYAAAARAAAAMQAFAAYAAAARAAEAMQAGAAYAAAARAAoAMQAHAAYAAAARAAsAMQAAAAcAAAASAAAAMQABAAcAAAASAAEAMQACAAcAAAASAAoAMQADAAcAAAASAAsAMQAEAAcAAAATAAAAMQAFAAcAAAATAAEAMQAGAAcAAAATAAoAMQAHAAcAAAATAAsAMQAAAAgAAAAGAAIAMQACAAIAAAAGAAMAMQADAAIAAAAGAAQAMQAEAAIAAAAGAAgAMQAFAAIAAAAGAAkAMQAGAAIAAAAMAAUAAgAEAAAAAAAPAAgAAgABAAAAAAA=")
+tile_set = ExtResource("32_coj4t")
+script = ExtResource("109_qfrkh")
+
+[node name="Scenarios" type="Node2D" parent="." unique_id=976409343]
+
+[node name="Mission" type="Node2D" parent="Scenarios" unique_id=878974265]
+script = ExtResource("110_wv8uv")
+scenario_name = "Prologue. Opening the Road"
+scenario_id = "alderbrook_00_opening_the_road"
+campaign_id = "road_to_alderbrook"
+campaign_mission = 1
+scenario_description = "Road to Alderbrook - prologue.
+
+The company has concentrated its fire support against a thin enemy roadblock. Open the road at A and secure the farm at B. Three rifle squads, two machine-gun teams, a light mortar, platoon headquarters and company headquarters are available, with a four-gun 105 mm battery off map.
+
+Establish machine-gun cover before advancing the rifles. Use the Fire Support tray to order mortar or artillery fire against spotted positions; keep your own troops clear of the target area. The enemy is dispersed between the road and farm, so one bombardment will not clear every position.
+
+[b]Major Victory:[/b] hold A and B for 15 seconds each.
+
+[b]Minor Victory:[/b] hold A for 15 seconds at the deadline. Either victory opens Quiet Approach.
+
+[b]Next assignment:[/b] the company and heavy weapons will continue along the main road. A small rifle patrol with platoon HQ will check the flank toward Alderbrook without fire support."
+duration_s = 600.0
+use_authored_duration = true
+released = true
+offboard_batteries = Array[ExtResource("111_n7hvg")]([ExtResource("112_eh1wx")])
+player_team = 1
+victory_conditions = Array[ExtResource("113_i7fqp")]([SubResource("Resource_v13uw"), SubResource("Resource_n8dhh"), SubResource("Resource_id4m7"), SubResource("Resource_81yaa")])
+axis_ai_status = 1
+allies_ai_status = 0
+
+[node name="Units" type="Node2D" parent="Scenarios/Mission" unique_id=1757769118]
+
+[node name="CA_P0_S0_Allies_CompanyHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=437630089 instance=ExtResource("115_r4afm")]
+position = Vector2(160, 896)
+script = ExtResource("116_2sle7")
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("118_a1hhw"), SubResource("Resource_ugw8x"), SubResource("Resource_opqin"), SubResource("Resource_m0wo0"), SubResource("Resource_gfsc7"), SubResource("Resource_5hgqf"), SubResource("Resource_yyuxn")])
+squad_loadout = ExtResource("122_wxibc")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+squads_collection = ExtResource("124_lmync")
+squad_type = 5
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S0_Allies_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1561952166 instance=ExtResource("115_r4afm")]
+position = Vector2(256, 832)
+script = ExtResource("116_2sle7")
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("125_42ujl"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
+squad_loadout = ExtResource("126_kmjn2")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S1_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=200493012 instance=ExtResource("115_r4afm")]
+position = Vector2(352, 640)
+script = ExtResource("116_2sle7")
+squad = 1
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("127_6dkp3"), ExtResource("128_clu7a"), ExtResource("129_nedix"), ExtResource("130_tfbkk"), ExtResource("131_pl8jw"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe")])
+squad_loadout = ExtResource("133_5fpyi")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S2_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1679858676 instance=ExtResource("115_r4afm")]
+position = Vector2(352, 896)
+script = ExtResource("116_2sle7")
+squad = 2
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("127_6dkp3"), ExtResource("128_clu7a"), ExtResource("129_nedix"), ExtResource("130_tfbkk"), ExtResource("131_pl8jw"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe")])
+squad_loadout = ExtResource("133_5fpyi")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S3_Allies_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1034971936 instance=ExtResource("115_r4afm")]
+position = Vector2(352, 1152)
+script = ExtResource("116_2sle7")
+squad = 3
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("127_6dkp3"), ExtResource("128_clu7a"), ExtResource("129_nedix"), ExtResource("130_tfbkk"), ExtResource("131_pl8jw"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe"), ExtResource("132_n00oe")])
+squad_loadout = ExtResource("133_5fpyi")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S4_Allies_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=955877465 instance=ExtResource("115_r4afm")]
+position = Vector2(256, 576)
+script = ExtResource("116_2sle7")
+squad = 4
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("127_6dkp3"), SubResource("Resource_jsgmt"), ExtResource("130_tfbkk"), ExtResource("135_6e5nt"), ExtResource("135_6e5nt")])
+squad_loadout = ExtResource("136_0ohh3")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S5_Allies_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1429992291 instance=ExtResource("115_r4afm")]
+position = Vector2(256, 1088)
+script = ExtResource("116_2sle7")
+squad = 5
+platoon = 1
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("127_6dkp3"), SubResource("Resource_jsgmt"), ExtResource("130_tfbkk"), ExtResource("135_6e5nt"), ExtResource("135_6e5nt")])
+squad_loadout = ExtResource("136_0ohh3")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P2_S1_Allies_Mortar" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1732707 instance=ExtResource("115_r4afm")]
+position = Vector2(160, 1152)
+script = ExtResource("116_2sle7")
+squad = 1
+platoon = 2
+team = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("128_clu7a"), SubResource("Resource_rxxvr"), ExtResource("130_tfbkk"), ExtResource("135_6e5nt"), ExtResource("135_6e5nt")])
+squad_loadout = ExtResource("138_ntts8")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 2
+squads_collection = ExtResource("124_lmync")
+squad_type = 3
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S0_Axis_PlatoonHQ" type="Node2D" parent="Scenarios/Mission/Units" unique_id=2014639014 instance=ExtResource("115_r4afm")]
+position = Vector2(1696, 896)
+script = ExtResource("116_2sle7")
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("139_e7s1w"), ExtResource("140_ef6o4"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
+squad_loadout = ExtResource("142_id67q")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+squad_type = 4
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S1_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1106628243 instance=ExtResource("115_r4afm")]
+position = Vector2(1312, 896)
+script = ExtResource("116_2sle7")
+squad = 1
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("143_1hvxm"), ExtResource("140_ef6o4"), ExtResource("144_71yq3"), ExtResource("145_1cy72"), ExtResource("146_7xbpv"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4")])
+squad_loadout = ExtResource("148_t0y37")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S2_Axis_MG" type="Node2D" parent="Scenarios/Mission/Units" unique_id=1274345417 instance=ExtResource("115_r4afm")]
+position = Vector2(1216, 704)
+script = ExtResource("116_2sle7")
+squad = 2
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("143_1hvxm"), SubResource("Resource_g85e3"), ExtResource("145_1cy72"), ExtResource("150_hw358"), ExtResource("150_hw358"), ExtResource("150_hw358"), ExtResource("147_x2de4")])
+squad_loadout = ExtResource("151_ip2a4")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+squad_type = 1
+metadata/_edit_lock_ = true
+
+[node name="CA_P1_S3_Axis_Rifle" type="Node2D" parent="Scenarios/Mission/Units" unique_id=110549882 instance=ExtResource("115_r4afm")]
+position = Vector2(1504, 1152)
+script = ExtResource("116_2sle7")
+squad = 3
+platoon = 1
+retreat_speed = 100.0
+fire_rate = 1.5
+loadouts = Array[ExtResource("117_w44ba")]([ExtResource("143_1hvxm"), ExtResource("140_ef6o4"), ExtResource("144_71yq3"), ExtResource("145_1cy72"), ExtResource("146_7xbpv"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4"), ExtResource("147_x2de4")])
+squad_loadout = ExtResource("148_t0y37")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+squads_collection = ExtResource("124_lmync")
+metadata/_edit_lock_ = true
+
+[node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=1754565340]
+
+[node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=909056854]
+tile_map_data = PackedByteArray("AAANAAYAAwAAAAAAAAAPAAgABAAAAAAAAAARAAYACQAAAAAAAAA=")
+tile_set = SubResource("TileSet_0jm0n")
+script = ExtResource("11_0ep6y")
+
+[node name="AlliedObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=738845126]
+tile_map_data = PackedByteArray("AAANAAYABgAAAAAAAAAPAAgABwAAAAAAAAACAAYAAgAAAAAAAAA=")
+tile_set = SubResource("TileSet_cwow2")
+script = ExtResource("11_0ep6y")

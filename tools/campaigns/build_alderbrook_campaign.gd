@@ -55,8 +55,8 @@ const ORCHARD_PLOTS: Array[Array] = [
 const MISSIONS: Array[Dictionary] = [
 	{
 		"id": "01_quiet_approach", "title": "1. Quiet Approach", "map": "Alderbrook Approach", "size": Vector2i(16, 10), "seconds": 600.0,
-		"briefing": "Road to Alderbrook - mission 1 of 5.\n\nA small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.\n\n[b]Major Victory:[/b] occupy the farm at A for 15 seconds.\n\n[b]Minor Victory:[/b] hold the rally point at B when time expires. A minor or major victory opens the next mission.",
-		"player": [[1, "hq", 2, 6], [1, "rifle", 2, 5], [1, "rifle", 2, 7]],
+		"briefing": "Road to Alderbrook - mission 1 of 5.\n\nThe company and its heavy weapons have continued along the main road. Your rifle squad and platoon headquarters must secure a farm on the flank toward Alderbrook. No reinforcements or artillery are available. Use the woodland belt to approach carefully, locate the defenders before committing, and keep headquarters behind the rifle squad. You can withdraw to rally point B if the farm proves too costly.\n\n[b]Major Victory:[/b] occupy the farm at A for 15 seconds.\n\n[b]Minor Victory:[/b] hold the rally point at B when time expires. A minor or major victory opens the next mission.",
+		"player": [[1, "hq", 2, 6], [1, "rifle", 2, 5]],
 		"enemy": [[1, "hq", 14, 5], [1, "rifle", 12, 5]],
 		"allied_markers": [[1, 12, 5], [2, 7, 6], [4, 2, 6]], "axis_markers": [[1, 12, 5], [4, 14, 5]],
 	},
@@ -231,7 +231,7 @@ func _run() -> void:
 			source.get_tile_data(Vector2i.ZERO, 1).flip_v = true
 	ResourceSaver.save(_water_set, RESOURCE_DIRECTORY + "alderbrook_water.tres")
 	_water_set.take_over_path(RESOURCE_DIRECTORY + "alderbrook_water.tres")
-	var maps: Array[PackedScene] = []
+	var maps: Array[PackedScene] = [load(MAP_DIRECTORY + "00_opening_the_road.tscn") as PackedScene]
 	for index: int in range(MISSIONS.size()):
 		var map: Map = _build_map(MISSIONS[index], index)
 		if map == null:
@@ -281,7 +281,7 @@ func _run() -> void:
 	main.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
-	print("Built five Alderbrook campaign missions.")
+	print("Built five Alderbrook missions with the existing prologue.")
 	get_tree().quit()
 
 
@@ -743,6 +743,7 @@ func _bake_los(map: Map) -> void:
 	LOSHelper.terrain_layer = map.get_terrain_layer()
 	LOSHelper.building_layer = map.get_building_layer()
 	LOSHelper.wall_layer = map.get_wall_layer()
+	LOSHelper.road_layer = map.get_road_layer()
 	var building_signature: String = LOSHelper.building_layout_signature()
 	var wall_signature: String = LOSHelper.wall_layout_signature()
 	LOSHelper.grid_size = map.grid_size

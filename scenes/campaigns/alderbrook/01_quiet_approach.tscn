@@ -126,6 +126,14 @@ test_at_scenario_end = true
 script = ExtResource("50_t3t2e")
 test_at_scenario_end = true
 
+[sub_resource type="Resource" id="Resource_patrol_minor"]
+script = ExtResource("49_hte11")
+objective_id = 2
+required_time_s = 15.0
+team = 1
+outcome_level = 0
+test_at_scenario_end = true
+
 [sub_resource type="Resource" id="Resource_dlmmx"]
 script = ExtResource("21_hi3l8")
 nickname = "Platoon Seargeant"
@@ -359,7 +367,7 @@ campaign_id = "road_to_alderbrook"
 campaign_mission = 1
 scenario_description = "Road to Alderbrook - mission 1 of 5.
 
-A small patrol must secure a farm on the approach to the village. There is time to plan; the woodland belt screens your starting positions. Move one squad at a time while the other covers it, and keep the platoon headquarters close.
+The company and its heavy weapons have continued along the main road. Your rifle squad and platoon headquarters must secure a farm on the flank toward Alderbrook. No reinforcements or artillery are available. Use the woodland belt to approach carefully, locate the defenders before committing, and keep headquarters behind the rifle squad. You can withdraw to rally point B if the farm proves too costly.
 
 [b]Major Victory:[/b] occupy the farm at A for 15 seconds.
 
@@ -367,9 +375,8 @@ A small patrol must secure a farm on the approach to the village. There is time 
 duration_s = 600.0
 use_authored_duration = true
 released = true
-offboard_batteries = Array[ExtResource("16_qktt2")]([SubResource("Resource_harg6"), SubResource("Resource_qktt2")])
 player_team = 1
-victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_h7ai6"), SubResource("Resource_61x6b"), SubResource("Resource_uobqf")])
+victory_conditions = Array[ExtResource("48_rhb3j")]([SubResource("Resource_h7ai6"), SubResource("Resource_patrol_minor"), SubResource("Resource_61x6b"), SubResource("Resource_uobqf")])
 axis_ai_status = 1
 allies_ai_status = 0
 
@@ -392,19 +399,6 @@ squad_type = 4
 position = Vector2(256, 704)
 map_unit_id = "6dac8ebad69bdfb53aca76118a03e8c2"
 squad = 1
-platoon = 1
-team = 1
-loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
-squad_loadout = ExtResource("34_26mfj")
-default_rifle = SubResource("Resource_v8x2n")
-default_smg = SubResource("Resource_b5oeb")
-default_mg = SubResource("Resource_ga1pk")
-formation_id = 1
-
-[node name="CA_P1_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=2004293180 instance=ExtResource("19_yycqq")]
-position = Vector2(256, 960)
-map_unit_id = "93d76a59f9687359ab9ca9f10a85631b"
-squad = 2
 platoon = 1
 team = 1
 loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
@@ -437,45 +431,6 @@ default_smg = SubResource("Resource_b5oeb")
 default_mg = SubResource("Resource_ga1pk")
 formation_id = 1
 
-[node name="CA_P2_S0_Allies_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=405853988 instance=ExtResource("19_yycqq")]
-position = Vector2(73, 841)
-map_unit_id = "55649dae29ca3e401a1ec4434f3d8f92"
-platoon = 2
-team = 1
-loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("22_fy3lb"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
-squad_loadout = ExtResource("25_wi054")
-default_rifle = SubResource("Resource_v8x2n")
-default_smg = SubResource("Resource_b5oeb")
-default_mg = SubResource("Resource_ga1pk")
-formation_id = 1
-squad_type = 4
-
-[node name="CA_P2_S1_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=618277268 instance=ExtResource("19_yycqq")]
-position = Vector2(50, 711)
-map_unit_id = "663916258585e352dc17d3b898603767"
-squad = 1
-platoon = 2
-team = 1
-loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
-squad_loadout = ExtResource("34_26mfj")
-default_rifle = SubResource("Resource_v8x2n")
-default_smg = SubResource("Resource_b5oeb")
-default_mg = SubResource("Resource_ga1pk")
-formation_id = 1
-
-[node name="CA_P2_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=263471798 instance=ExtResource("19_yycqq")]
-position = Vector2(55, 970)
-map_unit_id = "53e412e3b4772aaace0cfd952a6faadd"
-squad = 2
-platoon = 2
-team = 1
-loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
-squad_loadout = ExtResource("34_26mfj")
-default_rifle = SubResource("Resource_v8x2n")
-default_smg = SubResource("Resource_b5oeb")
-default_mg = SubResource("Resource_ga1pk")
-formation_id = 1
-
 [node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=466539195]
 
 [node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=302602225]
@@ -487,15 +442,3 @@ script = ExtResource("4_gq6xk")
 tile_map_data = PackedByteArray("AAAMAAUABgAAAAAAAAACAAYAAgAAAAAAAAAGAAcABwAAAAAAAAA=")
 tile_set = SubResource("TileSet_cwow2")
 script = ExtResource("4_gq6xk")
-
-[node name="Reinforcements" type="Node" parent="Scenarios/Mission" unique_id=1886768851]
-
-[node name="Reinforcement" type="Node" parent="Scenarios/Mission/Reinforcements" unique_id=140689895]
-script = ExtResource("55_7c7xa")
-reinforcement_id = "4275a42afe3b0d2f8c476f95ae68bc56"
-display_name = "Second Platoon"
-team = 1
-unit_ids = PackedStringArray("55649dae29ca3e401a1ec4434f3d8f92", "663916258585e352dc17d3b898603767", "53e412e3b4772aaace0cfd952a6faadd")
-expected_seconds = 5.0
-variation_seconds = 2.0
-entry_zone = "West Road"

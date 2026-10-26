@@ -19,13 +19,16 @@ func _run() -> void:
 	for map: Map in world.maps.get_children():
 		if map.campaign_name == "Road to Alderbrook":
 			campaign_maps.append(map)
-	_check(campaign_maps.size() == 5, "The normal mission menu installs all five campaign maps")
+	_check(campaign_maps.size() == 6, "The normal mission menu installs the prologue and five campaign maps")
 	_test_mission_catalog()
 	var mission: int = 0
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--mission="):
 			mission = argument.trim_prefix("--mission=").to_int()
 	if mission > 0:
+		if mission <= 2:
+			_test_prologue()
+			_test_quiet_start()
 		await _test_match(mission - 1)
 	elif not OS.get_cmdline_user_args().has("--catalog-only"):
 		_test_content()
@@ -51,7 +54,7 @@ func _test_mission_catalog() -> void:
 	if OS.is_debug_build():
 		_check(expected.size() > 5 and world.start_screen.scenario_buttons.has(world.maps.get_node("DefaultMap").get_scenario(0)), "Debug builds retain the development maps alongside Alderbrook")
 	else:
-		_check(expected.size() == 5, "Release builds expose only the five Alderbrook campaign missions")
+		_check(expected.size() == 6, "Release builds expose the prologue and five Alderbrook missions")
 		var headings: Array[String] = []
 		for child: Node in world.start_screen.maps_v_box_container.get_children():
 			if child is Label:
@@ -71,7 +74,7 @@ func _test_content() -> void:
 		var label: Label = child as Label
 		if label != null and label.text == "Road to Alderbrook":
 			headings += 1
-	_check(headings == 1, "The five missions share one campaign heading")
+	_check(headings == 1, "All six missions share one campaign heading")
 	for index: int in range(campaign_maps.size()):
 		var map: Map = campaign_maps[index]
 		var scenario: Scenario = map.get_scenario(0)
@@ -90,16 +93,20 @@ func _test_content() -> void:
 			if unit == null:
 				continue
 			var hex: Vector2i = map.get_ground_layer().local_to_map(unit.position)
-			_check(map.get_ground_layer().get_cell_source_id(hex) >= 0 and not cells.has(hex), "Every unit starts on a distinct playable hex")
+			_check(map.get_ground_layer().get_cell_source_id(hex) >= 0 and not cells.has(hex), "Distinct playable deployment: %s / %s / %s" % [map.name, unit.name, hex])
 			cells[hex] = true
 			var key: int = Globals.make_key(unit.team, unit.company, unit.platoon, unit.squad)
-			_check(not keys.has(key), "Campaign command identities never overwrite another unit")
+			_check(not keys.has(key), "Distinct command identity: %s / %s / %s" % [map.name, unit.name, key])
 			keys[key] = true
 			counts[unit.team] += 1
 			_check(unit.squad_loadout != null and unit.squad_loadout.team == unit.team, "Deployment uses the correct faction loadout")
 			if unit.team == scenario.player_team and not HqSupportPositionPolicy.is_headquarters(unit):
 				combat += 1
-		_check(combat > last_combat_count, "Player force size increases with each mission")
+		if index > 1:
+			_check(combat > last_combat_count, "Player force size increases after the restricted patrol")
+		elif index == 1:
+			_check(combat == 1 and combat < last_combat_count, "Quiet Approach reduces the prologue force to one rifle squad")
+			_check(scenario.offboard_batteries.is_empty() and scenario.get_reinforcements().is_empty(), "The patrol has no off-map support or reinforcements")
 		last_combat_count = combat
 		var los: LosLookupData = load(map.los_resource_path) as LosLookupData
 		_check(los != null, "Every new map ships its baked line of sight resource")
@@ -132,13 +139,44 @@ func _test_content() -> void:
 			_check(policy.configuration_error(scenario.victory_conditions).is_empty(), "Enemy withdrawal references valid campaign victory conditions")
 		for policy: EscapeMissionPolicy in scenario.ai_escape_policies:
 			_check(policy.configuration_error(scenario.victory_conditions).is_empty(), "Escape missions reference the actual campaign exit condition")
-		if index == 2:
+		if index == 3:
 			_check(scenario.ai_escape_policies.size() == 1 and scenario.ai_escape_policies[0].exit_condition.team == Globals.Team.AXIS, "Roadblock explicitly assigns the Axis column an escape mission")
 		else:
 			_check(scenario.ai_escape_policies.is_empty(), "Other campaign missions retain their existing strategic policies")
 		previous = scenario
 	_check(kinds.size() == 4, "The campaign uses all four implemented victory-condition types")
 	_test_quiet_start()
+	_test_prologue()
+
+
+func _test_prologue() -> void:
+	var scenario: Scenario = campaign_maps[0].get_scenario(0)
+	_check(scenario.scenario_id == "alderbrook_00_opening_the_road", "The prologue leads the campaign with its own stable save ID")
+	var counts: Dictionary[int, int] = {}
+	var defenders: int = 0
+	for unit: Unit in scenario.get_units():
+		if unit.team == scenario.player_team:
+			counts[unit.squad_type] = counts.get(unit.squad_type, 0) + 1
+		else:
+			defenders += 1
+	_check(counts.get(Globals.SquadType.Rifle, 0) == 3 and counts.get(Globals.SquadType.MG, 0) == 2, "The prologue fields three rifle squads and two MG teams")
+	_check(counts.get(Globals.SquadType.PLATOON_HEADQUARTERS, 0) == 1 and counts.get(Globals.SquadType.COMPANY_HEADQUARTERS, 0) == 1 and counts.get(Globals.SquadType.MORTAR, 0) == 1, "The prologue includes both HQ levels and an onboard mortar")
+	_check(defenders == 4, "A small dispersed defence faces the full player force")
+	_check(scenario.offboard_batteries.size() == 1, "The prologue supplies off-map artillery")
+	if scenario.offboard_batteries.size() == 1:
+		var battery: OffboardBattery = scenario.offboard_batteries[0]
+		_check(battery.is_valid() and battery.team == scenario.player_team and battery.gun_count == 4 and battery.rounds == 48, "The four-gun artillery battery is valid and supplied")
+	var major_holds: int = 0
+	var minor_holds: int = 0
+	for condition: VictoryCondition in scenario.victory_conditions:
+		if condition.team != scenario.player_team:
+			continue
+		_check(condition is OccupyObjectiveCondition, "Prologue victory requires securing ground rather than destroying every defender")
+		if condition.outcome_level == VictoryCondition.OutcomeLevel.MAJOR:
+			major_holds += 1
+		else:
+			minor_holds += 1
+	_check(major_holds == 2 and minor_holds == 1, "Both objectives are needed for major victory; the road alone permits minor victory")
 
 
 func _markers(scenario: Scenario, team: Globals.Team, id: int) -> Array[Vector2i]:
@@ -152,8 +190,22 @@ func _markers(scenario: Scenario, team: Globals.Team, id: int) -> Array[Vector2i
 
 
 func _test_quiet_start() -> void:
-	var map: Map = campaign_maps[0]
+	var map: Map = campaign_maps[1]
 	var scenario: Scenario = map.get_scenario(0)
+	var rifles: int = 0
+	var headquarters: int = 0
+	var minor_retreat: bool = false
+	for unit: Unit in scenario.get_units():
+		if unit.team == scenario.player_team:
+			if unit.squad_type == Globals.SquadType.Rifle:
+				rifles += 1
+			elif unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
+				headquarters += 1
+	_check(rifles == 1 and headquarters == 1 and scenario.offboard_batteries.is_empty() and scenario.get_reinforcements().is_empty(), "Quiet Approach has exactly the restricted rifle patrol without support")
+	for condition: VictoryCondition in scenario.victory_conditions:
+		if condition is OccupyObjectiveCondition and condition.team == scenario.player_team and condition.outcome_level == VictoryCondition.OutcomeLevel.MINOR:
+			minor_retreat = (condition as OccupyObjectiveCondition).objective_id == OccupyObjectiveCondition.ObjectiveId.B and condition.test_at_scenario_end
+	_check(minor_retreat, "The unsupported patrol can earn minor victory by holding rally point B")
 	for first: Unit in scenario.get_units():
 		for second: Unit in scenario.get_units():
 			if first.team == second.team:
@@ -169,7 +221,7 @@ func _test_quiet_start() -> void:
 func _test_progression() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://matches"))
 	var first: Scenario = campaign_maps[0].get_scenario(0)
-	_check(world.start_screen.get_lock_reason(first).is_empty(), "The opening patrol is available without a prior result")
+	_check(world.start_screen.get_lock_reason(first).is_empty(), "The prologue is available without a prior result")
 	for index: int in range(1, campaign_maps.size()):
 		var previous: Scenario = campaign_maps[index - 1].get_scenario(0)
 		var next: Scenario = campaign_maps[index].get_scenario(0)
@@ -197,7 +249,7 @@ func _test_progression() -> void:
 
 
 func _test_bridges() -> void:
-	for index: int in [3]:
+	for index: int in [4]:
 		var map: Map = campaign_maps[index]
 		var graph: AStar2D = map.get_ground_layer().astar
 		var from: int = graph.get_closest_point(map.get_ground_layer().map_to_local(Vector2i(3, 4)))
@@ -248,7 +300,11 @@ func _test_visual_variants() -> void:
 					_check(int(data.get_custom_data("elevation")) == 0 and data.get_collision_polygons_count(0) == 0, "Meadow art keeps open-ground rules")
 				elif family == "woods_green":
 					_check(bool(data.get_custom_data("woods")) and bool(data.get_custom_data("hindrance")) and bool(data.get_custom_data("blocking")), "Woodland art preserves LOS rules")
-					var canopy: TileSetAtlasSource = buildings.tile_set.get_source(buildings.get_cell_source_id(cell)) as TileSetAtlasSource
+					var canopy_id: int = buildings.get_cell_source_id(cell)
+					_check(canopy_id >= 0, "Woodland has a cover layer: %s / %s" % [map.name, cell])
+					if canopy_id < 0:
+						continue
+					var canopy: TileSetAtlasSource = buildings.tile_set.get_source(canopy_id) as TileSetAtlasSource
 					for texture: Texture2D in [source.texture, canopy.texture]:
 						if not images.has(texture):
 							images[texture] = texture.get_image()
@@ -260,7 +316,7 @@ func _test_visual_variants() -> void:
 					_check(ground.get_cell_source_id(cell) >= 0 and buildings.get_cell_source_id(cell) < 0, "Planting never overwrites rivers, buildings, or woods in " + map.map_name + " at " + str(cell))
 					if family in ["field_wheat", "field_green_rows"]:
 						crops[family] = true
-		_check(crops.size() == 2, "Every mission has both wheat and green-crop plots")
+		_check(crops.size() == 2, "Wheat and crop plots: " + str(map.name))
 	for family: String in families:
 		_check(families[family].size() >= 3, "Multiple connected " + family + " pieces appear across the campaign")
 
@@ -342,18 +398,24 @@ func _test_match(index: int) -> void:
 		unit.squad_fire.process_mode = Node.PROCESS_MODE_DISABLED
 		unit.stress_system.process_mode = Node.PROCESS_MODE_DISABLED
 		unit.combat_stats_timer.stop()
+	if index == 0:
+		var support: FireSupportController = world.game_controller.fire_support
+		_check(support != null and support.assets.size() == 2, "The live prologue exposes onboard mortar and off-map artillery in the support tray")
+		if support != null and support.assets.size() == 2:
+			_check(support.available_guns(1) == 4 and support.ammunition(1) == 48, "The live artillery battery retains its four guns and ammunition")
+			_check(support.request(1, Vector2i(13, 6), 15.0, FireSupportMission.Intensity.INTENSE), "The prologue artillery accepts an actual fire mission")
 	var planner: PlatoonAI = world.game_controller.platoon_ai
 	for frame: int in range(2400):
 		await get_tree().process_frame
 		if not planner.squad_assignments.is_empty():
 			break
 	_check(planner.active and not planner.squad_assignments.is_empty(), "Enemy tactical planning publishes actual mission orders")
-	if index >= 2:
+	if index >= 3:
 		_check(planner.company_command.uses_hierarchy(), "Larger enemy forces use company command")
 		for formation: CompanyPlatoon in planner.company_command.platoons.values():
 			if formation.support != null:
 				_check(formation.support.support_firepower() > 0.0, "Mortar-only detachments cannot block maneuver as designated covering platoons")
-	if index == 4:
+	if index == 5:
 		_check(planner.goal_director.active_fallback == null, "The final defense begins with its hold mission")
 		_check(planner.goal_director.diagnostics.has("Exit to deny enemy victory deferred until the linked hold-to-exit fallback activates"), "Enemy escape is deferred until the town defense fails")
 		_test_mortar_support_selection(planner.company_command)

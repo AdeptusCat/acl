@@ -7,8 +7,10 @@
 [ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/05_battle_for_alderbrook.tscn" id="5_cobea"]
 [ext_resource type="Script" uid="uid://iodsnpnipb2l" path="res://resources/campaigns/campaign_definition.gd" id="6_a4x8y"]
 
+[ext_resource type="PackedScene" path="res://scenes/campaigns/alderbrook/00_opening_the_road.tscn" id="0_prologue"]
+
 [resource]
 script = ExtResource("6_a4x8y")
 campaign_id = "road_to_alderbrook"
 title = "Road to Alderbrook"
-mission_maps = Array[PackedScene]([ExtResource("1_fsdvc"), ExtResource("2_3ia7j"), ExtResource("3_lpcmr"), ExtResource("4_u5qlt"), ExtResource("5_cobea")])
+mission_maps = Array[PackedScene]([ExtResource("0_prologue"), ExtResource("1_fsdvc"), ExtResource("2_3ia7j"), ExtResource("3_lpcmr"), ExtResource("4_u5qlt"), ExtResource("5_cobea")])

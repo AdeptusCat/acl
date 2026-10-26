@@ -23,8 +23,8 @@ BLUE: str = "#376889"
 RED: str = "#a45446"
 GOLD: str = "#d8b760"
 
-PHASES: list[str] = ["Patrol: 2 rifle squads + HQ", "Platoon: 3 rifles + MG + HQ", "Platoon: 3 rifles + 2 MGs + HQ", "Two reinforced platoons + company HQ", "Company: 3 platoons + mortar + company HQ"]
-GOALS: list[str] = ["Occupy the farm; secure the rally point.", "Occupy the outpost and destroy two units.", "Destroy two units and prevent enemy exits.", "Secure both crossings and exit three units.", "Occupy three districts, destroy six units, stop escape."]
+PHASES: list[str] = ["Prologue: rifles, MGs, mortar, HQs + artillery", "Patrol: 1 rifle squad + HQ", "Platoon: 3 rifles + MG + HQ", "Platoon: 3 rifles + 2 MGs + HQ", "Two reinforced platoons + company HQ", "Company: 3 platoons + mortar + company HQ"]
+GOALS: list[str] = ["Secure the road and farm with full fire support.", "Occupy the farm; secure the rally point.", "Occupy the outpost and destroy two units.", "Destroy two units and prevent enemy exits.", "Secure both crossings and exit three units.", "Occupy three districts, destroy six units, stop escape."]
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
@@ -66,7 +66,7 @@ def render_map(path: Path) -> tuple[dict, Image.Image]:
     draw.text((38, 47), data["title"], font=font(30, True), fill=PAPER)
     index: int = 0
     if "force_summary" not in data:
-        index = int(data["id"][:2]) - 1
+        index = int(data["id"][:2])
     duration: int = int(data["seconds"] / 60)
     subtitle: str = f"{data.get('force_summary', PHASES[index])}  |  {duration} minutes  |  {data['size'][0]} x {data['size'][1]} hexes"
     draw.text((38, 91), subtitle, font=font(16), fill="#c9c9b2")
@@ -132,40 +132,24 @@ def render_overview(maps: list[tuple[dict, Image.Image]]) -> None:
     draw: ImageDraw.ImageDraw = ImageDraw.Draw(canvas)
     draw.rectangle((0, 0, 1800, 168), fill=INK)
     draw.text((46, 30), "ROAD TO ALDERBROOK", font=font(44, True), fill=PAPER)
-    draw.text((48, 95), "Five linked Allied missions. Start with a patrol; finish with company command.", font=font(22), fill="#c9c9b2")
+    draw.text((48, 95), "Six linked missions. Full support, an isolated patrol, then the advance on Alderbrook.", font=font(22), fill="#c9c9b2")
     for index, (data, image) in enumerate(maps):
         x: int = 38 + (index % 2) * 880
         y: int = 200 + (index // 2) * 630
         width: int = 844
-        if index == 4:
-            x = 38
-            width = 1724
         height: int = 595
-        if index == 4:
-            height = 785
         draw.rounded_rectangle((x, y, x + width, y + height), radius=12, fill="#f7f4eb", outline="#c4bfad", width=2)
         draw.text((x + 24, y + 18), data["title"], font=font(25, True), fill=INK)
         draw.text((x + 24, y + 59), PHASES[index], font=font(16), fill="#59675c")
         crop: Image.Image = image.crop((24, 126, image.width - 24, image.height - 110))
         box: tuple[int, int] = (width - 48, 404)
-        if index == 4:
-            box = (950, 580)
         fitted: Image.Image = ImageOps.contain(crop, box, Image.Resampling.LANCZOS)
         px: int = x + (width - fitted.width) // 2
         py: int = y + 91 + (404 - fitted.height) // 2
-        if index == 4:
-            px = x + 24 + (950 - fitted.width) // 2
-            py = y + 92
         canvas.paste(fitted, (px, py))
         caption_y: int = y + 519
-        if index == 4:
-            caption_y = y + 705
         draw.text((x + 24, caption_y), GOALS[index], font=font(16, True), fill=INK)
         draw.text((x + 24, caption_y + 34), f"{int(data['seconds'] / 60)} minutes  |  {data['size'][0]} x {data['size'][1]} hexes", font=font(15), fill="#59675c")
-        if index == 4:
-            draw.text((x + 1000, y + 146), "The final battle", font=font(28, True), fill=INK)
-            for row, line in enumerate(["Three rifle platoons", "Machine-gun and mortar support", "Fields, orchard and garden lanes", "Estate, market and timber yard", "Enemy withdrawal and exit denial"]):
-                draw.text((x + 1000, y + 211 + row * 43), line, font=font(19), fill="#59675c")
     draw.text((46, 2290), "Designer overview: blue Allied deployment, red Axis deployment, gold objectives and exits.", font=font(16), fill=INK)
     canvas.save(OUTPUT / "campaign_overview.png")
 
@@ -177,7 +161,7 @@ if __name__ == "__main__":
     rendered: list[tuple[dict, Image.Image]] = []
     sources: list[Path] = arguments.manifests
     if not sources:
-        sources = sorted(OUTPUT.glob("0*.json"))
+        sources = [path for path in sorted(OUTPUT.glob("0*.json")) if "layers" in json.loads(path.read_text())]
     for source in sources:
         rendered.append(render_map(source))
     if not arguments.manifests:

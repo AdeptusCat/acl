@@ -1,6 +1,6 @@
 # Road to Alderbrook
 
-A five-mission Allied campaign, available under **Road to Alderbrook** in the
+An Allied campaign with a full-force prologue followed by five missions, available under **Road to Alderbrook** in the
 normal mission menu. Win the previous mission with a minor or major victory to
 unlock the next. Mission results use stable identifiers, so changing a briefing
 title does not erase progression. Earned unlocks survive replay defeats and draws;
@@ -11,7 +11,8 @@ by the existing save system.
 
 | Mission | Player force | Enemy force | Default time | Major victory |
 | --- | --- | --- | --- | --- |
-| 1. Quiet Approach | 2 rifle squads + platoon HQ | 1 rifle squad + HQ | 10 min | Hold farm A for 15 seconds |
+| Prologue. Opening the Road | 3 rifles + 2 MGs + light mortar + platoon HQ + company HQ + off-map 105 mm battery | 2 rifles + MG + HQ | 10 min | Hold road A and farm B for 15 seconds each |
+| 1. Quiet Approach | 1 rifle squad + platoon HQ | 1 rifle squad + HQ | 10 min | Hold farm A for 15 seconds |
 | 2. Orchard Outpost | 3 rifles + MG + HQ | 2 rifles + MG + HQ | 10 min | Hold A for 30 seconds and destroy 2 units |
 | 3. The Roadblock | 3 rifles + 2 MGs + HQ | 2 small platoons + company HQ | 9 min | Destroy 2 units and prevent all enemy exits |
 | 4. Two Crossings | 2 reinforced platoons + company HQ | 2 platoons + company HQ | 12 min | Hold A and B for 20 seconds each and exit 3 units east |
@@ -21,8 +22,15 @@ Every condition in a victory level must be satisfied. Exit prevention and the
 final battle are assessed at the deadline. Mission selection applies the
 authored time; the existing time control can still override it.
 
-The first patrol starts outside opposing weapon range, with only two combat
-squads to command. The orchard introduces a dedicated gun team, the roadblock
+The prologue gives the player eight units and a four-gun 105 mm battery with
+48 rounds against four dispersed defenders. Secure road A and farm B for major
+victory; holding A for 15 seconds at the deadline earns a minor victory. Both
+unlock Quiet Approach. The company and its supporting weapons continue along
+the main road while a rifle squad and platoon HQ check the flank.
+
+The patrol starts outside opposing weapon range, with one combat squad to
+command and no artillery or reinforcements. Use covered approaches and keep HQ
+behind the rifle squad. A retreat to rally point B can secure a minor victory. The orchard introduces a dedicated gun team, the roadblock
 introduces interception, and the river crossing introduces two-platoon
 coordination and leaving garrisons behind. The final battle transitions from hedged farmland through an orchard estate
 into connected village streets, with 17 player units against 14 enemy
@@ -47,7 +55,7 @@ eastern escape routes before breaking the town defense.
 
 ## Playable maps and images
 
-All five maps are editable Godot scenes. Mission four retains the river crossing;
+All six maps are editable Godot scenes. Mission four retains the river crossing;
 mission five uses connected country and town approaches with a small pond. Water
 has no ground or pathfinding points outside bridge cells. Each map ships compressed line of
 sight data calculated by the existing LOS service.
@@ -74,6 +82,7 @@ coordinates. They are designer overviews; the game's normal fog of war and
 enemy-intelligence briefing remain in effect.
 
 - [Campaign overview](maps/campaign_overview.png)
+- [Opening the Road](maps/00_opening_the_road.png)
 - [Quiet Approach](maps/01_quiet_approach.png)
 - [Orchard Outpost](maps/02_orchard_outpost.png)
 - [The Roadblock](maps/03_the_roadblock.png)
@@ -81,6 +90,14 @@ enemy-intelligence briefing remain in effect.
 - [Battle for Alderbrook](maps/05_battle_for_alderbrook.png)
 
 ## Authoring and verification
+
+The prologue has a separate builder, `tools/campaigns/build_alderbrook_prologue.tscn`,
+which preserves the five existing maps. Run it with `-- --roads-only`, import
+the road SVG, then run it normally and import its generated terrain atlases.
+Finally run with `-- --los-only` to bake LOS against the imported textures.
+It writes the scene, designer manifest, independent tile sets, and baked LOS.
+The main campaign builder retains the prologue at the front of the campaign.
+Existing mission save IDs stay unchanged.
 
 The campaign definition is `resources/campaigns/road_to_alderbrook.tres`; its
 mission scenes are in `scenes/campaigns/alderbrook/`. Edit the mission blueprints
@@ -97,7 +114,7 @@ editor changes. Its layout is defined in `alderbrook_village_layout.gd`.
 
 `tests/alderbrook_campaign_regression.tscn` checks content, progression, victory
 thresholds, deployment identities, the quiet opener, and bridge connectivity.
-Run with `-- --mission=1` through `-- --mission=5` to exercise each real match
+Run with `-- --mission=1` (prologue) through `-- --mission=6` (final battle) to exercise each real match
 startup, initialized victory state, and enemy tactical planning. The final match
 also checks that escape remains deferred while the defense is intact.
 
