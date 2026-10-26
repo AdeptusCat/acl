@@ -2899,7 +2899,7 @@ axis_ai_status = 1
 allies_ai_status = 0
 
 [node name="CA_P1_S2_Axis_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe3/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="0" unique_id=548395910 instance=ExtResource("19_sh7a8")]
-position = Vector2(1104, 1927)
+position = Vector2(744, 1017)
 squad = 2
 platoon = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_hph6x"), SubResource("Resource_5aamg"), SubResource("Resource_hnqnj"), SubResource("Resource_7lp0r"), SubResource("Resource_tj3jo"), SubResource("Resource_vl1dq"), SubResource("Resource_hx1je"), SubResource("Resource_ij5nj"), SubResource("Resource_n78lu"), SubResource("Resource_1o6i5")])
@@ -2909,7 +2909,7 @@ default_mg = SubResource("Resource_ga1pk")
 formation_id = 1
 
 [node name="CA_P1_S0_Allies_PlatoonHQ" parent="Maps/DefaultMap/Scenarios/OutpostProbe3/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="1" unique_id=1861937545 instance=ExtResource("19_sh7a8")]
-position = Vector2(1216, 1216)
+position = Vector2(1385, 1351)
 platoon = 1
 team = 1
 loadouts = Array[ExtResource("50_hph6x")]([SubResource("Resource_ladsi"), SubResource("Resource_7qc1y"), SubResource("Resource_dobo0"), SubResource("Resource_1ppj3"), SubResource("Resource_tpqd7"), SubResource("Resource_o0evn"), SubResource("Resource_qytxv"), SubResource("Resource_cv01b"), SubResource("Resource_61cyd"), SubResource("Resource_7frv1"), SubResource("Resource_ikqac"), SubResource("Resource_bad7w")])
@@ -2925,7 +2925,7 @@ squads = [NodePath(".."), NodePath("../../CA_P1_S1_Allies_Rifle"), NodePath("../
 objective_hex = Vector2i(11, 13)
 
 [node name="CA_P1_S1_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe3/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="2" unique_id=1720904070 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(1310, 1935)
+position = Vector2(711, 1292)
 squad = 1
 platoon = 1
 team = 1
@@ -2938,7 +2938,7 @@ default_mg = SubResource("Resource_ga1pk")
 formation_id = 1
 
 [node name="CA_P1_S2_Allies_Rifle" parent="Maps/DefaultMap/Scenarios/OutpostProbe3/Units" parent_id_path=PackedInt32Array(43599254, 1365216721) index="3" unique_id=931086420 node_paths=PackedStringArray("command_squad") instance=ExtResource("19_sh7a8")]
-position = Vector2(1312, 1280)
+position = Vector2(1415, 1362)
 squad = 2
 platoon = 1
 team = 1

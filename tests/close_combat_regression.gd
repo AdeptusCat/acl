@@ -61,6 +61,7 @@ func _run() -> void:
 	await _test_live_timer()
 	await _clear_fixtures()
 	await get_tree().process_frame
+	Globals.flush_casualty_history()
 	var saved_history: CasualtyHistory = CasualtyHistory.load_history(Globals.casualty_history.storage_path)
 	_check(saved_history.records.size() == Globals.casualty_history.records.size() and not saved_history.records.is_empty(), "Close-combat cleanup preserves the durable casualty archive")
 	main._on_try_again()

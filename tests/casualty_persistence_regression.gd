@@ -89,6 +89,7 @@ func _run() -> void:
 	next_unit.free()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	Globals.flush_casualty_history()
 	_verify_history(CasualtyHistory.load_history(HISTORY_PATH))
 	# Importing a saved match into an empty archive restores both teams' losses.
 	var complete_history: CasualtyHistory = Globals.casualty_history
@@ -115,6 +116,7 @@ func _run() -> void:
 	_check(loaded_legacy != null and loaded_legacy.casualty_records.is_empty(), "Older match saves load with an empty casualty roster")
 	await get_tree().process_frame
 	await get_tree().process_frame
+	Globals.flush_casualty_history()
 	Globals.casualty_history = complete_history
 	_check(Globals.casualty_history.save_history() == OK, "Archive can replace an existing saved history")
 	Globals.casualty_history = original_history

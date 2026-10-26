@@ -186,6 +186,7 @@ func _run() -> void:
 		_check(not is_instance_id_valid(child_id), "Restart frees the corpse's owned controllers")
 	_check(Globals.get_units().is_empty(), "Restart clears the battlefield")
 	_check(Globals.casualty_history.records.size() == hq_soldiers.size() + ranged_original_size, "History survives battlefield restart")
+	Globals.flush_casualty_history()
 	var reloaded_history: CasualtyHistory = CasualtyHistory.load_history(Globals.casualty_history.storage_path)
 	_check(reloaded_history.records.size() == Globals.casualty_history.records.size(), "Automatic history saves survive loading from disk")
 	# Allow outstanding burst/watchdog timers to resume after scene cleanup.

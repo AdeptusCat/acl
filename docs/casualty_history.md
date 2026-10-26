@@ -7,7 +7,7 @@ Casualties and their equipment are retained independently of battlefield nodes.
 
 Each `CasualtyRecord` stores the soldier's name, ID, rank and role, unit designation, team, battle ID, scenario, location, timestamp, and an optional `CasualtyEquipment` snapshot. Equipment stores the weapon's name and source path, type and family, ammunition, magazine contents, grenade state, setup state, and jam state. Weapons shared by a crew have the same weapon ID within a battle; each casualty retains the state observed at their own death. These snapshots describe historical equipment and do not change when another soldier recovers and uses the weapon.
 
-The archive saves automatically to `user://history/casualties.tres`, with writes collected at the end of the current frame. Saving writes a temporary resource before replacing the prior file. Normal application shutdown flushes pending records. An unreadable archive is reported and retained rather than overwritten. A battle reset clears the current battle list and preserves the archive.
+The archive saves automatically to `user://history/casualties.tres`. Deaths enter memory immediately; writes batch over 0.25 seconds and a dedicated worker copies the historical resources, serializes them, and writes the file. A newer queued snapshot replaces an older pending snapshot for the same path; an in-progress write finishes before the next starts. The worker never accesses battlefield nodes or modifies the live archive. Saving writes a temporary resource before replacing the prior file. Normal application shutdown waits for in-flight writes and flushes pending records. An unreadable archive is reported and retained rather than overwritten. A battle reset clears the current battle list and preserves the archive. `Globals.flush_casualty_history()` provides a blocking persistence checkpoint for explicit disk reads and regression tests; it is not used during ordinary casualty resolution.
 
 Individual casualty selection, ranged casualties, and direct unit death all record losses. Death disables controllers and clears leadership effects while retaining the corpse and its runtime casualty roster. Clearing the battlefield frees those nodes; the resource records remain available.
 
@@ -19,6 +19,9 @@ Regression checks:
 godot --headless --path . tests/unit_death_regression.tscn
 godot --headless --path . tests/casualty_persistence_regression.tscn
 godot --headless --path . tests/casualty_persistence_regression.tscn -- --verify-persistence
+godot --headless --path . tests/casualty_archive_worker_regression.tscn
+godot --headless --path . tests/casualty_archive_worker_regression.tscn -- --shutdown-fixture
+godot --headless --path . tests/casualty_archive_worker_regression.tscn -- --verify-shutdown
 ```
 
 The regression scenes use separate files under `user://tests/` and preserve the normal casualty archive. The final command reads the fixtures produced by the preceding command in a fresh Godot process.

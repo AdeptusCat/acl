@@ -1,6 +1,9 @@
 class_name GameGlobals
 extends Node
 
+const CASUALTY_ARCHIVE_WRITER: Script = preload("res://resources/casualties/casualty_archive_writer.gd")
+const CASUALTY_SAVE_BATCH_SECONDS: float = 0.25
+
 var team_player: Team
 var team_enemy: Team
 var astars: Dictionary[int, AStar2D]
@@ -22,6 +25,9 @@ var casualty_history: CasualtyHistory = CasualtyHistory.new()
 var battle_casualties: Array[CasualtyRecord] = []
 var battle_id: String = ""
 var _casualty_save_queued: bool = false
+var _casualty_save_elapsed: float = 0.0
+var _pending_casualty_histories: Dictionary[String, CasualtyHistory] = {}
+var _casualty_writer: CASUALTY_ARCHIVE_WRITER
 var session_log: SessionLog = SessionLog.new()
 var battle_exits: Array[UnitExitRecord] = []
 var _session_log_save_queued: bool = false
@@ -135,14 +141,16 @@ func get_units_for_team(team: Team) -> Array[Unit]:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	if not Engine.is_editor_hint():
 		casualty_history = CasualtyHistory.load_history()
 		session_log = SessionLog.load_log()
 
 
 func _exit_tree() -> void:
-	if _casualty_save_queued:
-		_save_casualty_history()
+	flush_casualty_history()
+	if _casualty_writer != null:
+		_casualty_writer.shutdown()
 	if _session_log_save_queued:
 		_save_session_log()
 
@@ -203,18 +211,58 @@ func import_casualty_records(records: Array[CasualtyRecord]) -> void:
 		_queue_casualty_save()
 
 
-func _queue_casualty_save() -> void:
+func _process(delta: float) -> void:
 	if _casualty_save_queued:
-		return
+		_casualty_save_elapsed += delta
+		if _casualty_save_elapsed >= CASUALTY_SAVE_BATCH_SECONDS:
+			_save_casualty_history()
+	_report_casualty_save_results()
+
+
+func _queue_casualty_save() -> void:
+	_pending_casualty_histories[casualty_history.storage_path] = casualty_history
 	_casualty_save_queued = true
-	_save_casualty_history.call_deferred()
 
 
 func _save_casualty_history() -> void:
 	_casualty_save_queued = false
-	var save_error: Error = casualty_history.save_history()
-	if save_error != OK:
-		push_error("Could not save casualty history: %s" % save_error)
+	_casualty_save_elapsed = 0.0
+	if _casualty_writer == null:
+		_casualty_writer = CASUALTY_ARCHIVE_WRITER.new()
+	for path: String in _pending_casualty_histories.keys():
+		var history: CasualtyHistory = _pending_casualty_histories[path]
+		var error: Error = _casualty_writer.queue_save(history)
+		if error != OK:
+			push_error("Could not queue casualty history save: %s" % error_string(error))
+		else:
+			_pending_casualty_histories.erase(path)
+	_casualty_save_queued = not _pending_casualty_histories.is_empty()
+
+
+func _report_casualty_save_results() -> void:
+	if _casualty_writer == null:
+		return
+	for result: Dictionary in _casualty_writer.take_results():
+		if result["error"] != OK:
+			push_error("Could not save casualty history '%s': %s" % [result["path"], error_string(result["error"])])
+
+
+func flush_casualty_history() -> void:
+	# Blocking is reserved for shutdown and explicit persistence checkpoints.
+	if _casualty_save_queued:
+		_save_casualty_history()
+	if _casualty_writer != null:
+		_casualty_writer.flush()
+		_report_casualty_save_results()
+	# If a worker could not start, only this explicit blocking checkpoint may
+	# fall back to synchronous saving. Gameplay keeps its pending records.
+	for path: String in _pending_casualty_histories.keys():
+		var error: Error = _pending_casualty_histories[path].save_history()
+		if error != OK:
+			push_error("Could not flush casualty history '%s': %s" % [path, error_string(error)])
+		else:
+			_pending_casualty_histories.erase(path)
+	_casualty_save_queued = not _pending_casualty_histories.is_empty()
 
 
 func reset() -> void:

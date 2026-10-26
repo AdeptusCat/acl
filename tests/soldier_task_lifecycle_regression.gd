@@ -117,6 +117,7 @@ func _test_restart(main: Node, cycle: int) -> void:
 	_check_released(soldier_refs, "Restart %d discards every runtime soldier" % cycle)
 	_check_released(task_refs, "Restart %d discards every soldier task" % cycle)
 	_check(Globals.casualty_history.records.size() == records_before + casualties, "Casualty history survives task cleanup")
+	Globals.flush_casualty_history()
 	var loaded_history: CasualtyHistory = CasualtyHistory.load_history(Globals.casualty_history.storage_path)
 	_check(loaded_history.records.size() == Globals.casualty_history.records.size(), "Casualty records and equipment remain saved after restart")
 	_check(loaded_history.records.back().equipment != null, "Saved casualties retain their equipment")
