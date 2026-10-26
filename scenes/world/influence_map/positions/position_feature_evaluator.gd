@@ -77,16 +77,16 @@ static func defensive_cover(query: PositionQuery, cell: Vector2i) -> float:
 	var cover: float = clampf(map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, cell), 0.0, 1.0)
 	if not query.use_directional_cover:
 		return cover
-	# Walls protect the candidate end of a firing lane, not every direction.
+	# Only endpoint walls provide local protection; shooter_cover also includes distant hindrance.
 	var lanes: Dictionary = query.snapshot.los.get(cell, {})
 	var directional: float = 1.0
 	var visible_contacts: int = 0
 	for contact: InfluenceContact in query.snapshot.get_defensive_contacts(query.team):
 		if lanes.has(contact.hex):
 			visible_contacts += 1
-			directional = minf(directional, float(lanes[contact.hex].get("shooter_cover", 0.0)) / 3.0)
+			directional = minf(directional, float(lanes[contact.hex].get("wall_cover", 0.0)) / 3.0)
 	if visible_contacts == 0:
-		directional = float(lanes.get(query.objective_hex, {}).get("shooter_cover", 0.0)) / 3.0
+		directional = float(lanes.get(query.objective_hex, {}).get("wall_cover", 0.0)) / 3.0
 	return maxf(cover, clampf(directional, 0.0, 1.0))
 
 

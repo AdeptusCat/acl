@@ -470,6 +470,7 @@ func _test_match(index: int) -> void:
 
 func _test_prologue_guard(planner: PlatoonAI) -> void:
 	var found: bool = false
+	var snapshot: InfluenceSnapshot = world.game_controller.influence_map_controller.snapshot
 	for unit: Unit in planner.goal_assignments:
 		var task: ScenarioGoalTask = planner.goal_assignments[unit]
 		if task.kind != ScenarioGoalTask.Kind.OCCUPY:
@@ -481,6 +482,24 @@ func _test_prologue_guard(planner: PlatoonAI) -> void:
 		_check(result != null and result.is_valid(), "The authored outpost has an available covered guard position")
 		if result != null and result.is_valid():
 			_check(result.profile_mode == PositionProfile.Mode.DEFEND and result.features.get("cover", 0.0) >= 0.1, "The prologue defender uses actual terrain or directional wall cover")
+			_check(result.target_hex != Vector2i(19, 10), "The prologue rejects the recorded exposed position south of the outpost")
+			var query: PositionQuery = PositionQuery.new()
+			query.unit = unit
+			query.team = unit.team
+			query.snapshot = snapshot
+			query.objective_hex = task.hex
+			query.use_directional_cover = true
+			var contacts: Array[InfluenceContact] = snapshot.get_defensive_contacts(unit.team).duplicate()
+			var contact: InfluenceContact = InfluenceContact.new()
+			contact.hex = Vector2i(7, 16)
+			contact.observed = true
+			snapshot.defensive_contacts[unit.team] = [contact]
+			var exposed_lane: Dictionary = snapshot.los[Vector2i(19, 10)][contact.hex]
+			_check(exposed_lane["shooter_cover"] > 0 and exposed_lane["wall_cover"] == 0, "The recorded open hex has distant sightline hindrance but no protective wall")
+			_check(PositionFeatureEvaluator.defensive_cover(query, Vector2i(19, 10)) == 0.0, "The recorded open hex cannot qualify for a covered guard duty")
+			contact.hex = Vector2i(15, 13)
+			_check(PositionFeatureEvaluator.defensive_cover(query, result.target_hex) >= 0.1, "The new prologue position has local cover facing the recorded attacking rifle squad")
+			snapshot.defensive_contacts[unit.team] = contacts
 			_check(LOSHelper.get_hex_distance(result.target_hex, task.hex) <= ScenarioGoalTask.SECURED_DEFENSE_RADIUS, "The prologue guard remains within response distance of its objective")
 	_check(found, "The prologue retains a guard assigned to its secured outpost")
 

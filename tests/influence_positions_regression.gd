@@ -2679,15 +2679,20 @@ func _test_secured_objective_cover() -> void:
 	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, covered, 0.0)
 	query.use_directional_cover = true
 	var contact_hex: Vector2i = Vector2i(6, 3)
-	query.snapshot.los[covered][contact_hex] = {"shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
+	query.snapshot.los[covered][contact_hex] = {"wall_cover": 2.0, "shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
 	advice = PositionQueryService.query_positions(query)
 	_check(advice.is_valid() and advice.target_hex == covered and advice.features["cover"] > 0.5, "A secured guard can use a wall or hedge facing a known threat without building cover")
 	_check(is_finite(PositionQueryService.rapid_candidate_score(query, map.cell_to_index(covered))), "Rapid guard selection also recognizes directional wall cover")
-	query.snapshot.los[covered][contact_hex]["shooter_cover"] = 0.0
-	query.snapshot.los[covered][query.objective_hex] = {"shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
+	query.snapshot.los[covered][contact_hex]["wall_cover"] = 0.0
+	query.snapshot.los[covered][contact_hex]["hindrance"] = 2.0
+	query.snapshot.los[covered][query.objective_hex] = {"wall_cover": 2.0, "shooter_cover": 2.0, "target_cover": 0.0, "hindrance": 0.0}
 	_check(not PositionQueryService.query_positions(query).is_valid(), "A wall facing the objective cannot conceal exposure to a known threat from another direction")
+	_check(PositionFeatureEvaluator.defensive_cover(query, covered) == 0.0, "Distant vegetation in shooter_cover cannot qualify an open guard position as cover")
+	_check(not is_finite(PositionQueryService.rapid_candidate_score(query, map.cell_to_index(covered))), "Rapid selection rejects distant hindrance without local cover")
 	query.snapshot.defensive_contacts[own.team] = []
 	_check(PositionQueryService.query_positions(query).is_valid(), "Without observed threats a wall facing the objective can protect its guard")
+	query.snapshot.los[covered][query.objective_hex]["wall_cover"] = 0.0
+	_check(not PositionQueryService.query_positions(query).is_valid(), "A quiet objective also rejects sightline hindrance without a local wall")
 	query.use_directional_cover = false
 	var detached: Vector2i = Vector2i(5, 3)
 	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, detached, 1.0)
