@@ -82,6 +82,8 @@ var _now_s: float = 0.0
 var _accum_window_s: float = 0.0
 
 var _bursts: Dictionary[Soldier, Dictionary] = {}
+var _burst_audio_tokens: Dictionary[int, int] = {}
+var _next_burst_audio_token: int = 0
 var _last_visible: Array[Unit] = []
 
 var fire_recent: float = 0.0 # 0..1 shows that they were shooting
@@ -152,6 +154,9 @@ func set_mg(machinge_guns : int) -> void:
 
 
 func set_soldiers(list: Array[Soldier]) -> void:
+	for soldier: Soldier in soldiers:
+		if _burst_audio_tokens.has(soldier.id):
+			_stop_burst_audio(soldier.weapon, soldier.id, _burst_audio_tokens[soldier.id], 0.0)
 	for soldier: Soldier in _bursts:
 		soldier.burst_active = false
 	_bursts.clear()
@@ -654,7 +659,7 @@ func _start_burst(soldier: Soldier, shots: int, cell: Vector2i, enemy: Unit, gro
 		return 0
 	var context: Dictionary = {"remaining": shots, "cell": cell, "enemy": enemy,
 		"ground": ground_fire, "distance": distance, "cover": cover, "targets": targets.duplicate(),
-		"until_next": 0.0, "mission": fire_support_mission,
+		"until_next": 0.0, "mission": fire_support_mission, "audio_started": false,
 		"origin": unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()}
 	_bursts[soldier] = context
 	soldier.burst_active = true
@@ -718,8 +723,22 @@ func _finish_burst(soldier: Soldier, context: Dictionary) -> void:
 	if soldier.is_alive and soldier.rounds_in_mag <= 0:
 		var grenade: bool = soldier.weapon.can_fire_riflegrenades and int(context["distance"]) <= soldier.weapon.riflegrenade_range
 		soldier.start_reload(grenade)
-	if soldier.weapon.fire_mode == WeaponSpec.FireMode.BURST:
-		_on_stop_mg_loop(soldier.weapon, unit.position, soldier.id, unit)
+	if bool(context["audio_started"]):
+		var delay: float = 0.0
+		if int(context["remaining"]) <= 0:
+			# Let the last automatic round sound for its firing interval before the tail.
+			delay = maxf(float(context["until_next"]), 0.0)
+		_stop_burst_audio(soldier.weapon, soldier.id, int(context["audio_token"]), delay)
+
+
+func _stop_burst_audio(weapon: WeaponSpec, owner_id: int, token: int, delay: float) -> void:
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	# An old burst's delayed tail must not stop a newer burst from the same soldier.
+	if _burst_audio_tokens.get(owner_id, -1) != token:
+		return
+	_burst_audio_tokens.erase(owner_id)
+	_on_stop_mg_loop(weapon, unit.position, owner_id, unit)
 
 
 func _emit_round(soldier: Soldier, context: Dictionary) -> void:
@@ -736,7 +755,16 @@ func _emit_round(soldier: Soldier, context: Dictionary) -> void:
 	_add_rounds_to_hex(cell, 1)
 	add_fire_impulse(1, 10)
 	shooting.emit(unit)
-	_on_fire_weapon(soldier.weapon, unit.position, soldier.weapon.fire_mode == WeaponSpec.FireMode.BURST, soldier.id, unit)
+	var automatic_audio: bool = soldier.weapon.fire_mode == WeaponSpec.FireMode.BURST and not grenade
+	if automatic_audio:
+		if not bool(context["audio_started"]):
+			_next_burst_audio_token += 1
+			context["audio_started"] = true
+			context["audio_token"] = _next_burst_audio_token
+			_burst_audio_tokens[soldier.id] = _next_burst_audio_token
+			_on_fire_weapon(soldier.weapon, unit.position, true, soldier.id, unit)
+	else:
+		_on_fire_weapon(soldier.weapon, unit.position, false, soldier.id, unit)
 	if grenade:
 		fire_riflegrenades(soldier)
 		soldier.weapon.riflegrenade_loaded = false
@@ -973,10 +1001,8 @@ func _setup_after_arriving_at_hex() -> void:
 
 func _on_fire_weapon(weapon_spec: WeaponSpec, pos: Vector2, is_auto: bool, owner_id: int, position_node: Node2D) -> void:
 	if is_auto:
-		# start loop when begins firing
+		# Automatic weapons use their continuous sample, without a generic shot overlay.
 		$"../WeaponAudio".start_mg_loop(owner_id, weapon_spec, position_node)
-		# each volley still spawns muzzle puffs/visuals and optional short bursts
-		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
 	else:
 		$"../WeaponAudio".play_shot(weapon_spec, pos, false)
 

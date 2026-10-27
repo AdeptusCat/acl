@@ -84,15 +84,14 @@ func play_shot_decay(weapon_spec: WeaponSpec, _position: Vector2, _is_distant: b
 func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D) -> void:
 	if not _active:
 		return
-	var existing: Node = get_node_or_null("mg_loop_%s" % str(owner_id))
-	
-	if _mg_loops.has(owner_id):
-		_mg_loops[owner_id].stop()
-		_mg_loops[owner_id].queue_free()
-	
-	if existing != null:
-		return
-	
+	var existing: Variant = _mg_loops.get(owner_id, null)
+	if is_instance_valid(existing):
+		var current: AudioStreamPlayer2D = existing as AudioStreamPlayer2D
+		if current.playing:
+			return
+		current.queue_free()
+	_mg_loops.erase(owner_id)
+
 	var ap: AudioStreamPlayer2D = AudioStreamPlayer2D.new()
 	if weapon_spec.snd_mg_loop == null:
 		ap.stream = snd_mg_loop_default
@@ -110,7 +109,7 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	# watchdog: kill if somehow not stopped within N seconds
 	var t: SceneTreeTimer = get_tree().create_timer(6.0)
 	await t.timeout
-	if is_instance_valid(ap):
+	if is_instance_valid(ap) and is_instance_valid(position_node) and _mg_loops.get(owner_id, null) == ap:
 		if ap.playing:
 			stop_mg_loop(weapon_spec, position_node.position, owner_id, position_node)
 			
@@ -124,9 +123,11 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 
 
 func stop_mg_loop(weapon_spec: WeaponSpec, _position: Vector2, owner_id: int, _position_node: Node2D) -> void:
-	var ap: AudioStreamPlayer2D = _mg_loops.get(owner_id, null) as AudioStreamPlayer2D
-	if ap != null and is_instance_valid(ap):
-		ap.stop()
-		ap.queue_free()
+	var existing: Variant = _mg_loops.get(owner_id, null)
 	_mg_loops.erase(owner_id)
+	if not is_instance_valid(existing):
+		return
+	var ap: AudioStreamPlayer2D = existing as AudioStreamPlayer2D
+	ap.stop()
+	ap.queue_free()
 	play_shot_decay(weapon_spec, _position)
