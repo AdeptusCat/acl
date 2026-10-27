@@ -10,6 +10,7 @@ const MOVING_DETECTION_RATE: float = 3.0
 const FIRING_DETECTION_RATE: float = 6.0
 const TARGET_CONCEALMENT_TRANSMISSION: float = 0.35
 const INTERVENING_HEX_TRANSMISSION: float = 0.55
+const MAX_IDENTIFICATION_EVIDENCE_RATE: float = 2.0
 
 const INDIRECT_CONTACT_TINT: Color = Color(0.45, 0.45, 0.45, 0.6)
 
@@ -160,12 +161,17 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 			if not unit.is_active() or unit.surrendered or unit.members_alive <= 0:
 				track.is_visible = false
 				continue
+			# Same-hex contacts are handled below, including when the LOS table
+			# deliberately omits its own origin. Observe them exactly once.
+			if enemy_tracked.current_hex == unit.current_hex:
+				continue
 
 			if track.is_visible and units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
-				var rate: float = compute_detect_rate(controller, unit, enemy_tracked)
+				var factors: Dictionary = detection_breakdown(controller, unit, enemy_tracked)
+				var rate: float = factors["rate"]
 				if track.maintain_detection(rate, elapsed_seconds):
 					track.record_detection()
-					track.observe_details(rate, elapsed_seconds)
+					track.observe_details(factors["identification_rate"], elapsed_seconds)
 					units_visible.append(enemy_tracked)
 				continue
 
@@ -203,6 +209,8 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 			if same_hex_track == null:
 				same_hex_track = EnemyTrack.new(unit, unit_in_current_hex)
 				track_map[unit_in_current_hex] = same_hex_track
+			if same_hex_track.is_visible and units_visible_by_this_unit.has(unit_in_current_hex):
+				same_hex_track.observe_details(MAX_IDENTIFICATION_EVIDENCE_RATE, elapsed_seconds)
 
 			same_hex_track.confidence = 1.0
 			same_hex_track.acquire_detection()
@@ -282,13 +290,21 @@ static func detection_breakdown(controller: Node2D, observer: Unit, enemy: Unit)
 		tracking_remaining = track.visual_contact_remaining_s
 		identification = track.identification_evidence
 	rate *= condition * search
+	# Recognizing an acquired silhouette depends on the view, rather than on
+	# movement, muzzle flashes or a remembered-location acquisition bonus.
+	var detail_quality: float = maxf(distance_factor * terrain_factor * exposure * attention * condition, 0.0)
+	var identification_rate: float = MAX_IDENTIFICATION_EVIDENCE_RATE * minf(sqrt(detail_quality), 1.0)
+	var has_los: bool = observer.current_hex == enemy.current_hex or LOSHelper.los_lookup.get(observer.current_hex, {}).has(enemy.current_hex)
+	if not has_los:
+		identification_rate = 0.0
 	return {"rate": maxf(rate, 0.0), "eligible": true, "distance_hexes": distance_hexes,
 		"distance_metres": distance_metres, "distance_factor": distance_factor, "concealment": concealment,
 		"hindrances": intervening_hexes, "terrain_factor": terrain_factor, "moving": moving,
 		"motion_factor": motion, "exposure": exposure, "firing": firing, "activity_rate": activity_rate,
 		"attention": attention, "observer_condition": condition, "search_bonus": search,
-		"has_los": observer.current_hex == enemy.current_hex or LOSHelper.los_lookup.get(observer.current_hex, {}).has(enemy.current_hex),
-		"tracking_remaining_s": tracking_remaining, "identification_evidence": identification}
+		"has_los": has_los,
+		"tracking_remaining_s": tracking_remaining, "identification_evidence": identification,
+		"identification_rate": identification_rate}
 
 
 static func target_exposure(enemy: Unit) -> float:
@@ -330,6 +346,9 @@ static func contact_report(team: Globals.Team, enemy: Unit) -> Dictionary:
 			continue
 		if best == null or track.identification_evidence > best.identification_evidence:
 			best = track
+		elif track.identification_evidence == best.identification_evidence:
+			if (track.is_visible and not best.is_visible) or (track.is_visible == best.is_visible and track.last_detail_observation_s > best.last_detail_observation_s):
+				best = track
 	if best != null:
 		return best.contact_report()
 	return {"title": "Unidentified contact", "status": "Brief sighting", "strength": "Strength unknown",

@@ -1,5 +1,26 @@
 # Weapon audio levels
 
+## Adjusting volume
+
+For one weapon, open its `.tres` definition under `resources/weapons/` in the
+Godot Inspector. `volume_db` controls its firing shot or automatic loop;
+`decay_volume_db` controls the sound after an automatic burst, and
+`hit_volume_db` controls its impact/explosion sound. Rifle-grenade launches and
+explosions have separate `riflegrenade_shot_volume_db` and
+`riflegrenade_hit_volume_db` values. Runtime weapons copy these definitions when
+created, so restart the battle after changing them.
+
+Lower values are quieter. For example, changing MG34 `volume_db` from `-13.1`
+to `-16.1` reduces firing gain by 3 dB; `-10.1` raises it by 3 dB. Adjust the
+tail by the same amount if the whole automatic firing event should change.
+
+For battle effects together, adjust `SFX_Close` and `SFX_Distant` in Godot's
+Audio bus panel and save `default_bus_layout.tres`. These buses include weapon
+and projectile effects. In-game Settings currently exposes Master and Music
+volume; Master also changes UI and music. There is no separate weapons slider.
+
+## Calibration
+
 All 20 authored weapon definitions use calibrated playback gains for their
 existing audio assets. Firing and explosive impacts target **−20 LUFS maximum
 momentary loudness**; automatic burst tails target **−24 LUFS**. A tail is four

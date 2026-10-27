@@ -21,6 +21,8 @@ var search_remaining_s: float = 0.0
 var identification_evidence: float = 0.0
 var observed_squad_type: int = -1
 var observed_type_name: String = ""
+var observed_activity: String = ""
+var last_detail_observation_s: float = -INF
 var estimated_strength_min: int = 0
 var estimated_strength_max: int = 0
 
@@ -221,13 +223,19 @@ func reacquisition_multiplier(candidate_hex: Vector2i) -> float:
 	return 1.0 + (MAX_SEARCH_BONUS - 1.0) * proximity * clampf(search_remaining_s / SEARCH_MEMORY_S, 0.0, 1.0)
 
 
-func observe_details(rate: float, delta: float) -> void:
-	if not is_visible or not is_instance_valid(enemy):
+func observe_details(evidence_rate: float, delta: float) -> void:
+	if not is_visible or not is_instance_valid(enemy) or evidence_rate <= 0.0 or delta <= 0.0:
 		return
-	identification_evidence = minf(STRENGTH_EVIDENCE_REQUIRED, identification_evidence + maxf(delta, 0.0) * clampf(sqrt(maxf(rate, 0.0)) * 0.5, 0.0, 0.5))
+	identification_evidence = minf(STRENGTH_EVIDENCE_REQUIRED, identification_evidence + delta * evidence_rate)
+	last_detail_observation_s = enemy._now()
 	if identification_evidence >= TYPE_EVIDENCE_REQUIRED:
 		observed_squad_type = enemy.squad_type
 		observed_type_name = enemy.get_squad_type_name(enemy.squad_type)
+		observed_activity = "Stationary"
+		if enemy.is_moving or (is_instance_valid(enemy.movement) and enemy.movement.is_moving):
+			observed_activity = "Moving"
+		if is_instance_valid(enemy.squad_fire) and enemy.squad_fire.fire_recent > 0.1:
+			observed_activity = "Firing"
 	if identification_evidence >= STRENGTH_EVIDENCE_REQUIRED:
 		estimated_strength_max = maxi(4, ceili(float(enemy.members_alive) / 4.0) * 4)
 		estimated_strength_min = estimated_strength_max - 3
@@ -244,7 +252,8 @@ func contact_report() -> Dictionary:
 		strength = "Estimated %d–%d soldiers" % [estimated_strength_min, estimated_strength_max]
 		status = "Strength estimated"
 	return {"title": title, "status": status, "strength": strength, "squad_type": observed_squad_type,
-		"strength_min": estimated_strength_min, "strength_max": estimated_strength_max, "evidence": identification_evidence}
+		"strength_min": estimated_strength_min, "strength_max": estimated_strength_max, "evidence": identification_evidence,
+		"activity": observed_activity}
 
 
 func _decay_awareness(delta: float) -> void:

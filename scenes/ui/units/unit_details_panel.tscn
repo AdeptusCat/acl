@@ -97,6 +97,13 @@ theme_type_variation = &"HudSecondary"
 text_overrun_behavior = 3
 clip_text = true
 
+[node name="Observation" type="Label" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+text = "Observed: Stationary"
+theme_type_variation = &"HudSecondary"
+autowrap_mode = 2
+
 [node name="Order" type="Label" parent="Scroll/Summary"]
 layout_mode = 2
 mouse_filter = 1

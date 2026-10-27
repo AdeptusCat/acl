@@ -13,6 +13,7 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var command_label: Label = $Scroll/Summary/Command
 @onready var strength_label: Label = $Scroll/Summary/Status/Headcount/Strength
 @onready var unit_status_label: Label = $Scroll/Summary/Status/Morale
+@onready var observation_label: Label = $Scroll/Summary/Observation
 @onready var order_label: Label = $Scroll/Summary/Order
 @onready var fire_effect_label: Label = $Scroll/Summary/FireEffect
 @onready var cohesion: Label = $Scroll/Summary/Details/Content/Readiness/Cohesion
@@ -235,6 +236,7 @@ func _refresh_summary() -> void:
 		return
 	for control: Control in [command_label, order_label, details_section, roster_section, pace_row]:
 		control.show()
+	observation_label.hide()
 	if strength_label.get_theme_font_size("font_size") != 26:
 		strength_label.add_theme_font_size_override("font_size", 26)
 	pace.disabled = not MatchInteractionHandler.can_command_unit(unit)
@@ -282,6 +284,9 @@ func _refresh_enemy_summary() -> void:
 	unit_status_label.text = report["status"]
 	unit_status_label.tooltip_text = unit_status_label.text
 	unit_status_label.remove_theme_color_override("font_color")
+	observation_label.visible = not str(report.get("activity", "")).is_empty()
+	observation_label.text = "Observed: " + str(report.get("activity", ""))
+	observation_label.tooltip_text = "Activity recorded during the latest visible observation."
 	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, rout_button, rout_explanation]:
 		control.hide()
 	debug_actions.hide()
@@ -324,12 +329,13 @@ func _refresh_spotting() -> void:
 	var activity: String = "Stationary"
 	if factors.get("moving", false):
 		activity = "Moving"
-	spotting_factors.text = "LOS: %s\nDistance: %d hexes · %.0f m\nTarget concealment: %d\nIntervening hindrances: %d\nActivity: %s\nMovement cue: %.2f×\nExposed silhouette: %.2f×\nRecent firing: %.2f\nAttention: %.2f×\nObserver condition: %.2f×\nLast-position search: %.2f×\nAcquisition rate: %.5f/s\nChance in 10 s: %.2f%%\nTracking: %.1f / %.0f s\nIdentification: %.1f / %.0f" % [sight,
+	spotting_factors.text = "LOS: %s\nDistance: %d hexes · %.0f m\nTarget concealment: %d\nIntervening hindrances: %d\nActivity: %s\nMovement cue: %.2f×\nExposed silhouette: %.2f×\nRecent firing: %.2f\nAttention: %.2f×\nObserver condition: %.2f×\nLast-position search: %.2f×\nAcquisition rate: %.5f/s\nChance in 10 s: %.2f%%\nTracking: %.1f / %.0f s\nIdentification: %.1f / %.0f\nIdentification rate: %.2f/s" % [sight,
 		factors.get("distance_hexes", 0), factors.get("distance_metres", 0.0), factors.get("concealment", 0),
 		factors.get("hindrances", 0), activity, factors.get("motion_factor", 1.0), factors.get("exposure", 1.0), factors.get("firing", 0.0),
 		factors.get("attention", 0.0), factors.get("observer_condition", 0.0), factors.get("search_bonus", 1.0), rate,
 		100.0 * (1.0 - exp(-rate * 10.0)), factors.get("tracking_remaining_s", 0.0), EnemyTrack.VISUAL_CONTACT_GRACE_S,
-		factors.get("identification_evidence", 0.0), EnemyTrack.STRENGTH_EVIDENCE_REQUIRED]
+		factors.get("identification_evidence", 0.0), EnemyTrack.STRENGTH_EVIDENCE_REQUIRED,
+		factors.get("identification_rate", 0.0)]
 
 
 func _on_spotting_target_selected(_index: int) -> void:

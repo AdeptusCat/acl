@@ -38,6 +38,9 @@ func _run() -> void:
 	_test_reacquisition()
 	_test_exposure_and_pace()
 	_test_information()
+	_test_contact_icons()
+	_test_identification_quality()
+	_test_same_hex_identification()
 	_test_diagnostics_and_controls()
 	_test_invalid_roster()
 	main.queue_free()
@@ -120,10 +123,13 @@ func _test_exposure_and_pace() -> void:
 
 func _test_information() -> void:
 	Debug.enemy_selectable = false
+	_set_hex(enemy, world.ground_layer.cube_to_map(friendly.current_cube + Vector3i(1, -1, 0)))
+	LOSHelper.los_lookup = {friendly.current_hex: {enemy.current_hex: {"target_concealment": 0, "hindrance": 0}}}
 	var track: EnemyTrack = EnemyTrack.new(friendly, enemy)
 	var tracks: Dictionary[Unit, EnemyTrack] = {enemy: track}
 	Globals.unit_enemy_tracks[friendly] = tracks
 	Globals.unit_visible_enemies[friendly] = [enemy]
+	Globals.unit_enemies_in_los = {friendly: [enemy]}
 	track.acquire_detection()
 	MatchVisibilityCoordinator.show_visible_units(controller)
 	var details: Control = world.ui.unit_details
@@ -135,25 +141,42 @@ func _test_information() -> void:
 	enemy.ui.set_unit_designation("Private formation name")
 	details._on_state_changed(STATES.MoraleState.PANIC)
 	_check(enemy.ui.members_count_label.text == "?" and enemy.ui.unit_designation_label.text == "Contact" and details.unit_status_label.text == "Brief sighting", "Live casualty, formation and morale updates cannot bypass observation limits")
-	track.observe_details(1.0, 3.1)
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.0)
+	_check(track.identification_evidence == 0.0, "A visibility refresh without simulation time cannot advance identification")
+	for tick: int in range(12):
+		MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.1)
 	details._process(0.1)
-	_check(details.unit_type_label.text == track.observed_type_name and details.strength_label.text == "Strength unknown", "Sustained observation identifies type before estimating strength")
-	track.observe_details(1.0, 5.0)
-	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(track.observed_squad_type >= 0 and details.unit_type_label.text == track.observed_type_name and details.strength_label.text == "Strength unknown", "The live visibility pipeline identifies an adjacent exposed contact within 1.2 seconds, before estimating strength")
+	_check(enemy.ui.unit_status_control.visible and enemy.ui.idle_texture_rect.visible and not enemy.ui._contact_marker.visible, "Identifying a contact replaces the question mark with its actual unit artwork")
+	_check(details.observation_label.visible and details.observation_label.text == "Observed: Stationary", "Enemy inspection reveals observed activity alongside its identified type")
+	for tick: int in range(18):
+		MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.1)
 	details._process(0.1)
-	_check(details.strength_label.text.begins_with("Estimated ") and track.estimated_strength_min <= enemy.members_alive and track.estimated_strength_max >= enemy.members_alive, "Further observation supplies a bounded strength estimate rather than an exact roster")
+	_check(details.strength_label.text.begins_with("Estimated ") and track.estimated_strength_min <= enemy.members_alive and track.estimated_strength_max >= enemy.members_alive and enemy.ui.members_count_label.text.contains("–"), "The live visibility pipeline reveals an adjacent contact's bounded strength estimate on the counter and details within three seconds")
 	_check(details.strength_label.get_theme_font("font").get_string_size(details.strength_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, details.strength_label.get_theme_font_size("font_size")).x <= 276.0, "The estimated strength label fits the squad details column")
 	var observed_type: String = track.observed_type_name
 	var observed_strength: int = track.estimated_strength_max
+	var other_observer: Unit = Globals.get_units_for_team(Globals.team_player)[1]
+	var fresh: EnemyTrack = EnemyTrack.new(other_observer, enemy)
+	fresh.acquire_detection()
+	enemy.squad_fire.fire_recent = 1.0
+	fresh.observe_details(2.0, 2.0)
+	var other_tracks: Dictionary[Unit, EnemyTrack] = {enemy: fresh}
+	Globals.unit_enemy_tracks[other_observer] = other_tracks
 	track.update_not_seen(0.1)
+	_check(MatchVisibilityCoordinator.contact_report(Globals.team_player, enemy)["activity"] == "Firing", "An equally identified live observation takes priority over stale remembered information")
+	Globals.unit_enemy_tracks.erase(other_observer)
 	var old_type: Globals.SquadType = enemy.squad_type
 	var old_members: int = enemy.members_alive
 	enemy.squad_type = Globals.SquadType.MORTAR
 	enemy.members_alive = 1
+	enemy.is_moving = true
 	track.observe_details(100.0, 100.0)
-	_check(track.observed_type_name == observed_type and track.estimated_strength_max == observed_strength, "A hidden contact report does not read live type or strength changes")
+	_check(track.observed_type_name == observed_type and track.estimated_strength_max == observed_strength and track.observed_activity == "Stationary", "A hidden contact report does not read live type, strength or activity changes")
 	enemy.squad_type = old_type
 	enemy.members_alive = old_members
+	enemy.is_moving = false
+	enemy.squad_fire.fire_recent = 0.0
 	track.acquire_detection()
 	Debug.enemy_selectable = true
 	details._process(0.1)
@@ -161,6 +184,76 @@ func _test_information() -> void:
 	Debug.enemy_selectable = false
 	details.show_unit_detail(friendly, false)
 	_check(details.roster_section.visible and details.strength_label.text.contains("/"), "Friendly inspection retains exact strength and its full roster")
+	_check(not details.observation_label.visible, "Switching back to friendly inspection removes the enemy observation summary")
+
+
+func _test_contact_icons() -> void:
+	var old_team: Globals.Team = enemy.team
+	var icons: Control = enemy.ui.unit_status_control
+	for team: Globals.Team in [Globals.Team.AXIS, Globals.Team.ALLIES]:
+		enemy.team = team
+		var expected: Array[Texture2D] = [icons.idle_ger, icons.idle_mg_ger, icons.idle_antitank_ger, icons.idle_mortar_ger]
+		if team == Globals.Team.ALLIES:
+			expected = [icons.idle_us, icons.idle_mg_us, icons.idle_antitank_us, icons.idle_mortar_us]
+		var types: Array[Globals.SquadType] = [Globals.SquadType.Rifle, Globals.SquadType.MG, Globals.SquadType.ANTITANK, Globals.SquadType.MORTAR]
+		for index: int in range(types.size()):
+			enemy.ui.set_contact_report({"squad_type": types[index], "activity": "Stationary"}, true)
+			_check(icons.visible and enemy.ui.idle_texture_rect.visible and enemy.ui.idle_texture_rect.texture == expected[index] and not enemy.ui._contact_marker.visible, "Identified type %d uses team %d's actual unit icon" % [types[index], team])
+		enemy.ui.set_contact_report({"squad_type": Globals.SquadType.MG, "activity": "Moving"}, true)
+		_check(enemy.ui.moving_texture_rect.visible, "An observed moving contact uses the moving unit artwork")
+		enemy.ui.set_contact_report({"squad_type": Globals.SquadType.MG, "activity": "Firing"}, true)
+		enemy.ui._on_timer_timeout()
+		enemy.ui.stopped_moving(false, false)
+		_check(enemy.ui.shooting_texture_rect.visible, "Animation timers and live movement callbacks cannot overwrite the contact's observed firing pose")
+	enemy.team = old_team
+	MatchVisibilityCoordinator.show_visible_units(controller)
+
+
+func _test_identification_quality() -> void:
+	var near: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, friendly, enemy)
+	var cell: Vector2i = enemy.current_hex
+	enemy.squad_fire.fire_recent = 1.0
+	var firing: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, friendly, enemy)
+	_check(firing["rate"] > near["rate"] and is_equal_approx(firing["identification_rate"], near["identification_rate"]), "A muzzle flash improves acquisition without making the silhouette easier to inspect")
+	enemy.squad_fire.fire_recent = 0.0
+	_set_hex(enemy, world.ground_layer.cube_to_map(friendly.current_cube + Vector3i(14, -14, 0)))
+	LOSHelper.los_lookup[friendly.current_hex][enemy.current_hex] = {"target_concealment": 0, "hindrance": 0}
+	var distant: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, friendly, enemy)
+	LOSHelper.los_lookup[friendly.current_hex][enemy.current_hex] = {"target_concealment": 1, "hindrance": 5}
+	var obscured: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, friendly, enemy)
+	_check(near["identification_rate"] > distant["identification_rate"] and distant["identification_rate"] > obscured["identification_rate"], "Distance, target concealment and intervening hindrances slow identification continuously")
+	LOSHelper.los_lookup[friendly.current_hex].erase(enemy.current_hex)
+	_check(MatchVisibilityCoordinator.detection_breakdown(controller, friendly, enemy)["identification_rate"] == 0.0, "Blocked LOS provides no identification evidence")
+	var coarse: EnemyTrack = EnemyTrack.new(friendly, enemy)
+	var fine: EnemyTrack = EnemyTrack.new(friendly, enemy)
+	coarse.acquire_detection()
+	fine.acquire_detection()
+	coarse.observe_details(obscured["identification_rate"], 3.0)
+	for tick: int in range(30):
+		fine.observe_details(obscured["identification_rate"], 0.1)
+	_check(is_equal_approx(coarse.identification_evidence, fine.identification_evidence), "Identification advances by elapsed simulation time rather than refresh count")
+	_set_hex(enemy, cell)
+
+
+func _test_same_hex_identification() -> void:
+	var cell: Vector2i = enemy.current_hex
+	_set_hex(enemy, friendly.current_hex)
+	LOSHelper.los_lookup = {friendly.current_hex: {}}
+	Globals.unit_enemies_in_los = {friendly: []}
+	Globals.unit_enemy_tracks.clear()
+	Globals.unit_visible_enemies = {friendly: []}
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.1)
+	var track: EnemyTrack = Globals.unit_enemy_tracks[friendly][enemy]
+	_check(track.is_visible and track.identification_evidence == 0.0, "Same-hex acquisition starts unidentified without counting time spent undetected")
+	Globals.unit_enemies_in_los[friendly] = [enemy]
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.25)
+	_check(is_equal_approx(track.identification_evidence, 0.5), "A same-hex candidate present in both paths receives observation evidence exactly once")
+	Globals.unit_enemies_in_los[friendly] = []
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 1.75)
+	_check(track.estimated_strength_max > 0 and enemy.ui.unit_status_control.visible and not enemy.ui._contact_marker.visible, "Same-hex observation reveals type, artwork and estimated strength even without a LOS-table origin entry")
+	_set_hex(enemy, cell)
+	LOSHelper.los_lookup = {friendly.current_hex: {enemy.current_hex: {"target_concealment": 0, "hindrance": 0}}}
+	Globals.unit_enemies_in_los = {friendly: [enemy]}
 
 
 func _test_diagnostics_and_controls() -> void:

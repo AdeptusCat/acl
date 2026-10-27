@@ -287,7 +287,8 @@ func set_contact_report(report: Dictionary, restricted: bool) -> void:
 		return
 	_contact_restricted = restricted
 	_contact_report = report
-	unit_status_control.visible = not restricted
+	var identified: bool = int(report.get("squad_type", -1)) >= 0
+	unit_status_control.visible = (not restricted or identified) and not _dead and not _exited
 	rank_texture_rect.visible = not restricted
 	morale_bar.visible = not restricted and not _dead and not _exited
 	$UnitStates.visible = not restricted
@@ -312,18 +313,11 @@ func set_contact_report(report: Dictionary, restricted: bool) -> void:
 		_contact_marker.position = sprite_node.position
 		_contact_marker.size = sprite_node.size
 		_contact_marker.text = "?"
-		match int(report.get("squad_type", -1)):
-			Globals.SquadType.Rifle:
-				_contact_marker.text = "Inf"
-			Globals.SquadType.MG:
-				_contact_marker.text = "MG"
-			Globals.SquadType.MORTAR:
-				_contact_marker.text = "Mtr"
-			Globals.SquadType.ANTITANK:
-				_contact_marker.text = "AT"
-			Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS:
-				_contact_marker.text = "HQ"
-		_contact_marker.show()
+		_contact_marker.visible = not identified and not _dead and not _exited
+		var unit: Unit = get_parent() as Unit
+		if identified and unit != null:
+			unit_status_control.set_status_image(unit.team, int(report["squad_type"]) as Globals.SquadType)
+			_show_contact_status()
 		unit_designation_label.text = "Contact"
 		members_count_label.text = "?"
 		if int(report.get("strength_max", 0)) > 0:
@@ -333,6 +327,16 @@ func set_contact_report(report: Dictionary, restricted: bool) -> void:
 			_contact_marker.hide()
 		var unit: Unit = get_parent() as Unit
 		if unit != null:
+			unit_status_control.set_status_image(unit.team, unit.squad_type)
+			if not _restore_restricted_pose():
+				if unit.broken:
+					_show_status(broken_texture_rect)
+				elif unit.is_moving:
+					_show_status(moving_texture_rect)
+				elif unit.squad_fire != null and unit.squad_fire.fire_recent > 0.1:
+					_show_status(shooting_texture_rect)
+				else:
+					_show_status(idle_texture_rect)
 			set_members_alive(unit.members_alive)
 			set_unit_designation(unit.get_squad_name())
 		_set_debug_text_visible(Debug.show_debug_text)
@@ -398,6 +402,23 @@ func _set_state_feedback(state: STATE_FEEDBACK.State) -> void:
 
 
 func _show_status(status: TextureRect) -> void:
+	if _contact_restricted:
+		_show_contact_status()
+		return
+	_display_status(status)
+
+
+func _show_contact_status() -> void:
+	var status: TextureRect = idle_texture_rect
+	match str(_contact_report.get("activity", "")):
+		"Moving":
+			status = moving_texture_rect
+		"Firing":
+			status = shooting_texture_rect
+	_display_status(status)
+
+
+func _display_status(status: TextureRect) -> void:
 	for child: Control in unit_status_control.get_children():
 		child.hide()
 	status.show()
@@ -509,9 +530,7 @@ func _on_morale_breaks() -> void:
 	$Timer.stop()
 	#broken_label.visible = true
 	show_broken()
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	broken_texture_rect.visible = true
+	_show_status(broken_texture_rect)
 	if detail_ui:
 		detail_ui._on_morale_breaks()
 
@@ -521,13 +540,9 @@ func _on_morale_recovered() -> void:
 		return
 	#broken_label.visible = false
 	show_success()
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	idle_texture_rect.visible = true
+	_show_status(idle_texture_rect)
 	if _surrendered:
-		idle_texture_rect.visible = false
-		broken_texture_rect.visible = false
-		surrendered_texture_rect.visible = true
+		_show_status(surrendered_texture_rect)
 	if detail_ui:
 		detail_ui._on_morale_recovered()
 
@@ -685,9 +700,7 @@ func _face_direction(direction: Vector2) -> void:
 func _show_shooting_status() -> void:
 	if _restore_restricted_pose():
 		return
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	shooting_texture_rect.visible = true
+	_show_status(shooting_texture_rect)
 	$Timer.start()
 
 
@@ -769,13 +782,9 @@ func _on_timer_timeout() -> void:
 		return
 	if surrendered_texture_rect.visible == true or broken_texture_rect.visible or routing_texture_rect.visible:
 		return
-	for child: Control in unit_status_control.get_children():
-		child.visible = false
-	idle_texture_rect.visible = true
+	_show_status(idle_texture_rect)
 	if _surrendered:
-		idle_texture_rect.visible = false
-		broken_texture_rect.visible = false
-		surrendered_texture_rect.visible = true
+		_show_status(surrendered_texture_rect)
 	_update_facing()
 	if detail_ui:
 		detail_ui._on_timer_timeout()

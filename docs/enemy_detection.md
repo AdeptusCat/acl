@@ -126,20 +126,29 @@ hidden movement. The bonus still requires valid LOS and multiplies the terrain,
 activity and observer factors. It never inflates an already visible contact's
 tracking allowance.
 
-New contacts initially reveal an unidentified marker and unknown strength.
-Maintained visible observation accumulates evidence at
-`clamp(sqrt(rate) * 0.5, 0, 0.5)` per second. At 1.5 evidence, the report captures
-the observed unit type; at 4.0, it captures a strength range in groups of four
-(for example 9–12 soldiers). A strong clear sighting therefore requires at least
-three seconds for type and eight for strength. Acquisition does not retroactively
-count time spent undetected. Brief LOS breaks retain previously observed facts.
+New contacts initially reveal a question mark and unknown strength. Maintained
+visible observation accumulates evidence at
+`2 * min(sqrt(distance_factor * terrain_factor * exposure * attention * observer_condition), 1)`
+per simulation second. This measures the view of an acquired silhouette;
+movement, muzzle flashes and search-memory bonuses cannot reveal its details
+faster independently of that view. At 1.5 evidence, the report captures the
+observed unit type and activity; at 4.0, it captures a strength range in groups
+of four (for example 9–12 soldiers). A clear adjacent sighting with full observer
+quality takes about 0.75 seconds for type and two seconds for strength after
+acquisition. Poor views and distracted observers take longer. Acquisition does
+not retroactively count time spent undetected. Same-hex contacts accumulate
+evidence at 2 per second even when the LOS table omits its origin hex, without
+double-counting the normal observation path. Brief LOS breaks retain observed facts.
 
-Only visible observations can update type or strength. Team reports combine
-the best still-remembered observation; hidden roster changes cannot alter them.
-Battlefield markers and enemy inspection use these reports rather than live
-strength, formation, rank, equipment silhouettes, morale, orders or soldier
-rosters. Friendly information remains exact. Explicit debug enemy control
-permits full inspection.
+Only visible observations can update type, strength or activity. Team reports
+use the most identified still-remembered observation, preferring visible and
+then more recent observations when identification is equal. Hidden roster
+changes cannot alter them. Type identification replaces the question mark with
+the existing faction-specific rifle, MG, antitank or mortar artwork. Its idle,
+moving or firing pose follows observed activity. The details panel shows type,
+estimated strength and observed activity; morale, formation, rank, orders and
+individual soldier rosters remain concealed. Friendly information remains
+exact. Explicit debug enemy control permits full inspection.
 
 ## Spotting diagnostics
 
