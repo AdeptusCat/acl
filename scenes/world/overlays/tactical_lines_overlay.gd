@@ -122,6 +122,7 @@ func _draw() -> void:
 	_draw_selected_watch_sectors()
 	_draw_selected_target()
 	_draw_player_routes()
+	_draw_queued_orders()
 	if Debug.show_los_lines:
 		for los_data: Dictionary in los_enemy_lines:
 			_draw_sight_line(los_data, 0.55)
@@ -286,6 +287,43 @@ func _draw_player_routes() -> void:
 				draw_arc(point, 10.0, 0.0, TAU, 32, Color(0.05, 0.08, 0.05, 0.9), width + 3.0, true)
 				draw_arc(point, 10.0, 0.0, TAU, 32, color, width, true)
 			previous = point
+
+func _draw_queued_orders() -> void:
+	if not is_instance_valid(LOSHelper.ground_layer):
+		return
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var font: Font = ThemeDB.fallback_font
+	for unit: Unit in Globals.get_units_for_team(Globals.team_player):
+		if not unit.is_active() or unit.action_controller == null or unit.action_controller.order_queue == null:
+			continue
+		var queue: SquadOrderQueue = unit.action_controller.order_queue
+		var previous: Vector2 = to_local(unit.global_position)
+		var entries: Array[Dictionary] = queue.entries()
+		for index: int in range(entries.size()):
+			var entry: Dictionary = entries[index]
+			var kind: int = entry["kind"]
+			var point: Vector2 = previous
+			if kind in [SquadOrderQueue.Kind.MOVE, SquadOrderQueue.Kind.WATCH]:
+				point = to_local(ground.to_global(ground.map_to_local(entry["target"])))
+			var group: CoordinatedOrderGroup = entry.get("group")
+			if unit.selected or group != null:
+				var color: Color = Color(1.0, 0.87, 0.24)
+				if group != null:
+					color = Color(0.45, 0.85, 1.0)
+				if point.distance_to(previous) > 0.1 and (index > 0 or queue.current.is_empty() or kind == SquadOrderQueue.Kind.WATCH):
+					draw_dashed_line(previous, point, color, 2.0, 8.0, true)
+				var marker: Vector2 = point
+				if kind in [SquadOrderQueue.Kind.WAIT, SquadOrderQueue.Kind.HOLD]:
+					marker += Vector2(0.0, -28.0)
+				var text: String = str(index + 1)
+				if group != null:
+					text = "G%d" % group.number
+				draw_circle(marker, 16.0, Color(0.05, 0.08, 0.05, 0.95))
+				draw_arc(marker, 16.0, 0.0, TAU, 32, color, 2.0, true)
+				draw_string(font, marker + Vector2(-font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x * 0.5, 5.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, color)
+			if kind == SquadOrderQueue.Kind.MOVE:
+				previous = point
+
 
 func strength_to_color_hsv(strength: float) -> Color:
 	var s: float = strength

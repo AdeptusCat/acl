@@ -338,7 +338,10 @@ func _check_keep_playing(world: Node, unit: Unit) -> void:
 		_check(wheel.is_open(), "The actual command wheel reopens in a completed map")
 		_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
 		_check(unit.action_controller.action_order_id > order_before and unit.action_controller.objective_hex == destination, "Move orders reach the surviving squad after Keep Playing")
-		unit.movement._process_movement(100.0)
+		for step: int in range(100):
+			if not unit.movement.is_moving:
+				break
+			unit.movement._process_movement(100.0)
 		_check(unit.current_hex == destination and unit.position == ground.map_to_local(destination), "The squad completes its movement after the map has ended")
 		var fire_target: Vector2i = _reachable_neighbor(unit, ground)
 		LOSHelper.los_lookup[unit.current_hex][fire_target] = {"target_cover": 0}

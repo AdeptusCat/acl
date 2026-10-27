@@ -260,6 +260,8 @@ func setAttackState(_attackState: AttackState) -> void:
 func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 	if not is_active() or in_close_combat:
 		return
+	if action_controller != null and action_controller.order_queue != null:
+		action_controller.order_queue.cancel()
 	if is_instance_valid(Debug.engagement_recorder):
 		Debug.engagement_recorder.record_order(self, cmd, parameter)
 	match cmd:
@@ -640,6 +642,8 @@ func get_watch_restriction() -> String:
 func set_watch_direction(direction: Vector2) -> bool:
 	if not get_watch_restriction().is_empty() or not direction.is_finite() or direction.is_zero_approx():
 		return false
+	if action_controller != null and action_controller.order_queue != null:
+		action_controller.order_queue.cancel()
 	watch_direction = direction.normalized()
 	if tactical_state != null:
 		tactical_state.update_attention(self)

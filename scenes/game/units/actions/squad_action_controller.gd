@@ -31,6 +31,7 @@ var ui: UnitUi
 
 var action_state: int = SquadActionState.NO_ORDER
 var action_order_id: int = 0
+var order_queue: SquadOrderQueue
 
 var withdraw_hex: Vector2i = Vector2i.ZERO
 var attack_hex: Vector2i = Vector2i.ZERO
@@ -56,6 +57,10 @@ func init(p_unit: Unit, p_movement: UnitMovement, p_squad_fire: SquadFireControl
 	squad_fire = p_squad_fire
 	stress = p_stress
 	ui = p_ui
+	order_queue = SquadOrderQueue.new()
+	order_queue.unit = unit
+	order_queue.set_process(false)
+	add_child(order_queue)
 	
 	establishing_timer = Timer.new()
 	establishing_timer.one_shot = true
@@ -140,6 +145,8 @@ func _enter_action_state(_prev: int, state: int) -> void:
 func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
 	if not unit.is_active() or unit.in_close_combat:
 		return
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -157,6 +164,8 @@ func give_defend_area_order(target_hex: Vector2i, path: Array[Vector3i]) -> void
 func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_and_hold: bool) -> void:
 	if not unit.is_active() or unit.in_close_combat:
 		return
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -174,6 +183,8 @@ func give_move_to_hex_order(target_hex: Vector2i, path: Array[Vector3i], take_an
 func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], exposed_segment: Array[Vector3i]) -> void:
 	if not unit.is_active() or unit.in_close_combat:
 		return
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	
 	objective_hex = target_hex
@@ -191,6 +202,8 @@ func give_attack_hex_order(target_hex: Vector2i, covered_path: Array[Vector3i], 
 func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> void:
 	if not unit.is_active() or unit.in_close_combat:
 		return
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	
 	withdraw_hex = target_hex
@@ -208,6 +221,8 @@ func give_withdraw_to_hex_order(target_hex: Vector2i, path: Array[Vector3i]) -> 
 func give_hold_order() -> void:
 	if not unit.is_active():
 		return
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	
 	objective_hex = unit.current_hex
@@ -223,6 +238,8 @@ func give_hold_order() -> void:
 
 
 func clear_orders() -> void:
+	if order_queue != null:
+		order_queue.cancel()
 	action_order_id += 1
 	_set_action_state(SquadActionState.NO_ORDER)
 	movement.stop()
@@ -363,6 +380,8 @@ func on_morale_state_changed(_prev: int, next: int) -> void:
 	squad_fire.seconds_per_volley = squad_fire.base_seconds_per_volley / rof_mult
 	
 	if next == MoraleState.PANIC:
+		if order_queue != null:
+			order_queue.cancel()
 		if action_state != SquadActionState.ROUTING:
 			if not unit.surrendered:
 				_start_rout()

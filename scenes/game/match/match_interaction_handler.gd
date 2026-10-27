@@ -34,21 +34,24 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 		return ""
 	if controller.ground_layer.get_cell_source_id(map_hex) == -1:
 		return "Choose a hex on the battlefield."
+	var order_origin: Vector2i = unit.current_hex
+	if Input.is_key_pressed(KEY_SHIFT) and unit.action_controller.order_queue != null:
+		order_origin = unit.action_controller.order_queue.planned_origin()
 	match option:
 		WheelOption.Option.WATCH:
 			if not unit.get_watch_restriction().is_empty():
 				return unit.get_watch_restriction()
-			if map_hex == unit.current_hex:
+			if map_hex == order_origin:
 				return "Choose another hex to set the watch direction."
 		WheelOption.Option.MOVE_NORMAL:
 			if unit.stress_system.state == STATES.MoraleState.PINNED:
 				return "Pinned: use Rout to attempt escape."
-			if map_hex == unit.current_hex:
+			if map_hex == order_origin:
 				if unit.movement.is_moving or unit.position.distance_to(controller.ground_layer.map_to_local(map_hex)) > 0.1:
 					return ""
 				return "The squad is already at this hex."
 			var pathfinder: AStar2D = Globals.astars.get(unit.team)
-			var from_id: int = controller.ground_layer.pathfinding_get_point_id(unit.current_hex)
+			var from_id: int = controller.ground_layer.pathfinding_get_point_id(order_origin)
 			var to_id: int = controller.ground_layer.pathfinding_get_point_id(map_hex)
 			if pathfinder == null or not pathfinder.has_point(from_id) or not pathfinder.has_point(to_id):
 				return "No route to this hex."
@@ -105,6 +108,16 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 		return false
 	var unit: Unit = controller.selected_unit
 	var glow_hex: Vector2i = map_hex
+	if Input.is_key_pressed(KEY_SHIFT) and option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.WATCH]:
+		var kind: SquadOrderQueue.Kind = SquadOrderQueue.Kind.MOVE
+		if option == WheelOption.Option.WATCH:
+			kind = SquadOrderQueue.Kind.WATCH
+		if not unit.action_controller.order_queue.append(kind, map_hex):
+			controller.order_feedback.emit(false, command, "Remove the final Watch or Hold order before appending another order.")
+			return false
+		controller.hex_glow(controller.ground_layer.map_to_local(map_hex))
+		controller.order_feedback.emit(true, "Queue " + command, "")
+		return true
 	match option:
 		WheelOption.Option.WATCH:
 			var target: Vector2 = controller.ground_layer.to_global(controller.ground_layer.map_to_local(map_hex))
