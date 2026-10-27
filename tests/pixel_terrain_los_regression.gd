@@ -45,7 +45,10 @@ func _test_size(size: int) -> void:
 	result = LOSHelper.check_los(origin - shift, target - shift, 1, 0, 1, 0)
 	_check(not result.blocked and result.hindrance == 0, "Transparent crop lanes do not hinder LOS at size " + str(size))
 	_test_hindrance_crossings(size, terrain, source, id, origin, target, shift)
+	_check(LOSHelper.get_target_concealment(ground.map_to_local(cell) + shift) == 1, "Field and orchard pixels conceal the target")
+	_check(LOSHelper.get_target_concealment(ground.map_to_local(cell) - shift) == 0, "Transparent crop margins do not conceal the target")
 	data.set_custom_data("blocking", true)
+	_check(LOSHelper.get_target_concealment(ground.map_to_local(cell) + shift) == 2, "Woods provide stronger target concealment")
 	result = LOSHelper.check_los(origin + shift, target + shift, 1, 0, 1, 0)
 	_check(result.blocked and result.block_point != ground.map_to_local(cell), "Woods block at the tree image entry at size " + str(size))
 	result = LOSHelper.check_los(origin - shift, target - shift, 1, 0, 1, 0)
@@ -66,6 +69,7 @@ func _test_size(size: int) -> void:
 	var building_source: TileSetAtlasSource = source.duplicate(true) as TileSetAtlasSource
 	var building_id: int = buildings.tile_set.add_source(building_source)
 	buildings.set_cell(cell, building_id, Vector2i(1, 0))
+	_check(LOSHelper.get_target_concealment(ground.map_to_local(cell) + shift) == 3, "Buildings provide strong target concealment")
 	_check(LOSHelper.check_los(origin + shift, target + shift, 1, 0, 1, 0).blocked, "Building atlas regions block correctly at size " + str(size))
 	_check(not LOSHelper.check_los(origin - shift, target - shift, 1, 0, 1, 0).blocked, "Transparent building margins stay clear at size " + str(size))
 	# Rays on a hex spine inspect real pixels on both adjacent tiles.

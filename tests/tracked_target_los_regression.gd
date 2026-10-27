@@ -127,8 +127,14 @@ func _test_los_transition(probe: FireProbe, attack_state: Unit.AttackState, path
 	LOS.update_all_unit_visibilities()
 	probe.set_target_unit(enemy)
 	_check(probe.target_unit == null, "Returning to LOS also requires detection before reacquisition")
-	controller._on_unit_visibility_checker_timer_timeout()
-	_check(Globals.unit_visible_enemies[shooter].has(enemy), "Visibility refresh detects the returning enemy")
+	# Reacquisition is probabilistic even when confidence from the old sighting survives.
+	seed(1971)
+	for attempt: int in range(1000):
+		controller.update_los_time(0.1)
+		controller._on_unit_visibility_checker_timer_timeout()
+		if Globals.unit_visible_enemies[shooter].has(enemy):
+			break
+	_check(Globals.unit_visible_enemies[shooter].has(enemy), "Visibility refresh reacquires the returning enemy through normal spotting")
 	shooter.setAttackState(attack_state)
 	probe.set_target_unit(enemy)
 	_ready_gunner()

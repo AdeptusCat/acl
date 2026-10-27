@@ -28,6 +28,9 @@ class VisualProbe extends UnitUi:
 	func set_ammunition_left(_ammo: int) -> void:
 		pass
 
+	func set_indirect_contact(_value: bool) -> void:
+		pass
+
 
 var failures: int = 0
 var shooter: Unit

@@ -324,8 +324,11 @@ func detection_multiplier(direction: Vector2) -> float:
 		return detection_quality
 	var angle: float = absf(focus_direction.angle_to(direction))
 	var half_width: float = clampf(attention_width * 0.5, 0.001, PI)
-	var alignment: float = 1.0 - smoothstep(0.0, half_width, angle)
-	var directional_rate: float = lerpf(PERIPHERAL_DETECTION_MULTIPLIER, FOCUSED_DETECTION_MULTIPLIER, alignment)
+	var directional_rate: float = 1.0
+	if angle <= half_width:
+		directional_rate = lerpf(FOCUSED_DETECTION_MULTIPLIER, 1.0, smoothstep(0.0, half_width, angle))
+	else:
+		directional_rate = lerpf(1.0, PERIPHERAL_DETECTION_MULTIPLIER, smoothstep(half_width, PI, angle))
 	return detection_quality * lerpf(1.0, directional_rate, focus_strength)
 
 
@@ -334,15 +337,13 @@ func _attention_quality(unit: Unit) -> float:
 	var expected_size: int = maxi(unit.original_size, FULL_ATTENTION_MEMBERS)
 	var quality: float = sqrt(clampf(float(unit.members_alive) / float(expected_size), 0.0, 1.0))
 	if unit.combat_stats != null:
-		quality *= lerpf(0.5, 1.0, clampf(unit.combat_stats.cohesion_current, 0.0, 1.0))
+		quality *= lerpf(0.75, 1.0, clampf(unit.combat_stats.cohesion_current, 0.0, 1.0))
 	if unit.stress_system != null:
-		quality *= lerpf(1.0, 0.75, clampf(unit.stress_system.S_eff / 100.0, 0.0, 1.0))
+		quality *= lerpf(1.0, 0.9, clampf(unit.stress_system.S_eff / 100.0, 0.0, 1.0))
 		match unit.stress_system.state:
 			STATES.MoraleState.CAUTIOUS:
 				quality *= 0.9
 			STATES.MoraleState.PINNED:
-				# Pinning limits observation without halving capacity and feeding
-				# the overload that caused the pin in the first place.
 				quality *= 0.8
 			STATES.MoraleState.PANIC:
 				quality *= 0.25

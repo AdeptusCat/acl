@@ -196,20 +196,20 @@
 	},
 	"visibility": {
 		"detected": {
-			"confidence": 0.4,
+			"confidence": 0.55,
 			"lock": true,
 			"los": true,
 			"los_time": 0.8,
-			"visible": false
+			"visible": true
 		},
 		"lost": {
-			"confidence": 0.35,
+			"confidence": 0.5,
 			"lock": false,
 			"los": false,
 			"los_time": 0.0,
 			"visible": false
 		},
-		"published": false,
+		"published": true,
 		"rng_tail": 0.909451186656952,
 		"same_hex": {
 			"confidence": 1.0,
@@ -219,7 +219,7 @@
 			"visible": true
 		},
 		"shooting": {
-			"confidence": 0.45,
+			"confidence": 0.5,
 			"lock": false,
 			"los": false,
 			"los_time": 0.0,

@@ -960,11 +960,14 @@ func get_target_concealment(sample_point: Vector2) -> int:
 	if building_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = building_layer.get_cell_tile_data(hex_map)
 		if tile_data and tile_data.has_custom_data("cover") and is_pixel_in_building(sample_point, building_layer):
-			return 2
+			return 3
 	if terrain_layer.get_cell_source_id(hex_map) != -1:
 		var tile_data: TileData = terrain_layer.get_cell_tile_data(hex_map)
-		if tile_data and tile_data.has_custom_data("hindrance") and bool(tile_data.get_custom_data("hindrance")) and is_pixel_in_building(sample_point, terrain_layer):
-			return 1
+		if tile_data and is_pixel_in_building(sample_point, terrain_layer):
+			if tile_data.has_custom_data("blocking") and bool(tile_data.get_custom_data("blocking")):
+				return 2
+			if tile_data.has_custom_data("hindrance") and bool(tile_data.get_custom_data("hindrance")):
+				return 1
 	return 0
 	
 

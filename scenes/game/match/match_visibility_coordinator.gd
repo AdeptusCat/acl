@@ -1,6 +1,15 @@
 extends RefCounted
 class_name MatchVisibilityCoordinator
 
+# Rates are per simulation second; distances use the gameplay scale, not sprite pixels.
+const METRES_PER_HEX: float = 40.0
+const DETECTION_REFERENCE_DISTANCE_METRES: float = 320.0
+const STATIONARY_DETECTION_RATE: float = 1.0
+const MOVING_DETECTION_RATE: float = 3.0
+const FIRING_DETECTION_RATE: float = 6.0
+const TARGET_CONCEALMENT_TRANSMISSION: float = 0.35
+const INTERVENING_HEX_TRANSMISSION: float = 0.65
+
 const INDIRECT_CONTACT_TINT: Color = Color(0.45, 0.45, 0.45, 0.6)
 
 # Synchronous MatchVisibilityCoordinator operations; state and scene identity stay on the caller.
@@ -109,7 +118,7 @@ static func update_los_time(controller: Node2D, delta: float) -> void:
 		Globals.unit_enemy_tracks[unit] = track_map
 
 
-static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void:
+static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed_seconds: float) -> void:
 	var next_visible: Dictionary = {}
 
 	for unit_variant: Unit in Globals.get_units():
@@ -143,6 +152,10 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 			if track == null:
 				continue
 
+			if not unit.is_active() or unit.surrendered or unit.members_alive <= 0:
+				track.is_visible = false
+				continue
+
 			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
 				track.record_detection()
 				units_visible.append(enemy_tracked)
@@ -152,24 +165,18 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 				track.is_visible = false
 				continue
 
-			var p_tick: float = controller._compute_detect_prob_per_tick(unit, enemy_tracked, 1.0)
-			var r: float = randf()
-
-			if r < p_tick:
-				track.confidence += 0.35
-			else:
-				track.confidence -= 0.10
-
-			track.confidence = clamp(track.confidence, 0.0, 1.0)
-
-			if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD:
+			var p_tick: float = controller._compute_detect_prob_per_tick(unit, enemy_tracked, elapsed_seconds)
+			# Acquisition is one time-scaled event. Failed rolls do not erase evidence.
+			if randf() < p_tick:
+				track.confidence = maxf(track.confidence, EnemyTrack.VISIBLE_CONF_THRESHOLD)
 				track.record_detection()
-				
 				units_visible.append(enemy_tracked)
 			else:
 				track.is_visible = false
 
-		var units_at_current_hex: Array = LOSHelper.find_units_at(unit.current_hex)
+		var units_at_current_hex: Array = []
+		if unit.is_active() and not unit.surrendered and unit.members_alive > 0:
+			units_at_current_hex = LOSHelper.find_units_at(unit.current_hex)
 
 		for unit_in_current_hex_variant: Variant in units_at_current_hex:
 			var unit_in_current_hex: Unit = unit_in_current_hex_variant as Unit
@@ -205,62 +212,44 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D) -> void
 static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, enemy: Unit, delta: float) -> float:
 	if not observer.is_active() or observer.surrendered or observer.members_alive <= 0:
 		return 0.0
-	var dist: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
-	if dist < 1:
-		dist = 1
-
-	var is_moving: bool = enemy.is_moving
-
-	var conceal: int = controller._get_concealment(observer.current_hex, enemy) # 0..N, higher = harder to see
-	#if conceal > 0:
-		#conceal = 1
-
-	# score components (tune)
-	var score: float = 0.0
-
-	# movement: huge
-	if is_moving:
-		score += 3.0
-	else:
-		score += 0.5
-
-	# distance penalty (log-ish)
-	score -= 0.25 * float(dist)
-
-	# concealment penalty
-	if conceal > 0:
-		score -= 0.8 * float(conceal)
-	if conceal == 0:
-		score += 1
-	
-	# shooting stimulus (0..1) -> add to score
-	var fire_recent: float = enemy.squad_fire.fire_recent
-	var fire_recent_mod: float = 10.0 * fire_recent
-	score += fire_recent_mod
-	# convert score -> hazard rate (lambda >= 0)
-	# baseline ensures “sometimes” even if score small
-	var lambda: float = 0.00 + 0.15 * max(score, 0.0)
+	if delta <= 0.0:
+		return 0.0
+	var distance_hexes: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
+	var distance_metres: float = float(distance_hexes) * METRES_PER_HEX
+	var distance_factor: float = 1.0 / (1.0 + pow(distance_metres / DETECTION_REFERENCE_DISTANCE_METRES, 2.0))
+	var concealment: int = controller._get_concealment(observer.current_hex, enemy)
+	var sight_line: Dictionary = LOSHelper.los_lookup.get(observer.current_hex, {}).get(enemy.current_hex, {})
+	var intervening_hexes: int = maxi(int(sight_line.get("hindrance", 0)), 0)
+	var terrain_factor: float = pow(TARGET_CONCEALMENT_TRANSMISSION, maxi(concealment, 0))
+	terrain_factor *= pow(INTERVENING_HEX_TRANSMISSION, intervening_hexes)
+	var activity_rate: float = STATIONARY_DETECTION_RATE
+	if enemy.is_moving:
+		activity_rate = MOVING_DETECTION_RATE
+	if enemy.squad_fire != null:
+		activity_rate += FIRING_DETECTION_RATE * clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
+	var rate: float = activity_rate * distance_factor * terrain_factor
 	if observer.tactical_state != null:
 		var direction: Vector2 = observer.global_position.direction_to(enemy.global_position)
-		lambda *= observer.tactical_state.detection_multiplier(direction)
-	var p: float = 1.0 - exp(-lambda * delta)
+		rate *= observer.tactical_state.detection_multiplier(direction)
+	# Movement and suppression affect spotting, without changing the squad's stress capacity.
+	if observer.is_moving:
+		rate *= 0.65
+	if observer.stress_system != null:
+		if observer.stress_system.under_fire:
+			rate *= 0.85
+		if observer.stress_system.state == STATES.MoraleState.PINNED:
+			rate *= 0.6
+	return clampf(1.0 - exp(-rate * delta), 0.0, 1.0)
 
-	return clamp(p, 0.0, 0.95)
 
-
-static func get_concealment(controller: Node2D, current_hex: Variant, enemy: Node) -> int:
-	var cover_map: Variant = LOSHelper.los_lookup.get(current_hex, null)
-	if cover_map == null:
-		return 0
-	if not cover_map.has(enemy.current_hex):
-		return 0
-	var data: Variant = cover_map[enemy.current_hex]
-	if data is Dictionary:
-		if data.has("target_conceal"):
-			return int(data["target_conceal"])
-		if data.has("target_cover"):
-			# fallback if you have nothing else
-			return int(data["target_cover"])
+static func get_concealment(_controller: Node2D, current_hex: Variant, enemy: Node) -> int:
+	var sight_line: Dictionary = LOSHelper.los_lookup.get(current_hex, {}).get(enemy.current_hex, {})
+	if sight_line.has("target_concealment"):
+		return maxi(int(sight_line["target_concealment"]), 0)
+	# Legacy LOS rows may lack concealment. Query terrain; bullet cover is not concealment.
+	if is_instance_valid(LOSHelper.terrain_layer) and is_instance_valid(LOSHelper.building_layer):
+		var target_position: Vector2 = LOSHelper.ground_layer.map_to_local(enemy.current_hex)
+		return LOSHelper.get_target_concealment(target_position)
 	return 0
 
 
@@ -285,10 +274,10 @@ static func on_unit_shooting(controller: Node2D, shooter: Unit) -> void:
 		if track == null:
 			continue
 
-		track.confidence += 0.1
-		track.confidence = clamp(track.confidence, 0.0, 1.0)
-
-		if track.confidence >= EnemyTrack.VISIBLE_CONF_THRESHOLD and Globals.unit_enemies_in_los.get(observer, []).has(shooter):
+		# Firing raises fire_recent, which feeds normal acquisition with all observer modifiers.
+		# Only an already acquired contact may refresh its position here.
+		if track.is_visible and observer.is_active() and not observer.surrendered and Globals.unit_enemies_in_los.get(observer, []).has(shooter):
+			track.confidence = clampf(track.confidence + 0.1, 0.0, 1.0)
 			track.record_detection()
 
 		Globals.unit_enemy_tracks[observer] = track_map

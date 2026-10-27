@@ -1,7 +1,7 @@
 class_name LosBakeCache
 extends RefCounted
 
-const VERSION: int = 1
+const VERSION: int = 2
 
 # Immutable for one rebuild. Live combat queries keep using the current layers.
 class Sprite extends RefCounted:

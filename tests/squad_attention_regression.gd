@@ -253,7 +253,7 @@ func _test_detection(unit: Unit, enemy: Unit, attention: SquadTacticalState) -> 
 	attention.focus_direction = Vector2.LEFT
 	var rear: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
 	_check(front > neutral and neutral > rear and rear > 0.0, "Focus improves forward spotting and reduces rear spotting without blindness")
-	_check(side <= neutral and side >= rear, "Peripheral spotting remains bounded by forward and rear spotting")
+	_check(is_equal_approx(side, neutral) and side > rear, "The attention boundary retains neutral observation effectiveness")
 	attention.focus_direction = Vector2.RIGHT
 	var half_tick: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 0.5)
 	_check(is_equal_approx(front, 1.0 - pow(1.0 - half_tick, 2.0)), "Attention scales the spotting hazard consistently across time steps")
@@ -271,8 +271,10 @@ func _test_detection(unit: Unit, enemy: Unit, attention: SquadTacticalState) -> 
 	unit.stress_system.state = STATES.MoraleState.NORMAL
 	attention.update_attention(unit)
 	controller.concealment = 20
-	_check(MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0) == 0.0, "Attention cannot bypass a concealment-suppressed base spotting rate")
+	var concealed: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	_check(concealed >= 0.0 and concealed < neutral * 0.001, "Deep concealment strongly attenuates acquisition")
 	controller.concealment = 0
+	_test_detection_factors(controller, unit, enemy, attention, neutral)
 	unit.surrendered = true
 	attention.update_attention(unit)
 	_check(attention.attention_quality == 0.0 and MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0) == 0.0, "Surrendered squads cannot spot")
@@ -280,6 +282,56 @@ func _test_detection(unit: Unit, enemy: Unit, attention: SquadTacticalState) -> 
 	attention.update_attention(unit)
 	enemy.squad_fire.free()
 	controller.free()
+
+
+func _test_detection_factors(controller: DetectionProbe, unit: Unit, enemy: Unit, attention: SquadTacticalState, neutral: float) -> void:
+	unit.is_moving = true
+	var moving_observer: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	_check(moving_observer < neutral, "Observer movement reduces acquisition")
+	unit.is_moving = false
+	unit.stress_system.under_fire = true
+	var suppressed: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	_check(suppressed > 0.0 and suppressed < neutral, "Suppression reduces spotting without blindness")
+	unit.stress_system.under_fire = false
+	enemy.is_moving = false
+	var stationary: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	_check(stationary < neutral, "Enemy movement increases detectability")
+	enemy.squad_fire.fire_recent = 1.0
+	_check(MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0) > stationary, "Enemy firing increases detectability")
+	enemy.squad_fire.fire_recent = 0.0
+	enemy.is_moving = true
+	var near_cube: Vector3i = enemy.current_cube
+	enemy.current_cube = unit.current_cube + Vector3i(16, -16, 0)
+	var distant: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	enemy.current_cube = unit.current_cube + Vector3i(32, -32, 0)
+	var farther: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+	_check(neutral > distant and distant > farther and farther > 0.0, "Distance smoothly reduces spotting beyond 640 metres without a cutoff")
+	enemy.current_cube = near_cube
+	for strength: int in [1, 2, 3]:
+		controller.concealment = strength
+		var concealed: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+		_check(concealed > 0.0 and concealed < neutral, "Target concealment reduces spotting at strength " + str(strength))
+	controller.concealment = 0
+	LOSHelper.los_lookup = {unit.current_hex: {enemy.current_hex: {"target_concealment": 2, "target_cover": 99, "hindrance": 0}}}
+	_check(MatchVisibilityCoordinator.get_concealment(controller, unit.current_hex, enemy) == 2, "Detection reads target concealment rather than bullet cover")
+	LOSHelper.los_lookup[unit.current_hex][enemy.current_hex] = {"target_cover": 99, "hindrance": 0}
+	_check(MatchVisibilityCoordinator.get_concealment(controller, unit.current_hex, enemy) == 0, "Legacy bullet cover does not become concealment")
+	var previous: float = neutral
+	for count: int in [1, 2, 3]:
+		LOSHelper.los_lookup[unit.current_hex][enemy.current_hex]["hindrance"] = count
+		var obstructed: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, unit, enemy, 1.0)
+		_check(obstructed > 0.0 and obstructed < previous, "Each crossed concealment hex compounds attenuation")
+		previous = obstructed
+	LOSHelper.los_lookup.clear()
+	attention.focus_direction = Vector2.RIGHT
+	attention.focus_strength = 1.0
+	attention.attention_width = PI / 2.0
+	var centre: float = attention.detection_multiplier(Vector2.RIGHT)
+	var inside: float = attention.detection_multiplier(Vector2.RIGHT.rotated(PI / 8.0))
+	var boundary: float = attention.detection_multiplier(Vector2.RIGHT.rotated(PI / 4.0))
+	var outside: float = attention.detection_multiplier(Vector2.LEFT)
+	_check(centre > inside and inside > boundary and is_equal_approx(boundary, attention.attention_quality) and boundary > outside and outside > 0.0, "The whole attention area benefits observation, with penalties only outside")
+	attention.update_attention(unit)
 
 
 func _check_neutral(attention: SquadTacticalState, message: String) -> void:

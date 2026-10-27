@@ -31,6 +31,8 @@ var overtime_active: bool = false
 var overtime_elapsed_seconds: float = 0.0
 var overtime_packages: Array[VictoryConditionCollection] = []
 
+var _visibility_elapsed_seconds: float = 0.0
+
 var selected_unit: Unit = null
 var stack_presenter: BattlefieldStacks
 var reinforcements: MatchReinforcementController
@@ -796,6 +798,7 @@ func _process(delta: float) -> void:
 
 
 func update_los_time(delta: float) -> void:
+	_visibility_elapsed_seconds += maxf(delta, 0.0)
 	MatchVisibilityCoordinator.update_los_time(self, delta)
 
 
@@ -816,7 +819,8 @@ func _on_spawn_timer_timeout() -> void:
 
 
 func _on_unit_visibility_checker_timer_timeout() -> void:
-	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(self)
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(self, _visibility_elapsed_seconds)
+	_visibility_elapsed_seconds = 0.0
 
 
 func _compute_detect_prob_per_tick(observer: Unit, enemy: Unit, delta: float) -> float:
