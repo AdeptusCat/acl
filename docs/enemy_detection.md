@@ -10,12 +10,14 @@ For an undetected candidate, the acquisition rate per simulation second is:
 
 ```
 activity_rate * distance_factor * target_transmission
-    * intervening_transmission * attention * observer_condition
+    * intervening_transmission * attention * observer_condition * search_bonus
 ```
 
 `distance_factor = 1 / (1 + (distance_metres / 240)^3)`. A stationary target's
 passive activity rate is `1 * distance_factor`; movement replaces that passive
-rate with `3`. Recent firing adds up to `6` before the other factors. A quiet
+rate with `3 * movement_speed_ratio`. Posture and the fraction of soldiers
+exposing themselves multiply this passive/movement cue. Recent firing adds up
+to `6` separately, so taking cover does not conceal an actual muzzle flash. A quiet
 stationary silhouette therefore receives distance attenuation twice. Movement
 and muzzle flashes remain stronger long-range cues. All curves are continuous;
 there is no detection-range cutoff.
@@ -43,6 +45,25 @@ Constants live in `scenes/game/match/match_visibility_coordinator.gd`.
 | Moving observer | 0.65 multiplier |
 | Observer under fire | 0.85 multiplier |
 | Pinned observer | Additional 0.6 multiplier |
+
+## Movement pace and exposure
+
+Friendly squad details include a **Movement pace** selector. Normal uses the
+existing crossing speed, Cautious uses 60%, and Fast uses 160%. Pace affects both
+live movement and route travel estimates and survives saves. Old saves default
+to Normal. The existing prone stance is also supported at 30% speed. Morale and
+terrain speed penalties continue to apply; pace cannot bypass movement locks.
+
+Movement visibility uses actual unscaled speed relative to the squad's base
+speed, including terrain, morale and pace, clamped to 0.1–2.0. Art resolution
+does not affect it. Crouching multiplies silhouette exposure by 0.7, prone by
+0.4, and running by 1.1. Default standing exposure is 1.0.
+
+Living soldiers additionally contribute according to behavior: engaging 1.0,
+taking cover 0.45, cowering 0.25 and recovering 0.6. The average multiplies
+posture exposure. Dead soldiers do not contribute. These are target visibility
+effects, separate from suppression's effects on the observer. Firing remains a
+separate cue before distance and terrain attenuation.
 
 Target concealment uses the existing terrain flags and actual opaque sprite
 pixels: fields/orchards have strength 1, woods have strength 2, and buildings
@@ -94,6 +115,47 @@ the old published visibility list cannot restore a lost contact without fresh
 acquisition. Engagement snapshots record `is_visible` and
 `visual_contact_remaining_s` for diagnosing retained and lost contacts.
 
+## Reacquisition and contact information
+
+A visible observation refreshes eight seconds of search memory. While hidden,
+the advantage decays with simulation time, even if the target hex remains in
+geometric LOS. Reacquiring within the last observed hex receives up to 3× the
+normal rate; the immediately adjacent hexes receive half that additional bonus.
+Outside that area the multiplier is 1. Last known coordinates do not follow
+hidden movement. The bonus still requires valid LOS and multiplies the terrain,
+activity and observer factors. It never inflates an already visible contact's
+tracking allowance.
+
+New contacts initially reveal an unidentified marker and unknown strength.
+Maintained visible observation accumulates evidence at
+`clamp(sqrt(rate) * 0.5, 0, 0.5)` per second. At 1.5 evidence, the report captures
+the observed unit type; at 4.0, it captures a strength range in groups of four
+(for example 9–12 soldiers). A strong clear sighting therefore requires at least
+three seconds for type and eight for strength. Acquisition does not retroactively
+count time spent undetected. Brief LOS breaks retain previously observed facts.
+
+Only visible observations can update type or strength. Team reports combine
+the best still-remembered observation; hidden roster changes cannot alter them.
+Battlefield markers and enemy inspection use these reports rather than live
+strength, formation, rank, equipment silhouettes, morale, orders or soldier
+rosters. Friendly information remains exact. Explicit debug enemy control
+permits full inspection.
+
+## Spotting diagnostics
+
+Expand **Debug**, enable **Spotting diagnostics**, select a friendly squad, then
+expand **Spotting diagnostics** in its details panel and choose a candidate.
+The display shows geometric LOS, distance, target concealment, intervening
+hindrance count, movement/exposure, firing, attention, observer condition,
+last-position search bonus, acquisition rate, ten-second probability, tracking
+allowance and identification evidence. This development-only view includes
+hidden candidates and defaults off.
+
+Production acquisition and the diagnostic display share `detection_breakdown`.
+Blocked lanes display zero effective acquisition. Engagement snapshots include
+search memory, sanitized contact reports and spotting factors for visible
+contacts. Hidden contacts retain recorded coordinates without live diagnostics.
+
 ## Attention and squad condition
 
 Attention gives up to 1.35 times the neutral rate at its centre, fades to neutral
@@ -123,3 +185,6 @@ rebuild their LOS data on the next load.
   intervening-hex counts at multiple tile sizes, including transparent gaps.
 - `tests/attention_stress_regression.tscn`: incoming-fire stress behavior.
 - `tests/tracked_target_los_regression.tscn`: firing and reacquisition across LOS loss.
+- `tests/contact_observation_regression.tscn`: bounded/local search memory,
+  movement speed and exposure, saved pace, observation-based reports and enemy
+  UI restrictions, diagnostic controls, and freed AI roster/reservation entries.

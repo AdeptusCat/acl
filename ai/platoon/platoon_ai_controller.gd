@@ -246,6 +246,9 @@ func set_scenario_goal_assignments(assignments: Dictionary[Unit, ScenarioGoalTas
 func set_squads(new_squads: Array[Unit]) -> void:
 	var owned: Array[Unit] = []
 	for squad: Unit in new_squads:
+		# A typed helper cannot accept a freed Object, even if it checks validity.
+		if not is_instance_valid(squad):
+			continue
 		if InfluenceUnitQuery.is_valid_living_unit(squad) and squad.team == team and not owned.has(squad):
 			owned.append(squad)
 	_cancel_plan()

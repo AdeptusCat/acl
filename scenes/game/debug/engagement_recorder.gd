@@ -351,12 +351,16 @@ func _unit_snapshot(unit: Unit) -> Dictionary:
 		if is_instance_valid(enemy):
 			visible.append(_unit_id(enemy))
 	var tracks_seen: Array[Dictionary] = []
+	var observer_controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
 	for enemy: Unit in Globals.unit_enemy_tracks.get(unit, {}):
 		var track: EnemyTrack = Globals.unit_enemy_tracks[unit][enemy] as EnemyTrack
 		if is_instance_valid(enemy) and track != null:
 			tracks_seen.append({"unit": _unit_id(enemy), "awareness": track.awareness,
 				"is_visible": track.is_visible, "visual_contact_remaining_s": track.visual_contact_remaining_s,
+				"search_remaining_s": track.search_remaining_s, "contact_report": track.contact_report(),
 				"hex": _value(track.last_known_hex), "position": _value(track.last_known_global_position)})
+			if track.is_visible and is_instance_valid(observer_controller) and observer_controller.has_method("_get_concealment"):
+				tracks_seen[-1]["spotting"] = _value(MatchVisibilityCoordinator.detection_breakdown(observer_controller, unit, enemy))
 	var stress: StressController = unit.stress_system
 	var attention: SquadTacticalState = unit.tactical_state
 	var cover: Dictionary = _cover_context(unit)

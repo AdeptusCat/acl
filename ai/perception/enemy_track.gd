@@ -13,6 +13,17 @@ var last_known_global_position: Vector2 = Vector2.ZERO
 var reaction_focus_direction: Vector2 = Vector2.ZERO
 var acquired_at_s: float = -INF
 
+const SEARCH_MEMORY_S: float = 8.0
+const MAX_SEARCH_BONUS: float = 3.0
+const TYPE_EVIDENCE_REQUIRED: float = 1.5
+const STRENGTH_EVIDENCE_REQUIRED: float = 4.0
+var search_remaining_s: float = 0.0
+var identification_evidence: float = 0.0
+var observed_squad_type: int = -1
+var observed_type_name: String = ""
+var estimated_strength_min: int = 0
+var estimated_strength_max: int = 0
+
 var confidence: float = 0.0
 # Remembered contact survives loss of visual confidence and never grants live visibility.
 var awareness: float = 0.0
@@ -150,6 +161,7 @@ func update_seen(delta: float, now_unix: float) -> void:
 		record_detection()
 	else:
 		_decay_awareness(delta)
+		search_remaining_s = maxf(0.0, search_remaining_s - maxf(delta, 0.0))
 
 	if los_time_s >= LOCK_REQUIRED_LOS_TIME_S:
 		has_confirmed_lock = true
@@ -163,6 +175,7 @@ func update_not_seen(delta: float) -> void:
 	has_confirmed_lock = false
 	is_visible = false
 	visual_contact_remaining_s = 0.0
+	search_remaining_s = maxf(0.0, search_remaining_s - maxf(delta, 0.0))
 	_decay_awareness(delta)
 
 	confidence -= 0.10 * delta
@@ -192,9 +205,46 @@ func record_detection() -> void:
 		return
 	is_visible = true
 	awareness = 1.0
+	search_remaining_s = SEARCH_MEMORY_S
 	last_known_global_position = enemy.global_position
 	last_known_hex = enemy.current_hex
 	_update_flags()
+
+
+func reacquisition_multiplier(candidate_hex: Vector2i) -> float:
+	if is_visible or search_remaining_s <= 0.0 or awareness <= 0.0 or not is_instance_valid(LOSHelper.ground_layer):
+		return 1.0
+	var offset: int = LOSHelper.get_hex_distance(last_known_hex, candidate_hex)
+	if offset > 1:
+		return 1.0
+	var proximity: float = 1.0 / float(offset + 1)
+	return 1.0 + (MAX_SEARCH_BONUS - 1.0) * proximity * clampf(search_remaining_s / SEARCH_MEMORY_S, 0.0, 1.0)
+
+
+func observe_details(rate: float, delta: float) -> void:
+	if not is_visible or not is_instance_valid(enemy):
+		return
+	identification_evidence = minf(STRENGTH_EVIDENCE_REQUIRED, identification_evidence + maxf(delta, 0.0) * clampf(sqrt(maxf(rate, 0.0)) * 0.5, 0.0, 0.5))
+	if identification_evidence >= TYPE_EVIDENCE_REQUIRED:
+		observed_squad_type = enemy.squad_type
+		observed_type_name = enemy.get_squad_type_name(enemy.squad_type)
+	if identification_evidence >= STRENGTH_EVIDENCE_REQUIRED:
+		estimated_strength_max = maxi(4, ceili(float(enemy.members_alive) / 4.0) * 4)
+		estimated_strength_min = estimated_strength_max - 3
+
+
+func contact_report() -> Dictionary:
+	var title: String = "Unidentified contact"
+	var status: String = "Brief sighting"
+	var strength: String = "Strength unknown"
+	if observed_squad_type >= 0:
+		title = observed_type_name
+		status = "Type identified"
+	if estimated_strength_max > 0:
+		strength = "Estimated %d–%d soldiers" % [estimated_strength_min, estimated_strength_max]
+		status = "Strength estimated"
+	return {"title": title, "status": status, "strength": strength, "squad_type": observed_squad_type,
+		"strength_min": estimated_strength_min, "strength_max": estimated_strength_max, "evidence": identification_evidence}
 
 
 func _decay_awareness(delta: float) -> void:

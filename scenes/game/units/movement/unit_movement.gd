@@ -30,7 +30,25 @@ var retreating: bool = false
 var retreat_distance: int = 3
 
 var obey_player_orders: bool = true
-var stance: int = 0  # 0 stand, 1 crouch, 2 prone, 3 run, 4 withdraw
+enum Stance { STANDING, CROUCHED, PRONE, RUNNING, WITHDRAWING }
+var stance: Stance = Stance.STANDING
+
+
+func pace_multiplier() -> float:
+	match stance:
+		Stance.CROUCHED:
+			return 0.6
+		Stance.PRONE:
+			return 0.3
+		Stance.RUNNING:
+			return 1.6
+		Stance.WITHDRAWING:
+			return 1.2
+	return 1.0
+
+
+func visibility_speed_ratio() -> float:
+	return maxf(0.0, move_speed * terrain_mult * pace_multiplier() / maxf(base_speed, 0.01))
 
 # --- map ASL-ish terrain to MF (per hex entered) ---
 enum TerrainType { OPEN, ROAD, ORCHARD, GRAIN, BRUSH, WOODS, BUILDING }
@@ -274,7 +292,7 @@ func _process_movement(delta: float) -> void:
 		return
 	var dir: Vector2 = (target_position - unit.position).normalized()
 	var dist: float = unit.position.distance_to(target_position)
-	var step: float = move_speed * _movement_scale() * terrain_mult * delta
+	var step: float = move_speed * _movement_scale() * terrain_mult * pace_multiplier() * delta
 	
 	# check if arrived at hex
 	if dist <= step:
@@ -406,7 +424,7 @@ func _mf_to_speed_mult(mf_total: float) -> float:
 
 
 func estimate_travel_seconds(from: Vector2, to: Vector2, movement_factor: float) -> float:
-	var speed: float = move_speed * _movement_scale() * _mf_to_speed_mult(movement_factor)
+	var speed: float = move_speed * _movement_scale() * _mf_to_speed_mult(movement_factor) * pace_multiplier()
 	if speed <= 0.0:
 		return INF
 	return from.distance_to(to) / speed

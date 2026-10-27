@@ -24,6 +24,7 @@ const SCROLL_HEIGHT: float = 270.0
 @onready var show_movement_lines: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowMovementLines
 @onready var hide_fog_of_war: CheckBox = $FoldableContainer/Scroll/VBoxContainer/HideFogOfWar
 @onready var show_enemies: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowEnemies
+@onready var spotting: CheckBox = $FoldableContainer/Scroll/VBoxContainer/ShowSpotting
 var _ai_controller: Node2D
 var _placement_overlay: InfluenceMapDebugDraw
 @onready var section: FoldableContainer = $FoldableContainer
@@ -64,6 +65,8 @@ func _ready() -> void:
 	show_movement_lines.button_pressed = Debug.show_movement_lines
 	hide_fog_of_war.button_pressed = Debug.hide_fog_of_war
 	show_enemies.button_pressed = Debug.show_enemies
+	spotting.button_pressed = Debug.show_spotting_diagnostics
+	spotting.toggled.connect(_on_spotting_toggled)
 	
 
 
@@ -211,3 +214,7 @@ func _on_hide_fog_of_war_toggled(toggled_on: bool) -> void:
 
 func _on_show_enemies_toggled(toggled_on: bool) -> void:
 	Debug.show_enemies = toggled_on
+
+
+func _on_spotting_toggled(enabled: bool) -> void:
+	Debug.show_spotting_diagnostics = enabled

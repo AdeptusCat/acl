@@ -17,3 +17,4 @@ class_name UnitSaveData
 @export var stress_slow: float = 0.0
 @export var cohesion: float = 1.0
 @export var state: int = 0
+@export var movement_stance: int = 0

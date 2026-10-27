@@ -73,6 +73,9 @@ var _state_feedback: STATE_FEEDBACK
 var _tactical_feedback: STATE_FEEDBACK
 var _elimination_fade: Tween
 var _facing_update_remaining: float = 0.0
+var _contact_restricted: bool = false
+var _contact_report: Dictionary = {}
+var _contact_marker: Label
 
 signal debug_kill_soldier
 
@@ -103,6 +106,9 @@ func _process(delta: float) -> void:
 
 
 func _update_focus_indicator() -> void:
+	if _contact_restricted:
+		focus_indicator.hide()
+		return
 	var unit: Unit = get_parent() as Unit
 	if unit == null or not unit.is_active() or unit.surrendered or unit.tactical_state == null:
 		focus_indicator.hide()
@@ -202,7 +208,7 @@ func _general_enemy_direction(unit: Unit) -> Vector2:
 
 func _set_debug_text_visible(enabled: bool) -> void:
 	# Stress balance arrows are gameplay indicators, independent of debug text.
-	$AmmunitionLeft.visible = enabled and OS.is_debug_build() and not _exited and not dead.visible
+	$AmmunitionLeft.visible = enabled and OS.is_debug_build() and not _exited and not dead.visible and not _contact_restricted
 
 
 func set_ammunition_left(ammo: int) -> void:
@@ -272,6 +278,66 @@ func set_indirect_contact(dimmed: bool) -> void:
 	var sprite_material: ShaderMaterial = sprite_node.material as ShaderMaterial
 	if sprite_material != null:
 		sprite_material.set_shader_parameter("indirect_contact", dimmed)
+
+
+func set_contact_report(report: Dictionary, restricted: bool) -> void:
+	if not is_node_ready() or sprite_node == null:
+		return
+	if not restricted and not _contact_restricted:
+		return
+	_contact_restricted = restricted
+	_contact_report = report
+	unit_status_control.visible = not restricted
+	rank_texture_rect.visible = not restricted
+	morale_bar.visible = not restricted and not _dead and not _exited
+	$UnitStates.visible = not restricted
+	$LeadershipRank.visible = not restricted
+	_set_debug_text_visible(Debug.show_debug_text)
+	if restricted:
+		broken_label.hide()
+		focus_indicator.hide()
+		stress_arrows.hide()
+		recovery_arrows.hide()
+		$Soldiers.hide()
+		if _contact_marker == null:
+			_contact_marker = Label.new()
+			_contact_marker.name = "ContactIdentity"
+			_contact_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_contact_marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_contact_marker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			_contact_marker.add_theme_font_size_override("font_size", 22)
+			_contact_marker.add_theme_color_override("font_outline_color", Color.BLACK)
+			_contact_marker.add_theme_constant_override("outline_size", 5)
+			add_child(_contact_marker)
+		_contact_marker.position = sprite_node.position
+		_contact_marker.size = sprite_node.size
+		_contact_marker.text = "?"
+		match int(report.get("squad_type", -1)):
+			Globals.SquadType.Rifle:
+				_contact_marker.text = "Inf"
+			Globals.SquadType.MG:
+				_contact_marker.text = "MG"
+			Globals.SquadType.MORTAR:
+				_contact_marker.text = "Mtr"
+			Globals.SquadType.ANTITANK:
+				_contact_marker.text = "AT"
+			Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS:
+				_contact_marker.text = "HQ"
+		_contact_marker.show()
+		unit_designation_label.text = "Contact"
+		members_count_label.text = "?"
+		if int(report.get("strength_max", 0)) > 0:
+			members_count_label.text = "%d–%d" % [report["strength_min"], report["strength_max"]]
+	else:
+		if _contact_marker != null:
+			_contact_marker.hide()
+		var unit: Unit = get_parent() as Unit
+		if unit != null:
+			set_members_alive(unit.members_alive)
+			set_unit_designation(unit.get_squad_name())
+		_set_debug_text_visible(Debug.show_debug_text)
+		stress_arrows.show()
+		recovery_arrows.show()
 
 
 func select() -> void:
@@ -382,10 +448,14 @@ func set_cover(cover_value: int) -> void:
 
 
 func set_members_alive(members_alive: int) -> void:
+	if _contact_restricted:
+		return
 	members_count_label.text = str(members_alive)
 
 
 func set_unit_designation(designation: String) -> void:
+	if _contact_restricted:
+		return
 	unit_designation_label.text = designation
 	update_formation_color()
 

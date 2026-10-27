@@ -112,6 +112,36 @@ tooltip_text = "Estimated effective firepower against this visible target, using
 text = "Fire effect: None · 0.00"
 autowrap_mode = 2
 
+[node name="Pace" type="HBoxContainer" parent="Scroll/Summary"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Scroll/Summary/Pace"]
+layout_mode = 2
+text = "Movement pace"
+size_flags_horizontal = 3
+
+[node name="Choice" type="OptionButton" parent="Scroll/Summary/Pace"]
+layout_mode = 2
+tooltip_text = "Cautious movement is slower and less visible. Fast movement increases speed and exposure."
+
+[node name="Spotting" type="FoldableContainer" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+folded = true
+title = "Spotting diagnostics"
+
+[node name="Content" type="VBoxContainer" parent="Scroll/Summary/Spotting"]
+layout_mode = 2
+
+[node name="Target" type="OptionButton" parent="Scroll/Summary/Spotting/Content"]
+layout_mode = 2
+clip_text = true
+
+[node name="Factors" type="Label" parent="Scroll/Summary/Spotting/Content"]
+layout_mode = 2
+autowrap_mode = 2
+theme_type_variation = &"HudSecondary"
+
 [node name="Rout" type="Button" parent="Scroll/Summary"]
 visible = false
 layout_mode = 2

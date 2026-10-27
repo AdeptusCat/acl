@@ -32,6 +32,11 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var hud_control: Control = get_parent() as Control
 @onready var summary_scroll: ScrollContainer = $Scroll
 @onready var summary: VBoxContainer = $Scroll/Summary
+@onready var pace_row: HBoxContainer = $Scroll/Summary/Pace
+@onready var pace: OptionButton = $Scroll/Summary/Pace/Choice
+@onready var spotting_section: FoldableContainer = $Scroll/Summary/Spotting
+@onready var spotting_target: OptionButton = $Scroll/Summary/Spotting/Content/Target
+@onready var spotting_factors: Label = $Scroll/Summary/Spotting/Content/Factors
 
 var unit: Unit
 var soldiers: Array[Soldier] = []
@@ -42,6 +47,7 @@ var soldiers_entries: Array[Dictionary] = []
 var opacity_tween: Tween
 var _roster_rows: Array[Control] = []
 var _refresh_elapsed_s: float = 0.0
+var _spotting_targets: Array[Unit] = []
 
 
 func _ready() -> void:
@@ -60,6 +66,12 @@ func _ready() -> void:
 	roster_section.folding_changed.connect(_on_roster_folding_changed)
 	debug_actions.visible = OS.is_debug_build()
 	Debug.enemy_selection_changed.connect(_on_enemy_selection_changed)
+	pace.add_item("Normal", UnitMovement.Stance.STANDING)
+	pace.add_item("Cautious", UnitMovement.Stance.CROUCHED)
+	pace.add_item("Fast", UnitMovement.Stance.RUNNING)
+	pace.item_selected.connect(_on_pace_selected)
+	spotting_target.item_selected.connect(_on_spotting_target_selected)
+	spotting_section.folding_changed.connect(_on_spotting_folded)
 	rout_button.set_rout_available(false)
 	set_process(false)
 	_fit_panel()
@@ -164,6 +176,16 @@ func _disconnect_unit() -> void:
 
 
 func _rebuild_roster() -> void:
+	if _restricted_enemy():
+		soldiers.clear()
+		casualties.clear()
+		soldier_entries_by_soldier.clear()
+		casualty_entries_by_casualty.clear()
+		for row: Control in _roster_rows:
+			row.hide()
+		roster_section.hide()
+		return
+	roster_section.show()
 	soldiers.assign(unit.squad_fire.soldiers)
 	casualties.assign(unit.squad_fire.casualties)
 	var total: int = soldiers.size() + casualties.size()
@@ -207,6 +229,17 @@ func _set_roster_row(index: int, soldier: Soldier) -> void:
 
 
 func _refresh_summary() -> void:
+	_refresh_spotting()
+	if _restricted_enemy():
+		_refresh_enemy_summary()
+		return
+	for control: Control in [command_label, order_label, details_section, roster_section, pace_row]:
+		control.show()
+	if strength_label.get_theme_font_size("font_size") != 26:
+		strength_label.add_theme_font_size_override("font_size", 26)
+	pace.disabled = not MatchInteractionHandler.can_command_unit(unit)
+	if is_instance_valid(unit.movement):
+		pace.select(maxi(0, pace.get_item_index(unit.movement.stance)))
 	debug_actions.visible = OS.is_debug_build() and MatchInteractionHandler.can_command_unit(unit)
 	unit_type_label.text = unit.get_hud_name()
 	unit_type_label.tooltip_text = unit_type_label.text
@@ -230,6 +263,81 @@ func _refresh_summary() -> void:
 	effectiveness.text = "%.0f%%" % (effectiveness_bar.value * 100.0)
 	casualty_shock.text = "%.0f%%" % (unit.combat_stats.recent_casualty_shock * 100.0)
 	_on_leadership_changed(unit.stress_system.leadership_bonus)
+
+
+func _restricted_enemy() -> bool:
+	return is_instance_valid(unit) and unit.team != Globals.team_player and not Debug.enemy_selectable
+
+
+func _refresh_enemy_summary() -> void:
+	var report: Dictionary = MatchVisibilityCoordinator.contact_report(Globals.team_player, unit)
+	unit_type_label.text = report["title"]
+	unit_type_label.tooltip_text = unit_type_label.text
+	formation_label.text = "Observed enemy contact"
+	formation_label.tooltip_text = formation_label.text
+	strength_label.text = report["strength"]
+	if strength_label.get_theme_font_size("font_size") != 18:
+		strength_label.add_theme_font_size_override("font_size", 18)
+	strength_label.tooltip_text = strength_label.text
+	unit_status_label.text = report["status"]
+	unit_status_label.tooltip_text = unit_status_label.text
+	unit_status_label.remove_theme_color_override("font_color")
+	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, rout_button, rout_explanation]:
+		control.hide()
+	debug_actions.hide()
+
+
+func _on_pace_selected(index: int) -> void:
+	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement):
+		unit.movement.stance = pace.get_item_id(index) as UnitMovement.Stance
+
+
+func _refresh_spotting() -> void:
+	spotting_section.visible = Debug.show_spotting_diagnostics and OS.is_debug_build() and unit.team == Globals.team_player
+	if not spotting_section.visible:
+		return
+	var targets: Array[Unit] = []
+	for candidate: Unit in Globals.get_units():
+		if candidate.team != unit.team and candidate.is_active():
+			targets.append(candidate)
+	if targets != _spotting_targets:
+		_spotting_targets = targets
+		spotting_target.clear()
+		for candidate: Unit in targets:
+			spotting_target.add_item("Candidate (%d, %d)" % [candidate.current_hex.x, candidate.current_hex.y])
+	if targets.is_empty():
+		spotting_factors.text = "No enemy candidates."
+		return
+	for index: int in range(targets.size()):
+		spotting_target.set_item_text(index, "Candidate (%d, %d)" % [targets[index].current_hex.x, targets[index].current_hex.y])
+	var target: Unit = targets[maxi(0, spotting_target.selected)]
+	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
+	if controller == null or not controller.has_method("_get_concealment"):
+		spotting_factors.text = "Spotting unavailable."
+		return
+	var factors: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, unit, target)
+	var sight: String = "Blocked"
+	var rate: float = 0.0
+	if factors.get("has_los", false) and factors.get("eligible", false):
+		sight = "Clear"
+		rate = factors["rate"]
+	var activity: String = "Stationary"
+	if factors.get("moving", false):
+		activity = "Moving"
+	spotting_factors.text = "LOS: %s\nDistance: %d hexes · %.0f m\nTarget concealment: %d\nIntervening hindrances: %d\nActivity: %s\nMovement cue: %.2f×\nExposed silhouette: %.2f×\nRecent firing: %.2f\nAttention: %.2f×\nObserver condition: %.2f×\nLast-position search: %.2f×\nAcquisition rate: %.5f/s\nChance in 10 s: %.2f%%\nTracking: %.1f / %.0f s\nIdentification: %.1f / %.0f" % [sight,
+		factors.get("distance_hexes", 0), factors.get("distance_metres", 0.0), factors.get("concealment", 0),
+		factors.get("hindrances", 0), activity, factors.get("motion_factor", 1.0), factors.get("exposure", 1.0), factors.get("firing", 0.0),
+		factors.get("attention", 0.0), factors.get("observer_condition", 0.0), factors.get("search_bonus", 1.0), rate,
+		100.0 * (1.0 - exp(-rate * 10.0)), factors.get("tracking_remaining_s", 0.0), EnemyTrack.VISUAL_CONTACT_GRACE_S,
+		factors.get("identification_evidence", 0.0), EnemyTrack.STRENGTH_EVIDENCE_REQUIRED]
+
+
+func _on_spotting_target_selected(_index: int) -> void:
+	_refresh_spotting()
+
+
+func _on_spotting_folded(_folded: bool) -> void:
+	_queue_fit()
 
 
 func _refresh_command_summary() -> void:
@@ -345,6 +453,8 @@ func _on_soldiers_changed() -> void:
 func _on_state_changed(state: int) -> void:
 	if not is_instance_valid(unit):
 		return
+	if _restricted_enemy():
+		return
 	unit_status_label.text = unit.get_state_name(state)
 	if state == STATES.MoraleState.COMBAT_INEFFECTIVE:
 		unit_status_label.text = "Ineffective"
@@ -413,6 +523,7 @@ func tween_opacity(target: float) -> Tween:
 
 func _on_enemy_selection_changed(_enabled: bool) -> void:
 	if is_instance_valid(unit):
+		_rebuild_roster()
 		_refresh_summary()
 
 

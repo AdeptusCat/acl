@@ -32,6 +32,7 @@ var show_los_lines: bool = false
 var show_movement_lines: bool = false
 var hide_fog_of_war: bool = false
 var show_enemies: bool = false
+var show_spotting_diagnostics: bool = false
 
 var units_to_kill: Array[Unit] = []
 var units_soldier_to_kill: Array[Unit] = []

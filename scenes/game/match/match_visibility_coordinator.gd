@@ -49,6 +49,10 @@ static func show_visible_units(controller: Node2D) -> void:
 		if dimmed:
 			unit.modulate = INDIRECT_CONTACT_TINT
 		unit.ui.set_indirect_contact(dimmed)
+		if unit.team != Globals.team_player:
+			unit.ui.set_contact_report(contact_report(Globals.team_player, unit), not Debug.enemy_selectable)
+		else:
+			unit.ui.set_contact_report({}, false)
 	if inspect_enemy and not observer.is_visible_in_tree():
 		controller._deselect_unit(observer)
 		controller.hide_unit_details_in_ui.emit()
@@ -161,6 +165,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 				var rate: float = compute_detect_rate(controller, unit, enemy_tracked)
 				if track.maintain_detection(rate, elapsed_seconds):
 					track.record_detection()
+					track.observe_details(rate, elapsed_seconds)
 					units_visible.append(enemy_tracked)
 				continue
 
@@ -222,8 +227,12 @@ static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, ene
 
 
 static func compute_detect_rate(controller: Node2D, observer: Unit, enemy: Unit) -> float:
+	return float(detection_breakdown(controller, observer, enemy).get("rate", 0.0))
+
+
+static func detection_breakdown(controller: Node2D, observer: Unit, enemy: Unit) -> Dictionary:
 	if not observer.is_active() or observer.surrendered or observer.members_alive <= 0:
-		return 0.0
+		return {"rate": 0.0, "eligible": false}
 	var distance_hexes: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
 	var distance_metres: float = float(distance_hexes) * METRES_PER_HEX
 	var distance_factor: float = 1.0 / (1.0 + pow(distance_metres / DETECTION_REFERENCE_DISTANCE_METRES, DETECTION_DISTANCE_EXPONENT))
@@ -235,23 +244,105 @@ static func compute_detect_rate(controller: Node2D, observer: Unit, enemy: Unit)
 	# A quiet stationary silhouette loses contrast much faster than movement or
 	# muzzle flashes. Its passive cue receives a second smooth distance factor.
 	var activity_rate: float = STATIONARY_DETECTION_RATE * distance_factor
-	if enemy.is_moving:
-		activity_rate = MOVING_DETECTION_RATE
+	var moving: bool = enemy.is_moving
+	var motion: float = 1.0
+	var exposure: float = target_exposure(enemy)
+	if is_instance_valid(enemy.movement):
+		moving = moving or enemy.movement.is_moving
+		motion = clampf(enemy.movement.visibility_speed_ratio(), 0.1, 2.0)
+	if moving:
+		activity_rate = MOVING_DETECTION_RATE * motion
+	activity_rate *= exposure
+	var firing: float = 0.0
 	if enemy.squad_fire != null:
-		activity_rate += FIRING_DETECTION_RATE * clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
+		firing = clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
+		activity_rate += FIRING_DETECTION_RATE * firing
 	var rate: float = activity_rate * distance_factor * terrain_factor
+	var attention: float = 1.0
 	if observer.tactical_state != null:
 		var direction: Vector2 = observer.global_position.direction_to(enemy.global_position)
-		rate *= observer.tactical_state.detection_multiplier(direction)
+		attention = observer.tactical_state.detection_multiplier(direction)
+		rate *= attention
+	var condition: float = 1.0
 	# Movement and suppression affect spotting, without changing the squad's stress capacity.
 	if observer.is_moving:
-		rate *= 0.65
+		condition *= 0.65
 	if observer.stress_system != null:
 		if observer.stress_system.under_fire:
-			rate *= 0.85
+			condition *= 0.85
 		if observer.stress_system.state == STATES.MoraleState.PINNED:
-			rate *= 0.6
-	return maxf(rate, 0.0)
+			condition *= 0.6
+	var search: float = 1.0
+	var track: EnemyTrack = Globals.unit_enemy_tracks.get(observer, {}).get(enemy, null) as EnemyTrack
+	if track != null:
+		search = track.reacquisition_multiplier(enemy.current_hex)
+	var tracking_remaining: float = 0.0
+	var identification: float = 0.0
+	if track != null:
+		tracking_remaining = track.visual_contact_remaining_s
+		identification = track.identification_evidence
+	rate *= condition * search
+	return {"rate": maxf(rate, 0.0), "eligible": true, "distance_hexes": distance_hexes,
+		"distance_metres": distance_metres, "distance_factor": distance_factor, "concealment": concealment,
+		"hindrances": intervening_hexes, "terrain_factor": terrain_factor, "moving": moving,
+		"motion_factor": motion, "exposure": exposure, "firing": firing, "activity_rate": activity_rate,
+		"attention": attention, "observer_condition": condition, "search_bonus": search,
+		"has_los": observer.current_hex == enemy.current_hex or LOSHelper.los_lookup.get(observer.current_hex, {}).has(enemy.current_hex),
+		"tracking_remaining_s": tracking_remaining, "identification_evidence": identification}
+
+
+static func target_exposure(enemy: Unit) -> float:
+	var posture: float = 1.0
+	if is_instance_valid(enemy.movement):
+		match enemy.movement.stance:
+			UnitMovement.Stance.CROUCHED:
+				posture = 0.7
+			UnitMovement.Stance.PRONE:
+				posture = 0.4
+			UnitMovement.Stance.RUNNING:
+				posture = 1.1
+	var exposed: float = 0.0
+	var alive: int = 0
+	if enemy.squad_fire != null:
+		for soldier: Soldier in enemy.squad_fire.soldiers:
+			if not soldier.is_alive:
+				continue
+			alive += 1
+			match soldier.behavior:
+				Soldier.Behavior.ENGAGING:
+					exposed += 1.0
+				Soldier.Behavior.TAKING_COVER:
+					exposed += 0.45
+				Soldier.Behavior.COWERING:
+					exposed += 0.25
+				Soldier.Behavior.RECOVERING:
+					exposed += 0.6
+	if alive > 0:
+		posture *= exposed / float(alive)
+	return posture
+
+
+static func contact_report(team: Globals.Team, enemy: Unit) -> Dictionary:
+	var best: EnemyTrack
+	for observer: Unit in Globals.get_units_for_team(team):
+		var track: EnemyTrack = Globals.unit_enemy_tracks.get(observer, {}).get(enemy, null) as EnemyTrack
+		if track == null or track.awareness <= 0.0:
+			continue
+		if best == null or track.identification_evidence > best.identification_evidence:
+			best = track
+	if best != null:
+		return best.contact_report()
+	return {"title": "Unidentified contact", "status": "Brief sighting", "strength": "Strength unknown",
+		"squad_type": -1, "strength_min": 0, "strength_max": 0, "evidence": 0.0}
+
+
+static func controller_for_unit(unit: Unit) -> Node2D:
+	var ancestor: Node = unit.get_parent()
+	while is_instance_valid(ancestor):
+		if ancestor is Node2D and ancestor.has_method("_get_concealment"):
+			return ancestor as Node2D
+		ancestor = ancestor.get_parent()
+	return null
 
 
 static func get_concealment(_controller: Node2D, current_hex: Variant, enemy: Node) -> int:

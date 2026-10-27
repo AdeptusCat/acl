@@ -10,6 +10,8 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 	data.map_unit_id = unit.map_unit_id
 	data.unit_scene_path = unit.scene_file_path
 	data.team = unit.team
+	if is_instance_valid(unit.movement):
+		data.movement_stance = unit.movement.stance
 	data.casualty_records.assign(unit.casualty_records)
 	data.exited = unit.exited
 	data.exit_record = unit.exit_record
@@ -36,6 +38,8 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 static func apply_save_data(unit: Unit, data: UnitSaveData) -> void:
 	unit.map_unit_id = data.map_unit_id
 	unit.team = data.team
+	if is_instance_valid(unit.movement):
+		unit.movement.stance = clampi(data.movement_stance, UnitMovement.Stance.STANDING, UnitMovement.Stance.WITHDRAWING) as UnitMovement.Stance
 
 	unit.squad_fire.soldiers.clear()
 

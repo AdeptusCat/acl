@@ -606,10 +606,12 @@ func _goals_for(roster: Array[Unit]) -> Dictionary[Unit, ScenarioGoalTask]:
 
 
 func _refresh_reservations() -> void:
-	for unit: Unit in reservations.keys():
-		if not InfluenceUnitQuery.is_valid_living_unit(unit) or unit.surrendered:
-			reservations.erase(unit)
+	# Rebuild in place: typed dictionaries cannot erase a previously freed key.
+	# Keep the dictionary identity shared with the subordinate planners.
+	reservations.clear()
 	for unit: Unit in owner.squads:
+		if not is_instance_valid(unit):
+			continue
 		if not InfluenceUnitQuery.is_valid_living_unit(unit) or unit.surrendered:
 			continue
 		var cell: Vector2i = unit.current_hex
