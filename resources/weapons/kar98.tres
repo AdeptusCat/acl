@@ -6,6 +6,11 @@
 [resource]
 script = ExtResource("1_ec0dn")
 name = "Karabiner 98k"
+burst_pause_s = 0.0
 range_hexes = 5
+raise_s = 0.7
+aim_s = 0.9
+cycle_s = 0.9
+reaim_s = 0.9
 snd_shot = ExtResource("2_byysb")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

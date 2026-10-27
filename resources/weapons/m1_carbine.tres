@@ -7,12 +7,13 @@
 script = ExtResource("1_484ug")
 name = "M1 Carbine"
 rpm = 450.0
-burst_pause_s = 0.25
+burst_pause_s = 0.0
 mag_capacity = 15
 reload_s = 1.8
 range_hexes = 4
 accuracy_base = 0.62
-raise_s = 0.9
-aim_s = 0.35
+raise_s = 0.6
+aim_s = 0.65
+reaim_s = 0.5
 snd_shot = ExtResource("2_qr05n")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

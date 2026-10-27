@@ -147,6 +147,7 @@ func _test_los_transition(probe: FireProbe, attack_state: Unit.AttackState, path
 	for shot: int in range(reacquired_shots):
 		expected.append(VISIBLE_HEX)
 	_check_destinations(expected, "Reacquired burst uses the visible destination")
+	await get_tree().create_timer(0.03).timeout
 	_check(probe.impact_hexes == [VISIBLE_HEX], "Reacquisition launches a damage volley at the visible hex")
 
 
@@ -165,11 +166,13 @@ func _test_ground_fire(probe: FireProbe) -> void:
 		shooter.setAttackState(Unit.AttackState.MANUAL_GROUND)
 		probe.set_target_hex(HIDDEN_HEX)
 		_ready_gunner()
+		shooter.attack_ground_rounds_budget = 50
 		var ground_shots: int = await probe._try_fire_soldier(0.1, gunner, false, 0, 0, 0, 0)
 		_check(ground_shots == 1, "Deliberate ground fire remains available outside LOS for family %d" % family)
 		if probe.pending_bursts > 0:
 			await probe.bursts_complete
 		_check_destinations([HIDDEN_HEX], "Ground-fire visuals retain their explicit destination")
+		await get_tree().create_timer(0.03).timeout
 		_check(probe.impact_hexes == [HIDDEN_HEX], "Ground fire launches its original damage volley")
 	gunner.weapon = original_weapon
 
@@ -204,6 +207,13 @@ func _find_blocked_origin() -> Vector2i:
 
 
 func _ready_gunner() -> void:
+	shooter.squad_fire._bursts.erase(gunner)
+	gunner.burst_active = false
+	gunner.weapon_raised = true
+	gunner.raise_remaining_s = 0.0
+	gunner.cycle_remaining_s = 0.0
+	gunner.reaim_remaining_s = 0.0
+	gunner.behavior = Soldier.Behavior.ENGAGING
 	gunner.setup_weapon_task.done = true
 	gunner.reload_task.done = true
 	gunner.aquire_target_task.done = true

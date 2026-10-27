@@ -7,12 +7,13 @@
 script = ExtResource("1_vn361")
 name = "M1 Garand"
 rpm = 400.0
-burst_pause_s = 0.25
+burst_pause_s = 0.0
 mag_capacity = 8
 reload_s = 2.8
 range_hexes = 5
 accuracy_base = 0.7
 priority = 3
-raise_s = 1.2
+raise_s = 0.7
+aim_s = 0.8
 snd_shot = ExtResource("2_momxg")
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

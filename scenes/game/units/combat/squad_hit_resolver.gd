@@ -16,7 +16,6 @@ static func fire_at(controller: SquadFireController, total_rounds: int, weapon: 
 	# FIXME units should not break when pinned but stress level not full
 	# TODO refactor fire functions
 	# TODO riflegrenate hits instant?
-	controller.add_fire_impulse(total_rounds, 10)
 	if not shot_origin.is_finite():
 		shot_origin = controller.unit.global_position
 	var terrain_defense_bonus: float = target_cover

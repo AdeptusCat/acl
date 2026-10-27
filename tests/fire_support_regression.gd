@@ -436,6 +436,11 @@ func _right_click_at(point: Vector2) -> void:
 	get_viewport().push_input(click, true)
 
 func _ready_gunner(soldier: Soldier) -> void:
+	soldier.weapon_raised = true
+	soldier.raise_remaining_s = 0.0
+	soldier.cycle_remaining_s = 0.0
+	soldier.reaim_remaining_s = 0.0
+	soldier.behavior = Soldier.Behavior.ENGAGING
 	soldier.setup_weapon_task.done = true
 	soldier.reload_task.done = true
 	soldier.aquire_target_task.done = true

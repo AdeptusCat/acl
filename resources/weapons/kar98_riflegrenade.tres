@@ -8,7 +8,12 @@
 [resource]
 script = ExtResource("1_b3g1r")
 name = "Karabiner 98k (Schießbecher)"
+burst_pause_s = 0.0
 range_hexes = 5
+raise_s = 0.7
+aim_s = 0.9
+cycle_s = 0.9
+reaim_s = 0.9
 can_fire_riflegrenades = true
 riflegrenade_range = 4
 he_casualty_potential = 2.0

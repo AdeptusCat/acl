@@ -43,6 +43,8 @@ static func handle_auto_fire(controller: SquadFireController,
 		
 		var score_pack: Dictionary = controller._score_enemy_for_target(controller.unit, enemy, current_hex)
 		var score: float = float(score_pack["score"])
+		if enemy == controller.target_unit:
+			score += maxf(absf(score) * 0.2, 2.0)
 		if not is_finite(score):
 			continue
 		var suppressed: bool = defensive_fire and TacticalPositionExecutor.is_sufficiently_suppressed(enemy)
@@ -74,11 +76,13 @@ static func score_enemy_for_target(controller: SquadFireController, shooter_unit
 	var has_range: bool = false
 
 	for soldier: Soldier in shooter_unit.squad_fire.soldiers:
+		if not soldier.is_alive or soldier.weapon.ammunition <= 0:
+			continue
 		var w_range: int = int(soldier.weapon.range_hexes)
 		if w_range >= distance:
 			has_range = true
 
-			var ratio: float = float(w_range) / float(distance) # bigger is better
+			var ratio: float = float(w_range) / float(maxi(distance, 1)) # bigger is better
 			if ratio > best_ratio:
 				best_ratio = ratio
 

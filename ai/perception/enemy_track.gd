@@ -9,6 +9,10 @@ var enemy: Unit = null
 var last_known_hex: Vector2i = Vector2i.ZERO
 var last_known_global_position: Vector2 = Vector2.ZERO
 
+# Preserve the pre-contact attention for the first individual reactions.
+var reaction_focus_direction: Vector2 = Vector2.ZERO
+var acquired_at_s: float = -INF
+
 var confidence: float = 0.0
 # Remembered contact survives loss of visual confidence and never grants live visibility.
 var awareness: float = 0.0

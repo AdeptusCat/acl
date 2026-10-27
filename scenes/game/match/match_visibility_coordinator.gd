@@ -168,6 +168,8 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 			var p_tick: float = controller._compute_detect_prob_per_tick(unit, enemy_tracked, elapsed_seconds)
 			# Acquisition is one time-scaled event. Failed rolls do not erase evidence.
 			if randf() < p_tick:
+				track.reaction_focus_direction = unit.tactical_state.focus_direction
+				track.acquired_at_s = unit._now()
 				track.confidence = maxf(track.confidence, EnemyTrack.VISIBLE_CONF_THRESHOLD)
 				track.record_detection()
 				units_visible.append(enemy_tracked)

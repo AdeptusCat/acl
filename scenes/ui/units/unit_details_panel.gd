@@ -287,8 +287,8 @@ func _refresh_roster_tasks() -> void:
 	for soldier: Soldier in soldiers:
 		if unit.surrendered:
 			set_progress_bar(soldier, "Surrendered", 0.0, 0.0)
-		elif not unit.is_good_order():
-			set_progress_bar(soldier, unit.get_state_name(int(unit.stress_system.state)), 0.0, 0.0)
+		elif soldier.behavior != Soldier.Behavior.ENGAGING:
+			set_progress_bar(soldier, soldier.combat_status(), 0.0, 0.0)
 		elif unit.is_moving:
 			set_progress_bar(soldier, "Moving", 0.0, 0.0)
 		elif unit.in_close_combat:
@@ -299,6 +299,8 @@ func _refresh_roster_tasks() -> void:
 			_set_soldier_task(soldier, soldier.reload_task)
 		elif not soldier.aquire_target_task.done and soldier.aquire_target_task.remaining_time_s > 0.0:
 			_set_soldier_task(soldier, soldier.aquire_target_task)
+		elif soldier.burst_active or soldier.cycle_remaining_s > 0.0 or soldier.reaim_remaining_s > 0.0:
+			set_progress_bar(soldier, soldier.combat_status(), 0.0, 0.0)
 		elif soldier.role == RankGrades.Role.LOADER or soldier.role == RankGrades.Role.ASSISTANT:
 			set_progress_bar(soldier, soldier.assist_task.task_name, 0.0, 0.0)
 		else:

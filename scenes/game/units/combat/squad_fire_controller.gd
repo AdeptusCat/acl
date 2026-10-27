@@ -21,12 +21,10 @@ const IMPACT_PATTERN: Script = preload("res://scenes/game/effects/burst_impact_p
 #@export var state_acc_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.5, 0.0, 0.0])
 #@export var state_rof_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.85, 0.35, 0.0, 0.0])
 
-# NEW: state influence on target acquisition time (Normal..CombatIneffective)
-#@export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 1.15, 1.6, 9999.0, 9999.0])
-#enum MoraleState { NORMAL, CAUTIOUS, PINNED, PANIC, COMBAT_INEFFECTIVE }
+# Deployment work speed. Reaction/reload/cadence use individual combat states.
 @export var state_acquire_mults: PackedFloat32Array = PackedFloat32Array([1.0, 0.8, 0.5, 0.0, 0.0])
 
-# panic/CI effectively “never acquire”
+# Panic and combat ineffectiveness suspend deployment.
 
 # Crew-served behaviour
 @export var crew_idle_to_loader: bool = true
@@ -83,6 +81,9 @@ var casualties: Array[Soldier] = []
 var _now_s: float = 0.0
 var _accum_window_s: float = 0.0
 
+var _bursts: Dictionary[Soldier, Dictionary] = {}
+var _last_visible: Array[Unit] = []
+
 var fire_recent: float = 0.0 # 0..1 shows that they were shooting
 
 const FIRE_EFFECT_WINDOW_MS: int = 4000
@@ -126,27 +127,13 @@ signal shooting(unit: Unit)
 
 
 func set_soldiers_new_target_task(target_distance: int) -> void:
-	for s: Soldier in soldiers:
-		if _uses_personal_defense(s):
+	for soldier: Soldier in soldiers:
+		if _uses_personal_defense(soldier) or soldier.role in [RankGrades.Role.LOADER, RankGrades.Role.ASSISTANT]:
 			continue
-		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
-			continue
-		#if not s.aquire_target_task.target_id == target_unit:
-		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-			s.reload_task.done = false
-			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-			s.rounds_in_mag = 1
-			s.weapon.riflegrenade_loaded = true
-			
-			#s.aquire_target_task.target_id = target_unit
-			s.aquire_target_task.done = false
-			s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
-		else:
-			if s.weapon.range_hexes >= target_distance:
-				#s.aquire_target_task.target_id = target_unit
-				#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
-				s.aquire_target_task.done = false
-				s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+		if soldier.weapon.can_fire_riflegrenades and target_distance <= soldier.weapon.riflegrenade_range:
+			soldier.start_reload(true)
+		_begin_soldier_engagement(soldier, null, target_hex)
+
 
 func set_mg(machinge_guns : int) -> void:
 	for i: int in machinge_guns:
@@ -165,6 +152,9 @@ func set_mg(machinge_guns : int) -> void:
 
 
 func set_soldiers(list: Array[Soldier]) -> void:
+	for soldier: Soldier in _bursts:
+		soldier.burst_active = false
+	_bursts.clear()
 	soldiers = list
 
 #var cover_map = LOSHelper.los_lookup.get(current_hex, null)
@@ -230,27 +220,15 @@ func set_target_unit(targetUnit: Unit) -> void:
 	draw_los_to_target_unit.emit(unit.current_hex, draw_los_to)
 	
 	for s: Soldier in soldiers:
-		if _uses_personal_defense(s):
+		if _uses_personal_defense(s) or s.role in [RankGrades.Role.LOADER, RankGrades.Role.ASSISTANT]:
 			continue
-		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
+		if not is_instance_valid(target_unit):
+			s.lose_contact()
 			continue
-		
-		if not s.aquire_target_task.target_id == target_unit:
+		if s.aquire_target_task.target_id != target_unit or not s.has_engagement:
 			if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-				s.reload_task.done = false
-				s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-				s.rounds_in_mag = 1
-				s.weapon.riflegrenade_loaded = true
-				
-				s.aquire_target_task.target_id = target_unit
-				s.aquire_target_task.done = false
-				s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
-			else:
-				if s.weapon.range_hexes >= distance:
-					s.aquire_target_task.target_id = target_unit
-					#if not s.aquire_target_task.remaining_time_s > 0.0 and not s.aquire_target_task.remaining_time_s < s.aquire_target_task.start_time_s:
-					s.aquire_target_task.done = false
-					s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+				s.start_reload(true)
+			_begin_soldier_engagement(s, target_unit, target_unit.current_hex)
 
 
 func set_target_hex(_target_hex: Vector2i) -> void:
@@ -299,31 +277,25 @@ func _refresh_tracked_target() -> bool:
 func _process(delta: float) -> void:
 	if not unit.is_active():
 		return
-	_tick_weapon_setup(delta)
-	if unit.ai_support_only:
-		if target_unit != null or has_target_hex or has_mortar_target_hex:
-			clear_target()
-		update_fire_recent(delta)
-		return
 	_now_s += delta
-	_accum_window_s += delta
-	
-	var visible_enemies1: Array = Globals.unit_visible_enemies.get(unit, [])
-	if not visible_enemies1.is_empty(): # and target_hex == Vector2i.ZERO
-		if unit.is_moving or not unit.is_active() or unit.broken or unit.surrendered:
-			return
-		else:
-			#if unit.team == Globals.team_player:
-			#unit.combat.handle_auto_fire(delta, unit, unit_visible_enemies, unit.current_hex, unit.range, unit.fire_rate, unit.firepower)
-			if unit.attackState == Unit.AttackState.AUTO:
-				handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
-	
-	if unit.attackState != Unit.AttackState.MANUAL_GROUND:
-		_refresh_tracked_target()
 	update_fire_recent(delta)
 	_update_state_multipliers()
+	_tick_weapon_setup(delta)
+	if unit.ai_support_only:
+		clear_target()
+		return
+	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
+	# A new contact wakes selection immediately; reconsideration keeps its normal cadence.
+	for enemy: Unit in visible:
+		if not _last_visible.has(enemy):
+			fire_timer = 0.0
+			break
+	_last_visible.assign(visible)
+	if unit.attackState == Unit.AttackState.AUTO and not unit.is_moving and not unit.broken and not unit.surrendered:
+		handle_auto_fire(delta, unit, unit.current_hex, unit.weapon_range, unit.fire_rate, unit.firepower)
+	if unit.attackState != Unit.AttackState.MANUAL_GROUND:
+		_refresh_tracked_target()
 	_tick_soldiers(delta)
-	
 
 
 func update_fire_recent(delta: float) -> void:
@@ -427,61 +399,37 @@ func fire_mortar(map_hex: Vector2i) -> void:
 
 
 func _tick_weapon_setup(delta: float) -> void:
-	# Deployment is stationary work, independent of target visibility and firing.
-	if unit.is_moving or unit.in_close_combat or unit.broken or unit.surrendered:
-		return
-	var delta_mod: float = delta * state_acquire_mults[stress_controller.state]
 	for soldier: Soldier in soldiers:
-		if soldier.is_alive:
-			soldier.is_weapon_setup_done(delta_mod)
+		if not soldier.is_alive:
+			continue
+		soldier.update_behavior(delta, stress_controller.state, stress_controller.under_fire)
+		if unit.is_moving or unit.in_close_combat:
+			soldier.lower_weapon()
+			continue
+		if unit.broken or unit.surrendered or soldier.behavior != Soldier.Behavior.ENGAGING:
+			continue
+		if not soldier.weapon_raised:
+			soldier.raise_remaining_s = maxf(0.0, soldier.raise_remaining_s - delta * _handling_speed())
+			soldier.weapon_raised = soldier.raise_remaining_s <= 0.0
+		if not soldier.is_weapon_setup_done(delta * state_acquire_mults[stress_controller.state]):
+			soldier.weapon_state = Soldier.WeaponState.SETTING_UP
 
 
 func _tick_soldiers(delta: float) -> void:
-	var target_cover: int = 0
-	var target_distance: int = 0
-	
-	if is_instance_valid(target_unit):
-		var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
-		if cover_map and cover_map.has(target_unit.current_hex):
-			var data: Dictionary = cover_map[target_unit.current_hex]
-			target_cover = data["target_cover"]
-		target_distance = LOSHelper.ground_layer.cube_distance(unit.current_cube, target_unit.current_cube)
-		
-	
-	var rounds_emitted: int = 0
+	# One synchronous pass. Airborne rounds never suspend this scheduler.
+	for soldier: Soldier in soldiers:
+		if not soldier.is_alive:
+			if _bursts.has(soldier):
+				_finish_burst(soldier, _bursts[soldier])
+			continue
+		var crew_served: bool = soldier.role == RankGrades.Role.GUNNER
+		var loaders: int = 0
+		var assistants: int = 0
+		if crew_served:
+			loaders = _count_role(RankGrades.Role.LOADER)
+			assistants = _count_role(RankGrades.Role.ASSISTANT)
+		_try_fire_soldier(delta, soldier, crew_served, loaders, assistants, 0, 0)
 
-	var gunners: Array[int] = _indices_with_role(RankGrades.Role.GUNNER)
-
-	# handle gunners first (crew-served)
-	var j: int = 0
-	while j < gunners.size():
-		if not unit.is_active():
-			return
-		var idx: int = gunners[j]
-		var s: Soldier = soldiers[idx]
-		if s.is_alive:
-			# Earlier gunners can await impacts; use the living crew at this attempt.
-			var crew_available: int = _count_role(RankGrades.Role.LOADER)
-			var support_crew_available: int = _count_role(RankGrades.Role.ASSISTANT)
-			rounds_emitted += await _try_fire_soldier(delta, s, true, crew_available, support_crew_available, target_distance, target_cover)
-			if rounds_emitted > 0:
-				pass
-			if rounds_emitted >= max_shots_per_tick:
-				return
-		j += 1
-
-	# then everyone else
-	var i: int = 0
-	while i < soldiers.size():
-		if not unit.is_active():
-			return
-		var s2: Soldier = soldiers[i]
-		if s2.is_alive:
-			if s2.role != RankGrades.Role.GUNNER:
-				rounds_emitted += await _try_fire_soldier(delta, s2, false, 0, 0, target_distance, target_cover)
-				if rounds_emitted >= max_shots_per_tick:
-					return
-		i += 1
 
 func _uses_personal_defense(soldier: Soldier) -> bool:
 	return unit.squad_type in [Globals.SquadType.MG, Globals.SquadType.MORTAR, Globals.SquadType.ANTITANK] and soldier.role != RankGrades.Role.GUNNER
@@ -511,7 +459,9 @@ func _personal_defense_target(soldier: Soldier) -> Unit:
 
 
 func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_available: int, support_crew_available: int, target_distance: int, target_cover: int) -> int:
-	if not unit.is_active() or unit.ai_support_only:
+	if _bursts.has(s):
+		return _advance_burst(s, delta)
+	if not s.is_alive or not unit.is_active() or unit.ai_support_only or unit.surrendered or unit.broken:
 		return 0
 	var personal_defense: bool = _uses_personal_defense(s)
 	if fire_support_mission != null and personal_defense:
@@ -542,25 +492,22 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 				return 0
 			personal_target_hex = shot_target.current_hex
 		if s.aquire_target_task.target_id != shot_target or (personal_ground_fire and s.last_target_hex != personal_target_hex):
-			s.aquire_target_task.target_id = shot_target
-			s.aquire_target_task.done = false
-			s.aquire_target_task.start_time_s = _calc_acquire_delay(s)
+			_begin_soldier_engagement(s, shot_target, personal_target_hex)
 		s.last_target_hex = personal_target_hex
 	elif mission_support_fire and not _has_safe_support_target(target_hex):
 		clear_target()
 		unit.setAttackState(Unit.AttackState.AUTO)
 		return 0
-	var state_idx: int = stress_controller.state
-	var delta_multiplyer: float = state_acquire_mults[state_idx]
-	var delta_mod: float = delta * delta_multiplyer
+	var handling_speed: float = _handling_speed()
 	if is_crew_served:
 		# Apply crew speed to remaining work so losses and replacements affect
 		# reload and firing preparation already in progress, without restarting them.
 		var crew_penalty: float = 1.0
 		if crew_available < s.weapon.crew_required - 1:
 			crew_penalty = maxf(1.0, s.weapon.undercrew_penalty_mult)
-		delta_mod *= compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal) / crew_penalty
+		handling_speed *= compute_support_efficiency(support_crew_available, s.weapon.support_crew_optimal) / crew_penalty
 	if not personal_defense and unit.attackState != Unit.AttackState.MANUAL_GROUND and not _refresh_tracked_target():
+		s.advance_handling(delta, handling_speed)
 		return 0
 	var _target_hex: Vector2i = target_hex
 	if personal_defense:
@@ -578,11 +525,11 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if unit.is_moving:
 		return 0
 	# The stationary update owns this countdown; firing only checks readiness.
+	var handling_ready: bool = s.advance_handling(delta, handling_speed)
 	if not s.is_weapon_setup_done(0.0):
+		s.weapon_state = Soldier.WeaponState.SETTING_UP
 		return 0
-	if not s.is_weapon_reload_done(delta_mod):
-		return 0
-	if not s.is_acquiring_target_done(delta_mod):
+	if not handling_ready:
 		return 0
 	# Crew preparation runs during the scheduled interval, rather than after it.
 	if fire_support_mission != null and not fire_support_mission.gun_ready(s):
@@ -613,7 +560,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	
 	
 	var batch_targets: Array[Unit] = []
-	var visible_enemies: Array = Globals.unit_visible_enemies.get(get_parent(), [])
+	var visible_enemies: Array = Globals.unit_visible_enemies.get(unit, [])
 	
 	# without this check an enemy will be attacked even though the unit is shooting the ground at another hex
 	if personal_defense or unit.attackState != Unit.AttackState.MANUAL_GROUND:
@@ -661,124 +608,157 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.weapon.riflegrenade_loaded == true and target_distance > s.weapon.riflegrenade_range:
 		s.rounds_in_mag = 0
 
-	# determine burst size for this weapon
-	var rounds_in_mag: int = s.rounds_in_mag
-	var shots: int = determine_burst_size(s.weapon, s.rounds_in_mag)
+	if s.rounds_in_mag <= 0:
+		s.start_reload(s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range)
+		return 0
+	var shots: int = mini(determine_burst_size(s.weapon, s.rounds_in_mag), s.weapon.ammunition)
 	if fire_support_mission != null:
 		shots = mini(shots, fire_support_mission.remaining)
-		if shots <= 0:
-			return 0
-		fire_support_mission.commit_gun(s, shots)
-	if personal_ground_fire:
+	var ground_fire: bool = unit.attackState == Unit.AttackState.MANUAL_GROUND and (not personal_defense or personal_ground_fire)
+	if fire_support_mission != null:
+		ground_fire = false
+	if ground_fire:
 		shots = mini(shots, unit.attack_ground_rounds_budget)
-	
-	if (not personal_defense or personal_ground_fire) and unit.attackState == Unit.AttackState.MANUAL_GROUND:
-		if unit.attack_ground_rounds_budget <= 0:
-			unit.setAttackState(Unit.AttackState.AUTO)
-		
-		unit.attack_ground_rounds_budget -= shots
-	
-	# emit shots immediately into current window
-	# visual
-	_add_rounds_to_hex(_target_hex, shots)
-	#fire_shot.emit()
-	
-	# audio
-	var auto_fire: bool = false
-	if s.weapon.fire_mode == WeaponSpec.FireMode.BURST:
-		auto_fire = true
-	# audio
-	if shots > 0:
-		_on_fire_weapon(s.weapon, unit.position, auto_fire, s.id, unit)
-	
-	# spend ammo
-	s.rounds_in_mag -= shots
-	s.weapon.ammunition -= shots
-	
-	# handle riflegrenades
-	var riflegrenade: bool = false
-	if s.weapon.riflegrenade_loaded == true and target_distance <= s.weapon.riflegrenade_range:
-		riflegrenade = true
-	
-	if riflegrenade == true:
-		fire_riflegrenades(s)
-		s.weapon.riflegrenade_loaded = false
-	else:
-		fire_shots(s, shots, s.weapon.rpm, auto_fire, _target_hex)
-	
-	
+	return _start_burst(s, shots, _target_hex, shot_target, ground_fire, target_distance, target_cover, batch_targets)
+
+
+func _begin_soldier_engagement(soldier: Soldier, enemy: Unit, cell: Vector2i) -> void:
+	var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(cell))
+	var alignment: float = 1.0
+	var focus: Vector2 = Vector2.ZERO
+	if unit.tactical_state != null:
+		focus = unit.tactical_state.focus_direction
+	var track: EnemyTrack = Globals.unit_enemy_tracks.get(unit, {}).get(enemy, null) as EnemyTrack
+	if track != null and unit._now() - track.acquired_at_s <= 1.0:
+		focus = track.reaction_focus_direction
+	if not focus.is_zero_approx():
+		var direction: Vector2 = unit.global_position.direction_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(cell)))
+		var angle: float = absf(focus.angle_to(direction))
+		alignment = 1.0 - smoothstep(0.0, PI, angle)
+	soldier.begin_engagement(enemy, cell, distance, alignment)
+
+
+func _handling_speed() -> float:
+	match stress_controller.state:
+		STATES.MoraleState.CAUTIOUS:
+			return 0.95
+		STATES.MoraleState.PINNED:
+			return 0.9
+		STATES.MoraleState.PANIC, STATES.MoraleState.COMBAT_INEFFECTIVE:
+			return 0.0
+	return 1.0
+
+
+func _start_burst(soldier: Soldier, shots: int, cell: Vector2i, enemy: Unit, ground_fire: bool, distance: int, cover: int, targets: Array[Unit]) -> int:
 	if shots <= 0:
-		# reload
-		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-			s.reload_task.done = false
-			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-			s.rounds_in_mag = 1
-			s.weapon.riflegrenade_loaded = true
-		else:
-			s.reload_task.done = false
-			s.reload_task.start_time_s = s.weapon.reload_s / s.rof_mult
-			s.rounds_in_mag = s.weapon.mag_capacity
 		return 0
-	
-	if shots > 1:
-		pass
-	
-	# apply jam chance
-	#var k: int = 0
-	#var jammed_now: bool = false
-	#while k < shots:
-		#var r: float = randf()
-		#if r < s.weapon.jam_per_shot:
-			#jammed_now = true
-		#k += 1
-	#if jammed_now:
-		#s.jammed = true
-	
-	# mortar reload
-	if not s.weapon.family == WeaponSpec.Family.MORTAR:
-		if not personal_defense and not is_instance_valid(target_unit):
-			target_unit = null
-		
-		# cadence to next burst (respect soldier’s rof and crew)
-		var rps: float = s.weapon.rpm / 60.0
-		if rps < 1.0:
-			rps = 1.0
-		var fire_time_s: float = float(shots) / rps
-		var pause_s: float = s.weapon.burst_pause_s
-		var _total_cadence_s: float = (fire_time_s + pause_s) / (s.rof_mult)
-		
-		s.aquire_target_task.target_id = shot_target
-		s.aquire_target_task.done = false
-		s.aquire_target_task.start_time_s = _calc_acquire_delay(s) + _total_cadence_s
-	
-	# reload
-	if s.rounds_in_mag <= 0:
-		if s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range:
-			s.reload_task.done = false
-			s.reload_task.start_time_s = s.weapon.reload_riflegrenade_s / s.rof_mult
-			s.rounds_in_mag = 1
-			s.weapon.riflegrenade_loaded = true
-		else:
-			s.reload_task.done = false
-			s.reload_task.start_time_s = s.weapon.reload_s / s.rof_mult
-			s.rounds_in_mag = s.weapon.mag_capacity
-		#return 0 # TODO figure out why this was in place? this just prohibits that damage is done
-	
-	var shot_origin: Vector2 = unit.global_position
-	var dist: float = shot_origin.distance_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(_target_hex)))
-	
-	var life: float = dist / s.weapon.projectile_speed      # seconds
-	if riflegrenade:
-		life = dist / s.weapon.riflegrenade_projectile_speed
+	var context: Dictionary = {"remaining": shots, "cell": cell, "enemy": enemy,
+		"ground": ground_fire, "distance": distance, "cover": cover, "targets": targets.duplicate(),
+		"until_next": 0.0, "mission": fire_support_mission,
+		"origin": unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()}
+	_bursts[soldier] = context
+	soldier.burst_active = true
+	soldier.weapon_state = Soldier.WeaponState.FIRING
+	return _advance_burst(soldier, 0.0)
+
+
+func _burst_can_continue(soldier: Soldier, context: Dictionary) -> bool:
+	if not soldier.is_alive or not unit.is_active() or unit.surrendered or unit.broken or unit.is_moving or unit.in_close_combat or unit.ai_support_only:
+		return false
+	if soldier.behavior != Soldier.Behavior.ENGAGING or Debug.dont_fire_wepaons:
+		return false
+	if mission_support_fire and not _has_safe_support_target(context["cell"]):
+		return false
+	if context["mission"] != null:
+		var mission: FireSupportMission = context["mission"] as FireSupportMission
+		return fire_support_mission == mission and mission.active and mission.remaining > 0 and not fire_support_hold
+	if context["ground"]:
+		return unit.attackState == Unit.AttackState.MANUAL_GROUND and target_hex == context["cell"] and unit.attack_ground_rounds_budget > 0
+	if not is_instance_valid(context["enemy"]):
+		return false
+	var enemy: Unit = context["enemy"] as Unit
+	if not _can_track_target(enemy) or enemy.current_hex != context["cell"]:
+		return false
+	if not _uses_personal_defense(soldier) and target_unit != enemy:
+		return false
+	for occupant: Unit in LOSHelper.find_units_at(context["cell"]):
+		if occupant.team == unit.team and not occupant.surrendered:
+			return false
+	return true
+
+
+func _advance_burst(soldier: Soldier, delta: float) -> int:
+	if not _bursts.has(soldier):
+		return 0
+	var context: Dictionary = _bursts[soldier]
+	if not _burst_can_continue(soldier, context):
+		_finish_burst(soldier, context)
+		if not context["ground"] and not _uses_personal_defense(soldier):
+			_refresh_tracked_target()
+		return 0
+	context["until_next"] -= maxf(delta, 0.0)
+	var emitted: int = 0
+	while float(context["until_next"]) <= 0.000001 and emitted < max_shots_per_tick:
+		if soldier.rounds_in_mag <= 0 or soldier.weapon.ammunition <= 0 or not _burst_can_continue(soldier, context):
+			_finish_burst(soldier, context)
+			break
+		_emit_round(soldier, context)
+		emitted += 1
+		context["remaining"] -= 1
+		context["until_next"] += 60.0 / maxf(soldier.weapon.rpm, 1.0)
+		if int(context["remaining"]) <= 0:
+			_finish_burst(soldier, context)
+			break
+	return emitted
+
+
+func _finish_burst(soldier: Soldier, context: Dictionary) -> void:
+	_bursts.erase(soldier)
+	soldier.finish_burst()
+	if soldier.is_alive and soldier.rounds_in_mag <= 0:
+		var grenade: bool = soldier.weapon.can_fire_riflegrenades and int(context["distance"]) <= soldier.weapon.riflegrenade_range
+		soldier.start_reload(grenade)
+	if soldier.weapon.fire_mode == WeaponSpec.FireMode.BURST:
+		_on_stop_mg_loop(soldier.weapon, unit.position, soldier.id, unit)
+
+
+func _emit_round(soldier: Soldier, context: Dictionary) -> void:
+	var cell: Vector2i = context["cell"]
+	var origin: Vector2 = context["origin"]
+	var grenade: bool = soldier.weapon.riflegrenade_loaded
+	soldier.rounds_in_mag -= 1
+	soldier.weapon.ammunition -= 1
+	if context["ground"]:
+		unit.attack_ground_rounds_budget -= 1
+	var mission: FireSupportMission = context["mission"] as FireSupportMission
+	if mission != null:
+		mission.commit_gun(soldier, 1)
+	_add_rounds_to_hex(cell, 1)
+	add_fire_impulse(1, 10)
+	shooting.emit(unit)
+	_on_fire_weapon(soldier.weapon, unit.position, soldier.weapon.fire_mode == WeaponSpec.FireMode.BURST, soldier.id, unit)
+	if grenade:
+		fire_riflegrenades(soldier)
+		soldier.weapon.riflegrenade_loaded = false
+	else:
+		# The visual API is kept independent of preparation and projectile impacts.
+		var impacts: PackedVector2Array = IMPACT_PATTERN.create(LOSHelper.ground_layer, cell, origin, 1)
+		fire_shot.emit(soldier.weapon, cell, origin, impacts[0])
+	var speed: float = float(soldier.weapon.projectile_speed)
+	if grenade:
+		speed = float(soldier.weapon.riflegrenade_projectile_speed)
+	var life: float = origin.distance_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(cell))) / maxf(speed, 1.0)
 	if is_instance_valid(Debug.engagement_recorder):
-		Debug.engagement_recorder.record_shot(self, s, shots, _target_hex, target_distance, target_cover, shot_origin, life, riflegrenade)
+		Debug.engagement_recorder.record_shot(self, soldier, 1, cell, context["distance"], context["cover"], origin, life, grenade)
+	var targets: Array[Unit] = []
+	targets.assign(context["targets"])
+	_resolve_airborne_round(soldier.weapon, grenade, cell, context["distance"], context["cover"], targets, origin, life)
+
+
+func _resolve_airborne_round(weapon: WeaponSpec, grenade: bool, cell: Vector2i, distance: int, cover: int, targets: Array[Unit], origin: Vector2, life: float) -> void:
 	await get_tree().create_timer(life).timeout
-	
-	if unit.is_active():
-		shooting.emit(unit)
-	# handle result on enemy unit
-	fire_at(shots, s.weapon, riflegrenade, _target_hex, target_distance, target_cover, batch_targets, shot_origin)
-	return shots
+	# A launched round lands even if its shooter dies or takes cover.
+	fire_at(1, weapon, grenade, cell, distance, cover, targets, origin)
 
 
 func compute_support_efficiency(support_crew_available: int, support_crew_optimal: int) -> float:
@@ -836,28 +816,10 @@ func determine_burst_size(weapon: WeaponSpec, rounds_in_mag: int) -> int:
 
 
 func aim_delay() -> void:
-	var state_idx: int = stress_controller.state
-	var acquire_mult: float = 1.0
-	if state_idx >= 0 and state_idx < state_acquire_mults.size():
-		acquire_mult = state_acquire_mults[state_idx]
-	for s: Soldier in soldiers:
-		if _uses_personal_defense(s):
+	for soldier: Soldier in soldiers:
+		if _uses_personal_defense(soldier) or soldier.role in [RankGrades.Role.LOADER, RankGrades.Role.ASSISTANT]:
 			continue
-		if s.role == RankGrades.Role.LOADER or s.role == RankGrades.Role.ASSISTANT:
-			continue
-		s.aquire_target_task.done = false
-		s.aquire_target_task.start_time_s = _calc_acquire_delay(s) * acquire_mult
-				
-		#var settle_s: float = _calc_acquire_delay(s) * acquire_mult
-		#s.next_ready_delta_s = settle_s
-		#s.next_ready_s = _now_s + s.next_ready_delta_s
-		#s.next_ready_start_s = _now_s
-		## ensure we don’t fire before we’ve acquired, even if next_ready_s was in the past
-		#if s.next_ready_s < s.acquire_ready_s and not s.acquire_ready_s == INF:
-			#s.next_ready_s = s.acquire_ready_s
-			#s.next_ready_start_s = _now_s
-			#s.next_ready_delta_s = s.acquire_ready_s - _now_s 
-		#
+		_begin_soldier_engagement(soldier, target_unit, target_hex)
 
 
 func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target_hex: Vector2i) -> void:
@@ -867,7 +829,7 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target
 	var shot_origin: Vector2 = unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()
 	var impacts: PackedVector2Array = IMPACT_PATTERN.create(LOSHelper.ground_layer, shot_target_hex, shot_origin, shots)
 	for shot: int in range(shots):
-		if not unit.is_active():
+		if not unit.is_active() or not s.is_alive or unit.surrendered or unit.broken or s.behavior != Soldier.Behavior.ENGAGING:
 			return
 		if support_burst and not _has_safe_support_target(shot_target_hex):
 			return
@@ -1003,28 +965,11 @@ func _setup_after_arriving_at_hex() -> void:
 		var s: Soldier = soldiers[i]
 		s.tasks.clear()
 		if s.is_alive:
+			s.lower_weapon()
 			s.setup_weapon_task.done = false
 			s.setup_weapon_task.start_time_s = s.weapon.setup_s
 		i += 1
 
-
-func _calc_acquire_delay(s: Soldier) -> float:
-	# prefer weapon raise/aim timings if available; else use soldier base
-	var base: float = s.base_acquire_s
-	if s.weapon != null:
-		if s.weapon.riflegrenade_loaded == true:
-			var has_raise: bool = s.weapon.raise_riflegrenade_s > 0.0
-			var has_aim: bool = s.weapon.aim_riflegrenade_s > 0.0
-			if has_raise or has_aim:
-				base = s.weapon.raise_riflegrenade_s + s.weapon.aim_riflegrenade_s
-		else:
-			var has_raise: bool = s.weapon.raise_s > 0.0
-			var has_aim: bool = s.weapon.aim_s > 0.0
-			if has_raise or has_aim:
-				base = s.weapon.raise_s + s.weapon.aim_s
-	# add a random bit per target switch
-	var jitter: float = randf_range(0.0, s.aim_jitter_s)
-	return base + jitter
 
 func _on_fire_weapon(weapon_spec: WeaponSpec, pos: Vector2, is_auto: bool, owner_id: int, position_node: Node2D) -> void:
 	if is_auto:

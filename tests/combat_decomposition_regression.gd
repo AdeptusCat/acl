@@ -193,6 +193,8 @@ func _observe_impact(variant: int, reverse_order: bool, random_seed: int) -> Dic
 	var batch: Array[Unit] = [targets[0], targets[1]]
 	if reverse_order:
 		batch.reverse()
+	# The impact fixture follows a muzzle event; impact resolution no longer emits firing cues.
+	shooter.squad_fire.add_fire_impulse(rounds, 10)
 	seed(random_seed)
 	shooter.squad_fire.fire_at(rounds, weapon, grenade, targets[0].current_hex, distance, cover, batch)
 	var tail: float = randf()

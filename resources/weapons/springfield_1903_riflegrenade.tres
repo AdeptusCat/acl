@@ -7,14 +7,16 @@
 [resource]
 script = ExtResource("1_1hi5c")
 name = "Springfield 1903 Rilegrenade"
-burst_pause_s = 0.85
+burst_pause_s = 0.0
 reload_s = 3.0
 range_hexes = 5
 accuracy_base = 0.68
 undercrew_penalty_mult = 1.0
 priority = 6
-raise_s = 1.6
-aim_s = 0.6
+raise_s = 0.7
+aim_s = 0.9
+cycle_s = 0.9
+reaim_s = 0.9
 can_fire_riflegrenades = true
 riflegrenade_range = 4
 he_burst_radius = 2.0

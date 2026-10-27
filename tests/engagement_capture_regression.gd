@@ -192,7 +192,9 @@ func _test_live_map() -> void:
 	rifleman.reload_task.done = true
 	rifleman.aquire_target_task.done = true
 	var rounds: int = await shooter.squad_fire._try_fire_soldier(0.1, rifleman, false, 0, 0, 4, 2)
-	_check(rounds > 0, "Real firing coroutine produces a committed shot and delayed impact")
+	_check(rounds > 0, "The synchronous firing update commits a shot without waiting for impact")
+	var flight_seconds: float = shooter.global_position.distance_to(target.global_position) / float(rifleman.weapon.projectile_speed)
+	await get_tree().create_timer(flight_seconds + 0.05).timeout
 	await get_tree().process_frame
 	var members_before_ignored: int = target.members_alive
 	Debug.no_damage = true

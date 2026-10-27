@@ -8,6 +8,9 @@ class FireProbe extends SquadFireController:
 	var impact_hexes: Array[Vector2i] = []
 
 	func _on_fire_weapon(_weapon: WeaponSpec, _position: Vector2, _auto: bool, _owner_id: int, _owner: Node2D) -> void:
+		shots_fired += 1
+
+	func _on_stop_mg_loop(_weapon: WeaponSpec, _position: Vector2, _id: int, _owner: Node2D) -> void:
 		pass
 
 	func fire_shots(_soldier: Soldier, shots: int, _rpm: float, _auto: bool, _hex: Vector2i) -> void:
@@ -160,6 +163,9 @@ func _test_movement_and_ineligibility() -> void:
 
 
 func _test_setup_under_contact() -> void:
+	gunner.behavior = Soldier.Behavior.ENGAGING
+	gunner.behavior_remaining_s = 10.0
+	gunner._behavior_morale = STATES.MoraleState.NORMAL
 	var duration: float = gunner.weapon.setup_s
 	probe._process(1.0)
 	_set_hex(enemy, Vector2i(2, 0))
@@ -259,7 +265,7 @@ func _test_crew_effects() -> void:
 		gunner.reload_task.done = false
 		gunner.reload_task.start_time_s = 100.0
 		probe._tick_soldiers(1.0)
-		_check(is_equal_approx(gunner.reload_task.remaining_time_s, 99.2), "Crew timing retains the existing cautious-state slowdown")
+		_check(is_equal_approx(gunner.reload_task.remaining_time_s, 99.05), "Cautious crew handling has one modest slowdown")
 	_prepare_crew("res://resources/weapons/kar98.tres", 0, 0)
 	gunner.reload_task.done = false
 	gunner.reload_task.start_time_s = 100.0
@@ -270,12 +276,19 @@ func _test_crew_effects() -> void:
 
 
 func _attempt_personal_fire(soldier: Soldier, target: Unit) -> int:
+	soldier.weapon_raised = true
+	soldier.raise_remaining_s = 0.0
+	soldier.cycle_remaining_s = 0.0
+	soldier.reaim_remaining_s = 0.0
+	soldier.behavior = Soldier.Behavior.ENGAGING
 	soldier.setup_weapon_task.done = true
 	soldier.reload_task.done = true
 	soldier.aquire_target_task.done = true
 	soldier.aquire_target_task.target_id = target
 	soldier.weapon.projectile_speed = 1000000
-	return await probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
+	var shots: int = probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
+	await get_tree().create_timer(0.02).timeout
+	return shots
 
 
 func _test_personal_defense() -> void:
@@ -370,8 +383,12 @@ func _test_personal_defense() -> void:
 
 
 func _test_personal_ground_order(leader: Soldier, assistant: Soldier, loader: Soldier, distant_hex: Vector2i) -> void:
+	gunner.is_alive = true
+	gunner.weapon.ammunition = 100
 	var controller: Node2D = get_tree().root.get_node("Main").world.game_controller
 	var previous_selection: Unit = controller.selected_unit
+	var previous_enemy_selectable: bool = Debug.enemy_selectable
+	Debug.enemy_selectable = true
 	controller.selected_unit = shooter
 	Globals.unit_visible_enemies[shooter] = []
 	var ordered_hex: Vector2i = Vector2i.ZERO
@@ -384,16 +401,16 @@ func _test_personal_ground_order(leader: Soldier, assistant: Soldier, loader: So
 		probe.impact_hexes.clear()
 		_check(await _attempt_personal_fire(soldier, null) == 0 and not soldier.aquire_target_task.done,
 			"An ordered adjacent ground hex starts normal personal-weapon acquisition")
-		await probe._try_fire_soldier(100.0, soldier, false, 0, 0, 0, 0)
 		var budget: int = shooter.attack_ground_rounds_budget
 		var ammunition: int = soldier.weapon.ammunition
-		var shots: int = await probe._try_fire_soldier(0.0, soldier, false, 0, 0, 0, 0)
+		var shots: int = probe._try_fire_soldier(100.0, soldier, false, 0, 0, 0, 0)
+		await get_tree().create_timer(0.02).timeout
 		_check(shots > 0 and probe.impact_hexes == [ordered_hex] and soldier.weapon.ammunition == ammunition - shots,
 			"Leaders and assistants fire at an ordered adjacent hex without detection")
 		_check(shooter.attack_ground_rounds_budget == budget - shots, "Ordered personal fire consumes the ground-fire round budget")
-		var cadence_remaining: float = soldier.aquire_target_task.remaining_time_s
-		await probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
-		_check(soldier.aquire_target_task.remaining_time_s < cadence_remaining,
+		var cadence_remaining: float = soldier.reaim_remaining_s
+		probe._try_fire_soldier(0.1, soldier, false, 0, 0, 0, 0)
+		_check(soldier.reaim_remaining_s < cadence_remaining,
 			"Repeated ground-fire attempts advance cadence instead of restarting acquisition")
 	gunner.is_alive = true
 	gunner.weapon.ammunition = 100
@@ -415,6 +432,7 @@ func _test_personal_ground_order(leader: Soldier, assistant: Soldier, loader: So
 	probe.set_target_hex(distant_hex)
 	_check(await _attempt_personal_fire(assistant, null) == 0, "Ground-fire orders beyond one hex do not release personal weapons")
 	controller.selected_unit = previous_selection
+	Debug.enemy_selectable = previous_enemy_selectable
 
 
 func _set_hex(unit: Unit, hex: Vector2i) -> void:

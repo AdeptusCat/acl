@@ -46,6 +46,10 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var priority: int = 1  # 10 meaning that it has to me manned first
 @export var raise_s: float = 1.5   # shoulder weapon
 @export var aim_s: float = 0.5     # acquire/sight picture
+# Follow-up fire does not repeat raising and initial acquisition.
+@export var cycle_s: float = 0.0
+@export var reaim_s: float = 0.65
+@export_range(0.0, 0.5) var aim_variation: float = 0.2
 @export var setup_s: float = 0.0     # setup weapon
 
 @export var projectile_speed: int = 1200

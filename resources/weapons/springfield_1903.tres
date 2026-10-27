@@ -5,11 +5,13 @@
 [resource]
 script = ExtResource("1_qmbp3")
 name = "Springfield 1903"
-burst_pause_s = 0.85
+raise_s = 0.7
+aim_s = 0.9
+cycle_s = 0.9
+reaim_s = 0.9
+burst_pause_s = 0.0
 reload_s = 3.0
 range_hexes = 5
 accuracy_base = 0.68
 undercrew_penalty_mult = 1.0
-raise_s = 1.6
-aim_s = 0.6
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

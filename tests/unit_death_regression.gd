@@ -42,6 +42,8 @@ func _run() -> void:
 	var enemy_hq: Unit = enemy_units[0]
 	var enemy_recipient: Unit = enemy_units[1]
 	_check(hq.team == recipient.team and enemy_hq.team == enemy_recipient.team, "Fixture pairs are on the same team")
+	# Authored loadouts can give both units the same senior rank; the aura fixture needs a superior.
+	hq.highest_rank_grade = maxi(hq.highest_rank_grade, recipient.highest_rank_grade + 1)
 	hq.current_cube = recipient.current_cube
 	hq.current_hex = recipient.current_hex
 	hq.leader_aura._update_aura()
@@ -70,7 +72,7 @@ func _run() -> void:
 	projectile_soldier.setup_weapon_task.done = true
 	projectile_soldier.reload_task.done = true
 	projectile_soldier.aquire_target_task.done = true
-	hq.attackState = Unit.AttackState.MANUAL_GROUND
+	hq.setAttackState(Unit.AttackState.MANUAL_GROUND)
 	impact_probe.target_hex = enemy_recipient.current_hex
 	Debug.dont_fire_wepaons = false
 	impact_probe._try_fire_soldier(0.1, projectile_soldier, false, 0, 0, 0, 0)
