@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dah7ucv8ihphs"
+
+[deps]
+
+files=["res://docs/weapon_audio_levels.role.translation", "res://docs/weapon_audio_levels.asset.translation", "res://docs/weapon_audio_levels.gain.translation", "res://docs/weapon_audio_levels.source.translation", "res://docs/weapon_audio_levels.playback.translation", "res://docs/weapon_audio_levels.playback.translation"]
+
+source_file="res://docs/weapon_audio_levels.csv"
+dest_files=["res://docs/weapon_audio_levels.role.translation", "res://docs/weapon_audio_levels.asset.translation", "res://docs/weapon_audio_levels.gain.translation", "res://docs/weapon_audio_levels.source.translation", "res://docs/weapon_audio_levels.playback.translation", "res://docs/weapon_audio_levels.playback.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

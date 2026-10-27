@@ -3,12 +3,13 @@ class_name MatchVisibilityCoordinator
 
 # Rates are per simulation second; distances use the gameplay scale, not sprite pixels.
 const METRES_PER_HEX: float = 40.0
-const DETECTION_REFERENCE_DISTANCE_METRES: float = 320.0
+const DETECTION_REFERENCE_DISTANCE_METRES: float = 240.0
+const DETECTION_DISTANCE_EXPONENT: float = 3.0
 const STATIONARY_DETECTION_RATE: float = 1.0
 const MOVING_DETECTION_RATE: float = 3.0
 const FIRING_DETECTION_RATE: float = 6.0
 const TARGET_CONCEALMENT_TRANSMISSION: float = 0.35
-const INTERVENING_HEX_TRANSMISSION: float = 0.65
+const INTERVENING_HEX_TRANSMISSION: float = 0.55
 
 const INDIRECT_CONTACT_TINT: Color = Color(0.45, 0.45, 0.45, 0.6)
 
@@ -156,9 +157,11 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 				track.is_visible = false
 				continue
 
-			if units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
-				track.record_detection()
-				units_visible.append(enemy_tracked)
+			if track.is_visible and units_visible_by_this_unit.has(enemy_tracked) and units_in_los.has(enemy_tracked):
+				var rate: float = compute_detect_rate(controller, unit, enemy_tracked)
+				if track.maintain_detection(rate, elapsed_seconds):
+					track.record_detection()
+					units_visible.append(enemy_tracked)
 				continue
 
 			if not units_in_los.has(enemy_tracked):
@@ -171,7 +174,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 				track.reaction_focus_direction = unit.tactical_state.focus_direction
 				track.acquired_at_s = unit._now()
 				track.confidence = maxf(track.confidence, EnemyTrack.VISIBLE_CONF_THRESHOLD)
-				track.record_detection()
+				track.acquire_detection()
 				units_visible.append(enemy_tracked)
 			else:
 				track.is_visible = false
@@ -197,7 +200,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 				track_map[unit_in_current_hex] = same_hex_track
 
 			same_hex_track.confidence = 1.0
-			same_hex_track.record_detection()
+			same_hex_track.acquire_detection()
 			same_hex_track.has_confirmed_lock = true
 			same_hex_track.currently_in_los = true
 
@@ -212,19 +215,26 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 
 
 static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, enemy: Unit, delta: float) -> float:
-	if not observer.is_active() or observer.surrendered or observer.members_alive <= 0:
-		return 0.0
 	if delta <= 0.0:
+		return 0.0
+	var rate: float = compute_detect_rate(controller, observer, enemy)
+	return clampf(1.0 - exp(-rate * delta), 0.0, 1.0)
+
+
+static func compute_detect_rate(controller: Node2D, observer: Unit, enemy: Unit) -> float:
+	if not observer.is_active() or observer.surrendered or observer.members_alive <= 0:
 		return 0.0
 	var distance_hexes: int = LOSHelper.ground_layer.cube_distance(observer.current_cube, enemy.current_cube)
 	var distance_metres: float = float(distance_hexes) * METRES_PER_HEX
-	var distance_factor: float = 1.0 / (1.0 + pow(distance_metres / DETECTION_REFERENCE_DISTANCE_METRES, 2.0))
+	var distance_factor: float = 1.0 / (1.0 + pow(distance_metres / DETECTION_REFERENCE_DISTANCE_METRES, DETECTION_DISTANCE_EXPONENT))
 	var concealment: int = controller._get_concealment(observer.current_hex, enemy)
 	var sight_line: Dictionary = LOSHelper.los_lookup.get(observer.current_hex, {}).get(enemy.current_hex, {})
 	var intervening_hexes: int = maxi(int(sight_line.get("hindrance", 0)), 0)
 	var terrain_factor: float = pow(TARGET_CONCEALMENT_TRANSMISSION, maxi(concealment, 0))
 	terrain_factor *= pow(INTERVENING_HEX_TRANSMISSION, intervening_hexes)
-	var activity_rate: float = STATIONARY_DETECTION_RATE
+	# A quiet stationary silhouette loses contrast much faster than movement or
+	# muzzle flashes. Its passive cue receives a second smooth distance factor.
+	var activity_rate: float = STATIONARY_DETECTION_RATE * distance_factor
 	if enemy.is_moving:
 		activity_rate = MOVING_DETECTION_RATE
 	if enemy.squad_fire != null:
@@ -241,7 +251,7 @@ static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, ene
 			rate *= 0.85
 		if observer.stress_system.state == STATES.MoraleState.PINNED:
 			rate *= 0.6
-	return clampf(1.0 - exp(-rate * delta), 0.0, 1.0)
+	return maxf(rate, 0.0)
 
 
 static func get_concealment(_controller: Node2D, current_hex: Variant, enemy: Node) -> int:

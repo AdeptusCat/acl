@@ -128,6 +128,8 @@ func _update_flags() -> void:
 
 const LOCK_REQUIRED_LOS_TIME_S: float = 0.75
 const VISIBLE_CONF_THRESHOLD: float = 0.55
+const VISUAL_CONTACT_GRACE_S: float = 5.0
+const TRACKING_RATE_MULTIPLIER: float = 10.0
 
 var los_time_s: float = 0.0
 var last_seen_unix_s: float = 0.0
@@ -135,6 +137,7 @@ var last_seen_unix_s: float = 0.0
 var currently_in_los: bool = false
 var is_visible: bool = false
 var has_confirmed_lock: bool = false
+var visual_contact_remaining_s: float = VISUAL_CONTACT_GRACE_S
 
 
 
@@ -159,6 +162,7 @@ func update_not_seen(delta: float) -> void:
 	los_time_s = 0.0
 	has_confirmed_lock = false
 	is_visible = false
+	visual_contact_remaining_s = 0.0
 	_decay_awareness(delta)
 
 	confidence -= 0.10 * delta
@@ -166,6 +170,21 @@ func update_not_seen(delta: float) -> void:
 		confidence = 0.0
 
 	_update_flags()
+
+
+func acquire_detection() -> void:
+	visual_contact_remaining_s = VISUAL_CONTACT_GRACE_S
+	record_detection()
+
+
+func maintain_detection(acquisition_rate: float, delta: float) -> bool:
+	# Knowing where to look makes tracking easier, but geometric LOS alone cannot
+	# maintain a distant concealed silhouette. Brief lulls retain a stable contact.
+	var replenishment: float = maxf(acquisition_rate, 0.0) * TRACKING_RATE_MULTIPLIER
+	visual_contact_remaining_s = clampf(visual_contact_remaining_s + maxf(delta, 0.0) * (replenishment - 1.0), 0.0, VISUAL_CONTACT_GRACE_S)
+	if visual_contact_remaining_s <= 0.0:
+		is_visible = false
+	return is_visible
 
 
 func record_detection() -> void:
