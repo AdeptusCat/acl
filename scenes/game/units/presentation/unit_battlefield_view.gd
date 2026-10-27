@@ -257,7 +257,6 @@ static func _influence_arrow_count(rate: float) -> int:
 	return 3
 
 func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
-	$LeadershipRank.text = RankGrades.TITLES.DE[rankGrade]
 	match rankGrade:
 		RankGrades.Grade.SOLDIER:
 			rank_texture_rect.texture = private_texture
@@ -290,9 +289,8 @@ func set_contact_report(report: Dictionary, restricted: bool) -> void:
 	var identified: bool = int(report.get("squad_type", -1)) >= 0
 	unit_status_control.visible = (not restricted or identified) and not _dead and not _exited
 	rank_texture_rect.visible = not restricted
-	morale_bar.visible = not restricted and not _dead and not _exited
+	morale_bar.visible = (not restricted or identified) and not _dead and not _exited
 	$UnitStates.visible = not restricted
-	$LeadershipRank.visible = not restricted
 	_set_debug_text_visible(Debug.show_debug_text)
 	if restricted:
 		broken_label.hide()

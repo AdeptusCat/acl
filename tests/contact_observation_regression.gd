@@ -136,7 +136,9 @@ func _test_information() -> void:
 	details.show_unit_detail(enemy, false)
 	_check(details.unit_type_label.text == "Unidentified contact" and details.strength_label.text == "Strength unknown", "A first sighting does not expose exact enemy identity or strength")
 	_check(not details.roster_section.visible and not details.details_section.visible and details.soldiers.is_empty(), "Enemy inspection cannot build or reveal the live soldier roster and internal combat statistics")
-	_check(enemy.ui.members_count_label.text == "?" and not enemy.ui.morale_bar.visible and not enemy.ui.unit_status_control.visible, "The battlefield counter also conceals exact strength, morale and equipment silhouette")
+	_check(enemy.ui.members_count_label.text == "?" and not enemy.ui.morale_bar.visible and not enemy.ui.unit_status_control.visible, "An unidentified contact conceals its stress bar, exact strength and equipment silhouette")
+	enemy.ui.update_bar(60, 100)
+	_check(is_equal_approx(enemy.ui.morale_bar.value, 0.4) and not enemy.ui.morale_bar.visible, "Stress updates cannot reveal an unidentified contact's stress bar")
 	enemy.ui.set_members_alive(2)
 	enemy.ui.set_unit_designation("Private formation name")
 	details._on_state_changed(STATES.MoraleState.PANIC)
@@ -147,7 +149,7 @@ func _test_information() -> void:
 		MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.1)
 	details._process(0.1)
 	_check(track.observed_squad_type >= 0 and details.unit_type_label.text == track.observed_type_name and details.strength_label.text == "Strength unknown", "The live visibility pipeline identifies an adjacent exposed contact within 1.2 seconds, before estimating strength")
-	_check(enemy.ui.unit_status_control.visible and enemy.ui.idle_texture_rect.visible and not enemy.ui._contact_marker.visible, "Identifying a contact replaces the question mark with its actual unit artwork")
+	_check(enemy.ui.unit_status_control.visible and enemy.ui.idle_texture_rect.visible and not enemy.ui._contact_marker.visible and enemy.ui.morale_bar.is_visible_in_tree(), "Identifying a contact reveals its actual unit artwork and stress bar")
 	_check(details.observation_label.visible and details.observation_label.text == "Observed: Stationary", "Enemy inspection reveals observed activity alongside its identified type")
 	for tick: int in range(18):
 		MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 0.1)
@@ -185,6 +187,8 @@ func _test_information() -> void:
 	details.show_unit_detail(friendly, false)
 	_check(details.roster_section.visible and details.strength_label.text.contains("/"), "Friendly inspection retains exact strength and its full roster")
 	_check(not details.observation_label.visible, "Switching back to friendly inspection removes the enemy observation summary")
+	MatchVisibilityCoordinator.show_visible_units(controller)
+	_check(not friendly.ui.has_node("LeadershipRank") and not enemy.ui.has_node("LeadershipRank"), "Neither friendly nor enemy counters display rank text")
 
 
 func _test_contact_icons() -> void:

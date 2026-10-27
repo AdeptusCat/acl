@@ -401,15 +401,6 @@ texture = ExtResource("33_eilf2")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="LeadershipRank" type="Label" parent="." unique_id=2033762604]
-visible = false
-layout_mode = 0
-offset_left = 11.0
-offset_top = -19.0
-offset_right = 51.0
-offset_bottom = 4.0
-text = "Rank"
-
 [node name="Rank" type="TextureRect" parent="." unique_id=1238218283]
 layout_mode = 0
 offset_left = 39.0

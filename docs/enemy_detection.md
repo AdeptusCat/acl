@@ -145,9 +145,11 @@ use the most identified still-remembered observation, preferring visible and
 then more recent observations when identification is equal. Hidden roster
 changes cannot alter them. Type identification replaces the question mark with
 the existing faction-specific rifle, MG, antitank or mortar artwork. Its idle,
-moving or firing pose follows observed activity. The details panel shows type,
-estimated strength and observed activity; morale, formation, rank, orders and
-individual soldier rosters remain concealed. Friendly information remains
+moving or firing pose follows observed activity. Identified enemies also show
+their current stress bar; unidentified contacts conceal it. The details
+panel shows type, estimated strength and observed activity; detailed morale,
+formation, rank, orders and individual soldier rosters remain concealed.
+Battlefield counters omit rank text for both teams. Friendly information remains
 exact. Explicit debug enemy control permits full inspection.
 
 ## Spotting diagnostics
