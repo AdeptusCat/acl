@@ -329,10 +329,11 @@ func _refresh_spotting() -> void:
 	var activity: String = "Stationary"
 	if factors.get("moving", false):
 		activity = "Moving"
-	spotting_factors.text = "LOS: %s\nDistance: %d hexes · %.0f m\nTarget concealment: %d\nIntervening hindrances: %d\nActivity: %s\nMovement cue: %.2f×\nExposed silhouette: %.2f×\nRecent firing: %.2f\nAttention: %.2f×\nObserver condition: %.2f×\nLast-position search: %.2f×\nAcquisition rate: %.5f/s\nChance in 10 s: %.2f%%\nTracking: %.1f / %.0f s\nIdentification: %.1f / %.0f\nIdentification rate: %.2f/s" % [sight,
+	spotting_factors.text = "LOS: %s\nDistance: %d hexes · %.0f m\nTarget concealment: %d\nIntervening hindrances: %d\nActivity: %s\nMovement cue: %.2f×\nExposed silhouette: %.2f×\nRecent firing: %.2f\nAttention: %.2f×\nObserver condition: %.2f×\nLast-position search: %.2f×\nAcquisition rate: %.5f/s\nMuzzle-flash contribution: %.5f/s\nChance in 10 s: %.2f%%\nTracking: %.1f / %.0f s\nIdentification: %.1f / %.0f\nIdentification rate: %.2f/s" % [sight,
 		factors.get("distance_hexes", 0), factors.get("distance_metres", 0.0), factors.get("concealment", 0),
 		factors.get("hindrances", 0), activity, factors.get("motion_factor", 1.0), factors.get("exposure", 1.0), factors.get("firing", 0.0),
 		factors.get("attention", 0.0), factors.get("observer_condition", 0.0), factors.get("search_bonus", 1.0), rate,
+		factors.get("firing_rate", 0.0),
 		100.0 * (1.0 - exp(-rate * 10.0)), factors.get("tracking_remaining_s", 0.0), EnemyTrack.VISUAL_CONTACT_GRACE_S,
 		factors.get("identification_evidence", 0.0), EnemyTrack.STRENGTH_EVIDENCE_REQUIRED,
 		factors.get("identification_rate", 0.0)]

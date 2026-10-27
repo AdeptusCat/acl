@@ -7,9 +7,11 @@ const DETECTION_REFERENCE_DISTANCE_METRES: float = 240.0
 const DETECTION_DISTANCE_EXPONENT: float = 3.0
 const STATIONARY_DETECTION_RATE: float = 1.0
 const MOVING_DETECTION_RATE: float = 3.0
-const FIRING_DETECTION_RATE: float = 6.0
+const FIRING_DETECTION_RATE: float = 18.0
 const TARGET_CONCEALMENT_TRANSMISSION: float = 0.35
 const INTERVENING_HEX_TRANSMISSION: float = 0.55
+const FIRING_CONCEALMENT_TRANSMISSION: float = 0.7
+const FIRING_INTERVENING_HEX_TRANSMISSION: float = 0.7
 const MAX_IDENTIFICATION_EVIDENCE_RATE: float = 2.0
 
 const INDIRECT_CONTACT_TINT: Color = Color(0.45, 0.45, 0.45, 0.6)
@@ -264,8 +266,12 @@ static func detection_breakdown(controller: Node2D, observer: Unit, enemy: Unit)
 	var firing: float = 0.0
 	if enemy.squad_fire != null:
 		firing = clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
-		activity_rate += FIRING_DETECTION_RATE * firing
-	var rate: float = activity_rate * distance_factor * terrain_factor
+	# Even one round gives a noticeable flash. Vegetation and target concealment
+	# obscure that cue less than a quiet silhouette; blocking LOS still applies.
+	var firing_terrain: float = pow(FIRING_CONCEALMENT_TRANSMISSION, maxi(concealment, 0))
+	firing_terrain *= pow(FIRING_INTERVENING_HEX_TRANSMISSION, intervening_hexes)
+	var firing_rate: float = FIRING_DETECTION_RATE * sqrt(firing) * distance_factor * firing_terrain
+	var rate: float = activity_rate * distance_factor * terrain_factor + firing_rate
 	var attention: float = 1.0
 	if observer.tactical_state != null:
 		var direction: Vector2 = observer.global_position.direction_to(enemy.global_position)
@@ -290,6 +296,7 @@ static func detection_breakdown(controller: Node2D, observer: Unit, enemy: Unit)
 		tracking_remaining = track.visual_contact_remaining_s
 		identification = track.identification_evidence
 	rate *= condition * search
+	firing_rate *= attention * condition * search
 	# Recognizing an acquired silhouette depends on the view, rather than on
 	# movement, muzzle flashes or a remembered-location acquisition bonus.
 	var detail_quality: float = maxf(distance_factor * terrain_factor * exposure * attention * condition, 0.0)
@@ -297,10 +304,12 @@ static func detection_breakdown(controller: Node2D, observer: Unit, enemy: Unit)
 	var has_los: bool = observer.current_hex == enemy.current_hex or LOSHelper.los_lookup.get(observer.current_hex, {}).has(enemy.current_hex)
 	if not has_los:
 		identification_rate = 0.0
+		firing_rate = 0.0
 	return {"rate": maxf(rate, 0.0), "eligible": true, "distance_hexes": distance_hexes,
 		"distance_metres": distance_metres, "distance_factor": distance_factor, "concealment": concealment,
 		"hindrances": intervening_hexes, "terrain_factor": terrain_factor, "moving": moving,
 		"motion_factor": motion, "exposure": exposure, "firing": firing, "activity_rate": activity_rate,
+		"firing_rate": firing_rate,
 		"attention": attention, "observer_condition": condition, "search_bonus": search,
 		"has_los": has_los,
 		"tracking_remaining_s": tracking_remaining, "identification_evidence": identification,

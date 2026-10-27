@@ -89,6 +89,7 @@ func _ready() -> void:
 	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 1000.0)
 	_check(not track.is_visible and Globals.unit_visible_enemies[observer].is_empty(), "No amount of exposure acquires an enemy outside LOS")
 	_test_distance_and_tracking(controller, observer, enemy)
+	_test_firing_reveal(controller, observer, enemy)
 	observer.surrendered = true
 	enemy.current_hex = observer.current_hex
 	Globals.unit_enemies_in_los[observer] = [enemy]
@@ -228,6 +229,55 @@ func _test_distance_and_tracking(controller: VisibilityProbe, observer: Unit, en
 	enemy.current_hex = original_hex
 	enemy.current_cube = LOSHelper.ground_layer.map_to_cube(original_hex)
 	enemy.position = LOSHelper.ground_layer.map_to_local(original_hex)
+
+
+func _test_firing_reveal(controller: VisibilityProbe, observer: Unit, enemy: Unit) -> void:
+	_prepare_case(observer, enemy, 6, 3, 0)
+	var quiet: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, observer, enemy)
+	var quiet_probability: float = MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, observer, enemy, 3.0)
+	enemy.squad_fire.add_fire_impulse(1, 10)
+	var first_shot: Dictionary = MatchVisibilityCoordinator.detection_breakdown(controller, observer, enemy)
+	_check(is_equal_approx(enemy.squad_fire.fire_recent, 0.1) and first_shot["firing_rate"] > 1.0, "One actual round produces a strong acquisition cue without requiring a full-volume squad volley")
+	_check(is_equal_approx(first_shot["identification_rate"], quiet["identification_rate"]), "The first muzzle flash reveals a contact sooner without accelerating type or strength identification")
+	var single_shot: float = _chance_during_firing_decay(controller, observer, enemy, 3.0, 0.1)
+	_check(single_shot > 0.9 and quiet_probability < 0.05, "A single shot in a house at 240 m gives over 90% first-contact chance within three seconds, while a silent silhouette stays difficult")
+	enemy.squad_fire.fire_recent = 0.1
+	var fine: float = _chance_during_firing_decay(controller, observer, enemy, 3.0, 0.05)
+	_check(absf(single_shot - fine) < 0.01, "The firing reveal window is stable across visibility refresh frequencies")
+	enemy.squad_fire.fire_recent = 1.0
+	_check(MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, observer, enemy, 1.0) > 0.95, "Sustained firing in a house at 240 m usually reveals the unidentified contact within one second")
+	_prepare_case(observer, enemy, 16, 0, 0)
+	enemy.squad_fire.add_fire_impulse(1, 10)
+	var distant_shot: float = _chance_during_firing_decay(controller, observer, enemy, 3.0, 0.1)
+	_check(distant_shot > 0.45 and distant_shot < single_shot, "A single distant muzzle flash is noticeable within three seconds but still loses strength with range")
+	for scenario: Vector3i in [Vector3i(14, 0, 5), Vector3i(17, 3, 0)]:
+		_prepare_case(observer, enemy, scenario.x, scenario.y, scenario.z)
+		enemy.squad_fire.fire_recent = 1.0
+		_check(MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, observer, enemy, 3.0) > 0.5, "Sustained distant firing can reveal a concealed contact within seconds at " + str(scenario.x) + " hexes")
+	_prepare_case(observer, enemy, 6, 3, 0)
+	var track: EnemyTrack = EnemyTrack.new(observer, enemy)
+	var tracks: Dictionary[Unit, EnemyTrack] = {enemy: track}
+	Globals.unit_enemy_tracks[observer] = tracks
+	enemy.squad_fire.add_fire_impulse(1, 10)
+	MatchVisibilityCoordinator.on_unit_shooting(controller, enemy)
+	_check(not track.is_visible and track.identification_evidence == 0.0, "A shot event cannot bypass observer-dependent acquisition or grant identification evidence")
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 1000.0)
+	_check(track.is_visible and track.observed_squad_type == -1 and track.estimated_strength_max == 0 and track.identification_evidence == 0.0, "Acquiring a shooter publishes an unidentified contact without revealing type, strength or retroactive observation")
+	track.update_not_seen(0.1)
+	Globals.unit_enemies_in_los[observer] = []
+	MatchVisibilityCoordinator.on_unit_visibility_checker_timer_timeout(controller, 1000.0)
+	_check(not track.is_visible and Globals.unit_visible_enemies[observer].is_empty(), "Even sustained firing cannot reveal the contact through blocked LOS")
+	_prepare_case(observer, enemy, 2, 0, 0)
+	_check(MatchVisibilityCoordinator.detection_breakdown(controller, observer, enemy)["firing_rate"] == 0.0, "A silent unit receives no muzzle-flash acquisition bonus")
+	print("Single-shot reveal within three seconds, house at 240 m / open at 640 m: ", single_shot, " / ", distant_shot)
+
+
+func _chance_during_firing_decay(controller: VisibilityProbe, observer: Unit, enemy: Unit, duration: float, step: float) -> float:
+	var complement: float = 1.0
+	for tick: int in range(roundi(duration / step)):
+		enemy.squad_fire.update_fire_recent(step)
+		complement *= 1.0 - MatchVisibilityCoordinator.compute_detect_prob_per_tick(controller, observer, enemy, step)
+	return 1.0 - complement
 
 
 func _check(condition: bool, message: String) -> void:

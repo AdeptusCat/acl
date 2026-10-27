@@ -9,18 +9,25 @@ confidence and remembered awareness survive.
 For an undetected candidate, the acquisition rate per simulation second is:
 
 ```
-activity_rate * distance_factor * target_transmission
-    * intervening_transmission * attention * observer_condition * search_bonus
+(activity_rate * distance_factor * target_transmission * intervening_transmission
+    + muzzle_flash_rate) * attention * observer_condition * search_bonus
 ```
 
 `distance_factor = 1 / (1 + (distance_metres / 240)^3)`. A stationary target's
 passive activity rate is `1 * distance_factor`; movement replaces that passive
 rate with `3 * movement_speed_ratio`. Posture and the fraction of soldiers
-exposing themselves multiply this passive/movement cue. Recent firing adds up
-to `6` separately, so taking cover does not conceal an actual muzzle flash. A quiet
-stationary silhouette therefore receives distance attenuation twice. Movement
-and muzzle flashes remain stronger long-range cues. All curves are continuous;
-there is no detection-range cutoff.
+exposing themselves multiply this passive/movement cue. A quiet stationary
+silhouette therefore receives distance attenuation twice.
+
+Muzzle flashes use a separate cue:
+`18 * sqrt(fire_recent) * distance_factor * 0.7^concealment * 0.7^hindrances`.
+One actual round adds 0.1 to `fire_recent`, capped at 1, and that signal decays
+with a 1.5-second half-life. The square-root response makes the first round
+noticeable without requiring the whole squad to fire. Concealment and intervening
+vegetation attenuate the flash less than a quiet silhouette; target posture
+does not hide an emitted flash. Observer attention and condition still apply.
+Movement and muzzle flashes remain stronger long-range cues. All range curves
+are continuous; there is no detection-range cutoff.
 
 The probability for an elapsed interval is `1 - exp(-rate * elapsed_seconds)`.
 One successful roll acquires the contact. Failed rolls do not subtract confidence.
@@ -39,12 +46,23 @@ Constants live in `scenes/game/match/match_visibility_coordinator.gd`.
 | Distance factor | `1 / (1 + (distance_metres / 240)^3)` |
 | Stationary target passive rate | `1 * distance_factor` per second |
 | Moving target base rate | 3 per second |
-| Recent firing | Adds up to 6 per second before other modifiers |
+| Muzzle-flash base rate | `18 * sqrt(fire_recent)` per second |
 | Target concealment transmission | `0.35 ^ concealment_strength` |
 | Intervening concealment transmission | `0.55 ^ crossed_hex_count` |
+| Muzzle-flash concealment transmission | `0.7 ^ concealment_strength` |
+| Muzzle-flash intervening transmission | `0.7 ^ crossed_hex_count` |
 | Moving observer | 0.65 multiplier |
 | Observer under fire | 0.85 multiplier |
 | Pinned observer | Additional 0.6 multiplier |
+
+For a healthy, focused observer with no intervening hindrances, a single shot
+from a house at 240 m now gives over 90% acquisition probability within three
+seconds, including signal decay. Sustained firing there gives over 95% within
+one second. A single shot in the open at 640 m gives about 50% within three
+seconds. These probabilities apply to the first unidentified contact. Firing
+does not accelerate the separate visual type/strength identification process
+or reveal the stress bar before identification. Blocking LOS still prevents
+acquisition altogether. Silent-target tuning remains as shown below.
 
 ## Movement pace and exposure
 
