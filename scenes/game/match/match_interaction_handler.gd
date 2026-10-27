@@ -35,6 +35,11 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 	if controller.ground_layer.get_cell_source_id(map_hex) == -1:
 		return "Choose a hex on the battlefield."
 	match option:
+		WheelOption.Option.WATCH:
+			if not unit.get_watch_restriction().is_empty():
+				return unit.get_watch_restriction()
+			if map_hex == unit.current_hex:
+				return "Choose another hex to set the watch direction."
 		WheelOption.Option.MOVE_NORMAL:
 			if unit.stress_system.state == STATES.MoraleState.PINNED:
 				return "Pinned: use Rout to attempt escape."
@@ -101,6 +106,11 @@ static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option
 	var unit: Unit = controller.selected_unit
 	var glow_hex: Vector2i = map_hex
 	match option:
+		WheelOption.Option.WATCH:
+			var target: Vector2 = controller.ground_layer.to_global(controller.ground_layer.map_to_local(map_hex))
+			if not unit.set_watch_direction(target - unit.global_position):
+				controller.order_feedback.emit(false, command, "Cannot set this watch direction.")
+				return false
 		WheelOption.Option.MOVE_NORMAL:
 			unit.order(Globals.UnitCmd.MOVE, map_hex)
 		WheelOption.Option.FIRE_AT:

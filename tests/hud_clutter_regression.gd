@@ -96,7 +96,7 @@ func _run() -> void:
 	_pointer_event(_screen_rect(settings.controls_button).get_center(), MouseButton.MOUSE_BUTTON_LEFT)
 	await _settle()
 	_check(settings.controls_panel.visible and not settings.menu.visible and not settings.settings_button.button_pressed, "Controls opens separately and closes Settings")
-	_check(settings.control_rows.get_child_count() == 8, "The controls panel describes selection, roster, orders, cancellation, camera, zoom and closing")
+	_check(settings.control_rows.get_child_count() == 9, "The controls panel describes selection, roster, orders, watch sectors, cancellation, camera, zoom and closing")
 	var readable: bool = true
 	for row: HBoxContainer in settings.control_rows.get_children():
 		for label: Label in row.get_children():

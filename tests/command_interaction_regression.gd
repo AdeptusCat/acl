@@ -43,11 +43,12 @@ func _run() -> void:
 	_right_open(target_point)
 	await _settle()
 	_check(wheel.is_open() and wheel.selected_label.text == "Move", "Right click opens the wheel with Move in the center")
-	_check(wheel.options.size() == 5 and wheel.options[0].option == WheelOption.Option.MOVE_NORMAL and wheel.options[1].option == WheelOption.Option.FIRE_AT and wheel.options[2].option == WheelOption.Option.STOP and wheel.options[3].option == WheelOption.Option.NONE and wheel.options[4].option == WheelOption.Option.ROUT, "Rout joins the wheel while Move stays in the center")
-	_check(wheel.get_option_point(0) == Vector2.ZERO and is_zero_approx(wheel.get_option_point(1).x) and wheel.get_option_point(1).y < 0.0 and wheel.get_option_point(2).x < 0.0 and is_zero_approx(wheel.get_option_point(2).y) and is_zero_approx(wheel.get_option_point(3).x) and wheel.get_option_point(3).y > 0.0 and wheel.get_option_point(4).x > 0.0, "Move is centered, with Fire above, Stop left, Cancel below and Rout right")
+	_check(wheel.options.size() == 6 and wheel.options[0].option == WheelOption.Option.MOVE_NORMAL and wheel.options[1].option == WheelOption.Option.FIRE_AT and wheel.options[2].option == WheelOption.Option.STOP and wheel.options[3].option == WheelOption.Option.NONE and wheel.options[4].option == WheelOption.Option.ROUT and wheel.options[5].option == WheelOption.Option.WATCH, "Watch joins the wheel while Move stays in the center and existing command indices remain stable")
+	_check(wheel.get_option_point(0) == Vector2.ZERO and is_zero_approx(wheel.get_option_point(1).x) and wheel.get_option_point(1).y < 0.0 and wheel.get_option_point(2).x < 0.0 and wheel.get_option_point(3).y > 0.0 and wheel.get_option_point(4).x > 0.0 and wheel.get_option_point(5).x > 0.0 and wheel.get_option_point(5).y < 0.0, "The expanded wheel keeps Fire above, Stop and Cancel left, and Rout and Watch right")
 	for index: int in range(1, wheel.options.size()):
 		_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(index))
 		_check(wheel.selected_label.text.begins_with(WheelOption.COMMAND_NAMES[wheel.options[index].option]), "Pointing at each outer command selects its displayed label")
+	_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(4))
 	_check(wheel.selected_label.text == "Rout · attempt escape" and wheel.restriction_label.text == "Available while pinned.", "Rout remains visible with its restriction for a fresh squad")
 	_motion(wheel.get_global_transform_with_canvas() * wheel.get_option_point(0))
 	_check(wheel.selected_label.text == "Move", "Pointing at Move displays the command prominently")
@@ -86,6 +87,12 @@ func _run() -> void:
 	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(2))
 	_check(unit.action_controller.action_state == SquadActionController.SquadActionState.NO_ORDER and not unit.movement.is_moving, "Stop clears the pending movement order")
 	_check(_feedback_title(world).contains("Order accepted · Stop"), "Stop reports acceptance")
+	_right_open(target_point)
+	await _settle()
+	_right_release(wheel.get_global_transform_with_canvas() * wheel.get_option_point(5))
+	_check(unit.has_watch_order() and unit.watch_direction.is_equal_approx(unit.global_position.direction_to(ground.to_global(ground.map_to_local(destination)))) and unit.action_controller.action_state == SquadActionController.SquadActionState.NO_ORDER, "Watch uses the original pointer's hex through actual input without creating movement")
+	_check(_feedback_title(world).contains("Order accepted · Watch"), "Watch reports acceptance")
+	unit.clear_watch_order()
 	unit.movement._process_movement(0.1)
 	# Exercise a real in-flight return through the command acceptance path.
 	controller.order_via_option_wheel(destination, WheelOption.Option.MOVE_NORMAL)
@@ -231,7 +238,7 @@ func _check_enemy_inspection(world: Node, friendly: Unit, destination: Vector2i)
 	_check(controller.selected_unit == enemy and panel.unit == enemy and panel.visible, "A visible enemy opens squad details for inspection")
 	_check(not panel.rout_button.visible and not panel.debug_actions.visible, "Enemy inspection hides rout and debug action buttons")
 	var order_before: int = enemy.action_controller.action_order_id
-	for option: WheelOption.Option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.FIRE_AT, WheelOption.Option.STOP, WheelOption.Option.ROUT]:
+	for option: WheelOption.Option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.FIRE_AT, WheelOption.Option.STOP, WheelOption.Option.ROUT, WheelOption.Option.WATCH]:
 		_check(not controller.order_via_option_wheel(destination, option) and str(feedback.back()["explanation"]).contains("inspected"), "Enemy inspection rejects command " + MatchInteractionHandler.command_name(option))
 	var kill_count: int = Debug.units_to_kill.size()
 	var soldier_count: int = Debug.units_soldier_to_kill.size()

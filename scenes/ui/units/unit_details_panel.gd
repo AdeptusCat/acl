@@ -35,6 +35,10 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var summary: VBoxContainer = $Scroll/Summary
 @onready var pace_row: HBoxContainer = $Scroll/Summary/Pace
 @onready var pace: OptionButton = $Scroll/Summary/Pace/Choice
+@onready var watch_row: VBoxContainer = $Scroll/Summary/Watch
+@onready var watch_width: OptionButton = $Scroll/Summary/Watch/Controls/Width
+@onready var watch_automatic: Button = $Scroll/Summary/Watch/Controls/Automatic
+@onready var watch_status: Label = $Scroll/Summary/Watch/Status
 @onready var spotting_section: FoldableContainer = $Scroll/Summary/Spotting
 @onready var spotting_target: OptionButton = $Scroll/Summary/Spotting/Content/Target
 @onready var spotting_factors: Label = $Scroll/Summary/Spotting/Content/Factors
@@ -71,6 +75,11 @@ func _ready() -> void:
 	pace.add_item("Cautious", UnitMovement.Stance.CROUCHED)
 	pace.add_item("Fast", UnitMovement.Stance.RUNNING)
 	pace.item_selected.connect(_on_pace_selected)
+	watch_width.add_item("Narrow · 60°", Unit.WatchWidth.NARROW)
+	watch_width.add_item("Normal · 120°", Unit.WatchWidth.NORMAL)
+	watch_width.add_item("Wide · 180°", Unit.WatchWidth.WIDE)
+	watch_width.item_selected.connect(_on_watch_width_selected)
+	watch_automatic.pressed.connect(_on_watch_automatic_pressed)
 	spotting_target.item_selected.connect(_on_spotting_target_selected)
 	spotting_section.folding_changed.connect(_on_spotting_folded)
 	rout_button.set_rout_available(false)
@@ -234,8 +243,9 @@ func _refresh_summary() -> void:
 	if _restricted_enemy():
 		_refresh_enemy_summary()
 		return
-	for control: Control in [command_label, order_label, details_section, roster_section, pace_row]:
+	for control: Control in [command_label, order_label, details_section, roster_section, pace_row, watch_row]:
 		control.show()
+	_refresh_watch_controls()
 	observation_label.hide()
 	if strength_label.get_theme_font_size("font_size") != 26:
 		strength_label.add_theme_font_size_override("font_size", 26)
@@ -287,7 +297,7 @@ func _refresh_enemy_summary() -> void:
 	observation_label.visible = not str(report.get("activity", "")).is_empty()
 	observation_label.text = "Observed: " + str(report.get("activity", ""))
 	observation_label.tooltip_text = "Activity recorded during the latest visible observation."
-	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, rout_button, rout_explanation]:
+	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, watch_row, rout_button, rout_explanation]:
 		control.hide()
 	debug_actions.hide()
 
@@ -295,6 +305,43 @@ func _refresh_enemy_summary() -> void:
 func _on_pace_selected(index: int) -> void:
 	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement):
 		unit.movement.stance = pace.get_item_id(index) as UnitMovement.Stance
+
+
+func _can_change_watch() -> bool:
+	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit) or not unit.get_watch_restriction().is_empty():
+		return false
+	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
+	return controller != null and MatchInteractionHandler.command_restriction(controller, unit.current_hex, WheelOption.Option.STOP).is_empty()
+
+
+func _refresh_watch_controls() -> void:
+	var allowed: bool = _can_change_watch()
+	watch_width.disabled = not allowed
+	watch_automatic.disabled = not allowed or not unit.has_watch_order()
+	watch_width.select(watch_width.get_item_index(unit.watch_width))
+	watch_status.text = "Automatic attention"
+	if unit.has_watch_order():
+		watch_status.text = "Watching assigned sector"
+		if unit.tactical_state != null and unit.tactical_state.watch_diverted:
+			watch_status.text = "Attention temporarily diverted"
+		elif unit.is_moving:
+			watch_status.text = "Moving · reduced watch"
+
+
+func _on_watch_width_selected(index: int) -> void:
+	if not is_instance_valid(unit):
+		return
+	if _can_change_watch():
+		unit.set_watch_width(watch_width.get_item_id(index) as Unit.WatchWidth)
+	_refresh_summary()
+
+
+func _on_watch_automatic_pressed() -> void:
+	if not is_instance_valid(unit):
+		return
+	if _can_change_watch():
+		unit.clear_watch_order()
+	_refresh_summary()
 
 
 func _refresh_spotting() -> void:

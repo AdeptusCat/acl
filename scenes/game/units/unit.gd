@@ -126,6 +126,10 @@ var retreat_target_hex: Vector2i = Vector2i()
 var effective_range: int = 0
 var in_close_combat: bool = false
 
+enum WatchWidth { NARROW, NORMAL, WIDE }
+var watch_direction: Vector2 = Vector2.ZERO
+var watch_width: WatchWidth = WatchWidth.NORMAL
+
 var highest_rank_grade: RankGrades.Grade = RankGrades.Grade.SOLDIER
 
 @export var squads_collection: SquadsCollection
@@ -598,6 +602,51 @@ func _on_morale_breaks() -> void:
 		#deselect_unit.emit(self)
 		#deselect()
 	broken = true
+	clear_watch_order()
+
+
+func has_watch_order() -> bool:
+	return not watch_direction.is_zero_approx()
+
+
+func watch_arc_radians() -> float:
+	return deg_to_rad(60.0 * float(watch_width + 1))
+
+
+func get_watch_restriction() -> String:
+	if not is_active() or members_alive <= 0:
+		return "Select an active squad."
+	if surrendered:
+		return "This squad has surrendered."
+	if broken:
+		return "This squad is routed."
+	if in_close_combat:
+		return "Cannot issue orders during close combat."
+	return ""
+
+
+func set_watch_direction(direction: Vector2) -> bool:
+	if not get_watch_restriction().is_empty() or not direction.is_finite() or direction.is_zero_approx():
+		return false
+	watch_direction = direction.normalized()
+	if tactical_state != null:
+		tactical_state.update_attention(self)
+	return true
+
+
+func set_watch_width(width: WatchWidth) -> bool:
+	if not get_watch_restriction().is_empty() or width < WatchWidth.NARROW or width > WatchWidth.WIDE:
+		return false
+	watch_width = width
+	if tactical_state != null:
+		tactical_state.update_attention(self)
+	return true
+
+
+func clear_watch_order() -> void:
+	watch_direction = Vector2.ZERO
+	if tactical_state != null:
+		tactical_state.update_attention(self)
 
 
 func _on_morale_recovered() -> void:
@@ -941,8 +990,7 @@ func surrender() -> void:
 	Globals.units_destroyed.units_collection[enemy_team].units.append(self)
 	movement.stop()
 	surrendered = true
-	if tactical_state != null:
-		tactical_state.update_attention(self)
+	clear_watch_order()
 	#alive = false
 	broken = false
 	for candidate: Unit in Globals.get_units():
@@ -956,8 +1004,7 @@ func exit_map(record_event: bool = true) -> void:
 	if not is_active() or surrendered:
 		return
 	exited = true
-	if tactical_state != null:
-		tactical_state.update_attention(self)
+	clear_watch_order()
 	position = LOSHelper.ground_layer.map_to_local(current_hex)
 	is_moving = false
 	movement.is_moving = false
@@ -1008,6 +1055,7 @@ func can_rout() -> bool:
 func request_rout() -> bool:
 	if not can_rout():
 		return false
+	clear_watch_order()
 	if stress_system.state == STATES.MoraleState.PANIC:
 		# A completed rout can leave morale in panic; no state-change signal fires again.
 		action_controller.on_morale_state_changed(STATES.MoraleState.PANIC, STATES.MoraleState.PANIC)
@@ -1020,8 +1068,7 @@ func die() -> void:
 	if not is_active():
 		return
 	alive = false
-	if tactical_state != null:
-		tactical_state.update_attention(self)
+	clear_watch_order()
 	# Direct elimination must retain the remaining men and equipment as casualties.
 	var remaining_members: int = squad_fire.soldiers.size()
 	for soldier: Soldier in squad_fire.soldiers:

@@ -184,8 +184,7 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 			var p_tick: float = controller._compute_detect_prob_per_tick(unit, enemy_tracked, elapsed_seconds)
 			# Acquisition is one time-scaled event. Failed rolls do not erase evidence.
 			if randf() < p_tick:
-				track.reaction_focus_direction = unit.tactical_state.focus_direction
-				track.acquired_at_s = unit._now()
+				_snapshot_reaction_attention(unit, track)
 				track.confidence = maxf(track.confidence, EnemyTrack.VISIBLE_CONF_THRESHOLD)
 				track.acquire_detection()
 				units_visible.append(enemy_tracked)
@@ -213,6 +212,8 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 				track_map[unit_in_current_hex] = same_hex_track
 			if same_hex_track.is_visible and units_visible_by_this_unit.has(unit_in_current_hex):
 				same_hex_track.observe_details(MAX_IDENTIFICATION_EVIDENCE_RATE, elapsed_seconds)
+			else:
+				_snapshot_reaction_attention(unit, same_hex_track)
 
 			same_hex_track.confidence = 1.0
 			same_hex_track.acquire_detection()
@@ -227,6 +228,14 @@ static func on_unit_visibility_checker_timer_timeout(controller: Node2D, elapsed
 	for unit: Unit in Globals.get_units():
 		unit.tactical_state.update_attention(unit)
 	controller.show_visible_units()
+
+
+static func _snapshot_reaction_attention(observer: Unit, track: EnemyTrack) -> void:
+	track.reaction_focus_direction = observer.tactical_state.focus_direction
+	track.reaction_attention_width = observer.tactical_state.attention_width
+	track.reaction_focus_strength = observer.tactical_state.focus_strength
+	track.reaction_watch_focus = observer.tactical_state.watch_focus_active
+	track.acquired_at_s = observer._now()
 
 
 static func compute_detect_prob_per_tick(controller: Node2D, observer: Unit, enemy: Unit, delta: float) -> float:

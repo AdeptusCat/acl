@@ -169,7 +169,10 @@ func _update_facing() -> void:
 			_face_direction(unit_container.to_global(unit.movement.target_position) - unit.global_position)
 		return
 	if idle_texture_rect.visible:
-		_face_direction(_general_enemy_direction(unit))
+		if unit.has_watch_order() and unit.tactical_state != null and not unit.tactical_state.focus_direction.is_zero_approx():
+			_face_direction(unit.tactical_state.focus_direction)
+		else:
+			_face_direction(_general_enemy_direction(unit))
 
 
 func _general_enemy_direction(unit: Unit) -> Vector2:

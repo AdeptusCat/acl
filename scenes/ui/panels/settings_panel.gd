@@ -10,6 +10,7 @@ const CONTROL_HINTS: Dictionary[String, String] = {
 	"Roster row": "Select and center squad",
 	"Hold right click": "Open the order wheel",
 	"Release right click": "Issue the selected order",
+	"Watch order": "Set sector; width in details",
 	"Esc / left click": "Cancel an open command wheel",
 	"WASD / arrows": "Move the camera",
 	"Mouse wheel": "Zoom the battlefield",

@@ -119,6 +119,7 @@ func _on_draw_los_to_enemy(from_hex: Vector2i, to_hex: Vector2i) -> void:
 
 
 func _draw() -> void:
+	_draw_selected_watch_sectors()
 	_draw_selected_target()
 	_draw_player_routes()
 	if Debug.show_los_lines:
@@ -195,6 +196,39 @@ func _counter_edge(unit: Unit, toward: Vector2) -> Vector2:
 	var direction: Vector2 = (transform.affine_inverse() * toward - half_size).normalized()
 	var reach: float = minf(half_size.x / maxf(absf(direction.x), 0.001), half_size.y / maxf(absf(direction.y), 0.001))
 	return transform * (half_size + direction * reach)
+
+
+func _watch_sector_points(unit: Unit) -> PackedVector2Array:
+	if not is_instance_valid(unit) or not unit.selected or not unit.is_active() or unit.surrendered or not unit.has_watch_order() or not unit.is_visible_in_tree():
+		return PackedVector2Array()
+	if unit.team != Globals.team_player and not Debug.enemy_selectable:
+		return PackedVector2Array()
+	if not is_instance_valid(unit.ui) or not unit.ui.is_node_ready():
+		return PackedVector2Array()
+	var radius: float = 160.0
+	if is_instance_valid(LOSHelper.ground_layer) and LOSHelper.ground_layer.tile_set != null:
+		radius = float(LOSHelper.ground_layer.tile_set.tile_size.x) * 2.5
+	var origin: Vector2 = _counter_center(unit)
+	var points: PackedVector2Array = PackedVector2Array([to_local(origin)])
+	var half_width: float = unit.watch_arc_radians() * 0.5
+	for step: int in range(33):
+		var angle: float = lerpf(-half_width, half_width, float(step) / 32.0)
+		points.append(to_local(origin + unit.watch_direction.rotated(angle) * radius))
+	points.append(to_local(origin))
+	return points
+
+
+func _draw_selected_watch_sectors() -> void:
+	var pixel: float = 1.0 / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)
+	for unit: Unit in Globals.get_units():
+		var points: PackedVector2Array = _watch_sector_points(unit)
+		if points.is_empty():
+			continue
+		var tint: Color = Color(0.9, 0.74, 0.39)
+		if unit.tactical_state != null and unit.tactical_state.watch_diverted:
+			tint = Color(0.66, 0.67, 0.62)
+		draw_colored_polygon(points.slice(0, points.size() - 1), Color(tint, 0.07))
+		draw_polyline(points, Color(tint, 0.7), 1.5 * pixel, true)
 
 
 func _draw_selected_target() -> void:

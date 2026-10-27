@@ -10,6 +10,7 @@ enum Option {
 	ASSAULT,
 	STOP,
 	ROUT,
+	WATCH,
 }
 
 const COMMAND_NAMES: Dictionary[Option, String] = {
@@ -21,6 +22,7 @@ const COMMAND_NAMES: Dictionary[Option, String] = {
 	Option.ASSAULT: "Assault",
 	Option.STOP: "Stop",
 	Option.ROUT: "Rout",
+	Option.WATCH: "Watch",
 }
 
 @export var option: Option = Option.NONE

@@ -433,7 +433,6 @@ layout_mode = 1
 anchors_preset = 0
 grow_horizontal = 1
 grow_vertical = 1
-options = Array[ExtResource("26_vnqvi")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_yy7ol"), SubResource("AtlasTexture_rout")])
 
 [node name="SelectionWheel" parent="Control" unique_id=266719107 instance=ExtResource("25_o71gb")]
 visible = false

@@ -11,6 +11,9 @@ var last_known_global_position: Vector2 = Vector2.ZERO
 
 # Preserve the pre-contact attention for the first individual reactions.
 var reaction_focus_direction: Vector2 = Vector2.ZERO
+var reaction_attention_width: float = TAU
+var reaction_focus_strength: float = 1.0
+var reaction_watch_focus: bool = false
 var acquired_at_s: float = -INF
 
 const SEARCH_MEMORY_S: float = 8.0

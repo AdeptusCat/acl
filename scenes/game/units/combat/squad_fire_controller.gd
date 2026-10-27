@@ -723,15 +723,26 @@ func _begin_soldier_engagement(soldier: Soldier, enemy: Unit, cell: Vector2i) ->
 	var distance: int = LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(cell))
 	var alignment: float = 1.0
 	var focus: Vector2 = Vector2.ZERO
+	var width: float = TAU
+	var strength: float = 1.0
+	var watching: bool = false
 	if unit.tactical_state != null:
 		focus = unit.tactical_state.focus_direction
+		width = unit.tactical_state.attention_width
+		strength = unit.tactical_state.focus_strength
+		watching = unit.tactical_state.watch_focus_active
 	var track: EnemyTrack = Globals.unit_enemy_tracks.get(unit, {}).get(enemy, null) as EnemyTrack
 	if track != null and unit._now() - track.acquired_at_s <= 1.0:
 		focus = track.reaction_focus_direction
+		width = track.reaction_attention_width
+		strength = track.reaction_focus_strength
+		watching = track.reaction_watch_focus
 	if not focus.is_zero_approx():
 		var direction: Vector2 = unit.global_position.direction_to(LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(cell)))
 		var angle: float = absf(focus.angle_to(direction))
 		alignment = 1.0 - smoothstep(0.0, PI, angle)
+		if watching:
+			alignment = SquadTacticalState.watch_reaction_alignment(direction, focus, width, strength)
 	soldier.begin_engagement(enemy, cell, distance, alignment)
 
 

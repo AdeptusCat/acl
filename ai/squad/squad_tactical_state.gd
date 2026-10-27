@@ -40,6 +40,10 @@ var focus_strength: float = 0.0
 var attention_width: float = TAU
 var attention_quality: float = 0.0
 var has_contact: bool = false
+var watch_focus_active: bool = false
+var watch_diverted: bool = false
+var focus_detection_multiplier: float = FOCUSED_DETECTION_MULTIPLIER
+var peripheral_detection_multiplier: float = PERIPHERAL_DETECTION_MULTIPLIER
 # Raw demand, clockwise from world-space east. Opposing contacts remain separate.
 var directional_demand: PackedFloat32Array = PackedFloat32Array()
 var total_directional_demand: float = 0.0
@@ -85,6 +89,10 @@ func _update_focus(unit: Unit) -> void:
 	attention_width = TAU
 	attention_quality = 0.0
 	has_contact = false
+	watch_focus_active = false
+	watch_diverted = false
+	focus_detection_multiplier = FOCUSED_DETECTION_MULTIPLIER
+	peripheral_detection_multiplier = PERIPHERAL_DETECTION_MULTIPLIER
 	directional_demand.resize(DEMAND_SECTOR_COUNT)
 	directional_demand.fill(0.0)
 	total_directional_demand = 0.0
@@ -105,6 +113,9 @@ func _update_focus(unit: Unit) -> void:
 	update_fire_pressure(unit._now())
 
 	var contact_direction: Vector2 = Vector2.ZERO
+	var watching_order: bool = unit.has_watch_order() and not unit.broken
+	var urgent_direction: Vector2 = Vector2.ZERO
+	var urgent_weight: float = 0.0
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
 	var tracks: Dictionary = Globals.unit_enemy_tracks.get(unit, {})
 	var observed: Array[Unit] = []
@@ -121,6 +132,12 @@ func _update_focus(unit: Unit) -> void:
 			firing = clampf(enemy.squad_fire.fire_recent, 0.0, 1.0)
 			urgency += firing
 		contact_direction += _add_directional_demand(enemy.global_position - unit.global_position, urgency)
+		if watching_order and is_instance_valid(LOSHelper.ground_layer):
+			var distance: int = LOSHelper.get_hex_distance(unit.current_hex, enemy.current_hex)
+			var weight: float = urgency * float(3 - distance)
+			if distance <= 2 and weight > urgent_weight and not enemy.global_position.is_equal_approx(unit.global_position):
+				urgent_weight = weight
+				urgent_direction = unit.global_position.direction_to(enemy.global_position)
 
 	var enemy_direction: Vector2 = Vector2.ZERO
 	for index: int in range(DEMAND_SECTOR_COUNT):
@@ -128,6 +145,10 @@ func _update_focus(unit: Unit) -> void:
 			# Incoming fire provides a bearing, without identifying or revealing its source.
 			var suppression: float = _suppression_weight(index, unit._now()) * INCOMING_SUPPRESSION_DEMAND
 			enemy_direction += _add_directional_weight(_incoming_fire_directions[index], incoming_fire_demand[index], suppression)
+			var weight: float = incoming_fire_demand[index] * 3.0
+			if incoming_fire_demand[index] >= 0.15 and weight > urgent_weight:
+				urgent_weight = weight
+				urgent_direction = _incoming_fire_directions[index]
 	for enemy: Unit in tracks:
 		if not is_instance_valid(enemy) or not enemy.is_active() or enemy.surrendered or enemy.team == unit.team:
 			continue
@@ -138,6 +159,27 @@ func _update_focus(unit: Unit) -> void:
 			continue
 		# Hidden units contribute only their recorded position, never their live position.
 		enemy_direction += _add_directional_demand(track.last_known_global_position - unit.global_position, track.awareness * 0.5)
+	if watching_order:
+		if unit.attackState != Unit.AttackState.AUTO and is_instance_valid(unit.squad_fire) and unit.squad_fire.has_target_hex and is_instance_valid(LOSHelper.ground_layer):
+			var fire_direction: Vector2 = _hex_offset(unit, unit.squad_fire.target_hex).normalized()
+			if not fire_direction.is_zero_approx():
+				urgent_direction = fire_direction
+		if not urgent_direction.is_zero_approx():
+			watch_diverted = true
+			_set_attention(urgent_direction, 1.0, PI / 2.0)
+			return
+		if not unit.in_close_combat:
+			var strength: float = 1.0
+			if unit.is_moving or (is_instance_valid(unit.movement) and unit.movement.is_moving):
+				strength = 0.45
+			if has_contact:
+				strength *= 0.8
+			watch_focus_active = true
+			focus_detection_multiplier = lerpf(1.65, 1.15, float(unit.watch_width) / 2.0)
+			peripheral_detection_multiplier = lerpf(0.3, 0.65, float(unit.watch_width) / 2.0)
+			_set_attention(unit.watch_direction, strength, unit.watch_arc_radians())
+			return
+		watch_diverted = true
 	if has_contact:
 		_set_attention(contact_direction + enemy_direction, 1.0, PI / 2.0)
 		return
@@ -326,10 +368,18 @@ func detection_multiplier(direction: Vector2) -> float:
 	var half_width: float = clampf(attention_width * 0.5, 0.001, PI)
 	var directional_rate: float = 1.0
 	if angle <= half_width:
-		directional_rate = lerpf(FOCUSED_DETECTION_MULTIPLIER, 1.0, smoothstep(0.0, half_width, angle))
+		directional_rate = lerpf(focus_detection_multiplier, 1.0, smoothstep(0.0, half_width, angle))
 	else:
-		directional_rate = lerpf(1.0, PERIPHERAL_DETECTION_MULTIPLIER, smoothstep(half_width, PI, angle))
+		directional_rate = lerpf(1.0, peripheral_detection_multiplier, smoothstep(half_width, PI, angle))
 	return detection_quality * lerpf(1.0, directional_rate, focus_strength)
+
+
+static func watch_reaction_alignment(direction: Vector2, focus: Vector2, width: float, strength: float) -> float:
+	if direction.is_zero_approx() or focus.is_zero_approx():
+		return 0.5
+	var angle: float = absf(focus.angle_to(direction))
+	var coverage: float = 1.0 - smoothstep(clampf(width * 0.5, 0.001, PI - 0.001), PI, angle)
+	return lerpf(0.5, coverage, clampf(strength, 0.0, 1.0))
 
 
 func _attention_quality(unit: Unit) -> float:

@@ -10,6 +10,8 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 	data.map_unit_id = unit.map_unit_id
 	data.unit_scene_path = unit.scene_file_path
 	data.team = unit.team
+	data.watch_direction = unit.watch_direction
+	data.watch_width = unit.watch_width
 	if is_instance_valid(unit.movement):
 		data.movement_stance = unit.movement.stance
 	data.casualty_records.assign(unit.casualty_records)
@@ -47,6 +49,12 @@ static func apply_save_data(unit: Unit, data: UnitSaveData) -> void:
 		#var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
 	
 	unit._setup_runtime_soldiers(data.squad_loadout)
+	unit.watch_width = clampi(data.watch_width, Unit.WatchWidth.NARROW, Unit.WatchWidth.WIDE) as Unit.WatchWidth
+	unit.watch_direction = Vector2.ZERO
+	if data.watch_direction.is_finite() and unit.get_watch_restriction().is_empty():
+		unit.watch_direction = data.watch_direction.normalized()
+	if unit.tactical_state != null:
+		unit.tactical_state.update_attention(unit)
 	unit.casualty_records.assign(data.casualty_records)
 	Globals.import_casualty_records(unit.casualty_records)
 	if data.exited:

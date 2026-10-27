@@ -186,6 +186,8 @@ func _update_status() -> void:
 		selected_label.text = "Rout · attempt escape"
 		restriction_label.text = "Uncontrolled retreat.\nNo escape route means surrender."
 		color = ROUT_COLOR
+	elif command == WheelOption.Option.WATCH:
+		restriction_label.text = "Watch toward this hex.\nAdjust the arc in squad details."
 	if not reason.is_empty():
 		restriction_label.text = reason
 		color = Color(0.96, 0.62, 0.43)

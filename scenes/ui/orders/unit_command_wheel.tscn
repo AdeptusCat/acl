@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://3pikgwnx3em6" path="res://assets/status/idle_ger.png" id="5_7182e"]
 [ext_resource type="Texture2D" uid="uid://bqxj0vhj8e7xy" path="res://assets/status/shooting_ger.png" id="6_440tw"]
 [ext_resource type="Texture2D" path="res://assets/ui/hud/rout.svg" id="7_rout"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/cautious.svg" id="8_watch"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_u3j7b"]
 atlas = ExtResource("3_7182e")
@@ -43,6 +44,12 @@ script = ExtResource("2_qi7m7")
 option = 7
 metadata/_custom_type_script = "uid://jcslscqj1lw"
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_watch"]
+atlas = ExtResource("8_watch")
+region = Rect2(0, 0, 32, 32)
+script = ExtResource("2_qi7m7")
+option = 8
+
 [node name="SelectionWheel" type="Control" unique_id=273686875]
 z_index = 20
 layout_mode = 0
@@ -59,4 +66,4 @@ highlight_color = Color(0.29, 0.28, 0.19, 1)
 outer_radius = 140
 inner_radius = 40
 line_width = 1
-options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_fkrsx"), SubResource("AtlasTexture_rout")])
+options = Array[ExtResource("2_qi7m7")]([SubResource("AtlasTexture_u3j7b"), SubResource("AtlasTexture_fff2e"), SubResource("AtlasTexture_ia5md"), SubResource("AtlasTexture_fkrsx"), SubResource("AtlasTexture_rout"), SubResource("AtlasTexture_watch")])

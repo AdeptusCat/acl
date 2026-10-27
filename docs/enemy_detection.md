@@ -192,6 +192,13 @@ at its boundary, and falls toward 0.35 behind the squad. Focus strength blends
 these rates toward neutral; ordinary pre-contact strength is at most 0.6.
 Switching focus temporarily reduces observation by up to 35 percent.
 
+Explicit [watch sectors](watch_sectors.md) replace the automatic expectation
+with a persistent bearing and a 60°, 120° or 180° arc. Their centre/rear
+multipliers range from 1.65/0.30 for narrow sectors to 1.15/0.65 for wide ones.
+Nearby detected threats, received fire and explicit fire orders can temporarily
+divert attention. Acquisition snapshots preserve the watch direction and width
+for individual first reactions, before the squad turns toward the new contact.
+
 Observation capacity uses the square root of surviving observers relative to
 `max(original_size, 10)`. Cohesion contributes 0.75–1.0, stress contributes
 1.0–0.9, and morale contributes normal 1.0, cautious 0.9, pinned 0.8, panic

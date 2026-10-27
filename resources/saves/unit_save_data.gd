@@ -18,3 +18,5 @@ class_name UnitSaveData
 @export var cohesion: float = 1.0
 @export var state: int = 0
 @export var movement_stance: int = 0
+@export var watch_direction: Vector2 = Vector2.ZERO
+@export var watch_width: int = Unit.WatchWidth.NORMAL
