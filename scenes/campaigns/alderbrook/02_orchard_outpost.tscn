@@ -130,6 +130,12 @@ script = ExtResource("50_fknkq")
 required_unit_count = 3
 test_at_scenario_end = true
 
+[sub_resource type="Resource" id="Resource_y3qnw"]
+script = ExtResource("49_w2yj8")
+objective_id = 2
+test_at_scenario_end = true
+metadata/_custom_type_script = "uid://cryk5wbke0nxs"
+
 [sub_resource type="Resource" id="Resource_dlmmx"]
 script = ExtResource("21_dn6qs")
 nickname = "Platoon Seargeant"
@@ -385,7 +391,7 @@ duration_s = 600.0
 use_authored_duration = true
 released = true
 player_team = 1
-victory_conditions = Array[ExtResource("48_mifp1")]([SubResource("Resource_wh05p"), SubResource("Resource_1dt80"), SubResource("Resource_ukdny"), SubResource("Resource_tnr7k"), SubResource("Resource_jyj6a")])
+victory_conditions = Array[ExtResource("48_mifp1")]([SubResource("Resource_wh05p"), SubResource("Resource_1dt80"), SubResource("Resource_ukdny"), SubResource("Resource_tnr7k"), SubResource("Resource_jyj6a"), SubResource("Resource_y3qnw")])
 axis_ai_status = 1
 allies_ai_status = 0
 
@@ -393,6 +399,7 @@ allies_ai_status = 0
 
 [node name="CA_P1_S0_Allies_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=437630089 instance=ExtResource("19_svlok")]
 position = Vector2(66, 700)
+map_unit_id = "05d5d0b3e2ae9c0e77fca5d54fa72010"
 platoon = 1
 team = 1
 loadouts = Array[ExtResource("21_dn6qs")]([ExtResource("22_gu2vp"), SubResource("Resource_dlmmx"), SubResource("Resource_ahjmf"), SubResource("Resource_asadm"), SubResource("Resource_ihjum")])
@@ -405,6 +412,7 @@ squad_type = 4
 
 [node name="CA_P1_S1_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=1636835219 instance=ExtResource("19_svlok")]
 position = Vector2(54, 595)
+map_unit_id = "77bf41cce6a8fce13c36e9e3e4c8cc8d"
 squad = 1
 platoon = 1
 team = 1
@@ -417,6 +425,7 @@ formation_id = 1
 
 [node name="CA_P1_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=820879368 instance=ExtResource("19_svlok")]
 position = Vector2(65, 1102)
+map_unit_id = "7723d06e3c26d1c2effcedf26d298dd3"
 squad = 2
 platoon = 1
 team = 1
@@ -429,6 +438,7 @@ formation_id = 1
 
 [node name="CA_P1_S3_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=923545547 instance=ExtResource("19_svlok")]
 position = Vector2(56, 1323)
+map_unit_id = "f14ff736f4e41d7872b530c086b2e19c"
 squad = 3
 platoon = 1
 team = 1
@@ -441,6 +451,7 @@ formation_id = 1
 
 [node name="CA_P1_S4_Allies_MG" parent="Scenarios/Mission/Units" unique_id=2133865710 instance=ExtResource("19_svlok")]
 position = Vector2(56, 1213)
+map_unit_id = "417cc41ed3e93c6e7d9206e3149f2cc0"
 squad = 4
 platoon = 1
 team = 1
@@ -454,6 +465,7 @@ squad_type = 1
 
 [node name="CA_P1_S0_Axis_PlatoonHQ" parent="Scenarios/Mission/Units" unique_id=968236179 instance=ExtResource("19_svlok")]
 position = Vector2(1504, 1024)
+map_unit_id = "2fe80062a9a761c704f92c5152c33c8f"
 platoon = 1
 loadouts = Array[ExtResource("21_dn6qs")]([ExtResource("38_psnfx"), ExtResource("39_6i6qo"), SubResource("Resource_rwfxm"), SubResource("Resource_h7cha"), SubResource("Resource_vumxo"), SubResource("Resource_vcyyo"), SubResource("Resource_ryqsp")])
 squad_loadout = ExtResource("41_pi8l3")
@@ -465,6 +477,7 @@ squad_type = 4
 
 [node name="CA_P1_S1_Axis_Rifle" parent="Scenarios/Mission/Units" unique_id=161366236 instance=ExtResource("19_svlok")]
 position = Vector2(1312, 896)
+map_unit_id = "8b01b6ae0ea392da991e983d0abfbb8e"
 squad = 1
 platoon = 1
 loadouts = Array[ExtResource("21_dn6qs")]([ExtResource("42_b1il5"), ExtResource("39_6i6qo"), ExtResource("43_6pcj2"), ExtResource("44_v5hsi"), ExtResource("45_vbep5"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee")])
@@ -475,6 +488,7 @@ formation_id = 1
 
 [node name="CA_P1_S2_Axis_Rifle" parent="Scenarios/Mission/Units" unique_id=1528074560 instance=ExtResource("19_svlok")]
 position = Vector2(1408, 704)
+map_unit_id = "5846c7b443cc9b5fd4b2b91676eb9ad3"
 squad = 2
 platoon = 1
 loadouts = Array[ExtResource("21_dn6qs")]([ExtResource("42_b1il5"), ExtResource("39_6i6qo"), ExtResource("43_6pcj2"), ExtResource("44_v5hsi"), ExtResource("45_vbep5"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee"), ExtResource("46_lyaee")])
@@ -485,6 +499,7 @@ formation_id = 1
 
 [node name="CA_P1_S3_Axis_MG" parent="Scenarios/Mission/Units" unique_id=2029085262 instance=ExtResource("19_svlok")]
 position = Vector2(1216, 576)
+map_unit_id = "d4436b5aa746c6ab0c95caba1d96f2dd"
 squad = 3
 platoon = 1
 loadouts = Array[ExtResource("21_dn6qs")]([ExtResource("42_b1il5"), SubResource("Resource_g85e3"), ExtResource("44_v5hsi"), ExtResource("49_axm4p"), ExtResource("49_axm4p"), ExtResource("49_axm4p"), ExtResource("46_lyaee")])
@@ -498,7 +513,7 @@ squad_type = 1
 [node name="Objectives" type="Node2D" parent="Scenarios/Mission" unique_id=1877013166]
 
 [node name="AxisObjectivesTileMapLayer" type="TileMapLayer" parent="Scenarios/Mission/Objectives" unique_id=1351693584]
-tile_map_data = PackedByteArray("AAANAAYAAwAAAAAAAAAPAAcACQAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAANAAYAAwAAAAAAAAAPAAcACQAAAAAAAAAJAAgABAAAAAAAAAA=")
 tile_set = SubResource("TileSet_0jm0n")
 script = ExtResource("4_o7egj")
 

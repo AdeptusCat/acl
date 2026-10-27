@@ -15,6 +15,7 @@ var _follow_gaps: Dictionary[Unit, Dictionary] = {}
 var _idle_support_since: Dictionary[Unit, float] = {}
 var _hq_priorities: Dictionary[Unit, Unit] = {}
 var _hq_contenders: Dictionary[Unit, Dictionary] = {}
+var _screen_objectives: Dictionary[Unit, Vector2i] = {}
 var _anchor_contender: Unit
 var _anchor_since: float = -INF
 
@@ -26,6 +27,7 @@ func clear() -> void:
 	_idle_support_since.clear()
 	_hq_priorities.clear()
 	_hq_contenders.clear()
+	_screen_objectives.clear()
 	optional_mover = null
 	support_anchor = null
 	_anchor_contender = null
@@ -37,6 +39,9 @@ static func is_busy(unit: Unit) -> bool:
 
 
 func observe(units: Array[Unit], now: float) -> void:
+	for unit: Unit in _screen_objectives.keys():
+		if not units.has(unit):
+			_screen_objectives.erase(unit)
 	for unit: Unit in orders.keys():
 		if not units.has(unit) or not TacticalPositionExecutor.is_active_defender(unit):
 			forget(unit)
@@ -46,6 +51,8 @@ func observe(units: Array[Unit], now: float) -> void:
 			forget(unit)
 			continue
 		if not is_busy(unit) and unit.current_hex == record["result"].target_hex and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION:
+			if record.get("screen_deployment", false):
+				_screen_objectives[unit] = record["result"].objective_hex
 			if record["settled_at"] == -INF:
 				record["settled_at"] = now
 			if optional_mover == unit and _optional_started:
@@ -82,7 +89,13 @@ func accepted(result: PositionResult, now: float) -> void:
 		settled_at = previous["settled_at"]
 	if not is_busy(unit) and unit.current_hex == result.target_hex and unit.action_controller.action_state == SquadActionController.SquadActionState.HOLDING_POSITION and settled_at == -INF:
 		settled_at = now
-	orders[unit] = {"result": result, "order_id": unit.action_controller.action_order_id, "settled_at": settled_at}
+	var screen_deployment: bool = result.profile_mode == PositionProfile.Mode.DEFEND and result.features.get("responsibility", "") == "cover_approach" and not result.features.get("screen_fallback", false)
+	if not previous.is_empty() and previous["result"].target_hex == result.target_hex and previous["result"].objective_hex == result.objective_hex and previous["result"].profile_mode == result.profile_mode:
+		# Updated approach evidence must not turn a checked, unfinished deployment into another advance.
+		screen_deployment = screen_deployment or previous.get("screen_deployment", false)
+	orders[unit] = {"result": result, "order_id": unit.action_controller.action_order_id, "settled_at": settled_at, "screen_deployment": screen_deployment}
+	if screen_deployment and settled_at != -INF:
+		_screen_objectives[unit] = result.objective_hex
 	if not HqSupportPositionPolicy.is_headquarters(unit) and result.features.get("movement_kind", "") == "optional" and result.should_move:
 		optional_mover = unit
 		_optional_started = true
@@ -90,6 +103,10 @@ func accepted(result: PositionResult, now: float) -> void:
 		optional_mover = null
 	if result.should_move:
 		_proposals.erase(unit)
+
+
+func has_deployed_screen(unit: Unit, objective: Vector2i) -> bool:
+	return _screen_objectives.has(unit) and _screen_objectives[unit] == objective
 
 
 func declined(unit: Unit) -> void:

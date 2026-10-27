@@ -1264,14 +1264,15 @@ func _configure_position_stability(query: PositionQuery) -> void:
 				break
 	query.rapid_response = true
 	query.optimize_position = false
-	if query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and not query.reserve_position and InfluenceUnitQuery.get_unit_range(query.unit) > 2:
+	query.initial_deployment = not position_stability.has_deployed_screen(query.unit, query.objective_hex) and query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
+	query.minimum_forward_progress = 0
+	if query.initial_deployment and not query.reserve_position and InfluenceUnitQuery.get_unit_range(query.unit) > 2:
 		var screen_strength: int = 0
 		for unit: Unit in squads:
 			if DefenseSectorAllocator.combat_reserve_capable(unit):
 				screen_strength += 1
 		if screen_strength >= 3:
 			query.minimum_forward_progress = 2
-	query.initial_deployment = not accepted_positions.has(query.unit) and query.profile.mode == PositionProfile.Mode.DEFEND and query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH
 	query.response_priority = 1
 	if accepted_positions.has(query.unit):
 		query.response_priority = 0

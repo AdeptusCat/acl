@@ -11,9 +11,6 @@
 [ext_resource type="Texture2D" uid="uid://drvniker1271f" path="res://assets/tiles/16x16_2b - Kopie.png" id="8_fy3lb"]
 [ext_resource type="TileSet" uid="uid://dky7ipek6sjb4" path="res://resources/campaigns/alderbrook_terrain.tres" id="9_hfvsb"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/building_tile_map_layer.tscn" id="15_fy3lb"]
-[ext_resource type="Script" uid="uid://cdv7kxgdwq1so" path="res://resources/weapons/offboard_battery.gd" id="16_qktt2"]
-[ext_resource type="Resource" path="res://resources/weapons/offboard_105mm_he.tres" id="17_yycqq"]
-[ext_resource type="Resource" uid="uid://cg2ua8j6pxhkn" path="res://resources/weapons/m1_81mm_mortar.tres" id="18_7c7xa"]
 [ext_resource type="PackedScene" uid="uid://rsqpaeas8ic5" path="res://scenes/game/units/unit.tscn" id="19_yycqq"]
 [ext_resource type="Script" uid="uid://doub5i2qbimo0" path="res://resources/soldiers/soldier_loadout.gd" id="21_hi3l8"]
 [ext_resource type="Resource" uid="uid://cntsjxepp043a" path="res://resources/soldiers/united_states/platoon_leader.tres" id="22_fy3lb"]
@@ -52,7 +49,6 @@
 [ext_resource type="Texture2D" uid="uid://ba7swy07te61o" path="res://assets/objectives/allies_a.png" id="52_sfbom"]
 [ext_resource type="Texture2D" uid="uid://bm1dwvmp0x7k3" path="res://assets/objectives/allies_b.png" id="53_tii1o"]
 [ext_resource type="Texture2D" uid="uid://dvigi28x8fe3i" path="res://assets/objectives/allies_c.png" id="54_1k02o"]
-[ext_resource type="Script" uid="uid://bity868dvulei" path="res://scenes/scenarios/reinforcements/reinforcement_definition.gd" id="55_7c7xa"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/wall_tile_map_layer.tscn" id="ConnectedWallLayer"]
 [ext_resource type="PackedScene" path="res://scenes/world/maps/layers/road_tile_map_layer.tscn" id="SharedRoadLayer"]
 
@@ -100,22 +96,18 @@ sources/2 = SubResource("TileSetAtlasSource_dlgsm")
 sources/3 = SubResource("TileSetAtlasSource_qw1vt")
 sources/4 = SubResource("TileSetAtlasSource_wi054")
 
-[sub_resource type="Resource" id="Resource_harg6"]
-script = ExtResource("16_qktt2")
-weapon = ExtResource("17_yycqq")
-gun_count = 3
-rounds = 2
-metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
-
-[sub_resource type="Resource" id="Resource_qktt2"]
-script = ExtResource("16_qktt2")
-weapon = ExtResource("18_7c7xa")
-metadata/_custom_type_script = "uid://cdv7kxgdwq1so"
-
 [sub_resource type="Resource" id="Resource_h7ai6"]
 script = ExtResource("49_hte11")
 required_time_s = 15.0
 team = 1
+
+[sub_resource type="Resource" id="Resource_patrol_minor"]
+script = ExtResource("49_hte11")
+objective_id = 2
+required_time_s = 15.0
+team = 1
+outcome_level = 0
+test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_61x6b"]
 script = ExtResource("49_hte11")
@@ -124,14 +116,6 @@ test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_uobqf"]
 script = ExtResource("50_t3t2e")
-test_at_scenario_end = true
-
-[sub_resource type="Resource" id="Resource_patrol_minor"]
-script = ExtResource("49_hte11")
-objective_id = 2
-required_time_s = 15.0
-team = 1
-outcome_level = 0
 test_at_scenario_end = true
 
 [sub_resource type="Resource" id="Resource_dlmmx"]
@@ -399,6 +383,19 @@ squad_type = 4
 position = Vector2(256, 704)
 map_unit_id = "6dac8ebad69bdfb53aca76118a03e8c2"
 squad = 1
+platoon = 1
+team = 1
+loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])
+squad_loadout = ExtResource("34_26mfj")
+default_rifle = SubResource("Resource_v8x2n")
+default_smg = SubResource("Resource_b5oeb")
+default_mg = SubResource("Resource_ga1pk")
+formation_id = 1
+
+[node name="CA_P1_S2_Allies_Rifle" parent="Scenarios/Mission/Units" unique_id=1975964560 instance=ExtResource("19_yycqq")]
+position = Vector2(253, 968)
+map_unit_id = "97a735df615c05eb0e5b85aa553a0814"
+squad = 2
 platoon = 1
 team = 1
 loadouts = Array[ExtResource("21_hi3l8")]([ExtResource("28_yh8o1"), ExtResource("29_61x6b"), ExtResource("30_uobqf"), ExtResource("31_8g80o"), ExtResource("32_r7btv"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i"), ExtResource("33_ywl6i")])

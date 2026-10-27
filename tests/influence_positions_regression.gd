@@ -150,6 +150,7 @@ func _run() -> void:
 	_test_corridor_evidence()
 	_test_objective_connected_defense()
 	_test_forward_screen_and_fallback()
+	_test_established_screen_retention()
 	_test_local_interception()
 	_test_complementary_defense()
 	_test_loadout_stationary_roles()
@@ -3348,6 +3349,107 @@ func _test_forward_screen_and_fallback() -> void:
 	query.minimum_forward_progress = 0
 	query.sector_cells = [query.objective_hex]
 	_check(not PositionQueryService.query_positions(query).is_valid(), "A covering squad cannot block the objective reserved for the required garrison")
+
+
+func _screen_retention_query(planner: PlatoonAI, unit: Unit, snapshot: InfluenceSnapshot, source: Vector2i, cells: Array[Vector2i]) -> PositionQuery:
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = unit.team
+	query.snapshot = snapshot
+	query.objective_hex = planner.current_order.objective_hex
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.use_defense_area = false
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.geography = PositionQuery.Geography.SECTOR_ONLY
+	query.sector_cells = cells
+	query.axis = ThreatAxis.new()
+	query.axis.source_hex = source
+	query.axis.target_hex = query.objective_hex
+	query.axis.approach_hexes = [Vector2i(3, 3)]
+	planner._configure_position_stability(query)
+	return query
+
+
+func _test_established_screen_retention() -> void:
+	var fixture: PositionQuery = _defense_fixture()
+	var first: UnitProbe = _unit(own.team, Vector2i(2, 5))
+	var second: UnitProbe = _unit(own.team, Vector2i(0, 5))
+	var third: UnitProbe = _unit(own.team, Vector2i(0, 6))
+	var units: Array[Unit] = [first, second, third]
+	var weapon: WeaponSpec = load("res://resources/weapons/kar98.tres") as WeaponSpec
+	for unit: Unit in units:
+		_equip(unit, [weapon])
+		unit.combat_stats.combat_effectiveness = 1.0
+		unit.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		unit.position = ground.map_to_local(unit.current_hex)
+		fixture.snapshot.positions[unit] = unit.current_hex
+		fixture.snapshot.teams[unit] = unit.team
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.team = own.team
+	planner.influence_map_controller = controller
+	planner.set_squads(units)
+	planner.current_order = MissionOrder.new()
+	planner.current_order.objective_hex = first.current_hex
+	var initial: PositionQuery = _screen_retention_query(planner, first, fixture.snapshot, Vector2i(8, 5), [Vector2i(4, 5)])
+	_check(initial.initial_deployment and initial.minimum_forward_progress == 2, "An undeployed three-squad defense still establishes a forward screen")
+	var deployment: PositionResult = PositionQueryService.query_positions(initial)
+	_check(deployment.is_valid() and deployment.should_move, "The initial screen has a checked forward deployment")
+	if deployment.is_valid():
+		first.movement.is_moving = true
+		first.movement.target_hex = deployment.target_hex
+		first.action_controller.action_state = SquadActionController.SquadActionState.MOVING_TO_POSITION
+		planner.position_stability.accepted(deployment, 0.0)
+		_check(not planner.position_stability.has_deployed_screen(first, initial.objective_hex), "An accepted destination does not count as an established screen before arrival")
+		# Approach evidence can change while a squad finishes its accepted bound.
+		var refreshed: PositionResult = PositionResult.new()
+		refreshed.unit = first
+		refreshed.status = PositionResult.Status.RETAINED
+		refreshed.target_index = deployment.target_index
+		refreshed.target_hex = deployment.target_hex
+		refreshed.objective_hex = deployment.objective_hex
+		refreshed.features = deployment.features.duplicate()
+		refreshed.features["screen_fallback"] = true
+		planner.position_stability.accepted(refreshed, 1.0)
+		first.current_hex = deployment.target_hex
+		first.position = ground.map_to_local(first.current_hex)
+		fixture.snapshot.positions[first as Unit] = first.current_hex
+		first.movement.is_moving = false
+		first.action_controller.action_state = SquadActionController.SquadActionState.ESTABLISHING_POSITION
+		planner.position_stability.observe(units, 2.0)
+		_check(not planner.position_stability.has_deployed_screen(first, initial.objective_hex), "Weapon establishment must finish before the screen is credited")
+		first.action_controller.action_state = SquadActionController.SquadActionState.HOLDING_POSITION
+		planner.position_stability.observe(units, 3.0)
+		_check(planner.position_stability.has_deployed_screen(first, initial.objective_hex), "Finishing the originally checked screen completes deployment despite newer approach evidence")
+		planner._configure_position_stability(initial)
+		_check(not initial.initial_deployment and initial.minimum_forward_progress == 0, "Reconfiguring an existing query clears its completed deployment requirement")
+		var shifted: PositionQuery = _screen_retention_query(planner, first, fixture.snapshot, Vector2i(2, 1), [first.current_hex])
+		_check(not shifted.initial_deployment and shifted.minimum_forward_progress == 0, "An established screen is not forced through initial forward deployment again")
+		DefensePositionPolicy.prepare(shifted)
+		_check(DefensePositionPolicy.forward_progress(shifted, first.current_hex) < 2, "The shifted approach reproduces a formerly disqualified forward position")
+		var retained: PositionResult = PositionQueryService.query_positions(shifted)
+		_check(retained.is_valid() and retained.target_hex == first.current_hex and not retained.should_move, "A useful covered screen remains in place after the approach direction changes")
+		planner.position_stability.forget(first)
+		planner.accepted_positions.erase(first)
+		var recovered: PositionQuery = _screen_retention_query(planner, first, fixture.snapshot, Vector2i(2, 1), [first.current_hex])
+		_check(not recovered.initial_deployment and recovered.minimum_forward_progress == 0, "Losing a transient order or recovering from suppression does not restart screen deployment")
+		planner.current_order.objective_hex = Vector2i(3, 5)
+		var reassigned: PositionQuery = _screen_retention_query(planner, first, fixture.snapshot, Vector2i(8, 5), [first.current_hex])
+		_check(reassigned.initial_deployment and reassigned.minimum_forward_progress == 2, "A new defensive objective gets its own initial deployment")
+		var fallback: PositionResult = PositionResult.new()
+		fallback.unit = first
+		fallback.status = PositionResult.Status.ACCEPTED
+		fallback.target_index = deployment.target_index
+		fallback.target_hex = first.current_hex
+		fallback.objective_hex = reassigned.objective_hex
+		fallback.features = {"responsibility": "cover_approach", "screen_fallback": true}
+		planner.position_stability.accepted(fallback, 4.0)
+		_check(not planner.position_stability.has_deployed_screen(first, reassigned.objective_hex), "A rear fallback does not suppress a later initial forward opportunity")
+	planner.free()
+	for unit: Unit in units:
+		unit.squad_fire.free()
+		unit.squad_fire = null
+		unit.free()
+	_publish()
 
 
 func _test_objective_connected_defense() -> void:

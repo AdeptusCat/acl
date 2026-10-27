@@ -148,6 +148,7 @@ static func evaluate(query: PositionQuery, cell: Vector2i) -> Dictionary:
 				responsibility = ""
 	return {"responsibility": responsibility, "blocking": blocking, "interposition": interposition,
 		"forward_progress": progress, "screen_fallback": screen_fallback,
+		"initial_screen_deployment": query.initial_deployment, "minimum_forward_progress": query.minimum_forward_progress,
 		"required_crossing_branch": query.required_crossing_branch, "crossing_coverage": crossing,
 		"covered_approaches": covered_approaches, "approach_count": query.defense_approaches.size(),
 		"important_approaches_covered": important_covered, "important_approach_count": important_count,
