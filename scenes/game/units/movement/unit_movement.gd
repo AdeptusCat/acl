@@ -334,17 +334,23 @@ func _get_terrain_multiplier() -> void:
 		#terrain_mult = 1.0
 		return
 	
-	var next_terr: int = _get_terrain_type(path_hexes[path_index])
-	var mf_total: float = compute_total_mf(unit.current_hex, path_hexes[path_index], next_terr)
-	
-	var from: Vector2 = LOSHelper.ground_layer.map_to_local(unit.current_hex)
-	var to: Vector2 = LOSHelper.ground_layer.map_to_local(path_hexes[path_index])
-	var cover_dict: Dictionary = LOSHelper.check_los(from, to, 1, 1, 1, 1)
-	if cover_dict.has("wall_cover"):
-		if cover_dict.wall_cover > 0:
-			mf_total += 1.0
-	
-	terrain_mult = _mf_to_speed_mult(mf_total)
+	terrain_mult = _mf_to_speed_mult(crossing_movement_factor(unit.current_hex, path_hexes[path_index]))
+
+
+func crossing_movement_factor(from_hex: Vector2i, to_hex: Vector2i) -> float:
+	var factor: float = compute_total_mf(from_hex, to_hex, _get_terrain_type(to_hex))
+	var record: Dictionary = LOSHelper.los_lookup.get(from_hex, {}).get(to_hex, {})
+	if not record.has("wall_cover") and is_instance_valid(LOSHelper.wall_layer) and is_instance_valid(LOSHelper.building_layer):
+		record = LOSHelper.check_los(LOSHelper.ground_layer.map_to_local(from_hex), LOSHelper.ground_layer.map_to_local(to_hex), 1, 1, 1, 1)
+	if float(record.get("wall_cover", 0.0)) > 0.0:
+		factor += mf_wall_hexside
+	return factor
+
+
+func estimate_crossing_seconds(from_hex: Vector2i, to_hex: Vector2i, from_position: Vector2 = Vector2.INF) -> float:
+	if not from_position.is_finite():
+		from_position = LOSHelper.ground_layer.map_to_local(from_hex)
+	return estimate_travel_seconds(from_position, LOSHelper.ground_layer.map_to_local(to_hex), crossing_movement_factor(from_hex, to_hex))
 
 
 # ----------------------------------------------------------------------
@@ -374,7 +380,7 @@ func _apply_speed(v: float) -> void:
 
 func _get_terrain_type(hex: Vector2i) -> int:
 	var terrain_type: int = TerrainType.OPEN
-	if LOSHelper.building_layer.get_cell_source_id(hex) != -1:
+	if is_instance_valid(LOSHelper.building_layer) and LOSHelper.building_layer.get_cell_source_id(hex) != -1:
 		terrain_type = TerrainType.BUILDING
 	return terrain_type
 

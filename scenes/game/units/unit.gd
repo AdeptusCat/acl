@@ -319,7 +319,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 		Globals.UnitCmd.MOVE:
 			var to_hex: Vector2i = parameter as Vector2i
 			if not current_hex == to_hex:
-				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team)
+				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team, self)
 				give_move_to_hex_order(to_hex, path, false)
 			else:
 				clear_orders()
@@ -668,6 +668,7 @@ func remember_enemy(enemy: Unit) -> void:
 	info["last_seen_time"] = _now()
 	info["last_seen_hex"] = enemy.current_hex
 	info["firepower"] = InfluenceUnitQuery.get_unit_firepower(enemy)
+	info["movement_firepower_by_range"] = InfluenceUnitQuery.capture_movement_firepower(enemy)
 	info["effectiveness"] = InfluenceUnitQuery.get_unit_effectiveness(enemy)
 	info["weapon_range"] = InfluenceUnitQuery.get_unit_range(enemy)
 	info["crossing_seconds"] = InfluenceUnitQuery.captured_crossing_seconds(enemy)

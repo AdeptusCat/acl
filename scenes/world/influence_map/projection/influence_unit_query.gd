@@ -95,6 +95,17 @@ static func get_unit_range(unit: Unit) -> int:
 	return result
 
 
+static func capture_movement_firepower(unit: Unit) -> PackedFloat32Array:
+	var result: PackedFloat32Array = PackedFloat32Array()
+	var state_multiplier: float = 1.0
+	if unit.stress_system != null:
+		var modifiers: Dictionary = STATES.STATE_MOD[unit.stress_system.state]
+		state_multiplier = float(modifiers["acc"]) * float(modifiers["rof"])
+	for distance: int in range(get_unit_range(unit) + 1):
+		result.append(get_firepower_at_range(unit, distance) * state_multiplier)
+	return result
+
+
 static func get_unit_effectiveness(unit: Unit) -> float:
 	if unit.combat_stats != null:
 		return clampf(unit.combat_stats.combat_effectiveness, 0.0, 1.0)
@@ -110,8 +121,6 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 		for enemy: Unit in observer.enemy_memory:
 			if not is_instance_valid(enemy):
 				continue
-			if enemy.exited:
-				continue
 			var memory: Dictionary = observer.enemy_memory[enemy]
 			var age: float = now - float(memory.get("last_seen_time", -INF))
 			if age < 0.0 or age > Unit.ENEMY_MEMORY_LIFETIME:
@@ -124,6 +133,7 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 			contact.crossing_seconds = memory.get("crossing_seconds", 2.0)
 			# Memory uses captured capability, never a hidden live loadout/state.
 			contact.firepower = memory.get("firepower", 1.0)
+			contact.movement_firepower_by_range = memory.get("movement_firepower_by_range", PackedFloat32Array())
 			contact.effectiveness = memory.get("effectiveness", 1.0)
 			contact.weapon_range = memory.get("weapon_range", 6)
 			if not known.has(enemy) or contact.confidence > known[enemy].confidence:
@@ -137,11 +147,13 @@ static func capture_contacts(team: int, policy: int) -> Array[InfluenceContact]:
 		observed = Globals.get_units_for_team(Globals.get_enemy_team(team))
 	for enemy: Unit in observed:
 		if not is_valid_living_unit(enemy) or enemy.team == team:
+			known.erase(enemy)
 			continue
 		var contact: InfluenceContact = InfluenceContact.new()
 		contact.unit = enemy
 		contact.hex = enemy.current_hex
 		contact.firepower = get_unit_firepower(enemy)
+		contact.movement_firepower_by_range = capture_movement_firepower(enemy)
 		contact.effectiveness = get_unit_effectiveness(enemy)
 		contact.weapon_range = get_unit_range(enemy)
 		contact.observed = true

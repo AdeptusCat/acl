@@ -78,6 +78,7 @@ static func _copy_contact(source: InfluenceContact) -> InfluenceContact:
 	contact.hex = source.hex
 	contact.confidence = source.confidence
 	contact.firepower = source.firepower
+	contact.movement_firepower_by_range = source.movement_firepower_by_range.duplicate()
 	contact.effectiveness = source.effectiveness
 	contact.weapon_range = source.weapon_range
 	contact.observed = source.observed

@@ -69,6 +69,8 @@ Each snapshot adds:
 
 `disposition` separates accepted execution from no candidate/executor rejection and explicit blocks: missing company support, another platoon's position claim, unsafe approach, unsafe open HQ position, or retaining the last covering squad. `accepted` means the executor accepted the advice; it does not necessarily issue a new order. Compare the before/after order IDs and movement state. `ai_plan_cancelled` records pending plans discarded by objective/context changes, invalid movement origins or failed validation.
 
+`move_route` records normal movement's selected hex path, destination, estimated travel seconds, accumulated exposure seconds, risk weight and combined cost. Its contacts contain only the issuing team's observed or remembered positions and captured range-specific capability. A zero-length path indicates that the requested destination was unreachable. Movement/threat rule hashes are included in metadata.
+
 The recorder reads existing decisions and knowledge. It does not run additional tactical searches, select targets, reserve positions or roll random numbers. Alternatives represent the planner's available shortlist, not an exhaustive ranking of every map hex. Rule hashes include AI selection, coordination, execution and recording scripts; metadata also records the baked LOS resource hash.
 
 ## Persistence and limits

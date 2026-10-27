@@ -5,6 +5,11 @@ const ROOT_DIRECTORY: String = "user://debug/engagements"
 const SAMPLE_INTERVAL_S: float = 1.0
 const SCHEMA_VERSION: int = 2
 const RULE_SCRIPTS: Array[String] = [
+	"res://autoloads/movement_system.gd",
+	"res://autoloads/threat_map.gd",
+	"res://scenes/game/units/movement/move_route_planner.gd",
+	"res://scenes/game/units/movement/unit_movement.gd",
+	"res://scenes/world/influence_map/projection/influence_unit_query.gd",
 	"res://scenes/game/units/combat/unit_stress_controller.gd",
 	"res://scenes/game/units/combat/squad_fire_controller.gd",
 	"res://scenes/game/units/combat/squad_hit_resolver.gd",
@@ -148,6 +153,20 @@ func record_order(unit: Unit, command: int, target: Variant) -> void:
 	if tracks(unit):
 		_register(unit)
 		record_event("order", {"unit": _unit_id(unit), "command": command, "target": _value(target)})
+
+
+func record_move_route(unit: Unit, target: Vector2i, route: MoveRoutePlanner, contacts: Array[InfluenceContact]) -> void:
+	if not tracks(unit):
+		return
+	var knowledge: Array[Dictionary] = []
+	var hex_path: Array[Vector2i] = []
+	for cube: Vector3i in route.path:
+		hex_path.append(LOSHelper.ground_layer.cube_to_map(cube))
+	for contact: InfluenceContact in contacts:
+		knowledge.append({"unit": _value(contact.unit), "hex": _value(contact.hex), "observed": contact.observed, "confidence": contact.confidence,
+			"firepower_by_range": _value(contact.movement_firepower_by_range), "effectiveness": contact.effectiveness, "weapon_range": contact.weapon_range})
+	record_event("move_route", {"unit": _unit_id(unit), "target": _value(target), "path": _value(hex_path), "travel_seconds": route.travel_seconds,
+		"exposure_seconds": route.exposure_seconds, "risk_weight": MoveRoutePlanner.RISK_WEIGHT, "cost": route.cost, "contacts": knowledge})
 
 
 func record_shot(controller: SquadFireController, soldier: Soldier, rounds: int, cell: Vector2i, distance: int, cover: int, origin: Vector2, flight_s: float, grenade: bool) -> void:
