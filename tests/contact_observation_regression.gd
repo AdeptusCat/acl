@@ -102,7 +102,7 @@ func _test_exposure_and_pace() -> void:
 	_check(saved.movement_stance == UnitMovement.Stance.CROUCHED, "Saving retains the chosen movement pace")
 	enemy.movement.stance = UnitMovement.Stance.RUNNING
 	enemy.apply_save_data(saved)
-	_check(enemy.movement.stance == UnitMovement.Stance.CROUCHED and UnitSaveData.new().movement_stance == UnitMovement.Stance.STANDING, "Loading restores pace while older saves default to normal movement")
+	_check(enemy.movement.stance == UnitMovement.Stance.CROUCHED and UnitSaveData.new().movement_stance == UnitMovement.Stance.RUNNING, "Loading restores pace while older saves default to fast movement")
 	enemy.movement.stance = UnitMovement.Stance.STANDING
 	enemy.is_moving = false
 	enemy.movement.is_moving = false

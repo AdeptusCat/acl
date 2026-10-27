@@ -31,17 +31,19 @@ var retreat_distance: int = 3
 
 var obey_player_orders: bool = true
 enum Stance { STANDING, CROUCHED, PRONE, RUNNING, WITHDRAWING }
-var stance: Stance = Stance.STANDING
+var stance: Stance = Stance.RUNNING
 
 
 func pace_multiplier() -> float:
 	match stance:
+		Stance.STANDING:
+			return 0.7
 		Stance.CROUCHED:
-			return 0.6
+			return 0.4
 		Stance.PRONE:
 			return 0.3
 		Stance.RUNNING:
-			return 1.6
+			return 1.0
 		Stance.WITHDRAWING:
 			return 1.2
 	return 1.0
