@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="WeaponSpec" format=3 uid="uid://cg2ua8j6pxhkn"]
 
 [ext_resource type="Script" uid="uid://bikdnoi2rxdle" path="res://resources/weapons/weapon_spec.gd" id="1_adqvj"]
-[ext_resource type="Texture2D" path="res://assets/ui/hud/fire_support/m1_81mm_mortar.png" id="4_icon"]
 [ext_resource type="AudioStream" uid="uid://clu68qf010qmw" path="res://assets/audio/fx/weapons/riflegrenade_explosion.mp3" id="2_o20th"]
 [ext_resource type="AudioStream" uid="uid://ckfcdihaq1min" path="res://assets/audio/fx/weapons/mortar/mortar-96223.mp3" id="3_782b1"]
+[ext_resource type="Texture2D" uid="uid://drigsqjayrafx" path="res://assets/ui/hud/fire_support/m1_81mm_mortar.png" id="4_icon"]
 
 [resource]
 script = ExtResource("1_adqvj")
@@ -25,5 +25,4 @@ he_burst_radius = 7.5
 snd_shot = ExtResource("3_782b1")
 snd_hit = ExtResource("2_o20th")
 volume_db = -15.0
-hit_volume_db = -10.6
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

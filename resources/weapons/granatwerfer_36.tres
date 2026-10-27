@@ -22,5 +22,4 @@ he_burst_radius = 4.0
 snd_shot = ExtResource("3_y4l6k")
 snd_hit = ExtResource("2_ckkmk")
 volume_db = -15.0
-hit_volume_db = -10.6
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

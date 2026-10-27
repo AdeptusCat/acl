@@ -22,7 +22,4 @@ riflegrenade_range = 4
 he_burst_radius = 2.0
 riflegrenade_shot = ExtResource("2_t4u0y")
 riflegrenade_hit = ExtResource("1_agyg1")
-volume_db = 1.5
-riflegrenade_shot_volume_db = -6.9
-riflegrenade_hit_volume_db = -10.6
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"
