@@ -45,6 +45,22 @@ The listener now sits at the camera origin. The same probe gives identical
 levels 500 pixels left and right of centre. This corrects the shared positional
 imbalance without changing authored weapon gains or their firing cadence.
 
+## Missing rifle playback
+
+Rifle muzzle sounds, automatic tails and explosive impacts use the shared
+AudioPool; automatic firing loops are parented directly to their firing unit.
+The pool node had an authored `(2278, 1584)` map offset, while `play_one_shot`
+assigned world-space firing positions as local child positions. That added the
+pool's offset a second time, moving a rifle sound 2,774 pixels away from its
+actual muzzle and beyond the default 2,000-pixel audible distance at view centre.
+
+An engine mixer probe playing the actual M1 Garand sample through the real pool
+captured zero audio before the correction and audible output afterwards. The pool now assigns world-space
+positions explicitly, and its unused authored offset is removed. Muzzle and
+burst-tail callers also pass world coordinates. The audio regression exercises
+the real pool under translation, rotation and scaling, simultaneous rifle
+requests, and advancing playback; the earlier event-only probe missed this bug.
+
 ## Findings and changes
 
 The previous firing levels spanned 24.6 dB: approximately −2.9 LUFS for MG34

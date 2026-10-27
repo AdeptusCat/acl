@@ -121,6 +121,7 @@ func _run() -> void:
 	Debug.dont_fire_wepaons = false
 	_check(sound.starts == starts and sound.stops == stops, "A burst rejected before its first round emits no loop or decay")
 	await _test_loop_lifecycle()
+	await _test_real_one_shot_pool()
 	_test_weapon_levels()
 	fire.calc.free()
 	fixture.free()
@@ -170,6 +171,32 @@ func _test_loop_lifecycle() -> void:
 	await get_tree().process_frame
 	manager.free()
 	position_node.free()
+
+
+func _test_real_one_shot_pool() -> void:
+	# Exercise the real pool: the event-recording probe cannot detect misplaced sounds.
+	var real_pool: AudioPool = AudioPool.new()
+	real_pool.position = Vector2(2278.0, 1584.0)
+	real_pool.rotation = 0.25
+	real_pool.scale = Vector2(1.5, 1.5)
+	fixture.add_child(real_pool)
+	var weapon: WeaponSpec = load("res://resources/weapons/m1_garand.tres") as WeaponSpec
+	var muzzle: Vector2 = Vector2(1600.0, 1000.0)
+	real_pool.play_one_shot(weapon.snd_shot, muzzle, weapon.volume_db, 1.0, "SFX_Close")
+	var player: AudioStreamPlayer2D = real_pool.pool[0]
+	_check(player.global_position.is_equal_approx(muzzle), "A rifle one-shot stays at its world-space muzzle even under a translated, rotated and scaled pool")
+	_check(player.playing and player.stream == weapon.snd_shot and not player.stream_paused, "The real pool starts the authored rifle sample unpaused")
+	for index: int in range(1, 8):
+		real_pool.play_one_shot(weapon.snd_shot, muzzle + Vector2(index, 0.0), weapon.volume_db, 1.0, "SFX_Close")
+	var occupied: int = 0
+	for voice: AudioStreamPlayer2D in real_pool.pool:
+		if voice.playing:
+			occupied += 1
+	_check(occupied == 8 and player.global_position.is_equal_approx(muzzle), "Same-frame rifle shots occupy separate voices without moving or replacing the first shot")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_check(player.playing and player.get_playback_position() > 0.0, "Rifle playback advances through the actual audio player")
+	real_pool.free()
 
 
 func _test_weapon_levels() -> void:

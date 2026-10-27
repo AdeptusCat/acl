@@ -838,7 +838,7 @@ func _stop_burst_audio(weapon: WeaponSpec, owner_id: int, token: int, delay: flo
 	if _burst_audio_tokens.get(owner_id, -1) != token:
 		return
 	_burst_audio_tokens.erase(owner_id)
-	_on_stop_mg_loop(weapon, unit.position, owner_id, unit)
+	_on_stop_mg_loop(weapon, unit.global_position, owner_id, unit)
 
 
 func _emit_round(soldier: Soldier, context: Dictionary) -> void:
@@ -865,9 +865,9 @@ func _emit_round(soldier: Soldier, context: Dictionary) -> void:
 			context["audio_started"] = true
 			context["audio_token"] = _next_burst_audio_token
 			_burst_audio_tokens[soldier.id] = _next_burst_audio_token
-			_on_fire_weapon(soldier.weapon, unit.position, true, soldier.id, unit)
+			_on_fire_weapon(soldier.weapon, origin, true, soldier.id, unit)
 	else:
-		_on_fire_weapon(soldier.weapon, unit.position, false, soldier.id, unit)
+		_on_fire_weapon(soldier.weapon, origin, false, soldier.id, unit)
 	if grenade:
 		fire_riflegrenades(soldier)
 		soldier.weapon.riflegrenade_loaded = false
@@ -971,7 +971,7 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target
 		if get_tree(): # mighit be already freed or removed as child
 			await get_tree().create_timer(interval).timeout
 	if auto_fire and unit.is_active():
-		_on_stop_mg_loop(s.weapon, unit.position, s.id, unit)
+		_on_stop_mg_loop(s.weapon, unit.global_position, s.id, unit)
 
 
 func _has_safe_support_target(cell: Vector2i) -> bool:

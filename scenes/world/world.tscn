@@ -3798,7 +3798,6 @@ theme_override_font_sizes/font_size = 50
 text = "Start Area"
 
 [node name="AudioPool" parent="." unique_id=796764253 instance=ExtResource("65_hpffo")]
-position = Vector2(2278, 1584)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=405998870]
 stream = ExtResource("66_hnqnj")
