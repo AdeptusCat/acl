@@ -33,6 +33,8 @@ The rate changes smoothly from centre to neutral at the arc boundary, then
 toward the rear multiplier. Outside detection stays possible. Wider arcs cover
 the flanks better; narrow arcs concentrate observation. A watch sector never
 restricts which detected enemies the squad may fire upon.
+The separate [fire discipline](fire_discipline.md) setting controls whether
+automatic shooting is permitted; holding fire does not weaken the watch order.
 
 Stationary squads normally commit fully to the assignment. Moving squads keep
 the bearing with 45% commitment; existing movement penalties also apply.

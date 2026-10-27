@@ -25,6 +25,8 @@ const FOCUSED_DETECTION_MULTIPLIER: float = 1.35
 const PERIPHERAL_DETECTION_MULTIPLIER: float = 0.35
 const DEMAND_SECTOR_COUNT: int = 8
 const INCOMING_FIRE_WINDOW_SECONDS: float = 4.0
+const RETURN_FIRE_WINDOW_SECONDS: float = 8.0
+const RETURN_FIRE_HALF_ANGLE: float = PI / 6.0
 const FULL_ATTENTION_CAPACITY: float = 2.0
 const DEFAULT_SUPPRESSION_WINDOW_SECONDS: float = 2.0
 const INCOMING_SUPPRESSION_DEMAND: float = 2.0
@@ -311,6 +313,17 @@ func register_incoming_fire(direction: Vector2, now_seconds: float) -> Vector2:
 	update_fire_pressure(now_seconds)
 	last_attack_surprise = clampf(surprise, 0.0, 1.0)
 	return Vector2(last_attack_surprise, multi_direction_pressure)
+
+
+func has_recent_fire_from(direction: Vector2, now_seconds: float) -> bool:
+	if not direction.is_finite() or direction.is_zero_approx():
+		return false
+	var bearing: Vector2 = direction.normalized()
+	for index: int in range(DEMAND_SECTOR_COUNT):
+		var age: float = now_seconds - _incoming_fire_times[index]
+		if age >= 0.0 and age < RETURN_FIRE_WINDOW_SECONDS and bearing.dot(_incoming_fire_directions[index]) >= cos(RETURN_FIRE_HALF_ANGLE):
+			return true
+	return false
 
 
 func update_fire_pressure(now_seconds: float) -> void:

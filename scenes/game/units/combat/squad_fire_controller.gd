@@ -277,6 +277,45 @@ func _refresh_tracked_target() -> bool:
 	return true
 
 
+func automatic_fire_allowed(enemy: Unit) -> bool:
+	if not _can_track_target(enemy) or enemy.team == unit.team:
+		return false
+	match unit.fire_discipline:
+		Unit.FireDiscipline.HOLD_FIRE:
+			return false
+		Unit.FireDiscipline.RETURN_FIRE:
+			return unit.tactical_state != null and unit.tactical_state.has_recent_fire_from(enemy.global_position - unit.global_position, unit._now())
+	return true
+
+
+func has_fire_order_override() -> bool:
+	if fire_support_mission != null:
+		return fire_support_mission.active and not fire_support_hold
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND:
+		return has_target_hex and unit.attack_ground_rounds_budget > 0
+	return unit.attackState == Unit.AttackState.MANUAL_TRACK and _can_track_target(target_unit)
+
+
+func _fire_discipline_allows(enemy: Unit, cell: Vector2i, mission: FireSupportMission = null) -> bool:
+	if mission != null and mission == fire_support_mission and mission.active and not fire_support_hold:
+		return true
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND and has_target_hex and cell == target_hex and unit.attack_ground_rounds_budget > 0:
+		return true
+	if unit.attackState == Unit.AttackState.MANUAL_TRACK and is_instance_valid(enemy) and enemy == target_unit and cell == enemy.current_hex:
+		return true
+	return automatic_fire_allowed(enemy)
+
+
+func on_fire_discipline_changed() -> void:
+	fire_timer = 0.0
+	for soldier: Soldier in _bursts.keys():
+		var context: Dictionary = _bursts[soldier]
+		if not _burst_can_continue(soldier, context):
+			_finish_burst(soldier, context)
+	if unit.attackState == Unit.AttackState.AUTO and not automatic_fire_allowed(target_unit):
+		clear_target()
+
+
 
 
 func _process(delta: float) -> void:
@@ -290,6 +329,9 @@ func _process(delta: float) -> void:
 		_tick_automatic_fire(delta)
 		clear_target()
 		return
+	if unit.attackState == Unit.AttackState.MANUAL_GROUND and fire_support_mission == null and unit.attack_ground_rounds_budget <= 0:
+		unit.setAttackState(Unit.AttackState.AUTO)
+		clear_target()
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
 	# A new contact wakes selection immediately; reconsideration keeps its normal cadence.
 	for enemy: Unit in visible:
@@ -527,6 +569,8 @@ func _personal_defense_target(soldier: Soldier) -> Unit:
 	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
 		if not _can_track_target(enemy) or enemy.team == unit.team:
 			continue
+		if not _fire_discipline_allows(enemy, enemy.current_hex):
+			continue
 		if mission_support_fire and not _has_safe_support_target(enemy.current_hex):
 			continue
 		if LOSHelper.ground_layer.cube_distance(unit.current_cube, LOSHelper.ground_layer.map_to_cube(enemy.current_hex)) != 1:
@@ -572,6 +616,7 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 		else:
 			shot_target = _personal_defense_target(s)
 			if shot_target == null:
+				s.advance_handling(delta, _handling_speed())
 				return 0
 			personal_target_hex = shot_target.current_hex
 		if s.aquire_target_task.target_id != shot_target or (personal_ground_fire and s.last_target_hex != personal_target_hex):
@@ -627,6 +672,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 				return 0
 		elif not has_target_hex:
 			return 0
+	if not _fire_discipline_allows(shot_target, _target_hex, fire_support_mission):
+		s.weapon_state = Soldier.WeaponState.OBSERVING
+		return 0
 	
 	var cover_map: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {})
 	if cover_map and cover_map.has(_target_hex):
@@ -779,6 +827,8 @@ func _burst_can_continue(soldier: Soldier, context: Dictionary) -> bool:
 	if soldier.barrel_change_assisting or (soldier.weapon.uses_sustained_fire() and (soldier.weapon.automatic_fire.heat_locked or soldier.weapon.automatic_fire.swap_barrel >= 0)):
 		return false
 	if mission_support_fire and not _has_safe_support_target(context["cell"]):
+		return false
+	if not _fire_discipline_allows(context["enemy"] as Unit, context["cell"], context["mission"] as FireSupportMission):
 		return false
 	if context["mission"] != null:
 		var mission: FireSupportMission = context["mission"] as FireSupportMission

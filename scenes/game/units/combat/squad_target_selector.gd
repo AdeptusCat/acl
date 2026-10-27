@@ -29,7 +29,7 @@ static func handle_auto_fire(controller: SquadFireController,
 	var defensive_fire: bool = controller.unit.squad_ai_controller != null and controller.unit.squad_ai_controller.defensive_mission_controlled
 
 	for enemy: Unit in visible_enemies:
-		if not controller._can_track_target(enemy):
+		if not controller.automatic_fire_allowed(enemy):
 			continue
 		
 		var units_in_enemy_hex: Array[Unit] = LOSHelper.find_units_at(enemy.current_hex)

@@ -39,6 +39,9 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var watch_width: OptionButton = $Scroll/Summary/Watch/Controls/Width
 @onready var watch_automatic: Button = $Scroll/Summary/Watch/Controls/Automatic
 @onready var watch_status: Label = $Scroll/Summary/Watch/Status
+@onready var fire_discipline_row: VBoxContainer = $Scroll/Summary/FireDiscipline
+@onready var fire_discipline: OptionButton = $Scroll/Summary/FireDiscipline/Controls/Choice
+@onready var fire_discipline_status: Label = $Scroll/Summary/FireDiscipline/Status
 @onready var spotting_section: FoldableContainer = $Scroll/Summary/Spotting
 @onready var spotting_target: OptionButton = $Scroll/Summary/Spotting/Content/Target
 @onready var spotting_factors: Label = $Scroll/Summary/Spotting/Content/Factors
@@ -80,6 +83,10 @@ func _ready() -> void:
 	watch_width.add_item("Wide · 180°", Unit.WatchWidth.WIDE)
 	watch_width.item_selected.connect(_on_watch_width_selected)
 	watch_automatic.pressed.connect(_on_watch_automatic_pressed)
+	fire_discipline.add_item("Fire at will", Unit.FireDiscipline.FIRE_AT_WILL)
+	fire_discipline.add_item("Return fire", Unit.FireDiscipline.RETURN_FIRE)
+	fire_discipline.add_item("Hold fire", Unit.FireDiscipline.HOLD_FIRE)
+	fire_discipline.item_selected.connect(_on_fire_discipline_selected)
 	spotting_target.item_selected.connect(_on_spotting_target_selected)
 	spotting_section.folding_changed.connect(_on_spotting_folded)
 	rout_button.set_rout_available(false)
@@ -243,9 +250,10 @@ func _refresh_summary() -> void:
 	if _restricted_enemy():
 		_refresh_enemy_summary()
 		return
-	for control: Control in [command_label, order_label, details_section, roster_section, pace_row, watch_row]:
+	for control: Control in [command_label, order_label, details_section, roster_section, pace_row, watch_row, fire_discipline_row]:
 		control.show()
 	_refresh_watch_controls()
+	_refresh_fire_discipline_controls()
 	observation_label.hide()
 	if strength_label.get_theme_font_size("font_size") != 26:
 		strength_label.add_theme_font_size_override("font_size", 26)
@@ -297,7 +305,7 @@ func _refresh_enemy_summary() -> void:
 	observation_label.visible = not str(report.get("activity", "")).is_empty()
 	observation_label.text = "Observed: " + str(report.get("activity", ""))
 	observation_label.tooltip_text = "Activity recorded during the latest visible observation."
-	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, watch_row, rout_button, rout_explanation]:
+	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, watch_row, fire_discipline_row, rout_button, rout_explanation]:
 		control.hide()
 	debug_actions.hide()
 
@@ -307,7 +315,7 @@ func _on_pace_selected(index: int) -> void:
 		unit.movement.stance = pace.get_item_id(index) as UnitMovement.Stance
 
 
-func _can_change_watch() -> bool:
+func _can_change_tactical_settings() -> bool:
 	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit) or not unit.get_watch_restriction().is_empty():
 		return false
 	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
@@ -315,7 +323,7 @@ func _can_change_watch() -> bool:
 
 
 func _refresh_watch_controls() -> void:
-	var allowed: bool = _can_change_watch()
+	var allowed: bool = _can_change_tactical_settings()
 	watch_width.disabled = not allowed
 	watch_automatic.disabled = not allowed or not unit.has_watch_order()
 	watch_width.select(watch_width.get_item_index(unit.watch_width))
@@ -331,7 +339,7 @@ func _refresh_watch_controls() -> void:
 func _on_watch_width_selected(index: int) -> void:
 	if not is_instance_valid(unit):
 		return
-	if _can_change_watch():
+	if _can_change_tactical_settings():
 		unit.set_watch_width(watch_width.get_item_id(index) as Unit.WatchWidth)
 	_refresh_summary()
 
@@ -339,8 +347,29 @@ func _on_watch_width_selected(index: int) -> void:
 func _on_watch_automatic_pressed() -> void:
 	if not is_instance_valid(unit):
 		return
-	if _can_change_watch():
+	if _can_change_tactical_settings():
 		unit.clear_watch_order()
+	_refresh_summary()
+
+
+func _refresh_fire_discipline_controls() -> void:
+	fire_discipline.disabled = not _can_change_tactical_settings()
+	fire_discipline.select(fire_discipline.get_item_index(unit.fire_discipline))
+	fire_discipline_status.text = "Engage visible enemies automatically"
+	match unit.fire_discipline:
+		Unit.FireDiscipline.RETURN_FIRE:
+			fire_discipline_status.text = "Respond to recent incoming fire"
+		Unit.FireDiscipline.HOLD_FIRE:
+			fire_discipline_status.text = "Observe without automatic fire"
+	if unit.fire_discipline != Unit.FireDiscipline.FIRE_AT_WILL and unit.squad_fire.has_fire_order_override():
+		fire_discipline_status.text = "Explicit Fire order overrides discipline"
+
+
+func _on_fire_discipline_selected(index: int) -> void:
+	if not is_instance_valid(unit):
+		return
+	if _can_change_tactical_settings():
+		unit.set_fire_discipline(fire_discipline.get_item_id(index) as Unit.FireDiscipline)
 	_refresh_summary()
 
 

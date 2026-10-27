@@ -25,6 +25,8 @@ const COMPANY_NAMES: Dictionary[Company, String] = {
 
 enum AttackState { AUTO, MANUAL_GROUND, MANUAL_TRACK }
 var attackState: AttackState = AttackState.AUTO
+enum FireDiscipline { FIRE_AT_WILL, RETURN_FIRE, HOLD_FIRE }
+var fire_discipline: FireDiscipline = FireDiscipline.FIRE_AT_WILL
 var attack_ground_rounds_budget: int = 0
 var ai_support_only: bool = false
 var terrain_defense_bonus: int = 0
@@ -265,6 +267,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 			if squad_type == Globals.SquadType.MORTAR:
 				if parameter is Unit:
 					var enemy_unit: Unit = parameter as Unit
+					setAttackState(AttackState.MANUAL_TRACK)
 					squad_fire.set_target_unit(enemy_unit)
 				else:
 					var map_hex: Vector2i = parameter as Vector2i
@@ -607,6 +610,15 @@ func _on_morale_breaks() -> void:
 
 func has_watch_order() -> bool:
 	return not watch_direction.is_zero_approx()
+
+
+func set_fire_discipline(discipline: FireDiscipline) -> bool:
+	if not get_watch_restriction().is_empty() or discipline < FireDiscipline.FIRE_AT_WILL or discipline > FireDiscipline.HOLD_FIRE:
+		return false
+	fire_discipline = discipline
+	if is_instance_valid(squad_fire):
+		squad_fire.on_fire_discipline_changed()
+	return true
 
 
 func watch_arc_radians() -> float:

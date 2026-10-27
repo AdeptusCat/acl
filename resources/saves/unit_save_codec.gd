@@ -12,6 +12,7 @@ static func create_save_data(unit: Unit) -> UnitSaveData:
 	data.team = unit.team
 	data.watch_direction = unit.watch_direction
 	data.watch_width = unit.watch_width
+	data.fire_discipline = unit.fire_discipline
 	if is_instance_valid(unit.movement):
 		data.movement_stance = unit.movement.stance
 	data.casualty_records.assign(unit.casualty_records)
@@ -49,6 +50,10 @@ static func apply_save_data(unit: Unit, data: UnitSaveData) -> void:
 		#var soldier: Soldier = Soldier.create_from_save_data(soldier_data, self, team)
 	
 	unit._setup_runtime_soldiers(data.squad_loadout)
+	unit.fire_discipline = Unit.FireDiscipline.FIRE_AT_WILL
+	if data.fire_discipline >= Unit.FireDiscipline.FIRE_AT_WILL and data.fire_discipline <= Unit.FireDiscipline.HOLD_FIRE:
+		unit.fire_discipline = data.fire_discipline as Unit.FireDiscipline
+	unit.squad_fire.on_fire_discipline_changed()
 	unit.watch_width = clampi(data.watch_width, Unit.WatchWidth.NARROW, Unit.WatchWidth.WIDE) as Unit.WatchWidth
 	unit.watch_direction = Vector2.ZERO
 	if data.watch_direction.is_finite() and unit.get_watch_restriction().is_empty():

@@ -20,3 +20,4 @@ class_name UnitSaveData
 @export var movement_stance: int = 0
 @export var watch_direction: Vector2 = Vector2.ZERO
 @export var watch_width: int = Unit.WatchWidth.NORMAL
+@export var fire_discipline: int = Unit.FireDiscipline.FIRE_AT_WILL
