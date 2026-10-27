@@ -90,7 +90,12 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var snd_reload: AudioStream = null
 @export var snd_distant: AudioStream = null     # low-salience distant thumpse one-shot muzzle
 @export var snd_hit: AudioStream = null     
-@export var volume_db: float = 0.0
+# Absolute playback gains. Defaults match the shared rifle and explosion assets.
+@export var volume_db: float = 1.5
+@export var decay_volume_db: float = -14.2
+@export var hit_volume_db: float = -10.6
+@export var riflegrenade_shot_volume_db: float = -6.9
+@export var riflegrenade_hit_volume_db: float = -10.6
 
 @export var riflegrenade_shot: AudioStream = null
 @export var riflegrenade_hit: AudioStream = null     

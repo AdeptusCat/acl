@@ -23,4 +23,6 @@ he_suppression_power = 28.0
 he_burst_radius = 2.0
 snd_shot = ExtResource("3_tspwy")
 snd_hit = ExtResource("2_2vvn3")
+volume_db = -11.6
+hit_volume_db = -14.0
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

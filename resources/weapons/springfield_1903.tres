@@ -14,4 +14,5 @@ reload_s = 3.0
 range_hexes = 5
 accuracy_base = 0.68
 undercrew_penalty_mult = 1.0
+volume_db = 1.5
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

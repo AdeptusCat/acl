@@ -35,5 +35,6 @@ heat_hard_limit = 450.0
 heat_resume = 200.0
 snd_mg_loop = ExtResource("2_0x148")
 snd_mg_loop_decay = ExtResource("3_0kjp7")
-volume_db = -3.0
+volume_db = -17.1
+decay_volume_db = -13.7
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

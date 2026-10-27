@@ -44,21 +44,15 @@ func play_shot(weapon_spec: WeaponSpec, _position: Vector2, is_distant: bool = f
 			var p: float = _rand_pitch()
 			audio_pool.play_one_shot(weapon_spec.snd_distant, _position, -6.0, p, "SFX_Distant")
 			return
-	# close shot
+	var shot: AudioStream = snd_shot_default
+	var volume: float = weapon_spec.volume_db
 	if weapon_spec.can_fire_riflegrenades and weapon_spec.riflegrenade_loaded:
 		if weapon_spec.riflegrenade_shot != null:
-			var p2: float = _rand_pitch()
-			audio_pool.play_one_shot(weapon_spec.riflegrenade_shot, _position, 6.0, p2, "SFX_Close")
-		else:
-			var p2: float = _rand_pitch()
-			audio_pool.play_one_shot(snd_shot_default, _position, -6.0, p2, "SFX_Close")
-	else:
-		if weapon_spec.snd_shot != null:
-			var p2: float = _rand_pitch()
-			audio_pool.play_one_shot(weapon_spec.snd_shot, _position, -6.0, p2, "SFX_Close")
-		else:
-			var p2: float = _rand_pitch()
-			audio_pool.play_one_shot(snd_shot_default, _position, -6.0, p2, "SFX_Close")
+			shot = weapon_spec.riflegrenade_shot
+			volume = weapon_spec.riflegrenade_shot_volume_db
+	elif weapon_spec.snd_shot != null:
+		shot = weapon_spec.snd_shot
+	audio_pool.play_one_shot(shot, _position, volume, _rand_pitch(), "SFX_Close")
 	# mechanical click
 	if weapon_spec.snd_mech != null:
 		audio_pool.play_one_shot(weapon_spec.snd_mech, _position, -2.0, 1.0, "SFX_Close")
@@ -71,13 +65,10 @@ func play_shot_decay(weapon_spec: WeaponSpec, _position: Vector2, _is_distant: b
 			#var p: float = _rand_pitch()
 			#audio_pool.play_one_shot(weapon_spec.snd_distant, position, -6.0, p, "SFX_Distant")
 			#return
-	# close shot
+	var decay: AudioStream = snd_mg_loop_decay_default
 	if weapon_spec.snd_mg_loop_decay != null:
-		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(weapon_spec.snd_mg_loop_decay, _position, 0.0, p2, "SFX_Close")
-	else:
-		var p2: float = _rand_pitch()
-		audio_pool.play_one_shot(snd_mg_loop_decay_default, _position, 0.0, p2, "SFX_Close")
+		decay = weapon_spec.snd_mg_loop_decay
+	audio_pool.play_one_shot(decay, _position, weapon_spec.decay_volume_db, _rand_pitch(), "SFX_Close")
 
 
 # For MG start/stop looped sound: keep a node per firing source
@@ -100,7 +91,9 @@ func start_mg_loop(owner_id: int, weapon_spec: WeaponSpec, position_node: Node2D
 	ap.bus = "SFX_Close"
 	ap.autoplay = false
 	position_node.add_child(ap)
-	ap.position = position_node.position
+	# The loop is already a child of the firing unit; applying its position again
+	# moves the sound away from the weapon and changes distance attenuation.
+	ap.position = Vector2.ZERO
 	ap.volume_db = weapon_spec.volume_db
 	ap.play()
 	ap.name = "mg_loop_%s" % str(owner_id)

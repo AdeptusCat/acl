@@ -23,4 +23,6 @@ reaim_s = 0.35
 projectile_speed = 600
 snd_mg_loop = ExtResource("2_colei")
 snd_mg_loop_decay = ExtResource("3_hxtgg")
+volume_db = -11.7
+decay_volume_db = -7.1
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

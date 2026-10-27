@@ -33,5 +33,6 @@ spare_barrels = 2
 barrel_change_s = 5.0
 snd_mg_loop = ExtResource("2_uou5u")
 snd_mg_loop_decay = ExtResource("3_ii5bs")
-volume_db = 4.0
+volume_db = -13.1
+decay_volume_db = -14.2
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

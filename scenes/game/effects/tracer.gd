@@ -311,10 +311,10 @@ func _play_impact_sound() -> void:
 	if not is_instance_valid(_audio_pool) or _weapon == null:
 		return
 	var sound: AudioStream = null
-	var volume: float = 0.0
+	var volume: float = _weapon.hit_volume_db
 	if kind == Kind.GRENADE:
 		sound = _weapon.riflegrenade_hit
-		volume = 6.0
+		volume = _weapon.riflegrenade_hit_volume_db
 	elif kind == Kind.ROCKET or kind == Kind.MORTAR:
 		sound = _weapon.snd_hit
 	if sound != null:

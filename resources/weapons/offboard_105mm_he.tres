@@ -19,3 +19,4 @@ range_hexes = 100
 he_burst_radius = 10.0
 he_suppression_power = 60.0
 snd_hit = ExtResource("2")
+hit_volume_db = -10.6

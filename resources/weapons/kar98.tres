@@ -13,4 +13,5 @@ aim_s = 0.9
 cycle_s = 0.9
 reaim_s = 0.9
 snd_shot = ExtResource("2_byysb")
+volume_db = -12.5
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"

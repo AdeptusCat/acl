@@ -6,10 +6,12 @@ class UnitProbe extends Unit:
 
 class PoolProbe extends AudioPool:
 	var streams: Array[AudioStream] = []
+	var volumes: Array[float] = []
 	func _ready() -> void:
 		pass
-	func play_one_shot(stream: AudioStream, _position: Vector2, _volume: float = 0.0, _pitch: float = 1.0, _bus: String = "") -> void:
+	func play_one_shot(stream: AudioStream, _position: Vector2, volume: float = 0.0, _pitch: float = 1.0, _bus: String = "") -> void:
 		streams.append(stream)
+		volumes.append(volume)
 
 class AudioProbe extends WeaponAudio:
 	var starts: int = 0
@@ -119,6 +121,7 @@ func _run() -> void:
 	Debug.dont_fire_wepaons = false
 	_check(sound.starts == starts and sound.stops == stops, "A burst rejected before its first round emits no loop or decay")
 	await _test_loop_lifecycle()
+	_test_weapon_levels()
 	fire.calc.free()
 	fixture.free()
 	shooter.free()
@@ -146,6 +149,7 @@ func _test_loop_lifecycle() -> void:
 	manager._active = true
 	manager.audio_pool = pool
 	var position_node: Node2D = Node2D.new()
+	position_node.position = Vector2(400.0, 300.0)
 	fixture.add_child(position_node)
 	var weapon: WeaponSpec = WeaponSpec.new()
 	weapon.snd_mg_loop = AudioStreamGenerator.new()
@@ -153,6 +157,7 @@ func _test_loop_lifecycle() -> void:
 	pool.streams.clear()
 	manager.start_mg_loop(10, weapon, position_node)
 	var original: AudioStreamPlayer2D = manager._mg_loops[10]
+	_check(original.global_position == position_node.global_position, "Automatic sound stays at its firing unit rather than doubling its map position")
 	manager.start_mg_loop(10, weapon, position_node)
 	_check(manager._mg_loops[10] == original and original.playing, "Repeated loop starts preserve the existing playback instead of restarting it")
 	manager.stop_mg_loop(weapon, Vector2.ZERO, 10, position_node)
@@ -163,6 +168,48 @@ func _test_loop_lifecycle() -> void:
 	manager.shutdown()
 	_check(manager._mg_loops.is_empty(), "Shutdown clears active playback")
 	await get_tree().process_frame
+	manager.free()
+	position_node.free()
+
+
+func _test_weapon_levels() -> void:
+	var manager: ManagedAudio = ManagedAudio.new()
+	fixture.add_child(manager)
+	manager._active = true
+	manager.audio_pool = pool
+	manager.snd_shot_default = load("res://assets/audio/fx/weapons/gun.mp3") as AudioStream
+	var position_node: Node2D = Node2D.new()
+	fixture.add_child(position_node)
+	var tracer: BattlefieldTracer = BattlefieldTracer.new()
+	tracer._audio_pool = pool
+	for file: String in DirAccess.get_files_at("res://resources/weapons"):
+		if not file.ends_with(".tres"):
+			continue
+		var weapon: WeaponSpec = (load("res://resources/weapons/" + file) as WeaponSpec).create_runtime()
+		if weapon.fire_mode == WeaponSpec.FireMode.BURST:
+			manager.start_mg_loop(100, weapon, position_node)
+			var player: AudioStreamPlayer2D = manager._mg_loops[100]
+			_check(is_equal_approx(player.volume_db, weapon.volume_db), weapon.name + " loop applies its calibrated firing gain")
+			manager.stop_mg_loop(weapon, Vector2.ZERO, 100, position_node)
+			_check(is_equal_approx(pool.volumes[-1], weapon.decay_volume_db), weapon.name + " tail uses its independent calibrated gain")
+		elif weapon.family != WeaponSpec.Family.HOWITZER:
+			manager.play_shot(weapon, Vector2.ZERO)
+			_check(is_equal_approx(pool.volumes[-1], weapon.volume_db), weapon.name + " shot, including fallback rifles, applies its firing gain")
+		if weapon.can_fire_riflegrenades:
+			weapon.riflegrenade_loaded = true
+			manager.play_shot(weapon, Vector2.ZERO)
+			_check(pool.streams[-1] == weapon.riflegrenade_shot and is_equal_approx(pool.volumes[-1], weapon.riflegrenade_shot_volume_db), weapon.name + " grenade launch keeps a separate gain from normal rifle fire")
+			tracer._weapon = weapon
+			tracer.kind = BattlefieldTracer.Kind.GRENADE
+			tracer._play_impact_sound()
+			_check(pool.streams[-1] == weapon.riflegrenade_hit and is_equal_approx(pool.volumes[-1], weapon.riflegrenade_hit_volume_db), weapon.name + " grenade impact applies its calibrated gain")
+		if weapon.snd_hit != null:
+			tracer._weapon = weapon
+			tracer.kind = BattlefieldTracer.Kind.MORTAR
+			tracer._play_impact_sound()
+			_check(pool.streams[-1] == weapon.snd_hit and is_equal_approx(pool.volumes[-1], weapon.hit_volume_db), weapon.name + " explosive impact applies its calibrated gain")
+	tracer.free()
+	manager.shutdown()
 	manager.free()
 	position_node.free()
 

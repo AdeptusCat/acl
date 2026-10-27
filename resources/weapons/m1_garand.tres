@@ -16,4 +16,5 @@ priority = 3
 raise_s = 0.7
 aim_s = 0.8
 snd_shot = ExtResource("2_momxg")
+volume_db = -8.6
 metadata/_custom_type_script = "uid://bikdnoi2rxdle"
