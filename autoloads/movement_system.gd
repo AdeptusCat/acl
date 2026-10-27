@@ -1,5 +1,47 @@
 extends Node
 
+const REPLAN_BUDGET_USEC: int = 2000
+
+var _move_replanners: Dictionary[int, MoveRouteReplanner] = {}
+var _replan_cursor: int = 0
+
+
+func watch_move_order(unit: Unit, destination: Vector2i) -> void:
+	_move_replanners.erase(unit.get_instance_id())
+	if not unit.movement.is_moving or unit.movement.path_hexes.size() < 2 or unit.movement.target_hex != destination:
+		return
+	var replanner: MoveRouteReplanner = MoveRouteReplanner.new()
+	replanner.start(unit, destination)
+	_move_replanners[unit.get_instance_id()] = replanner
+
+
+func _process(delta: float) -> void:
+	if _move_replanners.is_empty():
+		return
+	var deadline: int = Time.get_ticks_usec() + REPLAN_BUDGET_USEC
+	for id: int in _move_replanners.keys():
+		var replanner: MoveRouteReplanner = _move_replanners[id]
+		if not replanner.is_current():
+			_move_replanners.erase(id)
+			continue
+		replanner.observe(delta)
+	var replanners: Array[MoveRouteReplanner] = _move_replanners.values()
+	if replanners.is_empty():
+		return
+	for offset: int in range(replanners.size()):
+		var index: int = (_replan_cursor + offset) % replanners.size()
+		replanners[index].advance(deadline)
+		if Time.get_ticks_usec() >= deadline:
+			_replan_cursor = (index + 1) % replanners.size()
+			return
+
+
+func replan_at_boundary(unit: Unit) -> bool:
+	var replanner: MoveRouteReplanner = _move_replanners.get(unit.get_instance_id())
+	if replanner == null:
+		return false
+	return replanner.try_at_boundary()
+
 
 func _compute_path(from_h: Vector2i, to_h: Vector2i, team: int, moving_unit: Unit = null) -> Array[Vector3i]:
 	var movement: UnitMovement

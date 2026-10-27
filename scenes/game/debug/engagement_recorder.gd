@@ -8,6 +8,8 @@ const RULE_SCRIPTS: Array[String] = [
 	"res://autoloads/movement_system.gd",
 	"res://autoloads/threat_map.gd",
 	"res://scenes/game/units/movement/move_route_planner.gd",
+	"res://scenes/game/units/movement/move_route_search.gd",
+	"res://scenes/game/units/movement/move_route_replanner.gd",
 	"res://scenes/game/units/movement/unit_movement.gd",
 	"res://scenes/world/influence_map/projection/influence_unit_query.gd",
 	"res://scenes/game/units/combat/unit_stress_controller.gd",
@@ -155,7 +157,7 @@ func record_order(unit: Unit, command: int, target: Variant) -> void:
 		record_event("order", {"unit": _unit_id(unit), "command": command, "target": _value(target)})
 
 
-func record_move_route(unit: Unit, target: Vector2i, route: MoveRoutePlanner, contacts: Array[InfluenceContact]) -> void:
+func record_move_route(unit: Unit, target: Vector2i, route: MoveRoutePlanner, contacts: Array[InfluenceContact], context: Dictionary = {}) -> void:
 	if not tracks(unit):
 		return
 	var knowledge: Array[Dictionary] = []
@@ -165,8 +167,11 @@ func record_move_route(unit: Unit, target: Vector2i, route: MoveRoutePlanner, co
 	for contact: InfluenceContact in contacts:
 		knowledge.append({"unit": _value(contact.unit), "hex": _value(contact.hex), "observed": contact.observed, "confidence": contact.confidence,
 			"firepower_by_range": _value(contact.movement_firepower_by_range), "effectiveness": contact.effectiveness, "weapon_range": contact.weapon_range})
-	record_event("move_route", {"unit": _unit_id(unit), "target": _value(target), "path": _value(hex_path), "travel_seconds": route.travel_seconds,
-		"exposure_seconds": route.exposure_seconds, "risk_weight": MoveRoutePlanner.RISK_WEIGHT, "cost": route.cost, "contacts": knowledge})
+	var data: Dictionary = {"unit": _unit_id(unit), "target": _value(target), "path": _value(hex_path), "travel_seconds": route.travel_seconds,
+		"exposure_seconds": route.exposure_seconds, "risk_weight": MoveRoutePlanner.RISK_WEIGHT, "cost": route.cost, "contacts": knowledge}
+	var details: Dictionary = _value(context)
+	data.merge(details, true)
+	record_event("move_route", data)
 
 
 func record_shot(controller: SquadFireController, soldier: Soldier, rounds: int, cell: Vector2i, distance: int, cover: int, origin: Vector2, flight_s: float, grenade: bool) -> void:

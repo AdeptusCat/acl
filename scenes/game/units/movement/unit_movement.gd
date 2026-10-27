@@ -182,6 +182,12 @@ func _clear_path_state() -> void:
 	retreating = false
 
 
+func replace_remaining_move_path(path: Array[Vector2i]) -> void:
+	path_hexes = path.duplicate()
+	path_index = 1
+	_start_move_to_hex(path_hexes[path_index])
+
+
 # ----------------------------------------------------------------------
 # ATTACK-MOVE PATH SUPPORT
 # ----------------------------------------------------------------------
@@ -280,6 +286,8 @@ func _process_movement(delta: float) -> void:
 		# Hex-entry signals can synchronously admit this unit to close combat.
 		if unit.in_close_combat:
 			stop()
+			return
+		if MovementSystem.replan_at_boundary(unit):
 			return
 		is_moving = false
 		stopped_moving.emit()

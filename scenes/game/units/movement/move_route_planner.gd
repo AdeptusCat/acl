@@ -36,6 +36,43 @@ var exposure_seconds: float = 0.0
 var cost: float = 0.0
 
 
+func evaluate_path(hexes: Array[Vector2i], team: int, movement: UnitMovement, contacts: Array[InfluenceContact], origin_position: Vector2 = Vector2.INF) -> void:
+	path.clear()
+	travel_seconds = 0.0
+	exposure_seconds = 0.0
+	cost = 0.0
+	if hexes.is_empty() or not Globals.astars.has(team) or not is_instance_valid(LOSHelper.ground_layer):
+		return
+	var ground: HexagonTileMapLayer = LOSHelper.ground_layer
+	var graph: AStar2D = Globals.astars[team]
+	var previous_id: int = -1
+	var risks: Dictionary[Vector2i, float] = {}
+	for index: int in range(hexes.size()):
+		var cell: Vector2i = hexes[index]
+		var id: int = ground.pathfinding_get_point_id(cell)
+		if not graph.has_point(id) or graph.is_point_disabled(id) or ground.local_to_map(graph.get_point_position(id)) != cell:
+			path.clear()
+			return
+		if index > 0 and not graph.are_points_connected(previous_id, id, false):
+			path.clear()
+			return
+		risks[cell] = ThreatMap.risk_at(cell, contacts, LOSHelper.los_lookup)
+		path.append(ground.map_to_cube(cell))
+		previous_id = id
+		if index == 0:
+			continue
+		var from_position: Vector2 = Vector2.INF
+		if index == 1:
+			from_position = origin_position
+		var seconds: float = movement.estimate_crossing_seconds(hexes[index - 1], cell, from_position)
+		if not is_finite(seconds):
+			path.clear()
+			return
+		travel_seconds += seconds
+		exposure_seconds += seconds * (risks[hexes[index - 1]] + risks[cell]) * 0.5
+	cost = travel_seconds + RISK_WEIGHT * exposure_seconds
+
+
 func build(from_hex: Vector2i, to_hex: Vector2i, team: int, movement: UnitMovement, contacts: Array[InfluenceContact], origin_position: Vector2 = Vector2.INF) -> void:
 	path.clear()
 	travel_seconds = 0.0

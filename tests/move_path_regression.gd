@@ -19,8 +19,12 @@ class ActionProbe extends SquadActionController:
 	var commanded_hex: Vector2i
 
 	func give_move_to_hex_order(target: Vector2i, path: Array[Vector3i], _take_and_hold: bool) -> void:
+		action_order_id += 1
+		objective_hex = target
+		action_state = SquadActionState.MOVING_TO_POSITION
 		commanded_hex = target
 		commanded_path = path
+		unit.movement.follow_cube_path(path)
 
 
 class RecorderProbe extends EngagementRecorder:
@@ -44,6 +48,7 @@ var start: Vector2i = Vector2i(1, 3)
 var finish: Vector2i = Vector2i(5, 3)
 var direct: Array[Vector2i] = [Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), Vector2i(4, 3), Vector2i(5, 3)]
 var detour: Array[Vector2i] = [Vector2i(1, 3), Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2), Vector2i(4, 2), Vector2i(5, 2), Vector2i(5, 3)]
+var arrivals: int = 0
 
 
 func _ready() -> void:
@@ -67,7 +72,9 @@ func _run() -> void:
 	_test_crossing_time()
 	_test_command_and_topology()
 	_test_route_logging()
+	_test_replanning()
 	_test_large_map()
+	MovementSystem._move_replanners.clear()
 	Globals.unit_visible_enemies.clear()
 	Globals.astars.clear()
 	LOSHelper.los_lookup.clear()
@@ -294,6 +301,10 @@ func _test_command_and_topology() -> void:
 	ground.astar.connect_points(penultimate, last, false)
 	route.build(finish, start, own.team, own.movement, [])
 	_check(route.path.is_empty(), "The search preserves one-way connections")
+	var search: MoveRouteSearch = MoveRouteSearch.new()
+	search.start(own.movement, start, [])
+	search.advance(-1)
+	_check(search.path_from(finish).is_empty(), "Backward replanning preserves the original direction of one-way connections")
 
 
 func _test_route_logging() -> void:
@@ -306,7 +317,144 @@ func _test_route_logging() -> void:
 	var data: Dictionary = recorder.recorded["data"]
 	_check(recorder.recorded["type"] == "move_route" and data["target"] == [finish.x, finish.y] and data["path"][-1] == [finish.x, finish.y], "Move diagnostics record the actual destination and path as map hexes")
 	_check(data["cost"] == route.cost and data["contacts"].size() == 1 and data["contacts"][0]["firepower_by_range"] is Array, "Move diagnostics preserve cost and the captured threat capability used by the search")
+	recorder.record_move_route(own, finish, route, contacts, {"reason": "detected_threat", "disposition": "replanned", "previous_path": direct})
+	data = recorder.recorded["data"]
+	_check(data["reason"] == "detected_threat" and data["disposition"] == "replanned" and data["previous_path"][0] == [start.x, start.y], "Replan diagnostics serialize the reason, outcome and previous map path")
 	recorder.free()
+
+
+func _begin_manual_move(paths: Array) -> MoveRouteReplanner:
+	MovementSystem._move_replanners.clear()
+	own.movement.stop()
+	own.current_hex = start
+	own.current_cube = ground.map_to_cube(start)
+	own.position = ground.map_to_local(start)
+	own.broken = false
+	own.in_close_combat = false
+	own.stress_system.state = STATES.MoraleState.NORMAL
+	own.movement.move_speed = 30.0
+	own.enemy_memory.clear()
+	enemy.firepower = 16
+	enemy.combat_stats.combat_effectiveness = 1.0
+	enemy.stress_system.state = STATES.MoraleState.NORMAL
+	Globals.unit_visible_enemies[own] = []
+	_graph(paths)
+	own.order(Globals.UnitCmd.MOVE, finish)
+	return MovementSystem._move_replanners.get(own.get_instance_id())
+
+
+func _finish_route_search(replanner: MoveRouteReplanner) -> void:
+	for index: int in range(2000):
+		if replanner.job != null and replanner.job.completed:
+			return
+		MovementSystem._process(0.016)
+	_check(false, "Background route search completes within its frame budget")
+
+
+func _test_replanning() -> void:
+	var replanner: MoveRouteReplanner = _begin_manual_move([direct, detour])
+	_check(replanner != null and own.movement.path_hexes == direct, "Only an accepted manual move starts an automatic route watcher")
+	enemy.current_hex = Vector2i(3, 7)
+	MovementSystem._process(0.5)
+	_check(replanner.job == null and own.movement.path_hexes == direct, "Hidden enemy movement does not start a route search")
+	enemy.current_hex = Vector2i(3, 6)
+	Globals.unit_visible_enemies[own] = [enemy]
+	LOSHelper.los_lookup[enemy.current_hex] = {Vector2i(8, 8): {"target_cover": 0, "hindrance": 0}}
+	MovementSystem._process(0.5)
+	_check(replanner.job == null, "A newly detected enemy outside the remaining route does not trigger replanning")
+	replanner = _begin_manual_move([direct, detour])
+	var ally: UnitProbe = _unit(own.team, Vector2i(0, 3))
+	Globals.unit_visible_enemies[ally] = [enemy]
+	own.movement._process_movement(0.2)
+	var moving_position: Vector2 = own.position
+	MovementSystem._process(0.5)
+	_finish_route_search(replanner)
+	_check(own.movement.is_moving and own.movement.path_hexes == direct and own.position == moving_position, "A team-shared detection computes an alternative without stopping or changing the in-flight crossing")
+	_check(not MovementSystem.replan_at_boundary(own), "A completed search cannot turn a squad around between hex centers")
+	var order: int = own.action_controller.action_order_id
+	arrivals = 0
+	own.unit_arrived_at_hex.connect(_count_arrival)
+	own.movement._process_movement(100.0)
+	_check(replanner.last_disposition == "replanned" and own.movement.path_hexes != direct and own.movement.path_hexes[0] == direct[1], "The safer route is installed from the next reached hex instead of the search's old origin")
+	_check(own.movement.target_hex == finish and own.action_controller.objective_hex == finish and own.action_controller.action_order_id == order, "Automatic rerouting preserves the clicked destination and the action order")
+	_check(own.movement.is_moving and arrivals == 0, "Rerouting does not emit a false arrival or interrupt movement")
+	enemy.firepower = 20
+	MovementSystem._process(0.5)
+	_check(replanner.pending and replanner.job == null, "The cooldown retains new threat information without immediately switching routes again")
+	for index: int in range(30):
+		if not own.movement.is_moving:
+			break
+		own.movement._process_movement(100.0)
+	MovementSystem._process(0.1)
+	_check(own.current_hex == finish and arrivals == 1 and MovementSystem._move_replanners.is_empty(), "The rerouted squad reaches its original destination once and releases its watcher")
+	own.unit_arrived_at_hex.disconnect(_count_arrival)
+	Globals.unit_visible_enemies.erase(ally)
+	ally.free()
+	replanner = _begin_manual_move([direct, detour])
+	enemy.firepower = 1
+	enemy.combat_stats.combat_effectiveness = 0.1
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	_finish_route_search(replanner)
+	own.movement._process_movement(100.0)
+	_check(replanner.last_disposition == "retained_no_improvement" and own.movement.path_hexes == direct and own.movement.is_moving, "A weak threat cannot cause a marginal detour or freeze the current move")
+	replanner = _begin_manual_move([direct, detour])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	_finish_route_search(replanner)
+	enemy.stress_system.state = STATES.MoraleState.PANIC
+	own.movement._process_movement(100.0)
+	_check(replanner.last_disposition == "retained_no_improvement" and own.movement.path_hexes == direct, "Applying a route rechecks observed suppression instead of following an obsolete threat snapshot")
+	replanner = _begin_manual_move([direct])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	_finish_route_search(replanner)
+	own.movement._process_movement(100.0)
+	_check(own.movement.path_hexes == direct and own.movement.is_moving, "A threatening enemy does not cancel movement when no better connected route exists")
+	replanner = _begin_manual_move([direct, detour])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	own.movement.stop()
+	MovementSystem._process(0.5)
+	_check(MovementSystem._move_replanners.is_empty() and not MovementSystem.replan_at_boundary(own), "Stop cancels pending searches without restarting an old move")
+	replanner = _begin_manual_move([direct, detour])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	own.movement._process_movement(0.2)
+	own.stress_system.state = STATES.MoraleState.PINNED
+	own.movement.state_changed(STATES.MoraleState.PINNED)
+	MovementSystem._process(0.5)
+	_check(MovementSystem._move_replanners.is_empty() and not own.movement.is_moving, "Pinning cancels the route watcher and its pending search")
+	own.stress_system.state = STATES.MoraleState.NORMAL
+	own.movement.state_changed(STATES.MoraleState.NORMAL)
+	_check(own.movement.path_hexes.is_empty() and own.movement.target_hex == own.current_hex, "Recovery recenters the squad without resurrecting the canceled destination")
+	replanner = _begin_manual_move([direct, detour])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	own.order(Globals.UnitCmd.MOVE, detour[2])
+	_check(not replanner.is_current() and own.movement.target_hex == detour[2], "A new player destination invalidates the previous search immediately")
+	_check(not replanner.try_at_boundary(), "A stale search cannot replace a newer player order")
+	MovementSystem._move_replanners.clear()
+	var action: ActionProbe = own.action_controller as ActionProbe
+	var cubes: Array[Vector3i] = []
+	for cell: Vector2i in direct:
+		cubes.append(ground.map_to_cube(cell))
+	action.give_move_to_hex_order(finish, cubes, false)
+	_check(MovementSystem._move_replanners.is_empty(), "AI movement through the tactical order API does not acquire a manual route watcher")
+	replanner = _begin_manual_move([direct, detour])
+	Globals.unit_visible_enemies[own] = [enemy]
+	MovementSystem._process(0.5)
+	action.give_move_to_hex_order(finish, cubes, false)
+	MovementSystem._process(0.1)
+	_check(not replanner.is_current() and MovementSystem._move_replanners.is_empty(), "A tactical replacement of the same destination invalidates the manual watcher's action ownership")
+	own.movement.stop()
+	own.current_hex = start
+	own.position = ground.map_to_local(start)
+	Globals.unit_visible_enemies[own] = []
+
+
+func _count_arrival(_cell: Vector2i) -> void:
+	arrivals += 1
 
 
 func _test_large_map() -> void:
@@ -329,6 +477,26 @@ func _test_large_map() -> void:
 	var milliseconds: float = float(Time.get_ticks_usec() - before) / 1000.0
 	_check(not path.is_empty() and ground.cube_to_map(path[-1]) == Vector2i(28, 18), "A complete route remains available on a 600-hex map")
 	print("600-hex move route search: ", milliseconds, " ms")
+	var search: MoveRouteSearch = MoveRouteSearch.new()
+	search.start(own.movement, Vector2i(28, 18), [])
+	search.advance(Time.get_ticks_usec())
+	_check(not search.completed, "An expired frame budget defers the automatic route search")
+	var slices: int = 0
+	for index: int in range(2000):
+		if search.completed:
+			break
+		search.advance(Time.get_ticks_usec() + 250)
+		slices += 1
+	var alternative: Array[Vector2i] = search.path_from(start)
+	_check(search.completed and slices > 1 and not alternative.is_empty() and alternative[-1] == Vector2i(28, 18), "A large automatic route search completes over multiple bounded slices")
+	var original: Array[Vector2i] = []
+	for cube: Vector3i in path:
+		original.append(ground.cube_to_map(cube))
+	var expected: MoveRoutePlanner = MoveRoutePlanner.new()
+	expected.evaluate_path(original, own.team, own.movement, [])
+	var actual: MoveRoutePlanner = MoveRoutePlanner.new()
+	actual.evaluate_path(alternative, own.team, own.movement, [])
+	_check(is_equal_approx(expected.cost, actual.cost), "The background reverse search agrees with the normal route planner's optimum")
 
 
 func _check(condition: bool, message: String) -> void:

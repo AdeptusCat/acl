@@ -321,6 +321,7 @@ func order(cmd: Globals.UnitCmd, parameter: Variant) -> void:
 			if not current_hex == to_hex:
 				var path: Array[Vector3i] = MovementSystem._compute_path(current_hex, to_hex, team, self)
 				give_move_to_hex_order(to_hex, path, false)
+				MovementSystem.watch_move_order(self, to_hex)
 			else:
 				clear_orders()
 		Globals.UnitCmd.STOP:
