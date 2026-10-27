@@ -359,6 +359,10 @@ static func _loses_objective_guard(query: PositionQuery) -> bool:
 
 
 static func rejection(query: PositionQuery, cell: Vector2i, features: Dictionary, check_handoff: bool = true) -> String:
+	if query.defense_responsibility == PositionQuery.Responsibility.COVER_APPROACH and cell != query.origin_hex and not needs_withdrawal(query):
+		# A distant firing lane cannot justify leaving the objective unsupported for a long march.
+		if features.get("route_seconds", 0.0) + query.profile.establishment_seconds > query.profile.max_screen_deployment_seconds:
+			return "deployment_time"
 	for key: String in query.reserve_response_limits:
 		if features.get("reserve_branch_status", {}).get(key, {}).get("response_seconds", INF) > query.reserve_response_limits[key]:
 			return "reserve_gap"

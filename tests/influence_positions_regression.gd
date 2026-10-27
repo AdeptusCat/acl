@@ -139,6 +139,7 @@ func _run() -> void:
 	_test_defensive_commitment()
 	_test_defensive_responsibility()
 	_test_secured_objective_cover()
+	_test_screen_deployment_budget()
 	_test_crossing_budget()
 	_test_rapid_defense_response()
 	_test_defensive_withdrawal()
@@ -2698,6 +2699,27 @@ func _test_secured_objective_cover() -> void:
 	map.set_layer_value(InfluenceMap.Layer.TERRAIN_COVER, detached, 1.0)
 	query.sector_cells = [detached]
 	_check(not PositionQueryService.query_positions(query).is_valid(), "Secured-objective guards cannot withdraw to distant cover outside their response radius")
+	_publish()
+
+
+func _test_screen_deployment_budget() -> void:
+	var query: PositionQuery = _defense_fixture()
+	_add_defense_contact(query)
+	query.objective_hex = own.current_hex
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	query.sector_cells = [Vector2i(4, 3)]
+	var advice: PositionResult = PositionQueryService.query_positions(query)
+	_check(advice.is_valid(), "A nearby covered screen remains reachable within its deployment budget")
+	if advice.is_valid():
+		query.profile.max_screen_deployment_seconds = advice.features["route_seconds"] + query.profile.establishment_seconds - 0.1
+		var rejected: PositionResult = PositionQueryService.query_positions(query)
+		_check(not rejected.is_valid() and rejected.rejections.has("deployment_time"), "Screen deployment includes actual route time and weapon establishment, not hex distance alone")
+		query.rapid_response = true
+		_check(not PositionQueryService.query_positions(query).is_valid(), "Rapid screening decisions enforce the same deployment deadline")
+		query.defense_responsibility = PositionQuery.Responsibility.OCCUPY
+		query.objective_hex = Vector2i(4, 3)
+		query.profile.max_screen_deployment_seconds = 0.0
+		_check(PositionQueryService.query_positions(query).is_valid(), "A mandatory occupation move is not restricted by the optional screening deadline")
 	_publish()
 
 

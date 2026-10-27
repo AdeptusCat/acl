@@ -29,6 +29,7 @@ var defensive_mount: WeaponSpec.Mount = WeaponSpec.Mount.NONE
 @export var commitment_seconds: float = 0.0
 @export var max_exposure_seconds: float = INF
 @export var max_open_exposure_seconds: float = INF
+@export var max_screen_deployment_seconds: float = INF
 @export var forecast_route_weight: float = 1.0
 @export var interposition_weight: float = 0.0
 @export var blocking_weight: float = 0.0
@@ -59,6 +60,7 @@ static func for_mode(p_mode: Mode) -> PositionProfile:
 		profile.max_route_exposure = 0.98
 		profile.max_exposure_seconds = 6.0
 		profile.max_open_exposure_seconds = 2.0
+		profile.max_screen_deployment_seconds = 20.0
 		profile.forecast_route_weight = 0.25
 		profile.cover_weight = 2.0
 		profile.objective_weight = 4.0

@@ -502,6 +502,34 @@ func _test_prologue_guard(planner: PlatoonAI) -> void:
 			snapshot.defensive_contacts[unit.team] = contacts
 			_check(LOSHelper.get_hex_distance(result.target_hex, task.hex) <= ScenarioGoalTask.SECURED_DEFENSE_RADIUS, "The prologue guard remains within response distance of its objective")
 	_check(found, "The prologue retains a guard assigned to its secured outpost")
+	_test_prologue_screen_detour(planner)
+
+
+func _test_prologue_screen_detour(planner: PlatoonAI) -> void:
+	var unit: Unit = null
+	for candidate: Unit in planner.squads:
+		if candidate.squad == 3:
+			unit = candidate
+	_check(unit != null, "The authored prologue provides its supporting rifle squad")
+	if unit == null:
+		return
+	# The route accepted in the supplied 05-44-23 capture, reproduced on the real map.
+	var path: Array[Vector2i] = [Vector2i(23, 13), Vector2i(24, 13), Vector2i(24, 12), Vector2i(25, 11),
+		Vector2i(25, 10), Vector2i(25, 9), Vector2i(25, 8), Vector2i(25, 7), Vector2i(25, 6), Vector2i(24, 6),
+		Vector2i(23, 5), Vector2i(22, 5), Vector2i(21, 4), Vector2i(20, 5), Vector2i(19, 4), Vector2i(18, 5),
+		Vector2i(17, 4), Vector2i(16, 5), Vector2i(15, 5), Vector2i(15, 6), Vector2i(14, 7)]
+	var query: PositionQuery = PositionQuery.new()
+	query.unit = unit
+	query.team = unit.team
+	query.snapshot = world.game_controller.influence_map_controller.snapshot
+	query.objective_hex = Vector2i(19, 9)
+	query.origin_hex = path[0]
+	query.profile = PositionProfile.for_mode(PositionProfile.Mode.DEFEND)
+	query.defense_responsibility = PositionQuery.Responsibility.COVER_APPROACH
+	DefensePositionPolicy.prepare(query)
+	var features: Dictionary = PositionFeatureEvaluator.evaluate(query, path[-1], path)
+	_check(features["route_seconds"] > 40.0, "The recorded 20-hex screen detour still exceeds forty seconds on the authored map")
+	_check(DefensePositionPolicy.rejection(query, path[-1], features) == "deployment_time", "A long detour to a firing lane no longer qualifies as defensive deployment")
 
 
 func _test_final_defense_losses(planner: PlatoonAI) -> void:

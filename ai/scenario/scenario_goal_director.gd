@@ -193,6 +193,7 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 	for state: VictoryConditionProgress in progress:
 		if state.team == team and state.outcome == own_level and state.valid:
 			_add_own_tasks(state, planner)
+	_anchor_defensive_destruction()
 	_prioritize_garrisons(planner)
 	for task: ScenarioGoalTask in tasks:
 		if task.kind != ScenarioGoalTask.Kind.EXIT:
@@ -206,6 +207,22 @@ func _build_tasks(planner: PlatoonAI, seconds_left: float, now: float = -INF) ->
 			task.urgent = true
 			task.reason += "; breach the weakest defended corridor at " + str(breach.hex)
 	tasks.sort_custom(_prefer_task)
+
+
+func _anchor_defensive_destruction() -> void:
+	if posture != PositionProfile.Mode.DEFEND:
+		return
+	var defending_ground: bool = false
+	for task: ScenarioGoalTask in tasks:
+		if task.kind == ScenarioGoalTask.Kind.OCCUPY:
+			defending_ground = true
+			break
+	if not defending_ground:
+		return
+	for task: ScenarioGoalTask in tasks.duplicate():
+		if task.kind == ScenarioGoalTask.Kind.HUNT:
+			tasks.erase(task)
+			diagnostics.append("Destroy enemies through defensive fire supporting the occupation mission; keep supporting squads on defensive duties")
 
 
 func _escape_mission(progress: Array[VictoryConditionProgress]) -> EscapeMissionPolicy:

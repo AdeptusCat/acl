@@ -87,6 +87,7 @@ func _run() -> void:
 	_test_bound_stability()
 	_test_recovered_defender()
 	_test_enemy_knowledge()
+	_test_defensive_destruction()
 	_test_enemy_conditions_ignored()
 	_test_fallback_authoring()
 	_test_hold_to_exit_fallback()
@@ -441,6 +442,36 @@ func _test_recovered_defender() -> void:
 	_set_hex(enemy, original)
 	snapshot.contacts[planner.team] = []
 	snapshot.defensive_contacts[planner.team] = []
+
+
+func _test_defensive_destruction() -> void:
+	var hold: OccupyObjectiveCondition = _occupy([rifles[0].current_hex])
+	hold.state.victory_conditions_met[rifles[0].current_hex] = true
+	var destroy: DestroyUnitsCondition = DestroyUnitsCondition.new()
+	destroy.team = planner.team
+	var enemy: Unit = Globals.get_units_for_team(Globals.get_enemy_team(planner.team))[0]
+	var contact: InfluenceContact = InfluenceContact.new()
+	contact.unit = enemy
+	contact.hex = enemy.current_hex
+	contact.observed = true
+	var previous: Array[InfluenceContact] = controller.influence_map_controller.snapshot.get_defensive_contacts(planner.team)
+	controller.influence_map_controller.snapshot.defensive_contacts[planner.team] = [contact]
+	var goals: ScenarioGoalDirector = ScenarioGoalDirector.new()
+	# Condition ordering must not change the defensive interpretation of the quota.
+	goals.configure(planner.team, [destroy, hold], PositionProfile.Mode.DEFEND)
+	goals.initial_order(planner, MissionOrder.new(), 300.0)
+	_check(goals.tasks.size() == 1 and goals.primary.kind == ScenarioGoalTask.Kind.OCCUPY, "Defending a hold-and-destroy mission does not send supporting squads on hunts")
+	_check(not goals.diagnostics.is_empty(), "The director explains that defensive fire advances the destruction quota")
+	goals.configure(planner.team, [hold, destroy], PositionProfile.Mode.ASSAULT)
+	goals.initial_order(planner, MissionOrder.new(), 300.0)
+	var hunt_found: bool = false
+	for task: ScenarioGoalTask in goals.tasks:
+		hunt_found = hunt_found or task.kind == ScenarioGoalTask.Kind.HUNT
+	_check(hunt_found, "An explicit assault posture can still hunt while pursuing an occupation goal")
+	goals.configure(planner.team, [destroy], PositionProfile.Mode.DEFEND)
+	goals.initial_order(planner, MissionOrder.new(), 300.0)
+	_check(goals.primary != null and goals.primary.kind == ScenarioGoalTask.Kind.HUNT, "A destruction-only mission retains its pursuit behavior")
+	controller.influence_map_controller.snapshot.defensive_contacts[planner.team] = previous
 
 
 func _test_enemy_conditions_ignored() -> void:
