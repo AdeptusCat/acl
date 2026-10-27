@@ -252,7 +252,20 @@ func _test_crossing_time() -> void:
 	_check(is_equal_approx(own.movement.estimate_crossing_seconds(start, direct[1]), baseline * 2.0), "Building entry uses the execution movement factor")
 	for cell: Vector2i in direct.slice(1, -1):
 		buildings.set_cell(cell, 0, Vector2i.ZERO)
-	_check(_path() == detour, "A longer open route can arrive sooner than a short slow route through buildings")
+	_check(_path() == direct, "Units use the shorter covered route despite slower building movement and no known enemies")
+	var covered_route: MoveRoutePlanner = MoveRoutePlanner.new()
+	covered_route.build(start, finish, own.team, own.movement, [])
+	var evaluated: MoveRoutePlanner = MoveRoutePlanner.new()
+	evaluated.evaluate_path(direct, own.team, own.movement, [])
+	_check(covered_route.travel_seconds > baseline * 4.0 and is_equal_approx(covered_route.cost, evaluated.cost), "Covered route scoring preserves actual slow travel time and matches reevaluation")
+	var search: MoveRouteSearch = MoveRouteSearch.new()
+	search.start(own.movement, finish, [])
+	search.advance(-1)
+	_check(search.path_from(start) == direct, "Budgeted replanning also uses slower covered terrain")
+	buildings.clear()
+	for cell: Vector2i in detour.slice(1, -1):
+		buildings.set_cell(cell, 0, Vector2i.ZERO)
+	_check(_path() == detour, "Units accept a moderate slower detour to remain in cover")
 	buildings.clear()
 	LOSHelper.los_lookup[start][direct[1]]["wall_cover"] = 2
 	_check(is_equal_approx(own.movement.estimate_crossing_seconds(start, direct[1]), baseline * 2.0), "Crossing a wall costs the same time in planning and execution")

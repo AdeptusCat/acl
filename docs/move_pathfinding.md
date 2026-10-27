@@ -3,12 +3,13 @@
 Normal move commands keep the clicked destination and choose the route with the lowest combined travel and exposure cost:
 
 ```text
-cost = travel_seconds + 4 × exposure_seconds
+crossing_cost = crossing_seconds / (1 + 2 × destination_cover) + 4 × crossing_exposure_seconds
+cost = sum(crossing_cost)
 ```
 
 Each crossing uses the squad's movement speed, destination terrain and wall or hedge crossing factor. Planning and execution share `UnitMovement.crossing_movement_factor()`. Reissued orders estimate the first crossing from the squad's actual position. The route search preserves the battlefield's directed connections and disabled cells without changing the shared graph's weights.
 
-Exposure is crossing time multiplied by the average incoming risk at its endpoints. Incoming risk combines captured enemy weapon capability at that distance, ammunition, morale, effectiveness, line of sight, directional target cover and hindrance. Risk is normalized to 0–1, so additional travel has a finite cost and cover alone does not justify a detour through an unthreatened area. Dangerous routes remain available when they are the only connected route; defensive AI exposure budgets do not cancel an explicit move command.
+Exposure is crossing time multiplied by the average incoming risk at its endpoints. Incoming risk combines captured enemy weapon capability at that distance, ammunition, morale, effectiveness, line of sight, directional target cover and hindrance. Risk is normalized to 0–1. Destination cover also reduces the travel portion of route cost, so squads use covered terrain even when crossing it takes longer and no enemy has been observed. Actual movement speed and reported travel time retain the terrain slowdown. Cover comes from the destination terrain and directional LOS record; added distance still carries a positive cost. Dangerous routes remain available when they are the only connected route; defensive AI exposure budgets do not cancel an explicit move command.
 
 Routing always uses the issuing side's observed contacts and existing six-second contact memory, even when the AI influence-map inspector uses omniscient knowledge. A hidden enemy's last observed position, range-specific firepower and effectiveness remain frozen while confidence decays. A never-observed enemy contributes no risk.
 

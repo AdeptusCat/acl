@@ -2,6 +2,20 @@ class_name MoveRoutePlanner
 extends RefCounted
 
 const RISK_WEIGHT: float = 4.0
+const COVER_WEIGHT: float = 2.0
+
+
+static func crossing_cost(from_hex: Vector2i, to_hex: Vector2i, seconds: float, exposure: float) -> float:
+	var record: Dictionary = LOSHelper.los_lookup.get(from_hex, {}).get(to_hex, {})
+	var cover: float = maxf(0.0, float(record.get("target_cover", 0.0)))
+	if is_instance_valid(LOSHelper.building_layer) and LOSHelper.building_layer.get_cell_source_id(to_hex) != -1:
+		var tile: TileData = LOSHelper.building_layer.get_cell_tile_data(to_hex)
+		var terrain_cover: float = float(LOSHelper.BUILDING_COVER)
+		if tile != null and tile.has_custom_data("cover"):
+			terrain_cover = float(tile.get_custom_data("cover"))
+		cover = maxf(cover, terrain_cover)
+	# Cover offsets slow terrain even without a known enemy; actual travel time stays unchanged.
+	return seconds / (1.0 + COVER_WEIGHT * cover) + RISK_WEIGHT * seconds * exposure
 
 
 class RouteGraph extends AStar2D:
@@ -14,7 +28,7 @@ class RouteGraph extends AStar2D:
 
 	func _compute_cost(from_id: int, to_id: int) -> float:
 		var exposure: float = (risks[cells[from_id]] + risks[cells[to_id]]) * 0.5
-		return crossing_seconds(from_id, to_id) * (1.0 + RISK_WEIGHT * exposure)
+		return MoveRoutePlanner.crossing_cost(cells[from_id], cells[to_id], crossing_seconds(from_id, to_id), exposure)
 
 	func _estimate_cost(_from_id: int, _to_id: int) -> float:
 		# Zero keeps the search exact for directed, time-weighted edges and a moving origin.
@@ -70,7 +84,7 @@ func evaluate_path(hexes: Array[Vector2i], team: int, movement: UnitMovement, co
 			return
 		travel_seconds += seconds
 		exposure_seconds += seconds * (risks[hexes[index - 1]] + risks[cell]) * 0.5
-	cost = travel_seconds + RISK_WEIGHT * exposure_seconds
+		cost += crossing_cost(hexes[index - 1], cell, seconds, (risks[hexes[index - 1]] + risks[cell]) * 0.5)
 
 
 func build(from_hex: Vector2i, to_hex: Vector2i, team: int, movement: UnitMovement, contacts: Array[InfluenceContact], origin_position: Vector2 = Vector2.INF) -> void:
@@ -112,4 +126,4 @@ func build(from_hex: Vector2i, to_hex: Vector2i, team: int, movement: UnitMoveme
 		var seconds: float = graph.crossing_seconds(previous, id)
 		travel_seconds += seconds
 		exposure_seconds += seconds * (graph.risks[graph.cells[previous]] + graph.risks[graph.cells[id]]) * 0.5
-	cost = travel_seconds + RISK_WEIGHT * exposure_seconds
+		cost += graph._compute_cost(previous, id)

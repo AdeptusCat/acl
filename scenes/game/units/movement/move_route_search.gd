@@ -75,7 +75,7 @@ func advance(deadline_usec: int) -> void:
 					if not is_finite(seconds):
 						continue
 					var risk: float = (_risks[id] + _risks[neighbor]) * 0.5
-					_incoming[neighbor].append({"from": id, "cost": seconds * (1.0 + MoveRoutePlanner.RISK_WEIGHT * risk)})
+					_incoming[neighbor].append({"from": id, "cost": MoveRoutePlanner.crossing_cost(_cells[id], _cells[neighbor], seconds, risk)})
 			Phase.SEARCH:
 				if _frontier.is_empty():
 					completed = true
