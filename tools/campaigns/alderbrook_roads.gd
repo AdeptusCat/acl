@@ -19,10 +19,7 @@ const ROUTES: Array[Array] = [
 	[
 		[Vector3(-1, 7.5, 0), Vector3(4.5, 7.3, -0.2), Vector3(7.5, 6, -0.08), Vector3(12.5, 6.1, 0.1), Vector3(20, 7, 0)],
 	],
-	[
-		[Vector3(-1, 5.1, 0), Vector3(3.5, 4.95, -0.12), Vector3(7, 3.9, 0), Vector3(9.5, 4, 0), Vector3(13.5, 4, 0), Vector3(17, 4.5, 0), Vector3(24, 4.25, -0.02)],
-		[Vector3(-1, 10.9, 0), Vector3(4, 10.8, -0.08), Vector3(7.5, 10.1, -0.08), Vector3(9.5, 10, 0), Vector3(13.5, 10, 0), Vector3(17, 9.6, 0), Vector3(24, 10.55, 0.04)],
-	],
+	AlderbrookCrossingsLayout.ROUTES,
 	AlderbrookVillageLayout.ROUTES,
 ]
 

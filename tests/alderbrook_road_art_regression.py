@@ -26,7 +26,7 @@ def check_map(path: Path) -> int:
             if layer["name"] == "GroundTileMapLayer":
                 mask.polygon([(px - 32, py - 64), (px + 32, py - 64), (px + 64, py), (px + 32, py + 64), (px - 32, py + 64), (px - 64, py)], fill=255)
             name: str = Path(cell["texture"]).stem
-            if not name.startswith("road_") and name != "bridge":
+            if not name.startswith("road_") and name != "bridge" and layer["name"] != "WaterTileMapLayer":
                 continue
             if name.startswith("road_"):
                 assert layer["name"] == "RoadTileMapLayer", f"{data['id']}: road art remains in {layer['name']}"

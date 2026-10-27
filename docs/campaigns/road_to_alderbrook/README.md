@@ -50,6 +50,12 @@ toward barn B and the northern walled farmhouse A. A curved north-to-east road,
 a winding farm lane and an exposed eastern field flank replace the first map's
 horizontal road and woodland belts. See the [Orchard layout](maps/02_orchard_outpost.md).
 
+Two Crossings uses a 28 × 20 layout inspired by the narrow winding river on ASL
+board 41. A single-file chain of river hexes separates the banks, with two
+single-hex bridges staggered between a northern stone hamlet and a southern
+timber yard. Bank lanes link the approaches and the eastern exits. See the
+[crossings layout](maps/04_two_crossings.md).
+
 ## Minor victories and enemy behavior
 
 - Quiet Approach: hold rally point B for 15 seconds at the deadline.
@@ -117,6 +123,12 @@ Orchard also has a separate builder, `tools/campaigns/build_alderbrook_orchard.t
 which edits its existing scene, preserves loadouts and victory resources, and
 writes independent tile sets. Use the same roads/import/build/import/LOS sequence;
 its layout is defined in `alderbrook_orchard_layout.gd`.
+
+Two Crossings has `tools/campaigns/build_alderbrook_crossings.tscn`, with the same
+roads/import/build/import/LOS sequence. Its roads-only mode also generates the
+connected river and bridge artwork. The layout is defined in
+`alderbrook_crossings_layout.gd`; this builder preserves the existing mission's
+forces, loadouts, rules and save identity.
 
 The campaign definition is `resources/campaigns/road_to_alderbrook.tres`; its
 mission scenes are in `scenes/campaigns/alderbrook/`. Edit the mission blueprints

@@ -98,19 +98,46 @@
 	{
 		"cells": [
 			{
-				"cover": 3,
+				"cover": 2,
 				"hex": [
-					14,
-					5
+					7,
+					4
 				],
-				"kind": "Stone Building",
-				"variant": "building_stone_01"
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
 			},
 			{
 				"cover": 3,
 				"hex": [
-					14,
-					11
+					15,
+					4
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					16,
+					2
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					16,
+					7
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					17,
+					3
 				],
 				"kind": "Stone Building",
 				"variant": "building_stone_01"
@@ -119,10 +146,55 @@
 				"cover": 3,
 				"hex": [
 					18,
-					8
+					3
+				],
+				"kind": "Stone Building",
+				"variant": "building_stone_02"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					21,
+					13
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_03"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					21,
+					16
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					22,
+					14
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
+			},
+			{
+				"cover": 3,
+				"hex": [
+					25,
+					9
 				],
 				"kind": "Stone Building",
 				"variant": "building_stone_01"
+			},
+			{
+				"cover": 2,
+				"hex": [
+					25,
+					13
+				],
+				"kind": "Wood Building",
+				"variant": "building_wood_02"
 			}
 		],
 		"id": "alderbrook_04_two_crossings"

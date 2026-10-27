@@ -74,11 +74,10 @@ const MISSIONS: Array[Dictionary] = [
 		"allied_markers": [[1, 7, 7], [4, 5, 9]], "axis_markers": [[0, 0, 6], [0, 0, 7], [0, 0, 8], [0, 0, 9], [4, 18, 7]],
 	},
 	{
-		"id": "04_two_crossings", "title": "4. Two Crossings", "map": "Alderbrook Crossings", "size": Vector2i(24, 16), "seconds": 720.0,
-		"briefing": "Road to Alderbrook - mission 4 of 5.\n\nTwo reinforced platoons must open the river crossings and move a force into the village approaches. The river is impassable away from the two bridges. Assign a platoon to each crossing; leave a garrison on each eastern bank while the remaining squads pass through.\n\n[b]Major Victory:[/b] hold A and B for 20 seconds each and exit three units through the eastern Exit markers. All three requirements must be met together.\n\n[b]Minor Victory:[/b] exit two units by the deadline. Enemy infantry and fire support guard the eastern approaches.",
-		"player": [[1, "hq", 2, 4], [1, "rifle", 3, 3], [1, "rifle", 3, 4], [1, "rifle", 3, 5], [1, "mg", 2, 6], [2, "hq", 2, 10], [2, "rifle", 3, 9], [2, "rifle", 3, 10], [2, "rifle", 3, 11], [2, "mg", 2, 12], [0, "company_hq", 1, 7]],
-		"enemy": [[1, "hq", 17, 4], [1, "rifle", 14, 3], [1, "rifle", 14, 5], [1, "mg", 16, 4], [2, "hq", 17, 10], [2, "rifle", 14, 9], [2, "rifle", 14, 11], [2, "mg", 16, 10], [0, "company_hq", 20, 7]],
-		"allied_markers": [[1, 13, 4], [2, 13, 10], [0, 22, 4], [0, 22, 10], [4, 2, 7]], "axis_markers": [[1, 13, 4], [4, 17, 7]],
+		"id": "04_two_crossings", "title": "4. Two Crossings", "map": "Alderbrook Crossings", "size": AlderbrookCrossingsLayout.SIZE, "seconds": 720.0,
+		"briefing": AlderbrookCrossingsLayout.BRIEFING,
+		"player": AlderbrookCrossingsLayout.PLAYER, "enemy": AlderbrookCrossingsLayout.ENEMY,
+		"allied_markers": AlderbrookCrossingsLayout.ALLIED_MARKERS, "axis_markers": AlderbrookCrossingsLayout.AXIS_MARKERS,
 	},
 	{
 		"id": "05_battle_for_alderbrook", "title": "5. Battle for Alderbrook", "map": "Alderbrook Village", "size": AlderbrookVillageLayout.SIZE, "seconds": 900.0,
@@ -135,6 +134,8 @@ func _run() -> void:
 	if OS.get_cmdline_user_args().has("--roads-only"):
 		for index: int in range(MISSIONS.size()):
 			_roads.write_assets(str(MISSIONS[index]["id"]), _road_layouts[index])
+		var river: AlderbrookCrossingsRiver = AlderbrookCrossingsRiver.new()
+		river.write_assets(river.layout(_road_layouts[3]), _road_layouts[3])
 		for kind: String in ["bridge", "river"]:
 			var image: Image = Image.new()
 			assert(image.load_svg_from_string(FileAccess.get_file_as_string("res://assets/tiles/campaign/" + kind + ".svg")) == OK)
@@ -252,10 +253,18 @@ func _run() -> void:
 				get_tree().quit(1)
 				return
 			village.free()
+		if index == 3:
+			var crossings: Node = load("res://tools/campaigns/build_alderbrook_crossings.gd").new()
+			if not crossings.create_crossings(map, _road_layouts[index]):
+				crossings.free()
+				get_tree().quit(1)
+				return
+			crossings.bake_crossings_art(map)
+			crossings.free()
 		var art_id: String = str(MISSIONS[index]["id"])
 		if index == 4:
 			art_id += "_village"
-		if index != 1:
+		if index != 1 and index != 3:
 			ConnectedTerrainBaker.bake(map.get_terrain_layer(), art_id + "_terrain")
 			ConnectedTerrainBaker.bake(map.get_building_layer(), art_id + "_woods")
 		if index == 4:
@@ -410,25 +419,6 @@ func _build_map(spec: Dictionary, index: int) -> Map:
 	elif index == 2:
 		_house(buildings, terrain, Vector2i(7, 7), true)
 		_house(buildings, terrain, Vector2i(8, 9), false)
-	elif index == 3:
-		var river_x: int = 11
-		var crossings: Array[int] = [4, 10]
-		var river_width: int = 2
-		for x: int in range(river_x, river_x + river_width):
-			for y: int in range(map.grid_size.y):
-				var cell: Vector2i = Vector2i(x, y)
-				terrain.erase_cell(cell)
-				buildings.erase_cell(cell)
-				water.set_cell(cell, 0, Vector2i.ZERO)
-				if crossings.has(y):
-					var alternative: int = 0
-					if x % 2 == 0:
-						alternative = 1
-					water.set_cell(cell, 1, Vector2i.ZERO, alternative)
-				else:
-					ground.erase_cell(cell)
-		for cell: Vector2i in [Vector2i(14, 5), Vector2i(14, 11), Vector2i(18, 8)]:
-			_house(buildings, terrain, cell, true)
 	if not _place_roads(ground, terrain, roads, buildings, water, index, ground_sources[0]):
 		map.free()
 		return null
@@ -727,6 +717,8 @@ func _export_layout(map: Map, spec: Dictionary) -> void:
 			var data: TileData = layer.get_cell_tile_data(cell)
 			var region: Rect2i = source.get_tile_texture_region(layer.get_cell_atlas_coords(cell))
 			var cell_data: Dictionary = {"hex": [cell.x, cell.y], "position": [position.x, position.y], "texture": source.texture.resource_path, "flip_h": data.flip_h, "flip_v": data.flip_v}
+			if layer.name == &"WaterTileMapLayer" and layer.get_cell_source_id(cell) == 1:
+				cell_data["bridge"] = true
 			if data.texture_origin != Vector2i.ZERO:
 				cell_data["texture_origin"] = [data.texture_origin.x, data.texture_origin.y]
 			if data.modulate != Color.WHITE:
