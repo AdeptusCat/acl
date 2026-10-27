@@ -61,11 +61,10 @@ const MISSIONS: Array[Dictionary] = [
 		"allied_markers": [[1, 12, 5], [2, 7, 6], [4, 2, 6]], "axis_markers": [[1, 12, 5], [4, 14, 5]],
 	},
 	{
-		"id": "02_orchard_outpost", "title": "2. Orchard Outpost", "map": "Alderbrook Orchard", "size": Vector2i(18, 12), "seconds": 600.0,
-		"briefing": "Road to Alderbrook - mission 2 of 5.\n\nYour full platoon now has a machine-gun team. Clear the orchard outpost before the company moves up. The central lane is quick but exposed; the orchard and northern woodland give covered alternatives. Set up the gun before sending rifle squads forward.\n\n[b]Major Victory:[/b] destroy two enemy units and hold the farmhouse at A for 30 seconds. Both requirements must be met.\n\n[b]Minor Victory:[/b] hold the orchard barn at B when time expires.",
-		"player": [[1, "hq", 2, 6], [1, "rifle", 3, 5], [1, "rifle", 3, 6], [1, "rifle", 3, 7], [1, "mg", 2, 8]],
-		"enemy": [[1, "hq", 15, 7], [1, "rifle", 13, 6], [1, "rifle", 14, 5], [1, "mg", 12, 4]],
-		"allied_markers": [[1, 13, 6], [2, 9, 8], [4, 2, 6]], "axis_markers": [[1, 13, 6], [4, 15, 7]],
+		"id": "02_orchard_outpost", "title": "2. Orchard Outpost", "map": "Alderbrook Orchard", "size": AlderbrookOrchardLayout.SIZE, "seconds": 600.0,
+		"briefing": AlderbrookOrchardLayout.BRIEFING,
+		"player": AlderbrookOrchardLayout.PLAYER, "enemy": AlderbrookOrchardLayout.ENEMY,
+		"allied_markers": AlderbrookOrchardLayout.ALLIED_MARKERS, "axis_markers": AlderbrookOrchardLayout.AXIS_MARKERS,
 	},
 	{
 		"id": "03_the_roadblock", "title": "3. The Roadblock", "map": "Alderbrook Roadblock", "size": Vector2i(20, 14), "seconds": 540.0,
@@ -239,6 +238,11 @@ func _run() -> void:
 			return
 		add_child(map)
 		await get_tree().process_frame
+		if index == 1:
+			var orchard: Node = load("res://tools/campaigns/build_alderbrook_orchard.gd").new()
+			orchard.create_orchard(map, _road_layouts[index])
+			orchard.bake_orchard_art(map)
+			orchard.free()
 		if index == 4:
 			var village: Node = load("res://tools/campaigns/build_alderbrook_village.gd").new()
 			village.village_layout = _road_layouts[index]
@@ -251,8 +255,9 @@ func _run() -> void:
 		var art_id: String = str(MISSIONS[index]["id"])
 		if index == 4:
 			art_id += "_village"
-		ConnectedTerrainBaker.bake(map.get_terrain_layer(), art_id + "_terrain")
-		ConnectedTerrainBaker.bake(map.get_building_layer(), art_id + "_woods")
+		if index != 1:
+			ConnectedTerrainBaker.bake(map.get_terrain_layer(), art_id + "_terrain")
+			ConnectedTerrainBaker.bake(map.get_building_layer(), art_id + "_woods")
 		if index == 4:
 			var village_path: String = RESOURCE_DIRECTORY + "alderbrook_village_terrain.tres"
 			assert(ResourceSaver.save(map.get_terrain_layer().tile_set, village_path) == OK)

@@ -385,18 +385,24 @@ func _test_roads() -> void:
 		var variants: Dictionary[Vector2i, bool] = {}
 		var frontier: Array[Vector2i] = []
 		var prologue: bool = map.name == &"AlderbrookPrologue"
+		var orchard: bool = map.name == &"Alderbrook2"
 		for cell: Vector2i in roads.get_used_cells():
 			corridor[cell] = true
 			variants[roads.get_cell_atlas_coords(cell)] = true
 			_check(ground.get_cell_source_id(cell) >= 0, "Road corridors have playable ground")
 			_check(not bool(roads.get_cell_tile_data(cell).get_custom_data("hindrance")) and not bool(roads.get_cell_tile_data(cell).get_custom_data("blocking")), "Curved road pieces preserve open-road LOS rules")
-			if (prologue and cell.y == map.grid_size.y - 1) or (not prologue and cell.x == 0):
+			var entry: bool = cell.x == 0
+			if prologue:
+				entry = cell.y == map.grid_size.y - 1
+			elif orchard:
+				entry = cell.y == 0
+			if entry:
 				frontier.append(cell)
 		for cell: Vector2i in water.get_used_cells():
 			if water.get_cell_source_id(cell) == 1:
 				corridor[cell] = true
 		_check(variants.size() >= 12, "Each mission uses distinct road pieces instead of a repeated chevron")
-		_check(not frontier.is_empty(), "Each road network enters from its deployment edge")
+		_check(not frontier.is_empty(), "Each road network enters from its authored map edge")
 		var reached: Dictionary[Vector2i, bool] = {}
 		for start: Vector2i in frontier:
 			reached[start] = true
@@ -408,7 +414,7 @@ func _test_roads() -> void:
 				if corridor.has(neighbor) and not reached.has(neighbor):
 					reached[neighbor] = true
 					frontier.append(neighbor)
-		_check(reached.size() == corridor.size(), "All road and bridge pieces belong to continuous routes from the deployment edge")
+		_check(reached.size() == corridor.size(), "All road and bridge pieces belong to continuous routes from the entry edge")
 		var eastern_connections: int = 0
 		for cell: Vector2i in reached:
 			if (prologue and cell.y == 0) or (not prologue and cell.x == map.grid_size.x - 1):

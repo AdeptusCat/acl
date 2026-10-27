@@ -44,6 +44,12 @@ coordination and leaving garrisons behind. The final battle transitions from hed
 into connected village streets, with 17 player units against 14 enemy
 units. Mortars and company command become part of the engagement.
 
+Orchard Outpost uses a 22 × 16 orchard estate inspired by ASL boards 17 and 54.
+The platoon advances diagonally from the southwest through hedged orchard plots
+toward barn B and the northern walled farmhouse A. A curved north-to-east road,
+a winding farm lane and an exposed eastern field flank replace the first map's
+horizontal road and woodland belts. See the [Orchard layout](maps/02_orchard_outpost.md).
+
 ## Minor victories and enemy behavior
 
 - Quiet Approach: hold rally point B for 15 seconds at the deadline.
@@ -106,6 +112,11 @@ Finally run with `-- --los-only` to bake LOS against the imported textures.
 It writes the scene, designer manifest, independent tile sets, and baked LOS.
 The main campaign builder retains the prologue at the front of the campaign.
 Existing mission save IDs stay unchanged.
+
+Orchard also has a separate builder, `tools/campaigns/build_alderbrook_orchard.tscn`,
+which edits its existing scene, preserves loadouts and victory resources, and
+writes independent tile sets. Use the same roads/import/build/import/LOS sequence;
+its layout is defined in `alderbrook_orchard_layout.gd`.
 
 The campaign definition is `resources/campaigns/road_to_alderbrook.tres`; its
 mission scenes are in `scenes/campaigns/alderbrook/`. Edit the mission blueprints

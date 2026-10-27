@@ -1,0 +1,244 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/tiles/campaign/roads/road_02_orchard_outpost.svg" id="1_o6ag5"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_nw_so.png" id="2_mjjni"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_n_so.png" id="3_n4tjs"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_nw_n.png" id="4_wq7sk"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_nw_no.png" id="5_4b8qf"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_n_s.png" id="6_kiyuj"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_n_s_nw.png" id="7_c021v"]
+[ext_resource type="Texture2D" path="res://assets/tiles/terrain/road_nw_no_s.png" id="8_pwx73"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_o6ag5"]
+resource_name = "Road - Orchard estate lanes"
+texture = ExtResource("1_o6ag5")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+1:0/0 = 0
+1:0/0/custom_data_4 = "Road"
+2:0/0 = 0
+2:0/0/custom_data_4 = "Road"
+3:0/0 = 0
+3:0/0/custom_data_4 = "Road"
+4:0/0 = 0
+4:0/0/custom_data_4 = "Road"
+5:0/0 = 0
+5:0/0/custom_data_4 = "Road"
+6:0/0 = 0
+6:0/0/custom_data_4 = "Road"
+7:0/0 = 0
+7:0/0/custom_data_4 = "Road"
+0:1/0 = 0
+0:1/0/custom_data_4 = "Road"
+1:1/0 = 0
+1:1/0/custom_data_4 = "Road"
+2:1/0 = 0
+2:1/0/custom_data_4 = "Road"
+3:1/0 = 0
+3:1/0/custom_data_4 = "Road"
+4:1/0 = 0
+4:1/0/custom_data_4 = "Road"
+5:1/0 = 0
+5:1/0/custom_data_4 = "Road"
+6:1/0 = 0
+6:1/0/custom_data_4 = "Road"
+7:1/0 = 0
+7:1/0/custom_data_4 = "Road"
+0:2/0 = 0
+0:2/0/custom_data_4 = "Road"
+1:2/0 = 0
+1:2/0/custom_data_4 = "Road"
+2:2/0 = 0
+2:2/0/custom_data_4 = "Road"
+3:2/0 = 0
+3:2/0/custom_data_4 = "Road"
+4:2/0 = 0
+4:2/0/custom_data_4 = "Road"
+5:2/0 = 0
+5:2/0/custom_data_4 = "Road"
+6:2/0 = 0
+6:2/0/custom_data_4 = "Road"
+7:2/0 = 0
+7:2/0/custom_data_4 = "Road"
+0:3/0 = 0
+0:3/0/custom_data_4 = "Road"
+1:3/0 = 0
+1:3/0/custom_data_4 = "Road"
+2:3/0 = 0
+2:3/0/custom_data_4 = "Road"
+3:3/0 = 0
+3:3/0/custom_data_4 = "Road"
+4:3/0 = 0
+4:3/0/custom_data_4 = "Road"
+5:3/0 = 0
+5:3/0/custom_data_4 = "Road"
+6:3/0 = 0
+6:3/0/custom_data_4 = "Road"
+7:3/0 = 0
+7:3/0/custom_data_4 = "Road"
+0:4/0 = 0
+0:4/0/custom_data_4 = "Road"
+1:4/0 = 0
+1:4/0/custom_data_4 = "Road"
+2:4/0 = 0
+2:4/0/custom_data_4 = "Road"
+3:4/0 = 0
+3:4/0/custom_data_4 = "Road"
+4:4/0 = 0
+4:4/0/custom_data_4 = "Road"
+5:4/0 = 0
+5:4/0/custom_data_4 = "Road"
+6:4/0 = 0
+6:4/0/custom_data_4 = "Road"
+7:4/0 = 0
+7:4/0/custom_data_4 = "Road"
+0:5/0 = 0
+0:5/0/custom_data_4 = "Road"
+1:5/0 = 0
+1:5/0/custom_data_4 = "Road"
+2:5/0 = 0
+2:5/0/custom_data_4 = "Road"
+3:5/0 = 0
+3:5/0/custom_data_4 = "Road"
+4:5/0 = 0
+4:5/0/custom_data_4 = "Road"
+5:5/0 = 0
+5:5/0/custom_data_4 = "Road"
+6:5/0 = 0
+6:5/0/custom_data_4 = "Road"
+7:5/0 = 0
+7:5/0/custom_data_4 = "Road"
+0:6/0 = 0
+0:6/0/custom_data_4 = "Road"
+1:6/0 = 0
+1:6/0/custom_data_4 = "Road"
+2:6/0 = 0
+2:6/0/custom_data_4 = "Road"
+3:6/0 = 0
+3:6/0/custom_data_4 = "Road"
+4:6/0 = 0
+4:6/0/custom_data_4 = "Road"
+5:6/0 = 0
+5:6/0/custom_data_4 = "Road"
+6:6/0 = 0
+6:6/0/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mjjni"]
+resource_name = "Road"
+texture = ExtResource("2_mjjni")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 3
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n4tjs"]
+resource_name = "Road"
+texture = ExtResource("3_n4tjs")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
+0:0/3 = 3
+0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wq7sk"]
+resource_name = "Road"
+texture = ExtResource("4_wq7sk")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
+0:0/2 = 2
+0:0/2/flip_h = true
+0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
+0:0/3 = 3
+0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4b8qf"]
+resource_name = "Road"
+texture = ExtResource("5_4b8qf")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kiyuj"]
+resource_name = "Road"
+texture = ExtResource("6_kiyuj")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c021v"]
+resource_name = "Road"
+texture = ExtResource("7_c021v")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 4
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_h = true
+0:0/1/custom_data_4 = "Road"
+0:0/2 = 2
+0:0/2/flip_v = true
+0:0/2/custom_data_4 = "Road"
+0:0/3 = 3
+0:0/3/flip_h = true
+0:0/3/flip_v = true
+0:0/3/custom_data_4 = "Road"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pwx73"]
+resource_name = "Road"
+texture = ExtResource("8_pwx73")
+texture_region_size = Vector2i(128, 128)
+0:0/next_alternative_id = 3
+0:0/0 = 0
+0:0/0/custom_data_4 = "Road"
+0:0/1 = 1
+0:0/1/flip_v = true
+0:0/1/custom_data_4 = "Road"
+
+[resource]
+tile_shape = 3
+tile_offset_axis = 1
+tile_size = Vector2i(128, 128)
+custom_data_layer_0/name = "woods"
+custom_data_layer_0/type = 1
+custom_data_layer_1/name = "orchard"
+custom_data_layer_1/type = 0
+custom_data_layer_2/name = "hindrance"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "blocking"
+custom_data_layer_3/type = 1
+custom_data_layer_4/name = "name"
+custom_data_layer_4/type = 4
+custom_data_layer_5/name = "art_family"
+custom_data_layer_5/type = 4
+sources/18 = SubResource("TileSetAtlasSource_mjjni")
+sources/19 = SubResource("TileSetAtlasSource_n4tjs")
+sources/20 = SubResource("TileSetAtlasSource_wq7sk")
+sources/21 = SubResource("TileSetAtlasSource_4b8qf")
+sources/22 = SubResource("TileSetAtlasSource_kiyuj")
+sources/23 = SubResource("TileSetAtlasSource_c021v")
+sources/24 = SubResource("TileSetAtlasSource_pwx73")
+sources/1 = SubResource("TileSetAtlasSource_o6ag5")

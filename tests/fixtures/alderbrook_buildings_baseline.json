@@ -16,21 +16,57 @@
 	{
 		"cells": [
 			{
-				"cover": 2,
 				"hex": [
-					9,
+					10,
 					8
 				],
 				"kind": "Wood Building",
+				"cover": 2,
 				"variant": "building_wood_01"
 			},
 			{
-				"cover": 3,
+				"hex": [
+					12,
+					8
+				],
+				"kind": "Wood Building",
+				"cover": 2,
+				"variant": "building_wood_01"
+			},
+			{
 				"hex": [
 					13,
-					6
+					5
 				],
 				"kind": "Stone Building",
+				"cover": 3,
+				"variant": "building_stone_01"
+			},
+			{
+				"hex": [
+					15,
+					3
+				],
+				"kind": "Stone Building",
+				"cover": 3,
+				"variant": "building_stone_01"
+			},
+			{
+				"hex": [
+					16,
+					1
+				],
+				"kind": "Stone Building",
+				"cover": 3,
+				"variant": "building_stone_01"
+			},
+			{
+				"hex": [
+					17,
+					2
+				],
+				"kind": "Stone Building",
+				"cover": 3,
 				"variant": "building_stone_01"
 			}
 		],
