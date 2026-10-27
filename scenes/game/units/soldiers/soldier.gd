@@ -49,7 +49,7 @@ var cadence_phase_s: float = 0.0      # fixed per-soldier desync in cadence
 
 # Behavior controls willingness to expose; handling controls the physical weapon.
 enum Behavior { ENGAGING, TAKING_COVER, COWERING, RECOVERING }
-enum WeaponState { LOWERED, READY, PREPARING, FIRING, CYCLING, REAIMING, RELOADING, SETTING_UP }
+enum WeaponState { LOWERED, READY, PREPARING, FIRING, CYCLING, REAIMING, RELOADING, SETTING_UP, OBSERVING, COOLING, CHANGING_BARREL }
 
 var behavior: Behavior = Behavior.ENGAGING
 var weapon_state: WeaponState = WeaponState.READY
@@ -61,6 +61,8 @@ var cycle_remaining_s: float = 0.0
 var reaim_remaining_s: float = 0.0
 var burst_active: bool = false
 var has_engagement: bool = false
+var barrel_change_assisting: bool = false
+var barrel_change_worked: bool = false
 var _behavior_morale: int = -1
 var _combat_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _reload_rounds: int = 0
@@ -201,6 +203,9 @@ func finish_burst() -> void:
 
 
 func advance_handling(delta: float, speed: float) -> bool:
+	if barrel_change_assisting or barrel_change_worked or weapon.automatic_fire.swap_barrel >= 0:
+		weapon_state = WeaponState.CHANGING_BARREL
+		return false
 	if burst_active:
 		weapon_state = WeaponState.FIRING
 		return false
@@ -250,6 +255,19 @@ func advance_handling(delta: float, speed: float) -> bool:
 	return true
 
 
+func automatic_burst_size(rapid: bool) -> int:
+	var nominal: int = weapon.burst_rounds
+	if rapid:
+		nominal = weapon.rapid_burst_rounds
+	if weapon.automatic_fire.heat() >= weapon.heat_soft_limit:
+		nominal = maxi(2, int(float(nominal) * 0.65))
+	return clampi(nominal + _combat_rng.randi_range(-1, 1), 1, rounds_in_mag)
+
+
+func finish_automatic_burst(rapid: bool, suppressed: bool) -> void:
+	weapon.automatic_fire.finish_burst(weapon, rapid, suppressed, _combat_rng.randf_range(0.85, 1.15))
+
+
 func combat_status() -> String:
 	match behavior:
 		Behavior.TAKING_COVER:
@@ -258,6 +276,8 @@ func combat_status() -> String:
 			return "Cowering"
 		Behavior.RECOVERING:
 			return "Recovering"
+	if barrel_change_assisting or barrel_change_worked or weapon.automatic_fire.swap_barrel >= 0:
+		return "Changing barrel"
 	match weapon_state:
 		WeaponState.FIRING:
 			return "Firing"
@@ -265,6 +285,10 @@ func combat_status() -> String:
 			return "Cycling action"
 		WeaponState.REAIMING:
 			return "Restoring aim"
+		WeaponState.OBSERVING:
+			return "Observing between bursts"
+		WeaponState.COOLING:
+			return "Cooling barrel"
 	return "Ready"
 
 

@@ -105,12 +105,15 @@ func _test_support_weapon_transfer() -> void:
 	var weapon: WeaponSpec = old_gunner.weapon
 	weapon.ammunition -= 8
 	weapon.is_setup = true
+	weapon.automatic_fire.barrel_heat[0] = 125.0
+	weapon.automatic_fire.pause_remaining_s = 1.5
 	first.squad_fire.soldiers.erase(old_gunner)
 	first._assign_gunner_and_loader_for_weapon(weapon)
 	_check(replacement.role == RankGrades.Role.GUNNER, "Loader takes over the dropped support weapon")
 	_check(replacement.weapon == weapon, "Re-crewing preserves the same physical weapon")
 	_check(replacement.weapon.ammunition == source.ammunition_start - 8, "Re-crewing does not refill spent ammunition")
 	_check(replacement.weapon.is_setup, "Re-crewing retains existing weapon state")
+	_check(replacement.weapon.automatic_fire.heat() == 125.0 and replacement.weapon.automatic_fire.pause_remaining_s == 1.5, "Re-crewing retains barrel heat and the current fire discipline pause")
 	_check(second.squad_fire.soldiers[0].weapon.ammunition == source.ammunition_start, "Other support weapons remain independent")
 	_check(replacement.create_save_data().weapon_resource_path == source.resource_path, "Transferred weapons retain their source asset path")
 

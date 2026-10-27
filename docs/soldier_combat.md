@@ -63,6 +63,11 @@ mechanical RPM. Automatic burst pauses overlap correction through `max(pause,
 reaim)`, with rounds inside each burst following RPM. Setup and rifle-grenade
 preparation remain separate weapon requirements.
 
+MG34, M1919A4 and BAR fire discipline also imposes an observation pause, which
+elapses alongside handling and reloads. Their controlled/rapid burst profiles,
+physical barrel heat and crew-assisted barrel changes are described in
+[sustained_fire.md](sustained_fire.md).
+
 ## Scheduling and observation
 
 The controller updates each soldier once in a synchronous pass. Active bursts

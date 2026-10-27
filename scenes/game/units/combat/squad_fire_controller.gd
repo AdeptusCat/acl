@@ -287,6 +287,7 @@ func _process(delta: float) -> void:
 	_update_state_multipliers()
 	_tick_weapon_setup(delta)
 	if unit.ai_support_only:
+		_tick_automatic_fire(delta)
 		clear_target()
 		return
 	var visible: Array = Globals.unit_visible_enemies.get(unit, [])
@@ -422,6 +423,7 @@ func _tick_weapon_setup(delta: float) -> void:
 
 func _tick_soldiers(delta: float) -> void:
 	# One synchronous pass. Airborne rounds never suspend this scheduler.
+	_tick_automatic_fire(delta)
 	for soldier: Soldier in soldiers:
 		if not soldier.is_alive:
 			if _bursts.has(soldier):
@@ -433,7 +435,80 @@ func _tick_soldiers(delta: float) -> void:
 		if crew_served:
 			loaders = _count_role(RankGrades.Role.LOADER)
 			assistants = _count_role(RankGrades.Role.ASSISTANT)
+			if soldier.weapon.uses_sustained_fire():
+				loaders = _available_automatic_crew(RankGrades.Role.LOADER)
+				assistants = _available_automatic_crew(RankGrades.Role.ASSISTANT)
 		_try_fire_soldier(delta, soldier, crew_served, loaders, assistants, 0, 0)
+
+
+func _tick_automatic_fire(delta: float) -> void:
+	var advanced: Dictionary[WeaponSpec, bool] = {}
+	# Include dropped guns; a replacement receives their existing barrels and heat.
+	for soldier: Soldier in soldiers + casualties:
+		soldier.barrel_change_assisting = false
+		soldier.barrel_change_worked = false
+		if soldier.weapon.uses_sustained_fire() and not advanced.has(soldier.weapon):
+			soldier.weapon.automatic_fire.advance(delta, soldier.weapon)
+			advanced[soldier.weapon] = true
+	if unit.is_moving or unit.in_close_combat or unit.broken or unit.surrendered or unit.ai_support_only:
+		return
+	for gunner: Soldier in soldiers:
+		if not gunner.is_alive or gunner.behavior != Soldier.Behavior.ENGAGING or gunner.burst_active:
+			continue
+		if not gunner.weapon.uses_sustained_fire() or not gunner.setup_weapon_task.done or gunner.weapon.ammunition <= 0:
+			continue
+		var state: AutomaticFireState = gunner.weapon.automatic_fire
+		var swap_delta: float = delta
+		if state.swap_barrel < 0:
+			if state.begin_barrel_change(gunner.weapon):
+				# Work starts on the next update, after the swap has actually been selected.
+				gunner.weapon_state = Soldier.WeaponState.CHANGING_BARREL
+				swap_delta = 0.0
+			else:
+				continue
+		var helper: Soldier = _barrel_change_helper()
+		# Do not also spend this update's handling time on a reload or firing aim.
+		gunner.barrel_change_worked = true
+		var speed: float = _handling_speed()
+		if helper != null:
+			helper.barrel_change_assisting = true
+			helper.weapon_state = Soldier.WeaponState.CHANGING_BARREL
+		else:
+			speed /= maxf(gunner.weapon.undercrew_penalty_mult, 1.0)
+		speed *= compute_support_efficiency(_available_automatic_crew(RankGrades.Role.ASSISTANT), gunner.weapon.support_crew_optimal)
+		if state.advance_barrel_change(swap_delta * speed, gunner.weapon):
+			gunner.reaim_remaining_s = maxf(gunner.reaim_remaining_s, gunner.weapon.reaim_s)
+
+
+func _barrel_change_helper() -> Soldier:
+	for role: RankGrades.Role in [RankGrades.Role.LOADER, RankGrades.Role.ASSISTANT]:
+		for soldier: Soldier in soldiers:
+			if soldier.role == role and soldier.is_alive and soldier.behavior == Soldier.Behavior.ENGAGING and not soldier.barrel_change_assisting and not soldier.burst_active and soldier.reload_task.done:
+				return soldier
+	return null
+
+
+func _available_automatic_crew(role: RankGrades.Role) -> int:
+	var count: int = 0
+	for soldier: Soldier in soldiers:
+		if soldier.role == role and soldier.is_alive and soldier.behavior == Soldier.Behavior.ENGAGING:
+			count += 1
+	return count
+
+
+func _rapid_fire_opportunity(enemy: Unit, distance: int, cell: Vector2i) -> bool:
+	if not is_instance_valid(enemy) or not _can_track_target(enemy):
+		return false
+	if TacticalPositionExecutor.is_sufficiently_suppressed(enemy):
+		return false
+	if distance <= 2:
+		return true
+	var lane: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {}).get(cell, {})
+	var concealment: int = int(lane.get("target_concealment", -1))
+	if concealment < 0:
+		# Older LOS caches omit concealment; bullet cover is not a substitute.
+		concealment = LOSHelper.get_target_concealment(enemy.global_position)
+	return enemy.is_moving and concealment == 0 and int(lane.get("hindrance", 0)) == 0
 
 
 func _uses_personal_defense(soldier: Soldier) -> bool:
@@ -467,6 +542,9 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if _bursts.has(s):
 		return _advance_burst(s, delta)
 	if not s.is_alive or not unit.is_active() or unit.ai_support_only or unit.surrendered or unit.broken:
+		return 0
+	if s.barrel_change_assisting or s.barrel_change_worked or s.weapon.automatic_fire.swap_barrel >= 0:
+		s.weapon_state = Soldier.WeaponState.CHANGING_BARREL
 		return 0
 	var personal_defense: bool = _uses_personal_defense(s)
 	if fire_support_mission != null and personal_defense:
@@ -616,7 +694,21 @@ func _try_fire_soldier(delta: float, s: Soldier, is_crew_served: bool, crew_avai
 	if s.rounds_in_mag <= 0:
 		s.start_reload(s.weapon.can_fire_riflegrenades and target_distance <= s.weapon.riflegrenade_range)
 		return 0
-	var shots: int = mini(determine_burst_size(s.weapon, s.rounds_in_mag), s.weapon.ammunition)
+	var rapid: bool = false
+	if s.weapon.uses_sustained_fire():
+		var state: AutomaticFireState = s.weapon.automatic_fire
+		rapid = state.select_rapid(s.weapon, _rapid_fire_opportunity(shot_target, target_distance, _target_hex))
+		if state.heat_locked:
+			s.weapon_state = Soldier.WeaponState.COOLING
+			return 0
+		if state.pause_remaining_s > 0.0:
+			s.weapon_state = Soldier.WeaponState.OBSERVING
+			return 0
+	var shots: int
+	if s.weapon.uses_sustained_fire():
+		shots = mini(s.automatic_burst_size(rapid), s.weapon.ammunition)
+	else:
+		shots = mini(determine_burst_size(s.weapon, s.rounds_in_mag), s.weapon.ammunition)
 	if fire_support_mission != null:
 		shots = mini(shots, fire_support_mission.remaining)
 	var ground_fire: bool = unit.attackState == Unit.AttackState.MANUAL_GROUND and (not personal_defense or personal_ground_fire)
@@ -660,6 +752,7 @@ func _start_burst(soldier: Soldier, shots: int, cell: Vector2i, enemy: Unit, gro
 	var context: Dictionary = {"remaining": shots, "cell": cell, "enemy": enemy,
 		"ground": ground_fire, "distance": distance, "cover": cover, "targets": targets.duplicate(),
 		"until_next": 0.0, "mission": fire_support_mission, "audio_started": false,
+		"emitted": 0, "rapid": soldier.weapon.automatic_fire.rapid_active,
 		"origin": unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()}
 	_bursts[soldier] = context
 	soldier.burst_active = true
@@ -671,6 +764,8 @@ func _burst_can_continue(soldier: Soldier, context: Dictionary) -> bool:
 	if not soldier.is_alive or not unit.is_active() or unit.surrendered or unit.broken or unit.is_moving or unit.in_close_combat or unit.ai_support_only:
 		return false
 	if soldier.behavior != Soldier.Behavior.ENGAGING or Debug.dont_fire_wepaons:
+		return false
+	if soldier.barrel_change_assisting or (soldier.weapon.uses_sustained_fire() and (soldier.weapon.automatic_fire.heat_locked or soldier.weapon.automatic_fire.swap_barrel >= 0)):
 		return false
 	if mission_support_fire and not _has_safe_support_target(context["cell"]):
 		return false
@@ -720,6 +815,11 @@ func _advance_burst(soldier: Soldier, delta: float) -> int:
 func _finish_burst(soldier: Soldier, context: Dictionary) -> void:
 	_bursts.erase(soldier)
 	soldier.finish_burst()
+	if soldier.weapon.uses_sustained_fire() and int(context["emitted"]) > 0:
+		var suppressed: bool = false
+		if is_instance_valid(context["enemy"]):
+			suppressed = TacticalPositionExecutor.is_sufficiently_suppressed(context["enemy"] as Unit)
+		soldier.finish_automatic_burst(bool(context["rapid"]), suppressed)
 	if soldier.is_alive and soldier.rounds_in_mag <= 0:
 		var grenade: bool = soldier.weapon.can_fire_riflegrenades and int(context["distance"]) <= soldier.weapon.riflegrenade_range
 		soldier.start_reload(grenade)
@@ -747,6 +847,9 @@ func _emit_round(soldier: Soldier, context: Dictionary) -> void:
 	var grenade: bool = soldier.weapon.riflegrenade_loaded
 	soldier.rounds_in_mag -= 1
 	soldier.weapon.ammunition -= 1
+	context["emitted"] += 1
+	if soldier.weapon.uses_sustained_fire():
+		soldier.weapon.automatic_fire.record_round(soldier.weapon)
 	if context["ground"]:
 		unit.attack_ground_rounds_budget -= 1
 	var mission: FireSupportMission = context["mission"] as FireSupportMission

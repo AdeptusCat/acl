@@ -293,13 +293,17 @@ func _refresh_roster_tasks() -> void:
 			set_progress_bar(soldier, "Moving", 0.0, 0.0)
 		elif unit.in_close_combat:
 			set_progress_bar(soldier, soldier.close_combat_task.task_name, 0.0, 0.0)
+		elif soldier.barrel_change_assisting:
+			set_progress_bar(soldier, "Changing barrel", 0.0, 0.0)
+		elif soldier.barrel_change_worked or soldier.weapon.automatic_fire.swap_barrel >= 0:
+			set_progress_bar(soldier, "Changing barrel", soldier.weapon.barrel_change_s, soldier.weapon.automatic_fire.swap_remaining_s)
 		elif not soldier.setup_weapon_task.done and soldier.setup_weapon_task.remaining_time_s > 0.0:
 			_set_soldier_task(soldier, soldier.setup_weapon_task)
 		elif not soldier.reload_task.done and soldier.reload_task.remaining_time_s > 0.0:
 			_set_soldier_task(soldier, soldier.reload_task)
 		elif not soldier.aquire_target_task.done and soldier.aquire_target_task.remaining_time_s > 0.0:
 			_set_soldier_task(soldier, soldier.aquire_target_task)
-		elif soldier.burst_active or soldier.cycle_remaining_s > 0.0 or soldier.reaim_remaining_s > 0.0:
+		elif soldier.burst_active or soldier.cycle_remaining_s > 0.0 or soldier.reaim_remaining_s > 0.0 or soldier.weapon_state in [Soldier.WeaponState.OBSERVING, Soldier.WeaponState.COOLING]:
 			set_progress_bar(soldier, soldier.combat_status(), 0.0, 0.0)
 		elif soldier.role == RankGrades.Role.LOADER or soldier.role == RankGrades.Role.ASSISTANT:
 			set_progress_bar(soldier, soldier.assist_task.task_name, 0.0, 0.0)

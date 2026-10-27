@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/automatic_fire_regression.gd" id="1"]
+
+[node name="AutomaticFireRegression" type="Node"]
+script = ExtResource("1")

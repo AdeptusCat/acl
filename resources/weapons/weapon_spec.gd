@@ -17,6 +17,7 @@ enum Mount { NONE, BIPOD, TRIPOD }
 
 var is_setup: bool = false
 var source_resource_path: String = ""
+var automatic_fire: AutomaticFireState = AutomaticFireState.new()
 
 enum AmmoType {BULLET, HE, AP}
 enum Family { SMALL_ARM, SPIGOT_LAUNCHER, ROCKET_LAUNCHER, MORTAR, GUN, AUTOCANNON, HOWITZER }
@@ -51,6 +52,22 @@ enum FireMode { SINGLE, BURST, MANUAL }
 @export var reaim_s: float = 0.65
 @export_range(0.0, 0.5) var aim_variation: float = 0.2
 @export var setup_s: float = 0.0     # setup weapon
+
+@export_group("Sustained automatic fire")
+# Zero preserves the ordinary handling cadence for rifles, SMGs and support guns.
+@export var sustained_pause_s: float = 0.0
+@export var rapid_burst_rounds: int = 0
+@export var rapid_pause_s: float = 0.4
+@export var rapid_window_s: float = 3.0
+@export var rapid_recovery_s: float = 18.0
+@export var heat_per_round: float = 1.0
+@export var barrel_cooling_per_s: float = 1.0
+@export var heat_soft_limit: float = 160.0
+@export var heat_hard_limit: float = 250.0
+@export var heat_resume: float = 110.0
+@export var spare_barrels: int = 0
+@export var barrel_change_s: float = 0.0
+@export_group("")
 
 @export var projectile_speed: int = 1200
 
@@ -88,4 +105,10 @@ func create_runtime() -> WeaponSpec:
 		runtime.source_resource_path = resource_path
 	runtime.ammunition = ammunition_start
 	runtime.riflegrenade_loaded = false
+	runtime.automatic_fire = AutomaticFireState.new()
+	runtime.automatic_fire.reset(runtime)
 	return runtime
+
+
+func uses_sustained_fire() -> bool:
+	return fire_mode == FireMode.BURST and sustained_pause_s > 0.0
