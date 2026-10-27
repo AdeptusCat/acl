@@ -3,6 +3,7 @@ extends Node
 
 const ROOT_DIRECTORY: String = "user://debug/engagements"
 const SAMPLE_INTERVAL_S: float = 1.0
+const SCHEMA_VERSION: int = 2
 const RULE_SCRIPTS: Array[String] = [
 	"res://scenes/game/units/combat/unit_stress_controller.gd",
 	"res://scenes/game/units/combat/squad_fire_controller.gd",
@@ -10,6 +11,17 @@ const RULE_SCRIPTS: Array[String] = [
 	"res://scenes/game/units/combat/unit_combat_stats.gd",
 	"res://scenes/game/units/combat/unit_casualty_handler.gd",
 	"res://ai/squad/squad_tactical_state.gd",
+	"res://ai/platoon/platoon_ai_controller.gd",
+	"res://ai/company/company_ai_controller.gd",
+	"res://ai/scenario/scenario_goal_director.gd",
+	"res://ai/platoon/platoon_position_stability.gd",
+	"res://scenes/world/influence_map/positions/position_profile.gd",
+	"res://scenes/world/influence_map/positions/defense_position_policy.gd",
+	"res://scenes/world/influence_map/positions/defense_area_job.gd",
+	"res://scenes/world/influence_map/positions/tactical_position_executor.gd",
+	"res://scenes/game/debug/engagement_recorder.gd",
+	"res://scenes/world/influence_map/positions/position_feature_evaluator.gd",
+	"res://scenes/world/influence_map/positions/position_query_service.gd",
 	"res://autoloads/unit_states.gd",
 	"res://autoloads/rank_grades.gd",
 	"res://scenes/game/units/unit.gd",
@@ -68,7 +80,7 @@ func start_capture(controller: Node, root_directory: String = ROOT_DIRECTORY) ->
 	_started_physics_frame = Engine.get_physics_frames()
 	_result.clear()
 	active = true
-	if not _save_json("metadata.json", _metadata()) or not _save_json("map.json", _map_snapshot()) or not _save_json("summary.json", {"schema_version": 1, "complete": false, "reason": "capturing"}):
+	if not _save_json("metadata.json", _metadata()) or not _save_json("map.json", _map_snapshot()) or not _save_json("summary.json", {"schema_version": SCHEMA_VERSION, "complete": false, "reason": "capturing"}):
 		_abort("Could not save engagement capture metadata")
 		return false
 	_connect(controller, "tree_exiting", _on_owner_exiting)
@@ -104,7 +116,7 @@ func finish(reason: String) -> void:
 		_sample()
 		record_event("session_finished", {"reason": reason})
 		_flush()
-		if active and not _save_json("summary.json", {"schema_version": 1, "complete": true, "reason": reason, "elapsed_s": _elapsed_s, "events": _sequence, "samples": _sample_count, "units": _units.size(), "result": _result}):
+		if active and not _save_json("summary.json", {"schema_version": SCHEMA_VERSION, "complete": true, "reason": reason, "elapsed_s": _elapsed_s, "events": _sequence, "samples": _sample_count, "units": _units.size(), "result": _result}):
 			push_warning("Could not finalize engagement capture summary: " + directory)
 	active = false
 	_disconnect_all()
@@ -120,7 +132,7 @@ func record_event(kind: String, data: Dictionary) -> int:
 	if not active or not _capture_allowed():
 		return -1
 	_sequence += 1
-	var row: Dictionary = {"schema_version": 1, "seq": _sequence, "time_s": _elapsed_s, "physics_frame": Engine.get_physics_frames() - _started_physics_frame, "type": kind, "data": data}
+	var row: Dictionary = {"schema_version": SCHEMA_VERSION, "seq": _sequence, "time_s": _elapsed_s, "physics_frame": Engine.get_physics_frames() - _started_physics_frame, "type": kind, "data": data}
 	_events.store_line(JSON.stringify(row))
 	return _sequence
 
@@ -227,7 +239,7 @@ func _sample() -> void:
 		states.append(state)
 	_attention.clear()
 	_sample_count += 1
-	_snapshots.store_line(JSON.stringify({"sample": _sample_count, "time_s": _elapsed_s, "physics_frame": Engine.get_physics_frames() - _started_physics_frame, "match": _match_state(), "debug": _debug_flags(), "units": states}))
+	_snapshots.store_line(JSON.stringify({"schema_version": SCHEMA_VERSION, "sample": _sample_count, "time_s": _elapsed_s, "physics_frame": Engine.get_physics_frames() - _started_physics_frame, "match": _match_state(), "debug": _debug_flags(), "units": states, "ai": _ai_state(), "objectives": _objective_state()}))
 
 
 func _register(unit: Unit) -> void:
@@ -306,6 +318,7 @@ func _unit_snapshot(unit: Unit) -> Dictionary:
 			tracks_seen.append({"unit": _unit_id(enemy), "awareness": track.awareness, "hex": _value(track.last_known_hex), "position": _value(track.last_known_global_position)})
 	var stress: StressController = unit.stress_system
 	var attention: SquadTacticalState = unit.tactical_state
+	var cover: Dictionary = _cover_context(unit)
 	return {
 		"unit": _unit_id(unit),
 		"name": str(unit.name),
@@ -317,7 +330,9 @@ func _unit_snapshot(unit: Unit) -> Dictionary:
 		"loadout": unit.squad_loadout.resource_path,
 		"hex": _value(unit.current_hex),
 		"position": _value(unit.global_position),
-		"cover": unit.current_cover_bonus,
+		"cover": cover["local_terrain"],
+		"cover_context": cover,
+		"movement": {"path": _value(unit.movement.path_hexes), "path_index": unit.movement.path_index, "remaining_waypoints": _value(unit.movement.remaining_waypoints()), "target": _value(unit.movement.target_hex)},
 		"terrain_defense": unit.terrain_defense_bonus,
 		"active": unit.is_active(),
 		"surrendered": unit.surrendered,
@@ -348,12 +363,12 @@ func _metadata() -> Dictionary:
 			rules[path] = FileAccess.get_sha256(path)
 	var map_data: Dictionary = {}
 	if is_instance_valid(Globals.map_chosen):
-		map_data = {"name": Globals.map_chosen.map_name, "scene": Globals.map_chosen.scene_file_path, "los_resource": Globals.map_chosen.los_resource_path}
+		map_data = {"name": Globals.map_chosen.map_name, "scene": Globals.map_chosen.scene_file_path, "los_resource": Globals.map_chosen.los_resource_path, "los_sha256": FileAccess.get_sha256(Globals.map_chosen.los_resource_path)}
 	var scenario_data: Dictionary = {}
 	if is_instance_valid(Globals.scenario_chosen):
 		scenario_data = {"scene": Globals.scenario_chosen.scene_file_path, "settings": _exports(Globals.scenario_chosen)}
 	return {
-		"schema_version": 1,
+		"schema_version": SCHEMA_VERSION,
 		"started_utc": Time.get_datetime_string_from_system(true),
 		"battle_id": Globals.battle_id,
 		"engine": Engine.get_version_info(),
@@ -388,7 +403,170 @@ func _map_snapshot() -> Dictionary:
 					custom[layer.tile_set.get_custom_data_layer_name(index)] = _value(tile.get_custom_data_by_layer_id(index))
 			cells.append({"hex": _value(cell), "source": layer.get_cell_source_id(cell), "atlas": _value(layer.get_cell_atlas_coords(cell)), "alternative": layer.get_cell_alternative_tile(cell), "data": custom})
 		layers.append({"name": str(layer.name), "tileset": layer.tile_set.resource_path, "tile_size": _value(layer.tile_set.tile_size), "position": _value(layer.global_position), "cells": cells})
-	return {"layers": layers}
+	return {"schema_version": SCHEMA_VERSION, "layers": layers}
+
+
+func _cover_context(unit: Unit) -> Dictionary:
+	var local_cover: int = unit.terrain_defense_bonus
+	if is_instance_valid(LOSHelper.ground_layer) and is_instance_valid(LOSHelper.building_layer):
+		local_cover = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(unit.current_hex))
+	var lanes: Array[Dictionary] = []
+	var known: Dictionary[Unit, Vector2i] = {}
+	for enemy: Unit in Globals.unit_visible_enemies.get(unit, []):
+		if is_instance_valid(enemy):
+			known[enemy] = enemy.current_hex
+	for enemy: Unit in Globals.unit_enemy_tracks.get(unit, {}):
+		var track: EnemyTrack = Globals.unit_enemy_tracks[unit][enemy] as EnemyTrack
+		if is_instance_valid(enemy) and track != null and track.awareness > 0.0 and not known.has(enemy):
+			known[enemy] = track.last_known_hex
+	for enemy: Unit in known:
+		var cell: Vector2i = known[enemy]
+		var outgoing: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {}).get(cell, {})
+		var incoming: Dictionary = LOSHelper.los_lookup.get(cell, {}).get(unit.current_hex, {})
+		lanes.append({"source": _unit_id(enemy), "source_hex": _value(cell), "observed": Globals.unit_visible_enemies.get(unit, []).has(enemy),
+			"outgoing_los": not outgoing.is_empty(), "incoming_los": not incoming.is_empty(), "local_wall_cover": outgoing.get("wall_cover", 0),
+			"incoming_target_cover": incoming.get("target_cover", 0), "incoming_hindrance": incoming.get("hindrance", 0)})
+	return {"local_terrain": local_cover, "lanes": lanes}
+
+
+func _goal_trace(task: ScenarioGoalTask) -> Dictionary:
+	if task == null:
+		return {}
+	return {"key": task.key, "condition": task.condition, "kind": ScenarioGoalTask.Kind.keys()[task.kind], "hex": task.hex, "required_units": task.required_units,
+		"priority": task.priority, "urgent": task.urgent, "defend_from_cover": task.defend_from_cover, "withdrawal": task.withdrawal,
+		"breach_required": task.breach_required, "breach_hex": task.breach_hex, "reason": task.reason}
+
+
+func _position_trace(result: PositionResult, detailed: bool = true) -> Dictionary:
+	if result == null:
+		return {}
+	var alternatives: Array[Dictionary] = []
+	for candidate: PositionCandidate in result.alternatives.slice(0, 4):
+		if not detailed:
+			break
+		alternatives.append({"hex": candidate.hex, "score": candidate.score, "features": candidate.features, "path": candidate.path})
+	var profile: Dictionary = {}
+	if detailed and result.position_profile != null:
+		profile = _exports(result.position_profile)
+	return {"status": PositionResult.Status.keys()[result.status], "mode": PositionProfile.Mode.keys()[result.profile_mode],
+		"decision": PositionResult.Decision.keys()[result.decision], "objective": result.objective_hex, "target": result.target_hex,
+		"proposed": result.proposed_hex, "should_move": result.should_move, "score": result.score, "previous_score": result.previous_score,
+		"reason": result.reason, "features": result.features, "path": result.path, "path_steps": maxi(0, result.path.size() - 1),
+		"snapshot_version": result.snapshot_version, "context": result.context, "profile": profile, "rejections": result.rejections,
+		"alternatives": alternatives, "approach_sources": result.approach_sources, "approach_evidence": result.approach_evidence,
+		"sector_priorities": result.sector_priorities, "branch_sources": result.branch_sources, "branch_evidence": result.branch_evidence}
+
+
+func record_ai_decision(planner: PlatoonAI, unit: Unit, result: PositionResult, disposition: String, previous_order: int, previous_accepted: Dictionary) -> void:
+	if not tracks(unit):
+		return
+	_register(unit)
+	var data: Dictionary = {"unit": unit, "planner": "planner_%d" % planner.get_instance_id(), "team": planner.team, "goal": _goal_trace(planner.goal_assignments.get(unit)),
+		"position": _position_trace(result), "disposition": disposition, "previous_order_id": previous_order, "previous_accepted": previous_accepted,
+		"order_id": unit.action_controller.action_order_id, "current_hex": unit.current_hex, "actual_move_target": unit.movement.target_hex,
+		"moving": unit.movement.is_moving, "accepted": planner.accepted_positions.get(unit, {}), "cover": _cover_context(unit)}
+	var cells: Array[Dictionary] = []
+	var snapshot: InfluenceSnapshot = planner._planning_snapshot
+	if snapshot == null:
+		snapshot = planner.influence_map_controller.snapshot
+	if snapshot != null and snapshot.maps.has(planner.team):
+		var map: InfluenceMap = snapshot.maps[planner.team]
+		var target_lanes: Dictionary = snapshot.los.get(result.target_hex, {})
+		var cover_sources: Array[Dictionary] = []
+		for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+			var lane: Dictionary = target_lanes.get(contact.hex, {})
+			cover_sources.append({"source": contact.unit, "hex": contact.hex, "observed": contact.observed,
+				"los": not lane.is_empty(), "local_wall_cover": lane.get("wall_cover", 0), "hindrance": lane.get("hindrance", 0)})
+		data["candidate_cover_inputs"] = {"snapshot_version": snapshot.version, "hex": result.target_hex,
+			"terrain_cover_normalized": map.get_layer_value(InfluenceMap.Layer.TERRAIN_COVER, result.target_hex),
+			"sources": cover_sources, "objective_lane": target_lanes.get(result.objective_hex, {})}
+		var relevant: Array[Vector2i] = [unit.current_hex, result.target_hex, result.proposed_hex]
+		var previous: Dictionary = previous_accepted
+		if previous.has("hex"):
+			relevant.append(previous["hex"])
+		for cell: Vector2i in relevant:
+			if map.is_valid_cell(cell):
+				cells.append({"hex": cell, "eligibility": result.describe_cell(map.cell_to_index(cell))})
+	data["cell_diagnostics"] = cells
+	record_event("ai_decision", _value(data))
+
+
+func _planner_trace(planner: PlatoonAI) -> Dictionary:
+	var assignments: Array[Dictionary] = []
+	for unit: Unit in planner.squads:
+		var assignment: Dictionary = planner.squad_assignments.get(unit, {})
+		assignments.append({"unit": unit, "goal": _goal_trace(planner.goal_assignments.get(unit)), "role": assignment.get("role", ""),
+			"position": _position_trace(assignment.get("result"), false), "accepted": planner.accepted_positions.get(unit, {}),
+			"reserved_hex": planner.reserved_hexes_by_squad.get(unit), "busy": PlatoonPositionStability.is_busy(unit)})
+	var contacts: Array[Dictionary] = []
+	var snapshot: InfluenceSnapshot = planner.influence_map_controller.snapshot
+	var pressure: Dictionary = {}
+	if snapshot != null:
+		pressure = snapshot.sector_pressure.get(planner.team, {})
+		for contact: InfluenceContact in snapshot.get_defensive_contacts(planner.team):
+			contacts.append({"unit": contact.unit, "hex": contact.hex, "observed": contact.observed, "confidence": contact.confidence,
+				"last_seen_at": contact.last_seen_at, "weapon_range": contact.weapon_range, "firepower": contact.firepower})
+	var mission: Dictionary = {}
+	if planner.current_order != null:
+		var order: MissionOrder = planner.current_order
+		mission = {"type": MissionOrder.MissionType.keys()[order.mission_type], "objective": order.objective_hex,
+			"mode": PositionProfile.Mode.keys()[order.position_mode], "intent": order.execution_intent, "geography": order.geography,
+			"defense_radius": order.defense_radius, "movement_radius": order.movement_radius, "sector_cells": order.sector_cells,
+			"fallback_hexes": order.fallback_hexes, "responsibility": order.defense_responsibility, "reserve_policy": order.reserve_policy,
+			"exposure_budget_seconds": order.exposure_budget_seconds, "open_crossing_budget_seconds": order.open_crossing_budget_seconds}
+	return {"planner": "planner_%d" % planner.get_instance_id(), "team": planner.team, "active": planner.active, "mission": mission, "assignments": assignments,
+		"contacts": contacts, "sector_pressure": pressure, "defense_gaps": planner.defense_gaps, "branch_gaps": planner.defense_branch_gaps,
+		"reserve": planner.reserve_squad, "reserve_deployed": planner.reserve_deployed, "reserve_reason": planner.reserve_reason,
+		"requires_company_support": planner.company_requires_support, "support_squads": planner.company_support_squads,
+		"maneuver_squads": planner.company_maneuver_squads, "planning": planner._planning_job != null,
+		"planning_index": planner._planning_index, "pending_requests": planner._planning_requests.size(), "reconsider_in_s": planner.time_until_reconsider}
+
+
+func _ai_state() -> Dictionary:
+	var host: Node = _owner.get_ref() as Node
+	var planner: PlatoonAI = host.get("platoon_ai") as PlatoonAI
+	if planner == null or planner.influence_map_controller == null:
+		return {}
+	var planners: Array[Dictionary] = [_planner_trace(planner)]
+	var formations: Array[Dictionary] = []
+	if planner.company_command != null:
+		for formation: CompanyPlatoon in planner.company_command.platoons.values():
+			formations.append({"company": formation.company, "platoon": formation.number, "role": CompanyPlatoon.Role.keys()[formation.role],
+				"objective": formation.objective, "reason": formation.reason, "goal": _goal_trace(formation.task), "squads": formation.squads})
+			if is_instance_valid(formation.planner) and formation.planner != planner:
+				planners.append(_planner_trace(formation.planner))
+		var headquarters: PlatoonAI = planner.company_command._headquarters_planner
+		if is_instance_valid(headquarters) and headquarters != planner:
+			planners.append(_planner_trace(headquarters))
+	var goals: Array[Dictionary] = []
+	var diagnostics: PackedStringArray = []
+	var fallback_reason: String = ""
+	if planner.goal_director != null:
+		for task: ScenarioGoalTask in planner.goal_director.tasks:
+			goals.append(_goal_trace(task))
+		diagnostics = planner.goal_director.diagnostics
+		fallback_reason = planner.goal_director.fallback_reason
+	return _value({"planners": planners, "formations": formations, "goals": goals, "diagnostics": diagnostics, "fallback_reason": fallback_reason})
+
+
+func _objective_state() -> Array[Dictionary]:
+	var conditions: Array[Dictionary] = []
+	if not is_instance_valid(Globals.scenario_chosen):
+		return conditions
+	for condition: VictoryCondition in Globals.scenario_chosen.victory_conditions:
+		var progress: VictoryConditionProgress = VictoryConditionProgress.read(condition)
+		var row: Dictionary = {"condition": condition.resource_path, "team": progress.team, "kind": VictoryConditionProgress.Kind.keys()[progress.kind],
+			"outcome": progress.outcome, "at_end": condition.test_at_scenario_end, "hexes": progress.hexes, "complete": progress.complete,
+			"valid": progress.valid, "held_seconds": progress.held_seconds, "required_seconds": progress.required_seconds,
+			"required_units": progress.required_units, "remaining_units": progress.remaining_units}
+		if condition is OccupyObjectiveCondition:
+			var occupation: OccupyObjectiveCondition = condition as OccupyObjectiveCondition
+			if occupation.state != null:
+				row["secured"] = occupation.state.victory_conditions_met
+				row["controlling_teams"] = occupation.state.controlling_teams
+				row["enemy_hold_seconds"] = occupation.state.enemy_hold_times_s
+		conditions.append(_value(row))
+	return conditions
 
 
 func _exports(object: Object) -> Dictionary:
@@ -443,7 +621,7 @@ func _on_result(winner: int, outcome: int, timeout: bool) -> void:
 	record_event("match_result", _result)
 	_sample()
 	_flush()
-	if active and not _save_json("summary.json", {"schema_version": 1, "complete": false, "reason": "result_shown_capture_continues", "elapsed_s": _elapsed_s, "events": _sequence, "samples": _sample_count, "result": _result}):
+	if active and not _save_json("summary.json", {"schema_version": SCHEMA_VERSION, "complete": false, "reason": "result_shown_capture_continues", "elapsed_s": _elapsed_s, "events": _sequence, "samples": _sample_count, "result": _result}):
 		_abort("Could not save engagement result summary")
 
 

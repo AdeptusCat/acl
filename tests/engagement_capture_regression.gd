@@ -216,6 +216,13 @@ func _test_live_map() -> void:
 	_check(not observed.is_empty() and observed.soldiers.size() == target.members_alive, "Snapshots retain the full live roster and actual casualties")
 	_check(observed.has("attention_gain_since_sample") and not observed.attention_gain_since_sample.is_empty(), "Continuous attention gains are aggregated into snapshots")
 	_check(observed.has("attention") and observed.attention.has("required") and observed.attention.has("suppression_activity") and observed.has("command") and observed.has("orders") and observed.stress.has("pressure_rps") and observed.stress.has("time_without_fire_s"), "Snapshots contain attention, HQ, orders and pressure context")
+	_test_cover_capture(recorder, target, shooter)
+	_test_ai_capture(recorder, world.game_controller, shooter)
+	recorder._sample()
+	recorder._flush()
+	var latest: Dictionary = _json_lines(path.path_join("snapshots.jsonl")).back()
+	_check(latest.schema_version == 2 and latest.has("ai") and not latest.objectives.is_empty(), "Versioned snapshots include AI command state and live objective progress")
+	_check(not latest.ai.planners.is_empty() and latest.ai.planners[0].mission.has("mode"), "AI snapshots describe the actual mission rather than an empty resource reference")
 	var metadata: Dictionary = _json(path.path_join("metadata.json"))
 	_check(metadata.recovery_limits.leadership_multiplier == 1.5 and metadata.recovery_limits.hq_personal_multiplier == 1.5, "Metadata records the leadership and personal HQ recovery budgets")
 	_check(metadata.map.name == map.map_name and not metadata.rules_sha256.is_empty(), "Metadata identifies the map and exact rule hashes")
@@ -250,6 +257,91 @@ func _test_live_map() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_check(not recorder.active and bool(_json(path.path_join("summary.json")).complete), "Closing the map flushes and closes capture")
+
+
+func _test_cover_capture(recorder: EngagementRecorder, unit: Unit, enemy: Unit) -> void:
+	var original_hex: Vector2i = unit.current_hex
+	var original_cached: int = unit.terrain_defense_bonus
+	var original_legacy: int = unit.current_cover_bonus
+	var covered: bool = false
+	for cell: Vector2i in LOSHelper.building_layer.get_used_cells():
+		var actual: int = LOSHelper.is_sample_point_in_building(LOSHelper.ground_layer.map_to_local(cell))
+		if actual <= 0:
+			continue
+		_set_hex(unit, cell)
+		unit.current_cover_bonus = 0
+		unit.terrain_defense_bonus = 0
+		var state: Dictionary = recorder._unit_snapshot(unit)
+		_check(state.cover == actual and state.cover_context.local_terrain == actual, "Cover capture samples real local terrain even when legacy and cached values are zero")
+		covered = true
+		break
+	_check(covered, "The live cover fixture contains terrain with physical protection")
+	_set_hex(unit, original_hex)
+	unit.terrain_defense_bonus = original_cached
+	unit.current_cover_bonus = original_legacy
+	var original_visible: Array = Globals.unit_visible_enemies.get(unit, []).duplicate()
+	var original_lanes: Dictionary = LOSHelper.los_lookup.get(unit.current_hex, {}).duplicate(true)
+	Globals.unit_visible_enemies[unit] = [enemy]
+	LOSHelper.los_lookup[unit.current_hex] = {enemy.current_hex: {"wall_cover": 2, "shooter_cover": 7, "hindrance": 5}}
+	var context: Dictionary = recorder._cover_context(unit)
+	_check(context.lanes[0].local_wall_cover == 2 and context.lanes[0].observed, "Directional cover excludes distant vegetation and identifies the observed source")
+	Globals.unit_visible_enemies[unit] = original_visible
+	LOSHelper.los_lookup[unit.current_hex] = original_lanes
+
+
+func _test_ai_capture(recorder: EngagementRecorder, host: Node, unit: Unit) -> void:
+	var planner: PlatoonAI = PlatoonAI.new()
+	planner.active = false
+	planner.team = unit.team
+	planner.squads = [unit]
+	planner.influence_map_controller = host.influence_map_controller
+	planner.current_order = MissionOrder.new()
+	host.add_child(planner)
+	var goal: ScenarioGoalTask = ScenarioGoalTask.new()
+	goal.kind = ScenarioGoalTask.Kind.OCCUPY
+	goal.key = "capture_logging_fixture"
+	goal.hex = unit.current_hex
+	goal.defend_from_cover = true
+	planner.goal_assignments[unit] = goal
+	var result: DefensePositionResult = DefensePositionResult.new()
+	result.unit = unit
+	result.status = PositionResult.Status.NO_CANDIDATE
+	result.reason = "No covered position protects the objective"
+	result.rejections["cover"] = 7
+	result.path = [unit.current_hex, unit.current_hex + Vector2i(1, 0)]
+	var alternative: PositionCandidate = PositionCandidate.new()
+	alternative.hex = unit.current_hex
+	alternative.score = 2.0
+	result.alternatives = [alternative]
+	planner.squad_assignments[unit] = {"result": result, "role": "scenario_goal"}
+	planner._issue_order(unit)
+	result.status = PositionResult.Status.ACCEPTED
+	result.target_index = 0
+	result.profile_mode = PositionProfile.Mode.ADVANCE
+	result.position_profile = PositionProfile.for_mode(PositionProfile.Mode.ADVANCE)
+	planner.company_requires_support = true
+	planner._issue_order(unit)
+	planner._planning_requests = [{"query": PositionQuery.new()}]
+	planner._cancel_plan("fixture_validation_failed")
+	recorder._flush()
+	var decisions: Array[Dictionary] = []
+	var cancelled: bool = false
+	for event: Dictionary in _json_lines(recorder.directory.path_join("events.jsonl")):
+		if event.type == "ai_decision" and event.data.unit == recorder._unit_id(unit):
+			decisions.append(event.data)
+		if event.type == "ai_plan_cancelled" and event.data.reason == "fixture_validation_failed":
+			cancelled = true
+	_check(decisions.size() >= 2, "The actual AI execution entry point records its decisions")
+	if decisions.size() >= 2:
+		var rejected: Dictionary = decisions[decisions.size() - 2]
+		var blocked: Dictionary = decisions.back()
+		_check(rejected.disposition == "executor_rejected_or_no_candidate" and rejected.position.rejections.cover == 7, "No-candidate decisions preserve their rejection counts")
+		_check(blocked.disposition == "company_support_unavailable" and blocked.position.status == "ACCEPTED", "A valid proposal blocked during execution is distinguishable from an issued order")
+		_check(blocked.goal.defend_from_cover and blocked.goal.kind == "OCCUPY" and blocked.position.path.size() == 2, "AI decisions retain mission duty and the planned route")
+		_check(blocked.position.alternatives.size() == 1 and blocked.position.profile.has("travel_weight"), "Decision events preserve alternative scores and the scoring profile")
+		_check(rejected.position.score is String, "Non-finite AI scores remain explicit and valid in JSON")
+	_check(cancelled, "Aborted AI planning records its cause")
+	planner.free()
 
 
 func _set_hex(unit: Unit, cell: Vector2i) -> void:

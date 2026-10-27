@@ -1,6 +1,6 @@
 # Debug map engagement capture
 
-Every map game started from a debug build automatically opens an engagement capture. This uses the same `OS.is_debug_build()` gate as the existing debug controls. Editor scene inspection and release builds do not start captures or create capture directories. There is no extra switch to enable before reproducing a battle.
+Capture is disabled by default. Enable **Capture logs** in battle settings before reproducing a problem. Enabling it during a battle starts a fresh capture; disabling it flushes and closes the capture. The preference persists across launches. Editor scene inspection does not start capture.
 
 Captures are stored in:
 
@@ -48,6 +48,28 @@ Snapshots include both teams and remembered contacts, including units hidden by 
 - Assigned HQ, actual command-link/presence strengths, target, action/order/task IDs, objective and movement targets, visible enemies and their remembered tracks.
 
 Each snapshot also records match-clock/result state, continued-play state, time scale and relevant debug flags. The match result is an event; capture stays open while the result screen is shown and when play continues afterward.
+
+## AI evidence and schema version 2
+
+New captures identify `schema_version: 2` in metadata, map, summaries, events and snapshots. Older recordings are unchanged and retain their original limitations.
+
+Unit `cover` now samples physical protection at the unit's hex center using the same terrain lookup as combat. It no longer reads the unmaintained `current_cover_bonus`. `terrain_defense` retains the gameplay cached value, allowing stale terrain state to be detected. `cover_context.local_terrain` repeats the sampled value explicitly. It does not include directional walls.
+
+`cover_context.lanes` records visible or positively remembered enemies, their observed/remembered hexes, LOS availability, and `local_wall_cover` facing each source. `incoming_target_cover` and `incoming_hindrance` preserve the separate incoming LOS values. Target/shooter cover from a LOS record can include intervening vegetation; it must not be interpreted as local terrain protection. A hedge can protect one bearing while `cover` remains zero.
+
+Each snapshot adds:
+
+- `objectives`: condition identity, side, outcome level, deadline-only flag, hexes, required/held time, secured flags, controlling sides, enemy recapture time, remaining unit requirements and completion state.
+- `ai.planners`: main, company subordinate and headquarters planners; missions, per-unit goal/role/position assignments, accepted destinations, reservations, planning progress, reserve reasons and defensive coverage gaps.
+- Captured AI contacts with observed/remembered status, confidence, captured hex and last-seen time; delayed aggregate sector pressure is separate. These describe AI knowledge, not proof that every battlefield unit was observed.
+- Company formation roles, assigned objectives, reasons and goal tasks. Snapshot position traces omit detailed scoring profiles and alternatives to reduce repeated data.
+- Unit movement paths, path indices and remaining waypoints, including exposed assault legs. These are actual movement state; planned paths are recorded separately.
+
+`ai_decision` is emitted at the AI execution entry point after its safety checks. It includes the proposed/selected target, duty, profile/mode, scoring weights and features, current/previous scores, rejection counts, up to four available alternatives, planned path, contact/approach evidence, previous accepted destination, actual movement target and before/after action order IDs. Relevant current/proposed/previous cells retain their eligibility explanations. `candidate_cover_inputs` records the selected hex’s terrain layer and directional wall/hindrance values toward captured contacts and the objective, with the diagnostic snapshot version. This permits checking cover orientation without treating distant vegetation as local protection. Non-finite scores serialize as strings such as `inf` and `-inf`.
+
+`disposition` separates accepted execution from no candidate/executor rejection and explicit blocks: missing company support, another platoon's position claim, unsafe approach, unsafe open HQ position, or retaining the last covering squad. `accepted` means the executor accepted the advice; it does not necessarily issue a new order. Compare the before/after order IDs and movement state. `ai_plan_cancelled` records pending plans discarded by objective/context changes, invalid movement origins or failed validation.
+
+The recorder reads existing decisions and knowledge. It does not run additional tactical searches, select targets, reserve positions or roll random numbers. Alternatives represent the planner's available shortlist, not an exhaustive ranking of every map hex. Rule hashes include AI selection, coordination, execution and recording scripts; metadata also records the baked LOS resource hash.
 
 ## Persistence and limits
 

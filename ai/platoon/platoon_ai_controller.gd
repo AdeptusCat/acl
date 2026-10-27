@@ -1380,7 +1380,7 @@ func _continue_budgeted_plan() -> void:
 	if current_order.position_mode == PositionProfile.Mode.ASSAULT or _planning_job.query.goal_key != "":
 		mission_objective = _planning_objective_hex
 	if _planning_job.canceled or current_order.objective_hex != mission_objective:
-		_cancel_plan()
+		_cancel_plan("query_cancelled_or_objective_changed")
 		time_until_reconsider = 0.0
 		return
 	if not _planning_job.completed:
@@ -1388,7 +1388,7 @@ func _continue_budgeted_plan() -> void:
 	var query: PositionQuery = _planning_job.query
 	# Keep only the checked route suffix when an owned move has advanced.
 	if not PositionQueryService.refresh_moving_origin(query, _planning_job.result):
-		_cancel_plan()
+		_cancel_plan("moving_origin_invalid")
 		time_until_reconsider = 0.0
 		return
 	_accept_planning_result(_planning_requests[_planning_index], _planning_job.result)
@@ -1410,7 +1410,7 @@ func _publish_ready_result() -> void:
 	var result: DefensePositionResult = _planning_results[_planning_index]
 	var query: PositionQuery = _planning_requests[_planning_index]["query"]
 	if not PositionQueryService.refresh_moving_origin(query, result) or _defense_plan_outdated():
-		_cancel_plan()
+		_cancel_plan("origin_or_defense_plan_changed")
 		time_until_reconsider = 0.0
 		return
 	# Publish only checked advice. Later departures are checked against this live
@@ -1448,20 +1448,20 @@ func _accept_planning_result(request: Dictionary, advice: PositionResult) -> voi
 
 func _commit_plan() -> void:
 	if _defense_plan_outdated() or (_validation_job != null and (not _validation_job.completed or not _validation_job.valid or not _validation_job.unchanged())):
-		_cancel_plan()
+		_cancel_plan("plan_or_batch_validation_failed")
 		time_until_reconsider = 0.0
 		return
 	for index: int in range(_planning_requests.size()):
 		var query: PositionQuery = _planning_requests[index]["query"]
 		if not PositionQueryService.refresh_moving_origin(query, _planning_results[index]):
-			_cancel_plan()
+			_cancel_plan("moving_origin_invalid")
 			time_until_reconsider = 0.0
 			return
 	for index: int in range(_planning_results.size()):
 		var result: DefensePositionResult = _planning_results[index]
 		var query: PositionQuery = _planning_requests[index]["query"]
 		if result.context != query.context_key():
-			_cancel_plan()
+			_cancel_plan("query_context_changed")
 			time_until_reconsider = 0.0
 			return
 		if _validation_job == null and result.is_valid() and query.profile.mode == PositionProfile.Mode.DEFEND:
@@ -1472,7 +1472,7 @@ func _commit_plan() -> void:
 			query.handoff_prepared = false
 			var protection: Dictionary = DefensePositionPolicy.evaluate(query, result.target_hex)
 			if protection["responsibility"] == "" or not protection["preserves_screen"] or not DefensePositionPolicy.handoff_ready(query, result.target_hex, result.features):
-				_cancel_plan()
+				_cancel_plan("departure_protection_failed")
 				time_until_reconsider = 0.0
 				return
 	squad_assignments.clear()
@@ -1532,7 +1532,11 @@ func _defense_plan_outdated() -> bool:
 	return false
 
 
-func _cancel_plan() -> void:
+func _cancel_plan(reason: String = "mission_or_roster_changed") -> void:
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	if not _planning_requests.is_empty() and is_instance_valid(recorder) and recorder.active:
+		recorder.record_event("ai_plan_cancelled", {"planner": "planner_%d" % get_instance_id(), "team": team, "reason": reason,
+			"planning_index": _planning_index, "pending_requests": _planning_requests.size()})
 	position_stability.release_unstarted_optional()
 	_readiness_job = null
 	_planning_readiness = null
@@ -1612,6 +1616,17 @@ func _issue_orders() -> void:
 
 
 func _issue_order(squad: Unit) -> void:
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	if not is_instance_valid(recorder) or not recorder.active:
+		_execute_order(squad)
+		return
+	var previous_order: int = squad.action_controller.action_order_id
+	var previous_accepted: Dictionary = accepted_positions.get(squad, {}).duplicate()
+	var disposition: String = _execute_order(squad)
+	recorder.record_ai_decision(self, squad, squad_assignments[squad]["result"], disposition, previous_order, previous_accepted)
+
+
+func _execute_order(squad: Unit) -> String:
 	var result: PositionResult = squad_assignments[squad]["result"]
 	if result.is_valid() and result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and not company_maneuver_squads.is_empty():
 		var bound: bool = false
@@ -1620,7 +1635,7 @@ func _issue_order(squad: Unit) -> void:
 				bound = true
 		if bound and _has_established_attack_support(squads) and not _has_established_attack_support(squads, squad):
 			position_stability.declined(squad)
-			return
+			return "hold_last_attack_support"
 	if result.is_valid() and not company_reservations.is_empty():
 		var capacity: int = 1
 		if goal_assignments.has(squad) and goal_assignments[squad].is_destination_goal():
@@ -1638,7 +1653,7 @@ func _issue_order(squad: Unit) -> void:
 			result.should_move = false
 			result.reason = "Position occupied or claimed by another platoon"
 			time_until_reconsider = 0.0
-			return
+			return "company_position_claimed"
 	var clear_exit: bool = goal_assignments.has(squad) and goal_assignments[squad].kind == ScenarioGoalTask.Kind.EXIT and not goal_assignments[squad].requires_breach(squad)
 	if result.is_valid() and company_requires_support and not clear_exit and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT] and not _has_company_support():
 		executor.cancel(squad, true)
@@ -1646,7 +1661,7 @@ func _issue_order(squad: Unit) -> void:
 		accepted_positions.erase(squad)
 		company_reservations[squad] = squad.current_hex
 		time_until_reconsider = 0.0
-		return
+		return "company_support_unavailable"
 	if result.is_valid() and result.features.has("scenario_goal") and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
 		var check: PositionQuery = PositionQuery.new()
 		check.unit = squad
@@ -1681,7 +1696,7 @@ func _issue_order(squad: Unit) -> void:
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
 			time_until_reconsider = 0.0
-			return
+			return "approach_no_longer_safe"
 	if result.is_valid() and result.profile_mode == PositionProfile.Mode.HQ_SUPPORT and result.features.get("open_support_position", false):
 		var check: PositionQuery = PositionQuery.new()
 		check.unit = squad
@@ -1696,7 +1711,7 @@ func _issue_order(squad: Unit) -> void:
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
 			time_until_reconsider = 0.0
-			return
+			return "open_hq_position_no_longer_safe"
 	if current_order != null and current_order.position_mode == PositionProfile.Mode.ASSAULT and not result.features.has("scenario_goal"):
 		var press_attack: bool = _can_attack_without_overwatch(squad, result.objective_hex)
 		if press_attack and result.profile_mode in [PositionProfile.Mode.ADVANCE, PositionProfile.Mode.ASSAULT]:
@@ -1707,7 +1722,7 @@ func _issue_order(squad: Unit) -> void:
 			accepted_positions.erase(squad)
 			reserved_hexes_by_squad[squad] = squad.current_hex
 			_planning_reservations[squad] = squad.current_hex
-			return
+			return "assault_support_unavailable"
 		if result.profile_mode == PositionProfile.Mode.SUPPORT_BY_FIRE and result.should_move and not _has_pressing_attack(squads):
 			var protects_attack: bool = _has_attack_bound(squads) or (_has_known_attack_defenders(squads) and _has_established_attack_support(squads))
 			if protects_attack and not _has_established_attack_support(squads, squad):
@@ -1715,7 +1730,7 @@ func _issue_order(squad: Unit) -> void:
 				reserved_hexes_by_squad[squad] = squad.current_hex
 				_planning_reservations[squad] = squad.current_hex
 				position_stability.declined(squad)
-				return
+				return "hold_covering_fire"
 	var departing: bool = result.should_move and result.target_hex != squad.current_hex and result.profile_mode == PositionProfile.Mode.DEFEND
 	var origin: Vector2i = squad.current_hex
 	squad.position_advice = result
@@ -1736,12 +1751,14 @@ func _issue_order(squad: Unit) -> void:
 			accepted_at = previous.get("at", accepted_at)
 		accepted_positions[squad] = {"hex": result.target_hex, "context": result.context, "at": accepted_at}
 		squad.best_index = result.target_index
+		return "accepted"
 	else:
 		executor.cancel(squad, true)
 		position_stability.forget(squad)
 		accepted_positions.erase(squad)
 		reserved_hexes_by_squad[squad] = squad.current_hex
 		_planning_reservations[squad] = squad.current_hex
+	return "executor_rejected_or_no_candidate"
 
 
 func _get_effective_squads() -> Array[Unit]:
