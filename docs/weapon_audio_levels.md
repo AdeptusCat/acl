@@ -21,10 +21,29 @@ volume; Master also changes UI and music. There is no separate weapons slider.
 
 ## Calibration
 
-All 20 authored weapon definitions use calibrated playback gains for their
-existing audio assets. Firing and explosive impacts target **−20 LUFS maximum
-momentary loudness**; automatic burst tails target **−24 LUFS**. A tail is four
-decibels below the firing body so it does not jump out when firing stops.
+The 20 authored weapon definitions use per-asset playback gains. Firing and
+explosive impacts target **−20 LUFS maximum momentary loudness**; automatic burst
+tails target **−24 LUFS**. The current M1919A4 gain is −15.0 dB, producing
+−17.9 LUFS, 2.1 LU above the calibration target. Its tail remains −24 LUFS.
+
+## Positional volume investigation
+
+The M1919A4's low in-game volume was not reproduced at the source: its current
+firing loop measures 2.1 LU louder than MG34 and BAR. Its normal 0.9-second
+burst contains that level, with no silent lead-in or stereo cancellation.
+All automatic weapons use the same bus, gain application and spatial player
+settings; no M1919-specific runtime gain override was found.
+
+The battlefield AudioListener2D was offset by `(1440, 738)` from its parent
+Camera2D, placing it 1,618 pixels away from the view centre. Spatial players
+have a default maximum distance of 2,000 pixels. A headless engine mixer probe
+using the same source signal measured a centre-screen source 10.9 dB quieter
+with that offset. A source 500 pixels left of centre was completely inaudible,
+while the corresponding source on the right was audible.
+
+The listener now sits at the camera origin. The same probe gives identical
+levels 500 pixels left and right of centre. This corrects the shared positional
+imbalance without changing authored weapon gains or their firing cadence.
 
 ## Findings and changes
 
@@ -47,8 +66,9 @@ firing unit and making distance attenuation comparable with muzzle one-shots.
 
 ## Firing calibration
 
-Every firing entry below now measures −20.0 LUFS at the meter's 0.1 LU resolution,
-before spatial attenuation, random pitch variation and bus/master settings.
+Firing entries below measure −20.0 LUFS at the meter's 0.1 LU resolution, except
+the M1919A4 at −17.9 LUFS, before spatial attenuation, random pitch variation
+and bus/master settings.
 These are loudness measurements of the audible event, not rounds-per-minute
 averages or a promise that different timbres sound identical.
 
@@ -59,7 +79,7 @@ averages or a promise that different timbres sound identical.
 | M1 Carbine | −17.1 | −8.9 |
 | Enfield / Springfield, including grenade-capable rifle fire | −27.5 | +1.5 |
 | MG34, both mounts | −2.9 | −13.1 |
-| M1919A4 | −5.9 | −17.1 |
+| M1919A4 | −5.9 | −15.0 |
 | BAR | −8.0 | −15.0 |
 | MP40 | −8.3 | −11.7 |
 | M3 Grease Gun | −4.5 | −15.5 |
@@ -95,7 +115,8 @@ gunshot appear artificially quiet. Original recordings are retained.
 
 The tool decodes each asset again with its actual playback gain and writes a
 report. `--check` requires each event within 1 LU of its role's target and true
-peaks no higher than −3 dBTP. The checked-in
+peaks no higher than −3 dBTP. With the current gains it flags the M1919A4 firing
+loop as 2.1 LU above target; all other events meet the target. The checked-in
 [measurement report](weapon_audio_levels.csv) contains all 36 events, including
 shared assets and fallback rifles.
 

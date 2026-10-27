@@ -3704,7 +3704,6 @@ script = ExtResource("29_wnndm")
 speed = 800.0
 
 [node name="AudioListener2D" type="AudioListener2D" parent="GameController/Camera2D" unique_id=874593329]
-position = Vector2(1440, 738)
 current = true
 
 [node name="SpawnTimer" type="Timer" parent="GameController" unique_id=1246364667]

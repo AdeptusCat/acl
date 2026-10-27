@@ -10,7 +10,7 @@ kar98_riflegrenade.tres,grenade_fire,res://assets/audio/fx/weapons/riflegrenade_
 kar98_riflegrenade.tres,grenade_impact,res://assets/audio/fx/weapons/riflegrenade_explosion.mp3,-10.6,-9.4,-20.0,-11.4
 m1918a1_bar.tres,fire,res://assets/audio/fx/weapons/m1918a1_bar/m1918a1_bar.mp3,-15.0,-5.0,-20.0,-13.5
 m1918a1_bar.tres,tail,res://assets/audio/fx/weapons/m1918a1_bar/m1918a1_bar_decay.mp3,-13.7,-10.3,-24.0,-14.6
-m1919a4.tres,fire,res://assets/audio/fx/weapons/m1919a4/m1919a4.mp3,-17.1,-2.9,-20.0,-15.0
+m1919a4.tres,fire,res://assets/audio/fx/weapons/m1919a4/m1919a4.mp3,-15.0,-2.9,-17.9,-12.9
 m1919a4.tres,tail,res://assets/audio/fx/weapons/m1919a4/m1919a4_decay.mp3,-13.7,-10.3,-24.0,-15.5
 m1_81mm_mortar.tres,fire,res://assets/audio/fx/weapons/mortar/mortar-96223.mp3,-15.0,-5.0,-20.0,-13.0
 m1_81mm_mortar.tres,impact,res://assets/audio/fx/weapons/riflegrenade_explosion.mp3,-10.6,-9.4,-20.0,-11.4
