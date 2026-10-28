@@ -79,6 +79,7 @@ func _ready() -> void:
 	game_controller.show_unit_details_in_ui.connect(ui._on_show_unit_details)
 	game_controller.hide_unit_details_in_ui.connect(ui._on_hide_unit_details)
 	game_controller.order_feedback.connect(ui.show_order_feedback)
+	game_controller.command_notice.connect(ui.show_command_notice)
 	ui.selection_wheel_alt.cancelled.connect(_on_wheel_cancelled)
 	ui.squad_roster.unit_selected.connect(game_controller.select_and_center_unit)
 	ui.mission_objectives.objective_focused.connect(game_controller.move_camera)

@@ -1,6 +1,8 @@
 extends Node
 class_name CommandSuccession
 
+signal command_notice(team: Globals.Team, title: String, explanation: String)
+
 const REFRESH_SECONDS: float = 0.25
 
 var formations: Array[FormationCommand] = []
@@ -94,6 +96,9 @@ func _formation(unit: Unit, level: Globals.SquadType) -> FormationCommand:
 func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 	if not formation.established:
 		return
+	var previous_commander: Unit = formation.commander
+	var previous_leader: Soldier = formation.leader
+	var previously_reconstituted: bool = formation.reconstituted
 	if is_instance_valid(formation.headquarters) and formation.commander != formation.headquarters:
 		var local_leader: Soldier = headquarters_leader(formation.headquarters)
 		if local_leader != null:
@@ -129,6 +134,30 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 		formation.support_link.compute_direct_connectivity(formation.headquarters, formation.commander)
 		if formation.headquarters.current_hex == formation.commander.current_hex and not formation.headquarters.is_moving and not formation.commander.is_moving:
 			formation.reconstituted = true
+	_announce_changes(formation, previous_commander, previous_leader, previously_reconstituted)
+
+
+func _announce_changes(formation: FormationCommand, previous_commander: Unit, previous_leader: Soldier, previously_reconstituted: bool) -> void:
+	if not formation.announced:
+		formation.announced = true
+		return
+	var designation: String = "Company %s" % Unit.COMPANY_NAMES[formation.company]
+	var role: String = "company commander"
+	if formation.level == Globals.SquadType.PLATOON_HEADQUARTERS:
+		designation += " · Platoon %d" % formation.platoon
+		role = "platoon commander"
+	if previous_commander != formation.commander or previous_leader != formation.leader:
+		if formation.has_commander():
+			var expected_grade: RankGrades.Grade = RankGrades.Grade.COMPANY_LEADER
+			if formation.level == Globals.SquadType.PLATOON_HEADQUARTERS:
+				expected_grade = RankGrades.Grade.PLATOON_LEADER
+			if formation.commander != formation.headquarters or formation.leader.rank_grade < expected_grade:
+				role = "acting " + role
+			command_notice.emit(formation.team, designation + ": command changed", "%s is now %s.\nHQ located with %s." % [formation.leader.name, role, formation.commander.get_squad_name()])
+		else:
+			command_notice.emit(formation.team, designation + ": no commander", "No eligible successor remains. HQ survivors can still move and defend themselves.")
+	if formation.reconstituted and (not previously_reconstituted or previous_leader != formation.leader):
+		command_notice.emit(formation.team, designation + " HQ reconstituted", "%s has rejoined the HQ remnant. Command effectiveness restored to 100%%." % formation.leader.name)
 
 
 func _assign(unit: Unit) -> void:
@@ -168,6 +197,7 @@ func _assign(unit: Unit) -> void:
 	unit.command_efficiency = efficiency
 	if changed:
 		unit._refresh_leader_aura()
+	unit.ui.set_command_level(unit.get_command_icon_level())
 
 
 static func _unit_order(first: Unit, second: Unit) -> bool:

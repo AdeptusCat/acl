@@ -164,6 +164,31 @@ autowrap_mode = 3
 wait_time = 3.0
 one_shot = true
 
+[node name="CommandNotice" type="PanelContainer" parent="Control"]
+visible = false
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="Control/CommandNotice"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Control/CommandNotice/Content"]
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Explanation" type="Label" parent="Control/CommandNotice/Content"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HideTimer" type="Timer" parent="Control/CommandNotice"]
+wait_time = 6.0
+one_shot = true
+
 [node name="TileDetails" parent="Control" unique_id=200690569 instance=ExtResource("35_terrain")]
 layout_mode = 1
 

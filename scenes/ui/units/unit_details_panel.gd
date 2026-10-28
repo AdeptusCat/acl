@@ -11,6 +11,8 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var unit_type_label: Label = $Scroll/Summary/Identity
 @onready var formation_label: Label = $Scroll/Summary/Formation
 @onready var command_label: Label = $Scroll/Summary/Command
+@onready var commander_label: Label = $Scroll/Summary/Commander
+@onready var hq_status_label: Label = $Scroll/Summary/HQStatus
 @onready var strength_label: Label = $Scroll/Summary/Status/Headcount/Strength
 @onready var unit_status_label: Label = $Scroll/Summary/Status/Morale
 @onready var observation_label: Label = $Scroll/Summary/Observation
@@ -242,7 +244,7 @@ func _rebuild_roster() -> void:
 func _set_roster_row(index: int, soldier: Soldier) -> void:
 	var entries: Dictionary = soldiers_entries[index]
 	entries[Entry.NAME].text = soldier.name
-	entries[Entry.ROLE].text = RankGrades.get_role_name(soldier.role)
+	entries[Entry.ROLE].text = unit.get_soldier_role_name(soldier)
 	entries[Entry.WEAPON].text = soldier.weapon.name
 	for key: Entry in [Entry.NAME, Entry.ROLE, Entry.WEAPON]:
 		var label: Label = entries[key] as Label
@@ -269,7 +271,7 @@ func _refresh_summary() -> void:
 		pace.select(maxi(0, pace.get_item_index(unit.movement.stance)))
 	debug_actions.visible = OS.is_debug_build() and MatchInteractionHandler.can_command_unit(unit)
 	unit_type_label.text = unit.get_hud_name()
-	unit_type_label.tooltip_text = unit_type_label.text
+	unit_type_label.tooltip_text = unit_type_label.text + "\nOriginal unit: " + unit.get_squad_name()
 	formation_label.text = unit.get_formation_name()
 	var selected_count: int = 0
 	for member: Unit in Globals.get_units_for_team(Globals.team_player):
@@ -318,7 +320,7 @@ func _refresh_enemy_summary() -> void:
 	observation_label.visible = not str(report.get("activity", "")).is_empty()
 	observation_label.text = "Observed: " + str(report.get("activity", ""))
 	observation_label.tooltip_text = "Activity recorded during the latest visible observation."
-	for control: Control in [command_label, order_label, fire_effect_label, details_section, roster_section, pace_row, watch_row, fire_discipline_row, rout_button, rout_explanation]:
+	for control: Control in [command_label, commander_label, hq_status_label, order_label, fire_effect_label, details_section, roster_section, pace_row, watch_row, fire_discipline_row, rout_button, rout_explanation]:
 		control.hide()
 	debug_actions.hide()
 
@@ -441,9 +443,22 @@ func _refresh_command_summary() -> void:
 	command_label.text = "HQ: " + CommandConnectivity.contact_text(contact)
 	if not CommandConnectivity.needs_command_contact(unit):
 		command_label.text = "HQ: Top-level"
-	var assignment: String = unit.get_command_assignment_text()
-	if not assignment.is_empty():
-		command_label.text = assignment + " · " + CommandConnectivity.contact_text(contact)
+	var appointment: FormationCommand = unit.get_command_appointment()
+	commander_label.hide()
+	hq_status_label.hide()
+	if appointment != null and appointment.has_commander():
+		commander_label.text = "Commander: " + appointment.leader.name
+		commander_label.tooltip_text = appointment.commander.get_soldier_role_name(appointment.leader) + "\nLocated in: " + appointment.commander.get_squad_name()
+		commander_label.show()
+		if appointment.commander == unit or appointment.headquarters == unit:
+			hq_status_label.text = unit.get_headquarters_status_text()
+			hq_status_label.add_theme_color_override("font_color", Color(0.65, 0.85, 0.55))
+			if appointment.efficiency() < 1.0:
+				hq_status_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.4))
+			hq_status_label.show()
+	if (appointment == null or not appointment.has_commander()) and CommandSuccession.is_headquarters(unit):
+		hq_status_label.text = unit.get_headquarters_status_text()
+		hq_status_label.show()
 	command_label.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
 	var commander_name: String = "Unavailable"
 	if is_instance_valid(unit.command_squad):
@@ -494,6 +509,9 @@ func _current_order_text() -> String:
 
 func _refresh_roster_tasks() -> void:
 	for soldier: Soldier in soldiers:
+		if soldier_entries_by_soldier.has(soldier):
+			var entries: Dictionary = soldier_entries_by_soldier[soldier]
+			(entries[Entry.ROLE] as Label).text = unit.get_soldier_role_name(soldier)
 		if unit.surrendered:
 			set_progress_bar(soldier, "Surrendered", 0.0, 0.0)
 		elif soldier.behavior != Soldier.Behavior.ENGAGING:

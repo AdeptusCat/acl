@@ -31,7 +31,7 @@ class RosterUiUnderTest extends UnitUi:
 	func set_loadout(_soldiers: Array[Soldier]) -> void:
 		events.append("loadout:%d" % _soldiers.size())
 
-	func set_leadership_rank(_grade: int) -> void:
+	func set_command_level(_level: int) -> void:
 		pass
 
 

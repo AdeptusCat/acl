@@ -22,6 +22,7 @@ extends CanvasLayer
 var _left_layout_queued: bool = false
 var _top_layout_queued: bool = false
 var _compact_layout: bool = false
+var _command_notices: Array[Dictionary] = []
 
 signal try_again
 signal battle_results_requested
@@ -53,8 +54,10 @@ func _ready() -> void:
 	$Control.resized.connect(_layout_order_feedback)
 	countdown_panel_container.item_rect_changed.connect(_layout_order_feedback)
 	$Control/OrderFeedback.minimum_size_changed.connect(_layout_order_feedback)
+	$Control/CommandNotice.minimum_size_changed.connect(_layout_order_feedback)
+	$Control/CommandNotice/HideTimer.timeout.connect(_show_next_command_notice)
 	mission_objectives.item_rect_changed.connect(_layout_order_feedback)
-	$Control/OrderFeedback/HideTimer.timeout.connect($Control/OrderFeedback.hide)
+	$Control/OrderFeedback/HideTimer.timeout.connect(hide_order_feedback)
 	get_window().size_changed.connect(_layout_mission_objectives)
 	$Control.resized.connect(_queue_left_layout)
 	for panel: PanelContainer in [squad_roster, tile_details, debug_panel]:
@@ -239,6 +242,25 @@ func show_target_hex_cover_distance(point: Vector2, target_cover: int, distance:
 	target_cover_distance.show_firepower(firepower)
 
 
+func show_command_notice(title: String, explanation: String) -> void:
+	_command_notices.append({"title": title, "explanation": explanation})
+	if not $Control/CommandNotice.visible:
+		_show_next_command_notice()
+
+
+func _show_next_command_notice() -> void:
+	$Control/CommandNotice.hide()
+	if _command_notices.is_empty():
+		return
+	var notice: Dictionary = _command_notices.pop_front()
+	$Control/CommandNotice/Content/Title.text = notice["title"]
+	$Control/CommandNotice/Content/Title.add_theme_color_override("font_color", Color(0.85, 0.82, 0.55))
+	$Control/CommandNotice/Content/Explanation.text = notice["explanation"]
+	$Control/CommandNotice.show()
+	$Control/CommandNotice/HideTimer.start()
+	_layout_order_feedback()
+
+
 func show_order_feedback(accepted: bool, command: String, explanation: String) -> void:
 	var title: String = "Order rejected · " + command
 	var color: Color = Color(0.96, 0.62, 0.43)
@@ -255,6 +277,7 @@ func show_order_cancelled() -> void:
 func hide_order_feedback() -> void:
 	$Control/OrderFeedback.hide()
 	$Control/OrderFeedback/HideTimer.stop()
+	_layout_order_feedback()
 
 
 func _show_order_message(title: String, explanation: String, color: Color) -> void:
@@ -278,6 +301,12 @@ func _layout_order_feedback() -> void:
 	panel.position = Vector2(left, countdown_panel_container.get_rect().end.y + 12.0)
 	if mission_objectives.visible and panel.get_rect().intersects(mission_objectives.get_rect()):
 		panel.position.y = mission_objectives.get_rect().end.y + 12.0
+	var notice: PanelContainer = $Control/CommandNotice
+	notice.custom_minimum_size.x = 320.0
+	notice.size = Vector2(320.0, notice.get_combined_minimum_size().y)
+	notice.position = panel.position
+	if panel.visible:
+		notice.position.y = panel.get_rect().end.y + 8.0
 
 
 func show_hex_edge_hint(direction: int, cover: int, point: Vector2) -> void:

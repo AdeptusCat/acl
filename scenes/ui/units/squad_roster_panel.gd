@@ -114,7 +114,7 @@ func _reveal_selected() -> void:
 	if is_instance_valid(_pending_reveal) and _pending_reveal.selected and rows.has(_pending_reveal):
 		var target: Control = rows[_pending_reveal]
 		var group: Vector2i = _group_key(_pending_reveal)
-		if _pending_reveal.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and platoon_branches.has(group):
+		if not _at_company_level(_pending_reveal) and platoon_branches.has(group):
 			var branch: FoldableContainer = platoon_branches[group]
 			if branch.size.y <= scroll.size.y:
 				target = branch
@@ -165,7 +165,7 @@ func _rebuild_groups(units: Array[Unit]) -> void:
 			company_branches[group.x] = company_branch
 			company_branch.folding_changed.connect(_on_company_folding_changed.bind(group.x))
 		var row_parent: VBoxContainer = company_branches[group.x].get_node("Indent/Content") as VBoxContainer
-		if unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS:
+		if not _at_company_level(unit):
 			if not platoon_branches.has(group):
 				var platoon_branch: FoldableContainer = _create_branch("Platoon %d" % group.y, row_parent)
 				platoon_branch.folded = not expanded_platoons.has(group)
@@ -219,7 +219,7 @@ func _expand_selected_branch(unit: Unit) -> void:
 	for company: int in company_branches:
 		company_branches[company].folded = company != selected_group.x
 	for group: Vector2i in platoon_branches:
-		platoon_branches[group].folded = group != selected_group or unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS
+		platoon_branches[group].folded = group != selected_group or _at_company_level(unit)
 	_request_layout()
 
 
@@ -248,8 +248,12 @@ func _on_platoon_folding_changed(folded: bool, selected_group: Vector2i) -> void
 	_request_layout()
 
 
+func _at_company_level(unit: Unit) -> bool:
+	return unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS or unit.get_command_icon_level() == Globals.SquadType.COMPANY_HEADQUARTERS
+
+
 func _group_key(unit: Unit) -> Vector2i:
-	if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+	if _at_company_level(unit):
 		return Vector2i(unit.company, 0)
 	return Vector2i(unit.company, unit.platoon)
 
@@ -271,6 +275,10 @@ func _formation_less(left: Unit, right: Unit) -> bool:
 		return left_group.x < right_group.x
 	if left_group.y != right_group.y:
 		return left_group.y < right_group.y
+	var left_commands_company: bool = left.get_command_icon_level() == Globals.SquadType.COMPANY_HEADQUARTERS
+	var right_commands_company: bool = right.get_command_icon_level() == Globals.SquadType.COMPANY_HEADQUARTERS
+	if left_commands_company != right_commands_company:
+		return left_commands_company
 	if left.squad != right.squad:
 		return left.squad < right.squad
 	return left.get_instance_id() < right.get_instance_id()

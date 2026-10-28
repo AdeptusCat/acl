@@ -13,6 +13,7 @@ var leader: Soldier
 var support_link: CommandConnectivity
 var reconstituted: bool = false
 var established: bool = false
+var announced: bool = false
 
 
 func has_commander() -> bool:

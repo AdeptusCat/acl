@@ -16,6 +16,8 @@ func set_soldier_detail(_soldier: Soldier) -> void:
 			
 	$HBoxContainer/WeaponName.text = soldier.weapon.name
 	$HBoxContainer/RoleName.text = RankGrades.get_role_name(soldier.role)
+	if is_instance_valid(soldier.unit):
+		$HBoxContainer/RoleName.text = soldier.unit.get_soldier_role_name(soldier)
 	$HBoxContainer/Nickname.text = soldier.name
 
 func _process(_delta: float) -> void:

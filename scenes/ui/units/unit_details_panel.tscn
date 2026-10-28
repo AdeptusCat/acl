@@ -97,6 +97,20 @@ theme_type_variation = &"HudSecondary"
 text_overrun_behavior = 3
 clip_text = true
 
+[node name="Commander" type="Label" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+mouse_filter = 1
+theme_type_variation = &"HudSecondary"
+autowrap_mode = 2
+
+[node name="HQStatus" type="Label" parent="Scroll/Summary"]
+visible = false
+layout_mode = 2
+mouse_filter = 1
+theme_type_variation = &"HudSecondary"
+autowrap_mode = 2
+
 [node name="Observation" type="Label" parent="Scroll/Summary"]
 visible = false
 layout_mode = 2

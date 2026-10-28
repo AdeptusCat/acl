@@ -60,6 +60,7 @@ signal hex_selected(map_hex: Vector2i, event_pos: Vector2)
 signal start_match
 signal ai_status_changed(team: Globals.Team, enabled: bool, mode: PositionProfile.Mode)
 signal order_feedback(accepted: bool, command: String, explanation: String)
+signal command_notice(title: String, explanation: String)
 
 var end_game_handled: bool = false
 var continuing_after_end: bool = false
@@ -128,6 +129,7 @@ func setup() -> void:
 	
 	command_succession = CommandSuccession.new()
 	add_child(command_succession)
+	command_succession.command_notice.connect(_on_command_notice)
 	command_succession.refresh()
 
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
@@ -159,6 +161,14 @@ func setup() -> void:
 	
 	influence_map_debug_draw.setup()
 	influence_map_debug_draw.set_debug_enabled(Debug.show_ai_placement)
+
+func _on_command_notice(team: Globals.Team, title: String, explanation: String) -> void:
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	if is_instance_valid(recorder):
+		recorder.record_event("command_notice", {"team": team, "title": title, "explanation": explanation})
+	if team == Globals.team_player:
+		command_notice.emit(title, explanation)
+
 
 func spawn_formation() -> void:
 	if Globals.game_mode == Globals.GameMode.ATTACK:

@@ -73,7 +73,7 @@ var _state_feedback: STATE_FEEDBACK
 var _tactical_feedback: STATE_FEEDBACK
 var _elimination_fade: Tween
 var _facing_update_remaining: float = 0.0
-var _is_headquarters: bool = false
+var _has_command_appointment: bool = false
 var _contact_restricted: bool = false
 var _contact_report: Dictionary = {}
 var _contact_marker: Label
@@ -260,24 +260,29 @@ static func _influence_arrow_count(rate: float) -> int:
 		return 2
 	return 3
 
-func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
-	match rankGrade:
-		RankGrades.Grade.SOLDIER:
-			rank_texture_rect.texture = private_texture
-		RankGrades.Grade.ASSISTANT_TEAM_LEADER:
-			rank_texture_rect.texture = private_first_class_texture
-		RankGrades.Grade.TEAM_LEADER:
-			rank_texture_rect.texture = corporal_texture
-		RankGrades.Grade.SQUAD_LEADER:
-			rank_texture_rect.texture = sergeant_texture
-		RankGrades.Grade.PLATOON_LEADER:
+func set_command_level(level: int) -> void:
+	rank_texture_rect.texture = null
+	rank_texture_rect.tooltip_text = ""
+	match level:
+		Globals.SquadType.PLATOON_HEADQUARTERS:
 			rank_texture_rect.texture = second_lieutenant_texture
-		RankGrades.Grade.COMPANY_LEADER:
+			rank_texture_rect.tooltip_text = "Platoon command"
+		Globals.SquadType.COMPANY_HEADQUARTERS:
 			rank_texture_rect.texture = captain_texture
+			rank_texture_rect.tooltip_text = "Company command"
+	var unit: Unit = get_parent() as Unit
+	if unit != null and level >= 0:
+		var appointment: FormationCommand = unit.get_command_appointment()
+		if appointment != null and appointment.has_commander():
+			rank_texture_rect.tooltip_text = unit.get_hud_name() + "\nCommander: " + appointment.leader.name + "\n" + unit.get_headquarters_status_text()
+	_has_command_appointment = rank_texture_rect.texture != null
+	_update_rank_visibility()
+	if is_instance_valid(detail_ui):
+		detail_ui.set_command_level(level)
 
 
 func _update_rank_visibility() -> void:
-	rank_texture_rect.visible = _is_headquarters and not _contact_restricted and not _dead and not _exited
+	rank_texture_rect.visible = _has_command_appointment and not _contact_restricted and not _dead and not _exited and not _surrendered
 
 
 func set_indirect_contact(dimmed: bool) -> void:
@@ -464,10 +469,11 @@ func update_team_sprite(team : int, _squad_type: Globals.SquadType) -> void:
 		1:
 			sprite_node.texture = sprite_team_1
 	unit_status_control.set_status_image(team, _squad_type)
-	_is_headquarters = _squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]
-	_update_rank_visibility()
 	if detail_ui:
 		detail_ui.update_team_sprite(team, _squad_type)
+	var unit: Unit = get_parent() as Unit
+	if unit != null:
+		set_command_level(unit.get_command_icon_level())
 
 
 func set_cover(cover_value: int) -> void:
@@ -719,6 +725,7 @@ func surrender() -> void:
 	if _dead or _exited or _surrendered:
 		return
 	_surrendered = true
+	_update_rank_visibility()
 	_clear_tactical_feedback()
 	focus_indicator.hide()
 	$Timer.stop()

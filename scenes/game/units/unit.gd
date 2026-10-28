@@ -453,8 +453,7 @@ func _refresh_leader_aura() -> void:
 		leader_aura.rally_bonus = rally * command_efficiency
 		leader_aura.cohesion_mult = 1.0 + (coh - 1.0) * command_efficiency
 	
-	#var rank: RankGrades.Grade = _highest_grade_from_loadouts()
-	ui.set_leadership_rank(grade)
+	ui.set_command_level(get_command_icon_level())
 
 
 func _highest_grade_from_runtime() -> int:
@@ -989,6 +988,17 @@ static func format_squad_name(number: int) -> String:
 
 
 func get_hud_name() -> String:
+	var level: int = get_command_icon_level()
+	if level == Globals.SquadType.COMPANY_HEADQUARTERS:
+		if acting_command_level >= 0:
+			return "Acting Company HQ"
+		return "Company HQ"
+	if level == Globals.SquadType.PLATOON_HEADQUARTERS:
+		if acting_command_level >= 0:
+			return "Acting Platoon HQ"
+		return "Platoon HQ"
+	if is_active() and not surrendered and CommandSuccession.is_headquarters(self) and company_command != null:
+		return get_squad_name() + " Remnant"
 	var designation: String = get_squad_name()
 	match squad_type:
 		Globals.SquadType.Rifle:
@@ -1000,6 +1010,55 @@ func get_hud_name() -> String:
 		Globals.SquadType.MORTAR:
 			return designation + " · Mortar"
 	return designation
+
+
+func get_command_icon_level() -> int:
+	if not is_active() or surrendered:
+		return -1
+	if company_command != null and company_command.has_commander() and company_command.commander == self:
+		return Globals.SquadType.COMPANY_HEADQUARTERS
+	if platoon_command != null and platoon_command.has_commander() and platoon_command.commander == self:
+		return Globals.SquadType.PLATOON_HEADQUARTERS
+	# Before formation setup, show staffed authored HQs using their echelon.
+	if company_command == null and platoon_command == null and CommandSuccession.is_headquarters(self) and CommandSuccession.headquarters_leader(self) != null:
+		return squad_type
+	return -1
+
+
+func get_command_appointment() -> FormationCommand:
+	for formation: FormationCommand in [company_command, platoon_command]:
+		if formation != null and formation.has_commander() and (formation.commander == self or formation.headquarters == self):
+			return formation
+	return CommandConnectivity.commanding_formation(self)
+
+
+func get_soldier_role_name(soldier: Soldier) -> String:
+	var appointment: FormationCommand = get_command_appointment()
+	if appointment != null and appointment.has_commander() and appointment.commander == self and appointment.leader == soldier:
+		var prefix: String = ""
+		if acting_command_level >= 0:
+			prefix = "Acting "
+		if appointment.level == Globals.SquadType.COMPANY_HEADQUARTERS:
+			return prefix + "Company Commander"
+		return prefix + "Platoon Commander"
+	return RankGrades.get_role_name(soldier.role)
+
+
+func get_headquarters_status_text() -> String:
+	var appointment: FormationCommand = get_command_appointment()
+	if appointment == null or not appointment.has_commander():
+		if CommandSuccession.is_headquarters(self):
+			return "No eligible commander"
+		return ""
+	if appointment.commander == appointment.headquarters:
+		return "HQ operational"
+	if appointment.reconstituted and appointment.has_support():
+		return "HQ reconstituted · 100% command effectiveness"
+	if appointment.has_support():
+		return "HQ remnant in contact · 75% command effectiveness\nStop together in the same hex to reconstitute HQ."
+	if appointment.has_remnant():
+		return "HQ remnant out of contact · 75% command effectiveness"
+	return "HQ lost · 75% command effectiveness"
 
 
 func get_command_assignment_text() -> String:
@@ -1028,7 +1087,7 @@ func get_command_assignment_text() -> String:
 
 
 func get_formation_name() -> String:
-	if squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+	if get_command_icon_level() == Globals.SquadType.COMPANY_HEADQUARTERS or squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 		return "Company %s · Headquarters" % COMPANY_NAMES[company]
 	return "Company %s · Platoon %d" % [COMPANY_NAMES[company], platoon]
 

@@ -35,6 +35,8 @@ const RULE_SCRIPTS: Array[String] = [
 	"res://scenes/game/units/soldiers/soldier.gd",
 	"res://scenes/game/units/command/command_connectivity.gd",
 	"res://scenes/game/units/command/leader_aura.gd",
+	"res://scenes/game/units/command/command_succession.gd",
+	"res://scenes/game/units/command/formation_command.gd",
 	"res://scenes/game/units/actions/squad_action_controller.gd",
 ]
 
@@ -392,12 +394,29 @@ func _unit_snapshot(unit: Unit) -> Dictionary:
 		"stress": {"effective": stress.S_eff, "fast": stress.stress_fast, "slow": stress.stress_slow, "morale": stress.state, "incoming_rate": stress.incoming_stress_rate, "actual_recovery_rate": stress.stress_recovery_rate, "capacity": stress.get_recovery_capacity(), "net_rate": stress.net_stress_rate, "balance_window_s": stress.balance_sample_duration_s, "pressure_rps": stress._last_pressure_rps, "under_fire_remaining_s": stress._under_fire_t, "time_without_fire_s": stress._time_without_fire_s, "casualty_shock": stress._casualty_recovery_shock, "casualty_shock_remaining_s": stress._casualty_recovery_t, "since_pinned_s": stress._since_pinned, "since_unpinned_s": stress._repin_since_unpin, "leadership_bonus": stress.leadership_bonus, "presence": stress.leader_presence_strength, "base_cohesion": stress.cohesion, "aura_cohesion_mult": stress._leadership_cohesion_mult},
 		"attention": {"focus": _value(attention.focus_direction), "width": attention.attention_width, "quality": attention.attention_quality, "capacity": attention.attention_capacity, "demand": attention.total_directional_demand, "required": attention.required_attention, "suppression_activity": attention.suppression_activity, "sectors": _value(attention.directional_demand), "incoming_sectors": _value(attention.incoming_fire_demand), "deficit": attention.attention_deficit, "overload_rate": attention.attention_stress_rate, "switching_rate": attention.switching_stress_rate, "switch_load": attention.attention_switch_load, "surprise": attention.last_attack_surprise, "crossfire": attention.multi_direction_pressure, "flanked": attention.flanked, "surrounded": attention.surrounded},
 		"combat": {"cohesion": unit.combat_stats.cohesion_current, "cohesion_target": unit.combat_stats.cohesion_target, "effectiveness": unit.combat_stats.combat_effectiveness, "casualty_shock": unit.combat_stats.recent_casualty_shock},
-		"command": {"hq": _unit_id(unit.command_squad), "link": unit.command_connectivity.command_link_strength, "presence": unit.command_connectivity.leader_presence_strength},
+		"command": _command_snapshot(unit),
 		"orders": {"attack_state": unit.attackState, "target": _unit_id(unit.squad_fire.target_unit), "target_hex": _value(unit.squad_fire.target_hex), "has_target": unit.squad_fire.has_target_hex, "action": unit.action_controller.action_state, "action_order": unit.action_controller.action_order_id, "objective_hex": _value(unit.action_controller.objective_hex), "move_target": _value(unit.movement.target_hex), "role": attention.current_role, "task_id": attention.assigned_task_id, "support_only": unit.ai_support_only},
 		"visible_enemies": visible,
 		"enemy_tracks": tracks_seen,
 		"soldiers": roster,
 	}
+
+
+func _command_snapshot(unit: Unit) -> Dictionary:
+	var result: Dictionary = {"hq": _unit_id(unit.command_squad), "link": unit.command_connectivity.command_link_strength, "presence": unit.command_connectivity.leader_presence_strength,
+		"acting_level": unit.acting_command_level, "display_name": unit.get_hud_name(), "relay_used": unit.command_connectivity.hq_relay_used}
+	var appointment: FormationCommand = unit.get_command_appointment()
+	if appointment != null and appointment.has_commander():
+		result["formation_level"] = appointment.level
+		result["commander_unit"] = _unit_id(appointment.commander)
+		result["commander_soldier"] = appointment.leader.id
+		result["commander_name"] = appointment.leader.name
+		result["commander_rank"] = appointment.leader.rank_grade
+		result["headquarters_unit"] = _unit_id(appointment.headquarters)
+		result["reconstituted"] = appointment.reconstituted
+		result["hq_support"] = appointment.has_support()
+		result["efficiency"] = appointment.efficiency()
+	return result
 
 
 func _metadata() -> Dictionary:
