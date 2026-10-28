@@ -8,6 +8,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 	for soldier: Soldier in unit.squad_fire.soldiers:
 		if soldier == casualty:
 			var members_alive_before: int = unit.squad_fire.soldiers.size()
+			var secondary_roles_before: Vector2i = secondary_role_counts(unit)
 			
 			var leader_down: bool = casualty.role == RankGrades.Role.SQUAD_LEADER
 			
@@ -68,6 +69,8 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 			if roles_lost.has(RankGrades.Role.LOADER):
 				unit._fill_missing_loaders_for_existing_guns()
 
+			restore_secondary_roles(unit, secondary_roles_before)
+
 			# optional: if you maintain any cached fire stats, rebuild them now
 			# squad_fire.rebuild_cached_stats()
 			# emit signals as needed
@@ -87,6 +90,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 
 static func apply_casualties(unit: Unit, n: int) -> void:
 	var members_alive_before: int = unit.squad_fire.soldiers.size()
+	var secondary_roles_before: Vector2i = secondary_role_counts(unit)
 	var casualty_count: int = clampi(n, 0, members_alive_before)
 	if casualty_count == 0:
 		return
@@ -183,6 +187,8 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 	# 3) if we lost a loader but the gun’s still in the squad, top up loaders
 	if roles_lost.has(RankGrades.Role.LOADER):
 		unit._fill_missing_loaders_for_existing_guns()
+
+	restore_secondary_roles(unit, secondary_roles_before)
 	
 	# optional: if you maintain any cached fire stats, rebuild them now
 	# squad_fire.rebuild_cached_stats()
@@ -192,6 +198,37 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 
 
 # ---------- helpers (typed, no ternarys) ----------
+
+
+static func secondary_role_counts(unit: Unit) -> Vector2i:
+	var counts: Vector2i = Vector2i.ZERO
+	for soldier: Soldier in unit.squad_fire.soldiers:
+		match soldier.role:
+			RankGrades.Role.ASSISTANT_SQUAD_LEADER:
+				counts.x += 1
+			RankGrades.Role.ASSISTANT:
+				counts.y += 1
+	return counts
+
+
+static func restore_secondary_roles(unit: Unit, previous_counts: Vector2i) -> void:
+	# Restore existing positions after leadership and essential weapon crew are filled.
+	# This also covers assistants promoted into higher-priority roles.
+	var current_counts: Vector2i = secondary_role_counts(unit)
+	while current_counts.x < previous_counts.x:
+		var replacement_idx: int = unit._find_first_SOLDIER()
+		if replacement_idx == -1:
+			break
+		unit.squad_fire.soldiers[replacement_idx].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+		current_counts.x += 1
+	if not unit._has_role(RankGrades.Role.GUNNER):
+		return
+	while current_counts.y < previous_counts.y:
+		var replacement_idx: int = unit._find_first_SOLDIER()
+		if replacement_idx == -1:
+			break
+		unit.squad_fire.soldiers[replacement_idx].role = RankGrades.Role.ASSISTANT
+		current_counts.y += 1
 
 
 static func promote_new_leader(unit: Unit) -> void:

@@ -3,6 +3,12 @@ extends Node
 # Run with: godot --headless --path . tests/unit_roster_regression.tscn
 class UnitUnderTest extends Unit:
 	var elimination_count: int = 0
+	var forced_casualty_indexes: Array[int] = []
+
+	func get_unique_random_ints(n: int, maximum: int) -> Array[int]:
+		if not forced_casualty_indexes.is_empty():
+			return forced_casualty_indexes.duplicate()
+		return super.get_unique_random_ints(n, maximum)
 
 	func _set_combat_ineffective() -> void:
 		elimination_count += 1
@@ -53,6 +59,7 @@ func _run() -> void:
 	_test_saved_roster_initialization()
 	_test_runtime_phase_order()
 	_test_specific_role_replacement()
+	_test_secondary_role_replacement()
 	for unit: UnitUnderTest in units:
 		unit.free()
 	units.clear()
@@ -198,7 +205,7 @@ func _test_runtime_phase_order() -> void:
 
 
 func _test_specific_role_replacement() -> void:
-	var unit: UnitUnderTest = _create_unit(5, 0)
+	var unit: UnitUnderTest = _create_unit(6, 0)
 	var leader: Soldier = unit.squad_fire.soldiers[0]
 	var assistant: Soldier = unit.squad_fire.soldiers[1]
 	var gunner: Soldier = unit.squad_fire.soldiers[2]
@@ -219,11 +226,85 @@ func _test_specific_role_replacement() -> void:
 	)
 	unit.apply_specific_casualty(leader)
 	_check(assistant.role == RankGrades.Role.SQUAD_LEADER, "Assistant takes over a specific leader casualty")
-	_check(ui.events == ["members:4", "casualty", "signal:4", "loadout:4"], "Specific casualty publishes the updated roster before loadout presentation")
+	_check(ui.events == ["members:5", "casualty", "signal:5", "loadout:5"], "Specific casualty publishes the updated roster before loadout presentation")
 	unit.apply_specific_casualty(gunner)
 	_check(loader.role == RankGrades.Role.GUNNER and loader.weapon == gun, "Specific gunner loss transfers the physical weapon to the loader")
 	_check(gun.ammunition == definition.ammunition_start - 7 and gun.is_setup, "Casualty recrewing retains ammunition and setup")
 	_check(unit.squad_fire.soldiers[unit.squad_fire.soldiers.size() - 1].role == RankGrades.Role.LOADER, "Ordinary soldier fills the loader vacancy")
+
+
+func _test_secondary_role_replacement() -> void:
+	for specific: bool in [true, false]:
+		var unit: UnitUnderTest = _create_unit(8, 0)
+		var roster: Array[Soldier] = unit.squad_fire.soldiers.duplicate()
+		roster[0].role = RankGrades.Role.SQUAD_LEADER
+		roster[1].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+		roster[2].role = RankGrades.Role.GUNNER
+		roster[2].weapon = (load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec).create_runtime()
+		roster[3].role = RankGrades.Role.LOADER
+		roster[4].role = RankGrades.Role.ASSISTANT
+		roster[5].weapon = (load("res://resources/weapons/kar98_riflegrenade.tres") as WeaponSpec).create_runtime()
+		var replacement_weapon: WeaponSpec = roster[6].weapon
+		var replacement_grade: RankGrades.Grade = roster[6].rank_grade
+		_apply_role_casualty(unit, roster[1], specific)
+		_check(roster[6].role == RankGrades.Role.ASSISTANT_SQUAD_LEADER, "An ordinary soldier replaces the assistant squad leader on both casualty paths")
+		_check(roster[6].weapon == replacement_weapon and roster[6].rank_grade == replacement_grade, "Assistant leader replacement preserves the soldier's weapon and rank")
+		_apply_role_casualty(unit, roster[4], specific)
+		_check(roster[7].role == RankGrades.Role.ASSISTANT, "An ordinary soldier replaces a weapon assistant on both casualty paths")
+		_check(roster[5].role == RankGrades.Role.SOLDIER and roster[3].role == RankGrades.Role.LOADER, "Secondary replacements preserve rifle grenadiers and essential crew")
+		_apply_role_casualty(unit, roster[6], specific)
+		_check(not unit._has_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER), "An unfillable vacancy does not take a specialist or weapon assistant")
+
+		var succession: UnitUnderTest = _create_unit(4, 0)
+		var assistant: Soldier = succession.squad_fire.soldiers[1]
+		var successor: Soldier = succession.squad_fire.soldiers[2]
+		succession.squad_fire.soldiers[0].role = RankGrades.Role.SQUAD_LEADER
+		assistant.role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+		_apply_role_casualty(succession, succession.squad_fire.soldiers[0], specific)
+		_check(assistant.role == RankGrades.Role.SQUAD_LEADER and successor.role == RankGrades.Role.ASSISTANT_SQUAD_LEADER, "Promoting the assistant leader also fills the vacated assistant position")
+
+		var crew: UnitUnderTest = _create_unit(4, 0)
+		var helper: Soldier = crew.squad_fire.soldiers[2]
+		var reserve: Soldier = crew.squad_fire.soldiers[3]
+		crew.squad_fire.soldiers[0].role = RankGrades.Role.GUNNER
+		crew.squad_fire.soldiers[0].weapon = (load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec).create_runtime()
+		crew.squad_fire.soldiers[1].role = RankGrades.Role.LOADER
+		helper.role = RankGrades.Role.ASSISTANT
+		_apply_role_casualty(crew, crew.squad_fire.soldiers[1], specific)
+		_check(helper.role == RankGrades.Role.LOADER and reserve.role == RankGrades.Role.ASSISTANT, "An assistant promoted to loader is replaced after the essential crew is filled")
+
+	var batch: UnitUnderTest = _create_unit(8, 0)
+	batch.squad_fire.soldiers[0].role = RankGrades.Role.GUNNER
+	batch.squad_fire.soldiers[0].weapon = (load("res://resources/weapons/mg34_heavy.tres") as WeaponSpec).create_runtime()
+	batch.squad_fire.soldiers[1].role = RankGrades.Role.LOADER
+	batch.squad_fire.soldiers[2].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+	batch.squad_fire.soldiers[3].role = RankGrades.Role.ASSISTANT
+	batch.squad_fire.soldiers[4].role = RankGrades.Role.ASSISTANT
+	batch.forced_casualty_indexes = [2, 3, 4]
+	batch._apply_casualties(3)
+	_check(batch._has_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER) and UnitCasualtyHandler.secondary_role_counts(batch).y == 2, "A batch casualty restores all lost secondary positions when reserves suffice")
+
+	var depleted: UnitUnderTest = _create_unit(5, 0)
+	depleted.squad_fire.soldiers[0].role = RankGrades.Role.SQUAD_LEADER
+	depleted.squad_fire.soldiers[1].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+	depleted.squad_fire.soldiers[2].role = RankGrades.Role.GUNNER
+	depleted.squad_fire.soldiers[2].weapon = (load("res://resources/weapons/mg34.tres") as WeaponSpec).create_runtime()
+	depleted.squad_fire.soldiers[3].role = RankGrades.Role.LOADER
+	depleted.forced_casualty_indexes = [1, 3]
+	depleted._apply_casualties(2)
+	_check(depleted._has_role(RankGrades.Role.LOADER) and not depleted._has_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER), "The final reserve fills an essential loader vacancy before an assistant leader vacancy")
+
+	var ordinary: UnitUnderTest = _create_unit(3, 0)
+	ordinary._apply_casualties(1)
+	_check(UnitCasualtyHandler.secondary_role_counts(ordinary) == Vector2i.ZERO, "Casualties do not invent secondary positions absent from the squad")
+
+
+func _apply_role_casualty(unit: UnitUnderTest, casualty: Soldier, specific: bool) -> void:
+	if specific:
+		unit.apply_specific_casualty(casualty)
+	else:
+		unit.forced_casualty_indexes = [unit.squad_fire.soldiers.find(casualty)]
+		unit._apply_casualties(1)
 
 
 func _make_loadout(size: int) -> SquadLoadoutSpec:
