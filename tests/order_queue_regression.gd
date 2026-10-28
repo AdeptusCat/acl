@@ -173,12 +173,11 @@ func _test_controls(world: Node) -> void:
 	shift.keycode = KEY_SHIFT
 	Input.parse_input_event(shift)
 	Input.flush_buffered_events()
-	details._refresh_order_controls()
-	_check(details._order_rows.get_child_count() == 1, "The panel displays numbered queued orders")
+	_check(first.action_controller.order_queue.pending.size() == 1, "Hiding queue controls preserves the queued move")
+	for control: Node in details.find_children("*", "FoldableContainer", true, false):
+		_check((control as FoldableContainer).title != "Order queue", "Unit details do not expose an order queue section")
 	if OS.get_cmdline_user_args().has("--capture"):
 		get_tree().root.size = Vector2i(1152, 648)
-		details._orders_section.folded = false
-		details._refresh_order_controls()
 		controller.los_renderer.queue_redraw()
 		for frame: int in range(6):
 			await get_tree().process_frame

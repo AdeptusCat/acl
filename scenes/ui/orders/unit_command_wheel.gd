@@ -52,7 +52,7 @@ func _ready() -> void:
 	content.add_child(restriction_label)
 	var cancel_hint: Label = Label.new()
 	cancel_hint.theme_type_variation = &"HudSecondary"
-	cancel_hint.text = "Shift: queue Move / Watch\nEsc or left click: cancel"
+	cancel_hint.text = "Esc or left click: cancel"
 	cancel_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cancel_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_child(cancel_hint)
@@ -188,9 +188,6 @@ func _update_status() -> void:
 		color = ROUT_COLOR
 	elif command == WheelOption.Option.WATCH:
 		restriction_label.text = "Watch toward this hex.\nAdjust the arc in squad details."
-	if Input.is_key_pressed(KEY_SHIFT) and command in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.WATCH]:
-		selected_label.text = "Queue " + str(WheelOption.COMMAND_NAMES[command])
-		restriction_label.text = "Append this order to the squad's queue."
 	if not reason.is_empty():
 		restriction_label.text = reason
 		color = Color(0.96, 0.62, 0.43)

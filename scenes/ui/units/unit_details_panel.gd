@@ -58,14 +58,9 @@ var opacity_tween: Tween
 var _roster_rows: Array[Control] = []
 var _refresh_elapsed_s: float = 0.0
 var _spotting_targets: Array[Unit] = []
-var _orders_section: FoldableContainer
-var _order_rows: VBoxContainer
-var _queue_status: Label
-var _order_signature: String = ""
 
 
 func _ready() -> void:
-	_setup_order_controls()
 	minimum_size_changed.connect(_queue_fit)
 	summary.minimum_size_changed.connect(_queue_fit)
 	if hud_control != null:
@@ -255,10 +250,8 @@ func _set_roster_row(index: int, soldier: Soldier) -> void:
 func _refresh_summary() -> void:
 	_refresh_spotting()
 	if _restricted_enemy():
-		_orders_section.hide()
 		_refresh_enemy_summary()
 		return
-	_refresh_order_controls()
 	for control: Control in [command_label, order_label, details_section, roster_section, pace_row, watch_row, fire_discipline_row]:
 		control.show()
 	_refresh_watch_controls()
@@ -672,62 +665,3 @@ func _on_debug_rout_pressed() -> void:
 	if not unit.is_active() or unit.surrendered or unit.broken or unit.movement.retreating:
 		return
 	unit.stress_system._set_state(STATES.MoraleState.PANIC)
-
-
-func _setup_order_controls() -> void:
-	_orders_section = FoldableContainer.new()
-	_orders_section.title = "Order queue"
-	summary.add_child(_orders_section)
-	summary.move_child(_orders_section, order_label.get_index() + 1)
-	var content: VBoxContainer = VBoxContainer.new()
-	_orders_section.add_child(content)
-	var hint: Label = Label.new()
-	hint.text = "Shift + Move / Watch: append order.\nA normal order replaces the queue."
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(hint)
-	_queue_status = Label.new()
-	_queue_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(_queue_status)
-	_order_rows = VBoxContainer.new()
-	content.add_child(_order_rows)
-
-
-func _refresh_order_controls() -> void:
-	_orders_section.visible = MatchInteractionHandler.can_command_unit(unit)
-	if not _orders_section.visible:
-		return
-	var queue: SquadOrderQueue = unit.action_controller.order_queue
-	var entries: Array[Dictionary] = queue.entries()
-	_queue_status.text = "No queued orders"
-	if not entries.is_empty():
-		_queue_status.text = queue.status_text()
-	_queue_status.tooltip_text = _queue_status.text
-	var signature: String = str(unit.get_instance_id()) + ":" + str(not queue.current.is_empty())
-	for entry: Dictionary in entries:
-		signature += "|" + SquadOrderQueue.describe(entry)
-	if signature != _order_signature:
-		_order_signature = signature
-		for child: Node in _order_rows.get_children():
-			_order_rows.remove_child(child)
-			child.queue_free()
-		for index: int in range(entries.size()):
-			var row: HBoxContainer = HBoxContainer.new()
-			_order_rows.add_child(row)
-			var label: Label = Label.new()
-			label.text = "%d. %s" % [index + 1, SquadOrderQueue.describe(entries[index])]
-			if index == 0 and not queue.current.is_empty():
-				label.text = "Active · " + label.text
-				label.add_theme_color_override("font_color", Color(1.0, 0.87, 0.24))
-			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(label)
-			var remove_order: Button = Button.new()
-			remove_order.text = "Remove"
-			remove_order.pressed.connect(_on_remove_queued_order.bind(unit, index))
-			row.add_child(remove_order)
-
-
-func _on_remove_queued_order(owner: Unit, index: int) -> void:
-	if owner == unit and MatchInteractionHandler.can_command_unit(owner):
-		owner.action_controller.order_queue.remove(index)
-		_refresh_order_controls()
