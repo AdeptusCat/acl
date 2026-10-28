@@ -148,8 +148,12 @@ func _test_orders_and_controls() -> void:
 	_check(controller.order_via_option_wheel(target, WheelOption.Option.STOP) and friendly.watch_direction.is_equal_approx(assigned), "Stop clears action orders while preserving the independent watch assignment")
 	var details: Control = world.ui.unit_details
 	details.show_unit_detail(friendly, false)
-	details.watch_width.item_selected.emit(details.watch_width.get_item_index(Unit.WatchWidth.WIDE))
-	_check(friendly.watch_width == Unit.WatchWidth.WIDE and is_equal_approx(friendly.tactical_state.attention_width, PI), "The squad details selector changes the actual watch width")
+	for width: int in details.watch_width_buttons:
+		var button: Button = details.watch_width_buttons[width]
+		button.pressed.emit()
+		_check(friendly.watch_width == width and is_equal_approx(friendly.tactical_state.attention_width, friendly.watch_arc_radians()), "Each watch icon changes the actual watch width")
+		_check(button.button_pressed and button.button_group.get_pressed_button() == button, "Watch icons highlight only the selected angle")
+		_check(button.icon != null and button.text.is_empty() and not button.tooltip_text.is_empty(), "Watch angle options use icons and explanatory tooltips")
 	details.watch_automatic.pressed.emit()
 	_check(not friendly.has_watch_order() and details.watch_status.text == "Automatic attention", "Auto clears the assignment and restores automatic attention")
 	controller.order_via_option_wheel(target, WheelOption.Option.WATCH)
@@ -157,13 +161,18 @@ func _test_orders_and_controls() -> void:
 	controller.end_game_handled = true
 	controller.continuing_after_end = false
 	details._refresh_summary()
-	_check(details.watch_width.disabled and details.watch_automatic.disabled and not controller.order_via_option_wheel(target, WheelOption.Option.WATCH), "Mission completion blocks both watch commands and details controls")
+	for width: int in details.watch_width_buttons:
+		_check(details.watch_width_buttons[width].disabled, "Mission completion disables every watch angle icon")
+	details._on_watch_width_selected(Unit.WatchWidth.NARROW)
+	_check(friendly.watch_width == Unit.WatchWidth.WIDE and details.watch_automatic.disabled and not controller.order_via_option_wheel(target, WheelOption.Option.WATCH), "Mission completion blocks watch commands and stale details signals")
 	controller.end_game_handled = false
 	Debug.enemy_selectable = false
 	Globals.unit_visible_enemies[friendly] = [enemy]
 	controller.show_visible_units()
 	details.show_unit_detail(enemy, false)
-	_check(not details.watch_row.visible, "Enemy inspection cannot reveal or change enemy watch assignments")
+	var previous_width: Unit.WatchWidth = enemy.watch_width
+	details._on_watch_width_selected(Unit.WatchWidth.NARROW)
+	_check(not details.watch_row.visible and enemy.watch_width == previous_width, "Enemy inspection cannot reveal or change enemy watch assignments")
 	details.show_unit_detail(friendly, false)
 	_reset_contacts(3)
 
@@ -179,6 +188,9 @@ func _test_save() -> void:
 	friendly.clear_watch_order()
 	friendly.apply_save_data(loaded)
 	_check(friendly.watch_direction.is_equal_approx(assigned) and friendly.watch_width == Unit.WatchWidth.NARROW and friendly.tactical_state.watch_focus_active, "Loading restores the bearing, width and effective watch attention")
+	var details: Control = world.ui.unit_details
+	details._refresh_summary()
+	_check(details.watch_width_buttons[Unit.WatchWidth.NARROW].button_pressed, "Loading a saved angle updates the highlighted watch icon")
 	var defaults: UnitSaveData = UnitSaveData.new()
 	_check(defaults.watch_direction == Vector2.ZERO and defaults.watch_width == Unit.WatchWidth.NORMAL, "Older saves default to automatic attention and a normal arc")
 	loaded.watch_direction = defaults.watch_direction
@@ -199,6 +211,12 @@ func _test_overlay() -> void:
 	lines.queue_redraw()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	var details: Control = world.ui.unit_details
+	var narrow: Button = details.watch_width_buttons[Unit.WatchWidth.NARROW]
+	_check(details.watch_row.get_global_rect().encloses(narrow.get_global_rect()) and details.watch_row.get_global_rect().encloses(details.watch_automatic.get_global_rect()), "The watch icons and Auto button fit inside the squad panel")
+	if OS.get_cmdline_user_args().has("--capture"):
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/acl-watch-angle-icons.png")
 	var left: Vector2 = points[1] - points[0]
 	var right: Vector2 = points[points.size() - 2] - points[0]
 	_check(is_equal_approx(absf(left.angle_to(right)), friendly.watch_arc_radians()), "The displayed arc matches the chosen width")

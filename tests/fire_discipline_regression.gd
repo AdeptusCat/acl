@@ -340,9 +340,20 @@ func _test_controls_and_save() -> void:
 	controller._select_unit(friendly)
 	var details: PanelContainer = world.ui.unit_details
 	details.show_unit_detail(friendly, false)
-	details.fire_discipline.item_selected.emit(details.fire_discipline.get_item_index(Unit.FireDiscipline.HOLD_FIRE))
-	_check(friendly.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and details.fire_discipline_row.visible and not details.fire_discipline.disabled, "The squad details control changes friendly fire discipline")
+	var hold_fire: Button = details.fire_discipline_buttons[Unit.FireDiscipline.HOLD_FIRE]
+	for discipline: int in details.fire_discipline_buttons:
+		var button: Button = details.fire_discipline_buttons[discipline]
+		button.pressed.emit()
+		_check(friendly.fire_discipline == discipline and button.button_pressed and button.button_group.get_pressed_button() == button, "Each fire icon selects its discipline and highlights only the active mode")
+		_check(button.icon != null and button.text.is_empty() and not button.tooltip_text.is_empty(), "Fire discipline options use labeled tooltips and icons")
+	hold_fire.pressed.emit()
+	_check(friendly.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and details.fire_discipline_row.visible and not hold_fire.disabled, "The squad details control changes friendly fire discipline")
 	_check(details.fire_discipline_status.text == "Observe without automatic fire", "The details panel explains the active discipline")
+	for stance: int in details.pace_buttons:
+		var button: Button = details.pace_buttons[stance]
+		button.pressed.emit()
+		_check(friendly.movement.stance == stance and button.button_pressed and button.button_group.get_pressed_button() == button, "Each pace icon selects its stance and highlights only the active pace")
+		_check(button.icon != null and button.text.is_empty() and not button.tooltip_text.is_empty(), "Movement pace options use labeled tooltips and icons")
 	friendly.setAttackState(Unit.AttackState.MANUAL_GROUND)
 	friendly.squad_fire.set_target_hex(hostile.current_hex)
 	details._refresh_summary()
@@ -372,20 +383,24 @@ func _test_controls_and_save() -> void:
 	_check(friendly.fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL and UnitSaveData.new().fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL, "Invalid values and older saves default to fire at will")
 	controller.end_game_handled = true
 	details._refresh_summary()
-	details._on_fire_discipline_selected(details.fire_discipline.get_item_index(Unit.FireDiscipline.HOLD_FIRE))
-	_check(details.fire_discipline.disabled and friendly.fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL, "Mission completion disables discipline changes even through a stale UI signal")
+	details._on_fire_discipline_selected(Unit.FireDiscipline.HOLD_FIRE)
+	_check(hold_fire.disabled and friendly.fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL, "Mission completion disables discipline changes even through a stale UI signal")
 	controller.end_game_handled = false
 	Debug.enemy_selectable = false
 	Globals.unit_visible_enemies[friendly] = [hostile]
 	controller.show_visible_units()
 	details.show_unit_detail(hostile, false)
 	var previous: Unit.FireDiscipline = hostile.fire_discipline
-	details._on_fire_discipline_selected(details.fire_discipline.get_item_index(Unit.FireDiscipline.HOLD_FIRE))
+	details._on_fire_discipline_selected(Unit.FireDiscipline.HOLD_FIRE)
 	_check(not details.fire_discipline_row.visible and hostile.fire_discipline == previous, "Enemy inspection hides discipline and cannot modify it")
+	var previous_stance: UnitMovement.Stance = hostile.movement.stance
+	details._on_pace_selected(UnitMovement.Stance.CROUCHED)
+	_check(not details.pace_row.visible and hostile.movement.stance == previous_stance, "Enemy inspection hides pace icons and cannot change movement pace")
 	details.show_unit_detail(friendly, false)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	_check(details.fire_discipline.get_rect().end.x <= details.fire_discipline_row.size.x, "The discipline controls fit inside the squad panel")
+	_check(details.fire_discipline_row.get_global_rect().encloses(hold_fire.get_global_rect()) and details.fire_discipline_row.get_global_rect().encloses(details.fire_discipline_buttons[Unit.FireDiscipline.FIRE_AT_WILL].get_global_rect()), "The discipline icons fit inside the squad panel")
+	_check(details.pace_row.get_global_rect().encloses(details.pace_buttons[UnitMovement.Stance.CROUCHED].get_global_rect()) and details.pace_row.get_global_rect().encloses(details.pace_buttons[UnitMovement.Stance.RUNNING].get_global_rect()), "The pace icons fit inside the squad panel")
 	friendly.tactical_state = SquadTacticalState.new()
 	friendly.set_fire_discipline(Unit.FireDiscipline.RETURN_FIRE)
 	Globals.unit_visible_enemies[friendly] = [hostile]

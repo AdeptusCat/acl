@@ -7,6 +7,21 @@
 [ext_resource type="Script" path="res://scenes/ui/orders/rout_button.gd" id="3"]
 [ext_resource type="Script" path="res://scenes/ui/units/unit_type_label.gd" id="5"]
 [ext_resource type="Script" path="res://scenes/ui/units/leadership_bonus_label.gd" id="7"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/pace_cautious.svg" id="pace_cautious"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/pace_normal.svg" id="pace_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/pace_fast.svg" id="pace_fast"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/fire_hold.svg" id="fire_hold"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/fire_return.svg" id="fire_return"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/fire_at_will.svg" id="fire_at_will"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/watch_narrow.svg" id="watch_narrow"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/watch_normal.svg" id="watch_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/units/watch_wide.svg" id="watch_wide"]
+
+[sub_resource type="ButtonGroup" id="PaceGroup"]
+
+[sub_resource type="ButtonGroup" id="FireDisciplineGroup"]
+
+[sub_resource type="ButtonGroup" id="WatchWidthGroup"]
 
 [sub_resource type="StyleBoxFlat" id="BarBackground"]
 bg_color = Color(0.2, 0.2, 0.17, 1)
@@ -141,9 +156,36 @@ layout_mode = 2
 text = "Movement pace"
 size_flags_horizontal = 3
 
-[node name="Choice" type="OptionButton" parent="Scroll/Summary/Pace"]
+[node name="Choices" type="HBoxContainer" parent="Scroll/Summary/Pace"]
 layout_mode = 2
-tooltip_text = "Cautious movement is slower and less visible. Fast movement increases speed and exposure."
+theme_override_constants/separation = 4
+
+[node name="Cautious" type="Button" parent="Scroll/Summary/Pace/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Cautious\nMove slowly with reduced visibility."
+toggle_mode = true
+button_group = SubResource("PaceGroup")
+icon = ExtResource("pace_cautious")
+icon_alignment = 1
+
+[node name="Normal" type="Button" parent="Scroll/Summary/Pace/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Normal\nMove at a normal pace with standard exposure."
+toggle_mode = true
+button_group = SubResource("PaceGroup")
+icon = ExtResource("pace_normal")
+icon_alignment = 1
+
+[node name="Fast" type="Button" parent="Scroll/Summary/Pace/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Fast\nMove quickly with increased exposure."
+toggle_mode = true
+button_group = SubResource("PaceGroup")
+icon = ExtResource("pace_fast")
+icon_alignment = 1
 
 [node name="FireDiscipline" type="VBoxContainer" parent="Scroll/Summary"]
 layout_mode = 2
@@ -156,9 +198,36 @@ layout_mode = 2
 text = "Fire discipline"
 size_flags_horizontal = 3
 
-[node name="Choice" type="OptionButton" parent="Scroll/Summary/FireDiscipline/Controls"]
+[node name="Choices" type="HBoxContainer" parent="Scroll/Summary/FireDiscipline/Controls"]
 layout_mode = 2
-tooltip_text = "Hold fire prevents automatic shooting, including personal defence. Return fire engages visible enemies within 30° of fire received in the last 8 seconds. Explicit Fire orders override the setting until completed or cancelled."
+theme_override_constants/separation = 4
+
+[node name="HoldFire" type="Button" parent="Scroll/Summary/FireDiscipline/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Hold fire\nObserve without automatic shooting, including personal defence. Explicit Fire orders override this setting until completed or cancelled."
+toggle_mode = true
+button_group = SubResource("FireDisciplineGroup")
+icon = ExtResource("fire_hold")
+icon_alignment = 1
+
+[node name="ReturnFire" type="Button" parent="Scroll/Summary/FireDiscipline/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Return fire\nEngage visible enemies within 30° of fire received in the last 8 seconds. Explicit Fire orders override this setting until completed or cancelled."
+toggle_mode = true
+button_group = SubResource("FireDisciplineGroup")
+icon = ExtResource("fire_return")
+icon_alignment = 1
+
+[node name="FireAtWill" type="Button" parent="Scroll/Summary/FireDiscipline/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Fire at will\nEngage visible enemies automatically."
+toggle_mode = true
+button_group = SubResource("FireDisciplineGroup")
+icon = ExtResource("fire_at_will")
+icon_alignment = 1
 
 [node name="Status" type="Label" parent="Scroll/Summary/FireDiscipline"]
 layout_mode = 2
@@ -174,13 +243,40 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="Scroll/Summary/Watch/Controls"]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Watch"
 tooltip_text = "Use Watch in the order wheel to assign a direction."
 
-[node name="Width" type="OptionButton" parent="Scroll/Summary/Watch/Controls"]
+[node name="Choices" type="HBoxContainer" parent="Scroll/Summary/Watch/Controls"]
 layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "Narrow sectors concentrate observation. Wide sectors cover more ground."
+theme_override_constants/separation = 4
+
+[node name="Narrow" type="Button" parent="Scroll/Summary/Watch/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Narrow · 60°\nConcentrate observation in a narrow sector. Use Watch in the order wheel to assign a direction."
+toggle_mode = true
+button_group = SubResource("WatchWidthGroup")
+icon = ExtResource("watch_narrow")
+icon_alignment = 1
+
+[node name="Normal" type="Button" parent="Scroll/Summary/Watch/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Normal · 120°\nBalance observation concentration and sector coverage. Use Watch in the order wheel to assign a direction."
+toggle_mode = true
+button_group = SubResource("WatchWidthGroup")
+icon = ExtResource("watch_normal")
+icon_alignment = 1
+
+[node name="Wide" type="Button" parent="Scroll/Summary/Watch/Controls/Choices"]
+custom_minimum_size = Vector2(40, 36)
+layout_mode = 2
+tooltip_text = "Wide · 180°\nCover a wider sector with less concentrated observation. Use Watch in the order wheel to assign a direction."
+toggle_mode = true
+button_group = SubResource("WatchWidthGroup")
+icon = ExtResource("watch_wide")
+icon_alignment = 1
 
 [node name="Automatic" type="Button" parent="Scroll/Summary/Watch/Controls"]
 layout_mode = 2

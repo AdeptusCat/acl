@@ -36,13 +36,25 @@ enum Entry { NAME, ROLE, RANK, WEAPON, TASK, PROGRESS_BAR }
 @onready var summary_scroll: ScrollContainer = $Scroll
 @onready var summary: VBoxContainer = $Scroll/Summary
 @onready var pace_row: HBoxContainer = $Scroll/Summary/Pace
-@onready var pace: OptionButton = $Scroll/Summary/Pace/Choice
+@onready var pace_buttons: Dictionary[int, Button] = {
+	UnitMovement.Stance.CROUCHED: $Scroll/Summary/Pace/Choices/Cautious,
+	UnitMovement.Stance.STANDING: $Scroll/Summary/Pace/Choices/Normal,
+	UnitMovement.Stance.RUNNING: $Scroll/Summary/Pace/Choices/Fast,
+}
 @onready var watch_row: VBoxContainer = $Scroll/Summary/Watch
-@onready var watch_width: OptionButton = $Scroll/Summary/Watch/Controls/Width
+@onready var watch_width_buttons: Dictionary[int, Button] = {
+	Unit.WatchWidth.NARROW: $Scroll/Summary/Watch/Controls/Choices/Narrow,
+	Unit.WatchWidth.NORMAL: $Scroll/Summary/Watch/Controls/Choices/Normal,
+	Unit.WatchWidth.WIDE: $Scroll/Summary/Watch/Controls/Choices/Wide,
+}
 @onready var watch_automatic: Button = $Scroll/Summary/Watch/Controls/Automatic
 @onready var watch_status: Label = $Scroll/Summary/Watch/Status
 @onready var fire_discipline_row: VBoxContainer = $Scroll/Summary/FireDiscipline
-@onready var fire_discipline: OptionButton = $Scroll/Summary/FireDiscipline/Controls/Choice
+@onready var fire_discipline_buttons: Dictionary[int, Button] = {
+	Unit.FireDiscipline.HOLD_FIRE: $Scroll/Summary/FireDiscipline/Controls/Choices/HoldFire,
+	Unit.FireDiscipline.RETURN_FIRE: $Scroll/Summary/FireDiscipline/Controls/Choices/ReturnFire,
+	Unit.FireDiscipline.FIRE_AT_WILL: $Scroll/Summary/FireDiscipline/Controls/Choices/FireAtWill,
+}
 @onready var fire_discipline_status: Label = $Scroll/Summary/FireDiscipline/Status
 @onready var spotting_section: FoldableContainer = $Scroll/Summary/Spotting
 @onready var spotting_target: OptionButton = $Scroll/Summary/Spotting/Content/Target
@@ -76,19 +88,13 @@ func _ready() -> void:
 	roster_section.folding_changed.connect(_on_roster_folding_changed)
 	debug_actions.visible = OS.is_debug_build()
 	Debug.enemy_selection_changed.connect(_on_enemy_selection_changed)
-	pace.add_item("Normal", UnitMovement.Stance.STANDING)
-	pace.add_item("Cautious", UnitMovement.Stance.CROUCHED)
-	pace.add_item("Fast", UnitMovement.Stance.RUNNING)
-	pace.item_selected.connect(_on_pace_selected)
-	watch_width.add_item("Narrow · 60°", Unit.WatchWidth.NARROW)
-	watch_width.add_item("Normal · 120°", Unit.WatchWidth.NORMAL)
-	watch_width.add_item("Wide · 180°", Unit.WatchWidth.WIDE)
-	watch_width.item_selected.connect(_on_watch_width_selected)
+	for stance: int in pace_buttons:
+		pace_buttons[stance].pressed.connect(_on_pace_selected.bind(stance))
+	for width: int in watch_width_buttons:
+		watch_width_buttons[width].pressed.connect(_on_watch_width_selected.bind(width))
 	watch_automatic.pressed.connect(_on_watch_automatic_pressed)
-	fire_discipline.add_item("Fire at will", Unit.FireDiscipline.FIRE_AT_WILL)
-	fire_discipline.add_item("Return fire", Unit.FireDiscipline.RETURN_FIRE)
-	fire_discipline.add_item("Hold fire", Unit.FireDiscipline.HOLD_FIRE)
-	fire_discipline.item_selected.connect(_on_fire_discipline_selected)
+	for discipline: int in fire_discipline_buttons:
+		fire_discipline_buttons[discipline].pressed.connect(_on_fire_discipline_selected.bind(discipline))
 	spotting_target.item_selected.connect(_on_spotting_target_selected)
 	spotting_section.folding_changed.connect(_on_spotting_folded)
 	rout_button.set_rout_available(false)
@@ -258,12 +264,10 @@ func _refresh_summary() -> void:
 		control.show()
 	_refresh_watch_controls()
 	_refresh_fire_discipline_controls()
+	_refresh_pace_controls()
 	observation_label.hide()
 	if strength_label.get_theme_font_size("font_size") != 26:
 		strength_label.add_theme_font_size_override("font_size", 26)
-	pace.disabled = not MatchInteractionHandler.can_command_unit(unit)
-	if is_instance_valid(unit.movement):
-		pace.select(maxi(0, pace.get_item_index(unit.movement.stance)))
 	debug_actions.visible = OS.is_debug_build() and MatchInteractionHandler.can_command_unit(unit)
 	unit_type_label.text = unit.get_hud_name()
 	unit_type_label.tooltip_text = unit_type_label.text + "\nOriginal unit: " + unit.get_squad_name()
@@ -320,9 +324,19 @@ func _refresh_enemy_summary() -> void:
 	debug_actions.hide()
 
 
-func _on_pace_selected(index: int) -> void:
+func _refresh_pace_controls() -> void:
+	var allowed: bool = MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement)
+	for stance: int in pace_buttons:
+		var button: Button = pace_buttons[stance]
+		button.disabled = not allowed
+		button.set_pressed_no_signal(is_instance_valid(unit.movement) and unit.movement.stance == stance)
+
+
+func _on_pace_selected(stance: UnitMovement.Stance) -> void:
 	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement):
-		unit.movement.stance = pace.get_item_id(index) as UnitMovement.Stance
+		unit.movement.stance = stance
+	if is_instance_valid(unit):
+		_refresh_pace_controls()
 
 
 func _can_change_tactical_settings() -> bool:
@@ -334,9 +348,11 @@ func _can_change_tactical_settings() -> bool:
 
 func _refresh_watch_controls() -> void:
 	var allowed: bool = _can_change_tactical_settings()
-	watch_width.disabled = not allowed
+	for width: int in watch_width_buttons:
+		var button: Button = watch_width_buttons[width]
+		button.disabled = not allowed
+		button.set_pressed_no_signal(unit.watch_width == width)
 	watch_automatic.disabled = not allowed or not unit.has_watch_order()
-	watch_width.select(watch_width.get_item_index(unit.watch_width))
 	watch_status.text = "Automatic attention"
 	if unit.has_watch_order():
 		watch_status.text = "Watching assigned sector"
@@ -346,11 +362,11 @@ func _refresh_watch_controls() -> void:
 			watch_status.text = "Moving · reduced watch"
 
 
-func _on_watch_width_selected(index: int) -> void:
+func _on_watch_width_selected(width: Unit.WatchWidth) -> void:
 	if not is_instance_valid(unit):
 		return
 	if _can_change_tactical_settings():
-		unit.set_watch_width(watch_width.get_item_id(index) as Unit.WatchWidth)
+		unit.set_watch_width(width)
 	_refresh_summary()
 
 
@@ -363,8 +379,11 @@ func _on_watch_automatic_pressed() -> void:
 
 
 func _refresh_fire_discipline_controls() -> void:
-	fire_discipline.disabled = not _can_change_tactical_settings()
-	fire_discipline.select(fire_discipline.get_item_index(unit.fire_discipline))
+	var allowed: bool = _can_change_tactical_settings()
+	for discipline: int in fire_discipline_buttons:
+		var button: Button = fire_discipline_buttons[discipline]
+		button.disabled = not allowed
+		button.set_pressed_no_signal(unit.fire_discipline == discipline)
 	fire_discipline_status.text = "Engage visible enemies automatically"
 	match unit.fire_discipline:
 		Unit.FireDiscipline.RETURN_FIRE:
@@ -375,11 +394,11 @@ func _refresh_fire_discipline_controls() -> void:
 		fire_discipline_status.text = "Explicit Fire order overrides discipline"
 
 
-func _on_fire_discipline_selected(index: int) -> void:
+func _on_fire_discipline_selected(discipline: Unit.FireDiscipline) -> void:
 	if not is_instance_valid(unit):
 		return
 	if _can_change_tactical_settings():
-		unit.set_fire_discipline(fire_discipline.get_item_id(index) as Unit.FireDiscipline)
+		unit.set_fire_discipline(discipline)
 	_refresh_summary()
 
 
