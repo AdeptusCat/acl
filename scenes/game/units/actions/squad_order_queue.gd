@@ -1,7 +1,7 @@
 class_name SquadOrderQueue
 extends Node
 
-enum Kind { MOVE, WATCH, HOLD, WAIT }
+enum Kind { MOVE, WATCH, HOLD }
 
 var unit: Unit
 var current: Dictionary = {}
@@ -23,20 +23,17 @@ func can_append(kind: Kind) -> bool:
 		last = pending.back()
 	if not last.is_empty() and int(last["kind"]) in [Kind.WATCH, Kind.HOLD]:
 		return false
-	return kind in [Kind.MOVE, Kind.WATCH, Kind.HOLD, Kind.WAIT]
+	return kind in [Kind.MOVE, Kind.WATCH, Kind.HOLD]
 
 
-func append(kind: Kind, target: Vector2i = Vector2i.ZERO, group: CoordinatedOrderGroup = null) -> bool:
-	if not can_append(kind) or (kind == Kind.WAIT and group == null):
+func append(kind: Kind, target: Vector2i = Vector2i.ZERO) -> bool:
+	if not can_append(kind):
 		return false
 	# Adopt an existing move when Shift is first used partway through a route.
 	if current.is_empty() and unit.movement.is_moving:
 		current = {"kind": Kind.MOVE, "target": unit.movement.target_hex}
 		_order_id = unit.action_controller.action_order_id
 	var entry: Dictionary = {"kind": kind, "target": target}
-	if group != null:
-		entry["group"] = group
-		group.add_member(self)
 	pending.append(entry)
 	set_process(true)
 	return true
@@ -93,17 +90,6 @@ func planned_origin() -> Vector2i:
 	return origin
 
 
-func contains_group(group: CoordinatedOrderGroup) -> bool:
-	for entry: Dictionary in entries():
-		if entry.get("group") == group:
-			return true
-	return false
-
-
-func waiting_for(group: CoordinatedOrderGroup) -> bool:
-	return available() and unit.stress_system.state != STATES.MoraleState.PINNED and not unit.movement.is_moving and failure.is_empty() and current.get("group") == group
-
-
 static func describe(entry: Dictionary) -> String:
 	var target: Vector2i = entry["target"]
 	match int(entry["kind"]):
@@ -113,10 +99,7 @@ static func describe(entry: Dictionary) -> String:
 			return "Watch toward (%d, %d)" % [target.x, target.y]
 		Kind.HOLD:
 			return "Hold position"
-	var group: CoordinatedOrderGroup = entry.get("group")
-	if group != null:
-		return "Wait for group G%d" % group.number
-	return "Wait for group"
+	return "Unknown order"
 
 
 func status_text() -> String:
@@ -126,12 +109,6 @@ func status_text() -> String:
 		return failure
 	if current.is_empty():
 		return "Orders pending"
-	if int(current["kind"]) == Kind.WAIT:
-		var group: CoordinatedOrderGroup = current["group"]
-		var state: Dictionary = group.status()
-		if not group.armed:
-			return "G%d · Planning: %d of %d ready. Start group when orders are set." % [group.number, state["ready"], state["total"]]
-		return "G%d · Waiting: %d of %d squads ready" % [group.number, state["ready"], state["total"]]
 	return describe(current)
 
 
@@ -160,10 +137,6 @@ func _process(_delta: float) -> void:
 			else:
 				# Pinning clears the live path; resume the same order after recovery.
 				_start_current()
-		Kind.WAIT:
-			var group: CoordinatedOrderGroup = current["group"]
-			if not unit.movement.is_moving and group.try_release():
-				current = {}
 
 
 func _start_current() -> void:
@@ -183,7 +156,7 @@ func _start_current() -> void:
 			var target_position: Vector2 = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(target))
 			if not unit.set_watch_direction(target_position - unit.global_position):
 				failure = "Cannot watch toward this hex; remove this order to continue."
-		Kind.HOLD, Kind.WAIT:
+		Kind.HOLD:
 			_hold_position()
 	_order_id = unit.action_controller.action_order_id
 	issuing = false

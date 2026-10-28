@@ -28,6 +28,18 @@ class ControllerProbe extends Node2D:
 			unit.deselect()
 			selected_unit = null
 
+	func get_selected_units() -> Array[Unit]:
+		var members: Array[Unit] = []
+		if is_instance_valid(selected_unit):
+			members.append(selected_unit)
+		return members
+
+	func set_selected_units(members: Array[Unit]) -> void:
+		if is_instance_valid(selected_unit):
+			_deselect_unit(selected_unit)
+		if not members.is_empty():
+			_select_unit(members.back())
+
 	func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
 		return stacks.cycle_selection(cell, picked)
 

@@ -37,7 +37,6 @@ func _run() -> void:
 	onward = _neighbor(destination, origin)
 	_test_sequence()
 	_test_interruptions()
-	_test_group()
 	await _test_controls(world)
 	main.queue_free()
 	await get_tree().process_frame
@@ -149,68 +148,6 @@ func _test_interruptions() -> void:
 	first.in_close_combat = false
 
 
-func _test_group() -> void:
-	_reset(first, origin)
-	_reset(second, onward)
-	var a: SquadOrderQueue = first.action_controller.order_queue
-	var b: SquadOrderQueue = second.action_controller.order_queue
-	var group: CoordinatedOrderGroup = CoordinatedOrderGroup.new()
-	group.armed = true
-	a.append(SquadOrderQueue.Kind.WAIT, Vector2i.ZERO, group)
-	b.append(SquadOrderQueue.Kind.MOVE, destination)
-	b.append(SquadOrderQueue.Kind.WAIT, Vector2i.ZERO, group)
-	a.append(SquadOrderQueue.Kind.MOVE, destination)
-	b.append(SquadOrderQueue.Kind.MOVE, origin)
-	a._process(0.0)
-	b._process(0.0)
-	a._process(0.0)
-	_check(a.waiting_for(group) and not group.released and group.status()["ready"] == 1, "The first squad waits while the second is approaching")
-	_finish(second)
-	b._process(0.0)
-	second.stress_system.state = STATES.MoraleState.PINNED
-	a._process(0.0)
-	_check(not group.released and a.status_text().contains("1 of 2"), "A pinned member blocks coordinated release and reports readiness")
-	second.stress_system.state = STATES.MoraleState.NORMAL
-	a._process(0.0)
-	b._process(0.0)
-	_check(group.released and a.current.is_empty() and b.current.is_empty(), "All ready squads pass the shared wait together")
-	a._process(0.0)
-	b._process(0.0)
-	_check(first.movement.is_moving and second.movement.is_moving, "Both squads begin their independent following moves")
-	for disposition: String in ["cancel", "remove", "exit", "surrender", "death", "rout", "close_combat", "freed"]:
-		_reset(first, origin)
-		_reset(second, onward)
-		group = CoordinatedOrderGroup.new()
-		group.armed = true
-		a.append(SquadOrderQueue.Kind.WAIT, Vector2i.ZERO, group)
-		b.append(SquadOrderQueue.Kind.WAIT, Vector2i.ZERO, group)
-		a._process(0.0)
-		match disposition:
-			"cancel":
-				second.clear_orders()
-			"remove":
-				b.remove(0)
-			"exit":
-				second.exited = true
-			"surrender":
-				second.surrendered = true
-			"death":
-				second.alive = false
-			"rout":
-				second.broken = true
-			"close_combat":
-				second.in_close_combat = true
-			"freed":
-				var gone: SquadOrderQueue = SquadOrderQueue.new()
-				group.add_member(gone)
-				gone.free()
-				second.clear_orders()
-		a._process(0.0)
-		_check(group.released, "Unavailable group members cannot deadlock the wait: " + disposition)
-	_reset(first, origin)
-	_reset(second, onward)
-
-
 func _test_controls(world: Node) -> void:
 	controller.select_and_center_unit(first)
 	var details: PanelContainer = world.ui.unit_details
@@ -231,20 +168,8 @@ func _test_controls(world: Node) -> void:
 	Input.flush_buffered_events()
 	details._refresh_order_controls()
 	_check(details._order_rows.get_child_count() == 1, "The panel displays numbered queued orders")
-	details._on_group_toggle()
-	details.show_unit_detail(second, false)
-	details._on_group_toggle()
-	_check(not details._group_wait.disabled, "Selecting squads individually builds a coordination group")
-	details._on_group_wait()
-	var last_a: Dictionary = first.action_controller.order_queue.pending.back()
-	var last_b: Dictionary = second.action_controller.order_queue.pending.back()
-	_check(last_a["group"] == last_b["group"], "The panel appends the same shared wait to both squads")
-	var group: CoordinatedOrderGroup = last_a["group"]
-	_check(not group.try_release(), "An unstarted group cannot release while the player is still planning")
 	details._on_queue_hold()
-	_check(second.action_controller.order_queue.pending.back()["kind"] == SquadOrderQueue.Kind.HOLD, "The panel can append final Hold")
-	details._on_start_group()
-	_check(group.armed, "Starting the group arms its shared wait for every member")
+	_check(first.action_controller.order_queue.pending.back()["kind"] == SquadOrderQueue.Kind.HOLD, "The panel can append final Hold")
 	if OS.get_cmdline_user_args().has("--capture"):
 		get_tree().root.size = Vector2i(1152, 648)
 		details._orders_section.folded = false

@@ -305,19 +305,14 @@ func _draw_queued_orders() -> void:
 			var point: Vector2 = previous
 			if kind in [SquadOrderQueue.Kind.MOVE, SquadOrderQueue.Kind.WATCH]:
 				point = to_local(ground.to_global(ground.map_to_local(entry["target"])))
-			var group: CoordinatedOrderGroup = entry.get("group")
-			if unit.selected or group != null:
+			if unit.selected:
 				var color: Color = Color(1.0, 0.87, 0.24)
-				if group != null:
-					color = Color(0.45, 0.85, 1.0)
 				if point.distance_to(previous) > 0.1 and (index > 0 or queue.current.is_empty() or kind == SquadOrderQueue.Kind.WATCH):
 					draw_dashed_line(previous, point, color, 2.0, 8.0, true)
 				var marker: Vector2 = point
-				if kind in [SquadOrderQueue.Kind.WAIT, SquadOrderQueue.Kind.HOLD]:
+				if kind == SquadOrderQueue.Kind.HOLD:
 					marker += Vector2(0.0, -28.0)
 				var text: String = str(index + 1)
-				if group != null:
-					text = "G%d" % group.number
 				draw_circle(marker, 16.0, Color(0.05, 0.08, 0.05, 0.95))
 				draw_arc(marker, 16.0, 0.0, TAU, 32, color, 2.0, true)
 				draw_string(font, marker + Vector2(-font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x * 0.5, 5.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, color)

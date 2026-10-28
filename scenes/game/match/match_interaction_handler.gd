@@ -13,11 +13,20 @@ static func command_name(option: WheelOption.Option) -> String:
 
 
 static func command_restriction(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> String:
+	if controller.has_method("get_selected_units"):
+		var members: Array[Unit] = controller.get_selected_units()
+		if members.size() > 1:
+			for member: Unit in members:
+				if _unit_command_restriction(controller, map_hex, option, member).is_empty():
+					return ""
+	return _unit_command_restriction(controller, map_hex, option, controller.selected_unit)
+
+
+static func _unit_command_restriction(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option, unit: Unit) -> String:
 	if option == WheelOption.Option.NONE:
 		return ""
 	if controller.end_game_handled and not controller.continuing_after_end:
 		return "The mission has ended."
-	var unit: Unit = controller.selected_unit
 	if not is_instance_valid(unit) or not unit.is_active():
 		return "Select an active squad."
 	if not can_command_unit(unit):
@@ -37,6 +46,8 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 	var order_origin: Vector2i = unit.current_hex
 	if Input.is_key_pressed(KEY_SHIFT) and unit.action_controller.order_queue != null:
 		order_origin = unit.action_controller.order_queue.planned_origin()
+		if option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.WATCH] and not unit.action_controller.order_queue.can_append(SquadOrderQueue.Kind.MOVE):
+			return "Remove the final Watch or Hold order before appending another order."
 	match option:
 		WheelOption.Option.WATCH:
 			if not unit.get_watch_restriction().is_empty():
@@ -62,7 +73,7 @@ static func command_restriction(controller: Node2D, map_hex: Vector2i, option: W
 				return "This squad cannot fire."
 			if InfluenceUnitQuery.get_unit_firepower(unit) <= 0.0:
 				return "No usable weapons or ammunition."
-			var data: Dictionary = target_feedback(controller, map_hex)
+			var data: Dictionary = unit_target_feedback(unit, map_hex)
 			if not bool(data["in_range"]):
 				return "Out of range."
 			if not bool(data["sight_clear"]) and not bool(data["indirect"]):
@@ -101,12 +112,35 @@ static func unit_target_feedback(unit: Unit, target: Vector2i) -> Dictionary:
 static func order_via_option_wheel(controller: Node2D, map_hex: Vector2i, option: WheelOption.Option) -> bool:
 	if option == WheelOption.Option.NONE:
 		return false
-	var reason: String = command_restriction(controller, map_hex, option)
+	var members: Array[Unit] = []
+	if controller.has_method("get_selected_units"):
+		members = controller.get_selected_units()
+	if members.size() <= 1:
+		return _order_for_unit(controller, controller.selected_unit, map_hex, option)
+	var accepted: int = 0
+	var reasons: PackedStringArray = []
+	for member: Unit in members:
+		var reason: String = _unit_command_restriction(controller, map_hex, option, member)
+		if not reason.is_empty():
+			reasons.append(member.get_hud_name() + ": " + reason)
+			continue
+		if _order_for_unit(controller, member, map_hex, option):
+			accepted += 1
+	var explanation: String = "%d of %d squads" % [accepted, members.size()]
+	if not reasons.is_empty():
+		explanation += ". " + "; ".join(reasons)
+	controller.order_feedback.emit(accepted > 0, command_name(option), explanation)
+	return accepted > 0
+
+
+static func _order_for_unit(controller: Node2D, unit: Unit, map_hex: Vector2i, option: WheelOption.Option) -> bool:
+	if option == WheelOption.Option.NONE:
+		return false
+	var reason: String = _unit_command_restriction(controller, map_hex, option, unit)
 	var command: String = command_name(option)
 	if not reason.is_empty():
 		controller.order_feedback.emit(false, command, reason)
 		return false
-	var unit: Unit = controller.selected_unit
 	var glow_hex: Vector2i = map_hex
 	if Input.is_key_pressed(KEY_SHIFT) and option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.WATCH]:
 		var kind: SquadOrderQueue.Kind = SquadOrderQueue.Kind.MOVE
@@ -199,13 +233,18 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 			if candidate.current_hex == stack_hex:
 				units.append(candidate)
 				friendly_only = false
+	if Input.is_key_pressed(KEY_SHIFT):
+		if picked != null and picked.team == Globals.team_player:
+			controller.toggle_unit_selection(picked)
+		elif friendly_only and not units.is_empty():
+			controller.toggle_unit_selection(units[0])
+		return
 	if friendly_only and units.size() > 1 and controller.has_method("cycle_stack_selection"):
 		if controller.cycle_stack_selection(stack_hex, picked):
 			return
 	if units.is_empty():
-		if is_instance_valid(controller.selected_unit):
-			controller._deselect_unit(controller.selected_unit)
-			controller.hide_unit_details_in_ui.emit()
+		var empty: Array[Unit] = []
+		controller.set_selected_units(empty)
 		controller.previous_selected_hex = stack_hex
 		controller.selected_hex_index = 0
 		return
@@ -216,7 +255,7 @@ static func on_mouse_button_left_pressed(controller: Node2D, event_pos: Vector2)
 		controller.selected_hex_index = maxi(0, units.find(picked))
 	controller.previous_selected_hex = stack_hex
 	var unit: Unit = units[controller.selected_hex_index]
-	if unit != controller.selected_unit:
+	if unit != controller.selected_unit or controller.get_selected_units().size() > 1:
 		controller._select_unit(unit)
 	controller.show_unit_details_in_ui.emit(unit)
 	LOSHelper.clear_los()
@@ -296,21 +335,14 @@ static func select_unit(controller: Node2D, unit: Unit) -> void:
 		return
 	if unit.team != Globals.team_player and (unit.surrendered or not unit.is_visible_in_tree()):
 		return
-	controller.influence_map_controller.clear_inspection_queries()
-	if controller.selected_unit:
-		controller.selected_unit.deselect()
-	controller.selected_unit = unit
-	unit.select()
-	controller.influence_map_debug_draw.set_selected_unit(unit)
+	var members: Array[Unit] = [unit]
+	controller.set_selected_units(members, false)
 
 
 static func deselect_unit(controller: Node2D, unit: Unit) -> void:
-	if controller.selected_unit == unit:
-		controller.influence_map_controller.clear_inspection_queries()
-		controller.selected_unit.deselect()
-		controller.selected_unit = null
-		LOSHelper.clear_los()
-		controller.influence_map_debug_draw.set_selected_unit(null)
+	var members: Array[Unit] = controller.get_selected_units()
+	members.erase(unit)
+	controller.set_selected_units(members)
 
 
 static func get_position_advice(unit: Unit, controller: Node2D) -> PositionResult:

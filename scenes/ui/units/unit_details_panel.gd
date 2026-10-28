@@ -60,11 +60,6 @@ var _orders_section: FoldableContainer
 var _order_rows: VBoxContainer
 var _queue_status: Label
 var _queue_hold: Button
-var _group_toggle: Button
-var _group_wait: Button
-var _group_start: Button
-var _group_members_label: Label
-var _coordination_members: Array[WeakRef] = []
 var _order_signature: String = ""
 
 
@@ -277,6 +272,12 @@ func _refresh_summary() -> void:
 	unit_type_label.text = unit.get_hud_name()
 	unit_type_label.tooltip_text = unit_type_label.text
 	formation_label.text = unit.get_formation_name()
+	var selected_count: int = 0
+	for member: Unit in Globals.get_units_for_team(Globals.team_player):
+		if member.selected and member.is_active():
+			selected_count += 1
+	if selected_count > 1:
+		formation_label.text = "%d squads selected · %s" % [selected_count, formation_label.text]
 	formation_label.tooltip_text = formation_label.text
 	_refresh_command_summary()
 	var remaining: int = unit.squad_fire.soldiers.size()
@@ -671,35 +672,6 @@ func _setup_order_controls() -> void:
 	_queue_hold.text = "Queue Hold position"
 	_queue_hold.pressed.connect(_on_queue_hold)
 	content.add_child(_queue_hold)
-	_group_toggle = Button.new()
-	_group_toggle.pressed.connect(_on_group_toggle)
-	content.add_child(_group_toggle)
-	_group_members_label = Label.new()
-	_group_members_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(_group_members_label)
-	_group_wait = Button.new()
-	_group_wait.pressed.connect(_on_group_wait)
-	content.add_child(_group_wait)
-	_group_start = Button.new()
-	_group_start.pressed.connect(_on_start_group)
-	content.add_child(_group_start)
-	var clear_group: Button = Button.new()
-	clear_group.text = "Clear group selection"
-	clear_group.pressed.connect(_on_clear_coordination)
-	content.add_child(clear_group)
-
-
-func _selected_coordination_members() -> Array[Unit]:
-	var result: Array[Unit] = []
-	var valid_references: Array[WeakRef] = []
-	for reference: WeakRef in _coordination_members:
-		var member: Unit = reference.get_ref() as Unit
-		if member == null or not MatchInteractionHandler.can_command_unit(member) or not member.action_controller.order_queue.available():
-			continue
-		result.append(member)
-		valid_references.append(reference)
-	_coordination_members = valid_references
-	return result
 
 
 func _refresh_order_controls() -> void:
@@ -712,10 +684,6 @@ func _refresh_order_controls() -> void:
 	if not entries.is_empty():
 		_queue_status.text = queue.status_text()
 	_queue_status.tooltip_text = _queue_status.text
-	if queue.current.get("kind", -1) == SquadOrderQueue.Kind.WAIT:
-		var group: CoordinatedOrderGroup = queue.current["group"]
-		var state: Dictionary = group.status()
-		_queue_status.tooltip_text = "\n".join(state["blockers"])
 	var signature: String = str(unit.get_instance_id()) + ":" + str(not queue.current.is_empty())
 	for entry: Dictionary in entries:
 		signature += "|" + SquadOrderQueue.describe(entry)
@@ -740,28 +708,9 @@ func _refresh_order_controls() -> void:
 			remove_order.pressed.connect(_on_remove_queued_order.bind(unit, index))
 			row.add_child(remove_order)
 	_queue_hold.disabled = not queue.can_append(SquadOrderQueue.Kind.HOLD)
-	var members: Array[Unit] = _selected_coordination_members()
-	_group_toggle.text = "Add squad to group"
-	if unit in members:
-		_group_toggle.text = "Remove squad from group"
-	_group_toggle.disabled = not queue.available()
-	var names: PackedStringArray = []
-	var can_wait: bool = members.size() >= 2
-	for member: Unit in members:
-		names.append(member.get_hud_name())
-		if member.team != unit.team or not member.action_controller.order_queue.can_append(SquadOrderQueue.Kind.WAIT):
-			can_wait = false
-	_group_members_label.text = "Group: " + ", ".join(names)
-	_group_members_label.visible = not names.is_empty()
-	_group_wait.text = "Queue group wait (%d squads)" % members.size()
-	_group_wait.disabled = not can_wait
-	_group_start.hide()
-	for entry: Dictionary in entries:
-		var planned_group: CoordinatedOrderGroup = entry.get("group")
-		if planned_group != null and not planned_group.armed:
-			_group_start.text = "Start group G%d when ready" % planned_group.number
-			_group_start.show()
-			break
+	for member: Unit in Globals.get_units_for_team(Globals.team_player):
+		if member.selected and member.action_controller.order_queue.can_append(SquadOrderQueue.Kind.HOLD):
+			_queue_hold.disabled = false
 
 
 func _on_remove_queued_order(owner: Unit, index: int) -> void:
@@ -772,50 +721,12 @@ func _on_remove_queued_order(owner: Unit, index: int) -> void:
 
 func _on_queue_hold() -> void:
 	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit):
-		unit.action_controller.order_queue.append(SquadOrderQueue.Kind.HOLD)
+		var members: Array[Unit] = []
+		for member: Unit in Globals.get_units_for_team(unit.team):
+			if member.selected:
+				members.append(member)
+		if members.is_empty():
+			members.append(unit)
+		for member: Unit in members:
+			member.action_controller.order_queue.append(SquadOrderQueue.Kind.HOLD)
 		_refresh_order_controls()
-
-
-func _on_group_toggle() -> void:
-	var members: Array[Unit] = _selected_coordination_members()
-	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit):
-		return
-	if unit in members:
-		for index: int in range(_coordination_members.size() - 1, -1, -1):
-			if _coordination_members[index].get_ref() == unit:
-				_coordination_members.remove_at(index)
-	else:
-		_coordination_members.append(weakref(unit))
-	_refresh_order_controls()
-
-
-func _on_group_wait() -> void:
-	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit):
-		return
-	var members: Array[Unit] = _selected_coordination_members()
-	if members.size() < 2:
-		return
-	for member: Unit in members:
-		if member.team != unit.team or not member.action_controller.order_queue.can_append(SquadOrderQueue.Kind.WAIT):
-			return
-	var group: CoordinatedOrderGroup = CoordinatedOrderGroup.new()
-	for member: Unit in members:
-		member.action_controller.order_queue.append(SquadOrderQueue.Kind.WAIT, Vector2i.ZERO, group)
-	_coordination_members.clear()
-	_refresh_order_controls()
-
-
-func _on_clear_coordination() -> void:
-	_coordination_members.clear()
-	_refresh_order_controls()
-
-
-func _on_start_group() -> void:
-	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit):
-		return
-	for entry: Dictionary in unit.action_controller.order_queue.entries():
-		var group: CoordinatedOrderGroup = entry.get("group")
-		if group != null and not group.armed:
-			group.armed = true
-			break
-	_refresh_order_controls()

@@ -157,6 +157,11 @@ func _on_roster_selection(_unit: Unit) -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and game_controller._selection_pressed:
+		game_controller.cancel_selection_drag(true)
+		clear_hex_inspection()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_cancel") and has_inspected_hex:
 		clear_hex_inspection()
 		get_viewport().set_input_as_handled()
@@ -271,6 +276,7 @@ func _on_game_started(map: Map, scenario: Scenario, team : int, game_mode: Globa
 		return
 	is_setup = true
 	input_manager.set_battle_input_enabled(false)
+	game_controller.cancel_selection_drag()
 	await LoadingScreen.show_loading("Loading battlefield...")
 	Globals.begin_battle()
 	
@@ -386,6 +392,7 @@ func _on_battle_results_requested() -> void:
 		return
 	ui.selection_wheel_alt.cancel()
 	input_manager.set_battle_input_enabled(false)
+	game_controller.cancel_selection_drag()
 	clear_hex_inspection()
 	ui.hide_target_hex_cover_distance()
 	ui.hide_order_feedback()
@@ -396,6 +403,7 @@ func _on_battle_results_requested() -> void:
 
 var selected_map_hex: Vector2i
 var _command_unit: Unit
+var _command_selection_revision: int = -1
 
 func _on_input_manager_right_button_pressed() -> void:
 	if not is_setup or (game_controller.end_game_handled and not game_controller.continuing_after_end) or not is_instance_valid(game_controller.selected_unit):
@@ -410,6 +418,7 @@ func _on_input_manager_right_button_pressed() -> void:
 	if not MatchInteractionHandler.can_command_unit(game_controller.selected_unit):
 		return
 	_command_unit = game_controller.selected_unit
+	_command_selection_revision = game_controller.selection_revision
 	ui.hide_target_hex_cover_distance()
 	ui.hide_order_feedback()
 	LOSHelper.clear_los()
@@ -417,7 +426,7 @@ func _on_input_manager_right_button_pressed() -> void:
 
 
 func _wheel_restriction(option: WheelOption.Option) -> String:
-	if not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit:
+	if not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit or _command_selection_revision != game_controller.selection_revision:
 		return "Squad selection changed. Open the wheel again."
 	return MatchInteractionHandler.command_restriction(game_controller, selected_map_hex, option)
 
@@ -429,7 +438,7 @@ func _on_input_manager_right_button_released() -> void:
 	var option: WheelOption.Option = ui.selection_wheel_alt.close()
 	if option == WheelOption.Option.NONE:
 		ui.show_order_cancelled()
-	elif not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit:
+	elif not is_instance_valid(_command_unit) or _command_unit != game_controller.selected_unit or _command_selection_revision != game_controller.selection_revision:
 		game_controller.order_feedback.emit(false, MatchInteractionHandler.command_name(option), "Squad selection changed. Open the wheel again.")
 	else:
 		game_controller.order_via_option_wheel(selected_map_hex, option)
@@ -445,6 +454,7 @@ func _on_game_controller_show_winner(winner_team: int, outcome_level: VictoryCon
 	ui.set_battle_results_available(false)
 	ui.selection_wheel_alt.cancel()
 	input_manager.set_battle_input_enabled(false)
+	game_controller.cancel_selection_drag()
 	clear_hex_inspection()
 	ui.hide_target_hex_cover_distance()
 	var match_save: MatchSaveData = MatchSaveData.new()

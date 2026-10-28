@@ -34,6 +34,14 @@ var overtime_packages: Array[VictoryConditionCollection] = []
 var _visibility_elapsed_seconds: float = 0.0
 
 var selected_unit: Unit = null
+var selected_units: Array[Unit] = []
+var selection_revision: int = 0
+var _selection_pressed: bool = false
+var _selection_dragging: bool = false
+var _selection_start: Vector2
+var _selection_end: Vector2
+var _selection_additive: bool = false
+var _selection_before_drag: Array[Unit] = []
 var stack_presenter: BattlefieldStacks
 var reinforcements: MatchReinforcementController
 var fire_support: FireSupportController
@@ -64,6 +72,10 @@ func draw_points(_point_array: Array[Vector2]) -> void:
 	point_array = _point_array
 	queue_redraw()
 func _draw() -> void:
+	if _selection_dragging:
+		var rect: Rect2 = get_global_transform_with_canvas().affine_inverse() * Rect2(_selection_start, _selection_end - _selection_start).abs()
+		draw_rect(rect, Color(0.45, 0.85, 1.0, 0.15))
+		draw_rect(rect, Color(0.45, 0.85, 1.0), false, 2.0 / maxf(get_global_transform_with_canvas().get_scale().x, 0.01))
 	#for point in point_array:
 		##draw_line(point, point, Color(1, 0, 0), 2.0)
 		#draw_circle(point, 5.0, Color.RED)
@@ -318,7 +330,43 @@ func _on_mouse_button_left_pressed(event_pos: Vector2) -> void:
 	if fire_support != null and fire_support.choosing_target:
 		fire_support.begin_target(event_pos, Input.is_key_pressed(KEY_SHIFT))
 		return
+	_selection_pressed = true
+	_selection_dragging = false
+	_selection_start = event_pos
+	_selection_end = event_pos
+	_selection_additive = Input.is_key_pressed(KEY_SHIFT)
+	_selection_before_drag = get_selected_units()
 	MatchInteractionHandler.on_mouse_button_left_pressed(self, event_pos)
+
+
+func _on_mouse_button_left_released(event_pos: Vector2) -> void:
+	if not _selection_pressed:
+		return
+	_on_mouse_event_position_changed(event_pos)
+	_selection_pressed = false
+	if _selection_dragging and (not end_game_handled or continuing_after_end):
+		var rect: Rect2 = Rect2(_selection_start, event_pos - _selection_start).abs()
+		var members: Array[Unit] = []
+		if _selection_additive:
+			for member: Unit in _selection_before_drag:
+				if is_instance_valid(member) and member.is_active() and member.team == Globals.team_player:
+					members.append(member)
+		for unit: Unit in Globals.get_units_for_team(Globals.team_player):
+			if BattlefieldStacks._can_show_unit(unit) and rect.intersects(BattlefieldStacks.counter_rect(unit)) and not members.has(unit):
+				members.append(unit)
+		set_selected_units(members)
+	_selection_dragging = false
+	_selection_before_drag.clear()
+	queue_redraw()
+
+
+func cancel_selection_drag(restore_selection: bool = false) -> void:
+	if restore_selection and _selection_pressed:
+		set_selected_units(_selection_before_drag)
+	_selection_pressed = false
+	_selection_dragging = false
+	_selection_before_drag.clear()
+	queue_redraw()
 
 
 var origin_hex: Variant
@@ -327,6 +375,11 @@ var targetCover: int
 var distance: int
 var firepower: float
 func _on_mouse_event_position_changed(_event_pos: Vector2) -> void:
+	if _selection_pressed:
+		_selection_end = _event_pos
+		if _selection_start.distance_to(_event_pos) >= 8.0:
+			_selection_dragging = true
+		queue_redraw()
 	return
 	#mouse_event_position_changed.emit(event_pos)
 	#if selected_unit:
@@ -386,7 +439,58 @@ func _on_key_space_pressed(_event_pos: Vector2) -> void:
 
 func _select_unit(unit: Unit) -> void:
 	MatchInteractionHandler.select_unit(self, unit)
+
+
+func get_selected_units() -> Array[Unit]:
+	var members: Array[Unit] = []
+	for unit: Unit in selected_units:
+		if is_instance_valid(unit) and unit.is_active() and not unit.is_queued_for_deletion():
+			members.append(unit)
+	return members
+
+
+func set_selected_units(members: Array[Unit], show_details: bool = true) -> void:
+	var valid: Array[Unit] = []
+	for unit: Unit in members:
+		if not is_instance_valid(unit) or not unit.is_active() or unit.is_queued_for_deletion() or valid.has(unit):
+			continue
+		if unit.team != Globals.team_player:
+			if unit.surrendered or not unit.is_visible_in_tree() or members.size() > 1:
+				continue
+		valid.append(unit)
+	if selected_units != valid:
+		selection_revision += 1
+	for unit: Unit in selected_units:
+		if is_instance_valid(unit) and not valid.has(unit):
+			unit.deselect()
+	selected_units = valid
+	selected_unit = null
+	for unit: Unit in selected_units:
+		unit.select()
+		selected_unit = unit
+	influence_map_controller.clear_inspection_queries()
+	influence_map_debug_draw.set_selected_unit(selected_unit)
+	LOSHelper.clear_los()
 	show_visible_units()
+	if show_details:
+		if selected_unit != null:
+			show_unit_details_in_ui.emit(selected_unit)
+		else:
+			hide_unit_details_in_ui.emit()
+
+
+func toggle_unit_selection(unit: Unit) -> void:
+	if not is_instance_valid(unit) or not unit.is_active() or unit.team != Globals.team_player:
+		return
+	var members: Array[Unit] = []
+	for selected: Unit in get_selected_units():
+		if selected.team == Globals.team_player:
+			members.append(selected)
+	if members.has(unit):
+		members.erase(unit)
+	else:
+		members.append(unit)
+	set_selected_units(members)
 
 
 func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
@@ -398,6 +502,9 @@ func cycle_stack_selection(cell: Vector2i, picked: Unit) -> bool:
 func select_and_center_unit(unit: Unit) -> void:
 	if not is_instance_valid(unit) or not unit.is_active() or unit.is_queued_for_deletion() or unit.team != Globals.team_player:
 		return
+	if Input.is_key_pressed(KEY_SHIFT):
+		toggle_unit_selection(unit)
+		return
 	_select_unit(unit)
 	show_unit_details_in_ui.emit(unit)
 	LOSHelper.clear_los()
@@ -406,7 +513,6 @@ func select_and_center_unit(unit: Unit) -> void:
 
 func _deselect_unit(unit: Unit) -> void:
 	MatchInteractionHandler.deselect_unit(self, unit)
-	show_visible_units()
 
 
 func _is_exit_hex(team: Globals.Team, hex: Vector2i) -> bool:
@@ -430,9 +536,8 @@ func _is_exit_hex(team: Globals.Team, hex: Vector2i) -> bool:
 
 
 func _on_unit_exited(unit: Unit) -> void:
-	if selected_unit == unit:
+	if selected_units.has(unit):
 		_deselect_unit(unit)
-		hide_unit_details_in_ui.emit()
 	Globals.unit_visible_enemies.erase(unit)
 	Globals.unit_enemies_in_los.erase(unit)
 	Globals.unit_enemy_tracks.erase(unit)
@@ -463,6 +568,8 @@ func _on_unit_surrendered(unit: Unit) -> void:
 
 
 func _on_unit_died(unit: Unit) -> void:
+	if selected_units.has(unit):
+		_deselect_unit(unit)
 	var enemy_team: Globals.Team
 	if unit.team == Globals.Team.AXIS:
 		enemy_team = Globals.Team.ALLIES

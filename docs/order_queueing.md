@@ -1,24 +1,17 @@
-# Order queues and coordinated movement
+# Selection and order queues
 
-Hold **Shift** while releasing a **Move** or **Watch** command to append it. Without Shift, an accepted command replaces the queue. Stop clears it. The first Shift order adopts an existing move, so a squad already travelling can receive its next waypoint without changing its current route.
+Click a battlefield squad or roster row to select it. **Shift-click** adds or removes a friendly squad from the selection. Roster Shift-clicks preserve the camera position. Drag a rectangle with the left mouse button to select friendly squads whose counters intersect it. Drag in any direction; **Shift-drag** adds to the existing selection. An ordinary empty click clears selection. Enemies remain individually inspectable and are excluded from multiple selection.
 
-The squad details panel contains **Order queue**. It lists numbered actions, marks the current action, and lets you remove any action. **Queue Hold position** adds a final Hold. Watch and Hold remain active until removed or replaced; remove them before appending further actions.
+Every selected squad is highlighted on the battlefield and in the roster. The most recently selected squad supplies the details and order queue shown in the panel; the formation label also shows the selection count.
 
-Moves advance only after the entire route finishes, not at intermediate hexes. Each leg finds its route from the squad's position when that leg starts, using the ordinary cover and threat preferences. Queued Watch computes its bearing from the position reached after movement. A blocked leg reports the failure and keeps later orders waiting; remove that leg to continue. Pinning pauses the queue and recovery rebuilds the interrupted move. Rout, surrender, death, map exit, close combat, and replacement orders cancel queued execution.
+Wheel commands apply to every selected squad. Each squad checks its own command restrictions and finds its own route to the chosen hex. Unavailable squads are skipped, and feedback reports how many accepted the order. Selecting another squad while the wheel is open invalidates that wheel's pending command.
 
-## A shared waiting step
+Hold **Shift** while releasing **Move** or **Watch** to append the command to every selected squad's queue. Without Shift, an accepted command replaces that squad's queue. Stop clears it. The first Shift order adopts an existing move without replacing its route.
 
-1. Select a squad and add its approach moves.
-2. In Order queue, click **Add squad to group**.
-3. Select each other participating squad, add its approach moves, and add it to the group.
-4. Click **Queue group wait**. The same numbered group, such as G1, is appended to every participant's queue. Group selection then clears for the next plan.
-5. Select each participant and append its following Move and final Watch or Hold.
-6. On any participant, click **Start group G1 when ready**. Squads finish their approach and release the shared wait once all remaining participants are ready.
+The **Order queue** section lists numbered actions for the active squad and lets you remove them. **Queue Hold position** appends a final Hold to the selected squads. Watch and Hold remain active until removed or replaced; remove them before appending further actions. Shared waiting steps and coordination groups have been removed.
 
-Squads can move into position during planning, but they cannot leave the waiting step before the group is started. A pinned squad remains a blocker. Readiness appears in squad details; its tooltip identifies approaching, pinned, or blocked members. Cancelling or removing a member's waiting step, surrendering, routing, dying, leaving the map, or entering close combat removes that member from the wait so survivors can continue. Clearing the group selection only clears the prospective selection; it does not cancel waiting steps already queued.
+Moves advance only after the entire route finishes. Each leg uses the squad's actual position when it begins, with the ordinary cover and threat preferences. Watch computes its bearing from the final position. A blocked leg reports failure and waits for removal. Pinning pauses the queue; recovery rebuilds the interrupted move. Rout, surrender, death, exit, close combat, and replacement orders cancel queued execution.
 
-The selected squad shows numbered queued destinations. Dashed connections show the planned sequence; the live route retains its terrain-following line. Shared G markers appear at participants' planned waiting positions, including when another squad is selected. Future legs are routed when they begin, so dashed connections are not promised travel paths.
+Selected squads show numbered queued destinations and dashed connections. These show the sequence, while the live route shows the actual path. Queues apply to the current battle and are not stored in campaign unit saves.
 
-This first implementation supports Move, Watch, Hold, and shared waits. Timed suppression, delays, and arbitrary action dependencies are not included. Queues are runtime battle orders and are not stored in campaign unit saves.
-
-Run `tests/order_queue_regression.tscn` for movement sequencing, final actions, replacement and cancellation, pin recovery, blocked routes, coordinated release, removed members, and panel controls. Pass `-- --capture` with rendering enabled to capture the order panel.
+Validation scenes: `tests/multiple_selection_regression.tscn`, `tests/order_queue_regression.tscn`, `tests/command_interaction_regression.tscn`, `tests/stacked_squads_regression.tscn`, and `tests/squad_roster_hud_regression.tscn`.

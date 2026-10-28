@@ -3809,6 +3809,7 @@ environment = SubResource("Environment_tj3jo")
 
 [connection signal="key_space_pressed" from="InputManager" to="GameController" method="_on_key_space_pressed"]
 [connection signal="mouse_button_left_pressed" from="InputManager" to="GameController" method="_on_mouse_button_left_pressed"]
+[connection signal="mouse_button_left_released" from="InputManager" to="GameController" method="_on_mouse_button_left_released"]
 [connection signal="mouse_button_right_pressed" from="InputManager" to="GameController" method="_on_mouse_button_right_pressed"]
 [connection signal="mouse_event_position_changed" from="InputManager" to="GameController" method="_on_mouse_event_position_changed"]
 [connection signal="right_button_pressed" from="InputManager" to="." method="_on_input_manager_right_button_pressed"]

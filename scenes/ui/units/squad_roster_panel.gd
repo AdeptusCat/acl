@@ -71,7 +71,7 @@ func refresh() -> void:
 	var selected: Unit
 	for unit: Unit in rows:
 		rows[unit].refresh()
-		if unit.selected:
+		if unit.selected and (selected == null or unit.get_instance_id() == _focused_unit_id):
 			selected = unit
 	if selected != null:
 		if rebuilt or selected.get_instance_id() != _focused_unit_id:
@@ -210,6 +210,12 @@ func _create_branch(title: String, parent: VBoxContainer) -> FoldableContainer:
 func _expand_selected_branch(unit: Unit) -> void:
 	_focused_unit_id = unit.get_instance_id()
 	var selected_group: Vector2i = _group_key(unit)
+	if _multiple_selection_active():
+		company_branches[selected_group.x].expand()
+		if platoon_branches.has(selected_group):
+			platoon_branches[selected_group].expand()
+		_request_layout()
+		return
 	for company: int in company_branches:
 		company_branches[company].folded = company != selected_group.x
 	for group: Vector2i in platoon_branches:
@@ -218,6 +224,9 @@ func _expand_selected_branch(unit: Unit) -> void:
 
 
 func _on_company_folding_changed(folded: bool, company: int) -> void:
+	if _multiple_selection_active():
+		_request_layout()
+		return
 	if not folded:
 		for other: int in company_branches:
 			if other != company:
@@ -229,6 +238,9 @@ func _on_company_folding_changed(folded: bool, company: int) -> void:
 
 
 func _on_platoon_folding_changed(folded: bool, selected_group: Vector2i) -> void:
+	if _multiple_selection_active():
+		_request_layout()
+		return
 	if not folded:
 		for group: Vector2i in platoon_branches:
 			if group != selected_group:
@@ -240,6 +252,16 @@ func _group_key(unit: Unit) -> Vector2i:
 	if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
 		return Vector2i(unit.company, 0)
 	return Vector2i(unit.company, unit.platoon)
+
+
+func _multiple_selection_active() -> bool:
+	var count: int = 0
+	for member: Unit in rows:
+		if is_instance_valid(member) and member.selected:
+			count += 1
+			if count > 1:
+				return true
+	return false
 
 
 func _formation_less(left: Unit, right: Unit) -> bool:
