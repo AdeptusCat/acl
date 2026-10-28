@@ -62,6 +62,7 @@ func _run() -> void:
 	_shift(false)
 	var pair: Array[Unit] = [first, second]
 	controller.set_selected_units(pair)
+	_test_group_settings(world)
 	first.clear_orders()
 	second.clear_orders()
 	_check(controller.order_via_option_wheel(onward, WheelOption.Option.MOVE_NORMAL), "A move can be issued to multiple selected squads")
@@ -114,6 +115,72 @@ func _run() -> void:
 	await get_tree().process_frame
 	print("Multiple selection checks: ", checks, "; failures: ", failures)
 	get_tree().quit(failures)
+
+
+func _test_group_settings(world: Node) -> void:
+	var details: PanelContainer = world.ui.unit_details
+	var unselected: Unit = Globals.get_units_for_team(Globals.team_player)[0]
+	var original_pace: UnitMovement.Stance = unselected.movement.stance
+	var original_discipline: Unit.FireDiscipline = unselected.fire_discipline
+	var original_width: Unit.WatchWidth = unselected.watch_width
+	var original_watch: Vector2 = unselected.watch_direction
+	details.pace_buttons[UnitMovement.Stance.CROUCHED].pressed.emit()
+	_check(first.movement.stance == UnitMovement.Stance.CROUCHED and second.movement.stance == UnitMovement.Stance.CROUCHED, "A pace icon changes every selected squad")
+	details.fire_discipline_buttons[Unit.FireDiscipline.HOLD_FIRE].pressed.emit()
+	_check(first.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and second.fire_discipline == Unit.FireDiscipline.HOLD_FIRE, "A fire discipline icon changes every selected squad")
+	first.set_watch_direction(Vector2.RIGHT)
+	second.set_watch_direction(Vector2.UP)
+	details.watch_width_buttons[Unit.WatchWidth.WIDE].pressed.emit()
+	_check(first.watch_width == Unit.WatchWidth.WIDE and second.watch_width == Unit.WatchWidth.WIDE and first.watch_direction == Vector2.RIGHT and second.watch_direction == Vector2.UP, "A watch angle icon changes every selected squad while preserving individual bearings")
+	details.watch_automatic.pressed.emit()
+	_check(not first.has_watch_order() and not second.has_watch_order(), "Watch Auto clears the assignments of every selected squad")
+	first.set_watch_direction(Vector2.RIGHT)
+	details._refresh_summary()
+	_check(not details.watch_automatic.disabled, "Watch Auto remains available when only a secondary selected squad has an assignment")
+	details.watch_automatic.pressed.emit()
+	_check(not first.has_watch_order(), "Watch Auto clears a secondary squad's assignment when the displayed squad already uses automatic attention")
+	_check(unselected.movement.stance == original_pace and unselected.fire_discipline == original_discipline and unselected.watch_width == original_width and unselected.watch_direction == original_watch, "Group settings leave unselected squads unchanged")
+	second.in_close_combat = true
+	details._refresh_summary()
+	_check(not details.fire_discipline_buttons[Unit.FireDiscipline.RETURN_FIRE].disabled and not details.watch_width_buttons[Unit.WatchWidth.NARROW].disabled, "A restricted primary squad does not disable settings for eligible selected squads")
+	details.fire_discipline_buttons[Unit.FireDiscipline.RETURN_FIRE].pressed.emit()
+	details.watch_width_buttons[Unit.WatchWidth.NARROW].pressed.emit()
+	_check(first.fire_discipline == Unit.FireDiscipline.RETURN_FIRE and first.watch_width == Unit.WatchWidth.NARROW and second.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and second.watch_width == Unit.WatchWidth.WIDE, "Group settings check command restrictions separately for each squad")
+	second.in_close_combat = false
+	first.set_watch_direction(Vector2.RIGHT)
+	second.set_watch_direction(Vector2.UP)
+	second.in_close_combat = true
+	details.watch_automatic.pressed.emit()
+	_check(not first.has_watch_order() and second.watch_direction == Vector2.UP, "Watch Auto preserves restricted squads' assignments")
+	second.in_close_combat = false
+	controller.end_game_handled = true
+	details._refresh_summary()
+	details._on_fire_discipline_selected(Unit.FireDiscipline.FIRE_AT_WILL)
+	details._on_watch_width_selected(Unit.WatchWidth.NORMAL)
+	details._on_watch_automatic_pressed()
+	_check(first.fire_discipline == Unit.FireDiscipline.RETURN_FIRE and second.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and first.watch_width == Unit.WatchWidth.NARROW and second.watch_width == Unit.WatchWidth.WIDE and second.has_watch_order(), "Mission completion blocks group tactical changes through stale signals")
+	controller.end_game_handled = false
+	var single: Array[Unit] = [first]
+	controller.set_selected_units(single)
+	details.pace_buttons[UnitMovement.Stance.RUNNING].pressed.emit()
+	details.fire_discipline_buttons[Unit.FireDiscipline.FIRE_AT_WILL].pressed.emit()
+	details.watch_width_buttons[Unit.WatchWidth.NORMAL].pressed.emit()
+	_check(first.movement.stance == UnitMovement.Stance.RUNNING and second.movement.stance == UnitMovement.Stance.CROUCHED and first.fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL and second.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and first.watch_width == Unit.WatchWidth.NORMAL and second.watch_width == Unit.WatchWidth.WIDE, "Removing a squad from selection immediately excludes it from every setting change")
+	var pair: Array[Unit] = [first, second]
+	controller.set_selected_units(pair)
+	Debug.enemy_selectable = false
+	var enemy: Unit = Globals.get_units_for_team(Globals.team_enemy)[0]
+	details.show_unit_detail(enemy, false)
+	details._on_pace_selected(UnitMovement.Stance.STANDING)
+	details._on_fire_discipline_selected(Unit.FireDiscipline.RETURN_FIRE)
+	details._on_watch_width_selected(Unit.WatchWidth.NARROW)
+	details._on_watch_automatic_pressed()
+	_check(first.movement.stance == UnitMovement.Stance.RUNNING and second.movement.stance == UnitMovement.Stance.CROUCHED and first.fire_discipline == Unit.FireDiscipline.FIRE_AT_WILL and second.fire_discipline == Unit.FireDiscipline.HOLD_FIRE and first.watch_width == Unit.WatchWidth.NORMAL and second.watch_width == Unit.WatchWidth.WIDE and second.has_watch_order(), "Stale controls during enemy inspection cannot change the friendly selection")
+	details.show_unit_detail(second, false)
+	details.pace_buttons[UnitMovement.Stance.RUNNING].pressed.emit()
+	details.fire_discipline_buttons[Unit.FireDiscipline.FIRE_AT_WILL].pressed.emit()
+	details.watch_width_buttons[Unit.WatchWidth.NORMAL].pressed.emit()
+	details.watch_automatic.pressed.emit()
 
 
 func _shift(pressed: bool) -> void:

@@ -324,8 +324,28 @@ func _refresh_enemy_summary() -> void:
 	debug_actions.hide()
 
 
+func _settings_units() -> Array[Unit]:
+	var members: Array[Unit] = []
+	if not is_instance_valid(unit) or not unit.is_active() or unit.is_queued_for_deletion() or not MatchInteractionHandler.can_command_unit(unit):
+		return members
+	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
+	if controller != null and controller.has_method("get_selected_units"):
+		var selected: Array[Unit] = controller.get_selected_units()
+		if selected.has(unit):
+			for member: Unit in selected:
+				if MatchInteractionHandler.can_command_unit(member):
+					members.append(member)
+			return members
+	members.append(unit)
+	return members
+
+
 func _refresh_pace_controls() -> void:
-	var allowed: bool = MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement)
+	var allowed: bool = false
+	for member: Unit in _settings_units():
+		if is_instance_valid(member.movement):
+			allowed = true
+			break
 	for stance: int in pace_buttons:
 		var button: Button = pace_buttons[stance]
 		button.disabled = not allowed
@@ -333,26 +353,33 @@ func _refresh_pace_controls() -> void:
 
 
 func _on_pace_selected(stance: UnitMovement.Stance) -> void:
-	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit) and is_instance_valid(unit.movement):
-		unit.movement.stance = stance
+	for member: Unit in _settings_units():
+		if is_instance_valid(member.movement):
+			member.movement.stance = stance
 	if is_instance_valid(unit):
 		_refresh_pace_controls()
 
 
-func _can_change_tactical_settings() -> bool:
-	if not is_instance_valid(unit) or not MatchInteractionHandler.can_command_unit(unit) or not unit.get_watch_restriction().is_empty():
+func _can_change_tactical_settings(member: Unit) -> bool:
+	if not is_instance_valid(member) or not MatchInteractionHandler.can_command_unit(member) or not member.get_watch_restriction().is_empty():
 		return false
-	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(unit)
-	return controller != null and MatchInteractionHandler.command_restriction(controller, unit.current_hex, WheelOption.Option.STOP).is_empty()
+	var controller: Node2D = MatchVisibilityCoordinator.controller_for_unit(member)
+	return controller != null and MatchInteractionHandler.command_restriction(controller, member.current_hex, WheelOption.Option.STOP).is_empty()
 
 
 func _refresh_watch_controls() -> void:
-	var allowed: bool = _can_change_tactical_settings()
+	var allowed: bool = false
+	var can_clear_watch: bool = false
+	for member: Unit in _settings_units():
+		if _can_change_tactical_settings(member):
+			allowed = true
+			if member.has_watch_order():
+				can_clear_watch = true
 	for width: int in watch_width_buttons:
 		var button: Button = watch_width_buttons[width]
 		button.disabled = not allowed
 		button.set_pressed_no_signal(unit.watch_width == width)
-	watch_automatic.disabled = not allowed or not unit.has_watch_order()
+	watch_automatic.disabled = not can_clear_watch
 	watch_status.text = "Automatic attention"
 	if unit.has_watch_order():
 		watch_status.text = "Watching assigned sector"
@@ -365,21 +392,27 @@ func _refresh_watch_controls() -> void:
 func _on_watch_width_selected(width: Unit.WatchWidth) -> void:
 	if not is_instance_valid(unit):
 		return
-	if _can_change_tactical_settings():
-		unit.set_watch_width(width)
+	for member: Unit in _settings_units():
+		if _can_change_tactical_settings(member):
+			member.set_watch_width(width)
 	_refresh_summary()
 
 
 func _on_watch_automatic_pressed() -> void:
 	if not is_instance_valid(unit):
 		return
-	if _can_change_tactical_settings():
-		unit.clear_watch_order()
+	for member: Unit in _settings_units():
+		if _can_change_tactical_settings(member):
+			member.clear_watch_order()
 	_refresh_summary()
 
 
 func _refresh_fire_discipline_controls() -> void:
-	var allowed: bool = _can_change_tactical_settings()
+	var allowed: bool = false
+	for member: Unit in _settings_units():
+		if _can_change_tactical_settings(member):
+			allowed = true
+			break
 	for discipline: int in fire_discipline_buttons:
 		var button: Button = fire_discipline_buttons[discipline]
 		button.disabled = not allowed
@@ -397,8 +430,9 @@ func _refresh_fire_discipline_controls() -> void:
 func _on_fire_discipline_selected(discipline: Unit.FireDiscipline) -> void:
 	if not is_instance_valid(unit):
 		return
-	if _can_change_tactical_settings():
-		unit.set_fire_discipline(discipline)
+	for member: Unit in _settings_units():
+		if _can_change_tactical_settings(member):
+			member.set_fire_discipline(discipline)
 	_refresh_summary()
 
 
