@@ -59,7 +59,6 @@ var _spotting_targets: Array[Unit] = []
 var _orders_section: FoldableContainer
 var _order_rows: VBoxContainer
 var _queue_status: Label
-var _queue_hold: Button
 var _order_signature: String = ""
 
 
@@ -668,10 +667,6 @@ func _setup_order_controls() -> void:
 	content.add_child(_queue_status)
 	_order_rows = VBoxContainer.new()
 	content.add_child(_order_rows)
-	_queue_hold = Button.new()
-	_queue_hold.text = "Queue Hold position"
-	_queue_hold.pressed.connect(_on_queue_hold)
-	content.add_child(_queue_hold)
 
 
 func _refresh_order_controls() -> void:
@@ -707,26 +702,9 @@ func _refresh_order_controls() -> void:
 			remove_order.text = "Remove"
 			remove_order.pressed.connect(_on_remove_queued_order.bind(unit, index))
 			row.add_child(remove_order)
-	_queue_hold.disabled = not queue.can_append(SquadOrderQueue.Kind.HOLD)
-	for member: Unit in Globals.get_units_for_team(Globals.team_player):
-		if member.selected and member.action_controller.order_queue.can_append(SquadOrderQueue.Kind.HOLD):
-			_queue_hold.disabled = false
 
 
 func _on_remove_queued_order(owner: Unit, index: int) -> void:
 	if owner == unit and MatchInteractionHandler.can_command_unit(owner):
 		owner.action_controller.order_queue.remove(index)
-		_refresh_order_controls()
-
-
-func _on_queue_hold() -> void:
-	if is_instance_valid(unit) and MatchInteractionHandler.can_command_unit(unit):
-		var members: Array[Unit] = []
-		for member: Unit in Globals.get_units_for_team(unit.team):
-			if member.selected:
-				members.append(member)
-		if members.is_empty():
-			members.append(unit)
-		for member: Unit in members:
-			member.action_controller.order_queue.append(SquadOrderQueue.Kind.HOLD)
 		_refresh_order_controls()

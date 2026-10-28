@@ -8,7 +8,7 @@ Wheel commands apply to every selected squad. Each squad checks its own command 
 
 Hold **Shift** while releasing **Move** or **Watch** to append the command to every selected squad's queue. Without Shift, an accepted command replaces that squad's queue. Stop clears it. The first Shift order adopts an existing move without replacing its route.
 
-The **Order queue** section lists numbered actions for the active squad and lets you remove them. **Queue Hold position** appends a final Hold to the selected squads. Watch and Hold remain active until removed or replaced; remove them before appending further actions. Shared waiting steps and coordination groups have been removed.
+The **Order queue** section lists numbered actions for the active squad and lets you remove them. A final move stops at its destination automatically. Watch remains active until removed or replaced; remove it before appending further actions. Shared waiting steps and coordination groups have been removed.
 
 Moves advance only after the entire route finishes. Each leg uses the squad's actual position when it begins, with the ordinary cover and threat preferences. Watch computes its bearing from the final position. A blocked leg reports failure and waits for removal. Pinning pauses the queue; recovery rebuilds the interrupted move. Rout, surrender, death, exit, close combat, and replacement orders cancel queued execution.
 

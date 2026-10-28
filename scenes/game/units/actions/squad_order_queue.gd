@@ -1,7 +1,7 @@
 class_name SquadOrderQueue
 extends Node
 
-enum Kind { MOVE, WATCH, HOLD }
+enum Kind { MOVE, WATCH }
 
 var unit: Unit
 var current: Dictionary = {}
@@ -21,9 +21,9 @@ func can_append(kind: Kind) -> bool:
 	var last: Dictionary = current
 	if not pending.is_empty():
 		last = pending.back()
-	if not last.is_empty() and int(last["kind"]) in [Kind.WATCH, Kind.HOLD]:
+	if not last.is_empty() and int(last["kind"]) == Kind.WATCH:
 		return false
-	return kind in [Kind.MOVE, Kind.WATCH, Kind.HOLD]
+	return kind in [Kind.MOVE, Kind.WATCH]
 
 
 func append(kind: Kind, target: Vector2i = Vector2i.ZERO) -> bool:
@@ -97,8 +97,6 @@ static func describe(entry: Dictionary) -> String:
 			return "Move to (%d, %d)" % [target.x, target.y]
 		Kind.WATCH:
 			return "Watch toward (%d, %d)" % [target.x, target.y]
-		Kind.HOLD:
-			return "Hold position"
 	return "Unknown order"
 
 
@@ -156,8 +154,6 @@ func _start_current() -> void:
 			var target_position: Vector2 = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(target))
 			if not unit.set_watch_direction(target_position - unit.global_position):
 				failure = "Cannot watch toward this hex; remove this order to continue."
-		Kind.HOLD:
-			_hold_position()
 	_order_id = unit.action_controller.action_order_id
 	issuing = false
 

@@ -47,7 +47,7 @@ static func _unit_command_restriction(controller: Node2D, map_hex: Vector2i, opt
 	if Input.is_key_pressed(KEY_SHIFT) and unit.action_controller.order_queue != null:
 		order_origin = unit.action_controller.order_queue.planned_origin()
 		if option in [WheelOption.Option.MOVE_NORMAL, WheelOption.Option.WATCH] and not unit.action_controller.order_queue.can_append(SquadOrderQueue.Kind.MOVE):
-			return "Remove the final Watch or Hold order before appending another order."
+			return "Remove the final Watch order before appending another order."
 	match option:
 		WheelOption.Option.WATCH:
 			if not unit.get_watch_restriction().is_empty():
@@ -147,7 +147,7 @@ static func _order_for_unit(controller: Node2D, unit: Unit, map_hex: Vector2i, o
 		if option == WheelOption.Option.WATCH:
 			kind = SquadOrderQueue.Kind.WATCH
 		if not unit.action_controller.order_queue.append(kind, map_hex):
-			controller.order_feedback.emit(false, command, "Remove the final Watch or Hold order before appending another order.")
+			controller.order_feedback.emit(false, command, "Remove the final Watch order before appending another order.")
 			return false
 		controller.hex_glow(controller.ground_layer.map_to_local(map_hex))
 		controller.order_feedback.emit(true, "Queue " + command, "")

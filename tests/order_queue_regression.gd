@@ -112,7 +112,7 @@ func _test_sequence() -> void:
 	_check(queue.current["target"] == destination and queue.pending[0]["target"] == onward, "Shift adopts an existing live move without replacing it")
 	first.order(Globals.UnitCmd.MOVE, onward)
 	_check(queue.entries().is_empty(), "An ordinary move replaces the queue")
-	queue.append(SquadOrderQueue.Kind.HOLD)
+	queue.append(SquadOrderQueue.Kind.WATCH, origin)
 	first.clear_orders()
 	_check(queue.entries().is_empty(), "Stop clears queued actions")
 
@@ -121,7 +121,7 @@ func _test_interruptions() -> void:
 	_reset(first, origin)
 	var queue: SquadOrderQueue = first.action_controller.order_queue
 	queue.append(SquadOrderQueue.Kind.MOVE, destination)
-	queue.append(SquadOrderQueue.Kind.HOLD)
+	queue.append(SquadOrderQueue.Kind.WATCH, origin)
 	queue._process(0.0)
 	first.stress_system._set_state(STATES.MoraleState.PINNED)
 	queue._process(0.0)
@@ -131,21 +131,28 @@ func _test_interruptions() -> void:
 	_check(first.movement.is_moving and first.movement.target_hex == destination, "Recovery replans the interrupted leg")
 	_finish(first)
 	queue._process(0.0)
-	_check(queue.current.get("kind") == SquadOrderQueue.Kind.HOLD and not first.movement.is_moving, "Final Hold stops at the destination")
+	_check(queue.current.get("kind") == SquadOrderQueue.Kind.WATCH and not first.movement.is_moving, "Final Watch starts after reaching the destination")
 	_reset(first, origin)
 	queue.append(SquadOrderQueue.Kind.MOVE, Vector2i(-900, -900))
-	queue.append(SquadOrderQueue.Kind.HOLD)
+	queue.append(SquadOrderQueue.Kind.WATCH, origin)
 	queue._process(0.0)
 	_check(not queue.failure.is_empty() and queue.pending.size() == 1, "An unreachable leg blocks the queue instead of silently skipping it")
 	queue.remove(0)
 	queue._process(0.0)
-	_check(queue.current.get("kind") == SquadOrderQueue.Kind.HOLD, "Removing a blocked leg lets the queue continue")
+	_check(queue.current.get("kind") == SquadOrderQueue.Kind.WATCH, "Removing a blocked leg lets the queue continue")
 	_reset(first, origin)
 	queue.append(SquadOrderQueue.Kind.MOVE, destination)
 	first.in_close_combat = true
 	queue._process(0.0)
 	_check(queue.entries().is_empty(), "Close combat cancels queued actions")
 	first.in_close_combat = false
+	_reset(first, origin)
+	queue.append(SquadOrderQueue.Kind.MOVE, destination)
+	queue._process(0.0)
+	_finish(first)
+	queue._process(0.0)
+	_check(queue.entries().is_empty() and not first.movement.is_moving and first.current_hex == destination, "A final move stops at its destination without an additional queued action")
+	_reset(first, origin)
 
 
 func _test_controls(world: Node) -> void:
@@ -168,8 +175,6 @@ func _test_controls(world: Node) -> void:
 	Input.flush_buffered_events()
 	details._refresh_order_controls()
 	_check(details._order_rows.get_child_count() == 1, "The panel displays numbered queued orders")
-	details._on_queue_hold()
-	_check(first.action_controller.order_queue.pending.back()["kind"] == SquadOrderQueue.Kind.HOLD, "The panel can append final Hold")
 	if OS.get_cmdline_user_args().has("--capture"):
 		get_tree().root.size = Vector2i(1152, 648)
 		details._orders_section.folded = false
