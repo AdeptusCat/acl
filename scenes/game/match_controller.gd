@@ -130,6 +130,7 @@ func setup() -> void:
 	command_succession = CommandSuccession.new()
 	add_child(command_succession)
 	command_succession.command_notice.connect(_on_command_notice)
+	command_succession.company_headquarters_created.connect(_on_company_headquarters_created)
 	command_succession.refresh()
 
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
@@ -161,6 +162,19 @@ func setup() -> void:
 	
 	influence_map_debug_draw.setup()
 	influence_map_debug_draw.set_debug_enabled(Debug.show_ai_placement)
+
+func _on_company_headquarters_created(unit: Unit, source: Unit) -> void:
+	MatchUnitSpawner.register_authored_unit(self, unit)
+	unit.update_terrain_defense_bonus()
+	register_ai_unit(unit)
+	LOS._on_unit_entered_hex(unit, unit.current_hex)
+	update_visible_hexes()
+	show_visible_units()
+	draw_fog()
+	var recorder: EngagementRecorder = Debug.engagement_recorder
+	if is_instance_valid(recorder):
+		recorder.record_event("company_hq_created", {"source": recorder._unit_id(source), "headquarters": recorder._unit_id(unit), "commander_name": unit.company_command.leader.name})
+
 
 func _on_command_notice(team: Globals.Team, title: String, explanation: String) -> void:
 	var recorder: EngagementRecorder = Debug.engagement_recorder

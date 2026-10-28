@@ -34,6 +34,10 @@ func _run() -> void:
 	succession = CommandSuccession.new()
 	add_child(succession)
 	succession.set_process(false)
+	succession.company_headquarters_created.connect(func(unit: Unit, _source: Unit) -> void:
+		_freeze(unit)
+		units.append(unit)
+	)
 	succession.command_notice.connect(func(team: Globals.Team, title: String, explanation: String) -> void:
 		notices.append({"team": team, "title": title, "explanation": explanation})
 	)
@@ -190,45 +194,63 @@ func _test_company_succession() -> void:
 	var officer: Soldier = first.squad_fire.soldiers[0]
 	var sergeant: Soldier = first.squad_fire.soldiers[1]
 	var guide: Soldier = first.squad_fire.soldiers[2]
+	var weapon: WeaponSpec = officer.weapon
+	officer.rounds_in_mag = 2
 	var second: Unit = _unit(Globals.SquadType.PLATOON_HEADQUARTERS, Unit.Company.C, 2, 0, [_leader(RankGrades.Grade.PLATOON_LEADER), _rifleman()])
-	var subordinate: Unit = _unit(Globals.SquadType.Rifle, Unit.Company.C, 2, 1, [_leader()])
+	var next_officer: Soldier = second.squad_fire.soldiers[0]
+	var subordinate: Unit = _unit(Globals.SquadType.Rifle, Unit.Company.C, 2, 1, [_leader(RankGrades.Grade.TEAM_LEADER)])
 	succession.refresh()
 	company.apply_specific_casualty(company.squad_fire.soldiers[0])
+	var casualties_before: int = Globals.battle_casualties.size()
+	var exits_before: int = Globals.battle_exits.size()
 	succession.refresh()
-	_check(first.company_command.leader == officer and first.platoon_command.leader == sergeant, "Company promotion appoints a different soldier as platoon commander in the same refresh")
+	var headquarters: Unit = company.company_command.commander
+	_check(headquarters != first and headquarters != company and headquarters.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and headquarters.platoon == 0, "Promotion creates a separate company HQ")
+	_check(headquarters.current_hex == first.current_hex and headquarters.current_cube == first.current_cube, "Both HQs initially occupy the same hex")
+	_check(headquarters.members_alive == 1 and headquarters.squad_fire.soldiers[0] == officer and officer.unit == headquarters and not first.squad_fire.soldiers.has(officer), "Only the promoted officer moves into the new company HQ")
+	_check(officer.weapon == weapon and officer.rounds_in_mag == 2 and officer.rank_grade == RankGrades.Grade.PLATOON_LEADER, "Promotion preserves the officer's weapon, ammunition and rank")
+	_check(first.members_alive == 3 and first.original_size == 3 and headquarters.original_size == 1, "Splitting conserves the platoon HQ's living and original strength")
+	_check(Globals.battle_casualties.size() == casualties_before and Globals.battle_exits.size() == exits_before, "Separating the commander creates neither casualties nor evacuations")
+	_check(first.platoon_command.commander == first and first.platoon_command.leader == sergeant and guide.unit == first, "The sergeant and other platoon staff remain in the original HQ")
 	_check(first.get_soldier_role_name(sergeant) == "Acting Platoon Commander" and sergeant.rank_grade == RankGrades.Grade.SQUAD_LEADER, "The platoon successor is explicitly labeled without changing rank")
-	_check(first.company_command.commander == first and second.command_squad == first, "An eligible platoon commander automatically takes over the company")
-	_check(first.command_squad == null and subordinate.command_squad == second, "Company succession preserves the platoon hierarchy without cycles")
-	_check(first.acting_command_level == Globals.SquadType.COMPANY_HEADQUARTERS, "The acting company appointment appears on the original platoon HQ")
-	_check(first.get_hud_name() == "Acting Company HQ" and first.get_formation_name().contains("Headquarters"), "The new company HQ is explicitly named as such in the roster and selection header")
-	_check(company.get_hud_name() == "Company HQ Remnant", "The original HQ is visibly identified as a remnant")
-	_check(first.get_soldier_role_name(first.company_command.leader) == "Acting Company Commander", "The appointed soldier is identified as acting company commander")
+	_check(first.command_squad == headquarters and second.command_squad == headquarters and subordinate.command_squad == second and headquarters.command_squad == null, "Company and platoon command links remain separate and acyclic")
+	_check(headquarters.get_hud_name() == "Acting Company HQ" and first.get_hud_name() == "Acting Platoon HQ", "Both HQs have distinct visible command names")
+	_check(company.get_hud_name() == "Company HQ Remnant", "Original company staff remain a separate remnant until reunion")
+	_check(headquarters.get_soldier_role_name(officer) == "Acting Company Commander", "The detached officer is visibly identified as company commander")
 	_check(_has_notice(officer.name, "acting company commander") and _has_notice(sergeant.name, "acting platoon commander"), "Both appointments announce the named successor")
-	_check(first.get_headquarters_status_text().contains("75%"), "The unreconstituted HQ visibly explains its reduced effectiveness")
-	_check(first.ui.rank_texture_rect.visible and first.ui.rank_texture_rect.texture == first.ui.captain_texture and second.ui.rank_texture_rect.texture == second.ui.second_lieutenant_texture and not company.ui.rank_texture_rect.visible, "A platoon HQ taking company command displays II; the other platoon retains I")
-	_position(company, 0)
-	_position(first, 0)
-	succession.refresh()
-	_check(company.company_command.reconstituted and first.acting_command_reconstituted, "A company HQ remnant also reconstitutes automatically")
-	_check(first.get_headquarters_status_text().contains("reconstituted") and first.get_headquarters_status_text().contains("100%"), "Reconstitution produces a persistent visible confirmation")
-	_check(notices.back()["title"].contains("reconstituted"), "Reconstitution also produces a command notice")
-	var notice_count: int = notices.size()
-	succession.refresh()
-	_check(notices.size() == notice_count, "Unchanged command and support states do not repeat notices")
+	_check(headquarters.get_headquarters_status_text().contains("75%") and is_equal_approx(headquarters.command_efficiency, 0.75), "The new company HQ has reduced effectiveness until its staff arrive")
+	_check(headquarters.ui.rank_texture_rect.texture == headquarters.ui.captain_texture and headquarters.ui.rank_texture_rect.visible and first.ui.rank_texture_rect.texture == first.ui.second_lieutenant_texture and first.ui.rank_texture_rect.visible, "Separate company and platoon HQs display II and I simultaneously")
+	var unit_count: int = Globals.get_units().size()
 	for refresh_index: int in range(4):
 		succession.refresh()
-	_check(first.company_command.leader == officer and first.platoon_command.leader == sergeant, "Repeated refreshes never return platoon command to the company commander")
-	first.apply_specific_casualty(officer)
+	_check(Globals.get_units().size() == unit_count and company.company_command.commander == headquarters and first.platoon_command.leader == sergeant, "Repeated refreshes neither duplicate the company HQ nor recombine the appointments")
+	var staff: Soldier = company.squad_fire.soldiers[0]
+	_position(headquarters, 0)
+	_position(company, 0)
 	succession.refresh()
-	_check(first.company_command.leader == sergeant and first.platoon_command.leader == guide, "A second company succession fills both vacancies with distinct soldiers")
+	_check(headquarters.company_command.reconstituted and headquarters.members_alive == 2 and staff.unit == headquarters and not company.is_active(), "Company remnants transfer exclusively into the new company HQ")
+	_check(first.members_alive == 3 and first.platoon_command.leader == sergeant and first.is_active(), "Reuniting company staff leaves the platoon HQ intact")
+	_check(headquarters.get_headquarters_status_text().contains("100%"), "Reuniting company staff restores full command effectiveness")
+	_position(headquarters, 10)
+	succession.refresh()
+	_check(first.current_hex != headquarters.current_hex and first.command_squad == headquarters, "The two HQs can occupy different hexes and retain their command links")
+	headquarters.apply_specific_casualty(officer)
+	succession.refresh()
+	var replacement: Unit = company.company_command.commander
+	_check(replacement != second and replacement != headquarters and company.company_command.leader == next_officer and next_officer.unit == replacement, "A later company casualty detaches the next eligible platoon commander into another company HQ")
+	_check(first.platoon_command.leader == sergeant and second.platoon_command.commander == subordinate, "Further company succession preserves the first platoon and fills the second platoon vacancy")
+	replacement.surrendered = true
+	succession.refresh()
+	var third: Unit = company.company_command.commander
+	_check(third != first and third.squad_fire.soldiers.has(sergeant) and first.platoon_command.leader == guide, "Replacing a surrendered company commander also separates the next platoon successor")
 	first.surrendered = true
+	third.exited = true
 	succession.refresh()
-	_check(company.company_command.commander == second, "A surrendered acting commander is replaced")
-	second.exited = true
-	succession.refresh()
-	_check(company.company_command.commander == subordinate, "Company succession can cascade through a newly appointed acting platoon commander")
-	_check(not subordinate.platoon_command.has_commander(), "An eligible soldier cannot hold company and platoon command when no further successor survives")
-	subordinate.surrendered = true
+	var last: Unit = company.company_command.commander
+	_check(last != subordinate and last.squad_fire.soldiers[0].unit == last and not subordinate.is_active(), "Promoting the sole soldier of an acting HQ retires its empty original unit")
+	_check(last.leader_aura.leadership_bonus > 0.0, "A detached acting commander keeps the leadership bonus for his actual rank")
+	_check(not second.platoon_command.has_commander(), "A platoon remains leaderless when its final eligible commander transfers to the company")
+	last.surrendered = true
 	succession.refresh()
 	_check(not company.company_command.has_commander(), "The company remains leaderless when no eligible commander survives")
 
@@ -241,12 +263,13 @@ func _test_repurposed_headquarters() -> void:
 	var officer: Soldier = platoon.squad_fire.soldiers[0]
 	company.apply_specific_casualty(company.squad_fire.soldiers[0])
 	succession.refresh()
-	_check(platoon.company_command.leader == officer and platoon.platoon_command.commander == squad, "Without an eligible HQ deputy a squad leader fills the vacated platoon command")
+	var headquarters: Unit = company.company_command.commander
+	_check(officer.unit == headquarters and headquarters != platoon and platoon.platoon_command.commander == squad, "Without an eligible HQ deputy a squad leader fills the vacated platoon command")
 	_position(platoon, 50)
 	_position(squad, 50)
 	succession.refresh()
-	_check(platoon.is_active() and officer.unit == platoon and platoon.company_command.leader == officer and squad.members_alive == 2, "A platoon successor never absorbs the new company HQ as a remnant")
-	_check(not squad.platoon_command.has_remnant(), "An HQ holding company command is not reported as a leaderless platoon remnant")
+	_check(not platoon.is_active() and squad.members_alive == 3 and officer.unit == headquarters and headquarters.members_alive == 1, "Leaderless platoon staff join their acting platoon HQ while company command stays separate")
+	_check(company.company_command.commander == headquarters and squad.get_command_icon_level() == Globals.SquadType.PLATOON_HEADQUARTERS, "The new company HQ and reconstituted platoon HQ retain their separate appointments")
 
 
 func _test_unavailable_candidates() -> void:
@@ -297,31 +320,37 @@ func _test_presentation() -> void:
 	succession.command_notice.connect(notice_handler)
 	company.apply_specific_casualty(company.squad_fire.soldiers[0])
 	succession.refresh()
+	var headquarters: Unit = company.company_command.commander
 	hud.squad_roster.setup(Globals.team_player)
-	hud.unit_details.show_unit_detail(platoon, false)
+	hud.unit_details.show_unit_detail(headquarters, false)
 	hud.unit_details._process(0.0)
 	await get_tree().process_frame
 	_check(hud.unit_details.unit_type_label.text == "Acting Company HQ", "The selected unit header displays its new company HQ appointment")
 	_check(hud.unit_details.commander_label.visible and hud.unit_details.commander_label.text.contains("Test Platoon Leader"), "The actual acting commander is named in a visible summary line")
-	_check(hud.unit_details.commander_label.text.contains("Platoon 1: Test Platoon Sergeant"), "A shared HQ visibly names its separate platoon commander")
+	_check(not hud.unit_details.commander_label.text.contains("Test Platoon Sergeant"), "Company details list only the company commander")
 	_check(hud.unit_details.hq_status_label.visible and hud.unit_details.hq_status_label.text.contains("75%"), "Unreconstituted HQ effectiveness is visible without a tooltip")
-	var row: SquadRosterRow = hud.squad_roster.rows[platoon]
+	var row: SquadRosterRow = hud.squad_roster.rows[headquarters]
 	var company_rows: VBoxContainer = hud.squad_roster.company_branches[Unit.Company.E].get_node("Indent/Content") as VBoxContainer
-	_check(row.identity.text == "Acting Company HQ" and row.get_parent() == company_rows, "The acting HQ appears directly under its company instead of remaining buried under the old platoon")
+	_check(row.identity.text == "Acting Company HQ" and row.get_parent() == company_rows, "The new company HQ appears directly under its company")
 	_check(hud.squad_roster.rows[company].identity.text == "Company HQ Remnant", "The original company HQ row is explicitly labeled as a remnant")
 	_check(hud.get_node("Control/CommandNotice").visible and hud.get_node("Control/CommandNotice/Content/Explanation").text.contains("Test Platoon Leader") and hud.get_node("Control/CommandNotice/Content/Explanation").text.contains("acting company commander"), "The succession notice names the new commander")
+	_check(hud.squad_roster.rows[platoon].identity.text == "Acting Platoon HQ" and hud.squad_roster.rows[platoon].get_parent() != company_rows, "The platoon HQ retains its own row under its platoon")
+	hud.unit_details.show_unit_detail(platoon, false)
+	_check(hud.unit_details.commander_label.text.contains("Test Platoon Sergeant"), "Selecting the platoon HQ names its separate commander")
+	hud.unit_details.show_unit_detail(headquarters, false)
 	var recorder: EngagementRecorder = EngagementRecorder.new()
-	var command_data: Dictionary = recorder._command_snapshot(platoon)
-	_check(command_data["commander_soldier"] == platoon.company_command.leader.id and command_data["commander_name"] == "Test Platoon Leader" and command_data["acting_level"] == Globals.SquadType.COMPANY_HEADQUARTERS, "Engagement captures identify the appointed commander and echelon explicitly")
-	_check(command_data["appointments"].size() == 2 and command_data["appointments"][0]["commander_soldier"] != command_data["appointments"][1]["commander_soldier"], "Captures record both distinct command appointments in a shared HQ")
+	var command_data: Dictionary = recorder._command_snapshot(headquarters)
+	_check(command_data["commander_soldier"] == headquarters.company_command.leader.id and command_data["commander_name"] == "Test Platoon Leader" and command_data["acting_level"] == Globals.SquadType.COMPANY_HEADQUARTERS, "Engagement captures identify the appointed commander and echelon explicitly")
+	var platoon_data: Dictionary = recorder._command_snapshot(platoon)
+	_check(command_data["appointments"].size() == 1 and platoon_data["appointments"].size() == 1 and command_data["commander_unit"] != platoon_data["commander_unit"], "Captures record distinct physical units for company and platoon command")
 	recorder.free()
 	hud.unit_details.show_unit_detail(company, false)
 	_position(company, 0)
-	_position(platoon, 0)
+	_position(headquarters, 0)
 	succession.refresh()
 	hud.unit_details._process(0.0)
 	hud.squad_roster.refresh()
-	_check(hud.unit_details.unit == platoon and hud.unit_details.soldiers.size() == 4, "Selecting a merging remnant switches details to the receiving HQ and shows transferred personnel")
+	_check(hud.unit_details.unit == headquarters and hud.unit_details.soldiers.size() == 2, "Selecting a merging remnant switches details to the receiving HQ and shows transferred personnel")
 	_check(not hud.squad_roster.rows.has(company), "The empty remnant row is removed after transfer")
 	_check(hud.unit_details.hq_status_label.text.contains("reconstituted") and hud.unit_details.hq_status_label.text.contains("100%"), "Joining the remnant visibly changes HQ status to reconstituted at full effectiveness")
 	hud.show_order_feedback(true, "Move", "Move accepted")
@@ -355,6 +384,41 @@ func _test_live_merge() -> void:
 	if remnant == null:
 		main.free()
 		return
+	# Exercise the production creation signal, visibility, registration and selection.
+	var company: Unit = UNIT_SCENE.instantiate() as Unit
+	company.team = remnant.team
+	company.company = remnant.company
+	company.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+	controller.unit_container.add_child(company)
+	company.current_hex = remnant.current_hex + Vector2i(3, 0)
+	company.position = LOSHelper.ground_layer.map_to_local(company.current_hex)
+	var company_loadout: SquadLoadoutSpec = SquadLoadoutSpec.new()
+	company_loadout.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+	for entry: Vector2i in [_leader(RankGrades.Grade.COMPANY_LEADER), _rifleman()]:
+		var loadout: SoldierLoadout = SoldierLoadout.new()
+		loadout.role = entry.x as RankGrades.Role
+		loadout.rank_grade = entry.y as RankGrades.Grade
+		loadout.weapon = load("res://resources/weapons/kar98.tres") as WeaponSpec
+		company_loadout.soldiers.append(loadout)
+	company.squad_loadout = company_loadout
+	company.setup()
+	company.add_to_group("units")
+	MatchUnitSpawner.register_authored_unit(controller, company)
+	_freeze(company)
+	controller.command_succession.refresh()
+	var officer: Soldier = remnant.platoon_command.leader
+	var original_members: int = remnant.members_alive
+	company.apply_specific_casualty(company.squad_fire.soldiers[0])
+	controller.command_succession.refresh()
+	var company_hq: Unit = company.company_command.commander
+	_freeze(company_hq)
+	_check(company_hq != remnant and officer.unit == company_hq and company_hq.members_alive == 1 and remnant.members_alive == original_members - 1, "Live succession separates the company commander from the platoon HQ")
+	_check(Globals.get_unit(company_hq.team, company_hq.company, 0, 0) == company_hq and company_hq.unit_exited.is_connected(controller._on_unit_exited), "The new company HQ is registered with the live controller and formation hierarchy")
+	_check(company_hq.ui.rank_texture_rect.visible and remnant.ui.rank_texture_rect.visible and company_hq.ui.rank_texture_rect.texture != remnant.ui.rank_texture_rect.texture, "Live company and platoon HQs simultaneously display separate command icons")
+	var independent_selection: Array[Unit] = [company_hq]
+	controller.set_selected_units(independent_selection)
+	_check(controller.selected_unit == company_hq, "The new company HQ is independently selectable")
+	_check(company_hq.create_save_data().squad_loadout.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS, "The separate HQ saves as a company HQ")
 	while CommandSuccession.headquarters_leader(remnant) != null:
 		remnant.apply_specific_casualty(CommandSuccession.headquarters_leader(remnant))
 	controller.command_succession.refresh()

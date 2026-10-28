@@ -78,6 +78,7 @@ var original_size: int = 10
 var casualties_taken: int = 0
 var casualty_records: Array[CasualtyRecord] = []
 var merged_into: Unit = null
+var is_command_detachment: bool = false
 var embedded_leader_alive: bool = true
 
 
@@ -436,6 +437,9 @@ func _refresh_leader_aura() -> void:
 	var command_grade: int = grade
 	if CommandSuccession.is_headquarters(self):
 		var commander: Soldier = CommandSuccession.headquarters_leader(self)
+		var appointment: FormationCommand = get_command_appointment()
+		if appointment != null and appointment.has_commander() and appointment.commander == self:
+			commander = appointment.leader
 		command_grade = RankGrades.Grade.SOLDIER
 		if commander != null:
 			command_grade = commander.rank_grade
@@ -1151,6 +1155,40 @@ func exit_map(record_event: bool = true) -> void:
 	unit_exited.emit(self)
 
 
+func detach_commander_to(soldier: Soldier, headquarters: Unit) -> void:
+	var secondary_roles: Vector2i = UnitCasualtyHandler.secondary_role_counts(self)
+	if squad_fire._bursts.has(soldier):
+		squad_fire._finish_burst(soldier, squad_fire._bursts[soldier])
+	weapon_audio.stop_mg_loop(soldier.weapon, position, soldier.id, self)
+	squad_fire.soldiers.erase(soldier)
+	soldier.unit = headquarters
+	soldier.id = 0
+	soldier.role = RankGrades.Role.SQUAD_LEADER
+	soldier.target_id = null
+	soldier.target_acquired = false
+	soldier.tasks.clear()
+	headquarters.squad_fire.soldiers.append(soldier)
+	headquarters.members_alive = 1
+	headquarters.original_size = 1
+	headquarters.effective_range = soldier.weapon.range_hexes
+	headquarters.ui.set_members_alive(1)
+	headquarters.ui.set_loadout(headquarters.squad_fire.soldiers)
+	original_size -= 1
+	members_alive = squad_fire.soldiers.size()
+	effective_range = 0
+	for remaining: Soldier in squad_fire.soldiers:
+		effective_range = maxi(effective_range, remaining.weapon.range_hexes)
+	if not _has_role(RankGrades.Role.SQUAD_LEADER):
+		_promote_new_leader()
+	UnitCasualtyHandler.restore_secondary_roles(self, secondary_roles)
+	ui.set_members_alive(members_alive)
+	ui.set_loadout(squad_fire.soldiers)
+	_refresh_leader_aura()
+	soldiers_changed.emit()
+	if members_alive == 0:
+		_retire_after_transfer(headquarters)
+
+
 ## Join surviving HQ personnel without counting them as killed or evacuated.
 func absorb_headquarters_remnant(remnant: Unit) -> bool:
 	if remnant == self or not is_active() or surrendered or not is_instance_valid(remnant):
@@ -1187,24 +1225,32 @@ func absorb_headquarters_remnant(remnant: Unit) -> bool:
 	members_alive = squad_fire.soldiers.size()
 	remnant.original_size -= transferred
 	remnant.members_alive = 0
-	remnant.merged_into = self
-	remnant.movement.is_moving = false
-	remnant.movement._clear_path_state()
-	remnant.leader_aura.shutdown()
-	remnant.weapon_audio.shutdown()
-	remnant.remove_from_group("units")
-	remnant.add_to_group("merged_units")
-	if Globals.get_unit(remnant.team, remnant.company, remnant.platoon, remnant.squad) == remnant:
-		Globals.unregister_unit(remnant.team, remnant.company, remnant.platoon, remnant.squad)
-	remnant.hide()
-	remnant.set_process(false)
-	for child: Node in remnant.get_children():
-		remnant._shutdown_controller(child)
+	remnant._retire_after_transfer(self)
 	ui.set_members_alive(members_alive)
 	_refresh_leader_aura()
 	soldiers_changed.emit()
-	remnant.unit_merged.emit(remnant, self)
 	return true
+
+
+func _retire_after_transfer(destination: Unit) -> void:
+	merged_into = destination
+	clear_watch_order()
+	action_controller.clear_orders()
+	squad_fire.clear_target()
+	is_moving = false
+	movement.is_moving = false
+	movement._clear_path_state()
+	leader_aura.shutdown()
+	weapon_audio.shutdown()
+	remove_from_group("units")
+	add_to_group("merged_units")
+	if Globals.get_unit(team, company, platoon, squad) == self:
+		Globals.unregister_unit(team, company, platoon, squad)
+	hide()
+	set_process(false)
+	for child: Node in get_children():
+		_shutdown_controller(child)
+	unit_merged.emit(self, destination)
 
 
 func is_active() -> bool:

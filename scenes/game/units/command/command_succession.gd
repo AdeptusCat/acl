@@ -2,6 +2,7 @@ extends Node
 class_name CommandSuccession
 
 signal command_notice(team: Globals.Team, title: String, explanation: String)
+signal company_headquarters_created(unit: Unit, source: Unit)
 
 const REFRESH_SECONDS: float = 0.25
 
@@ -56,7 +57,7 @@ func refresh() -> void:
 			unit.platoon_command = _formation(unit, Globals.SquadType.PLATOON_HEADQUARTERS)
 		else:
 			unit.platoon_command = null
-		if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS:
+		if unit.squad_type == Globals.SquadType.COMPANY_HEADQUARTERS and not unit.is_command_detachment:
 			unit.company_command.headquarters = unit
 			unit.company_command.established = true
 		elif unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS and unit.platoon_command != null:
@@ -143,6 +144,8 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 				if leader != null and (formation.leader == null or leader.rank_grade > formation.leader.rank_grade):
 					formation.commander = candidate
 					formation.leader = leader
+	if formation.level == Globals.SquadType.COMPANY_HEADQUARTERS and formation.has_commander() and formation.commander.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and not formation.commander.in_close_combat:
+		_detach_company_commander(formation, units)
 	formation.support_link.clear_connectivity()
 	if formation.has_commander() and formation.has_remnant() and LOSHelper.ground_layer != null:
 		formation.support_link.compute_direct_connectivity(formation.headquarters, formation.commander)
@@ -151,6 +154,40 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 			formation.reconstituted = true
 			formation.support_link.clear_connectivity()
 	_announce_changes(formation, previous_commander, previous_leader, previously_reconstituted)
+
+
+func _detach_company_commander(formation: FormationCommand, units: Array[Unit]) -> void:
+	var source: Unit = formation.commander
+	var officer: Soldier = formation.leader
+	var scene: PackedScene = load("res://scenes/game/units/unit.tscn") as PackedScene
+	var headquarters: Unit = scene.instantiate() as Unit
+	headquarters.team = source.team
+	headquarters.company = source.company
+	headquarters.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+	headquarters.is_command_detachment = true
+	headquarters.ground_map = source.ground_map
+	source.get_parent().add_child(headquarters)
+	headquarters.global_position = LOSHelper.ground_layer.to_global(LOSHelper.ground_layer.map_to_local(source.current_hex))
+	headquarters.current_hex = source.current_hex
+	headquarters.company_command = formation
+	# Initialize controllers without generating any new personnel or equipment.
+	headquarters.squad_loadout = SquadLoadoutSpec.new()
+	headquarters.squad_loadout.squad_type = Globals.SquadType.COMPANY_HEADQUARTERS
+	headquarters.squad_loadout.team = source.team
+	headquarters.setup()
+	headquarters.squad_fire._now_s = source.squad_fire._now_s
+	headquarters.stress_system.stress_fast = source.stress_system.stress_fast
+	headquarters.stress_system.stress_slow = source.stress_system.stress_slow
+	headquarters.stress_system.under_fire = source.stress_system.under_fire
+	headquarters.combat_stats.cohesion_current = source.combat_stats.cohesion_current
+	headquarters.combat_stats.cohesion_target = source.combat_stats.cohesion_target
+	headquarters.fire_discipline = source.fire_discipline
+	formation.commander = headquarters
+	headquarters.add_to_group("units")
+	source.detach_commander_to(officer, headquarters)
+	units.append(headquarters)
+	company_headquarters_created.emit(headquarters, source)
+	headquarters.stress_system._set_state(source.stress_system.state)
 
 
 func _announce_changes(formation: FormationCommand, previous_commander: Unit, previous_leader: Soldier, previously_reconstituted: bool) -> void:

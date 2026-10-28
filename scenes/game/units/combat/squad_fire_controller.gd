@@ -1021,7 +1021,7 @@ func fire_shots(s: Soldier, shots: int, rpm: float, auto_fire: bool, shot_target
 	var shot_origin: Vector2 = unit.global_position + PROJECTILE_TRACER.sample_spawn_offset()
 	var impacts: PackedVector2Array = IMPACT_PATTERN.create(LOSHelper.ground_layer, shot_target_hex, shot_origin, shots)
 	for shot: int in range(shots):
-		if not unit.is_active() or not s.is_alive or unit.surrendered or unit.broken or s.behavior != Soldier.Behavior.ENGAGING:
+		if s.unit != unit or not unit.is_active() or not s.is_alive or unit.surrendered or unit.broken or s.behavior != Soldier.Behavior.ENGAGING:
 			return
 		if support_burst and not _has_safe_support_target(shot_target_hex):
 			return
