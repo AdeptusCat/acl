@@ -574,6 +574,16 @@ func _on_unit_exited(unit: Unit) -> void:
 		_on_win_condition_timer_timeout.call_deferred()
 
 
+func _on_unit_merged(unit: Unit, destination: Unit) -> void:
+	var was_selected: bool = selected_units.has(unit)
+	_on_unit_exited(unit)
+	if was_selected:
+		var remaining: Array[Unit] = get_selected_units()
+		if not remaining.has(destination):
+			remaining.append(destination)
+		set_selected_units(remaining)
+
+
 func _on_unit_surrendered(unit: Unit) -> void:
 	if unit.team != Globals.team_player and selected_unit == unit:
 		_deselect_unit(unit)

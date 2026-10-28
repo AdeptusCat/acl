@@ -21,7 +21,13 @@ func has_commander() -> bool:
 
 
 func has_remnant() -> bool:
-	return is_instance_valid(headquarters) and headquarters != commander and headquarters.is_active() and not headquarters.surrendered and headquarters.members_alive > 0
+	if not is_instance_valid(headquarters) or headquarters == commander or not headquarters.is_active() or headquarters.surrendered or headquarters.members_alive <= 0:
+		return false
+	# An HQ repurposed for another echelon is not a leaderless remnant.
+	for appointment: FormationCommand in [headquarters.company_command, headquarters.platoon_command]:
+		if appointment != null and appointment != self and appointment.has_commander() and appointment.commander == headquarters:
+			return false
+	return true
 
 
 func has_support() -> bool:

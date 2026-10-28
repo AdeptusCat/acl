@@ -20,12 +20,12 @@ static func is_headquarters(unit: Unit) -> bool:
 	return unit.squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]
 
 
-static func headquarters_leader(unit: Unit, deputy_only: bool = false) -> Soldier:
+static func headquarters_leader(unit: Unit, deputy_only: bool = false, excluded: Soldier = null) -> Soldier:
 	var best: Soldier = null
 	if not unit.is_active() or unit.surrendered:
 		return null
 	for soldier: Soldier in unit.squad_fire.soldiers:
-		if not soldier.is_alive or soldier.rank_grade < RankGrades.Grade.SQUAD_LEADER:
+		if soldier == excluded or not soldier.is_alive or soldier.rank_grade < RankGrades.Grade.SQUAD_LEADER:
 			continue
 		if soldier.role not in [RankGrades.Role.SQUAD_LEADER, RankGrades.Role.ASSISTANT_SQUAD_LEADER, RankGrades.Role.TEAM_LEADER, RankGrades.Role.ASSISTANT_TEAM_LEADER]:
 			continue
@@ -36,13 +36,13 @@ static func headquarters_leader(unit: Unit, deputy_only: bool = false) -> Soldie
 	return best
 
 
-static func squad_leader(unit: Unit) -> Soldier:
+static func squad_leader(unit: Unit, excluded: Soldier = null) -> Soldier:
 	if not unit.is_active() or unit.surrendered:
 		return null
 	if is_headquarters(unit):
-		return headquarters_leader(unit)
+		return headquarters_leader(unit, false, excluded)
 	for soldier: Soldier in unit.squad_fire.soldiers:
-		if soldier.is_alive and soldier.role == RankGrades.Role.SQUAD_LEADER and soldier.rank_grade >= RankGrades.Grade.TEAM_LEADER:
+		if soldier != excluded and soldier.is_alive and soldier.role == RankGrades.Role.SQUAD_LEADER and soldier.rank_grade >= RankGrades.Grade.TEAM_LEADER:
 			return soldier
 	return null
 
@@ -69,10 +69,16 @@ func refresh() -> void:
 	for formation: FormationCommand in formations:
 		if formation.level == Globals.SquadType.COMPANY_HEADQUARTERS:
 			_resolve(formation, units)
+	# A company appointment vacates that soldier's platoon appointment immediately.
+	for formation: FormationCommand in formations:
+		if formation.level == Globals.SquadType.PLATOON_HEADQUARTERS:
+			_resolve(formation, units)
 	for unit: Unit in units:
-		_assign(unit)
+		if unit.is_active():
+			_assign(unit)
 	for unit: Unit in units:
-		unit._on_command_connectivity_timeout()
+		if unit.is_active():
+			unit._on_command_connectivity_timeout()
 
 
 func _formation(unit: Unit, level: Globals.SquadType) -> FormationCommand:
@@ -99,8 +105,16 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 	var previous_commander: Unit = formation.commander
 	var previous_leader: Soldier = formation.leader
 	var previously_reconstituted: bool = formation.reconstituted
+	var excluded: Soldier = null
+	if formation.level == Globals.SquadType.PLATOON_HEADQUARTERS:
+		for company: FormationCommand in formations:
+			if company.level == Globals.SquadType.COMPANY_HEADQUARTERS and company.team == formation.team and company.company == formation.company and company.has_commander():
+				excluded = company.leader
+				break
+	if excluded != null and formation.leader == excluded:
+		formation.leader = null
 	if is_instance_valid(formation.headquarters) and formation.commander != formation.headquarters:
-		var local_leader: Soldier = headquarters_leader(formation.headquarters)
+		var local_leader: Soldier = headquarters_leader(formation.headquarters, false, excluded)
 		if local_leader != null:
 			formation.commander = formation.headquarters
 			formation.leader = local_leader
@@ -110,7 +124,7 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 		formation.leader = null
 		formation.reconstituted = false
 		if is_instance_valid(formation.headquarters):
-			formation.leader = headquarters_leader(formation.headquarters)
+			formation.leader = headquarters_leader(formation.headquarters, false, excluded)
 			if formation.leader != null:
 				formation.commander = formation.headquarters
 		if formation.commander == null:
@@ -121,7 +135,7 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 				if formation.level == Globals.SquadType.PLATOON_HEADQUARTERS:
 					if candidate.platoon != formation.platoon or is_headquarters(candidate):
 						continue
-					leader = squad_leader(candidate)
+					leader = squad_leader(candidate, excluded)
 				else:
 					var platoon_command: FormationCommand = candidate.platoon_command
 					if platoon_command != null and platoon_command.has_commander() and platoon_command.commander == candidate:
@@ -132,8 +146,10 @@ func _resolve(formation: FormationCommand, units: Array[Unit]) -> void:
 	formation.support_link.clear_connectivity()
 	if formation.has_commander() and formation.has_remnant() and LOSHelper.ground_layer != null:
 		formation.support_link.compute_direct_connectivity(formation.headquarters, formation.commander)
-		if formation.headquarters.current_hex == formation.commander.current_hex and not formation.headquarters.is_moving and not formation.commander.is_moving:
+		if formation.commander.absorb_headquarters_remnant(formation.headquarters):
+			formation.headquarters = formation.commander
 			formation.reconstituted = true
+			formation.support_link.clear_connectivity()
 	_announce_changes(formation, previous_commander, previous_leader, previously_reconstituted)
 
 
@@ -157,7 +173,7 @@ func _announce_changes(formation: FormationCommand, previous_commander: Unit, pr
 		else:
 			command_notice.emit(formation.team, designation + ": no commander", "No eligible successor remains. HQ survivors can still move and defend themselves.")
 	if formation.reconstituted and (not previously_reconstituted or previous_leader != formation.leader):
-		command_notice.emit(formation.team, designation + " HQ reconstituted", "%s has rejoined the HQ remnant. Command effectiveness restored to 100%%." % formation.leader.name)
+		command_notice.emit(formation.team, designation + " HQ reconstituted", "HQ survivors have transferred into %s's unit. Command effectiveness restored to 100%%." % formation.leader.name)
 
 
 func _assign(unit: Unit) -> void:

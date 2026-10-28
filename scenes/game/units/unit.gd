@@ -77,6 +77,7 @@ const PHYSICS_DT: float = 1.0 / 60.0
 var original_size: int = 10
 var casualties_taken: int = 0
 var casualty_records: Array[CasualtyRecord] = []
+var merged_into: Unit = null
 var embedded_leader_alive: bool = true
 
 
@@ -150,6 +151,7 @@ signal unit_entered_hex(new_hex: Vector2i)
 signal unit_arrived_at_hex(new_hex: Vector2i)
 signal unit_died(unit: Unit)
 signal unit_exited(unit: Unit)
+signal unit_merged(unit: Unit, destination: Unit)
 signal retreat_complete(retreat_hex: Vector2i)
 signal cover_updated(value: float)
 signal deselect_unit(unit: Unit)
@@ -1033,14 +1035,17 @@ func get_command_appointment() -> FormationCommand:
 
 
 func get_soldier_role_name(soldier: Soldier) -> String:
-	var appointment: FormationCommand = get_command_appointment()
-	if appointment != null and appointment.has_commander() and appointment.commander == self and appointment.leader == soldier:
-		var prefix: String = ""
-		if acting_command_level >= 0:
-			prefix = "Acting "
-		if appointment.level == Globals.SquadType.COMPANY_HEADQUARTERS:
-			return prefix + "Company Commander"
-		return prefix + "Platoon Commander"
+	for appointment: FormationCommand in [company_command, platoon_command]:
+		if appointment == null or not appointment.has_commander() or appointment.commander != self or appointment.leader != soldier:
+			continue
+		var expected_grade: RankGrades.Grade = RankGrades.Grade.COMPANY_LEADER
+		var title: String = "Company Commander"
+		if appointment.level == Globals.SquadType.PLATOON_HEADQUARTERS:
+			expected_grade = RankGrades.Grade.PLATOON_LEADER
+			title = "Platoon Commander"
+		if appointment.commander != appointment.headquarters or soldier.rank_grade < expected_grade:
+			return "Acting " + title
+		return title
 	return RankGrades.get_role_name(soldier.role)
 
 
@@ -1050,10 +1055,10 @@ func get_headquarters_status_text() -> String:
 		if CommandSuccession.is_headquarters(self):
 			return "No eligible commander"
 		return ""
+	if appointment.reconstituted and is_equal_approx(appointment.efficiency(), 1.0):
+		return "HQ reconstituted · 100% command effectiveness"
 	if appointment.commander == appointment.headquarters:
 		return "HQ operational"
-	if appointment.reconstituted and appointment.has_support():
-		return "HQ reconstituted · 100% command effectiveness"
 	if appointment.has_support():
 		return "HQ remnant in contact · 75% command effectiveness\nStop together in the same hex to reconstitute HQ."
 	if appointment.has_remnant():
@@ -1146,8 +1151,64 @@ func exit_map(record_event: bool = true) -> void:
 	unit_exited.emit(self)
 
 
+## Join surviving HQ personnel without counting them as killed or evacuated.
+func absorb_headquarters_remnant(remnant: Unit) -> bool:
+	if remnant == self or not is_active() or surrendered or not is_instance_valid(remnant):
+		return false
+	if not remnant.is_active() or remnant.surrendered or not CommandSuccession.is_headquarters(remnant):
+		return false
+	if team != remnant.team or company != remnant.company or current_hex != remnant.current_hex:
+		return false
+	for appointment: FormationCommand in [remnant.company_command, remnant.platoon_command]:
+		if appointment != null and appointment.has_commander() and appointment.commander == remnant:
+			return false
+	if is_moving or remnant.is_moving or movement.is_moving or remnant.movement.is_moving or in_close_combat or remnant.in_close_combat or remnant.members_alive <= 0:
+		return false
+	var next_id: int = 0
+	for soldier: Soldier in squad_fire.soldiers + squad_fire.casualties:
+		next_id = maxi(next_id, soldier.id + 1)
+	var transferred: int = remnant.squad_fire.soldiers.size()
+	remnant.clear_watch_order()
+	remnant.action_controller.clear_orders()
+	remnant.squad_fire.clear_target()
+	for soldier: Soldier in remnant.squad_fire.soldiers:
+		soldier.unit = self
+		soldier.id = next_id
+		next_id += 1
+		soldier.target_id = null
+		soldier.target_acquired = false
+		soldier.tasks.clear()
+		squad_fire.soldiers.append(soldier)
+	remnant.squad_fire.soldiers.clear()
+	for record: CasualtyRecord in remnant.casualty_records:
+		if not casualty_records.has(record):
+			casualty_records.append(record)
+	original_size += transferred
+	members_alive = squad_fire.soldiers.size()
+	remnant.original_size -= transferred
+	remnant.members_alive = 0
+	remnant.merged_into = self
+	remnant.movement.is_moving = false
+	remnant.movement._clear_path_state()
+	remnant.leader_aura.shutdown()
+	remnant.weapon_audio.shutdown()
+	remnant.remove_from_group("units")
+	remnant.add_to_group("merged_units")
+	if Globals.get_unit(remnant.team, remnant.company, remnant.platoon, remnant.squad) == remnant:
+		Globals.unregister_unit(remnant.team, remnant.company, remnant.platoon, remnant.squad)
+	remnant.hide()
+	remnant.set_process(false)
+	for child: Node in remnant.get_children():
+		remnant._shutdown_controller(child)
+	ui.set_members_alive(members_alive)
+	_refresh_leader_aura()
+	soldiers_changed.emit()
+	remnant.unit_merged.emit(remnant, self)
+	return true
+
+
 func is_active() -> bool:
-	return alive and not exited
+	return alive and not exited and merged_into == null
 
 
 func get_rout_restriction() -> String:

@@ -150,6 +150,7 @@ func show_unit_detail(selected_unit: Unit, tween_on: bool = true) -> void:
 		unit.state_changed.connect(_on_state_changed)
 		unit.unit_died.connect(_on_unit_removed)
 		unit.unit_exited.connect(_on_unit_removed)
+		unit.unit_merged.connect(_on_unit_merged)
 		unit.stress_system.leadership_changed.connect(_on_leadership_changed)
 		unit.action_controller.action_state_changed.connect(_on_action_state_changed)
 		roster_scroll.scroll_vertical = 0
@@ -189,6 +190,7 @@ func _disconnect_unit() -> void:
 		unit.state_changed.disconnect(_on_state_changed)
 		unit.unit_died.disconnect(_on_unit_removed)
 		unit.unit_exited.disconnect(_on_unit_removed)
+		unit.unit_merged.disconnect(_on_unit_merged)
 		unit.stress_system.leadership_changed.disconnect(_on_leadership_changed)
 		unit.action_controller.action_state_changed.disconnect(_on_action_state_changed)
 	unit = null
@@ -441,6 +443,8 @@ func _refresh_command_summary() -> void:
 	hq_status_label.hide()
 	if appointment != null and appointment.has_commander():
 		commander_label.text = "Commander: " + appointment.leader.name
+		if unit.company_command != null and unit.platoon_command != null and unit.company_command.has_commander() and unit.company_command.commander == unit and unit.platoon_command.has_commander() and unit.platoon_command.commander == unit:
+			commander_label.text = "Company: %s\nPlatoon %d: %s" % [unit.company_command.leader.name, unit.platoon, unit.platoon_command.leader.name]
 		commander_label.tooltip_text = appointment.commander.get_soldier_role_name(appointment.leader) + "\nLocated in: " + appointment.commander.get_squad_name()
 		commander_label.show()
 		if appointment.commander == unit or appointment.headquarters == unit:
@@ -606,6 +610,11 @@ func _on_leadership_changed(bonus: float) -> void:
 func _on_action_state_changed(_previous: int, _next: int) -> void:
 	if is_instance_valid(unit):
 		_refresh_summary()
+
+
+func _on_unit_merged(removed_unit: Unit, destination: Unit) -> void:
+	if removed_unit == unit:
+		show_unit_detail(destination, false)
 
 
 func _on_unit_removed(_removed_unit: Unit) -> void:

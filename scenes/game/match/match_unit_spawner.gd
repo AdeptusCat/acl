@@ -31,6 +31,7 @@ static func spawn_unit(controller: Node2D, team: Globals.Team, location: Vector2
 	unit.set_team(team)
 	
 	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_merged.connect(controller._on_unit_merged)
 	unit.unit_exited.connect(controller._on_unit_exited)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
@@ -131,6 +132,7 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 	unit.set_team(team)
 	
 	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_merged.connect(controller._on_unit_merged)
 	unit.unit_exited.connect(controller._on_unit_exited)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)
@@ -159,6 +161,7 @@ static func spawn_unit_from_save(controller: Node2D, team: Globals.Team, locatio
 
 static func register_authored_unit(controller: Node2D, unit: Unit) -> void:
 	unit.unit_died.connect(controller._on_unit_died)
+	unit.unit_merged.connect(controller._on_unit_merged)
 	unit.unit_exited.connect(controller._on_unit_exited)
 	unit.unit_entered_hex.connect(LOS._on_unit_entered_hex)
 	unit.unit_entered_hex.connect(controller._on_unit_entered_hex)

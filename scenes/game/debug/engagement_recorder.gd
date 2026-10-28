@@ -275,6 +275,7 @@ func _register(unit: Unit) -> void:
 	_units[key] = weakref(unit)
 	_connect(unit, "unit_died", _on_unit_died)
 	_connect(unit, "unit_exited", _on_unit_exited)
+	_connect(unit, "unit_merged", _on_unit_merged)
 	_connect(unit, "unit_surrendered", _on_surrendered.bind(unit))
 	_connect(unit, "soldiers_changed", _on_roster_changed.bind(unit))
 	_connect(unit.stress_system, "state_changed", _on_morale_changed.bind(unit))
@@ -405,6 +406,12 @@ func _unit_snapshot(unit: Unit) -> Dictionary:
 func _command_snapshot(unit: Unit) -> Dictionary:
 	var result: Dictionary = {"hq": _unit_id(unit.command_squad), "link": unit.command_connectivity.command_link_strength, "presence": unit.command_connectivity.leader_presence_strength,
 		"acting_level": unit.acting_command_level, "display_name": unit.get_hud_name(), "relay_used": unit.command_connectivity.hq_relay_used}
+	var appointments: Array[Dictionary] = []
+	for formation: FormationCommand in [unit.company_command, unit.platoon_command]:
+		if formation != null and formation.has_commander() and formation.commander == unit:
+			appointments.append({"level": formation.level, "commander_soldier": formation.leader.id, "commander_name": formation.leader.name})
+	result["appointments"] = appointments
+	result["merged_into"] = _unit_id(unit.merged_into)
 	var appointment: FormationCommand = unit.get_command_appointment()
 	if appointment != null and appointment.has_commander():
 		result["formation_level"] = appointment.level
@@ -695,6 +702,10 @@ func _on_owner_exiting() -> void:
 
 func _on_unit_died(unit: Unit) -> void:
 	record_event("unit_died", _unit_snapshot(unit))
+
+
+func _on_unit_merged(unit: Unit, destination: Unit) -> void:
+	record_event("unit_merged", {"unit": _unit_id(unit), "destination": _unit_id(destination), "state": _unit_snapshot(destination)})
 
 
 func _on_unit_exited(unit: Unit) -> void:
