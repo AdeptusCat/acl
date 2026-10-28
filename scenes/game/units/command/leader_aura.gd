@@ -61,7 +61,7 @@ func _update_aura() -> void:
 		if not _same_team(_owner_unit, unit):
 			continue
 		
-		if _owner_unit.highest_rank_grade <= unit.highest_rank_grade and not unit == _owner_unit:
+		if leadership_bonus <= 0.0 or (_owner_unit.highest_rank_grade <= unit.highest_rank_grade and unit != _owner_unit and unit.command_squad != _owner_unit):
 			continue
 			
 		var distance: int = LOSHelper.ground_layer.cube_distance(leader_cube, unit.current_cube)
@@ -84,14 +84,15 @@ func _update_aura() -> void:
 func _apply_to(unit: Node2D) -> void:
 	if not _active or not is_instance_valid(_owner_unit) or not _owner_unit.is_active():
 		return
-	if _affected.has(unit):
+	var parameters: Vector3 = Vector3(leadership_bonus, rally_bonus, cohesion_mult)
+	if _affected.get(unit, Vector3(-1.0, -1.0, -1.0)) == parameters:
 		return
 	if not unit.has_node("UnitStressController"):
 		return
 	var sc: StressController = unit.get_node("UnitStressController") as StressController
 	var sid: int = get_instance_id()
 	sc.add_leadership_source(sid, leadership_bonus, rally_bonus, cohesion_mult)
-	_affected[unit] = true
+	_affected[unit] = parameters
 
 func _remove_from(unit: Node2D) -> void:
 	if not _affected.has(unit):

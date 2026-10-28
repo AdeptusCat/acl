@@ -45,6 +45,7 @@ var _selection_before_drag: Array[Unit] = []
 var stack_presenter: BattlefieldStacks
 var reinforcements: MatchReinforcementController
 var fire_support: FireSupportController
+var command_succession: CommandSuccession
 
 
 signal update_timer_label(time_left_seconds: float)
@@ -125,6 +126,10 @@ func setup() -> void:
 			if unit.squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
 				unit.command_squad = Globals.get_unit(unit.team, unit.company, 0, 0)
 	
+	command_succession = CommandSuccession.new()
+	add_child(command_succession)
+	command_succession.refresh()
+
 	LOS.draw_los_to_enemy.connect(los_renderer._on_draw_los_to_enemy)
 	
 	#update_timer_label.emit(time_left_seconds)

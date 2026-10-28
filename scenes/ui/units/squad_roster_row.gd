@@ -69,6 +69,9 @@ func refresh() -> void:
 	rout_available.visible = unit.can_rout()
 	isolation.visible = _is_isolated()
 	tooltip_text = "%s\n%s\nStrength: %d/%d · Morale: %s\nClick to select and center\nShift-click to add or remove this squad" % [identity.text, unit.get_formation_name(), remaining, unit.original_size, morale.text]
+	var command_assignment: String = unit.get_command_assignment_text()
+	if not command_assignment.is_empty():
+		tooltip_text += "\n" + command_assignment
 	if rout_available.visible:
 		tooltip_text += "\nRout available: select this squad, then right click for Rout.\nAn uncontrolled retreat; no escape route means surrender."
 	if _is_isolated():

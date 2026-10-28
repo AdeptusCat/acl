@@ -441,6 +441,9 @@ func _refresh_command_summary() -> void:
 	command_label.text = "HQ: " + CommandConnectivity.contact_text(contact)
 	if not CommandConnectivity.needs_command_contact(unit):
 		command_label.text = "HQ: Top-level"
+	var assignment: String = unit.get_command_assignment_text()
+	if not assignment.is_empty():
+		command_label.text = assignment + " · " + CommandConnectivity.contact_text(contact)
 	command_label.add_theme_color_override("font_color", CommandConnectivityRenderer.contact_color(contact))
 	var commander_name: String = "Unavailable"
 	if is_instance_valid(unit.command_squad):
@@ -451,6 +454,8 @@ func _refresh_command_summary() -> void:
 	leadership_presence_label.text = "%d%%" % roundi(clampf(presence, 0.0, 1.0) * 100.0)
 	leadership_presence_label.tooltip_text = "Nearby leadership support, separate from communication quality."
 	command_label.tooltip_text = "%s\nHQ: %s\nContact method: %s\nLeadership support: %s" % [command_label.text, commander_name, CommandConnectivity.contact_method_for(unit), leadership_presence_label.text]
+	if unit.acting_command_level >= 0:
+		command_label.tooltip_text += "\nCommand effectiveness: %d%%\nBring the acting commander and HQ remnant to a halt in the same hex to reconstitute the HQ." % roundi(unit.command_efficiency * 100.0)
 
 
 func _current_order_text() -> String:

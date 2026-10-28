@@ -83,6 +83,12 @@ var embedded_leader_alive: bool = true
 @export var loadouts: Array[SoldierLoadout] = []
 @export var squad_loadout: SquadLoadoutSpec
 @export var command_squad: Unit = null
+var platoon_command: FormationCommand
+var company_command: FormationCommand
+var acting_command_level: int = -1
+var acting_command_supported: bool = false
+var acting_command_reconstituted: bool = false
+var command_efficiency: float = 1.0
 
 # optional defaults to speed setup (assign in the inspector)
 @export var default_rifle: WeaponSpec
@@ -425,17 +431,27 @@ func _refresh_leader_aura() -> void:
 	if not found:
 		return
 
-	if RankGrades.GRADE_PARAMS.has(grade):
-		var p: Dictionary = RankGrades.GRADE_PARAMS[grade]
+	var command_grade: int = grade
+	if CommandSuccession.is_headquarters(self):
+		var commander: Soldier = CommandSuccession.headquarters_leader(self)
+		command_grade = RankGrades.Grade.SOLDIER
+		if commander != null:
+			command_grade = commander.rank_grade
+	if RankGrades.GRADE_PARAMS.has(command_grade):
+		var p: Dictionary = RankGrades.GRADE_PARAMS[command_grade]
 		var lead: float = float(p["lead"])
 		var rally: float = float(p["rally"])
 		var radius: int = int(p["radius"])
 		var coh: float = float(p["coh_mult"])
 
+		if acting_command_level == Globals.SquadType.PLATOON_HEADQUARTERS:
+			radius = maxi(radius, 1)
+		elif acting_command_level == Globals.SquadType.COMPANY_HEADQUARTERS:
+			radius = maxi(radius, 2)
 		leader_aura.aura_radius_hexes = radius
-		leader_aura.leadership_bonus = lead
-		leader_aura.rally_bonus = rally
-		leader_aura.cohesion_mult = coh
+		leader_aura.leadership_bonus = lead * command_efficiency
+		leader_aura.rally_bonus = rally * command_efficiency
+		leader_aura.cohesion_mult = 1.0 + (coh - 1.0) * command_efficiency
 	
 	#var rank: RankGrades.Grade = _highest_grade_from_loadouts()
 	ui.set_leadership_rank(grade)
@@ -984,6 +1000,31 @@ func get_hud_name() -> String:
 		Globals.SquadType.MORTAR:
 			return designation + " · Mortar"
 	return designation
+
+
+func get_command_assignment_text() -> String:
+	if acting_command_level == Globals.SquadType.COMPANY_HEADQUARTERS:
+		if acting_command_reconstituted and acting_command_supported:
+			return "Acting Company HQ · Reconstituted"
+		if acting_command_supported:
+			return "Acting Company HQ · HQ support"
+		return "Acting Company HQ"
+	if acting_command_level == Globals.SquadType.PLATOON_HEADQUARTERS:
+		if acting_command_reconstituted and acting_command_supported:
+			return "Acting Platoon HQ · Reconstituted"
+		if acting_command_supported:
+			return "Acting Platoon HQ · HQ support"
+		return "Acting Platoon HQ"
+	if CommandSuccession.is_headquarters(self) and CommandSuccession.headquarters_leader(self) == null:
+		var formation: FormationCommand = company_command
+		if squad_type == Globals.SquadType.PLATOON_HEADQUARTERS:
+			formation = platoon_command
+		if formation != null and formation.reconstituted and formation.has_support():
+			return get_squad_name() + " · Reconstituted"
+		if formation != null and formation.has_commander():
+			return get_squad_name() + " · Remnant"
+		return get_squad_name() + " · No commander"
+	return ""
 
 
 func get_formation_name() -> String:

@@ -60,6 +60,8 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 
 			# 1) replace leader if needed: ASL first, else any SOLDIER
 			if roles_lost.has(RankGrades.Role.SQUAD_LEADER) or leader_down:
+				unit.embedded_leader_alive = false
+				unit.combat_stats.notify_leader_killed()
 				unit._promote_new_leader()
 			
 			# 2) re-crew any dropped guns (e.g., MG) — loader preferred as new gunner
@@ -243,6 +245,9 @@ static func restore_secondary_roles(unit: Unit, previous_counts: Vector2i) -> vo
 	var current_counts: Vector2i = secondary_role_counts(unit)
 	while current_counts.x < previous_counts.x:
 		var replacement_idx: int = unit._find_first_SOLDIER()
+		if CommandSuccession.is_headquarters(unit):
+			var deputy: Soldier = CommandSuccession.headquarters_leader(unit, true)
+			replacement_idx = unit.squad_fire.soldiers.find(deputy)
 		if replacement_idx == -1:
 			break
 		unit.squad_fire.soldiers[replacement_idx].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
@@ -258,6 +263,11 @@ static func restore_secondary_roles(unit: Unit, previous_counts: Vector2i) -> vo
 
 
 static func promote_new_leader(unit: Unit) -> void:
+	if CommandSuccession.is_headquarters(unit):
+		var successor: Soldier = CommandSuccession.headquarters_leader(unit)
+		if successor != null:
+			successor.role = RankGrades.Role.SQUAD_LEADER
+		return
 	var idx_asl: int = unit._index_of_role(RankGrades.Role.ASSISTANT_SQUAD_LEADER)
 	var new_leader_idx: int = idx_asl
 	if new_leader_idx == -1:

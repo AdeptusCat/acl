@@ -11,6 +11,8 @@ var _los_to_leader: bool = false
 var _voice_range_to_leader: bool = false
 var _runner_chain_to_leader: bool = false
 var _radio_link_to_leader: bool = false
+var hq_relay_used: bool = false
+var _relay_probe: CommandConnectivity
 
 var _state_mod_dict: Dictionary[STATES.MoraleState, float] = {
 		STATES.MoraleState.NORMAL : 1.0,
@@ -28,12 +30,19 @@ var leader_presence_strength: float = 0.0
 static func needs_command_contact(unit: Unit) -> bool:
 	if is_instance_valid(unit.command_squad):
 		return true
+	if unit.acting_command_level >= 0:
+		return false
+	if CommandSuccession.is_headquarters(unit) and unit.company_command != null and CommandSuccession.headquarters_leader(unit) == null:
+		return true
 	return unit.squad_type != Globals.SquadType.COMPANY_HEADQUARTERS and unit.squad_type != Globals.SquadType.PLATOON_HEADQUARTERS
 
 
 static func has_available_commander(unit: Unit) -> bool:
 	var commander: Unit = unit.command_squad
-	return is_instance_valid(commander) and commander != unit and commander.team == unit.team and commander.is_active() and not commander.surrendered
+	if not is_instance_valid(commander) or commander == unit or commander.team != unit.team or not commander.is_active() or commander.surrendered:
+		return false
+	var formation: FormationCommand = commanding_formation(unit)
+	return formation == null or formation.has_commander()
 
 
 static func contact_state_for(unit: Unit) -> ContactState:
@@ -66,6 +75,8 @@ static func contact_method_for(unit: Unit) -> String:
 	var link: CommandConnectivity = unit.command_connectivity
 	if not is_instance_valid(link) or link.command_link_strength <= 0.0:
 		return "No contact"
+	if link.hq_relay_used:
+		return "Via HQ remnant"
 	if link.radio_link_to_leader:
 		return "Radio"
 	if link.los_to_leader and link.voice_range_to_leader:
@@ -178,6 +189,7 @@ func compute_morale_link_strength() -> void:
 
 
 func clear_connectivity() -> void:
+	hq_relay_used = false
 	los_to_leader = false
 	voice_range_to_leader = false
 	runner_chain_to_leader = false
@@ -186,6 +198,38 @@ func clear_connectivity() -> void:
 
 
 func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
+	hq_relay_used = false
+	var formation: FormationCommand = commanding_formation(unit)
+	if formation != null and not formation.has_commander():
+		clear_connectivity()
+		return
+	compute_direct_connectivity(unit, command_squad)
+	if formation == null:
+		return
+	if formation.has_support() and unit != formation.headquarters:
+		if not is_instance_valid(_relay_probe):
+			_relay_probe = CommandConnectivity.new()
+			add_child(_relay_probe)
+		_relay_probe.compute_direct_connectivity(unit, formation.headquarters)
+		var relay_strength: float = minf(_relay_probe.command_link_strength, formation.support_link.command_link_strength)
+		if relay_strength > command_link_strength:
+			command_link_strength = relay_strength
+			hq_relay_used = true
+	command_link_strength *= formation.efficiency()
+	leader_presence_strength *= formation.efficiency()
+
+
+static func commanding_formation(unit: Unit) -> FormationCommand:
+	for formation: FormationCommand in [unit.platoon_command, unit.company_command]:
+		if formation != null and formation.commander == unit.command_squad:
+			return formation
+	return null
+
+
+func compute_direct_connectivity(unit: Unit, command_squad: Unit) -> void:
+	if LOSHelper.ground_layer == null:
+		clear_connectivity()
+		return
 	if not is_instance_valid(command_squad) or not command_squad.is_active() or command_squad.surrendered or command_squad == unit or command_squad.team != unit.team:
 		clear_connectivity()
 		return
@@ -213,3 +257,6 @@ func compute_connectivity(unit: Unit, command_squad: Unit) -> void:
 			runner_chain_to_leader = true
 		else:
 			runner_chain_to_leader = false
+
+	update_command_link_strength()
+	compute_morale_link_strength()
