@@ -306,7 +306,8 @@ func _check_morale_markers(squad: Unit, context: String) -> void:
 	var stress: Label = squad.ui.get_node("StressLevel")
 	var leadership: Label = squad.ui.get_node("LeadershipBonus")
 	_check(stress.visible and stress.text == "<<<" and leadership.visible and leadership.text == ">>", "%s preserves working stress and recovery arrows" % context)
-	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.value, 0.4) and squad.ui.rank_texture_rect.visible and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
+	var is_headquarters: bool = squad.squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]
+	_check(squad.ui.morale_bar.visible and is_equal_approx(squad.ui.morale_bar.value, 0.4) and squad.ui.rank_texture_rect.visible == is_headquarters and squad.ui.unit_status_control.visible, "%s preserves morale bars and squad status icons" % context)
 
 
 func _check_top_layout(world: Node, settings: Control) -> void:

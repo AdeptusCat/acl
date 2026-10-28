@@ -73,6 +73,7 @@ var _state_feedback: STATE_FEEDBACK
 var _tactical_feedback: STATE_FEEDBACK
 var _elimination_fade: Tween
 var _facing_update_remaining: float = 0.0
+var _is_headquarters: bool = false
 var _contact_restricted: bool = false
 var _contact_report: Dictionary = {}
 var _contact_marker: Label
@@ -275,6 +276,9 @@ func set_leadership_rank(rankGrade: RankGrades.Grade) -> void:
 			rank_texture_rect.texture = captain_texture
 
 
+func _update_rank_visibility() -> void:
+	rank_texture_rect.visible = _is_headquarters and not _contact_restricted and not _dead and not _exited
+
 
 func set_indirect_contact(dimmed: bool) -> void:
 	var sprite_material: ShaderMaterial = sprite_node.material as ShaderMaterial
@@ -291,7 +295,7 @@ func set_contact_report(report: Dictionary, restricted: bool) -> void:
 	_contact_report = report
 	var identified: bool = int(report.get("squad_type", -1)) >= 0
 	unit_status_control.visible = (not restricted or identified) and not _dead and not _exited
-	rank_texture_rect.visible = not restricted
+	_update_rank_visibility()
 	morale_bar.visible = (not restricted or identified) and not _dead and not _exited
 	$UnitStates.visible = not restricted
 	_set_debug_text_visible(Debug.show_debug_text)
@@ -460,6 +464,8 @@ func update_team_sprite(team : int, _squad_type: Globals.SquadType) -> void:
 		1:
 			sprite_node.texture = sprite_team_1
 	unit_status_control.set_status_image(team, _squad_type)
+	_is_headquarters = _squad_type in [Globals.SquadType.PLATOON_HEADQUARTERS, Globals.SquadType.COMPANY_HEADQUARTERS]
+	_update_rank_visibility()
 	if detail_ui:
 		detail_ui.update_team_sprite(team, _squad_type)
 
