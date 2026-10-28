@@ -335,6 +335,26 @@ func _init(_id: int, _name: String, _rank_grade: RankGrades.Grade, _role: RankGr
 	
 
 
+func take_over_weapon_from(previous: Soldier) -> void:
+	weapon = previous.weapon
+	rounds_in_mag = previous.rounds_in_mag
+	jammed = previous.jammed
+	setup_weapon_task.done = previous.setup_weapon_task.done
+	setup_weapon_task.start_time_s = previous.setup_weapon_task.start_time_s
+	setup_weapon_task.remaining_time_s = previous.setup_weapon_task.remaining_time_s
+	reload_task.done = previous.reload_task.done
+	reload_task.start_time_s = previous.reload_task.start_time_s
+	reload_task.remaining_time_s = previous.reload_task.remaining_time_s
+	_reload_rounds = previous._reload_rounds
+	_reload_grenade = previous._reload_grenade
+	cycle_remaining_s = previous.cycle_remaining_s
+	reaim_remaining_s = previous.reaim_remaining_s
+	burst_active = false
+	barrel_change_assisting = false
+	barrel_change_worked = false
+	lower_weapon()
+
+
 func is_weapon_setup_done(delta: float) -> bool:
 	if setup_weapon_task.done:
 		return true

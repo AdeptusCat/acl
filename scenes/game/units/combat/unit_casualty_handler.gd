@@ -15,6 +15,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 			# record which non-rifle roles were lost and what crew-served weapons got orphaned
 			var roles_lost: Array[int] = []
 			var dropped_support: Array[WeaponSpec] = []
+			var dropped_rifle_grenadiers: Array[Soldier] = []
 			if casualty.role != RankGrades.Role.SOLDIER:
 				if not roles_lost.has(casualty.role):
 					roles_lost.append(casualty.role)
@@ -22,6 +23,9 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 				if casualty.weapon != null:
 					dropped_support.append(casualty.weapon)
 			
+			if casualty.weapon != null and casualty.weapon.can_fire_riflegrenades:
+				dropped_rifle_grenadiers.append(casualty)
+
 			unit.weapon_audio.stop_mg_loop(casualty.weapon, unit.position, soldier.id, unit)
 			unit._record_casualty(casualty)
 			unit.squad_fire.casualties.append(casualty)
@@ -70,6 +74,7 @@ static func apply_specific_casualty(unit: Unit, casualty: Soldier) -> bool:
 				unit._fill_missing_loaders_for_existing_guns()
 
 			restore_secondary_roles(unit, secondary_roles_before)
+			restore_rifle_grenadiers(unit, dropped_rifle_grenadiers)
 
 			# optional: if you maintain any cached fire stats, rebuild them now
 			# squad_fire.rebuild_cached_stats()
@@ -120,6 +125,7 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 	# record which non-rifle roles were lost and what crew-served weapons got orphaned
 	var roles_lost: Array[int] = []
 	var dropped_support: Array[WeaponSpec] = []
+	var dropped_rifle_grenadiers: Array[Soldier] = []
 	var c: int = 0
 	while c < casualties.size():
 		var s: Soldier = casualties[c]
@@ -131,6 +137,8 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 		if s.role == RankGrades.Role.GUNNER:
 			if s.weapon != null:
 				dropped_support.append(s.weapon)
+		if s.weapon != null and s.weapon.can_fire_riflegrenades:
+			dropped_rifle_grenadiers.append(s)
 		c += 1
 	
 	for soldier: Soldier in casualties:
@@ -189,6 +197,7 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 		unit._fill_missing_loaders_for_existing_guns()
 
 	restore_secondary_roles(unit, secondary_roles_before)
+	restore_rifle_grenadiers(unit, dropped_rifle_grenadiers)
 	
 	# optional: if you maintain any cached fire stats, rebuild them now
 	# squad_fire.rebuild_cached_stats()
@@ -198,6 +207,23 @@ static func apply_casualties(unit: Unit, n: int) -> void:
 
 
 # ---------- helpers (typed, no ternarys) ----------
+
+
+static func restore_rifle_grenadiers(unit: Unit, casualties: Array[Soldier]) -> void:
+	for casualty: Soldier in casualties:
+		var replacement_idx: int = unit._find_first_SOLDIER()
+		if replacement_idx == -1:
+			break
+		var replacement: Soldier = unit.squad_fire.soldiers[replacement_idx]
+		# Finish the recipient's old firing action before changing its weapon.
+		if unit.squad_fire._bursts.has(replacement):
+			unit.squad_fire._finish_burst(replacement, unit.squad_fire._bursts[replacement])
+		replacement.take_over_weapon_from(casualty)
+	# Weapon replacement can change the squad's longest available range.
+	if not casualties.is_empty():
+		unit.effective_range = 0
+		for soldier: Soldier in unit.squad_fire.soldiers:
+			unit.effective_range = maxi(unit.effective_range, soldier.weapon.range_hexes)
 
 
 static func secondary_role_counts(unit: Unit) -> Vector2i:

@@ -60,6 +60,7 @@ func _run() -> void:
 	_test_runtime_phase_order()
 	_test_specific_role_replacement()
 	_test_secondary_role_replacement()
+	_test_rifle_grenadier_replacement()
 	for unit: UnitUnderTest in units:
 		unit.free()
 	units.clear()
@@ -297,6 +298,59 @@ func _test_secondary_role_replacement() -> void:
 	var ordinary: UnitUnderTest = _create_unit(3, 0)
 	ordinary._apply_casualties(1)
 	_check(UnitCasualtyHandler.secondary_role_counts(ordinary) == Vector2i.ZERO, "Casualties do not invent secondary positions absent from the squad")
+
+
+func _test_rifle_grenadier_replacement() -> void:
+	for specific: bool in [true, false]:
+		for reloading: bool in [true, false]:
+			var unit: UnitUnderTest = _create_unit(4, 0)
+			var casualty: Soldier = unit.squad_fire.soldiers[0]
+			var replacement: Soldier = unit.squad_fire.soldiers[2]
+			unit.squad_fire.soldiers[1].role = RankGrades.Role.ASSISTANT_SQUAD_LEADER
+			var grenade_rifle: WeaponSpec = (load("res://resources/weapons/kar98_riflegrenade.tres") as WeaponSpec).create_runtime()
+			grenade_rifle.ammunition = 37
+			grenade_rifle.riflegrenade_loaded = true
+			casualty.weapon = grenade_rifle
+			casualty.rounds_in_mag = 1
+			if reloading:
+				grenade_rifle.riflegrenade_loaded = false
+				casualty.rounds_in_mag = 0
+				casualty.start_reload(true)
+				casualty.reload_task.remaining_time_s = 0.5
+			var grade: RankGrades.Grade = replacement.rank_grade
+			replacement.rounds_in_mag = 0
+			replacement.start_reload()
+			replacement.burst_active = true
+			unit.squad_fire._bursts[replacement] = {"emitted": 0, "distance": 10, "audio_started": false}
+			_apply_role_casualty(unit, casualty, specific)
+			_check(replacement.weapon == grenade_rifle and grenade_rifle.ammunition == 37, "Both casualty paths transfer the physical grenade rifle without replenishing ammunition")
+			_check(replacement.role == RankGrades.Role.SOLDIER and replacement.rank_grade == grade, "The new rifle grenadier retains role and rank")
+			_check(replacement.rounds_in_mag == casualty.rounds_in_mag and replacement.reload_task.done == casualty.reload_task.done, "Grenadier replacement inherits the weapon's magazine and reload state")
+			_check(not unit.squad_fire._bursts.has(replacement) and not replacement.burst_active and not replacement.has_engagement, "Weapon pickup cancels the recipient's old burst and target acquisition")
+			_check(not replacement.weapon_raised and replacement.raise_remaining_s == grenade_rifle.raise_s, "The new grenadier must raise the recovered weapon")
+			if reloading:
+				_check(is_equal_approx(replacement.reload_task.remaining_time_s, 0.5), "Grenade reload progress survives replacement")
+				replacement.advance_handling(1.0, 1.0)
+			_check(grenade_rifle.riflegrenade_loaded and replacement.rounds_in_mag == 1, "Loaded grenades survive pickup and pending grenade reloads finish correctly")
+			var next_replacement: Soldier = unit.squad_fire.soldiers.back()
+			_apply_role_casualty(unit, replacement, specific)
+			_check(next_replacement.weapon == grenade_rifle, "The recovered grenade rifle can be passed on after another casualty")
+
+	var batch: UnitUnderTest = _create_unit(4, 0)
+	var first_weapon: WeaponSpec = (load("res://resources/weapons/kar98_riflegrenade.tres") as WeaponSpec).create_runtime()
+	var second_weapon: WeaponSpec = (load("res://resources/weapons/springfield_1903_riflegrenade.tres") as WeaponSpec).create_runtime()
+	batch.squad_fire.soldiers[0].weapon = first_weapon
+	batch.squad_fire.soldiers[1].weapon = second_weapon
+	batch.forced_casualty_indexes = [0, 1]
+	batch._apply_casualties(2)
+	_check(batch.squad_fire.soldiers[0].weapon == first_weapon and batch.squad_fire.soldiers[1].weapon == second_weapon, "Simultaneous grenadier losses transfer distinct weapons to distinct replacements")
+
+	var depleted: UnitUnderTest = _create_unit(3, 0)
+	depleted.squad_fire.soldiers[0].weapon = (load("res://resources/weapons/kar98_riflegrenade.tres") as WeaponSpec).create_runtime()
+	depleted.squad_fire.soldiers[1].role = RankGrades.Role.SQUAD_LEADER
+	depleted.squad_fire.soldiers[2].role = RankGrades.Role.LOADER
+	depleted.apply_specific_casualty(depleted.squad_fire.soldiers[0])
+	_check(not depleted.squad_fire.soldiers[0].weapon.can_fire_riflegrenades and not depleted.squad_fire.soldiers[1].weapon.can_fire_riflegrenades, "Rifle grenadier replacement does not take leaders or essential weapon crew")
 
 
 func _apply_role_casualty(unit: UnitUnderTest, casualty: Soldier, specific: bool) -> void:
